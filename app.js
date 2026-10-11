@@ -2849,12 +2849,9 @@ async function dbHasAnyActiveTourNow(
 
   try {
     if (!window.sb) {
-      renderArchiveBody(`
-        <div class="empty muted">
-          ${escapeHTML(t("archive_empty"))}
-        </div>
-      `);
-
+      uiLoadingRetry(listEl, tr3(
+        "Не удалось подключиться к архиву.", "Arxivga ulanib bo‘lmadi.", "Could not connect to archive."
+      ), () => renderArchiveView());
       return;
     }
 
@@ -3054,11 +3051,9 @@ async function dbHasAnyActiveTourNow(
           { ascending: true }
         );
 
-    if (
-      toursErr ||
-      !Array.isArray(tours) ||
-      !tours.length
-    ) {
+    if (toursErr) throw toursErr;
+    if (!Array.isArray(tours)) throw new Error("archive_invalid_tours_response");
+    if (!tours.length) {
       renderArchiveBody(
         `
           <div class="empty muted">
@@ -3127,11 +3122,9 @@ async function dbHasAnyActiveTourNow(
           ]
         );
 
-    if (
-      attemptsError ||
-      !Array.isArray(attempts) ||
-      !attempts.length
-    ) {
+    if (attemptsError) throw attemptsError;
+    if (!Array.isArray(attempts)) throw new Error("archive_invalid_attempts_response");
+    if (!attempts.length) {
       renderArchiveBody(
         `
           <div class="empty muted">
@@ -3252,26 +3245,9 @@ async function dbHasAnyActiveTourNow(
       );
     } catch {}
 
-    renderArchiveBody(`
-      <div class="empty muted">
-        <div
-          style="
-            font-weight:800;
-            margin-bottom:6px;
-          "
-        >
-          ${escapeHTML(
-            t("archive_unavailable_title")
-          )}
-        </div>
-
-        <div class="small">
-          ${escapeHTML(
-            t("archive_unavailable_sub")
-          )}
-        </div>
-      </div>
-    `);
+    if (pending.active()) uiLoadingRetry(listEl, tr3(
+      "Не удалось загрузить архив.", "Arxivni yuklab bo‘lmadi.", "Could not load archive."
+    ), () => renderArchiveView());
   } finally {
     pending.finish();
   }
@@ -3557,9 +3533,7 @@ async function renderNotificationsView() {
   ));
 
   if (!window.sb) {
-    listEl.innerHTML = `
-      <div class="empty muted">${escapeHTML(t("notifications_no_db"))}</div>
-    `;
+    uiLoadingRetry(listEl, t("notifications_no_db"), () => renderNotificationsView());
     await refreshNotificationsBadge();
     pending.finish();
     return;
@@ -21998,7 +21972,9 @@ async function updateTourAttempt(attemptId, patch) {
     if (text.includes("tour_review_not_open")) {
       wrap.innerHTML = `<div class="empty muted">${escapeHTML(tr3("Полный разбор откроется после глобального завершения тура.", "To‘liq tahlil tur global yopilgandan keyin ochiladi.", "Full review will open after the tour is globally closed."))}</div>`;
     } else {
-      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("not_available") || "Разбор временно недоступен.")}</div>`;
+      uiLoadingRetry(wrap, tr3(
+        "Не удалось загрузить разбор.", "Tahlilni yuklab bo‘lmadi.", "Could not load review."
+      ), () => renderTourReview());
     }
     try { trackEvent("tour_safe_review_error", { attempt_id: String(attemptId), message: String(error?.message || error || "unknown") }); } catch {}
   } finally {
