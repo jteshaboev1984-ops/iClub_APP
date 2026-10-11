@@ -3717,6 +3717,7 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
   .iclub-visual-v3 #courses-subject-hub > .subject-hub-primary-modes > #subject-hub-exam-prep-entry {grid-column:auto}
 }
 @media (max-width:359px) {
+  .iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > button.subject-mode-card,
   .iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card .subject-mode-card-button {
     padding:13px 12px 13px 14px;min-height:133px;
   }
