@@ -18918,18 +18918,8 @@ uniq.forEach(rec => {
                 btn?.addEventListener("click", async (e) => {
           e.stopPropagation();
 
-          showAsyncOverlay(tr3(
-            "Загружаем книги…",
-            "Kitoblar yuklanmoqda…",
-            "Loading books…"
-          ));
-
-          try {
-            pushCourses("books");
+          pushCourses("books");
             await renderBooks();
-          } finally {
-            hideAsyncOverlay();
-          }
         });
 
         wrap.appendChild(item);
@@ -23232,18 +23222,8 @@ if (action === "open-all-subjects") {
     });
   } catch {}
 
-   showAsyncOverlay(tr3(
-    "Загружаем рекомендации…",
-    "Tavsiyalar yuklanmoqda…",
-    "Loading recommendations…"
-  ));
-
-  try {
-    replaceCourses("my-recs");
+   replaceCourses("my-recs");
     await renderMyRecs();
-  } finally {
-    hideAsyncOverlay();
-  }
 
   return;
 }
@@ -23293,35 +23273,15 @@ if (action === "open-all-subjects") {
   return;
 }
    if (action === "my-rec-back") {
-  showAsyncOverlay(tr3(
-    "Загружаем рекомендации…",
-    "Tavsiyalar yuklanmoqda…",
-    "Loading recommendations…"
-  ));
-
-  try {
-    replaceCourses("my-recs");
+  replaceCourses("my-recs");
     await renderMyRecs();
-  } finally {
-    hideAsyncOverlay();
-  }
 
   return;
 }
 
 if (action === "my-rec-open-books") {
-  showAsyncOverlay(tr3(
-    "Загружаем книги…",
-    "Kitoblar yuklanmoqda…",
-    "Loading books…"
-  ));
-
-  try {
-    pushCourses("books");
+  pushCourses("books");
     await renderBooks();
-  } finally {
-    hideAsyncOverlay();
-  }
 
   return;
 }
@@ -23372,18 +23332,8 @@ if (action === "my-rec-to-subject") {
   state.courses.myRecReturnTarget = null;
   saveState();
 
-  showAsyncOverlay(tr3(
-    "Загружаем предмет…",
-    "Fan yuklanmoqda…",
-    "Loading subject…"
-  ));
-
-  try {
-    replaceCourses("subject-hub");
+  replaceCourses("subject-hub");
     await renderSubjectHub();
-  } finally {
-    hideAsyncOverlay();
-  }
 
   return;
 }
@@ -23821,18 +23771,8 @@ if (action === "tour-next" || action === "tour-submit") {
       }
        
                         if (action === "open-books") {
-        showAsyncOverlay(tr3(
-          "Загружаем книги…",
-          "Kitoblar yuklanmoqda…",
-          "Loading books…"
-        ));
-
-        try {
-          pushCourses("books");
+        pushCourses("books");
           await renderBooks();
-        } finally {
-          hideAsyncOverlay();
-        }
 
         return;
       }
@@ -23851,18 +23791,8 @@ if (action === "tour-next" || action === "tour-submit") {
         state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
         saveState();
 
-                showAsyncOverlay(tr3(
-          "Загружаем рекомендации…",
-          "Tavsiyalar yuklanmoqda…",
-          "Loading recommendations…"
-        ));
-
-        try {
-          pushCourses("my-recs");
+                pushCourses("my-recs");
           await renderMyRecs();
-        } finally {
-          hideAsyncOverlay();
-        }
 
         return;
       }
