@@ -3551,14 +3551,9 @@ async function renderNotificationsView() {
   state.notificationsRows = [];
   setNotificationsClearAllVisible(false);
 
-  listEl.innerHTML = `
-    <div class="empty muted">${escapeHTML(t("notifications_loading"))}</div>
-  `;
-
-  showAsyncOverlay(tr3(
-    "Загружаем уведомления…",
-    "Bildirishnomalar yuklanmoqda…",
-    "Loading notifications…"
+  const pending = beginUiLoading(listEl, "iclub-notifications-pending");
+  listEl.innerHTML = uiSkeletonRows(tr3(
+    "Загружаем уведомления", "Bildirishnomalar yuklanmoqda", "Loading notifications"
   ));
 
   if (!window.sb) {
@@ -3566,17 +3561,18 @@ async function renderNotificationsView() {
       <div class="empty muted">${escapeHTML(t("notifications_no_db"))}</div>
     `;
     await refreshNotificationsBadge();
-    hideAsyncOverlay();
+    pending.finish();
     return;
   }
 
   const uid = await getAuthUid().catch(() => null);
+  if (!pending.active()) return;
   if (!uid) {
     listEl.innerHTML = `
       <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
     `;
     await refreshNotificationsBadge();
-    hideAsyncOverlay();
+    pending.finish();
     return;
   }
 
@@ -3609,17 +3605,14 @@ async function renderNotificationsView() {
       .limit(100);
 
     if (error) throw error;
+    if (!pending.active()) return;
     rows = Array.isArray(data) ? data.filter(r => r?.notification) : [];
   } catch (e) {
     logClientError("renderNotificationsView_load", e);
-    listEl.innerHTML = `
-      <div class="empty muted">
-        ${escapeHTML(t("notifications_load_error"))}
-        <div class="small" style="margin-top:8px">${escapeHTML(t("support_route_after_retry"))}</div>
-      </div>
-    `;
+    if (!pending.active()) return;
+    uiLoadingRetry(listEl, t("notifications_load_error"), () => renderNotificationsView());
     await refreshNotificationsBadge();
-    hideAsyncOverlay();
+    pending.finish();
     return;
   }
 
@@ -3631,7 +3624,7 @@ async function renderNotificationsView() {
       <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
     `;
     await refreshNotificationsBadge();
-    hideAsyncOverlay();
+    pending.finish();
     return;
   }
 
@@ -3669,7 +3662,7 @@ async function renderNotificationsView() {
   }).join("");
 
   await markNotificationsRead(rows);
-  hideAsyncOverlay();
+  pending.finish();
 }
 
       function renderAboutView() {
@@ -9253,18 +9246,9 @@ async function renderCertificatesView() {
     oldViewerAtStart.remove();
   }
 
-  listEl.innerHTML = `
-    <div class="empty muted">
-      ${escapeHTML(
-        t("loading") || "Loading…"
-      )}
-    </div>
-  `;
-
-  showAsyncOverlay(tr3(
-    "Загружаем сертификаты…",
-    "Sertifikatlar yuklanmoqda…",
-    "Loading certificates…"
+  const pending = beginUiLoading(listEl, "iclub-certificates-pending");
+  listEl.innerHTML = uiSkeletonRows(tr3(
+    "Загружаем сертификаты", "Sertifikatlar yuklanmoqda", "Loading certificates"
   ));
 
   let rawRows = [];
@@ -9381,6 +9365,7 @@ async function renderCertificatesView() {
   };
 
   const renderCertificateContent = html => {
+    if (!pending.active() && listEl.getAttribute("aria-busy") === "true") return;
     listEl.innerHTML =
       buildSeasonControlHtml() +
       String(html || "");
@@ -9396,6 +9381,7 @@ async function renderCertificatesView() {
 
     const currentSeasonId =
       await getCurrentSeasonId();
+    if (!pending.active()) return;
 
     const savedSeasonId =
       seasonRows.length > 1
@@ -9466,8 +9452,15 @@ async function renderCertificatesView() {
           rawRows
         );
     }
+    if (!pending.active()) return;
+  } catch (error) {
+    logClientError("renderCertificatesView_load", error);
+    if (pending.active()) uiLoadingRetry(listEl, tr3(
+      "Не удалось загрузить сертификаты.", "Sertifikatlarni yuklab bo‘lmadi.", "Certificates could not be loaded."
+    ), () => renderCertificatesView());
+    return;
   } finally {
-    hideAsyncOverlay();
+    pending.finish();
   }
 
   if (!rows.length) {
@@ -21926,12 +21919,14 @@ async function updateTourAttempt(attemptId, patch) {
   const wrap = $("#tour-review-list");
   if (!wrap) return;
 
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
   const localPayload = state?.courses?.lastTourReviewPayload || null;
   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
+  const pending = attemptId ? beginUiLoading(wrap, "iclub-review-pending") : null;
+  if (attemptId) wrap.innerHTML = uiSkeletonRows(tr3("Загружаем разбор", "Tahlil yuklanmoqda", "Loading review"));
 
   const renderFromDetails = (details) => {
+    if (pending && !pending.active()) return;
     const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => d?.isCorrect === false);
     if (!mistakesOnly.length) {
       wrap.innerHTML = `
@@ -21972,7 +21967,6 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
-  showAsyncOverlay(tr3("Загружаем разбор тура…", "Tur tahlili yuklanmoqda…", "Loading tour review…"));
   try {
     const api = getTourSafeApi();
     if (!api?.review) throw new Error("safe_tour_review_unavailable");
@@ -21997,6 +21991,7 @@ async function updateTourAttempt(attemptId, patch) {
     });
     renderFromDetails(details);
   } catch (error) {
+    if (!pending.active()) return;
     const text = String(error?.message || error || "").toLowerCase();
     if (text.includes("tour_review_not_open")) {
       wrap.innerHTML = `<div class="empty muted">${escapeHTML(tr3("Полный разбор откроется после глобального завершения тура.", "To‘liq tahlil tur global yopilgandan keyin ochiladi.", "Full review will open after the tour is globally closed."))}</div>`;
@@ -22005,7 +22000,7 @@ async function updateTourAttempt(attemptId, patch) {
     }
     try { trackEvent("tour_safe_review_error", { attempt_id: String(attemptId), message: String(error?.message || error || "unknown") }); } catch {}
   } finally {
-    hideAsyncOverlay();
+    pending.finish();
   }
 }
    
