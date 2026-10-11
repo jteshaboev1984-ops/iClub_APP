@@ -18616,6 +18616,7 @@ const attempt =
 
   // Helper: render from "details" array in one place
   const renderFromDetails = (details) => {
+    if (pending && !pending.active()) return;
     if (!Array.isArray(details) || !details.length) {
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_empty"))}</div>`;
   return;
@@ -18766,8 +18767,11 @@ row.innerHTML = `
      // If we have DB attempt id -> DB-first review
   const dbAttemptId = attempt?.db?.ok ? Number(attempt?.db?.attemptId) : null;
 
-  // First paint: loading
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_loading_db"))}</div>`;
+  // Local attempt details display immediately; remote review gets in-place skeleton.
+  const pending = dbAttemptId ? beginUiLoading(wrap, "iclub-review-pending") : null;
+  if (pending) wrap.innerHTML = uiSkeletonRows(tr3(
+    "Загружаем разбор практики", "Amaliyot tahlili yuklanmoqda", "Loading practice review"
+  ));
 
   // DB-first flow (best-effort)
   (async () => {
@@ -18776,12 +18780,6 @@ row.innerHTML = `
       renderFromDetails(localDetails);
       return;
     }
-
-    showAsyncOverlay(tr3(
-      "Загружаем разбор практики…",
-      "Amaliyot tahlili yuklanmoqda…",
-      "Loading practice review…"
-    ));
 
     try {
       const safeApi = getPracticeSafeApi();
@@ -18800,7 +18798,7 @@ row.innerHTML = `
       } catch {}
       renderFromDetails([]);
     } finally {
-      hideAsyncOverlay();
+      pending?.finish();
     }
   })();
   }
@@ -18859,7 +18857,8 @@ if (!uniq.length) {
         // v1: если refs пусто — показываем корректный текст:
     // - если книги по предмету есть -> "Книги уже доступны"
     // - если книг нет -> "Будет добавлено позже"
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_loading") || "Loading…")}</div>`;
+    const pending = beginUiLoading(wrap, "iclub-practice-recs-pending");
+    wrap.innerHTML = uiSkeletonRows(tr3("Готовим рекомендации", "Tavsiyalar tayyorlanmoqda", "Loading recommendations"));
 
     (async () => {
       let booksAvailable = false;
@@ -18880,7 +18879,8 @@ if (!uniq.length) {
         }
       } catch {}
 
-     wrap.innerHTML = "";
+     if (!pending.active()) return;
+const fragment = document.createDocumentFragment();
 uniq.forEach(rec => {
   const item = document.createElement("div");
   item.className = "list-item";
@@ -18922,9 +18922,16 @@ uniq.forEach(rec => {
             await renderBooks();
         });
 
-        wrap.appendChild(item);
+        fragment.appendChild(item);
       });
-    })();
+      if (pending.active()) wrap.replaceChildren(fragment);
+      pending.finish();
+    })().catch(error => {
+      if (pending.active()) uiLoadingRetry(wrap, tr3(
+        "Не удалось загрузить рекомендации.", "Tavsiyalarni yuklab bo‘lmadi.", "Could not load recommendations."
+      ), () => renderPracticeRecs());
+      pending.finish();
+    });
   }
 
 async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
