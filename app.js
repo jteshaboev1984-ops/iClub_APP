@@ -17770,14 +17770,9 @@ async function renderToursHistorySummary(
   const owner = await window.iClubPracticeDraftIdentityV1?.bind();
   if (!owner) { showToast(t("not_available")); return; }
 
-  showAsyncOverlay(tr3(
-    "Загружаем практику…",
-    "Amaliyot yuklanmoqda…",
-    "Loading practice…"
-  ));
-
+  pushCourses("practice-start");
+  const entryPending = beginUiLoading(document.getElementById("courses-practice-start"), "iclub-practice-pending");
   try {
-    pushCourses("practice-start");
 
     const resumeBtn = $("#practice-resume-btn");
     const restartBtn = $("#practice-restart-btn");
@@ -17833,7 +17828,7 @@ async function renderToursHistorySummary(
       showToast(t("practice_resume_prompt"));
     }
   } finally {
-    hideAsyncOverlay();
+    entryPending.finish();
   }
 }
    
