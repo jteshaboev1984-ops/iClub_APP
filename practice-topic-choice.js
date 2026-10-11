@@ -229,6 +229,8 @@
       loading=true;
       status.textContent=c.loading;
       search.hidden=true;
+      list.setAttribute("aria-busy", "true");
+      list.innerHTML = '<div class="iclub-skeleton-topic" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'.repeat(3);
       try {
         if(!window.sb || typeof window.sb.rpc!=="function") throw new Error("offline");
         const {data,error}=await window.sb.rpc("get_practice_available_topics_safe_v1",
@@ -249,7 +251,10 @@
         retry.type="button";
         retry.addEventListener("click",()=>{ retry.remove(); load(); });
         list.replaceChildren(retry);
-      } finally { loading=false; }
+      } finally {
+        loading=false;
+        if (ownSerial===mountSerial) list.removeAttribute("aria-busy");
+      }
     }
     search.addEventListener("input",()=>{limit=10;render();});
     more.addEventListener("click",()=>{limit+=10;render();});

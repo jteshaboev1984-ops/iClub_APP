@@ -44,19 +44,21 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 // ---------------------------
 function showToursLoading() {
   const el = document.getElementById("tours-loading");
-  if (!el) return;
-
-  // update label via i18n if available
-  const txt = el.querySelector(".tours-loading-text");
-  if (txt && typeof t === "function") txt.textContent = t("loading") || txt.textContent;
-
+  const screen = document.getElementById("courses-tours");
+  const status = document.getElementById("tours-status");
+  if (!el || !screen) return { active: () => false, finish: () => {} };
+  if (status && el.nextElementSibling !== status) status.before(el);
+  el.setAttribute("role", "status");
+  el.setAttribute("aria-label", tr3("Загрузка туров", "Turlar yuklanmoqda", "Loading Tours"));
   el.classList.remove("hidden");
+  return beginUiLoading(screen, "iclub-tours-pending");
 }
 
-function hideToursLoading() {
+function hideToursLoading(pending) {
+  if (pending && !pending.active()) return;
   const el = document.getElementById("tours-loading");
-  if (!el) return;
-  el.classList.add("hidden");
+  if (el) el.classList.add("hidden");
+  pending?.finish();
 }
 
 function formatTourDateShort(isoDate) {
@@ -166,30 +168,55 @@ function refreshLiveProgressSurfaces() {
   } catch {}
 }
 
-function showViewTransitionOverlay(duration = 220) {
-  const el = document.getElementById("view-transition-overlay");
-  if (!el) return;
-
-  const txt = el.querySelector(".view-transition-text");
-  if (txt && typeof t === "function") {
-    txt.textContent = t("loading") || txt.textContent;
+/* Local display-only loading: only the newest request can clear a busy surface. */
+const __iclubLoadingScopes = new WeakMap();
+function beginUiLoading(node, cls, onTimeout = null, timeoutMs = 25000) {
+  if (!node) return { active: () => false, finish: () => {} };
+  const key = {};
+  __iclubLoadingScopes.set(node, key);
+  node.classList.add(cls);
+  node.setAttribute("aria-busy", "true");
+  const active = () => __iclubLoadingScopes.get(node) === key;
+  let timer = null;
+  const finish = () => {
+    if (timer !== null) { clearTimeout(timer); timer = null; }
+    if (!active()) return;
+    node.classList.remove(cls);
+    node.removeAttribute("aria-busy");
+    __iclubLoadingScopes.delete(node);
+  };
+  // Read-only surfaces may opt into a deadline. Critical saves never use it.
+  if (typeof onTimeout === "function") {
+    timer = setTimeout(() => {
+      if (!active()) return;
+      finish();
+      onTimeout();
+    }, Math.max(50, Number(timeoutMs) || 25000));
   }
-
-  el.classList.remove("hidden");
-  el.classList.remove("is-busy");
-
-  if (__viewTransitionTimer) {
-    clearTimeout(__viewTransitionTimer);
-    __viewTransitionTimer = null;
-  }
-
-  __viewTransitionTimer = setTimeout(() => {
-    el.classList.add("hidden");
-    el.classList.remove("is-busy");
-    __viewTransitionTimer = null;
-  }, duration);
+  return { active, finish };
 }
 
+/* Screen-local presentation only; no timer-based navigation delays. */
+function uiSkeletonRows(label, count = 3) {
+  const n = Math.max(1, Math.min(5, Number(count) || 3));
+  return '<div class="iclub-skeleton-stack" role="status" aria-label="' + escapeHTML(label) + '">' +
+    Array.from({length:n}, () => '<div class="iclub-skeleton-row" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>').join("") + '</div>';
+}
+function uiLoadingRetry(node, message, retry) {
+  if (!node) return;
+  node.replaceChildren();
+  const box = document.createElement("div");
+  box.className = "empty muted iclub-loading-error";
+  const text = document.createElement("p");
+  text.textContent = message;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn";
+  button.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+  button.addEventListener("click", retry);
+  box.append(text,button);
+  node.appendChild(box);
+}
 function showAsyncOverlay(label) {
   const el = document.getElementById("view-transition-overlay");
   if (!el) return;
@@ -2725,17 +2752,13 @@ async function dbHasAnyActiveTourNow(
     return;
   }
 
-  listEl.innerHTML = `
-    <div class="empty muted">
-      ${escapeHTML(t("archive_loading"))}
-    </div>
-  `;
-
-  showAsyncOverlay(tr3(
-    "Загружаем архив…",
-    "Arxiv yuklanmoqda…",
-    "Loading archive…"
-  ));
+  const pending = beginUiLoading(listEl, "iclub-archive-pending", () =>
+    uiLoadingRetry(listEl, tr3(
+      "Архив не ответил. Попробуйте снова.", "Arxiv javob bermadi. Qayta urinib ko‘ring.", "Archive did not respond. Please retry."
+    ), () => renderArchiveView())
+  );
+  const requestedSubject = state?.courses?.subjectKey;
+  listEl.innerHTML = uiSkeletonRows(tr3("Загружаем архив", "Arxiv yuklanmoqda", "Loading archive"));
 
   const renderArchiveBody = (
     contentHtml,
@@ -2804,6 +2827,7 @@ async function dbHasAnyActiveTourNow(
         `
         : "";
 
+    if (!pending.active() || requestedSubject !== state?.courses?.subjectKey) return;
     listEl.innerHTML =
       selectorHtml +
       String(contentHtml || "");
@@ -2840,12 +2864,9 @@ async function dbHasAnyActiveTourNow(
 
   try {
     if (!window.sb) {
-      renderArchiveBody(`
-        <div class="empty muted">
-          ${escapeHTML(t("archive_empty"))}
-        </div>
-      `);
-
+      uiLoadingRetry(listEl, tr3(
+        "Не удалось подключиться к архиву.", "Arxivga ulanib bo‘lmadi.", "Could not connect to archive."
+      ), () => renderArchiveView());
       return;
     }
 
@@ -2879,6 +2900,7 @@ async function dbHasAnyActiveTourNow(
 
     const currentSeasonId =
       await getCurrentSeasonId();
+    if (!pending.active() || requestedSubject !== state?.courses?.subjectKey) return;
 
     const savedSeasonId =
       seasonRows.length > 1
@@ -3044,11 +3066,9 @@ async function dbHasAnyActiveTourNow(
           { ascending: true }
         );
 
-    if (
-      toursErr ||
-      !Array.isArray(tours) ||
-      !tours.length
-    ) {
+    if (toursErr) throw toursErr;
+    if (!Array.isArray(tours)) throw new Error("archive_invalid_tours_response");
+    if (!tours.length) {
       renderArchiveBody(
         `
           <div class="empty muted">
@@ -3117,11 +3137,9 @@ async function dbHasAnyActiveTourNow(
           ]
         );
 
-    if (
-      attemptsError ||
-      !Array.isArray(attempts) ||
-      !attempts.length
-    ) {
+    if (attemptsError) throw attemptsError;
+    if (!Array.isArray(attempts)) throw new Error("archive_invalid_attempts_response");
+    if (!attempts.length) {
       renderArchiveBody(
         `
           <div class="empty muted">
@@ -3242,28 +3260,11 @@ async function dbHasAnyActiveTourNow(
       );
     } catch {}
 
-    renderArchiveBody(`
-      <div class="empty muted">
-        <div
-          style="
-            font-weight:800;
-            margin-bottom:6px;
-          "
-        >
-          ${escapeHTML(
-            t("archive_unavailable_title")
-          )}
-        </div>
-
-        <div class="small">
-          ${escapeHTML(
-            t("archive_unavailable_sub")
-          )}
-        </div>
-      </div>
-    `);
+    if (pending.active()) uiLoadingRetry(listEl, tr3(
+      "Не удалось загрузить архив.", "Arxivni yuklab bo‘lmadi.", "Could not load archive."
+    ), () => renderArchiveView());
   } finally {
-    hideAsyncOverlay();
+    pending.finish();
   }
 }
 
@@ -3541,32 +3542,30 @@ async function renderNotificationsView() {
   state.notificationsRows = [];
   setNotificationsClearAllVisible(false);
 
-  listEl.innerHTML = `
-    <div class="empty muted">${escapeHTML(t("notifications_loading"))}</div>
-  `;
-
-  showAsyncOverlay(tr3(
-    "Загружаем уведомления…",
-    "Bildirishnomalar yuklanmoqda…",
-    "Loading notifications…"
+  const pending = beginUiLoading(listEl, "iclub-notifications-pending", () =>
+    uiLoadingRetry(listEl, tr3(
+      "Уведомления не загрузились. Повторите.", "Bildirishnomalar yuklanmadi. Qayta urinib ko‘ring.", "Notifications did not load. Please retry."
+    ), () => renderNotificationsView())
+  );
+  listEl.innerHTML = uiSkeletonRows(tr3(
+    "Загружаем уведомления", "Bildirishnomalar yuklanmoqda", "Loading notifications"
   ));
 
   if (!window.sb) {
-    listEl.innerHTML = `
-      <div class="empty muted">${escapeHTML(t("notifications_no_db"))}</div>
-    `;
+    uiLoadingRetry(listEl, t("notifications_no_db"), () => renderNotificationsView());
     await refreshNotificationsBadge();
-    hideAsyncOverlay();
+    pending.finish();
     return;
   }
 
   const uid = await getAuthUid().catch(() => null);
+  if (!pending.active()) return;
   if (!uid) {
     listEl.innerHTML = `
       <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
     `;
     await refreshNotificationsBadge();
-    hideAsyncOverlay();
+    pending.finish();
     return;
   }
 
@@ -3599,17 +3598,14 @@ async function renderNotificationsView() {
       .limit(100);
 
     if (error) throw error;
+    if (!pending.active()) return;
     rows = Array.isArray(data) ? data.filter(r => r?.notification) : [];
   } catch (e) {
     logClientError("renderNotificationsView_load", e);
-    listEl.innerHTML = `
-      <div class="empty muted">
-        ${escapeHTML(t("notifications_load_error"))}
-        <div class="small" style="margin-top:8px">${escapeHTML(t("support_route_after_retry"))}</div>
-      </div>
-    `;
+    if (!pending.active()) return;
+    uiLoadingRetry(listEl, t("notifications_load_error"), () => renderNotificationsView());
     await refreshNotificationsBadge();
-    hideAsyncOverlay();
+    pending.finish();
     return;
   }
 
@@ -3621,7 +3617,7 @@ async function renderNotificationsView() {
       <div class="empty muted">${escapeHTML(t("notifications_empty"))}</div>
     `;
     await refreshNotificationsBadge();
-    hideAsyncOverlay();
+    pending.finish();
     return;
   }
 
@@ -3658,8 +3654,9 @@ async function renderNotificationsView() {
     `;
   }).join("");
 
+  // Content is ready; read-marker synchronization remains asynchronous.
+  pending.finish();
   await markNotificationsRead(rows);
-  hideAsyncOverlay();
 }
 
       function renderAboutView() {
@@ -6191,10 +6188,6 @@ function formatDateTime(ts) {
   const currentActive = document.querySelector(".view.is-active");
   const currentViewName = currentActive?.dataset?.view || "";
   const isSplashToRegistration = currentViewName === "splash" && viewName === "registration";
-
-  if (viewName !== "splash" && !isSplashToRegistration) {
-    showViewTransitionOverlay();
-  }
 
   VIEWS.forEach(v => {
     const el = $(`#view-${v}`);
@@ -9247,18 +9240,9 @@ async function renderCertificatesView() {
     oldViewerAtStart.remove();
   }
 
-  listEl.innerHTML = `
-    <div class="empty muted">
-      ${escapeHTML(
-        t("loading") || "Loading…"
-      )}
-    </div>
-  `;
-
-  showAsyncOverlay(tr3(
-    "Загружаем сертификаты…",
-    "Sertifikatlar yuklanmoqda…",
-    "Loading certificates…"
+  const pending = beginUiLoading(listEl, "iclub-certificates-pending");
+  listEl.innerHTML = uiSkeletonRows(tr3(
+    "Загружаем сертификаты", "Sertifikatlar yuklanmoqda", "Loading certificates"
   ));
 
   let rawRows = [];
@@ -9375,6 +9359,7 @@ async function renderCertificatesView() {
   };
 
   const renderCertificateContent = html => {
+    if (!pending.active() && listEl.getAttribute("aria-busy") === "true") return;
     listEl.innerHTML =
       buildSeasonControlHtml() +
       String(html || "");
@@ -9390,6 +9375,7 @@ async function renderCertificatesView() {
 
     const currentSeasonId =
       await getCurrentSeasonId();
+    if (!pending.active()) return;
 
     const savedSeasonId =
       seasonRows.length > 1
@@ -9460,8 +9446,15 @@ async function renderCertificatesView() {
           rawRows
         );
     }
+    if (!pending.active()) return;
+  } catch (error) {
+    logClientError("renderCertificatesView_load", error);
+    if (pending.active()) uiLoadingRetry(listEl, tr3(
+      "Не удалось загрузить сертификаты.", "Sertifikatlarni yuklab bo‘lmadi.", "Certificates could not be loaded."
+    ), () => renderCertificatesView());
+    return;
   } finally {
-    hideAsyncOverlay();
+    pending.finish();
   }
 
   if (!rows.length) {
@@ -11017,9 +11010,34 @@ async function renderRatings() {
 
   const token = ++ratingsState._token;
 
-const showLoading = () => { if (loadingEl) loadingEl.style.display = "flex"; };
+let ratingsWait = null;
+let ratingsPending = null;
+const ratingsRetry = () => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn primary";
+  button.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+  button.addEventListener("click", () => renderRatings());
+  listEl.appendChild(button);
+};
+const showLoading = () => {
+  if (loadingEl) loadingEl.style.display = "none";
+  ratingsPending = beginUiLoading(listEl, "iclub-ratings-pending");
+  listEl.innerHTML = Array.from({ length: 4 }, () =>
+    '<div class="iclub-skeleton-rating" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'
+  ).join("");
+  ratingsWait = setTimeout(() => {
+    if (token !== ratingsState._token || !ratingsPending.active()) return;
+    ratingsPending.finish();
+    ratingsState._token += 1;
+    listEl.innerHTML = '<div class="empty muted">' + escapeHTML(t("ratings_load_error")) + '</div>';
+    ratingsRetry();
+  }, 25000);
+};
 const hideLoading = () => {
   if (token !== ratingsState._token) return;
+  if (ratingsWait) { clearTimeout(ratingsWait); ratingsWait = null; }
+  ratingsPending?.finish();
   if (loadingEl) loadingEl.style.display = "none";
 };
 
@@ -11118,7 +11136,8 @@ const hideLoading = () => {
 
   // если Supabase ещё не готов
   if (!window.sb) {
-    listEl.innerHTML = `<div class="empty muted">${t("loading")}</div>`;
+    listEl.innerHTML = `<div class="empty muted">${escapeHTML(t("ratings_load_error"))}</div>`;
+    ratingsRetry();
     if (mybar) mybar.style.display = "none";
     if (hintEl) hintEl.style.display = "none";
     hideLoading();
@@ -11126,17 +11145,18 @@ const hideLoading = () => {
   }
 
     // boot selects (once)
+  showLoading(); // Display the local placeholder before the first asynchronous boot.
   await ensureRatingsBoot();
+  if (token !== ratingsState._token) return;
 
   // loading UI
-  listEl.innerHTML = "";
-  showLoading();
   if (mybar) mybar.style.display = "none";
 
   // user / participant
     const uid = await getAuthUid();
   const me = await getMyUserRow(uid);
   const myComp = await getMyCompetitiveSubjects(uid);
+  if (token !== ratingsState._token) return;
   const isParticipant = !!me?.is_school_student && (myComp?.length > 0);
 
   const myRegionId = Number(me?.region_id || 0) > 0 ? String(me.region_id) : "";
@@ -13264,6 +13284,7 @@ showToast(toPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
   }
 
   if (profile && window.sb && !__profileSubjectsDbReady) {
+    const profilePending = beginUiLoading(document.getElementById("profile-main"), "iclub-profile-pending");
     const compElTmp = document.getElementById("profile-metric-competitive");
     const studyElTmp = document.getElementById("profile-metric-study");
     if (compElTmp) compElTmp.textContent = "…";
@@ -13278,7 +13299,8 @@ showToast(toPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
          try { renderProfileSettings(); } catch {}
        }
      })
-     .catch(() => {});
+     .catch(() => {})
+     .finally(() => profilePending.finish());
    return;
   }
   
@@ -13315,10 +13337,10 @@ showToast(toPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
     compEl.textContent = "0";
     studyEl.textContent = "0";
 
-    bestEl.textContent = "—";
-    trendEl.textContent = "—";
-    stabilityEl.textContent = "—";
-    toursEl.textContent = "—";
+    bestEl.textContent = tr3("Нет результатов", "Natija yo‘q", "No results");
+    trendEl.textContent = tr3("Недостаточно данных", "Ma’lumot yetarli emas", "Not enough data");
+    stabilityEl.textContent = tr3("Нет данных", "Ma’lumot yo‘q", "No data");
+    toursEl.textContent = tr3("Нет данных", "Ma’lumot yo‘q", "No data");
 
     if (ratingsBtn) ratingsBtn.disabled = true;
 
@@ -13454,7 +13476,8 @@ keys.forEach(k => {
   if (Array.isArray(h?.last)) allAttempts.push(...h.last.map(a => ({ ...a, _subjectKey: k })));
 });
 
-  bestEl.textContent = best ? `${Math.round(Number(best.percent) || 0)}%` : "—";
+  bestEl.textContent = best ? `${Math.round(Number(best.percent) || 0)}%` : tr3("Нет результатов", "Natija yo‘q", "No results");
+  bestEl.classList.toggle("iclub-stat-empty", !best);
 
   // Trend: avg(last 3) - avg(prev 3)
   allAttempts.sort((a, b) => (Number(b.ts) || 0) - (Number(a.ts) || 0));
@@ -13468,8 +13491,9 @@ keys.forEach(k => {
 
     trendEl.textContent = (diff === 0) ? "0%" : `${diff > 0 ? "+" : ""}${diff}%`;
   } else {
-    trendEl.textContent = "—";
+    trendEl.textContent = tr3("Недостаточно данных", "Ma’lumot yetarli emas", "Not enough data");
   }
+  trendEl.classList.toggle("iclub-stat-empty", last6.length < 4);
 
   // Stability: уникальные дни с практикой за последние 7 дней
   const now = Date.now();
@@ -13496,16 +13520,18 @@ keys.forEach(k => {
   getProfileCompletedToursCount()
     .then((count) => {
       if (!toursEl) return;
-      toursEl.textContent = (count == null) ? "—" : String(count);
+      toursEl.textContent = (count == null) ? tr3("Нет данных", "Ma’lumot yo‘q", "No data") : String(count);
+      toursEl.classList.toggle("iclub-stat-empty", count == null);
     })
     .catch(() => {
       if (!toursEl) return;
-      toursEl.textContent = "—";
+      toursEl.textContent = tr3("Не загрузилось", "Yuklanmadi", "Load failed");
+      toursEl.classList.add("iclub-stat-empty");
     });
   
   if (currentLevelEl) {
     const bestPct = Number(best?.percent || 0);
-    const level = bestPct >= 85 ? t("profile_level_advanced") : (bestPct >= 70 ? t("profile_level_intermediate") : (bestPct > 0 ? t("profile_level_beginner") : "—"));
+    const level = bestPct >= 85 ? t("profile_level_advanced") : (bestPct >= 70 ? t("profile_level_intermediate") : (bestPct > 0 ? t("profile_level_beginner") : tr3("Не определён", "Aniqlanmagan", "Not determined")));
     currentLevelEl.textContent = level;
   }
 
@@ -14630,8 +14656,9 @@ async function computeHomeCompetitiveStats(subjectKey) {
 }
 
 async function updateHomeCompetitiveCard(cardEl, subjectKey) {
+  if (!cardEl) return;
+  const pending = beginUiLoading(cardEl, "iclub-home-pending");
   try {
-    if (!cardEl) return;
 
     const badgeEl = cardEl.querySelector(".home-competitive-badge");
     const modEl = cardEl.querySelector(".js-home-comp-module");
@@ -14642,6 +14669,7 @@ async function updateHomeCompetitiveCard(cardEl, subjectKey) {
     const btnEl = cardEl.querySelector(".home-competitive-btn");
 
     const s = await computeHomeCompetitiveStats(subjectKey);
+    if (!cardEl.isConnected || !pending.active()) return;
 
     const practiceTourNo = Number(s?.practiceTourNo || s?.moduleNo || 1);
     const done = Number(s?.practiceDone || 0);
@@ -14700,7 +14728,8 @@ if (noteEl) {
 }
 
 if (rankEl) {
-  rankEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
+  rankEl.textContent = total > 0 ? `${done}/${total}` : tr3("Нет данных", "Ma’lumot yo‘q", "No data");
+  rankEl.classList.toggle("iclub-stat-empty", total <= 0);
 }
 
 if (percentEl) {
@@ -14716,7 +14745,9 @@ if (percentEl) {
 
     if (btnEl) btnEl.disabled = false;
   } catch {
-    // silent
+    // Keep unavailable metrics distinct from verified progress.
+  } finally {
+    pending.finish();
   }
 }
 
@@ -14750,19 +14781,24 @@ if (percentEl) {
 }
 
 async function updateHomePinnedTile(tileEl, subjectKey) {
+  if (!tileEl) return;
+  const pending = beginUiLoading(tileEl, "iclub-home-pending");
   try {
-    if (!tileEl) return;
 
     const countEl = tileEl.querySelector(".js-home-pin-count");
     if (!countEl) return;
 
     const s = await computeHomeStudyPracticeStats(subjectKey);
+    if (!tileEl.isConnected || !pending.active()) return;
     const done = Number(s?.masteredCount || 0);
     const total = Number(s?.totalCount || 0);
 
-    countEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
+    countEl.textContent = total > 0 ? `${done}/${total}` : tr3("Нет данных", "Ma’lumot yo‘q", "No data");
+    countEl.classList.toggle("iclub-stat-empty", total <= 0);
   } catch {
-    // silent
+    // No invented progress.
+  } finally {
+    pending.finish();
   }
 } 
    
@@ -14791,7 +14827,7 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
 
     <div class="home-competitive-meta">
       <span class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</span>
-      <span class="home-competitive-rank js-home-comp-rank">—/—</span>
+      <span class="home-competitive-rank js-home-comp-rank">${tr3("Загрузка…", "Yuklanmoqda…", "Loading…")}</span>
     </div>
 
     <div class="home-competitive-percent js-home-comp-percent"></div>
@@ -14806,31 +14842,23 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   btn.type = "button";
   btn.className = "btn primary home-competitive-btn";
     btn.textContent = t("open_subject_btn") || "Open subject";
-  btn.disabled = true;
-
-  setTimeout(() => {
-    try { btn.disabled = false; } catch {}
-  }, 3500);
+  btn.disabled = false;
 
   btn.addEventListener("click", async (e) => {
     e.stopPropagation();
-
-    showAsyncOverlay(tr3(
-      "Загружаем предмет…",
-      "Fan yuklanmoqda…",
-      "Loading subject…"
-    ));
-
+    if (btn.dataset.opening === "1") return;
+    btn.dataset.opening = "1";
+    btn.disabled = true;
     try {
       state.courses.subjectKey = userSubject.key;
       state.courses.entryTab = "home";
-
       saveState();
       setTab("courses");
       replaceCourses("subject-hub");
       await renderSubjectHub();
     } finally {
-      hideAsyncOverlay();
+      btn.disabled = false;
+      delete btn.dataset.opening;
     }
   });
   el.appendChild(btn);
@@ -14839,7 +14867,7 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
     function homePinnedTileEl(userSubject, index = 0) {
   const subj = subjectByKey(userSubject.key);
   const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
-    const lessons = "—/—";
+    const lessons = tr3("Загрузка…", "Yuklanmoqda…", "Loading…");
 
   const el = document.createElement("button");
   el.type = "button";
@@ -14908,7 +14936,8 @@ function subjectIconCandidates(subjectKey) {
   const profile = loadProfile();
 
   // Если нет профиля — каталогу нечего делать (но это не должно случаться)
-  grid.innerHTML = "";
+  // One complete synchronous catalog frame; no progressive cards.
+  const catalogFragment = document.createDocumentFragment();
   if (!profile) {
     grid.innerHTML = `<div class="empty muted">${escapeHTML(t("need_registration_short"))}</div>`;
     return;
@@ -14945,12 +14974,6 @@ const renderMainFilterRow = () => {
 
   row.querySelectorAll("[data-main-filter]").forEach(btn => {
     const v = btn.getAttribute("data-main-filter");
-    btn.addEventListener("pointerup", (e) => {
-      e.preventDefault();
-      state.courses.mainFilter = v;
-      saveState();
-      renderAllSubjects();
-    });
     btn.addEventListener("click", () => {
       state.courses.mainFilter = v;
       saveState();
@@ -14993,7 +15016,7 @@ const appendSectionTitle = (text) => {
   const el = document.createElement("div");
   el.className = "grid-section-title";
   el.textContent = text;
-  grid.appendChild(el);
+  catalogFragment.appendChild(el);
 };
 
 const appendSubjectCard = (s) => {
@@ -15031,14 +15054,18 @@ const imgEl = head.querySelector(".catalog-ico-img");
 setImgWithFallback(imgEl, subjectIconCandidates(s.key));
 
     head.addEventListener("click", async () => {
-    const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(s.key);
-    if (accessOk === false) return;
-
-    // "Открыть" — без изменения профиля, как в контракте
-    state.courses.subjectKey = s.key;
-    saveState();
-    pushCourses("subject-hub");
-    renderSubjectHub();
+    if (head.dataset.opening === "1") return;
+    head.dataset.opening = "1";
+    try {
+      const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(s.key);
+      if (accessOk === false) return;
+      state.courses.subjectKey = s.key;
+      saveState();
+      pushCourses("subject-hub");
+      renderSubjectHub();
+    } finally {
+      delete head.dataset.opening;
+    }
   });
 
   card.appendChild(head); // ✅ вернуть заголовок с названием предмета
@@ -15309,7 +15336,7 @@ stateLine.textContent = isCompetitiveTab
   footer.appendChild(left);
   footer.appendChild(sw);
   card.appendChild(footer);
-  grid.appendChild(card);
+  catalogFragment.appendChild(card);
 };
 
   // ---- MAIN section + filter row + pinned-first + filter mode
@@ -15344,6 +15371,7 @@ if (mainSubjects.length) {
      const addOut = sortByCurrentTabState(additionalSubjects);
      addOut.forEach(appendSubjectCard);
    }
+   grid.replaceChildren(catalogFragment);
 }
 
         async function openSubjectHub(subjectKey) {
@@ -15556,8 +15584,20 @@ async function renderSubjectHubMentorCard(subjectKey) {
   // A stale Mathematics response may never occupy another subject's hub.
   const hubIdentityRoot = document.getElementById("courses-subject-hub");
   if (hubIdentityRoot) hubIdentityRoot.dataset.subjectKey = String(subjectKey || "");
+  const recoverHub = () => {
+    if (subjectKey !== state.courses?.subjectKey || getCoursesTopScreen() !== "subject-hub") return;
+    replaceCourses("all-subjects");
+    renderAllSubjects();
+    showToast(tr3(
+      "Предмет не загрузился. Проверьте соединение и откройте его снова.",
+      "Fan yuklanmadi. Internetni tekshirib, uni qayta oching.",
+      "Could not load the subject. Check your connection and open it again."
+    ));
+  };
+  const hubPending = beginUiLoading(hubIdentityRoot, "iclub-hub-pending", recoverHub);
+  try {
   const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
-  if (subjectKey !== state.courses.subjectKey) return;
+  if (subjectKey !== state.courses.subjectKey || !hubPending.active()) return;
   if (accessOk === false) {
     replaceCourses("all-subjects");
     renderAllSubjects();
@@ -15607,7 +15647,8 @@ async function renderSubjectHubMentorCard(subjectKey) {
     const toursSub = toursBtn?.querySelector(".muted.small");
 
     if (toursBtn) {
-      const planAccess = await window.iClubCommercialAccessUI?.checkCompetitive?.(state.courses.subjectKey);
+      const planAccess = await window.iClubCommercialAccessUI?.checkCompetitive?.(subjectKey);
+      if (subjectKey !== state.courses.subjectKey || !hubPending.active()) return;
       const planEnforced = planAccess?.enforced === true;
 
       // Additional subjects: tours do not exist by spec.
@@ -15650,7 +15691,15 @@ async function renderSubjectHubMentorCard(subjectKey) {
         updateTopbarForView("courses");
 
         // ✅ Subject mentor card
-    await renderSubjectHubMentorCard(subjectKey).catch(() => null);
+    Promise.resolve(renderSubjectHubMentorCard(subjectKey)).catch(() => null);
+  } catch (error) {
+    if (hubPending.active() && subjectKey === state.courses?.subjectKey) {
+      try { logClientError("renderSubjectHub_load", error); } catch {}
+      recoverHub();
+    }
+  } finally {
+    hubPending.finish();
+  }
   }
   // ---------------------------
   // Lessons (demo)
@@ -15659,8 +15708,14 @@ async function renderSubjectHubMentorCard(subjectKey) {
     const list = $("#lessons-list");
     const subj = subjectByKey(state.courses.subjectKey);
     if (!list) return;
-
-    list.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка...")}</div>`;
+    const requestedSubject = state.courses.subjectKey;
+    const pending = beginUiLoading(list, "iclub-lessons-pending", () =>
+      uiLoadingRetry(list, tr3(
+        "Уроки не загрузились. Попробуйте снова.", "Darslar yuklanmadi. Qayta urinib ko‘ring.", "Lessons did not load. Please retry."
+      ), () => renderLessons())
+    );
+    try {
+    list.innerHTML = '<div class="iclub-skeleton-lesson" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'.repeat(3);
 
     if (!window.sb) {
       list.innerHTML = `<div class="empty muted">${escapeHTML(t("lessons_no_db") || "База не подключена. Уроки недоступны.")}</div>`;
@@ -15669,6 +15724,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
     const subjectKey = state.courses.subjectKey;
     const subjectId = await getSubjectIdByKey(subjectKey);
+    if (!pending.active() || requestedSubject !== state.courses.subjectKey) return;
 
     if (!subjectId) {
       list.innerHTML = `<div class="empty muted">${escapeHTML(t("lessons_empty") || "Уроки пока не добавлены.")}</div>`;
@@ -15680,6 +15736,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
       .select("id,title,topic,order_no")
       .eq("subject_id", subjectId)
       .order("order_no", { ascending: true });
+    if (!pending.active() || requestedSubject !== state.courses.subjectKey) return;
 
     if (error) {
       logClientError("lessons_select_error", error);
@@ -15716,6 +15773,21 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
       list.appendChild(item);
     });
+    } catch {
+      if (pending.active() && requestedSubject === state.courses.subjectKey) {
+        list.innerHTML = '<div class="empty muted">' + escapeHTML(tr3(
+          "Не удалось загрузить уроки.", "Darslarni yuklab bo‘lmadi.", "Could not load lessons."
+        )) + '</div>';
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "btn primary";
+        retry.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+        retry.addEventListener("click", () => renderLessons());
+        list.appendChild(retry);
+      }
+    } finally {
+      pending.finish();
+    }
   }
 
     async function renderVideo() {
@@ -15751,6 +15823,7 @@ if (subjectEl) subjectEl.textContent = subjectTitle(subjectKey, subj ? subj.titl
   // ✅ привязываем subject-level экран к первому lesson_id предмета,
   // чтобы skip/complete и video_events не ломались
   const primaryLessonId = await getSubjectPrimaryLessonId(subjectKey);
+  if (subjectKey !== String(state?.courses?.subjectKey || "").trim().toLowerCase()) return;
   state.courses = state.courses || {};
   state.courses.lessonId = primaryLessonId || null;
   saveState();
@@ -17026,29 +17099,64 @@ function addMyRecsFromAttempt(attempt) {
 }
    
    // ---- Practice history render (inject into practice-start) ----
+  let __practiceStartRenderSeq = 0;
   async function renderPracticeStart() {
   const subjectKey = state.courses.subjectKey;
   const subj = subjectByKey(subjectKey);
   const viewSubjectKey = subjectKey;
+  const renderSeq = ++__practiceStartRenderSeq;
+  const showPracticeLoadFailure = (error = null) => {
+    if (renderSeq !== __practiceStartRenderSeq || state.courses?.subjectKey !== viewSubjectKey) return;
+    if (error) try { logClientError("renderPracticeStart_load", error); } catch {}
+    document.getElementById("practice-tour-picker")?.replaceChildren();
+    const startBtn = document.getElementById("practice-restart-btn");
+    if (startBtn) {
+      startBtn.disabled = true;
+      startBtn.dataset.premiumLoadingBlocked = "1";
+    }
+    const metaEl = document.getElementById("practice-stage-meta");
+    if (metaEl) metaEl.textContent = tr3(
+      "Не удалось загрузить данные практики.", "Amaliyot ma’lumotlarini yuklab bo‘lmadi.", "Could not load Practice data."
+    );
+    const empty = document.getElementById("practice-last-empty");
+    if (empty) {
+      empty.style.display = "block";
+      uiLoadingRetry(empty, tr3(
+        "Проверьте соединение и повторите.", "Internet aloqasini tekshirib, qayta urinib ko‘ring.", "Check your connection and try again."
+      ), () => renderPracticeStart());
+    }
+  };
+  const pending = beginUiLoading(document.getElementById("courses-practice-start"), "iclub-practice-pending", () => showPracticeLoadFailure());
+  const isCurrent = () => renderSeq === __practiceStartRenderSeq
+    && pending.active() && state.courses.subjectKey === viewSubjectKey;
 
   const titleEl = $("#practice-subject-title");
   if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj?.title || subjectKey || "—");
 
   const stageMetaEl = $("#practice-stage-meta");
-  if (stageMetaEl) stageMetaEl.textContent = "—";
+  if (stageMetaEl) stageMetaEl.textContent = tr3("Загружаем статистику", "Statistika yuklanmoqda", "Loading statistics");
 
   const bestScoreEl = $("#practice-best-score");
   const bestPctEl = $("#practice-best-percent");
   const bestTimeEl = $("#practice-best-time");
 
-  if (bestScoreEl) bestScoreEl.textContent = "—";
+  if (bestScoreEl) {
+    bestScoreEl.textContent = tr3("Нет результата", "Natija yo‘q", "No result");
+    bestScoreEl.classList.add("iclub-stat-empty");
+  }
   if (bestPctEl) bestPctEl.textContent = "";
-  if (bestTimeEl) bestTimeEl.textContent = "—";
+  if (bestTimeEl) {
+    bestTimeEl.textContent = tr3("После первой попытки", "Birinchi urinishdan so‘ng", "After first attempt");
+    bestTimeEl.classList.add("iclub-stat-empty");
+  }
 
   const tbody = $("#practice-last-tbody");
   const emptyEl = $("#practice-last-empty");
   if (tbody) tbody.innerHTML = "";
-  if (emptyEl) emptyEl.style.display = "block";
+  if (emptyEl) {
+    emptyEl.textContent = t("practice_no_attempts") || tr3("Пока нет попыток", "Hozircha urinishlar yo‘q", "No attempts yet");
+    emptyEl.style.display = "block";
+  }
 
   renderTrendBars({
     wrapEl: document.getElementById("practice-micro-bars"),
@@ -17069,13 +17177,18 @@ function addMyRecsFromAttempt(attempt) {
 
    return (async () => {
     const picker = await getPracticeTourCards(subjectKey);
-    if (state?.courses?.subjectKey !== viewSubjectKey) return;
+    if (!isCurrent()) return;
 
     const selectedTourNo = Number(picker?.selectedTourNo || 1);
 updatePracticeStartButtonForTour(selectedTourNo, false);
 
 const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo);
-if (state?.courses?.subjectKey !== viewSubjectKey) return;
+if (!isCurrent()) return;
+const startBtn = document.getElementById("practice-restart-btn");
+if (startBtn?.dataset.premiumLoadingBlocked === "1") {
+  startBtn.disabled = false;
+  delete startBtn.dataset.premiumLoadingBlocked;
+}
 
 renderPracticeTourPicker(picker.cards, selectedTourNo);
 updatePracticeStartButtonForTour(selectedTourNo, false);
@@ -17145,6 +17258,7 @@ window.iClubPracticeTopicChoice?.mount({
         }
       }
     } catch {}
+    if (!isCurrent()) return;
 
     if (!h) {
       h = loadPracticeHistory(subjectKey, selectedTourNo);
@@ -17154,9 +17268,15 @@ window.iClubPracticeTopicChoice?.mount({
     const last = Array.isArray(h?.last) ? h.last : [];
 
     if (best) {
-      if (bestScoreEl) bestScoreEl.textContent = `${best.score}/${best.total}`;
+      if (bestScoreEl) {
+        bestScoreEl.textContent = `${best.score}/${best.total}`;
+        bestScoreEl.classList.remove("iclub-stat-empty");
+      }
       if (bestPctEl) bestPctEl.textContent = `(${best.percent}%)`;
-      if (bestTimeEl) bestTimeEl.textContent = formatSecShort(best.durationSec);
+      if (bestTimeEl) {
+        bestTimeEl.textContent = formatSecShort(best.durationSec);
+        bestTimeEl.classList.remove("iclub-stat-empty");
+      }
     }
 
     if (tbody) tbody.innerHTML = "";
@@ -17218,14 +17338,17 @@ window.iClubPracticeTopicChoice?.mount({
       barClass: "practice-micro-bar",
       lastClass: "is-last"
     });
-  })().catch(() => {});
+  })().catch(error => {
+    if (isCurrent()) showPracticeLoadFailure(error);
+  }).finally(() => { pending.finish(); });
 }
    
          async function renderToursStart() {
-  showToursLoading();
+  const pending = showToursLoading();
+  const subjectKey = state.courses?.subjectKey || null;
+  const isCurrent = () => pending.active() && state.courses?.subjectKey === subjectKey;
   try {
     const profile = loadProfile?.() || null;
-    const subjectKey = state.courses?.subjectKey || null;
     const subj = subjectByKey(subjectKey);
 
     // subject title
@@ -17279,6 +17402,7 @@ const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDa
 
 const operationalSeasonId =
   await getCurrentSeasonId();
+if (!isCurrent()) return;
 
 // UI: show loading first to avoid 1-sec "wrong screen" flicker
 if (statusTitle) statusTitle.textContent = tr("loading", "Загрузка…");
@@ -17345,6 +17469,8 @@ if (!dbTours.length && window.sb && subjectId) {
     toursErr = toursErr || e;
   }
 }
+
+ if (!isCurrent()) return;
 
  // pick active / upcoming tours
 const activeTours = dbTours.filter(r => !!r.is_active && isInWindow(r));
@@ -17446,6 +17572,7 @@ if (!activeTour && !upcomingTour) {
       alreadyAttempted = await hasTourAttempt(uid, activeTour.id);
     }
   } catch {}
+  if (!isCurrent()) return;
 
   if (alreadyAttempted) {
     if (statusTitle) {
@@ -17476,13 +17603,31 @@ if (!activeTour && !upcomingTour) {
      try {
        await renderToursHistorySummary(
          subjectId,
-         operationalSeasonId
+         operationalSeasonId,
+         isCurrent
        );
      } catch {}
      
-      saveState();
+      if (isCurrent()) saveState();
+      } catch {
+        if (isCurrent()) {
+          const title = document.getElementById("tours-status-title");
+          const description = document.getElementById("tours-status-desc");
+          const button = document.getElementById("tours-open-btn");
+          if (title) title.textContent = tr3("Не удалось загрузить туры", "Turlarni yuklab bo‘lmadi", "Could not load Tours");
+          if (description) {
+            description.textContent = tr3("Проверьте соединение и повторите.", "Internet aloqasini tekshirib, qayta urinib ko‘ring.", "Check your connection and try again.");
+            const retry = document.createElement("button");
+            retry.type = "button";
+            retry.className = "btn primary";
+            retry.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+            retry.addEventListener("click", () => renderToursStart());
+            description.appendChild(retry);
+          }
+          if (button) button.classList.add("hidden");
+        }
       } finally {
-     hideToursLoading();
+     hideToursLoading(pending);
    }
   }
 
@@ -17492,7 +17637,8 @@ if (!activeTour && !upcomingTour) {
 // --------------------------------------
 async function renderToursHistorySummary(
   subjectId,
-  seasonIdArg = null
+  seasonIdArg = null,
+  isCurrent = () => true
 ) {
   const bestScoreEl = document.getElementById("tours-best-score");
   const bestPctEl = document.getElementById("tours-best-percent");
@@ -17517,6 +17663,7 @@ async function renderToursHistorySummary(
     await getCurrentSeasonId();
 
   let attempts = [];
+  let historyReadError = false;
 
   try {
     const uid = await getAuthUid();
@@ -17535,9 +17682,11 @@ async function renderToursHistorySummary(
         .eq("tours.season_id", Number(seasonId))
         .order("created_at", { ascending: false });
 
-      if (!error && Array.isArray(data)) attempts = data;
+      if (error || !Array.isArray(data)) historyReadError = true;
+      else attempts = data;
     }
-  } catch {}
+  } catch { historyReadError = true; }
+  if (!isCurrent()) return;
 
   // Group best attempt per tour_no (although now it's usually 1 attempt)
   const byTour = new Map();
@@ -17587,17 +17736,30 @@ async function renderToursHistorySummary(
     if (bestPctEl) bestPctEl.textContent = `(${pct}%)`;
     if (bestTimeEl) bestTimeEl.textContent = formatSecShort(time);
   } else {
-    if (bestScoreEl) bestScoreEl.textContent = "—";
+    if (bestScoreEl) bestScoreEl.textContent = historyReadError
+      ? tr3("Не загрузилось", "Yuklanmadi", "Load failed")
+      : tr3("Нет результата", "Natija yo‘q", "No result");
     if (bestPctEl) bestPctEl.textContent = "";
-    if (bestTimeEl) bestTimeEl.textContent = "—";
+    if (bestTimeEl) bestTimeEl.textContent = historyReadError
+      ? tr3("Повторите позже", "Keyinroq qayta urining", "Try again later")
+      : tr3("После первого тура", "Birinchi turdan so‘ng", "After first Tour");
   }
+  bestScoreEl?.classList.toggle("iclub-stat-empty", !best);
+  bestTimeEl?.classList.toggle("iclub-stat-empty", !best);
 
   // Render completed list
   if (historyCard) historyCard.style.display = "";
   if (historyListEl) historyListEl.innerHTML = "";
 
   if (!rows.length) {
-    if (historyEmptyEl) historyEmptyEl.style.display = "";
+    if (historyEmptyEl) {
+      historyEmptyEl.style.display = "";
+      if (historyReadError) {
+        uiLoadingRetry(historyEmptyEl, tr3("История туров не загрузилась.", "Turlar tarixi yuklanmadi.", "Could not load Tour history."), () => renderToursStart());
+      } else {
+        historyEmptyEl.textContent = tr3("Вы ещё не проходили туры по этому предмету.", "Siz hali bu fandan turlarni bajarmadingiz.", "No Tours completed for this subject yet.");
+      }
+    }
     if (historySubEl) historySubEl.textContent = "";
   } else {
     if (historyEmptyEl) historyEmptyEl.style.display = "none";
@@ -17710,15 +17872,11 @@ async function renderToursHistorySummary(
   const subjectKey = state.courses.subjectKey;
   const owner = await window.iClubPracticeDraftIdentityV1?.bind();
   if (!owner) { showToast(t("not_available")); return; }
+  if (subjectKey !== state?.courses?.subjectKey) return;
 
-  showAsyncOverlay(tr3(
-    "Загружаем практику…",
-    "Amaliyot yuklanmoqda…",
-    "Loading practice…"
-  ));
-
+  pushCourses("practice-start");
+  const entryPending = beginUiLoading(document.getElementById("courses-practice-start"), "iclub-practice-pending");
   try {
-    pushCourses("practice-start");
 
     const resumeBtn = $("#practice-resume-btn");
     const restartBtn = $("#practice-restart-btn");
@@ -17732,6 +17890,8 @@ async function renderToursHistorySummary(
     if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
     const picker = await getPracticeTourCards(subjectKey);
+    if (subjectKey !== state?.courses?.subjectKey) return;
+    if (typeof getCoursesTopScreen === "function" && getCoursesTopScreen() !== "practice-start") return;
 
     const draft = loadPracticeDraft();
     const draftTourNo = Number(
@@ -17774,7 +17934,7 @@ async function renderToursHistorySummary(
       showToast(t("practice_resume_prompt"));
     }
   } finally {
-    hideAsyncOverlay();
+    entryPending.finish();
   }
 }
    
@@ -18557,6 +18717,7 @@ const attempt =
 
   // Helper: render from "details" array in one place
   const renderFromDetails = (details) => {
+    if (pending && !pending.active()) return;
     if (!Array.isArray(details) || !details.length) {
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_empty"))}</div>`;
   return;
@@ -18707,8 +18868,11 @@ row.innerHTML = `
      // If we have DB attempt id -> DB-first review
   const dbAttemptId = attempt?.db?.ok ? Number(attempt?.db?.attemptId) : null;
 
-  // First paint: loading
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_loading_db"))}</div>`;
+  // Local attempt details display immediately; remote review gets in-place skeleton.
+  const pending = dbAttemptId ? beginUiLoading(wrap, "iclub-review-pending") : null;
+  if (pending) wrap.innerHTML = uiSkeletonRows(tr3(
+    "Загружаем разбор практики", "Amaliyot tahlili yuklanmoqda", "Loading practice review"
+  ));
 
   // DB-first flow (best-effort)
   (async () => {
@@ -18717,12 +18881,6 @@ row.innerHTML = `
       renderFromDetails(localDetails);
       return;
     }
-
-    showAsyncOverlay(tr3(
-      "Загружаем разбор практики…",
-      "Amaliyot tahlili yuklanmoqda…",
-      "Loading practice review…"
-    ));
 
     try {
       const safeApi = getPracticeSafeApi();
@@ -18741,7 +18899,7 @@ row.innerHTML = `
       } catch {}
       renderFromDetails([]);
     } finally {
-      hideAsyncOverlay();
+      pending?.finish();
     }
   })();
   }
@@ -18800,7 +18958,12 @@ if (!uniq.length) {
         // v1: если refs пусто — показываем корректный текст:
     // - если книги по предмету есть -> "Книги уже доступны"
     // - если книг нет -> "Будет добавлено позже"
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_loading") || "Loading…")}</div>`;
+    const pending = beginUiLoading(wrap, "iclub-practice-recs-pending", () =>
+      uiLoadingRetry(wrap, tr3(
+        "Рекомендации не загрузились. Попробуйте снова.", "Tavsiyalar yuklanmadi. Qayta urinib ko‘ring.", "Recommendations did not load. Please retry."
+      ), () => renderPracticeRecs())
+    );
+    wrap.innerHTML = uiSkeletonRows(tr3("Готовим рекомендации", "Tavsiyalar tayyorlanmoqda", "Loading recommendations"));
 
     (async () => {
       let booksAvailable = false;
@@ -18821,7 +18984,8 @@ if (!uniq.length) {
         }
       } catch {}
 
-     wrap.innerHTML = "";
+     if (!pending.active()) return;
+const fragment = document.createDocumentFragment();
 uniq.forEach(rec => {
   const item = document.createElement("div");
   item.className = "list-item";
@@ -18859,23 +19023,20 @@ uniq.forEach(rec => {
                 btn?.addEventListener("click", async (e) => {
           e.stopPropagation();
 
-          showAsyncOverlay(tr3(
-            "Загружаем книги…",
-            "Kitoblar yuklanmoqda…",
-            "Loading books…"
-          ));
-
-          try {
-            pushCourses("books");
+          pushCourses("books");
             await renderBooks();
-          } finally {
-            hideAsyncOverlay();
-          }
         });
 
-        wrap.appendChild(item);
+        fragment.appendChild(item);
       });
-    })();
+      if (pending.active()) wrap.replaceChildren(fragment);
+      pending.finish();
+    })().catch(error => {
+      if (pending.active()) uiLoadingRetry(wrap, tr3(
+        "Не удалось загрузить рекомендации.", "Tavsiyalarni yuklab bo‘lmadi.", "Could not load recommendations."
+      ), () => renderPracticeRecs());
+      pending.finish();
+    });
   }
 
 async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
@@ -18984,6 +19145,31 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
 async function renderMyRecs() {
   const wrap = $("#my-recs-list");
   if (!wrap) return;
+  const pending = beginUiLoading(wrap, "iclub-recs-pending");
+  const subjectKey = String(state?.courses?.subjectKey || "").trim();
+  const isCurrent = () => pending.active() && String(state?.courses?.subjectKey || "").trim() === subjectKey;
+  const skeleton = '<div class="iclub-skeleton-recs" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'.repeat(3);
+  wrap.innerHTML = skeleton;
+  try {
+    await renderMyRecsRaw(isCurrent, skeleton);
+  } catch {
+    if (isCurrent()) {
+      wrap.innerHTML = '<div class="empty muted">' + escapeHTML(tr3("Не удалось загрузить рекомендации.", "Tavsiyalarni yuklab bo‘lmadi.", "Could not load recommendations.")) + '</div>';
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "btn primary";
+      retry.textContent = tr3("Повторить", "Qayta urinish", "Retry");
+      retry.addEventListener("click", () => renderMyRecs());
+      wrap.appendChild(retry);
+    }
+  } finally {
+    pending.finish();
+  }
+}
+
+async function renderMyRecsRaw(isCurrent, skeleton) {
+  const wrap = $("#my-recs-list");
+  if (!wrap) return;
 
   const subjectKey = String(state?.courses?.subjectKey || "").trim();
   if (!subjectKey) {
@@ -19003,6 +19189,7 @@ async function renderMyRecs() {
 
   const currentSeasonId =
     await getCurrentSeasonId();
+  if (!isCurrent()) return;
 
   const savedSeasonId =
     seasonRows.length > 1
@@ -19031,6 +19218,7 @@ async function renderMyRecs() {
 
   const seasonOneId =
     await getSeasonOneId();
+  if (!isCurrent()) return;
 
   if (
     seasonRows.length > 1 &&
@@ -19056,13 +19244,14 @@ async function renderMyRecs() {
     }
   }
 
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
+  wrap.innerHTML = skeleton;
 
     // DB-first for both practice and tour
   const dbRows = await fetchMyRecsDB(
     subjectKey,
     selectedSeasonId
   );
+  if (!isCurrent()) return;
 
   let practiceRows = dbRows.filter(r => String(r?.source_type || "") === "practice");
   let tourRows = dbRows
@@ -19104,6 +19293,7 @@ async function renderMyRecs() {
       })
     );
 
+    if (!isCurrent()) return;
     practiceRows = checks.filter(x => x.keep).map(x => x.rec);
   }
    
@@ -19215,6 +19405,7 @@ async function renderMyRecs() {
       topicHistoryUnavailable = true;
     }
   }
+  if (!isCurrent()) return;
   // Practice has one coherent history; no nested tour/topic mode switch.
   const modeTabs = "";
   const tabBtn = (key, label, isActive) => `
@@ -20262,17 +20453,26 @@ async function renderBooks() {
   const wrap = $("#books-list");
   if (!wrap) return;
 
-  // show loading
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_loading") || "")}</div>`;
-
   const subjectKey = state?.courses?.subjectKey ? String(state.courses.subjectKey) : "";
+  const pending = beginUiLoading(wrap, "iclub-books-pending", () =>
+    uiLoadingRetry(wrap, tr3(
+      "Книги не загрузились. Попробуйте снова.", "Kitoblar yuklanmadi. Qayta urinib ko‘ring.", "Books did not load. Please retry."
+    ), () => renderBooks())
+  );
+  const isCurrent = () => pending.active() && subjectKey === String(state?.courses?.subjectKey || "");
+  const showLoadError = () => uiLoadingRetry(wrap, tr3(
+    "Не удалось загрузить книги.", "Kitoblarni yuklab bo‘lmadi.", "Books could not be loaded."
+  ), () => renderBooks());
+  wrap.innerHTML = uiSkeletonRows(tr3("Загрузка книг", "Kitoblar yuklanmoqda", "Loading books"));
   if (!subjectKey) {
     wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_pick_subject_first") || "")}</div>`;
+    pending.finish();
     return;
   }
 
   if (!window.sb) {
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_no_db") || "")}</div>`;
+    showLoadError();
+    pending.finish();
     return;
   }
 
@@ -20295,8 +20495,10 @@ async function renderBooks() {
     } catch {}
   }
 
+  if (!isCurrent()) return;
   if (!subjectId) {
-    wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_subject_not_found") || "")}</div>`;
+    showLoadError();
+    pending.finish();
     return;
   }
 
@@ -20310,16 +20512,22 @@ async function renderBooks() {
       .eq("is_active", true)
       .order("created_at", { ascending: false });
 
-    if (!error && Array.isArray(data)) rows = data;
-  } catch {}
+    if (error) throw error;
+    if (Array.isArray(data)) rows = data;
+  } catch (error) {
+    if (isCurrent()) showLoadError();
+    pending.finish();
+    return;
+  }
+  if (!isCurrent()) return;
 
   if (!rows.length) {
     wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("books_empty") || "")}</div>`;
+    pending.finish();
     return;
   }
 
-  wrap.innerHTML = "";
-
+  const fragment = document.createDocumentFragment();
   rows.forEach((b) => {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -20348,8 +20556,10 @@ async function renderBooks() {
 
       openExternal(url);
     });
-    wrap.appendChild(btn);
+    fragment.appendChild(btn);
   });
+  if (isCurrent()) wrap.replaceChildren(fragment);
+  pending.finish();
 }
 
     // ---------------------------
@@ -21791,12 +22001,18 @@ async function updateTourAttempt(attemptId, patch) {
   const wrap = $("#tour-review-list");
   if (!wrap) return;
 
-  wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("loading") || "Загрузка…")}</div>`;
   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
   const localPayload = state?.courses?.lastTourReviewPayload || null;
   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
+  const pending = attemptId ? beginUiLoading(wrap, "iclub-review-pending", () =>
+    uiLoadingRetry(wrap, tr3(
+      "Разбор не загрузился. Попробуйте снова.", "Tahlil yuklanmadi. Qayta urinib ko‘ring.", "Review did not load. Please retry."
+    ), () => renderTourReview())
+  ) : null;
+  if (attemptId) wrap.innerHTML = uiSkeletonRows(tr3("Загружаем разбор", "Tahlil yuklanmoqda", "Loading review"));
 
   const renderFromDetails = (details) => {
+    if (pending && !pending.active()) return;
     const mistakesOnly = (Array.isArray(details) ? details : []).filter(d => d?.isCorrect === false);
     if (!mistakesOnly.length) {
       wrap.innerHTML = `
@@ -21837,7 +22053,6 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
-  showAsyncOverlay(tr3("Загружаем разбор тура…", "Tur tahlili yuklanmoqda…", "Loading tour review…"));
   try {
     const api = getTourSafeApi();
     if (!api?.review) throw new Error("safe_tour_review_unavailable");
@@ -21862,15 +22077,18 @@ async function updateTourAttempt(attemptId, patch) {
     });
     renderFromDetails(details);
   } catch (error) {
+    if (!pending.active()) return;
     const text = String(error?.message || error || "").toLowerCase();
     if (text.includes("tour_review_not_open")) {
       wrap.innerHTML = `<div class="empty muted">${escapeHTML(tr3("Полный разбор откроется после глобального завершения тура.", "To‘liq tahlil tur global yopilgandan keyin ochiladi.", "Full review will open after the tour is globally closed."))}</div>`;
     } else {
-      wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("not_available") || "Разбор временно недоступен.")}</div>`;
+      uiLoadingRetry(wrap, tr3(
+        "Не удалось загрузить разбор.", "Tahlilni yuklab bo‘lmadi.", "Could not load review."
+      ), () => renderTourReview());
     }
     try { trackEvent("tour_safe_review_error", { attempt_id: String(attemptId), message: String(error?.message || error || "unknown") }); } catch {}
   } finally {
-    hideAsyncOverlay();
+    pending.finish();
   }
 }
    
@@ -22283,7 +22501,6 @@ function bindTabbar() {
     const topView = state.viewStack?.[state.viewStack.length - 1];
 
     if (topView === "certificates" && Number(state?.certificates?.selectedId || 0) > 0) {
-    showViewTransitionOverlay(260);
     state.certificates.selectedId = null;
     saveState();
     renderCertificatesView();
@@ -22293,7 +22510,6 @@ function bindTabbar() {
 
     // If we are on global screen -> go back in global stack
   if (topView && ["resources","news","notifications","community","about","support","support-topic","certificates","archive"].includes(topView)) {
-    showViewTransitionOverlay(260);
     globalBack();
     return;
   }
@@ -23126,18 +23342,8 @@ if (action === "open-all-subjects") {
     });
   } catch {}
 
-   showAsyncOverlay(tr3(
-    "Загружаем рекомендации…",
-    "Tavsiyalar yuklanmoqda…",
-    "Loading recommendations…"
-  ));
-
-  try {
-    replaceCourses("my-recs");
+   replaceCourses("my-recs");
     await renderMyRecs();
-  } finally {
-    hideAsyncOverlay();
-  }
 
   return;
 }
@@ -23187,35 +23393,15 @@ if (action === "open-all-subjects") {
   return;
 }
    if (action === "my-rec-back") {
-  showAsyncOverlay(tr3(
-    "Загружаем рекомендации…",
-    "Tavsiyalar yuklanmoqda…",
-    "Loading recommendations…"
-  ));
-
-  try {
-    replaceCourses("my-recs");
+  replaceCourses("my-recs");
     await renderMyRecs();
-  } finally {
-    hideAsyncOverlay();
-  }
 
   return;
 }
 
 if (action === "my-rec-open-books") {
-  showAsyncOverlay(tr3(
-    "Загружаем книги…",
-    "Kitoblar yuklanmoqda…",
-    "Loading books…"
-  ));
-
-  try {
-    pushCourses("books");
+  pushCourses("books");
     await renderBooks();
-  } finally {
-    hideAsyncOverlay();
-  }
 
   return;
 }
@@ -23266,18 +23452,8 @@ if (action === "my-rec-to-subject") {
   state.courses.myRecReturnTarget = null;
   saveState();
 
-  showAsyncOverlay(tr3(
-    "Загружаем предмет…",
-    "Fan yuklanmoqda…",
-    "Loading subject…"
-  ));
-
-  try {
-    replaceCourses("subject-hub");
+  replaceCourses("subject-hub");
     await renderSubjectHub();
-  } finally {
-    hideAsyncOverlay();
-  }
 
   return;
 }
@@ -23347,7 +23523,16 @@ if (action === "profile-open-ratings") {
 
 
             if (action === "open-practice") {
-        await openPracticeStart();
+        if (btn.dataset.opening === "1") return;
+        btn.dataset.opening = "1";
+        btn.setAttribute("aria-busy", "true");
+        btn.disabled = true;
+        try { await openPracticeStart(); }
+        finally {
+          delete btn.dataset.opening;
+          btn.removeAttribute("aria-busy");
+          btn.disabled = false;
+        }
         return;
       }
 
@@ -23359,20 +23544,9 @@ if (action === "profile-open-ratings") {
 if (action === "practice-select-tour") {
   const tourNo = Number(btn.dataset.tourNo || 0);
   if (tourNo > 0) {
-    showAsyncOverlay(tr3(
-      "Загружаем практику…",
-      "Amaliyot yuklanmoqda…",
-      "Loading practice…"
-    ));
-
     setSelectedPracticeTourNo(state.courses.subjectKey, tourNo);
     updatePracticeStartButtonForTour(tourNo, false);
-
-    try {
-  await renderPracticeStart();
-} finally {
-  hideAsyncOverlay();
-}
+    await renderPracticeStart();
   }
   return;
 }
@@ -23715,18 +23889,8 @@ if (action === "tour-next" || action === "tour-submit") {
       }
        
                         if (action === "open-books") {
-        showAsyncOverlay(tr3(
-          "Загружаем книги…",
-          "Kitoblar yuklanmoqda…",
-          "Loading books…"
-        ));
-
-        try {
-          pushCourses("books");
+        pushCourses("books");
           await renderBooks();
-        } finally {
-          hideAsyncOverlay();
-        }
 
         return;
       }
@@ -23745,18 +23909,8 @@ if (action === "tour-next" || action === "tour-submit") {
         state.courses.myRecsActiveTab = state.courses.myRecsActiveTab || "practice";
         saveState();
 
-                showAsyncOverlay(tr3(
-          "Загружаем рекомендации…",
-          "Tavsiyalar yuklanmoqda…",
-          "Loading recommendations…"
-        ));
-
-        try {
-          pushCourses("my-recs");
+                pushCourses("my-recs");
           await renderMyRecs();
-        } finally {
-          hideAsyncOverlay();
-        }
 
         return;
       }
