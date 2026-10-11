@@ -3732,3 +3732,9 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
   font-size:12px;line-height:1.35;font-weight:690;letter-spacing:0;
   color:#738097;overflow-wrap:anywhere;font-variant-numeric:normal;
 }
+
+/* Explicit peer order is identical while checking and after resolving access. */
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-hub-primary-label {order:0}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice {order:1}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-tours {order:2}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-exam {order:3}

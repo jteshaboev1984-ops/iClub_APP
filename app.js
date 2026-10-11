@@ -14867,7 +14867,7 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
     function homePinnedTileEl(userSubject, index = 0) {
   const subj = subjectByKey(userSubject.key);
   const title = subjectTitle(userSubject.key, subj ? subj.title : userSubject.key);
-    const lessons = "—/—";
+    const lessons = tr3("Загрузка…", "Yuklanmoqda…", "Loading…");
 
   const el = document.createElement("button");
   el.type = "button";
