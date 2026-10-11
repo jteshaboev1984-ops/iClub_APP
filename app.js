@@ -15584,6 +15584,14 @@ async function renderSubjectHubMentorCard(subjectKey) {
   // A stale Mathematics response may never occupy another subject's hub.
   const hubIdentityRoot = document.getElementById("courses-subject-hub");
   if (hubIdentityRoot) hubIdentityRoot.dataset.subjectKey = String(subjectKey || "");
+  // Update Exam Prep's subject before the first asynchronous access lookup.
+  // The previous subject's card must never flash in the next subject hub.
+  try {
+    Promise.resolve(window.iClubExamPrep?.syncSubjectHub?.({
+      subjectKey,
+      language: currentLang()
+    })).catch(() => null);
+  } catch {}
   const recoverHub = () => {
     if (subjectKey !== state.courses?.subjectKey || getCoursesTopScreen() !== "subject-hub") return;
     replaceCourses("all-subjects");
@@ -15607,14 +15615,7 @@ async function renderSubjectHubMentorCard(subjectKey) {
   const profile = loadProfile();
   const subj = subjectByKey(subjectKey);
 
-  // P0-14 HOST BRIDGE: isolated Exam Prep visibility/lifecycle sync; no domain logic here.
-  try {
-    Promise.resolve(window.iClubExamPrep?.syncSubjectHub?.({
-      subjectKey: state.courses.subjectKey,
-      language: currentLang()
-    })).catch(() => null);
-  } catch {}
-
+  // Exam Prep identity is already synchronized before access awaits.
   const titleEl = $("#subject-hub-title");
   const metaEl = $("#subject-hub-meta");
 
