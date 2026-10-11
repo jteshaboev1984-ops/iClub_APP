@@ -13337,10 +13337,10 @@ showToast(toPinned ? t("toast_added_pinned") : t("toast_removed_pinned"));
     compEl.textContent = "0";
     studyEl.textContent = "0";
 
-    bestEl.textContent = "—";
-    trendEl.textContent = "—";
-    stabilityEl.textContent = "—";
-    toursEl.textContent = "—";
+    bestEl.textContent = tr3("Нет результатов", "Natija yo‘q", "No results");
+    trendEl.textContent = tr3("Недостаточно данных", "Ma’lumot yetarli emas", "Not enough data");
+    stabilityEl.textContent = tr3("Нет данных", "Ma’lumot yo‘q", "No data");
+    toursEl.textContent = tr3("Нет данных", "Ma’lumot yo‘q", "No data");
 
     if (ratingsBtn) ratingsBtn.disabled = true;
 
@@ -13476,7 +13476,8 @@ keys.forEach(k => {
   if (Array.isArray(h?.last)) allAttempts.push(...h.last.map(a => ({ ...a, _subjectKey: k })));
 });
 
-  bestEl.textContent = best ? `${Math.round(Number(best.percent) || 0)}%` : "—";
+  bestEl.textContent = best ? `${Math.round(Number(best.percent) || 0)}%` : tr3("Нет результатов", "Natija yo‘q", "No results");
+  bestEl.classList.toggle("iclub-stat-empty", !best);
 
   // Trend: avg(last 3) - avg(prev 3)
   allAttempts.sort((a, b) => (Number(b.ts) || 0) - (Number(a.ts) || 0));
@@ -13490,8 +13491,9 @@ keys.forEach(k => {
 
     trendEl.textContent = (diff === 0) ? "0%" : `${diff > 0 ? "+" : ""}${diff}%`;
   } else {
-    trendEl.textContent = "—";
+    trendEl.textContent = tr3("Недостаточно данных", "Ma’lumot yetarli emas", "Not enough data");
   }
+  trendEl.classList.toggle("iclub-stat-empty", last6.length < 4);
 
   // Stability: уникальные дни с практикой за последние 7 дней
   const now = Date.now();
@@ -13518,16 +13520,18 @@ keys.forEach(k => {
   getProfileCompletedToursCount()
     .then((count) => {
       if (!toursEl) return;
-      toursEl.textContent = (count == null) ? "—" : String(count);
+      toursEl.textContent = (count == null) ? tr3("Нет данных", "Ma’lumot yo‘q", "No data") : String(count);
+      toursEl.classList.toggle("iclub-stat-empty", count == null);
     })
     .catch(() => {
       if (!toursEl) return;
-      toursEl.textContent = "—";
+      toursEl.textContent = tr3("Не загрузилось", "Yuklanmadi", "Load failed");
+      toursEl.classList.add("iclub-stat-empty");
     });
   
   if (currentLevelEl) {
     const bestPct = Number(best?.percent || 0);
-    const level = bestPct >= 85 ? t("profile_level_advanced") : (bestPct >= 70 ? t("profile_level_intermediate") : (bestPct > 0 ? t("profile_level_beginner") : "—"));
+    const level = bestPct >= 85 ? t("profile_level_advanced") : (bestPct >= 70 ? t("profile_level_intermediate") : (bestPct > 0 ? t("profile_level_beginner") : tr3("Не определён", "Aniqlanmagan", "Not determined")));
     currentLevelEl.textContent = level;
   }
 
@@ -14724,7 +14728,8 @@ if (noteEl) {
 }
 
 if (rankEl) {
-  rankEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
+  rankEl.textContent = total > 0 ? `${done}/${total}` : tr3("Нет данных", "Ma’lumot yo‘q", "No data");
+  rankEl.classList.toggle("iclub-stat-empty", total <= 0);
 }
 
 if (percentEl) {
@@ -14788,7 +14793,8 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
     const done = Number(s?.masteredCount || 0);
     const total = Number(s?.totalCount || 0);
 
-    countEl.textContent = total > 0 ? `${done}/${total}` : "—/—";
+    countEl.textContent = total > 0 ? `${done}/${total}` : tr3("Нет данных", "Ma’lumot yo‘q", "No data");
+    countEl.classList.toggle("iclub-stat-empty", total <= 0);
   } catch {
     // No invented progress.
   } finally {
@@ -14821,7 +14827,7 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
 
     <div class="home-competitive-meta">
       <span class="home-competitive-module js-home-comp-module">${escapeHTML(moduleTxt)}</span>
-      <span class="home-competitive-rank js-home-comp-rank">—/—</span>
+      <span class="home-competitive-rank js-home-comp-rank">${tr3("Загрузка…", "Yuklanmoqda…", "Loading…")}</span>
     </div>
 
     <div class="home-competitive-percent js-home-comp-percent"></div>
@@ -17128,15 +17134,21 @@ function addMyRecsFromAttempt(attempt) {
   if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj?.title || subjectKey || "—");
 
   const stageMetaEl = $("#practice-stage-meta");
-  if (stageMetaEl) stageMetaEl.textContent = "—";
+  if (stageMetaEl) stageMetaEl.textContent = tr3("Загружаем статистику", "Statistika yuklanmoqda", "Loading statistics");
 
   const bestScoreEl = $("#practice-best-score");
   const bestPctEl = $("#practice-best-percent");
   const bestTimeEl = $("#practice-best-time");
 
-  if (bestScoreEl) bestScoreEl.textContent = "—";
+  if (bestScoreEl) {
+    bestScoreEl.textContent = tr3("Нет результата", "Natija yo‘q", "No result");
+    bestScoreEl.classList.add("iclub-stat-empty");
+  }
   if (bestPctEl) bestPctEl.textContent = "";
-  if (bestTimeEl) bestTimeEl.textContent = "—";
+  if (bestTimeEl) {
+    bestTimeEl.textContent = tr3("После первой попытки", "Birinchi urinishdan so‘ng", "After first attempt");
+    bestTimeEl.classList.add("iclub-stat-empty");
+  }
 
   const tbody = $("#practice-last-tbody");
   const emptyEl = $("#practice-last-empty");
@@ -17256,9 +17268,15 @@ window.iClubPracticeTopicChoice?.mount({
     const last = Array.isArray(h?.last) ? h.last : [];
 
     if (best) {
-      if (bestScoreEl) bestScoreEl.textContent = `${best.score}/${best.total}`;
+      if (bestScoreEl) {
+        bestScoreEl.textContent = `${best.score}/${best.total}`;
+        bestScoreEl.classList.remove("iclub-stat-empty");
+      }
       if (bestPctEl) bestPctEl.textContent = `(${best.percent}%)`;
-      if (bestTimeEl) bestTimeEl.textContent = formatSecShort(best.durationSec);
+      if (bestTimeEl) {
+        bestTimeEl.textContent = formatSecShort(best.durationSec);
+        bestTimeEl.classList.remove("iclub-stat-empty");
+      }
     }
 
     if (tbody) tbody.innerHTML = "";
@@ -17645,6 +17663,7 @@ async function renderToursHistorySummary(
     await getCurrentSeasonId();
 
   let attempts = [];
+  let historyReadError = false;
 
   try {
     const uid = await getAuthUid();
@@ -17663,9 +17682,10 @@ async function renderToursHistorySummary(
         .eq("tours.season_id", Number(seasonId))
         .order("created_at", { ascending: false });
 
-      if (!error && Array.isArray(data)) attempts = data;
+      if (error || !Array.isArray(data)) historyReadError = true;
+      else attempts = data;
     }
-  } catch {}
+  } catch { historyReadError = true; }
   if (!isCurrent()) return;
 
   // Group best attempt per tour_no (although now it's usually 1 attempt)
@@ -17716,17 +17736,30 @@ async function renderToursHistorySummary(
     if (bestPctEl) bestPctEl.textContent = `(${pct}%)`;
     if (bestTimeEl) bestTimeEl.textContent = formatSecShort(time);
   } else {
-    if (bestScoreEl) bestScoreEl.textContent = "—";
+    if (bestScoreEl) bestScoreEl.textContent = historyReadError
+      ? tr3("Не загрузилось", "Yuklanmadi", "Load failed")
+      : tr3("Нет результата", "Natija yo‘q", "No result");
     if (bestPctEl) bestPctEl.textContent = "";
-    if (bestTimeEl) bestTimeEl.textContent = "—";
+    if (bestTimeEl) bestTimeEl.textContent = historyReadError
+      ? tr3("Повторите позже", "Keyinroq qayta urining", "Try again later")
+      : tr3("После первого тура", "Birinchi turdan so‘ng", "After first Tour");
   }
+  bestScoreEl?.classList.toggle("iclub-stat-empty", !best);
+  bestTimeEl?.classList.toggle("iclub-stat-empty", !best);
 
   // Render completed list
   if (historyCard) historyCard.style.display = "";
   if (historyListEl) historyListEl.innerHTML = "";
 
   if (!rows.length) {
-    if (historyEmptyEl) historyEmptyEl.style.display = "";
+    if (historyEmptyEl) {
+      historyEmptyEl.style.display = "";
+      if (historyReadError) {
+        uiLoadingRetry(historyEmptyEl, tr3("История туров не загрузилась.", "Turlar tarixi yuklanmadi.", "Could not load Tour history."), () => renderToursStart());
+      } else {
+        historyEmptyEl.textContent = tr3("Вы ещё не проходили туры по этому предмету.", "Siz hali bu fandan turlarni bajarmadingiz.", "No Tours completed for this subject yet.");
+      }
+    }
     if (historySubEl) historySubEl.textContent = "";
   } else {
     if (historyEmptyEl) historyEmptyEl.style.display = "none";

@@ -3654,6 +3654,7 @@ body.iclub-visual-v3 #courses-subject-hub.is-study > .subject-hub-tabs .hub-tab.
   background:linear-gradient(117deg,#FFFFFF 10%,#F3F7FF 100%);border-color:#CBD9F7;
 }
 .iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-exam::before {background:linear-gradient(180deg,#94B4F7,#3569D5)}
+.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > button.subject-mode-card,
 .iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card .subject-mode-card-button {
   box-sizing:border-box;display:grid;width:100%;min-width:0;min-height:138px;
   grid-template-rows:auto auto 1fr;gap:8px;padding:15px 16px 14px 17px;
