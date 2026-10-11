@@ -23429,20 +23429,9 @@ if (action === "profile-open-ratings") {
 if (action === "practice-select-tour") {
   const tourNo = Number(btn.dataset.tourNo || 0);
   if (tourNo > 0) {
-    showAsyncOverlay(tr3(
-      "Загружаем практику…",
-      "Amaliyot yuklanmoqda…",
-      "Loading practice…"
-    ));
-
     setSelectedPracticeTourNo(state.courses.subjectKey, tourNo);
     updatePracticeStartButtonForTour(tourNo, false);
-
-    try {
-  await renderPracticeStart();
-} finally {
-  hideAsyncOverlay();
-}
+    await renderPracticeStart();
   }
   return;
 }
