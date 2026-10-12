@@ -12,12 +12,12 @@ const same=(a,b,kind)=>{
  if(kind==='exam_prep_result')return a.status===b.status&&a.finalized_at===b.finalized_at&&
   a.component_code===b.component_code&&a.content_version_id===b.content_version_id;
  if(kind==='practice_result')return a.status===b.status&&a.finalized_at===b.finalized_at&&a.subject_id===b.subject_id;
- return a.finalized_at===b.finalized_at&&a.tour_id===b.tour_id;
+ return a.status===b.status&&a.tour_id===b.tour_id;
 };
 class MockServerContextResolver {
  constructor(services={}) {
   for(const name of ['hasProtectedAssessment','getExamPrepSession',
-   'getPracticeSession','getTourAttempt','getTourArchiveAccess','getSubjectById',
+   'getPracticeSession','getTourAttempt','getTourRuntime','getTourArchiveAccess','getSubjectById',
    'getTourById','subjectAccessAllowed']){
    if(typeof services[name]!=='function')throw Error('missing server service '+name);
   }
@@ -49,7 +49,14 @@ class MockServerContextResolver {
    if(row.status!=='finalized'||!isValidTime(row.finalized_at))
     return DENY('practice_not_finished');
   } else {
-   if(!isValidTime(row.finalized_at))return DENY('tour_not_finished');
+   if(!['submitted','time_expired'].includes(row.status))
+     return DENY('tour_not_finished');
+   // Tour attempt lacks finalized_at. Confirm separate runtime row.
+   let runtime;
+   try{runtime=await S.getTourRuntime(row.id)}catch{return DENY('tour_runtime_unavailable')}
+   if(!runtime||runtime.attempt_id!==row.id||runtime.user_id!==userId||
+       runtime.tour_id!==row.tour_id||!isValidTime(runtime.finalized_at))
+     return DENY('tour_not_finished');
   }
   let subjectKey='mathematics',category=kind==='exam_prep_result'?'exam_prep':kind==='practice_result'?'practice':'tour';
   try {
@@ -77,12 +84,24 @@ class MockServerContextResolver {
   let latest;
   try{latest=await fetch()}catch{return DENY('context_changed')}
   if(!same(row,latest,kind)||await blocked())return DENY('context_changed');
+  if(kind==='tour_archive') {
+    let latestRuntime, latestArchive;
+    try {
+      latestRuntime=await S.getTourRuntime(row.id);
+      latestArchive=await S.getTourArchiveAccess({userId,tourId:row.tour_id,attemptId:row.id});
+    }catch{return DENY('context_changed')}
+    if(!latestRuntime||latestRuntime.user_id!==userId||
+       latestRuntime.attempt_id!==row.id||latestRuntime.tour_id!==row.tour_id||
+       !isValidTime(latestRuntime.finalized_at)||
+       latestArchive?.unlocked!==true||latestArchive?.ownerVerified!==true)
+       return DENY('context_changed');
+  }
   // Fail closed on missing real topic evidence: this is only an eligibility
   // snapshot, NOT approval to ask the model or bill the learner.
   return {ok:true,verifiedBy:'server_owned_existing_db',
    context:{kind,subject:subjectKey,scope:category,component:
     kind==='exam_prep_result'?row.component_code:null,
-    sessionRef:resourceId,finalizedAt:row.finalized_at,
+    sessionRef:resourceId,finalizedAt:kind==='tour_archive'?null:row.finalized_at,
     topic:null,sourceReady:false,routeAuthority:'unified_ai'}};
  }
 }
