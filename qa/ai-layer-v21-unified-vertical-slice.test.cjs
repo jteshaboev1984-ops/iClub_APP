@@ -17,7 +17,7 @@ function fixture({plan='plus',mathEnabled=true,practiceEnabled=true,tourEnabled=
    locale:'ru',featureId:'math',sourceId:'src-math',sourceVersion:'v3',sourceKey:'p1:P1-CIR-01:theory:ru:v2'};
  const econ={surface:'practice',subject:'economics',feature:'theory',topic:'ECO-01',
    locale:'ru',featureId:'econ',sourceId:'src-econ',sourceVersion:'v3',sourceKey:'eco-source-01'};
- const tour={surface:'tour_archive',subject:'economics',feature:'theory',topic:'ECO-TOUR-01',
+ const tour={surface:'tour_archive',subject:'economics',feature:'archive_explanation',topic:'ECO-TOUR-01',
    locale:'ru',featureId:'tour',sourceId:'src-tour',sourceVersion:'v3',sourceKey:'eco-tour-source-01'};
  const rows=[math,econ,tour],registry=new PreviewFeatureRegistry();
  for(const r of rows)registry.register({...r,gates:greens});
@@ -60,14 +60,6 @@ function fixture({plan='plus',mathEnabled=true,practiceEnabled=true,tourEnabled=
   providerBudgetAllows:async()=>flags.providerAllowed,
   generateMock:async({topic})=>{modelCalls++;return 'Synthetic generated explanation about '+topic;}
  };
- services.getFeatureId=async(subject,feature)=>{
-   // Exact feature route in the mock verified server, not a browser hint.
-   return subject==='mathematics'?'math':services.currentSurface==='tour_archive'?'tour':'econ';
- };
- // For Tour feature, distinguish by topic via reviewed subject-specific data.
- services.getFeatureId=async(subject,feature)=>subject==='mathematics'?'math':feature==='theory'?'econ':'tour';
- // Source feature for Tour is separate category to avoid cross-screen reuse.
- tour.feature='archive_explanation';
  services.getFeatureId=async(subject,feature)=>
   subject==='mathematics'?'math':feature==='archive_explanation'?'tour':'econ';
  const ai=new SyntheticUnifiedAI({resolver,registry,services});
