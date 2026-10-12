@@ -83,3 +83,24 @@ test('RPC declaration is unique and no original legacy Tutor RPC is redefined',(
  assert.equal((sql.match(/create or replace function public\.get_iclub_ai_math_skill_context_service_v2\(/g)||[]).length,1);
  assert.equal(/create or replace function (?:public|private)\.get_exam_prep_ai_tutor_card_service_v1\(/.test(sql),false);
 });
+
+test('Math SQL fixture is fully transactional and synthetic-only',()=>{
+ const fixture=fs.readFileSync('qa/sql_drafts/iclub_ai_math_authority_local_pg.psql','utf8');
+ assert.match(fixture,/^BEGIN;/m);
+ assert.match(fixture,/^ROLLBACK;/m);
+ assert.match(fixture,/current_database\(\) !~ '\^iclub_ai_v21_scratch_/);
+ assert.match(fixture,/inet_server_addr\(\)/);
+ assert.ok(fixture.includes('\\ir iclub_ai_math_skill_context_v21_UNAPPLIED.sql'));
+ for(const item of ['skill_evidence_unverified','active_assessment','source_not_approved',
+ 'tutor_source_not_ready','skill_component_mismatch','context_not_authorized','gateway_disabled']){
+  assert.ok(fixture.includes(item),item);
+ }
+});
+test('Local scratch shell selects an explicit allowlisted Math or tariff suite',()=>{
+ const script=fs.readFileSync('qa/run-ai-layer-v21-postgres-local.sh','utf8');
+ assert.match(script,/ICLUB_PGTEST_SUITE/);
+ assert.match(script,/meter\) TEST_FILE="qa\/sql_drafts\/iclub_ai_v21_local_pg_regression\.psql"/);
+ assert.match(script,/math\) TEST_FILE="qa\/sql_drafts\/iclub_ai_math_authority_local_pg\.psql"/);
+ assert.ok(script.includes('case "$SUITE" in'));
+ assert.ok(script.includes('not exists (select 1 from pg_tables'));
+});
