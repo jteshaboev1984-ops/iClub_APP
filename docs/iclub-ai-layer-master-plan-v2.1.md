@@ -334,3 +334,32 @@ The consolidated offline runner now includes this as its **13th** Node test suit
 
 **Remaining GO gates:** actual local PostgreSQL compile/execution and concurrency; integration of the service-only SQL RPC into a *new* authenticated Edge pathway with entitlement/release checks and source-hash parity; actual per-topic and per-locale source QA; real provider cost budget and double-charge-safe idempotency across Edge instances; protected Preview/browser test and explicit architect approval. Current 1:3 rates are temporary.
 
+
+## 21. P5–P6 multi-subject delivery checkpoint — 2026-10-12
+
+**Scope:** User-directed app-wide AI Layer, **not only Mathematics**. This single QA milestone covers the active Mathematics, Biology, Chemistry, Economics and Informatics courses, inactive English A1/A2/B1/SAT/IELTS, Practice, Tours, General Help, Home, Profile, Lessons and future Videos. No live feature was enabled.
+
+**Verified read-only Supabase snapshot:**
+- Existing subject registry: five active core subjects (Biology, Chemistry, Mathematics, Informatics, Economics). English A1/A2/B1, SAT and IELTS exist but are currently inactive.
+- Existing global AI readiness: Mathematics Exam Prep full/adapter Math v1; global Mathematics/Biology/Chemistry/Economics/Informatics only basic with no academic adapter; general help basic with app_help_v1. New Global AI UI/gateway/generation all OFF and kill switch ON.
+- Practice source cards approved/runtime/rights original: **Economics 81 per locale** (80 answer_explanation + 1 result_context; **4 exact question IDs**, 76 topic-only answer cards); **Chemistry 38 per locale** (33 exact IDs, 5 topic-only). All three RU/UZ/EN locales have these counts. **357 approved cards = 111 exact-question rows + 246 generic/topic/result rows across locales**. The count measures published rows, **not** substantive editorial QA completion or readiness for the new AI. No overlapping currently approved source records for an exact question+locale were found at the time of audit.
+- Practice completion evidence: `public.practice_sessions_v4` (owner, subject, finalized status, finalized_at, question_ids) and `public.practice_session_answers_v4` (session_id, question_id). A topic-only source with `question_id=NULL` **must never** substitute for a specific answered-question explanation. Protected Tours still require independently opened archive and approved source.
+
+**New QA artifacts:**
+1. `qa/ai-layer-v21-subject-readiness-inventory.snapshot.json`: aggregated metadata only; every subject/feature marked not released for NEW AI.
+2. `qa/ai-layer-v21-cross-subject-admission.cjs` and `.test.cjs`: an authenticated, read-only, fail-closed multi-subject gate for Practice and archive Tours. It requires actual completed resource, owner, subject, exact topic/question evidence, current rights-cleared and versioned source, RU/UZ/EN, independent eight QA gates, cohort, protected-exam guard and rechecks after async work. It never charges, generates or mutates student data. **25/25** isolated committed-source JS cases GREEN (not native Node).
+3. `qa/sql_drafts/iclub_ai_practice_exact_source_v21_UNAPPLIED.sql`: scratch-only service_role RPC for a **finalized, answered, EXACT question** in Economics/Chemistry. Rejects unknown/foreign/unfinished question, wrong subject/locale, source with denied rights, ambiguous approved versions and global AI disabled. No generic card fallback, no answer text and no academic writes. **Unapplied, not in Supabase migrations.**
+4. `qa/sql_drafts/iclub_ai_practice_exact_source_local_pg.psql`: rollback-only synthetic SQL fixtures for both subjects, protected assessment and all negative cases. **PREPARED, NOT RUN in PostgreSQL**.
+5. `qa/ai-layer-v21-cross-subject-sql.test.cjs`: **14/14** static SQL and policy checks GREEN. Local scratch runner now allowlists meter/math/practice.
+6. `docs/iclub-ai-layer-p5-p6-multisubject-readiness-v2.1.md`: actual readiness/coverage, prioritization and content/editorial NO-GO rules.
+
+The consolidated `qa/run-ai-layer-v21-offline.cjs` now lists **18** test suites; full native Node/PostgreSQL/Edge/browser acceptance is NOT claimed. **39/39 newly introduced P5/P6 tests** passed by executing the exact GitHub sources in an isolated JS/V8 test harness.
+
+**Product-level decisions preserved:**
+- Mathematics Exam Prep P1/P5 continues on legacy endpoint and quotas with no changes.
+- Practice errors are explained only after the full session and only for the same exact question with verified approved source. Economics/Chemistry topic-level sources require a different governed explanation feature; cannot masquerade as exact errors.
+- Biology/Informatics future topics open only after source mapping, rights, correctness, all eight gates, cohort/locale. English/SAT/IELTS remain inactive; no AI merely because the app supports English UI.
+- Tours have zero new archival AI answers until server-unlocked archive and exact source approval. General Help is a separate verified fallback only if itself ready; Home/Profile require signed minimal progress/next-action data. Video without approved transcript stays blocked.
+
+**Release blockers:** real isolated PostgreSQL and concurrency test; trustworthy production-backed per-topic mapping and source QA; stable server-owned context/auth and idempotency across Edge workers; economics of temporary 1:3; native Node and mobile/browser RU/UZ/EN regression; one protected synthetic Preview at justified time; explicit architect beta approval. No direct production writes or Vercel builds in this checkpoint.
+
