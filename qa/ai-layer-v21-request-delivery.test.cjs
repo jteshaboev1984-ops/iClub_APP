@@ -6,13 +6,13 @@ const {EphemeralReplyReceipts}=require("./ai-layer-v21-reply-receipts.cjs");
 const user={userId:"learner-000001"};
 const req=(changes={})=>({principal:user,sessionId:"session-000001",
  requestId:"request-000001",nowMs:100,question:"Explain P1 source card",...changes});
-const mk=({approve=()=>true,route="generated",receiptStore,execute,identity}={})=>{
+const mk=({approve=()=>true,route="generated",receiptStore,execute,identity,maxCompletedIds=2048}={})=>{
  const calls={execute:0,authorize:[],resolve:0};
  const delivery=new SyntheticRequestDelivery({
   authorize:async({stage,request})=>{calls.authorize.push(stage);return approve(stage,request);},
   resolveIdentity:async({request})=>{calls.resolve++;return identity?identity(request):{fingerprint:"sha256-synthetic-fingerprint-for-topic",route};},
   execute:async({request})=>{calls.execute++;return execute?execute(request):{ok:true,reply:"Verified synthetic AI answer"};},
-  receipts:receiptStore
+  receipts:receiptStore,maxCompletedIds
  });
  return {delivery,calls};
 };
@@ -98,4 +98,29 @@ test("temporary receipt is not a raw conversation log",async()=>{
  assert.deepEqual(Object.keys(r).sort(),["alreadyProcessed","ok","reply"].sort());
  assert.ok(!JSON.stringify(r).includes("userId"));
  assert.equal(x.delivery.receipts.entries.size,1);
+});
+
+test("bounded completed tombstones block new provider spend before execution",async()=>{
+ const x=mk({maxCompletedIds:1});
+ assert.equal((await x.delivery.submit(req())).ok,true);
+ const extra=await x.delivery.submit(req({requestId:"request-000002"}));
+ assert.equal(extra.reason,"idempotency_capacity_full");
+ assert.equal(x.calls.execute,1);
+ assert.equal((await x.delivery.submit(req())).alreadyProcessed,true);
+});
+test("active in-flight reservation also consumes bounded admission capacity",async()=>{
+ let release;
+ const wait=new Promise(resolve=>{release=resolve;});
+ const x=mk({maxCompletedIds:1,execute:async()=>{await wait;return{ok:true,reply:"Done once"};}});
+ const first=x.delivery.submit(req());
+ await Promise.resolve();await Promise.resolve();await Promise.resolve();
+ const second=await x.delivery.submit(req({requestId:"request-000002"}));
+ assert.equal(second.reason,"idempotency_capacity_full");
+ release();
+ assert.equal((await first).ok,true);
+ assert.equal(x.calls.execute,1);
+});
+test("invalid memory tombstone limits rejected before any model call",()=>{
+ assert.throws(()=>mk({maxCompletedIds:0}),/invalid completed request capacity/);
+ assert.throws(()=>mk({maxCompletedIds:100001}),/invalid completed request capacity/);
 });
