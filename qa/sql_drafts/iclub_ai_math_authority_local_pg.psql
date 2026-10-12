@@ -1,0 +1,166 @@
+-- iClub AI v2.1: standalone Math P1/P5 authority integration regression.
+-- Run ONLY in an empty, disposable LOCAL DB named iclub_ai_v21_scratch_*.
+-- This script does not contain production learner information.
+-- Single transaction rolls back synthetic roles, schema, functions and rows.
+\set ON_ERROR_STOP on
+BEGIN;
+
+DO $guard$
+BEGIN
+ IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$' THEN
+  RAISE EXCEPTION 'STOP: not an iClub AI v2.1 scratch database';
+ END IF;
+ IF inet_server_addr() IS NOT NULL AND
+  inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) THEN
+  RAISE EXCEPTION 'STOP: scratch tests may only run on localhost';
+ END IF;
+ IF to_regclass('private.exam_prep_sessions') IS NOT NULL OR
+    to_regclass('private.exam_prep_ai_tutor_cards') IS NOT NULL THEN
+  RAISE EXCEPTION 'STOP: existing Exam Prep tables found';
+ END IF;
+END
+$guard$;
+
+CREATE SCHEMA IF NOT EXISTS private;
+DO $roles$
+DECLARE x text;
+BEGIN
+ FOREACH x IN ARRAY ARRAY['anon','authenticated','service_role'] LOOP
+  IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=x) THEN
+   EXECUTE format('CREATE ROLE %I NOLOGIN',x);
+  END IF;
+ END LOOP;
+END
+$roles$;
+
+CREATE TABLE private.iclub_global_ai_runtime_config(
+ id integer primary key,kill_switch boolean not null,gateway_enabled boolean not null
+);
+CREATE TABLE private.exam_prep_sessions(
+ id uuid primary key,user_id uuid not null,status text not null,
+ finalized_at timestamptz,component_code text not null
+);
+CREATE TABLE private.exam_prep_session_items(
+ session_id uuid not null,primary_skill_code text
+);
+CREATE TABLE private.exam_prep_evidence_events(
+ user_id uuid not null,session_id uuid not null,component_code text not null,
+ skill_code text not null,verification_status text not null
+);
+CREATE TABLE private.exam_prep_ai_source_cards(
+ source_card_key text primary key,component_code text not null,skill_code text,
+ locale text not null,card_type text not null,source_version text not null,
+ content_hash text not null,approval_status text not null,rights_status text not null,
+ is_runtime_allowed boolean not null
+);
+CREATE TABLE private.exam_prep_ai_tutor_cards(
+ source_card_key text not null,component_code text not null,skill_code text not null,
+ locale text not null,content_version text not null,content_hash text not null,
+ approval_status text not null,is_runtime_allowed boolean not null
+);
+CREATE TABLE private.iclub_ai_scratch_protection(
+ user_id uuid primary key,active boolean not null
+);
+CREATE FUNCTION private.iclub_ai_has_active_protected_assessment_v1(u uuid)
+RETURNS boolean LANGUAGE sql STABLE SET search_path=''
+AS $$ SELECT coalesce((SELECT p.active FROM private.iclub_ai_scratch_protection p
+ WHERE p.user_id=u),false) $$;
+
+-- SQL itself contains an independent scratch-only guard.
+\ir iclub_ai_math_skill_context_v21_UNAPPLIED.sql
+
+INSERT INTO private.iclub_global_ai_runtime_config(id,kill_switch,gateway_enabled)
+VALUES(1,true,false);
+INSERT INTO private.exam_prep_sessions(id,user_id,status,finalized_at,component_code) VALUES(
+ '30000000-0000-4000-8000-000000000001',
+ '10000000-0000-4000-8000-000000000001',
+ 'finalized',now(),'P1');
+INSERT INTO private.exam_prep_session_items(session_id,primary_skill_code) VALUES(
+ '30000000-0000-4000-8000-000000000001','P1-CIR-01');
+INSERT INTO private.exam_prep_evidence_events
+ (user_id,session_id,component_code,skill_code,verification_status)
+VALUES ('10000000-0000-4000-8000-000000000001',
+ '30000000-0000-4000-8000-000000000001','P1','P1-CIR-01','app_verified');
+INSERT INTO private.exam_prep_ai_source_cards(
+ source_card_key,component_code,skill_code,locale,card_type,source_version,
+ content_hash,approval_status,rights_status,is_runtime_allowed
+) VALUES ('p1:P1-CIR-01:theory:ru:v2','P1','P1-CIR-01','ru','theory','v2',
+ repeat('a',64),'approved','original_iclub',true);
+INSERT INTO private.exam_prep_ai_tutor_cards(
+ source_card_key,component_code,skill_code,locale,content_version,
+ content_hash,approval_status,is_runtime_allowed
+) VALUES('p1:P1-CIR-01:theory:ru:v2','P1','P1-CIR-01','ru',
+ 'tutor_v3_learner_first',repeat('b',32),'approved',true);
+
+DO $cases$
+DECLARE
+ u uuid:='10000000-0000-4000-8000-000000000001';
+ stranger uuid:='20000000-0000-4000-8000-000000000002';
+ sid uuid:='30000000-0000-4000-8000-000000000001';
+ a jsonb;
+BEGIN
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-CIR-01','ru');
+ IF a->>'reason' IS DISTINCT FROM 'gateway_disabled' THEN
+  RAISE EXCEPTION 'kill-switch ignored: %',a; END IF;
+
+ UPDATE private.iclub_global_ai_runtime_config SET kill_switch=false,gateway_enabled=true;
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-CIR-01','ru');
+ IF a->>'allowed' IS DISTINCT FROM 'true' OR a->>'source_hash'<>repeat('a',64)
+   OR a->>'tutor_content_version'<>'tutor_v3_learner_first' THEN
+  RAISE EXCEPTION 'valid approved Math source rejected: %',a; END IF;
+ IF a ? 'main_explanation' OR a ? 'body_text' OR a ? 'user_answer' THEN
+  RAISE EXCEPTION 'private answer content leaked into authority metadata'; END IF;
+
+ a:=public.get_iclub_ai_math_skill_context_service_v2(stranger,sid,'P1-CIR-01','ru');
+ IF a->>'reason' IS DISTINCT FROM 'context_not_authorized' THEN
+  RAISE EXCEPTION 'cross-user session leaked %',a; END IF;
+
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-FOO-99','ru');
+ IF a->>'reason' IS DISTINCT FROM 'skill_evidence_unverified' THEN
+  RAISE EXCEPTION 'unassigned skill approved %',a; END IF;
+
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P5-PRO-01','ru');
+ IF a->>'reason' IS DISTINCT FROM 'skill_component_mismatch' THEN
+  RAISE EXCEPTION 'cross-P1/P5 source approved %',a; END IF;
+
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-CIR-01','fr');
+ IF a->>'reason' IS DISTINCT FROM 'invalid_context' THEN
+  RAISE EXCEPTION 'unsupported language allowed %',a; END IF;
+
+ UPDATE private.exam_prep_sessions SET status='active',finalized_at=null WHERE id=sid;
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-CIR-01','ru');
+ IF a->>'reason' IS DISTINCT FROM 'context_not_authorized' THEN
+  RAISE EXCEPTION 'active assessment leaked content %',a; END IF;
+ UPDATE private.exam_prep_sessions SET status='finalized',finalized_at=now() WHERE id=sid;
+
+ UPDATE private.exam_prep_evidence_events
+  SET verification_status='self_reviewed' WHERE session_id=sid;
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-CIR-01','ru');
+ IF a->>'reason' IS DISTINCT FROM 'skill_evidence_unverified' THEN
+  RAISE EXCEPTION 'unverified evidence accepted %',a; END IF;
+ UPDATE private.exam_prep_evidence_events
+  SET verification_status='app_verified' WHERE session_id=sid;
+
+ UPDATE private.exam_prep_ai_tutor_cards SET approval_status='retired';
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-CIR-01','ru');
+ IF a->>'reason' IS DISTINCT FROM 'tutor_source_not_ready' THEN
+  RAISE EXCEPTION 'retired Tutor delivered %',a; END IF;
+ UPDATE private.exam_prep_ai_tutor_cards SET approval_status='approved';
+
+ UPDATE private.exam_prep_ai_source_cards SET rights_status='restricted';
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-CIR-01','ru');
+ IF a->>'reason' IS DISTINCT FROM 'source_not_approved' THEN
+  RAISE EXCEPTION 'rights restriction ignored %',a; END IF;
+ UPDATE private.exam_prep_ai_source_cards SET rights_status='original_iclub';
+
+ INSERT INTO private.iclub_ai_scratch_protection(user_id,active)VALUES(u,true);
+ a:=public.get_iclub_ai_math_skill_context_service_v2(u,sid,'P1-CIR-01','ru');
+ IF a->>'reason' IS DISTINCT FROM 'active_assessment' THEN
+  RAISE EXCEPTION 'protected assessment ignored %',a; END IF;
+
+ RAISE NOTICE 'Math source authority: all local scratch assertions GREEN';
+END
+$cases$;
+
+ROLLBACK;
+\echo 'All synthetic test rows and schema rolled back. No production database used.'
