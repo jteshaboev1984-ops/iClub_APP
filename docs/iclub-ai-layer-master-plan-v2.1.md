@@ -223,3 +223,17 @@ The original project documents 06 AI Layer Safety Architecture v1.1, 04 Content 
 6. Owner requested conserving Vercel quota: accumulate a full coherent package and run one protected Preview only when necessary.
 
 **Scope statement:** The independent tests are offline behavioural/source contracts over GitHub code, NOT proof of real SQL/RLS or an approved production feature.
+
+
+## 13. Continued offline build checkpoint — 2026-10-12
+
+No Vercel builds/deployments were requested or created. Existing production, Supabase, Math Tutor and learner history have not been changed.
+
+- Read-only source check of the latest Global AI SQL guard confirms active-assessment checks exist; future all-subject rollout still requires server-owned topic/screen/locale and a second protected-assessment guard immediately before model invocation and final response.
+- QA-only router, authority, readiness and cross-subject integrated tests extended to catch **TOCTOU**: assessment starts after admission, protected content/source version is revoked mid-request, AI feature is emergency-disabled while processing, or a previously completed reply is replayed during a protected assessment.
+- 80/80 independently executed saved-source behavioral and SQL **static** cases GREEN: Gateway 26, Authority 17, Readiness 12, Cross-subject 17, SQL draft static 8. Separate initial smoke and UI tests are not included in that total.
+- The only SQL v2 remains an **unapplied draft** under `qa/sql_drafts/`, never in `supabase/migrations`; no trusted live edge function references it.
+- Native PostgreSQL not installed in available sandbox, and offline package installation timed out; **real SQL execution, RLS and concurrency remain untested**. Do not release until local PostgreSQL test suite is truly run.
+- Full server integration still requires auth-bound context minting, source rights/hash binding, request receipt replay with bounded retention and nonpersistent raw conversation, budget controls, protected-assessment guard inside a race-safe boundary and real response validation.
+
+Next: package the v2 SQL tests for a local PostgreSQL runtime once available, refine verified Math P1/P5 adapter and in-browser AI interface. Do not pay Vercel build quota for microsteps. Preview only when the entire protected test candidate is ready and owner approves.
