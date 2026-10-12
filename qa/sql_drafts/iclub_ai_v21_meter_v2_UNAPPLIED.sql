@@ -67,7 +67,14 @@ begin
   for update;
 
   if found then
-    if v_existing.user_id<>p_user_id or v_existing.route_class<>p_route_class or v_existing.request_fingerprint is distinct from p_request_fingerprint then
+    if v_existing.user_id<>p_user_id
+       or v_existing.route_class<>p_route_class
+       or v_existing.request_fingerprint is distinct from p_request_fingerprint
+       or not exists (
+         select 1 from private.iclub_ai_usage_periods p
+         where p.id=v_existing.period_id
+           and p.usage_policy_code=p_usage_policy_code
+       ) then
       return jsonb_build_object('allowed',false,'reason','request_identity_mismatch');
     end if;
     return jsonb_build_object(
