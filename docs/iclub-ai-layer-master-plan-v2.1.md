@@ -262,3 +262,18 @@ The following GitHub blob SHA-1 hashes were verified read-only on both productio
 
 **P4 release gate:** New Global AI may open in Math only after complete parity checks (P1 45 + P5 36, three languages, both types of Tutor responses, permissions, protected assessments, no regression in legacy usage) and explicit owner approval for changeover. Existing Math Tutor stays functional even if ALL NEW Global AI features are emergency disabled. No Vercel deployment in this iteration.
 
+
+
+## 15. Math RPC and retry checkpoint — 2026-10-12
+
+Scope: QA-only additive modules, no active Global AI integration.
+
+- `qa/ai-layer-v21-reply-receipts.cjs`: 13/13 offline tests passed. Two-minute session-specific response cache, gated by fresh server authorization before replay.
+- `qa/ai-layer-v21-request-delivery.cjs`: 13/13 offline tests passed. Completed requests cannot repeat generation when the response is lost, expired or a cache is unavailable.
+- `qa/ai-layer-v21-math-source-rpc-bridge.cjs`: 18/18 offline tests passed. Uses the existing approved Math Tutor card and source RPC contract, requires a server-issued `routeAuthority=unified_ai` and refuses legacy Exam Prep entrypoints. Cross-subject, locale, exam and stale-content refusals tested.
+- 44/44 new offline cases passed against the saved GitHub source in an isolated JS runner. No native database verification claimed.
+- The local runner now includes these tests. Running `node qa/run-ai-layer-v21-offline.cjs` from a fully checked-out repository remains a separate validation gate.
+
+Critical limitations: in-memory receipts are not sufficient across production Edge restarts; server-owned DB request idempotency and short-lived replay need review. The existing Math Tutor continues through its old endpoint and is not subject to the new mixed quota. Local PostgreSQL, native Node suite, browser regression and separate release authorization remain pending.
+
+Zero additional Vercel deployments; no production or Supabase changes.
