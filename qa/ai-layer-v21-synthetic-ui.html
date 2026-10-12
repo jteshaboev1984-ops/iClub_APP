@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iClub AI Layer v2.1 — synthetic UI only</title>
+<style>
+:root{--ink:#1a3554;--blue:#2365b2;--muted:#708096;--line:#dfe6f0}*{box-sizing:border-box}
+body{font:15px/1.5 system-ui,Arial,sans-serif;background:#f4f7fb;color:var(--ink);margin:0}
+button,select,input{font:inherit}[hidden]{display:none!important}main{max-width:900px;margin:auto;padding:20px}
+header{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}header strong{font-size:23px}
+select{border:1px solid var(--line);padding:9px;background:white;border-radius:10px;max-width:48vw}
+.card{background:white;margin-top:20px;padding:24px;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 38px #1d3d6010}
+h1{font-size:22px;margin:0 0 10px}p{color:var(--muted)}.info{background:#f2f7ff;padding:12px;border-radius:12px}
+.action{background:#edf5ff;border:1px solid #c9dff5;border-radius:12px;color:#164979;padding:12px;margin-top:12px;cursor:pointer}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);height:70px;display:flex;justify-content:center;gap:26px;align-items:center;color:var(--muted);font-size:13px}
+#mark{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));right:16px;background:white;border:1px solid #c5dbee;border-radius:15px;box-shadow:0 9px 29px #23406c30;color:var(--blue);font-weight:800;padding:12px 16px;cursor:pointer;z-index:9}
+#chat{position:fixed;z-index:12;right:16px;bottom:86px;width:min(400px,calc(100vw - 32px));height:min(650px,calc(100dvh - 110px));background:white;border:1px solid var(--line);border-radius:21px;display:flex;flex-direction:column;box-shadow:0 18px 60px #1736572d;overflow:hidden}
+#chat.full{inset:0;width:100vw;height:100dvh;border-radius:0}#head{display:flex;justify-content:space-between;align-items:center;background:#f7faff;padding:14px 17px;border-bottom:1px solid var(--line)}
+#head button{background:#e9eff7;border:0;border-radius:8px;padding:7px 10px;cursor:pointer}
+#dialog{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}.bubble{padding:10px 13px;border-radius:14px;max-width:90%;white-space:pre-line}.bot{background:#f1f5fb;align-self:flex-start}.me{background:#e3efff;align-self:flex-end}
+#shortcuts{display:flex;gap:7px;padding:8px 12px;flex-wrap:wrap}#shortcuts button{border:1px solid var(--line);background:white;border-radius:12px;padding:7px;font-size:12px;cursor:pointer}
+form{padding:10px;display:flex;gap:8px;border-top:1px solid var(--line)}input{min-width:0;flex:1;border:1px solid var(--line);border-radius:10px;padding:11px}form button{border:0;border-radius:10px;background:var(--blue);color:white;padding:0 17px}
+small{font-size:12px;color:var(--muted)}
+@media(max-width:600px){#chat{left:0;right:0;bottom:0;width:100%;height:76dvh;border-radius:22px 22px 0 0}#chat.full{height:100dvh;border-radius:0}main{padding:16px}header{align-items:flex-start}.card{padding:19px}}
+</style></head><body>
+<main><header><strong>iClub AI <small>QA Preview</small></strong><div><select id="screen" aria-label="Раздел">
+<option value="home">Home</option><option value="math">Math Exam Prep</option><option value="practiceDone">Practice · завершена</option><option value="practiceOpen">Practice · выполняется</option><option value="tourArchive">Tours · архив</option><option value="biology">Biology</option><option value="english">English</option><option value="sat">SAT</option><option value="exam">Экзамен</option></select>
+<select id="plan" aria-label="Тестовый тариф"><option value="plus">Plus QA</option><option value="free">Free QA</option><option value="pro">Pro QA</option></select></div></header>
+<section class="card"><h1 id="title"></h1><p id="description"></p><div class="info" id="readiness"></div><button id="context" class="action">Объяснить</button><p><small>Только искусственный интерфейс. Подключений к базе, ученикам, платёжным системам и AI-моделям нет.</small></p></section></main>
+<nav><span>Home</span><span>Study</span><span>Ratings</span><span>Profile</span></nav>
+<button id="mark">iClub AI</button>
+<section id="chat" hidden aria-label="Тестовая панель iClub AI">
+<div id="head"><div><b>iClub AI Tutor</b><div><small id="where"></small></div></div><div><button id="expand">↗</button> <button id="close">✕</button></div></div>
+<div id="dialog" aria-live="polite"></div><div id="shortcuts"><button id="prepared">Объясни тему</button><button id="generated">Покажи новый пример</button></div>
+<form id="form"><input id="question" placeholder="Спросить iClub AI…" maxlength="500"><button>➤</button></form></section>
+<script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id),screen=$("screen"),chat=$("chat"),mark=$("mark"),plan=$("plan");
+const contexts={home:["Home",false],math:["Mathematics Exam Prep",true],practiceDone:["Practice: результат",true],practiceOpen:["Practice: выполняется",false],tourArchive:["Tours: архив открыт",true],biology:["Biology",false],english:["English",false],sat:["SAT",false],exam:["Защищённый экзамен",false]};
+const drafts=new Map(),used={free:0,plus:0,pro:0},started={free:null,plus:null,pro:null},caps={free:3,plus:9,pro:14};
+const restricted=()=>screen.value==="exam";
+const key=()=>screen.value==="home"?"general":screen.value;
+function draw(){
+const [title,ready]=contexts[screen.value];$("title").textContent=title;
+$("description").textContent=restricted()?"Во время проверки AI полностью скрыт.":ready?"Доступны только искусственные примеры поведения нового AI.":"Объяснения этого раздела пока готовятся.";
+$("readiness").textContent=ready?"Тест готового сценария":"В разработке";
+$("context").hidden=restricted();mark.hidden=restricted();
+if(restricted())chat.hidden=true;if(!chat.hidden)show();
+}
+function show(){
+$("where").textContent=contexts[screen.value][0];$("dialog").replaceChildren();
+for(const item of drafts.get(key())||[{mine:false,message:"Чем помочь?"}]){let b=document.createElement("div");b.className="bubble "+(item.mine?"me":"bot");b.textContent=item.message;$("dialog").append(b);}
+$("dialog").scrollTop=$("dialog").scrollHeight;
+}
+function append(mine,message){let arr=drafts.get(key())||[{mine:false,message:"Чем помочь?"}];arr.push({mine,message});drafts.set(key(),arr);show();}
+function ask(question,route){
+if(restricted())return;append(true,question);
+const ready=contexts[screen.value][1],appHelp=/iClub|навигац|help/i.test(question);
+if(!ready&&!appHelp){append(false,"В разработке");return;}
+const type=route||( /пример|example/i.test(question)?"generated":"prepared"),price=type==="generated"?3:1,p=plan.value;
+if(p==="free"&&type==="generated"){append(false,"Этот тип ответа сейчас недоступен. Можно выбрать готовое объяснение.");return;}
+if(started[p]!==null&&Date.now()>=started[p]+18000000){started[p]=null;used[p]=0;}
+if(used[p]+price>caps[p]){append(false,used[p]===caps[p]?"Лимит iClub AI достигнут. Попробуйте позже.":"Для этого ответа недостаточно лимита. Готовые объяснения ещё могут быть доступны.");return;}
+used[p]+=price;if(started[p]===null)started[p]=Date.now();
+append(false,type==="prepared"?"Демонстрационное готовое объяснение. Настоящие ответы будут только из утверждённых материалов iClub.":"Тестовый пример создан без обращения к модели AI.");
+}
+mark.addEventListener("click",()=>{if(restricted())return;chat.hidden=false;show();});
+$("context").addEventListener("click",()=>{chat.hidden=false;show();ask("Объясни этот экран","prepared");});
+$("close").addEventListener("click",()=>{chat.hidden=true;chat.classList.remove("full");});
+$("expand").addEventListener("click",()=>chat.classList.toggle("full"));
+$("prepared").addEventListener("click",()=>ask("Объясни тему","prepared"));
+$("generated").addEventListener("click",()=>ask("Покажи новый пример","generated"));
+$("form").addEventListener("submit",e=>{e.preventDefault();const q=$("question").value.trim();if(q)ask(q);$("question").value="";});
+screen.addEventListener("change",()=>{chat.hidden=true;chat.classList.remove("full");draw();});
+plan.addEventListener("change",draw);draw();
+})();
+</script></body></html>
