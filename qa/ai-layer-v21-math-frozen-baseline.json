@@ -1,0 +1,46 @@
+{
+  "version": "v2.1",
+  "baselineProductionCommit": "9afc7b44aead03b2a30544e6e7d4c4eb8670efbf",
+  "date": "2026-10-12",
+  "policy": "No changes to these original Exam Prep files during AI Layer development without explicit architect approval and a new parity baseline. Separate existing beta usage is preserved.",
+  "frozenFiles": {
+    "exam-prep/exam-prep-live.js": "4827d5d0aa101cabe88395403769c89017e892a9",
+    "exam-prep/exam-prep-ai-ui.js": "23feb4322840c94eea32c85f07891e78855bf0d3",
+    "exam-prep/exam-prep.css": "264d31a33ba34b926acd88265995e4b5fa5e8ae7",
+    "supabase/functions/exam-prep-ai/index.ts": "7484bc1ec4dae842c559e3c63c4b84935e5cf312",
+    "scripts/exam-prep-subject-isolation-regression.cjs": "8cd7b5aad83b6e7a52c28b1e5f8090a76a5f1514"
+  },
+  "requiredContract": {
+    "activeSubject": "mathematics",
+    "components": [
+      "P1",
+      "P5"
+    ],
+    "otherSubjectScreens": [
+      "informatics",
+      "economics",
+      "biology",
+      "chemistry",
+      "english_a1",
+      "sat"
+    ],
+    "legacyEdgeFunction": "exam-prep-ai",
+    "newEdgeFunction": "global-ai",
+    "tutorFollowupModes": [
+      "simplify",
+      "rephrase",
+      "focus",
+      "question"
+    ],
+    "preparedTutorSourceFields": [
+      "main_explanation",
+      "simple_explanation",
+      "alternative_explanation",
+      "focus_explanation"
+    ],
+    "legacyGeneratedFollowupMax": 2,
+    "legacyThreadStepsMax": 5,
+    "legacyUserTextMax": 250,
+    "policy": "New Global AI tariff must not silently charge working legacy Exam Prep Tutor while parity is pending."
+  }
+}
