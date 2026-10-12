@@ -156,7 +156,7 @@ test('Biology and Informatics active subjects remain not ready without sources',
 test('Inactive English A1/A2/B1, SAT, IELTS stay disabled',async()=>{
  for(const subject of ['english_a1','english_a2','english_b1','sat','ielts']){
   const x=make({subject});
-  assert.equal((await x.gate.admit(x.request())).reason,'subject_not_released');
+  assert.equal((await x.gate.admit(x.request())).reason,'subject_unverified');
  }
 });
 test('Home, Profile, Lesson, Videos and General help cannot fake topic evidence',async()=>{
@@ -234,7 +234,7 @@ test('A switched topic using the same evidence ID cannot reuse the old source',a
 
 test('Future subject activation is server-controlled, not locked to historical snapshot',async()=>{
  const x=make({subject:'english_a1'});
- assert.equal((await x.gate.admit(x.request())).reason,'subject_not_released');
+ assert.equal((await x.gate.admit(x.request())).reason,'subject_unverified');
  x.flags.subjectActive=true;
  const candidate=await x.gate.admit(x.request());
  assert.equal(candidate.reason,'approved_source_not_ready');
