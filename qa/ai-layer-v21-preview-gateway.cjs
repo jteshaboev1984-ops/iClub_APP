@@ -129,7 +129,6 @@ class PreviewGateway {
     const fingerprint=JSON.stringify([user.userId,user.plan,k,question.promptKey||'',normalized,route,src.version]);
     const reservation=this.ledger.reserve({userId:user.userId,plan:user.plan,requestId,requestFingerprint:fingerprint,route,nowMs});
     if (!reservation.ok) return reservation;
-    if (reservation.alreadyCompleted) return {ok:true,duplicate:true,route,reply:reservation.reply};
     // Extra guard is a trusted server callback, never supplied directly by UI.
     // It is checked AFTER usage admission, immediately before model calls and delivery.
     const guardAt = (stage) => {
@@ -137,6 +136,13 @@ class PreviewGateway {
       try { return context.serverRecheck(stage,{userId:user.userId,route,subject:context.subject,topic:context.topic})===true; }
       catch { return false; }
     };
+    // Completed retry must ALSO revalidate the context before replaying a
+    // previously charged answer. Never reveal it during a newly protected exam.
+    if (reservation.alreadyCompleted) {
+      return guardAt('before_delivery')
+        ? {ok:true,duplicate:true,route,reply:reservation.reply}
+        : fail('context_changed');
+    }
     if (!guardAt('before_provider')) {
       this.ledger.release(requestId);
       return fail('context_changed');
