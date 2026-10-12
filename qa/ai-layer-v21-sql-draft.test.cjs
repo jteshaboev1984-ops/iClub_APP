@@ -47,3 +47,30 @@ test('Only service_role may execute versioned RPC',()=>{
  assert.match(draft,/revoke all on function public\.reserve_iclub_ai_usage_service_v2[\s\S]*?from public,anon,authenticated;/);
  assert.match(draft,/grant execute on function public\.reserve_iclub_ai_usage_service_v2[\s\S]*?to service_role;/);
 });
+
+test('Scratch PostgreSQL runner refuses anything but an empty localhost scratch DB',()=>{
+ const runner=fs.readFileSync('qa/run-ai-layer-v21-postgres-local.sh','utf8');
+ assert.match(runner,/ICLUB_PGTEST_DB/);
+ assert.match(runner,/^\s*DB="\$\{ICLUB_PGTEST_DB:-\}"/m);
+ assert.match(runner,/^\s*if \[\[ ! "\$DB" =~ \^iclub_ai_v21_scratch_/m);
+ assert.match(runner,/127\.0\.0\.1/);
+ assert.match(runner,/NOT_EMPTY_OR_UNSAFE/);
+ assert.match(runner,/pg_tables/);
+ assert.match(runner,/unset DATABASE_URL SUPABASE_DB_URL SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY/);
+ assert.ok(!runner.includes('createdb '),'Test runner must not create arbitrary DB');
+});
+test('PostgreSQL script independently refuses populated or non-scratch DB',()=>{
+ const sql=fs.readFileSync('qa/sql_drafts/iclub_ai_v21_local_pg_regression.psql','utf8');
+ assert.match(sql,/current_database\(\) !~ '\^iclub_ai_v21_scratch_/);
+ assert.match(sql,/inet_server_addr\(\)/);
+ assert.match(sql,/to_regclass\('public\.users'\)/);
+ assert.match(sql,/get_iclub_ai_usage_service_v2|reserve_iclub_ai_usage_service_v2/);
+ assert.match(sql,/ROLLBACK;/);
+});
+test('SQL integration assertions cover cheap remainder and one-charge replay',()=>{
+ const sql=fs.readFileSync('qa/sql_drafts/iclub_ai_v21_local_pg_regression.psql','utf8');
+ for(const assertion of ['route_insufficient','request_already_completed','generation_not_entitled',
+    'request_identity_mismatch','period','plus_qa_v2','pro_qa_v2']){
+   assert.ok(sql.includes(assertion),assertion);
+ }
+});
