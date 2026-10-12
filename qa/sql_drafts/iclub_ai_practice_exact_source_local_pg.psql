@@ -132,6 +132,16 @@ BEGIN
   RAISE EXCEPTION 'rights-restricted source leaked %',result;END IF;
  UPDATE private.practice_ai_source_cards SET rights_status='original_iclub' WHERE source_card_key='chem-exact-101';
 
+ -- Two competing *approved* exact source versions must not be guessed.
+ INSERT INTO private.practice_ai_source_cards VALUES
+ ('chem-conflicting-101','chemistry',101,'kinetics','answer_explanation',
+  'ru','chem-source-older',repeat('e',64),'approved','original_iclub',true,now());
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,101,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'exact_source_not_ready' THEN
+  RAISE EXCEPTION 'ambiguous source versions silently resolved %',result;END IF;
+ DELETE FROM private.practice_ai_source_cards
+ WHERE source_card_key='chem-conflicting-101';
+
  INSERT INTO private.iclub_scratch_protection VALUES(learner,true);
  result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,101,'ru');
  IF result->>'reason' IS DISTINCT FROM 'active_assessment' THEN
