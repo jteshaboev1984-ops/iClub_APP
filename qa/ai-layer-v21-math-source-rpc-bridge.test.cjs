@@ -8,6 +8,7 @@ const req={principal,contextHandle:"handle-context-0001",mode:"main",nowMs:1000}
 const ctx=(changes={})=>({
  ownerId:principal.userId,active:true,expiresAt:9000,protectedAssessment:false,
  subject:"mathematics",componentCode:"P1",skillCode:"P1-CIR-01",locale:"ru",
+ routeAuthority:"unified_ai",
  contextVersion:"v1",...changes
 });
 const card=(changes={})=>({
@@ -98,4 +99,20 @@ test("source RPC outage fails closed without cached guess",async()=>{
 });
 test("freeform learner prompt is not converted to any convenient prepared card",async()=>{
  const x=setup();assert.equal((await x.bridge.prepare({...req,mode:"question"})).reason,"requires_separate_governed_route");
+});
+
+test("existing Exam Prep context is rejected instead of silently rerouted",async()=>{
+ const x=setup({freshContext:()=>ctx({routeAuthority:"legacy_exam_prep"})});
+ assert.equal((await x.bridge.prepare(req)).reason,"legacy_exam_prep_unchanged");
+ assert.equal(x.calls.some(c=>c[0]==="rpc"),false);
+});
+test("client cannot spoof unified permission if server context is legacy",async()=>{
+ const x=setup({freshContext:()=>ctx({routeAuthority:"legacy_exam_prep"})});
+ const r=await x.bridge.prepare({...req,routeAuthority:"unified_ai"});
+ assert.equal(r.reason,"legacy_exam_prep_unchanged");
+});
+test("route authority revoked during card lookup prevents output",async()=>{
+ let count=0;
+ const x=setup({freshContext:()=>++count===1?ctx():ctx({routeAuthority:"legacy_exam_prep"})});
+ assert.equal((await x.bridge.prepare(req)).reason,"context_changed");
 });
