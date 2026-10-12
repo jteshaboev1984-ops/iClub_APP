@@ -53,8 +53,8 @@ test('Source contradiction and rights failure deny all responses',()=>{
 });
 test('Exam, live Tour, incomplete Practice, locked Tour archive fail before usage',()=>{
  const g=qa();
- assert.equal(g.request(request('exam',{context:context({protectedAssessment:true})})).reason,'protected_assessment');
- assert.equal(g.request(request('tour',{context:context({activeTour:true})})).reason,'protected_assessment');
+ assert.equal(g.request(request('exam-123',{context:context({protectedAssessment:true})})).reason,'protected_assessment');
+ assert.equal(g.request(request('tour-123',{context:context({activeTour:true})})).reason,'protected_assessment');
  assert.equal(g.request(request('practice',{context:context({surface:'practice',practiceCompleted:false})})).reason,'practice_not_finished');
  assert.equal(g.request(request('archive',{context:context({surface:'tour_archive',archiveUnlocked:false})})).reason,'archive_locked');
  assert.equal(g.ledger.inspect('learner-001','plus',100).committed,0);
