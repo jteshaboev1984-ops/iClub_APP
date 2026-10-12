@@ -107,3 +107,11 @@ test('Local SQL rollover test exercises elapsed 5-hour period without resetting 
  assert.ok(sql.includes("status='active' AND committed_units=1"));
  assert.ok(sql.includes('ROLLBACK;'));
 });
+
+test('Even direct invocation of unapplied SQL refuses production databases',()=>{
+ assert.match(draft,/DO \$iclub_ai_v21_scratch_only\$/);
+ assert.ok(draft.includes("current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'"));
+ assert.ok(draft.includes("'127.0.0.1'::inet,'::1'::inet"));
+ assert.equal((draft.match(/create or replace function public\.reserve_iclub_ai_usage_service_v2\(/g)||[]).length,1);
+ assert.equal((draft.match(/create or replace function public\.finalize_iclub_ai_usage_service_v2\(/g)||[]).length,1);
+});
