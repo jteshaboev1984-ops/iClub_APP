@@ -54,6 +54,9 @@ class SyntheticUnifiedAI {
   if(ctx.context.routeAuthority!=='unified_ai'||ctx.context.sourceReady!==false||
      ctx.context.topic!==null)return fail('context_not_authoritative');
   const uid=request.principal.userId;
+  // The DB resolver calls the archive category 'tour'; the governed AI
+  // surface is 'tour_archive'. No live Tour screen receives this permission.
+  const surface=ctx.context.scope==='tour'?'tour_archive':ctx.context.scope;
   let evidence,source,plan,featureId,cohort,userKind;
   try{
    evidence=await this.services.getTopicEvidence({
@@ -64,7 +67,7 @@ class SyntheticUnifiedAI {
       evidence.component!==ctx.context.component||!evidence.evidenceId||
       !evidence.topic||!evidence.feature)return fail('topic_evidence_unverified');
    source=await this.services.getReviewedSource({
-     subject:ctx.context.subject,surface:ctx.context.scope,
+     subject:ctx.context.subject,surface,
      feature:evidence.feature,topic:evidence.topic,locale:lang.locale
    });
    if(!source||source.approved!==true||source.rightsApproved!==true||
@@ -82,7 +85,7 @@ class SyntheticUnifiedAI {
    userKind=await this.services.getLearnerKind(uid);
    plan=await this.services.getPlan(uid);
   }catch{return fail('authoritative_lookup_unavailable')}
-  const release=this.registry.evaluate({surface:ctx.context.scope,subject:ctx.context.subject,
+  const release=this.registry.evaluate({surface,subject:ctx.context.subject,
    feature:evidence.feature,topic:evidence.topic,locale:lang.locale,
    featureId,userKind,cohort});
   if(!release.allowed)return fail(release.reason);
