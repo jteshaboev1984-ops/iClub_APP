@@ -6,10 +6,11 @@ const {MathAuthorityV21}=require('./ai-layer-v21-math-authority-service.cjs');
 const USER='11111111-1111-4111-8111-111111111111';
 const SESSION='22222222-2222-4222-8222-222222222222';
 const args=(patch={})=>({principal:{authenticated:true,userId:USER},
- handle:'exam-result-handle-001',locale:'ru',...patch});
+ handle:'exam-result-handle-001',locale:'ru',nowMs:1000,...patch});
 const context=(patch={})=>({ownerId:USER,routeAuthority:'unified_ai',
  subject:'mathematics',kind:'exam_prep_result',active:true,
- protectedAssessment:false,sessionId:SESSION,component:'P1',skill:'P1-CIR-01',...patch});
+ protectedAssessment:false,sessionId:SESSION,component:'P1',skill:'P1-CIR-01',
+ expiresAtMs:9000,contextRevision:'rev-0001',...patch});
 const proof=(patch={})=>({allowed:true,subject:'mathematics',scope:'exam_prep',
  component:'P1',skill_code:'P1-CIR-01',locale:'ru',
  source_card_key:'p1:P1-CIR-01:theory:ru:v2',source_version:'v2',
@@ -122,4 +123,24 @@ test('backend/network failure denies without retrying legacy Tutor',async()=>{
  x.adapter.readAuthorityRpc=async()=>{throw Error('simulated outage')};
  assert.equal((await x.adapter.evaluate(args())).reason,'authority_backend_unavailable');
  assert.equal(x.events.some(e=>e[1]==='exam-prep-ai'),false);
+});
+
+test('expired context, malformed clock, or missing revision rejects even valid source',async()=>{
+ for(const c of [context({expiresAtMs:1000}),context({contextRevision:''})]){
+  const x=setup({ctx:c});
+  assert.equal((await x.adapter.evaluate(args())).reason,'context_unverified');
+  assert.equal(x.events.some(e=>e[0]==='rpc'),false);
+ }
+ assert.equal((await setup().adapter.evaluate(args({nowMs:-1}))).reason,'invalid_time');
+});
+test('source proof cannot replay after switching to a new completed Math session',async()=>{
+ const x=setup(),original=await x.adapter.evaluate(args());
+ x.state.ctx=context({sessionId:'33333333-3333-4333-8333-333333333333'});
+ const newer=await x.adapter.stillValid(args(),original.proof);
+ assert.equal(original.ok,true);assert.equal(newer.reason,'source_changed');
+});
+test('context revision changed mid-call is rejected without returning proof',async()=>{
+ let n=0;
+ const x=setup({ctx:()=>++n===1?context():context({contextRevision:'rev-0002'})});
+ assert.equal((await x.adapter.evaluate(args())).reason,'context_changed');
 });
