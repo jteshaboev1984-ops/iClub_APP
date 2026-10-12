@@ -127,6 +127,9 @@ class CrossSubjectAdmission {
   if(after?.ok!==true||after.context?.subject!==c.subject||
      after.context?.sessionRef!==c.sessionRef||
      newEvidence?.evidenceId!==evidence.evidenceId||
+     newEvidence?.subject!==c.subject||
+     newEvidence?.kind!==kind||newEvidence?.resourceId!==resourceId||
+     newEvidence?.topic!==evidence.topic||
      newEvidence?.questionId!==evidence.questionId||
      newEvidence?.verifiedAnswer!==evidence.verifiedAnswer||
      newEvidence?.archiveUnlocked!==evidence.archiveUnlocked||
