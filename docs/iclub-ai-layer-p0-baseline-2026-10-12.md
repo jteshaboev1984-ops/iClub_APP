@@ -52,7 +52,7 @@ QA test file: `qa/ai-layer-metering-v21.synthetic.js`, with eight test cases pas
 
 - Do not run UPDATE/INSERT/DELETE/DDL in production Supabase; no real subscriber/school accounts for QA.
 - Do not use production Supabase URL/service secrets in the Preview.
-- Before Vercel Preview, prove deployment protection AND environment isolation. Automatic branch deployments must not be treated as approved synthetic Preview.
+- 2026-10-12 owner-approved change: reuse existing protected Vercel Preview `qa/fix-exam-prep-subject-isolation-20261011` even if it connects to production Supabase, but **new AI route must remain synthetic/in-memory; no production AI writes or test registrations**. No separate cloud Supabase project required for UI QA.
 - No production/main changes and no PR merge. The QA branch holds only documentation and sandbox tests at this point.
 - AI rollout/public billing/Mentor Care remain unchanged and require separate explicit approval.
 
@@ -61,7 +61,14 @@ QA test file: `qa/ai-layer-metering-v21.synthetic.js`, with eight test cases pas
 - Check production aggregate integrity/RLS read-only immediately before any future deployment or branch promotion.
 - Map all course and screens, including English A1/A2/B1 and SAT; identify source/topic/locale readiness.
 - Implement exact contract checks for existing `reserve_iclub_ai_usage_service_v1` **in isolated QA database only**.
-- Establish a protected synthetic-only Preview independent of production network credentials, then UI/readiness work.
+- Reuse existing protected Preview. New AI UI uses entirely artificial content without provider/storage calls. Real AI DB-write behavior must be tested with local isolated fixtures, not via production Supabase.
 - Capture CI test pass/fail for this QA branch (local synthetic test passed; GitHub CI not claimed).
 
-**GO/NO-GO:** P0 preliminary evidence GREEN, but P1 deployed Preview is **NO-GO** until an isolated backend and Preview bindings are proven.
+**GO/NO-GO:** P0 baseline GREEN for docs and synthetic UI. Owner approved using the existing Preview for a **static autonomous UI page only**. Backend AI writes and billing on this Preview remain **NO-GO** until separate nonproduction write testing and explicit later release approval.
+
+## P1 update — 2026-10-12
+
+- Author approved reuse of existing Preview (no extra paid cloud Supabase).
+- Synthetic-only page was added to `qa/fix-exam-prep-subject-isolation-20261011` at `qa/ai-layer-v21-synthetic-ui.html`, commit `0832e685e412477e8f4ddbd5f0a74fa80fb51a66`.
+- Existing study app remains untouched by the static additive page; it must never call Supabase/OpenAI/Auth nor set feature flags.
+- This is **not** proof of working live Global AI, nor proof Preview has an independent DB.
