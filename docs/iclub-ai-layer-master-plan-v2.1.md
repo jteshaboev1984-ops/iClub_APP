@@ -277,3 +277,7 @@ Scope: QA-only additive modules, no active Global AI integration.
 Critical limitations: in-memory receipts are not sufficient across production Edge restarts; server-owned DB request idempotency and short-lived replay need review. The existing Math Tutor continues through its old endpoint and is not subject to the new mixed quota. Local PostgreSQL, native Node suite, browser regression and separate release authorization remain pending.
 
 Zero additional Vercel deployments; no production or Supabase changes.
+
+## 16. Offline SQL QA preparation — 2026-10-12
+
+Added scratch-only PostgreSQL regression script and its local runner under qa/. They have not been executed because PostgreSQL is unavailable here. The static source checks pass 11/11. The QA-only request-delivery handler now limits memory usage and refuses new paid work before exceeding safe capacity; its 16/16 tests pass. The real Exam Prep is unchanged. No deployment or database write was performed. SQL, browser and distributed Edge verification remain pending.
