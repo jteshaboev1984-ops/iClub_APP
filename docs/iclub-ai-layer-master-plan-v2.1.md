@@ -237,3 +237,28 @@ No Vercel builds/deployments were requested or created. Existing production, Sup
 - Full server integration still requires auth-bound context minting, source rights/hash binding, request receipt replay with bounded retention and nonpersistent raw conversation, budget controls, protected-assessment guard inside a race-safe boundary and real response validation.
 
 Next: package the v2 SQL tests for a local PostgreSQL runtime once available, refine verified Math P1/P5 adapter and in-browser AI interface. Do not pay Vercel build quota for microsteps. Preview only when the entire protected test candidate is ready and owner approves.
+
+## 14. P4 Mathematics Exam Prep protection — baseline freeze (2026-10-12)
+
+**Owner requirement:** never break the existing Math Exam Prep while adding Global AI. No silent quota cutover, no progress migration, no replacing existing AI Tutor routes.
+
+### Five byte-identical protected production files
+The following GitHub blob SHA-1 hashes were verified read-only on both production commit `9afc7b44aead03b2a30544e6e7d4c4eb8670efbf` and QA branch `qa/iclub-ai-layer-v21-20261012`:
+- `exam-prep/exam-prep-live.js`: `4827d5d0aa101cabe88395403769c89017e892a9`
+- `exam-prep/exam-prep-ai-ui.js`: `23feb4322840c94eea32c85f07891e78855bf0d3`
+- `exam-prep/exam-prep.css`: `264d31a33ba34b926acd88265995e4b5fa5e8ae7`
+- `supabase/functions/exam-prep-ai/index.ts`: `7484bc1ec4dae842c559e3c63c4b84935e5cf312`
+- `scripts/exam-prep-subject-isolation-regression.cjs`: `8cd7b5aad83b6e7a52c28b1e5f8090a76a5f1514`
+
+**Source of truth:** `qa/ai-layer-v21-math-frozen-baseline.json`. Any unapproved change must fail the baseline test, not automatically update its hashes. Reset the baseline only following an explicit architect decision AND proven equivalent Exam Prep UX/QA.
+
+**Original Math Tutor behavior retained:** dedicated `exam-prep-ai` endpoint; P1/P5 component isolation; 5-step thread limit; two generated followups; prepared modes `main`, `simplify`, `rephrase`, `focus` from approved Math Tutor v3 cards; a student's original `question` follows legacy source-backed generation rules, not a fabricated prepared-card match. The source subject-isolation regression checks Economics, Informatics, Biology, Chemistry, English A1 and SAT do not query or open Math P1/P5.
+
+**New QA-only read-only bridge:** `qa/ai-layer-v21-math-tutor-bridge.cjs` and `.test.cjs` (13/13 passed on committed source through V8 tests). Legacy Tutor entrypoint is **untouched, not routed through this module and charged 0 NEW unified quota units**. In future unified AI ONLY, an exact verified P1/P5 Tutor card and variant is admitted as `prepared=1` TEMPORARY unit, only after authoritative source-key/version/locale and exam safety checks. Unstructured questions remain separate generated routing; no implicit model call and no academic mutation in bridge.
+
+**New pinned-compatibility suite:** `qa/ai-layer-v21-math-frozen-parity.test.cjs`, nine scenarios passed in V8 source-level testing; GitHub-verified SHA matches for all five files. The runner `qa/run-ai-layer-v21-offline.cjs` now invokes the existing subject-isolation Node regression as well as AI tests. Its full native Node execution remains a separate gate, not claimed here.
+
+**Read-only Supabase recheck at 2026-10-12:** Exam Prep `core_enabled=true`, `ai_enabled=true`, `mentor_enabled=false`, `rollout_state=controlled_beta`; **3** `ai_assist=true` entitlements; Math v3 Tutor content **81 per en/ru/uz = 243** cards. New Global AI UI/gateway/generation/checkout are all disabled, `kill_switch=true`. Only SELECT queries were performed, without learner identity or answer retrieval.
+
+**P4 release gate:** New Global AI may open in Math only after complete parity checks (P1 45 + P5 36, three languages, both types of Tutor responses, permissions, protected assessments, no regression in legacy usage) and explicit owner approval for changeover. Existing Math Tutor stays functional even if ALL NEW Global AI features are emergency disabled. No Vercel deployment in this iteration.
+
