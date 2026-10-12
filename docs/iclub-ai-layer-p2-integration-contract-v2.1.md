@@ -69,3 +69,14 @@ The synthetic pipeline obtains the recheck from trusted test services (`qa/ai-la
 - Vercel deployments in this work cycle: **0**. Supabase writes, paid model calls, main/production changes: **0**.
 
 **Outstanding release gates:** PostgreSQL validation, opaque request receipt/replay bound to client session, true current-assessment recheck in real Edge, applied migration review, local/native Node tests, visual e2e and explicit beta permission.
+
+## P4 Mathematics compatibility freeze (2026-10-12)
+
+Five protected files from the production Mathematics Exam Prep (two UI JS files, Math CSS, active Math AI Edge source and subject-isolation regression) are confirmed **Git blob-identical** between production `9afc7b44` and current AI QA branch. Their hashes are pinned in `qa/ai-layer-v21-math-frozen-baseline.json`; the contract test `qa/ai-layer-v21-math-frozen-parity.test.cjs` checks these hashes, original separate Edge endpoint, P1/P5 subject gate, original two generated followup/five total step limits and the regression against Economics and Informatics routes. This gate must remain active on any future AI PR.
+
+The isolated `qa/ai-layer-v21-math-tutor-bridge.cjs` defines exactly how the future unified AI could READ approved Math Tutor cards without modifying the legacy tutor. Only a valid component/skill/locale/version/source-key tuple may become a prepared explanation. The legacy entrypoint returns a passthrough contract without any new unified quota charge, while the unified entrypoint would be charged once as prepared=1 under temporary 1:3 policy. It does not call the provider or change progress. Its committed-source tests pass **13/13**; new frozen compatibility test source checks pass **9/9** (with GitHub-blobs verified independently; full native Node execution still pending).
+
+Read-only Supabase aggregate flags and counts reconfirm 3 AI beta learners, 243 curated Tutor v3 cards (81 each locale), Core/AI ON and Mentor OFF. New Global AI remains OFF. Do not edit original Math Tutor source, Math beta entitlements, deployed Math Edge, progress or localStorage to test the new layer. Preserve exact followup user-facing texts instead of forcing new UX labels on the old Tutor.
+
+Before preview/real beta: run full native Node offline suite incl. subject-isolation regression; compare 5 pinned blob hashes; P1/P5 81 topic parity and 3-language UX; no duplicate billing; manually verify Core when Global AI is OFF; then author approves any migration separately. All production tests currently read-only.
+
