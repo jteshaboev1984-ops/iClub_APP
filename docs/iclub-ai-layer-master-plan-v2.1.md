@@ -197,3 +197,29 @@ Owner instruction: **не расходовать Vercel deploy/build quota на 
 - Mathematics Exam Prep не перенесён под новую квоту и не изменён. Practice и Tour AI не активированы. Нет rollout или платы.
 
 **Release gate:** продолжать staging/test work на QA-ветке; **не выкатывать Preview, пока не собран полноценный пакет** и владелец не дал разрешение на конкретный расход Vercel. Старый исправленный Preview использовать как рабочий ориентир, без AI-записей в общую базу.
+
+## 12. Technical checkpoint — 2026-10-12: authoritative mock integration and unexecuted SQL v2
+
+**All work is on QA branch only. No Vercel builds or changes to main, production, existing subscriptions, user histories or Supabase.**
+
+### Source verification
+The original project documents 06 AI Layer Safety Architecture v1.1, 04 Content Governance Model v1.1 and 03 Exam Prep Integration Architecture Audit v1.0 were read directly. They require server-derived academic context, protected exams, governed versioned sources and zero AI authority over learning evidence. The dormant edge code in supabase/functions/global-ai/index.ts currently accepts several UI hints; these must be reverified server-side before actual runtime integration.
+
+### Completed QA-only work
+- **Authority gate**: qa/ai-layer-v21-authority-gate.cjs + test (17/17 GREEN). Authentication/ownership mock, approved context, protected assessment, Practice completion, Tour archive opening, response language RU/UZ/EN and fail-closed ambiguity. It is *not* yet backed by production authentication.
+- **Fine-grained readiness**: qa/ai-layer-v21-readiness-registry.cjs + test (12/12 GREEN). Per surface, subject, function, topic and locale; eight quality/safety gates; owner-approved cohort for beta; feature-specific/global emergency stops.
+- **Shared quota pipeline**: qa/ai-layer-v21-synthetic-pipeline.cjs + test (13/13 GREEN). Checked Math+Economics both consume the same user's temporary 1:3 quota. Client-provided academic identity is ignored; provider spend approval comes from server services, not a request flag.
+- **Existing mock gateway**: qa/ai-layer-v21-preview-gateway.cjs + test (20/20 GREEN). No real source retrieval/provider/DB calls.
+- **SQL v2 draft ONLY**: qa/sql_drafts/iclub_ai_v21_meter_v2_UNAPPLIED.sql. New QA policy names, new versioned RPCs, request identity fingerprint, and route-specific shortfall without blanket exhaustion. Eight source-only contract checks (8/8 GREEN). **Not a real PostgreSQL run**, and NOT in the automatically applied migration folder.
+- **Frontend work**: QA global-ai-ui.js and .css updates keep icon fully hidden during protected assessment and respond to route_insufficient without closing cheaper routes. Seven formal interface tests saved. Targeted extracted-source checks previously GREEN.
+- **Offline runner**: node qa/run-ai-layer-v21-offline.cjs; six node:test files plus original synthetic smoke script; zero Vercel calls. Complete native Node runner remains to be executed in a checked-out source environment.
+
+### Open implementation barriers (NO-GO for beta)
+1. New SQL v2 needs disposable local PostgreSQL integration tests for concurrency, period expiry, replay identity, RLS and ownership. Do not execute draft against production Supabase.
+2. Client timeouts with already-completed request IDs currently fail closed in draft SQL; to return the original answer without a second provider call, design a bounded, session-compatible ephemeral response receipt. Until then do not claim end-to-end idempotent delivery.
+3. Current real Global AI Edge still calls v1 RPC, default client locale and existing subject/scope guard. A new adapter must derive actual topic/locale from authoritative server state, prevent spoofing, and re-check protected assessment immediately before provider invocation.
+4. Provider budget/price caps and tariff values remain provisional. No real paid model calls. Existing Mathematics Exam Prep Tutor stays exactly as it is.
+5. Need browser/e2e UI and safety regression on 320/390/desktop and all languages, with no real new AI writes to the existing Supabase.
+6. Owner requested conserving Vercel quota: accumulate a full coherent package and run one protected Preview only when necessary.
+
+**Scope statement:** The independent tests are offline behavioural/source contracts over GitHub code, NOT proof of real SQL/RLS or an approved production feature.
