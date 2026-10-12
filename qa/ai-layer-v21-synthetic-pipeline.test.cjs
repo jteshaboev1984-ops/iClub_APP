@@ -11,7 +11,7 @@ const src=x=>({surface:x.surface,subject:x.subject,feature:x.feature,topic:x.top
  approved:true,rightsApproved:true,readinessPassed:true,generationAllowed:true,
  variants:{topic_main:'Синтетическое готовое объяснение'},aliases:{'объясни тему':'topic_main'},
  syntheticGeneratedReply:'Искусственная генерация без настоящего провайдера'});
-function setUp({beta=false,ownerApprovedBeta=false,releaseMath=true,releaseEcon=true,mathBlocked=false,econBlocked=false}={}) {
+function setUp({beta=false,ownerApprovedBeta=false,releaseMath=true,releaseEcon=true,mathBlocked=false,econBlocked=false,budgetOpen=true}={}) {
  const reg=new PreviewFeatureRegistry({mode:beta?'beta':'preview',ownerApprovedBeta,authorizedCohorts:['approved-three']});
  const rows=[{...math,gates:{...pass}},{...econ,gates:{...pass}}];
  for(const row of rows)reg.register(row);
@@ -36,7 +36,8 @@ function setUp({beta=false,ownerApprovedBeta=false,releaseMath=true,releaseEcon=
    getFeatureId:(surface,subject)=>subject==='mathematics'?'math-topic':subject==='economics'?'econ-topic':'unknown',
    getLearnerCohort:()=>'approved-three',
    getLearnerKind:()=>beta?'authorized_beta':'synthetic',
-   getLearnerPlan:()=> 'plus'
+   getLearnerPlan:()=> 'plus',
+   providerBudgetAllows:()=>budgetOpen
  };
  const p=new SyntheticAIPipeline({services,registry:reg,sources:rows.map(src)});
  const principal={authenticated:true,userId:'synthetic-learner'};
@@ -91,6 +92,14 @@ test('Provider failures after successful admission release quota',()=>{
  const x=setUp();const r=x.ask('math-handle-001',{question:'Приведи нестандартный пример',promptKey:'',provider:'timeout'});
  assert.equal(r.reason,'provider_timeout');
  assert.equal(x.p.gateway.ledger.inspect('synthetic-learner','plus',100).remaining,9);
+});
+test('Blocked backend spend gate cannot be bypassed with a client claim',()=>{
+ const x=setUp({budgetOpen:false});
+ const q=x.ask('math-handle-001',{question:'Приведи нестандартный пример',promptKey:'',budgetAllowed:true});
+ assert.equal(q.reason,'provider_budget_unavailable');
+ assert.equal(x.p.gateway.modelCallAttempts,0);
+ assert.equal(x.p.gateway.ledger.inspect('synthetic-learner','plus',100).committed,0);
+ assert.equal(x.ask('math-handle-001').ok,true);
 });
 test('RU question cannot silently use only EN sources',()=>{
  const x=setUp();const r=x.ask('math-handle-001',{question:'Почему это верно?',promptKey:'',appLocale:'en'});
