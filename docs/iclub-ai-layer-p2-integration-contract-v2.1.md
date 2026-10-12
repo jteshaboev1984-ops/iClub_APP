@@ -80,3 +80,11 @@ Read-only Supabase aggregate flags and counts reconfirm 3 AI beta learners, 243 
 
 Before preview/real beta: run full native Node offline suite incl. subject-isolation regression; compare 5 pinned blob hashes; P1/P5 81 topic parity and 3-language UX; no duplicate billing; manually verify Core when Global AI is OFF; then author approves any migration separately. All production tests currently read-only.
 
+## Async reply replay and governed Math source — 2026-10-12
+
+New QA-only modules and independent saved-source results:
+- `qa/ai-layer-v21-reply-receipts.cjs`: 13/13 tests. Bounded in-memory session-scoped reply receipt, fresh authorization on every retrieval.
+- `qa/ai-layer-v21-request-delivery.cjs`: 13/13 tests. A response lost after completion may be replayed from the short-lived receipt; it must not trigger a second provider attempt. Cache expiry refuses retry without restarting generation.
+- `qa/ai-layer-v21-math-source-rpc-bridge.cjs`: 18/18 tests. Read-only bridge to approved Math Tutor and theory-card RPC contract; source, skill, component, version and locale all checked twice. A server-issued unified-AI context is mandatory; legacy Exam Prep contexts are rejected.
+
+This is **44/44 additional standalone mock cases**. They do not establish PostgreSQL safety or a working Edge deployment. In-memory completed-request records disappear on restart; production needs durable, minimal request-id accounting plus short-lived reply recovery without storing chat transcripts permanently. Old Math AI UI, Edge function, student progress and subject-isolation logic remain frozen. No Vercel deployment.
