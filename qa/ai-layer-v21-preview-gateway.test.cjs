@@ -146,3 +146,33 @@ test('Plan changes during an active period cannot mint extra allowance',()=>{
  success(l.finalize('plan-request','ok',0));
  assert.equal(l.inspect('learner-aaa','pro',1).reason,'plan_transition_requires_review');
 });
+
+test('Server context changes before generated provider: no call, no charge',()=>{
+ const g=qa();
+ const input=request('race-before-provider',{context:context({serverRecheck:(stage)=>false}),question:{text:'Новый пример',resolvedLocale:'ru'}});
+ assert.equal(g.request(input).reason,'context_changed');
+ assert.equal(g.modelCallAttempts,0);
+ assert.equal(g.ledger.inspect('learner-001','plus',100).remaining,9);
+});
+test('New protected exam after provider started prevents delivery and learner charge',()=>{
+ const g=qa(),calls=[];
+ const input=request('race-after-provider',{context:context({serverRecheck:(stage)=>{
+  calls.push(stage);return stage==='before_provider';
+ }}),question:{text:'Новый пример',resolvedLocale:'ru'}});
+ assert.equal(g.request(input).reason,'context_changed');
+ assert.deepEqual(calls,['before_provider','before_delivery']);
+ assert.equal(g.modelCallAttempts,1); // provider expense may have occurred
+ assert.equal(g.ledger.inspect('learner-001','plus',100).remaining,9);
+});
+test('No processed prepared answer after protection is enabled before delivery',()=>{
+ const g=qa();
+ const input=request('race-prepared',{context:context({serverRecheck:(stage)=>stage==='before_provider'})});
+ assert.equal(g.request(input).reason,'context_changed');
+ assert.equal(g.ledger.inspect('learner-001','plus',100).committed,0);
+});
+test('A server recheck exception denies and releases reservation',()=>{
+ const g=qa();
+ const input=request('guard-throws',{context:context({serverRecheck:()=>{throw Error('guard backend unavailable');}})});
+ assert.equal(g.request(input).reason,'context_changed');
+ assert.equal(g.ledger.inspect('learner-001','plus',100).remaining,9);
+});
