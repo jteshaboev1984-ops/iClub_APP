@@ -120,3 +120,34 @@ test('Return shape never leaks hidden usage units, source ids or tariffs',()=>{
  const r=x.ask('math-handle-001');assert.deepEqual(Object.keys(r).sort(),['ok','reply','duplicate'].sort());
  assert.ok(!JSON.stringify(r).includes('sourceId'));
 });
+
+test('Protected exam starting after admission stops the model before it is called',()=>{
+ const x=setUp();const original=x.services.getContext;let reads=0;
+ x.services.getContext=(...args)=>{const c=original(...args);reads++;return reads>=2?{...c,protectedAssessment:true}:c;};
+ const r=x.ask('math-handle-001',{question:'Приведи новый пример',promptKey:''});
+ assert.equal(r.reason,'context_changed');
+ assert.equal(x.p.gateway.modelCallAttempts,0);
+ assert.equal(x.p.gateway.ledger.inspect('synthetic-learner','plus',100).remaining,9);
+});
+test('Protected exam starting while provider is running prevents reply delivery',()=>{
+ const x=setUp();const original=x.services.getContext;let reads=0;
+ x.services.getContext=(...args)=>{const c=original(...args);reads++;return reads>=3?{...c,protectedAssessment:true}:c;};
+ const r=x.ask('math-handle-001',{question:'Приведи новый пример',promptKey:''});
+ assert.equal(r.reason,'context_changed');
+ assert.equal(x.p.gateway.modelCallAttempts,1);
+ assert.equal(x.p.gateway.ledger.inspect('synthetic-learner','plus',100).remaining,9);
+});
+test('Source version revoked during request prevents delivery and billing',()=>{
+ const x=setUp();const old=x.services.getRelease;let count=0;
+ x.services.getRelease=(arg)=>{count++;const result=old(arg);return count>=3?{...result,sourceVersion:'review-pending'}:result;};
+ const r=x.ask('math-handle-001');
+ assert.equal(r.reason,'context_changed');
+ assert.equal(x.p.gateway.ledger.inspect('synthetic-learner','plus',100).committed,0);
+});
+test('AI function emergency disabled while answering prevents response',()=>{
+ const x=setUp();const old=x.services.getContext;let reads=0;
+ x.services.getContext=(...args)=>{reads++;if(reads===3)x.reg.emergencyStopFeature('math-topic');return old(...args);};
+ const r=x.ask('math-handle-001',{question:'Приведи новый пример',promptKey:''});
+ assert.equal(r.reason,'context_changed');
+ assert.equal(x.p.gateway.ledger.inspect('synthetic-learner','plus',100).remaining,9);
+});
