@@ -347,13 +347,13 @@ The consolidated offline runner now includes this as its **13th** Node test suit
 
 **New QA artifacts:**
 1. `qa/ai-layer-v21-subject-readiness-inventory.snapshot.json`: aggregated metadata only; every subject/feature marked not released for NEW AI.
-2. `qa/ai-layer-v21-cross-subject-admission.cjs` and `.test.cjs`: an authenticated, read-only, fail-closed multi-subject gate for Practice and archive Tours. It requires actual completed resource, owner, subject, exact topic/question evidence, current rights-cleared and versioned source, RU/UZ/EN, independent eight QA gates, cohort, protected-exam guard and rechecks after async work. It never charges, generates or mutates student data. **25/25** isolated committed-source JS cases GREEN (not native Node).
+2. `qa/ai-layer-v21-cross-subject-admission.cjs` and `.test.cjs`: an authenticated, read-only, fail-closed multi-subject gate for Practice and archive Tours. It requires actual completed resource, owner, subject, exact topic/question evidence, current rights-cleared and versioned source, RU/UZ/EN, independent eight QA gates, cohort, protected-exam guard and rechecks after async work. It never charges, generates or mutates student data. **26/26** isolated committed-source JS cases GREEN (not native Node).
 3. `qa/sql_drafts/iclub_ai_practice_exact_source_v21_UNAPPLIED.sql`: scratch-only service_role RPC for a **finalized, answered, EXACT question** in Economics/Chemistry. Rejects unknown/foreign/unfinished question, wrong subject/locale, source with denied rights, ambiguous approved versions and global AI disabled. No generic card fallback, no answer text and no academic writes. **Unapplied, not in Supabase migrations.**
 4. `qa/sql_drafts/iclub_ai_practice_exact_source_local_pg.psql`: rollback-only synthetic SQL fixtures for both subjects, protected assessment and all negative cases. **PREPARED, NOT RUN in PostgreSQL**.
 5. `qa/ai-layer-v21-cross-subject-sql.test.cjs`: **14/14** static SQL and policy checks GREEN. Local scratch runner now allowlists meter/math/practice.
 6. `docs/iclub-ai-layer-p5-p6-multisubject-readiness-v2.1.md`: actual readiness/coverage, prioritization and content/editorial NO-GO rules.
 
-The consolidated `qa/run-ai-layer-v21-offline.cjs` now lists **18** test suites; full native Node/PostgreSQL/Edge/browser acceptance is NOT claimed. **39/39 newly introduced P5/P6 tests** passed by executing the exact GitHub sources in an isolated JS/V8 test harness.
+The consolidated `qa/run-ai-layer-v21-offline.cjs` now lists **18** test suites; full native Node/PostgreSQL/Edge/browser acceptance is NOT claimed. **40/40 newly introduced P5/P6 tests** passed by executing the exact GitHub sources in an isolated JS/V8 test harness.
 
 **Product-level decisions preserved:**
 - Mathematics Exam Prep P1/P5 continues on legacy endpoint and quotas with no changes.
@@ -363,3 +363,5 @@ The consolidated `qa/run-ai-layer-v21-offline.cjs` now lists **18** test suites;
 
 **Release blockers:** real isolated PostgreSQL and concurrency test; trustworthy production-backed per-topic mapping and source QA; stable server-owned context/auth and idempotency across Edge workers; economics of temporary 1:3; native Node and mobile/browser RU/UZ/EN regression; one protected synthetic Preview at justified time; explicit architect beta approval. No direct production writes or Vercel builds in this checkpoint.
 
+
+**P5/P6 follow-up QA refinement:** 2026-10-12 — frozen audit subject statuses were removed as runtime authority: live server `subjects.is_active` plus source/QA gates controls future releases (Master decisions 38C and 42A). Inactive current courses remain blocked. One further regression verified future subject activation cannot bypass missing approved content. New P5/P6 tests now **40/40** in isolated committed-source execution; no production rollout.
