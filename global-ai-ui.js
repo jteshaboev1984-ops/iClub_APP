@@ -44,6 +44,7 @@
       limitTitle: "Лимит iClub AI достигнут",
       limitReset: "Доступ восстановится в {time}.",
       limitPending: "Доступ восстановится после текущего периода.",
+      routeInsufficient: "Для этого ответа сейчас недостаточно доступного лимита. Готовые объяснения могут быть доступны.",
       subjectNames: {
         mathematics: "Математика",
         biology: "Биология",
@@ -77,6 +78,7 @@
       limitTitle: "iClub AI limiti tugadi",
       limitReset: "Kirish {time} da tiklanadi.",
       limitPending: "Kirish joriy davrdan keyin tiklanadi.",
+      routeInsufficient: "Bu javob uchun limit yetarli emas. Tayyor izohlar hali mavjud bo‘lishi mumkin.",
       subjectNames: {
         mathematics: "Matematika",
         biology: "Biologiya",
@@ -110,6 +112,7 @@
       limitTitle: "iClub AI limit reached",
       limitReset: "Access will return at {time}.",
       limitPending: "Access will return after the current period.",
+      routeInsufficient: "There is not enough allowance for this answer. Prepared explanations may still be available.",
       subjectNames: {
         mathematics: "Mathematics",
         biology: "Biology",
@@ -655,6 +658,13 @@
         closePanel();
         showToast(copy().assessmentStart);
         void refreshBootstrap();
+        return;
+      }
+
+      // New route-specific shortfall never closes the remaining inexpensive routes.
+      // Legacy usage_exhausted remains separate until backend parity is complete.
+      if (reason === "route_insufficient") {
+        appendMessage(threadKey, "assistant", copy().routeInsufficient, "notice");
         return;
       }
 
