@@ -7,7 +7,8 @@ const EXPECTED_CONTENT_VERSION="tutor_v3_learner_first";
 const FAIL=(reason)=>({ok:false,reason});
 const same=(a,b)=>a.ownerId===b.ownerId&&a.subject===b.subject&&
  a.componentCode===b.componentCode&&a.skillCode===b.skillCode&&
- a.locale===b.locale&&a.contextVersion===b.contextVersion;
+ a.locale===b.locale&&a.contextVersion===b.contextVersion&&
+ a.routeAuthority===b.routeAuthority;
 class MockMathTutorRpcBridge {
  constructor({getScopedContext,canUseUnifiedAI,rpc}={}) {
    if(typeof getScopedContext!=="function"||
@@ -26,6 +27,9 @@ class MockMathTutorRpcBridge {
    catch {return FAIL("context_unverified");}
    if(!context||context.ownerId!==principal.userId||context.expiresAt<=nowMs||
       context.active!==true)return FAIL("context_unverified");
+   // Trust only a SERVER-issued unified-AI context. Existing Exam Prep
+   // routes must never be diverted into this new bridge or silently billed.
+   if(context.routeAuthority!=="unified_ai")return FAIL("legacy_exam_prep_unchanged");
    if(context.protectedAssessment===true)return FAIL("protected_assessment");
    if(context.subject!=="mathematics")return FAIL("subject_mismatch");
    if(!["P1","P5"].includes(context.componentCode))return FAIL("component_invalid");
