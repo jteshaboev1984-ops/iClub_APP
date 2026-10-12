@@ -1,0 +1,140 @@
+-- iClub AI Layer v2.1 local PostgreSQL test (psql script, NEVER use production).
+-- Invoke only via qa/run-ai-layer-v21-postgres-local.sh after explicit QA checks.
+\set ON_ERROR_STOP on
+\echo 'iClub AI v2.1 scratch PostgreSQL: guarding target database'
+DO $guard$
+BEGIN
+  IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$' THEN
+    RAISE EXCEPTION 'REFUSING non-scratch database %',current_database();
+  END IF;
+  IF inet_server_addr() IS NOT NULL
+     AND inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) THEN
+    RAISE EXCEPTION 'REFUSING non-local PostgreSQL server';
+  END IF;
+  IF to_regclass('private.iclub_ai_usage_policies') IS NOT NULL
+     OR to_regclass('public.users') IS NOT NULL THEN
+    RAISE EXCEPTION 'REFUSING non-empty database or pre-existing iClub tables';
+  END IF;
+END
+$guard$;
+
+-- Minimal isolated test fixtures required by deployed migration; no real users.
+DO $roles$
+DECLARE r text;
+BEGIN
+  FOREACH r IN ARRAY ARRAY['anon','authenticated','service_role'] LOOP
+    IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=r) THEN
+      EXECUTE format('CREATE ROLE %I NOLOGIN',r);
+    END IF;
+  END LOOP;
+END $roles$;
+CREATE TABLE public.users(id uuid primary key);
+\ir ../../supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql
+\ir iclub_ai_v21_meter_v2_UNAPPLIED.sql
+
+\echo 'Running v2 test cases inside a transaction (rollback all synthetic users and usage)'
+BEGIN;
+INSERT INTO public.users(id) VALUES
+ ('00000000-0000-4000-8000-000000000001'),
+ ('00000000-0000-4000-8000-000000000002'),
+ ('00000000-0000-4000-8000-000000000003'),
+ ('00000000-0000-4000-8000-000000000004');
+
+-- Test 1: Plus seven prepared1; generation3 denied at remaining2;
+-- two prepared1 may still complete before total exhaustion.
+DO $case_one$
+DECLARE
+ uid uuid:='00000000-0000-4000-8000-000000000001';
+ rid uuid;
+ ans jsonb;
+ i int;
+ units int;
+ exhausted_now boolean;
+BEGIN
+ FOR i IN 1..7 LOOP
+   rid:=('10000000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid;
+   ans:=public.reserve_iclub_ai_usage_service_v2(rid,uid,'plus_qa_v2','prepared',repeat('a',64));
+   IF ans->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'plus prepared % reserve: %',i,ans; END IF;
+   ans:=public.finalize_iclub_ai_usage_service_v2(rid,'completed');
+   IF ans->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'plus prepared % finish: %',i,ans; END IF;
+ END LOOP;
+ SELECT committed_units,exhausted INTO units,exhausted_now FROM private.iclub_ai_usage_periods
+ WHERE user_id=uid AND status='active';
+ IF units<>7 OR exhausted_now THEN RAISE EXCEPTION 'expected 7 committed + not exhausted, got % %',units,exhausted_now; END IF;
+ ans:=public.reserve_iclub_ai_usage_service_v2(
+ '10000000-0000-4000-8000-000000000008',uid,'plus_qa_v2','generated',repeat('b',64));
+ IF ans->>'reason' IS DISTINCT FROM 'route_insufficient' THEN RAISE EXCEPTION 'generated3 should only fail route: %',ans; END IF;
+ SELECT committed_units,exhausted INTO units,exhausted_now FROM private.iclub_ai_usage_periods
+ WHERE user_id=uid AND status='active';
+ IF units<>7 OR exhausted_now THEN RAISE EXCEPTION 'expensive request damaged cheap remainder'; END IF;
+ FOR i IN 9..10 LOOP
+   rid:=('10000000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid;
+   ans:=public.reserve_iclub_ai_usage_service_v2(rid,uid,'plus_qa_v2','prepared',repeat('c',64));
+   IF ans->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'remaining cheap % failed: %',i,ans; END IF;
+   ans:=public.finalize_iclub_ai_usage_service_v2(rid,'completed');
+   IF ans->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'remaining cheap finish %: %',i,ans; END IF;
+ END LOOP;
+ SELECT committed_units,exhausted INTO units,exhausted_now FROM private.iclub_ai_usage_periods
+ WHERE user_id=uid AND status='active';
+ IF units<>9 OR NOT exhausted_now THEN RAISE EXCEPTION 'only full allowance should exhaust, got % %',units,exhausted_now; END IF;
+ -- A completed ID may never permit another provider call or double charge.
+ ans:=public.reserve_iclub_ai_usage_service_v2(
+  '10000000-0000-4000-8000-000000000009',uid,'plus_qa_v2','prepared',repeat('c',64));
+ IF ans->>'reason' IS DISTINCT FROM 'request_already_completed' THEN RAISE EXCEPTION 'duplicate completed ID not stopped: %',ans; END IF;
+END $case_one$;
+
+-- Test 2: Free has three prepared, no generated entitlement.
+DO $free$
+DECLARE
+ u uuid:='00000000-0000-4000-8000-000000000002';
+ a jsonb;
+BEGIN
+ a:=public.reserve_iclub_ai_usage_service_v2('20000000-0000-4000-8000-000000000001',u,
+   'free_qa_v2','generated',repeat('a',64));
+ IF a->>'reason' IS DISTINCT FROM 'generation_not_entitled' THEN RAISE EXCEPTION 'free gen leaked: %',a; END IF;
+ IF EXISTS(SELECT 1 FROM private.iclub_ai_usage_periods WHERE user_id=u)
+ THEN RAISE EXCEPTION 'denied free generation started a period'; END IF;
+END $free$;
+
+-- Test 3: Four Pro generated3 plus two prepared1 sums exactly 14.
+DO $pro$
+DECLARE
+ u uuid:='00000000-0000-4000-8000-000000000003';
+ rid uuid;
+ a jsonb;
+ i integer;
+ n integer;
+BEGIN
+ FOR i IN 1..6 LOOP
+   rid:=('30000000-0000-4000-8000-'||lpad(i::text,12,'0'))::uuid;
+   a:=public.reserve_iclub_ai_usage_service_v2(rid,u,'pro_qa_v2',
+     CASE WHEN i<=4 THEN 'generated' ELSE 'prepared' END,repeat('a',64));
+   IF a->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'pro route %: %',i,a; END IF;
+   a:=public.finalize_iclub_ai_usage_service_v2(rid,'completed');
+   IF a->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'pro finalize %: %',i,a; END IF;
+ END LOOP;
+ SELECT committed_units INTO n FROM private.iclub_ai_usage_periods WHERE user_id=u AND status='active';
+ IF n<>14 THEN RAISE EXCEPTION 'pro mixed weight expected 14 but got %',n; END IF;
+END $pro$;
+
+-- Test 4: released failure must not start clock, identity cannot be replayed.
+DO $cancel$
+DECLARE
+ u uuid:='00000000-0000-4000-8000-000000000004';
+ rid uuid:='40000000-0000-4000-8000-000000000001';
+ a jsonb;
+ n integer;
+BEGIN
+ a:=public.reserve_iclub_ai_usage_service_v2(rid,u,'plus_qa_v2','generated',repeat('a',64));
+ IF a->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'reserve failed: %',a; END IF;
+ a:=public.finalize_iclub_ai_usage_service_v2(rid,'released','provider_timeout');
+ IF a->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'release failed: %',a; END IF;
+ IF EXISTS(SELECT 1 FROM private.iclub_ai_usage_periods WHERE user_id=u AND status='active')
+ THEN RAISE EXCEPTION 'failed request started active timer'; END IF;
+ a:=public.reserve_iclub_ai_usage_service_v2(rid,u,'plus_qa_v2','prepared',repeat('a',64));
+ IF a->>'reason' IS DISTINCT FROM 'request_identity_mismatch' THEN RAISE EXCEPTION 'route mismatch leaked: %',a; END IF;
+ a:=public.reserve_iclub_ai_usage_service_v2(rid,u,'plus_qa_v2','generated',repeat('b',64));
+ IF a->>'reason' IS DISTINCT FROM 'request_identity_mismatch' THEN RAISE EXCEPTION 'fingerprint mismatch leaked: %',a; END IF;
+END $cancel$;
+ROLLBACK;
+\echo 'SQL GREEN: route-only 2 left; mixed 1:3; Free blocked; Pro14; failure, identity, timer. Fixtures rolled back.'
