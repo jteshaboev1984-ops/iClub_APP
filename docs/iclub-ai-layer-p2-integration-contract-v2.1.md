@@ -88,3 +88,15 @@ New QA-only modules and independent saved-source results:
 - `qa/ai-layer-v21-math-source-rpc-bridge.cjs`: 18/18 tests. Read-only bridge to approved Math Tutor and theory-card RPC contract; source, skill, component, version and locale all checked twice. A server-issued unified-AI context is mandatory; legacy Exam Prep contexts are rejected.
 
 This is **44/44 additional standalone mock cases**. They do not establish PostgreSQL safety or a working Edge deployment. In-memory completed-request records disappear on restart; production needs durable, minimal request-id accounting plus short-lived reply recovery without storing chat transcripts permanently. Old Math AI UI, Edge function, student progress and subject-isolation logic remain frozen. No Vercel deployment.
+
+## Checkpoint 17 — SQL v2 completion identity and expiry
+
+2026-10-12, QA branch only. Progress by Master Plan: P0 baseline complete; P1 static UI prepared but no new Preview deployment; P2 authoritative mock contracts complete, real Edge integration pending; P3 UI partial; P4 legacy Mathematics Tutor frozen with five verified hashes, read-only Math adapter prepared; P5/P6 routing contracts only; P7 temporary 1:3 metering plus unapplied v2 SQL draft, actual PostgreSQL tests pending; P8 full acceptance not run; P9 owner-controlled beta not started.
+
+Critical safety fix in qa/sql_drafts/iclub_ai_v21_meter_v2_UNAPPLIED.sql: v2 finalization now validates the exact request owner and SHA-256 fingerprint under the same per-user advisory transaction lock, denies completion after reservation TTL, and releases an expired hold through the unchanged v1 accounting helper. This avoids charging a learner for an already expired response. The entire v2 draft has an additional database-name/localhost guard, so it refuses direct execution on the production database.
+
+Updated qa/sql_drafts/iclub_ai_v21_local_pg_regression.psql adds owner/fingerprint mismatch, late finalization, and a five-hour period rollover case. Its actual PostgreSQL execution has NOT happened; database binaries are unavailable here. Static SQL source checks: 16/16 GREEN.
+
+Aggregate committed-source V8 QA runner: 173/173 checks across twelve test files (six suites 104, six suites 69). This is NOT a native Node, PostgreSQL, browser, integration or production success claim. The existing Mathematics Exam Prep files and live data are untouched; no Vercel deployment was initiated.
+
+Remaining release gates: real scratch PostgreSQL/transaction and multi-session concurrency testing; server-minted learner/subject/assessment context and runtime Edge adapter; persistent minimal idempotency across Edge restarts; economics of tentative 1:3 billing; native Node full-suite execution; full mobile RU/UZ/EN and Math 81-skill parity; isolated Preview and explicit owner approval.
