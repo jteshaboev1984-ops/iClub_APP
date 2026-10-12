@@ -176,3 +176,24 @@ test('A server recheck exception denies and releases reservation',()=>{
  assert.equal(g.request(input).reason,'context_changed');
  assert.equal(g.ledger.inspect('learner-001','plus',100).remaining,9);
 });
+
+test('An already charged answer cannot be replayed after server context becomes protected',()=>{
+ const g=qa();let protectedNow=false;
+ const input=request('replay-protected',{context:context({serverRecheck:()=>!protectedNow}),
+   question:{text:'Новый пример',resolvedLocale:'ru'}});
+ const first=g.request(input);assert.equal(first.ok,true);
+ protectedNow=true;
+ const retry=g.request(input);
+ assert.equal(retry.reason,'context_changed');
+ assert.equal(g.modelCallAttempts,1);
+ assert.equal(g.ledger.inspect('learner-001','plus',100).committed,3);
+});
+test('Safe retry with unchanged server authority returns same answer once',()=>{
+ const g=qa(),input=request('replay-authorized',{context:context({serverRecheck:()=>true}),
+  question:{text:'Новый пример',resolvedLocale:'ru'}});
+ const first=g.request(input),second=g.request(input);
+ assert.equal(first.ok,true);assert.equal(second.ok,true);
+ assert.equal(second.duplicate,true);assert.equal(second.reply,first.reply);
+ assert.equal(g.modelCallAttempts,1);
+ assert.equal(g.ledger.inspect('learner-001','plus',100).committed,3);
+});
