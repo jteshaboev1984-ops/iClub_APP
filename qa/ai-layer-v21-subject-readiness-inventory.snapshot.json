@@ -1,0 +1,162 @@
+{
+  "schema": "iclub_ai_v21_subject_inventory",
+  "asOf": "2026-10-12",
+  "origin": "read-only aggregate metadata from production Supabase; not a runtime release authority",
+  "safety": "No answer text, source keys, learner IDs, progress, or prompt content.",
+  "globalAIRuntime": {
+    "uiEnabled": false,
+    "gatewayEnabled": false,
+    "generationEnabled": false,
+    "killSwitch": true
+  },
+  "scopeReadiness": [
+    {
+      "subject": "mathematics",
+      "scope": "exam_prep",
+      "readiness": "full",
+      "adapter": "math_exam_prep_v1",
+      "newAIReleased": false,
+      "existingExamPrepUnchanged": true
+    },
+    {
+      "subject": "mathematics",
+      "scope": "global",
+      "readiness": "basic",
+      "adapter": null,
+      "newAIReleased": false
+    },
+    {
+      "subject": "biology",
+      "scope": "global",
+      "readiness": "basic",
+      "adapter": null,
+      "newAIReleased": false
+    },
+    {
+      "subject": "chemistry",
+      "scope": "global",
+      "readiness": "basic",
+      "adapter": null,
+      "newAIReleased": false
+    },
+    {
+      "subject": "economics",
+      "scope": "global",
+      "readiness": "basic",
+      "adapter": null,
+      "newAIReleased": false
+    },
+    {
+      "subject": "informatics",
+      "scope": "global",
+      "readiness": "basic",
+      "adapter": null,
+      "newAIReleased": false
+    },
+    {
+      "subject": "general",
+      "scope": "global",
+      "readiness": "basic",
+      "adapter": "app_help_v1",
+      "newAIReleased": false
+    }
+  ],
+  "subjects": [
+    {
+      "subject": "biology",
+      "active": true,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "chemistry",
+      "active": true,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "mathematics",
+      "active": true,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "informatics",
+      "active": true,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "economics",
+      "active": true,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "english_a1",
+      "active": false,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "english_a2",
+      "active": false,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "english_b1",
+      "active": false,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "sat",
+      "active": false,
+      "lessonAIReady": false
+    },
+    {
+      "subject": "ielts",
+      "active": false,
+      "lessonAIReady": false
+    }
+  ],
+  "practiceApprovedCards": {
+    "economics": {
+      "en": 81,
+      "ru": 81,
+      "uz": 81,
+      "perLocale": {
+        "answer_explanation": 80,
+        "result_context": 1,
+        "exactQuestionCards": 4,
+        "topicOnlyAnswerCards": 76,
+        "distinctTopics": 11
+      }
+    },
+    "chemistry": {
+      "en": 38,
+      "ru": 38,
+      "uz": 38,
+      "perLocale": {
+        "answer_explanation": 38,
+        "result_context": 0,
+        "exactQuestionCards": 33,
+        "topicOnlyAnswerCards": 5,
+        "distinctTopics": 5
+      }
+    },
+    "totalCards": 357,
+    "exactQuestionCardRowsAcrossLocales": 111,
+    "genericOrResultContextCardRowsAcrossLocales": 246,
+    "exactQuestionProofReadyForProduction": false,
+    "topicOnlyCardMayServeAsExactQuestionProof": false,
+    "sourceRightsApproved": true,
+    "editorialQAGatesFullyVerified": false,
+    "practiceAIEnabled": false
+  },
+  "releasePolicy": "NO automatic enablement based on counts or historical basic/full subject readiness. Require current release gates per surface × subject × feature × exact topic/question × locale, independently verified server completion, rights, content hash, cohort and per-scope kill switch.",
+  "unverifiedByThisInventory": [
+    "Biology governed sources",
+    "Informatics governed sources",
+    "English A1/A2/B1 lesson AI",
+    "SAT lesson AI",
+    "IELTS lesson AI",
+    "Tours archive sources by question",
+    "Home signed next-action aggregates",
+    "Profile signed progress aggregates",
+    "Video transcripts and timestamps"
+  ]
+}
