@@ -98,3 +98,12 @@ test('v2 finalize preserves advisory lock, row lock and service-only permission'
  assert.match(fn,/revoke all on function public\.finalize_iclub_ai_usage_service_v2\(uuid,uuid,text,text,text\)/);
  assert.match(fn,/grant execute on function public\.finalize_iclub_ai_usage_service_v2\(uuid,uuid,text,text,text\)/);
 });
+
+test('Local SQL rollover test exercises elapsed 5-hour period without resetting real data',()=>{
+ const sql=fs.readFileSync('qa/sql_drafts/iclub_ai_v21_local_pg_regression.psql','utf8');
+ assert.ok(sql.includes('DO $period_rollover$'));
+ assert.ok(sql.includes("reset_at=now()-interval '2 seconds'"));
+ assert.ok(sql.includes("status='closed' AND committed_units=14"));
+ assert.ok(sql.includes("status='active' AND committed_units=1"));
+ assert.ok(sql.includes('ROLLBACK;'));
+});
