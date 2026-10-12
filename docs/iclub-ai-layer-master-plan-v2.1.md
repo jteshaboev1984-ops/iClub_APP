@@ -318,3 +318,19 @@ The consolidated offline runner now includes this as its **13th** Node test suit
 
 **Next meaningful delivery gate:** build a read-only service adapter against authoritative session/evidence/source RPC and validate with actual local Node+Postgres, then package one protected Preview candidate. Do not begin student rollout or switch old Exam Prep routing until parity is proved and explicitly approved.
 
+
+## 20. Server-only Math source admission — P2/P4 integration checkpoint (2026-10-12)
+
+**Major deliverable:** first new Mathematics P1/P5 SQL admission proof tied to the **actual deployed database schema** and entirely isolated from active Exam Prep. This is a **scratch-guarded, unapplied SQL draft**, not a production migration. The code only authorizes *retrieval* of approved source metadata, never changes learner progress.
+
+- Real schema verified by read-only SELECT metadata + aggregate queries: `exam_prep_sessions` + `exam_prep_session_items` + `exam_prep_evidence_events` + Tutor v3 cards + versioned rights-cleared source cards. Importantly, finalized session alone is not enough: session membership of the skill and matching `app_verified` evidence are both required.
+- `qa/sql_drafts/iclub_ai_math_skill_context_v21_UNAPPLIED.sql` creates service-role-only `get_iclub_ai_math_skill_context_service_v2`, verifying correct learner/session/P1–P5/skill/language, current global-ai kill switch, existing protected-assessment guard, approved `tutor_v3_learner_first` card and `original_iclub` rights. It returns source hashes and binding metadata, **no answer text**. It cannot run on a non-scratch or remote database.
+- `qa/ai-layer-v21-math-authority-service.cjs` is a future server-only contract requiring a verified bearer, a short-lived revision-bound session context and revalidation before response delivery. **19/19** tests PASS against committed GitHub JavaScript source in V8.
+- `qa/ai-layer-v21-math-authority-sql.test.cjs`: **14/14** static checks PASS for SQL authorization, source/rights/evidence gating and scratch test security.
+- `qa/sql_drafts/iclub_ai_math_authority_local_pg.psql`: local PostgreSQL fixture covers gateway-disabled, foreign user, wrong skill, incomplete exam, unverified evidence, retired Tutor, rights blocked and protected assessment. All synthetic fixtures enclosed in a transaction that rolls back; this fixture is **PREPARED, NOT RUN** because PostgreSQL is still unavailable here.
+- `qa/run-ai-layer-v21-postgres-local.sh` now chooses `meter` or `math`, ONLY on a new empty localhost scratch database. The consolidated Node runner now contains **16 suites**, but native full Node run remains not completed. See `docs/iclub-ai-layer-math-authority-handoff-v2.1.md` for exact handoff.
+
+**Safety/rollback rule:** SQL draft is under `qa/sql_drafts` rather than `supabase/migrations`; no active Global AI Edge function or original Math `exam-prep-ai` imports it. Student beta permissions, completed assessments, Practice/Tours, Tutor texts and local progress are unchanged. No Vercel builds. No student rollout. Existing P1/P5 learning works even with new Global AI entirely disabled.
+
+**Remaining GO gates:** actual local PostgreSQL compile/execution and concurrency; integration of the service-only SQL RPC into a *new* authenticated Edge pathway with entitlement/release checks and source-hash parity; actual per-topic and per-locale source QA; real provider cost budget and double-charge-safe idempotency across Edge instances; protected Preview/browser test and explicit architect approval. Current 1:3 rates are temporary.
+
