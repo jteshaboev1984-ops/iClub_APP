@@ -16,7 +16,8 @@ const spec={
 function make({subject='economics',locale='ru',release=true,
   archiveRelease=false,sourceEnabled=true}={}){
  const flags={active:false,global:true,verified:true,finished:true,archive:true,
-  exact:true,sourceEnabled,rights:true,subjectActive:true,
+  exact:true,sourceEnabled,rights:true,
+  subjectActive:!['english_a1','english_a2','english_b1','sat','ielts'].includes(subject),
   release,sourceHash:'a'.repeat(64),sourceVersion:'v3',change:false,contextChange:false};
  const id=spec[subject]?.id??3;
  const db={
@@ -229,4 +230,13 @@ test('A switched topic using the same evidence ID cannot reuse the old source',a
  const result=await x.gate.admit(x.request());
  assert.equal(result.reason,'context_changed');
  assert.equal(result.charge,0);
+});
+
+test('Future subject activation is server-controlled, not locked to historical snapshot',async()=>{
+ const x=make({subject:'english_a1'});
+ assert.equal((await x.gate.admit(x.request())).reason,'subject_not_released');
+ x.flags.subjectActive=true;
+ const candidate=await x.gate.admit(x.request());
+ assert.equal(candidate.reason,'approved_source_not_ready');
+ assert.equal(candidate.charge,0);
 });
