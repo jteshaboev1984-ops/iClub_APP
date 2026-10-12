@@ -37,7 +37,7 @@ class MockServerContextResolver {
   const fetch=kind==='exam_prep_result'?()=>S.getExamPrepSession(resourceId):
               kind==='practice_result'?()=>S.getPracticeSession(resourceId):
               ()=>S.getTourAttempt(resourceId);
-  let row;
+  let row,originalTourRuntime=null;
   try{row=await fetch()}catch{return DENY('context_unavailable')}
   if(!row||row.user_id!==userId)return DENY('context_not_authorized');
   // All requirements derive from actual production schema. No client status.
@@ -57,6 +57,7 @@ class MockServerContextResolver {
    if(!runtime||runtime.attempt_id!==row.id||runtime.user_id!==userId||
        runtime.tour_id!==row.tour_id||!isValidTime(runtime.finalized_at))
      return DENY('tour_not_finished');
+   originalTourRuntime=runtime;
   }
   let subjectKey='mathematics',category=kind==='exam_prep_result'?'exam_prep':kind==='practice_result'?'practice':'tour';
   try {
@@ -84,6 +85,10 @@ class MockServerContextResolver {
   let latest;
   try{latest=await fetch()}catch{return DENY('context_changed')}
   if(!same(row,latest,kind)||await blocked())return DENY('context_changed');
+  try {
+    if(await S.subjectAccessAllowed(userId,subjectKey)!==true)
+      return DENY('context_changed');
+  }catch{return DENY('context_changed')}
   if(kind==='tour_archive') {
     let latestRuntime, latestArchive;
     try {
@@ -93,6 +98,7 @@ class MockServerContextResolver {
     if(!latestRuntime||latestRuntime.user_id!==userId||
        latestRuntime.attempt_id!==row.id||latestRuntime.tour_id!==row.tour_id||
        !isValidTime(latestRuntime.finalized_at)||
+       latestRuntime.finalized_at!==originalTourRuntime.finalized_at||
        latestArchive?.unlocked!==true||latestArchive?.ownerVerified!==true)
        return DENY('context_changed');
   }
