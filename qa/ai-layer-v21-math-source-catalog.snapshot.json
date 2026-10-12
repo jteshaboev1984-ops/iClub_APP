@@ -1,0 +1,1480 @@
+{
+  "kind": "test_only_math_content_inventory",
+  "status": "read_only_metadata_snapshot_not_authoritative",
+  "source": "production Supabase private.exam_prep_ai_tutor_cards, SELECT only",
+  "date": "2026-10-12",
+  "content_version": "tutor_v3_learner_first",
+  "expected_source_pack": "p3_02_full_theory_pack_v2_atomic_2026_10_06",
+  "expected_count": 243,
+  "approved_skill_locale_count": 243,
+  "contains_student_data": false,
+  "contains_answer_text": false,
+  "counts": {
+    "P1-en": 45,
+    "P1-ru": 45,
+    "P1-uz": 45,
+    "P5-en": 36,
+    "P5-ru": 36,
+    "P5-uz": 36
+  },
+  "rows": [
+    {
+      "component": "P1",
+      "skill": "P1-CIR-01",
+      "locale": "en",
+      "source_key": "p1:P1-CIR-01:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-CIR-01",
+      "locale": "ru",
+      "source_key": "p1:P1-CIR-01:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-CIR-01",
+      "locale": "uz",
+      "source_key": "p1:P1-CIR-01:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-CIR-02",
+      "locale": "en",
+      "source_key": "p1:P1-CIR-02:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-CIR-02",
+      "locale": "ru",
+      "source_key": "p1:P1-CIR-02:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-CIR-02",
+      "locale": "uz",
+      "source_key": "p1:P1-CIR-02:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-CIR-03",
+      "locale": "en",
+      "source_key": "p1:P1-CIR-03:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-CIR-03",
+      "locale": "ru",
+      "source_key": "p1:P1-CIR-03:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-CIR-03",
+      "locale": "uz",
+      "source_key": "p1:P1-CIR-03:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-01",
+      "locale": "en",
+      "source_key": "p1:P1-COO-01:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-01",
+      "locale": "ru",
+      "source_key": "p1:P1-COO-01:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-01",
+      "locale": "uz",
+      "source_key": "p1:P1-COO-01:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-02",
+      "locale": "en",
+      "source_key": "p1:P1-COO-02:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-02",
+      "locale": "ru",
+      "source_key": "p1:P1-COO-02:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-02",
+      "locale": "uz",
+      "source_key": "p1:P1-COO-02:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-03",
+      "locale": "en",
+      "source_key": "p1:P1-COO-03:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-03",
+      "locale": "ru",
+      "source_key": "p1:P1-COO-03:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-03",
+      "locale": "uz",
+      "source_key": "p1:P1-COO-03:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-04",
+      "locale": "en",
+      "source_key": "p1:P1-COO-04:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-04",
+      "locale": "ru",
+      "source_key": "p1:P1-COO-04:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-04",
+      "locale": "uz",
+      "source_key": "p1:P1-COO-04:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-05",
+      "locale": "en",
+      "source_key": "p1:P1-COO-05:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-05",
+      "locale": "ru",
+      "source_key": "p1:P1-COO-05:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-05",
+      "locale": "uz",
+      "source_key": "p1:P1-COO-05:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-06",
+      "locale": "en",
+      "source_key": "p1:P1-COO-06:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-06",
+      "locale": "ru",
+      "source_key": "p1:P1-COO-06:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-COO-06",
+      "locale": "uz",
+      "source_key": "p1:P1-COO-06:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-01",
+      "locale": "en",
+      "source_key": "p1:P1-DIF-01:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-01",
+      "locale": "ru",
+      "source_key": "p1:P1-DIF-01:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-01",
+      "locale": "uz",
+      "source_key": "p1:P1-DIF-01:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-02",
+      "locale": "en",
+      "source_key": "p1:P1-DIF-02:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-02",
+      "locale": "ru",
+      "source_key": "p1:P1-DIF-02:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-02",
+      "locale": "uz",
+      "source_key": "p1:P1-DIF-02:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-03",
+      "locale": "en",
+      "source_key": "p1:P1-DIF-03:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-03",
+      "locale": "ru",
+      "source_key": "p1:P1-DIF-03:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-03",
+      "locale": "uz",
+      "source_key": "p1:P1-DIF-03:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-04",
+      "locale": "en",
+      "source_key": "p1:P1-DIF-04:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-04",
+      "locale": "ru",
+      "source_key": "p1:P1-DIF-04:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-04",
+      "locale": "uz",
+      "source_key": "p1:P1-DIF-04:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-05",
+      "locale": "en",
+      "source_key": "p1:P1-DIF-05:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-05",
+      "locale": "ru",
+      "source_key": "p1:P1-DIF-05:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-05",
+      "locale": "uz",
+      "source_key": "p1:P1-DIF-05:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-06",
+      "locale": "en",
+      "source_key": "p1:P1-DIF-06:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-06",
+      "locale": "ru",
+      "source_key": "p1:P1-DIF-06:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-06",
+      "locale": "uz",
+      "source_key": "p1:P1-DIF-06:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-07",
+      "locale": "en",
+      "source_key": "p1:P1-DIF-07:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-07",
+      "locale": "ru",
+      "source_key": "p1:P1-DIF-07:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-DIF-07",
+      "locale": "uz",
+      "source_key": "p1:P1-DIF-07:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-01",
+      "locale": "en",
+      "source_key": "p1:P1-FUN-01:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-01",
+      "locale": "ru",
+      "source_key": "p1:P1-FUN-01:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-01",
+      "locale": "uz",
+      "source_key": "p1:P1-FUN-01:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-02",
+      "locale": "en",
+      "source_key": "p1:P1-FUN-02:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-02",
+      "locale": "ru",
+      "source_key": "p1:P1-FUN-02:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-02",
+      "locale": "uz",
+      "source_key": "p1:P1-FUN-02:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-03",
+      "locale": "en",
+      "source_key": "p1:P1-FUN-03:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-03",
+      "locale": "ru",
+      "source_key": "p1:P1-FUN-03:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-03",
+      "locale": "uz",
+      "source_key": "p1:P1-FUN-03:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-04",
+      "locale": "en",
+      "source_key": "p1:P1-FUN-04:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-04",
+      "locale": "ru",
+      "source_key": "p1:P1-FUN-04:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-04",
+      "locale": "uz",
+      "source_key": "p1:P1-FUN-04:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-05",
+      "locale": "en",
+      "source_key": "p1:P1-FUN-05:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-05",
+      "locale": "ru",
+      "source_key": "p1:P1-FUN-05:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-05",
+      "locale": "uz",
+      "source_key": "p1:P1-FUN-05:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-06",
+      "locale": "en",
+      "source_key": "p1:P1-FUN-06:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-06",
+      "locale": "ru",
+      "source_key": "p1:P1-FUN-06:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-06",
+      "locale": "uz",
+      "source_key": "p1:P1-FUN-06:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-07",
+      "locale": "en",
+      "source_key": "p1:P1-FUN-07:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-07",
+      "locale": "ru",
+      "source_key": "p1:P1-FUN-07:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-07",
+      "locale": "uz",
+      "source_key": "p1:P1-FUN-07:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-08",
+      "locale": "en",
+      "source_key": "p1:P1-FUN-08:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-08",
+      "locale": "ru",
+      "source_key": "p1:P1-FUN-08:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-FUN-08",
+      "locale": "uz",
+      "source_key": "p1:P1-FUN-08:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-01",
+      "locale": "en",
+      "source_key": "p1:P1-INT-01:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-01",
+      "locale": "ru",
+      "source_key": "p1:P1-INT-01:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-01",
+      "locale": "uz",
+      "source_key": "p1:P1-INT-01:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-02",
+      "locale": "en",
+      "source_key": "p1:P1-INT-02:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-02",
+      "locale": "ru",
+      "source_key": "p1:P1-INT-02:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-02",
+      "locale": "uz",
+      "source_key": "p1:P1-INT-02:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-03",
+      "locale": "en",
+      "source_key": "p1:P1-INT-03:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-03",
+      "locale": "ru",
+      "source_key": "p1:P1-INT-03:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-03",
+      "locale": "uz",
+      "source_key": "p1:P1-INT-03:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-04",
+      "locale": "en",
+      "source_key": "p1:P1-INT-04:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-04",
+      "locale": "ru",
+      "source_key": "p1:P1-INT-04:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-04",
+      "locale": "uz",
+      "source_key": "p1:P1-INT-04:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-05",
+      "locale": "en",
+      "source_key": "p1:P1-INT-05:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-05",
+      "locale": "ru",
+      "source_key": "p1:P1-INT-05:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-INT-05",
+      "locale": "uz",
+      "source_key": "p1:P1-INT-05:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-01",
+      "locale": "en",
+      "source_key": "p1:P1-QUA-01:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-01",
+      "locale": "ru",
+      "source_key": "p1:P1-QUA-01:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-01",
+      "locale": "uz",
+      "source_key": "p1:P1-QUA-01:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-02",
+      "locale": "en",
+      "source_key": "p1:P1-QUA-02:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-02",
+      "locale": "ru",
+      "source_key": "p1:P1-QUA-02:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-02",
+      "locale": "uz",
+      "source_key": "p1:P1-QUA-02:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-03",
+      "locale": "en",
+      "source_key": "p1:P1-QUA-03:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-03",
+      "locale": "ru",
+      "source_key": "p1:P1-QUA-03:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-03",
+      "locale": "uz",
+      "source_key": "p1:P1-QUA-03:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-04",
+      "locale": "en",
+      "source_key": "p1:P1-QUA-04:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-04",
+      "locale": "ru",
+      "source_key": "p1:P1-QUA-04:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-04",
+      "locale": "uz",
+      "source_key": "p1:P1-QUA-04:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-05",
+      "locale": "en",
+      "source_key": "p1:P1-QUA-05:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-05",
+      "locale": "ru",
+      "source_key": "p1:P1-QUA-05:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-05",
+      "locale": "uz",
+      "source_key": "p1:P1-QUA-05:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-06",
+      "locale": "en",
+      "source_key": "p1:P1-QUA-06:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-06",
+      "locale": "ru",
+      "source_key": "p1:P1-QUA-06:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-QUA-06",
+      "locale": "uz",
+      "source_key": "p1:P1-QUA-06:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-01",
+      "locale": "en",
+      "source_key": "p1:P1-SER-01:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-01",
+      "locale": "ru",
+      "source_key": "p1:P1-SER-01:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-01",
+      "locale": "uz",
+      "source_key": "p1:P1-SER-01:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-02",
+      "locale": "en",
+      "source_key": "p1:P1-SER-02:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-02",
+      "locale": "ru",
+      "source_key": "p1:P1-SER-02:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-02",
+      "locale": "uz",
+      "source_key": "p1:P1-SER-02:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-03",
+      "locale": "en",
+      "source_key": "p1:P1-SER-03:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-03",
+      "locale": "ru",
+      "source_key": "p1:P1-SER-03:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-03",
+      "locale": "uz",
+      "source_key": "p1:P1-SER-03:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-04",
+      "locale": "en",
+      "source_key": "p1:P1-SER-04:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-04",
+      "locale": "ru",
+      "source_key": "p1:P1-SER-04:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-04",
+      "locale": "uz",
+      "source_key": "p1:P1-SER-04:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-05",
+      "locale": "en",
+      "source_key": "p1:P1-SER-05:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-05",
+      "locale": "ru",
+      "source_key": "p1:P1-SER-05:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-SER-05",
+      "locale": "uz",
+      "source_key": "p1:P1-SER-05:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-01",
+      "locale": "en",
+      "source_key": "p1:P1-TRI-01:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-01",
+      "locale": "ru",
+      "source_key": "p1:P1-TRI-01:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-01",
+      "locale": "uz",
+      "source_key": "p1:P1-TRI-01:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-02",
+      "locale": "en",
+      "source_key": "p1:P1-TRI-02:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-02",
+      "locale": "ru",
+      "source_key": "p1:P1-TRI-02:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-02",
+      "locale": "uz",
+      "source_key": "p1:P1-TRI-02:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-03",
+      "locale": "en",
+      "source_key": "p1:P1-TRI-03:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-03",
+      "locale": "ru",
+      "source_key": "p1:P1-TRI-03:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-03",
+      "locale": "uz",
+      "source_key": "p1:P1-TRI-03:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-04",
+      "locale": "en",
+      "source_key": "p1:P1-TRI-04:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-04",
+      "locale": "ru",
+      "source_key": "p1:P1-TRI-04:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-04",
+      "locale": "uz",
+      "source_key": "p1:P1-TRI-04:theory:uz:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-05",
+      "locale": "en",
+      "source_key": "p1:P1-TRI-05:theory:en:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-05",
+      "locale": "ru",
+      "source_key": "p1:P1-TRI-05:theory:ru:v2"
+    },
+    {
+      "component": "P1",
+      "skill": "P1-TRI-05",
+      "locale": "uz",
+      "source_key": "p1:P1-TRI-05:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-01",
+      "locale": "en",
+      "source_key": "p5:P5-BIN-01:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-01",
+      "locale": "ru",
+      "source_key": "p5:P5-BIN-01:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-01",
+      "locale": "uz",
+      "source_key": "p5:P5-BIN-01:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-02",
+      "locale": "en",
+      "source_key": "p5:P5-BIN-02:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-02",
+      "locale": "ru",
+      "source_key": "p5:P5-BIN-02:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-02",
+      "locale": "uz",
+      "source_key": "p5:P5-BIN-02:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-03",
+      "locale": "en",
+      "source_key": "p5:P5-BIN-03:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-03",
+      "locale": "ru",
+      "source_key": "p5:P5-BIN-03:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-BIN-03",
+      "locale": "uz",
+      "source_key": "p5:P5-BIN-03:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-01",
+      "locale": "en",
+      "source_key": "p5:P5-CNT-01:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-01",
+      "locale": "ru",
+      "source_key": "p5:P5-CNT-01:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-01",
+      "locale": "uz",
+      "source_key": "p5:P5-CNT-01:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-02",
+      "locale": "en",
+      "source_key": "p5:P5-CNT-02:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-02",
+      "locale": "ru",
+      "source_key": "p5:P5-CNT-02:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-02",
+      "locale": "uz",
+      "source_key": "p5:P5-CNT-02:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-03",
+      "locale": "en",
+      "source_key": "p5:P5-CNT-03:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-03",
+      "locale": "ru",
+      "source_key": "p5:P5-CNT-03:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-03",
+      "locale": "uz",
+      "source_key": "p5:P5-CNT-03:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-04",
+      "locale": "en",
+      "source_key": "p5:P5-CNT-04:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-04",
+      "locale": "ru",
+      "source_key": "p5:P5-CNT-04:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-04",
+      "locale": "uz",
+      "source_key": "p5:P5-CNT-04:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-05",
+      "locale": "en",
+      "source_key": "p5:P5-CNT-05:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-05",
+      "locale": "ru",
+      "source_key": "p5:P5-CNT-05:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-CNT-05",
+      "locale": "uz",
+      "source_key": "p5:P5-CNT-05:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-01",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-01:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-01",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-01:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-01",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-01:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-02",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-02:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-02",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-02:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-02",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-02:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-03",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-03:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-03",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-03:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-03",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-03:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-04",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-04:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-04",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-04:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-04",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-04:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-05",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-05:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-05",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-05:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-05",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-05:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-06",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-06:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-06",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-06:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-06",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-06:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-07",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-07:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-07",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-07:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-07",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-07:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-08",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-08:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-08",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-08:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-08",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-08:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-09",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-09:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-09",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-09:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-09",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-09:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-10",
+      "locale": "en",
+      "source_key": "p5:P5-DAT-10:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-10",
+      "locale": "ru",
+      "source_key": "p5:P5-DAT-10:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DAT-10",
+      "locale": "uz",
+      "source_key": "p5:P5-DAT-10:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-01",
+      "locale": "en",
+      "source_key": "p5:P5-DRV-01:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-01",
+      "locale": "ru",
+      "source_key": "p5:P5-DRV-01:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-01",
+      "locale": "uz",
+      "source_key": "p5:P5-DRV-01:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-02",
+      "locale": "en",
+      "source_key": "p5:P5-DRV-02:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-02",
+      "locale": "ru",
+      "source_key": "p5:P5-DRV-02:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-02",
+      "locale": "uz",
+      "source_key": "p5:P5-DRV-02:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-03",
+      "locale": "en",
+      "source_key": "p5:P5-DRV-03:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-03",
+      "locale": "ru",
+      "source_key": "p5:P5-DRV-03:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-DRV-03",
+      "locale": "uz",
+      "source_key": "p5:P5-DRV-03:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-01",
+      "locale": "en",
+      "source_key": "p5:P5-GEO-01:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-01",
+      "locale": "ru",
+      "source_key": "p5:P5-GEO-01:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-01",
+      "locale": "uz",
+      "source_key": "p5:P5-GEO-01:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-02",
+      "locale": "en",
+      "source_key": "p5:P5-GEO-02:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-02",
+      "locale": "ru",
+      "source_key": "p5:P5-GEO-02:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-02",
+      "locale": "uz",
+      "source_key": "p5:P5-GEO-02:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-03",
+      "locale": "en",
+      "source_key": "p5:P5-GEO-03:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-03",
+      "locale": "ru",
+      "source_key": "p5:P5-GEO-03:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-GEO-03",
+      "locale": "uz",
+      "source_key": "p5:P5-GEO-03:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-01",
+      "locale": "en",
+      "source_key": "p5:P5-NOR-01:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-01",
+      "locale": "ru",
+      "source_key": "p5:P5-NOR-01:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-01",
+      "locale": "uz",
+      "source_key": "p5:P5-NOR-01:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-02",
+      "locale": "en",
+      "source_key": "p5:P5-NOR-02:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-02",
+      "locale": "ru",
+      "source_key": "p5:P5-NOR-02:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-02",
+      "locale": "uz",
+      "source_key": "p5:P5-NOR-02:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-03",
+      "locale": "en",
+      "source_key": "p5:P5-NOR-03:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-03",
+      "locale": "ru",
+      "source_key": "p5:P5-NOR-03:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-03",
+      "locale": "uz",
+      "source_key": "p5:P5-NOR-03:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-04",
+      "locale": "en",
+      "source_key": "p5:P5-NOR-04:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-04",
+      "locale": "ru",
+      "source_key": "p5:P5-NOR-04:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-04",
+      "locale": "uz",
+      "source_key": "p5:P5-NOR-04:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-05",
+      "locale": "en",
+      "source_key": "p5:P5-NOR-05:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-05",
+      "locale": "ru",
+      "source_key": "p5:P5-NOR-05:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-05",
+      "locale": "uz",
+      "source_key": "p5:P5-NOR-05:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-06",
+      "locale": "en",
+      "source_key": "p5:P5-NOR-06:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-06",
+      "locale": "ru",
+      "source_key": "p5:P5-NOR-06:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-NOR-06",
+      "locale": "uz",
+      "source_key": "p5:P5-NOR-06:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-01",
+      "locale": "en",
+      "source_key": "p5:P5-PRO-01:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-01",
+      "locale": "ru",
+      "source_key": "p5:P5-PRO-01:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-01",
+      "locale": "uz",
+      "source_key": "p5:P5-PRO-01:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-02",
+      "locale": "en",
+      "source_key": "p5:P5-PRO-02:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-02",
+      "locale": "ru",
+      "source_key": "p5:P5-PRO-02:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-02",
+      "locale": "uz",
+      "source_key": "p5:P5-PRO-02:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-03",
+      "locale": "en",
+      "source_key": "p5:P5-PRO-03:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-03",
+      "locale": "ru",
+      "source_key": "p5:P5-PRO-03:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-03",
+      "locale": "uz",
+      "source_key": "p5:P5-PRO-03:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-04",
+      "locale": "en",
+      "source_key": "p5:P5-PRO-04:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-04",
+      "locale": "ru",
+      "source_key": "p5:P5-PRO-04:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-04",
+      "locale": "uz",
+      "source_key": "p5:P5-PRO-04:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-05",
+      "locale": "en",
+      "source_key": "p5:P5-PRO-05:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-05",
+      "locale": "ru",
+      "source_key": "p5:P5-PRO-05:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-05",
+      "locale": "uz",
+      "source_key": "p5:P5-PRO-05:theory:uz:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-06",
+      "locale": "en",
+      "source_key": "p5:P5-PRO-06:theory:en:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-06",
+      "locale": "ru",
+      "source_key": "p5:P5-PRO-06:theory:ru:v2"
+    },
+    {
+      "component": "P5",
+      "skill": "P5-PRO-06",
+      "locale": "uz",
+      "source_key": "p5:P5-PRO-06:theory:uz:v2"
+    }
+  ]
+}
