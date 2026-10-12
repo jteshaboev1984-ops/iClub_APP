@@ -5,7 +5,9 @@
 // authorize a real student or release any AI feature.
 'use strict';
 const inventory=require('./ai-layer-v21-subject-readiness-inventory.snapshot.json');
-const ACTIVE=new Set(inventory.subjects.filter(s=>s.active).map(s=>s.subject));
+// Historical inventory is NOT a live activation switch: current subjects
+// are authorized only through server state + source/QA gates.
+const KNOWN_SUBJECTS=new Set(inventory.subjects.map(s=>s.subject));
 const VALID_LOCALE=new Set(['ru','uz','en']);
 const FAIL=reason=>({ok:false,reason,charge:0,providerCallRequired:false});
 const integerId=v=>typeof v==='number'&&Number.isSafeInteger(v)&&v>0;
@@ -57,7 +59,7 @@ class CrossSubjectAdmission {
   const c=context.context;
   if(!c||c.sourceReady!==false||c.topic!==null||c.routeAuthority!=='unified_ai')
    return FAIL('context_unverified');
-  if(!ACTIVE.has(c.subject))return FAIL('subject_not_released');
+  if(!KNOWN_SUBJECTS.has(c.subject))return FAIL('subject_not_released');
   if(c.subject==='mathematics')return FAIL('legacy_math_isolated');
   let record,evidence,proof,featureId,cohort,learnerKind;
   const scope=kind==='tour_archive'?'tour_archive':'practice';
@@ -146,4 +148,4 @@ class CrossSubjectAdmission {
    sourceVersion:proof.sourceVersion,sourceHash:proof.sourceHash};
  }
 }
-module.exports={CrossSubjectAdmission,ACTIVE};
+module.exports={CrossSubjectAdmission,KNOWN_SUBJECTS};
