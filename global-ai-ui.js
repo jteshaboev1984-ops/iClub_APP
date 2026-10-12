@@ -37,7 +37,7 @@
       topicSimple: "Объясни проще",
       topicAlternative: "Объясни по-другому",
       topicFocus: "Что важно запомнить?",
-      assessmentStart: "AI Tutor свёрнут на время экзамена. Он снова станет доступен после завершения.",
+      assessmentStart: "AI Tutor недоступен во время экзамена. Он вернётся после завершения.",
       assessmentTap: "AI Tutor недоступен во время экзамена. После завершения ты сможешь разобрать результат и ошибки.",
       unavailable: "iClub AI сейчас недоступен. Попробуй позже.",
       timeout: "Ответ занял слишком много времени. Попробуй ещё раз.",
@@ -70,7 +70,7 @@
       topicSimple: "Soddaroq tushuntir",
       topicAlternative: "Boshqacha tushuntir",
       topicFocus: "Nimani eslab qolish kerak?",
-      assessmentStart: "AI Tutor imtihon vaqtida yig‘ildi. Imtihon tugagach yana mavjud bo‘ladi.",
+      assessmentStart: "AI Tutor imtihon vaqtida mavjud emas. Imtihon tugagach yana ishlaydi.",
       assessmentTap: "AI Tutor imtihon vaqtida mavjud emas. Tugagach natija va xatolarni tahlil qilishing mumkin.",
       unavailable: "iClub AI hozir mavjud emas. Keyinroq qayta urinib ko‘r.",
       timeout: "Javob juda uzoq davom etdi. Qayta urinib ko‘r.",
@@ -103,7 +103,7 @@
       topicSimple: "Explain more simply",
       topicAlternative: "Explain it differently",
       topicFocus: "What should I remember?",
-      assessmentStart: "AI Tutor is collapsed during the exam. It will be available again after you finish.",
+      assessmentStart: "AI Tutor is unavailable during the exam. It will return after you finish.",
       assessmentTap: "AI Tutor is unavailable during the exam. After you finish, you can review your result and errors.",
       unavailable: "iClub AI is unavailable right now. Try again later.",
       timeout: "The answer took too long. Try again.",
@@ -751,8 +751,10 @@
     const m = mark();
     if (m) {
       const c = copy();
-      m.classList.toggle("is-assessment-blocked", blocked);
-      m.setAttribute("aria-label", blocked ? c.assessmentTap : c.open);
+      // Decision 33B: completely hide the mark during protected assessment.
+      // CSS [hidden] override is required because this button normally uses inline-flex.
+      m.hidden = blocked;
+      m.setAttribute("aria-label", c.open);
       m.removeAttribute("aria-disabled");
       if (blocked) m.setAttribute("aria-expanded", "false");
     }
