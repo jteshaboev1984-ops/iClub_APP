@@ -203,19 +203,78 @@ revoke all on function public.reserve_iclub_ai_usage_service_v2(uuid,uuid,text,t
 grant execute on function public.reserve_iclub_ai_usage_service_v2(uuid,uuid,text,text,text)
  to service_role;
 
--- Uses existing committed-weight-aware finalization, exposed under v2 name.
+-- v2 completion validates ownership/fingerprint and reservation lifetime
+-- before delegating the committed/reserved-unit accounting to existing v1.
+-- This is a QA draft only; the v1 deployed function remains untouched.
 create or replace function public.finalize_iclub_ai_usage_service_v2(
- p_request_id uuid,p_outcome text,p_release_reason text default null
+ p_request_id uuid,
+ p_user_id uuid,
+ p_request_fingerprint text,
+ p_outcome text,
+ p_release_reason text default null
 )
-returns jsonb language sql volatile security definer set search_path=''
+returns jsonb
+language plpgsql
+volatile
+security definer
+set search_path=''
 as $$
- select public.finalize_iclub_ai_usage_service_v1(p_request_id,p_outcome,p_release_reason);
+declare
+ v_res private.iclub_ai_usage_reservations%rowtype;
+ v_done jsonb;
+begin
+ if p_request_id is null or p_user_id is null
+    or p_request_fingerprint is null
+    or p_request_fingerprint !~ '^[0-9a-f]{64}$' then
+   return jsonb_build_object('ok',false,'reason','invalid_identity');
+ end if;
+ if p_outcome is null or p_outcome not in ('completed','released') then
+   return jsonb_build_object('ok',false,'reason','invalid_outcome');
+ end if;
+ perform pg_advisory_xact_lock(hashtextextended(p_user_id::text,0));
+ select * into v_res from private.iclub_ai_usage_reservations
+ where request_id=p_request_id for update;
+ if not found then
+   return jsonb_build_object('ok',false,'reason','reservation_missing');
+ end if;
+ if v_res.user_id<>p_user_id
+    or v_res.request_fingerprint is distinct from p_request_fingerprint
+    or not exists (
+      select 1 from private.iclub_ai_usage_periods p
+      where p.id=v_res.period_id and p.user_id=p_user_id
+    ) then
+   return jsonb_build_object('ok',false,'reason','request_identity_mismatch');
+ end if;
+ if v_res.status='completed' then
+   return jsonb_build_object(
+     'ok',p_outcome='completed','duplicate',true,'status','completed'
+   );
+ end if;
+ if v_res.status='released' then
+   return jsonb_build_object(
+     'ok',p_outcome='released','duplicate',true,'status','released'
+   );
+ end if;
+ if v_res.expires_at<=now() then
+   v_done:=public.finalize_iclub_ai_usage_service_v1(
+      p_request_id,'released','reservation_expired'
+   );
+   if v_done->>'ok' is distinct from 'true' then
+     return jsonb_build_object('ok',false,'reason','expiry_release_failed');
+   end if;
+   return jsonb_build_object(
+     'ok',false,'reason','reservation_expired','status','released'
+   );
+ end if;
+ return public.finalize_iclub_ai_usage_service_v1(
+   p_request_id,p_outcome,p_release_reason
+ );
+end;
 $$;
-revoke all on function public.finalize_iclub_ai_usage_service_v2(uuid,text,text)
+revoke all on function public.finalize_iclub_ai_usage_service_v2(uuid,uuid,text,text,text)
  from public,anon,authenticated;
-grant execute on function public.finalize_iclub_ai_usage_service_v2(uuid,text,text)
+grant execute on function public.finalize_iclub_ai_usage_service_v2(uuid,uuid,text,text,text)
  to service_role;
-
 -- OPEN GATES: duplicate request reply replay, local PG transaction tests,
 -- time-of-check protected assessment race, reauthorization before model call,
 -- route/version fingerprint hashing and quota migration MUST pass before use.
