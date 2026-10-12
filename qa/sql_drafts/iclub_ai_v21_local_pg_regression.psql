@@ -158,5 +158,34 @@ BEGIN
             WHERE request_id=rid AND status <> 'released')
     THEN RAISE EXCEPTION 'expired reservation was not released'; END IF;
 END $cancel$;
+-- Test 5: exact 5-hour reset closes exhausted period and opens a fresh one.
+-- All changes are still inside the scratch transaction and rolled back.
+DO $period_rollover$
+DECLARE
+ u uuid:='00000000-0000-4000-8000-000000000003';
+ rid uuid:='30000000-0000-4000-8000-000000000007';
+ a jsonb;
+ closed_count integer;
+ open_count integer;
+BEGIN
+ UPDATE private.iclub_ai_usage_periods
+ SET started_at=now()-interval '5 hours 2 seconds',
+     reset_at=now()-interval '2 seconds'
+ WHERE user_id=u AND status='active' AND committed_units=14;
+ IF NOT FOUND THEN RAISE EXCEPTION 'old Pro period missing'; END IF;
+ a:=public.reserve_iclub_ai_usage_service_v2(rid,u,'pro_qa_v2','prepared',repeat('f',64));
+ IF a->>'allowed' IS DISTINCT FROM 'true' THEN
+   RAISE EXCEPTION 'fresh 5-hour period should allow prepared: %',a;
+ END IF;
+ a:=public.finalize_iclub_ai_usage_service_v2(rid,u,repeat('f',64),'completed');
+ IF a->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'fresh period finish: %',a; END IF;
+ SELECT count(*) INTO closed_count FROM private.iclub_ai_usage_periods
+ WHERE user_id=u AND status='closed' AND committed_units=14;
+ SELECT count(*) INTO open_count FROM private.iclub_ai_usage_periods
+ WHERE user_id=u AND status='active' AND committed_units=1;
+ IF closed_count<>1 OR open_count<>1 THEN
+   RAISE EXCEPTION 'unexpected period rollover closed % fresh %',closed_count,open_count;
+ END IF;
+END $period_rollover$;
 ROLLBACK;
 \echo 'SQL GREEN: route-only 2 left; mixed 1:3; Free blocked; Pro14; failure, identity, timer. Fixtures rolled back.'
