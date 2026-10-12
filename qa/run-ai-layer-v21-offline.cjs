@@ -11,7 +11,9 @@ const cases = [
  "qa/ai-layer-v21-readiness-registry.test.cjs",
  "qa/ai-layer-v21-synthetic-pipeline.test.cjs",
  "qa/ai-layer-v21-interface-guard.test.cjs",
- "qa/ai-layer-v21-sql-draft.test.cjs"
+ "qa/ai-layer-v21-sql-draft.test.cjs",
+ "qa/ai-layer-v21-math-frozen-parity.test.cjs",
+ "qa/ai-layer-v21-math-tutor-bridge.test.cjs"
 ];
 for (const file of cases) {
  if (!existsSync(join(root,file))) {
@@ -28,4 +30,10 @@ const smoke = spawnSync(process.execPath, ["qa/ai-layer-metering-v21.synthetic.j
  cwd:root,stdio:"inherit",env:{PATH:process.env.PATH||"",HOME:process.env.HOME||""}
 });
 if (smoke.error) {console.error(smoke.error.message);process.exit(4);}
-process.exit(smoke.status||0);
+if (smoke.status !== 0) process.exit(smoke.status||1);
+// Preserve existing subject-isolation regression (Economics/Informatics must NOT open P1/P5).
+const isolation=spawnSync(process.execPath, ["scripts/exam-prep-subject-isolation-regression.cjs"],{
+ cwd:root,stdio:"inherit",env:{PATH:process.env.PATH||"",HOME:process.env.HOME||""}
+});
+if (isolation.error){console.error(isolation.error.message);process.exit(5);}
+process.exit(isolation.status||0);
