@@ -8,6 +8,12 @@ cd "$(dirname "$0")/.."
 DB="${ICLUB_PGTEST_DB:-}"
 HOST="${ICLUB_PGTEST_HOST:-127.0.0.1}"
 PORT="${ICLUB_PGTEST_PORT:-5432}"
+SUITE="${ICLUB_PGTEST_SUITE:-meter}"
+case "$SUITE" in
+  meter) TEST_FILE="qa/sql_drafts/iclub_ai_v21_local_pg_regression.psql" ;;
+  math) TEST_FILE="qa/sql_drafts/iclub_ai_math_authority_local_pg.psql" ;;
+  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter or math" >&2; exit 2 ;;
+esac
 
 if [[ ! "$DB" =~ ^iclub_ai_v21_scratch_[a-z0-9_]+$ ]]; then
   echo "STOP: ICLUB_PGTEST_DB must be a NEW disposable database named iclub_ai_v21_scratch_*" >&2
@@ -44,5 +50,5 @@ if [[ "$check" != "SCRATCH_OK" ]]; then
   exit 4
 fi
 echo "Scratch-only checks passed. Running SQL in the local disposable database..."
-psql -X -w -v ON_ERROR_STOP=1 -h "$HOST" -p "$PORT" -d "$DB"   -f qa/sql_drafts/iclub_ai_v21_local_pg_regression.psql
+psql -X -w -v ON_ERROR_STOP=1 -h "$HOST" -p "$PORT" -d "$DB" -f "$TEST_FILE"
 echo "LOCAL SQL TEST COMPLETE. Scratch DB must be destroyed separately after review."
