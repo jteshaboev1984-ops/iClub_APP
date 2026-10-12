@@ -4,15 +4,15 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {resolveMathPrepared}=require('./ai-layer-v21-math-tutor-bridge.cjs');
 const card={
- component_code:'P1',skill_code:'P1-ALG-01',locale:'ru',content_version:'tutor_v3_learner_first',
- source_card_key:'theory-P1-ALG-01-ru',
+ component_code:'P1',skill_code:'P1-CIR-01',locale:'ru',content_version:'tutor_v3_learner_first',
+ source_card_key:'p1:P1-CIR-01:theory:ru:v2',
  main_explanation:'Проверенное основное объяснение.',
  simple_explanation:'Простое объяснение.',
  alternative_explanation:'Альтернативное объяснение.',
  focus_explanation:'Главное, что нужно запомнить.'
 };
 const valid=(change={})=>({
- entrypoint:'unified_ai',subject:'mathematics',componentCode:'P1',skillCode:'P1-ALG-01',locale:'ru',
+ entrypoint:'unified_ai',subject:'mathematics',componentCode:'P1',skillCode:'P1-CIR-01',locale:'ru',
  mode:'main',card,approvedSourceKeys:[card.source_card_key],
  sourceVersion:'tutor_v3_learner_first',expectedSourceVersion:'tutor_v3_learner_first',
  contextVerified:true,topicApproved:true,protectedAssessment:false,...change
@@ -41,7 +41,7 @@ test('Freeform question never gets falsely classified as static card',()=>{
 });
 test('P1 must not be replaced with P5 card or skill',()=>{
  assert.equal(resolveMathPrepared(valid({componentCode:'P5'})).reason,'skill_invalid');
- assert.equal(resolveMathPrepared(valid({skillCode:'P5-PROB-01'})).reason,'skill_invalid');
+ assert.equal(resolveMathPrepared(valid({skillCode:'P5-PRO-01'})).reason,'skill_invalid');
 });
 test('A wrong-subject card is never used in Math',()=>{
  assert.equal(resolveMathPrepared(valid({subject:'economics'})).reason,'subject_mismatch');
