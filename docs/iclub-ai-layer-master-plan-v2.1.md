@@ -110,7 +110,7 @@
 | Этап | Работа | GO/NO-GO |
 |---|---|---|
 | **P0** read-only baseline | HEAD/production/flags, schema, README/docs, impact map, privacy and integrity invariants | Written evidence, no prod writes |
-| **P1** synthetic-only Preview | Отдельная QA-ветка; fixtures и mock gateway; UI screen simulator. Никакой production Supabase; не активировать Vercel Preview, пока проверка переменных/изоляции не подтверждена | 0 real network/API writes; secure Preview |
+| **P1** существующий защищённый Vercel Preview | Использовать готовую ветку `qa/fix-exam-prep-subject-isolation-20261011` как UI QA-среду; добавлять только автономные QA-страницы, mock/fixtures и безопасные read-only обращения. Preview может быть связан с production Supabase; **новые AI-функции не пишут в эту базу**, регистрировать тестовые аккаунты ради AI запрещено | Проверка без AI DB writes, без новых аккаунтов и без переключения production; все UI-обращения проверены |
 | **P2** readiness/router | Registry screen×subject×feature×topic×locale, exact response routes, no-source/blocked policies | All negative routes fail closed |
 | **P3** unified UX | Фирменный знак для выбора; mobile sheet 70–80%, desktop panel, 3 языка, context and security blackout | 320/390/desktop QA; hide AI during exam |
 | **P4** Math parity | Existing Tutor adapter + new UI, 243 cards and split P1/P5, one accounting path | Existing beta untouched; no double-charge |
@@ -153,8 +153,8 @@
 ## 8. Release and protection gates
 
 - **Absolutely no main or production deployment**, migrations, new live accounts, writes to Supabase/localStorage, hidden student quota activation, subject access cutover, or payments until a separate explicitly approved release step.
-- Work only on a dedicated QA branch; a branch push must not count as approval to expose an app Preview using production credentials. Verify Vercel preview isolation/protection before enabling a preview.
-- No real provider requests in initial Preview; synthetic test fixtures only.
+- Рабочая AI-ветка `qa/iclub-ai-layer-v21-20261012` остаётся источником технического Master Plan и тестов. Для визуальной проверки **разрешено переиспользовать существующий защищённый Preview** `qa/fix-exam-prep-subject-isolation-20261011`. Коммит/деплой Preview не разрешает писать в production Supabase, менять права и задания, создавать тестовых учеников или включать платную AI-генерацию. Проверять защиту Vercel и маршруты до запуска каждого теста.
+- No real provider requests in initial Preview; synthetic test fixtures only. **Не считать повторную регистрацию в Preview изоляцией базы** — Auth может создавать реальные записи, поэтому AI QA без новой регистрации.
 - For new code never edit legacy lesson/Practice/Tours question IDs/history in place. Preserve all P1/P5 45+36 learning contracts.
 - Do not delete old Tutor versions; preserve rollback.
 - Final plan weights/allowances/price policy after tests + architect approval. More recent user instructions override conflicting earlier working-doc weights/exhaustion.
@@ -164,4 +164,14 @@
 
 `docs/ai-rollout-working-canon.md`, `docs/exam-prep-ai-curated-tutor-content-plan-v1.md`, `docs/exam-prep-tutor-content-v3-audit-repair.md`, `docs/global-ai-tariffs-v1-implementation-plan.md`, `docs/iclub-global-ai-controlled-canary-readiness-v1.md`, `docs/iclub-global-ai-generation-canary-v1.md`. The October 6 tariffs doc remains a historical **previous decision**, overridden here *only* for Preview weight (5→3) and route-specific shortfall. Project architecture documents 01/03/04/05/06/07/08/09 remain governing academic/safety sources.
 
-**P0 implementation state:** QA branch created; the written baseline and synthetic-only metering test harness are separate files. This plan does not itself enable any AI function.
+**P0 implementation state:** QA branch created; the written baseline, mock UI и синтетический учёт уже реализованы. 2026-10-12 architect approved reuse of the existing protected Vercel Preview, even if its current app is linked to production Supabase, with **zero new AI writes to real DB and no test registrations**. Cloud test DB isn't required for UI QA; later SQL mutation tests may run only in temporary isolated local Postgres. This plan does not enable any AI function.
+
+## 10. Preview infrastructure decision — 2026-10-12
+
+- Владелец разрешил использовать уже действующий Vercel Preview из ветки `qa/fix-exam-prep-subject-isolation-20261011` для UI-разработки AI Layer независимо от того, подключён ли сам Preview к production Supabase. **Создание отдельного облачного проекта Supabase не требуется.**
+- Тот факт, что пользовательский код Preview использует существующий Supabase, **не даёт разрешения на записи AI-функций** в рабочую БД. Для проверки счётчика, списания, генерации, диалогов и feature gates: только in-memory mock, безопасные локальные фикстуры или отдельно запущенная локальная БД, не связанная с production.
+- До выполнения любого нового AI API-вызова подтверждаем, что он не пишет в auth, прогресс, AI usage, payment, рейтинг, сертификаты и историю. Server-side feature gates и database RLS сохраняются.
+- Нельзя делать вывод, что Preview использует другую БД из-за повторной регистрации. Не создавать новых пользователей для QA AI; использовать существующую тестовую сессию для чтения только при явном понимании доступа.
+- Проходить стандартные учебные сценарии допустимо как визуальный аудит, но **не отправлять реальные учебные ответы / оценочные попытки** под настоящей учетной записью при тестировании новых AI-функций. Все AI-тестовые ответы — искусственные.
+- Если у функции появляется потребность проверить настоящую запись в БД, подготовить отдельный изолированный локальный тест, а не экспериментировать с рабочими таблицами.
+- Состояние Preview/production проверить после каждого коммита; `main`/production/Supabase untouched.
