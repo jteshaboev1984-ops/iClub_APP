@@ -217,3 +217,16 @@ test('No student grade, raw question, answer or source key returned to client',a
  assert.equal('sourceKey' in r,false);
  assert.equal('userId' in r,false);
 });
+
+test('A switched topic using the same evidence ID cannot reuse the old source',async()=>{
+ const x=make();
+ const initial=x.services.getTopicEvidence;
+ let calls=0;
+ x.services.getTopicEvidence=async request=>{
+  const original=await initial(request);
+  return ++calls===1?original:{...original,topic:'unexpected_other_topic'};
+ };
+ const result=await x.gate.admit(x.request());
+ assert.equal(result.reason,'context_changed');
+ assert.equal(result.charge,0);
+});
