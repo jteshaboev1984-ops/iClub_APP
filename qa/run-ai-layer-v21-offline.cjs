@@ -10,7 +10,8 @@ const cases = [
  "qa/ai-layer-v21-authority-gate.test.cjs",
  "qa/ai-layer-v21-readiness-registry.test.cjs",
  "qa/ai-layer-v21-synthetic-pipeline.test.cjs",
- "qa/ai-layer-v21-interface-guard.test.cjs"
+ "qa/ai-layer-v21-interface-guard.test.cjs",
+ "qa/ai-layer-v21-sql-draft.test.cjs"
 ];
 for (const file of cases) {
  if (!existsSync(join(root,file))) {
