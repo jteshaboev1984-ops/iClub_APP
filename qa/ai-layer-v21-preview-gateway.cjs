@@ -130,6 +130,17 @@ class PreviewGateway {
     const reservation=this.ledger.reserve({userId:user.userId,plan:user.plan,requestId,requestFingerprint:fingerprint,route,nowMs});
     if (!reservation.ok) return reservation;
     if (reservation.alreadyCompleted) return {ok:true,duplicate:true,route,reply:reservation.reply};
+    // Extra guard is a trusted server callback, never supplied directly by UI.
+    // It is checked AFTER usage admission, immediately before model calls and delivery.
+    const guardAt = (stage) => {
+      if (typeof context.serverRecheck !== 'function') return true; // backward-compatible mock fixture only
+      try { return context.serverRecheck(stage,{userId:user.userId,route,subject:context.subject,topic:context.topic})===true; }
+      catch { return false; }
+    };
+    if (!guardAt('before_provider')) {
+      this.ledger.release(requestId);
+      return fail('context_changed');
+    }
     let reply;
     if (route==='prepared') reply=src.variants[variant];
     else {
@@ -139,6 +150,10 @@ class PreviewGateway {
     }
     if (typeof reply!=='string'||!reply.trim()||reply.length>3000) {
       this.ledger.release(requestId);return fail('output_validation_failed');
+    }
+    if (!guardAt('before_delivery')) {
+      this.ledger.release(requestId);
+      return fail('context_changed');
     }
     const done=this.ledger.finalize(requestId,reply,nowMs);
     return {...done,route,sourceId:src.sourceId};
