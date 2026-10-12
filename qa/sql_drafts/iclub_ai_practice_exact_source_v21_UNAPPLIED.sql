@@ -28,6 +28,7 @@ declare
  v_source_key text;
  v_source_hash text;
  v_source_version text;
+ v_source_candidates integer;
 begin
  if p_user_id is null or p_session_id is null or p_session_id<=0
     or p_question_id is null or p_question_id<=0
@@ -70,6 +71,22 @@ begin
 
  -- No generic topic fallback for a specific question. Most Economics
  -- approved cards have NULL question_id. They do NOT satisfy this proof.
+ -- Multiple current approved versions are ALSO unsafe: fail closed rather than
+ -- silently choose the latest explanation for a real learner.
+ select count(*) into v_source_candidates
+ from private.practice_ai_source_cards c
+ where c.subject_key=v_subject_key
+   and c.question_id=p_question_id
+   and c.locale=p_locale
+   and c.card_type='answer_explanation'
+   and c.approval_status='approved'
+   and c.rights_status='original_iclub'
+   and c.is_runtime_allowed=true
+   and length(c.content_hash)=64;
+ if v_source_candidates<>1 then
+  return jsonb_build_object('allowed',false,'reason','exact_source_not_ready');
+ end if;
+
  select c.source_card_key,c.content_hash,c.source_version
  into v_source_key,v_source_hash,v_source_version
  from private.practice_ai_source_cards c
