@@ -13,7 +13,8 @@ const cases = [
  "qa/ai-layer-v21-interface-guard.test.cjs",
  "qa/ai-layer-v21-sql-draft.test.cjs",
  "qa/ai-layer-v21-math-frozen-parity.test.cjs",
- "qa/ai-layer-v21-math-tutor-bridge.test.cjs"
+ "qa/ai-layer-v21-math-tutor-bridge.test.cjs",
+ "qa/ai-layer-v21-math-source-catalog.test.cjs"
 ];
 for (const file of cases) {
  if (!existsSync(join(root,file))) {
