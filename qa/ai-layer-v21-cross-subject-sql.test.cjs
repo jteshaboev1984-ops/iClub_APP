@@ -82,3 +82,10 @@ test('Subjects without governed source readiness remain inactive for new AI',()=
   assert.ok(r,name);assert.equal(r.lessonAIReady,false,name);
  }
 });
+
+test('Competing approved exact sources are refused instead of silently choosing',()=>{
+ assert.ok(body.includes('select count(*) into v_source_candidates'));
+ assert.ok(body.includes('if v_source_candidates<>1 then'));
+ assert.ok(suite.includes('ambiguous source versions silently resolved'));
+ assert.ok(suite.includes('chem-conflicting-101'));
+});
