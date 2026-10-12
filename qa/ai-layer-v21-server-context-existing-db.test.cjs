@@ -149,3 +149,14 @@ test('Bad/unknown resource IDs and anonymous calls fail before DB fetch',async()
  assert.equal((await x.resolver.resolve(request('tour_archive',{principal:{authenticated:false,userId:U}}))).reason,'auth_required');
  assert.equal((await x.resolver.resolve(request('unsafe_raw_db_write'))).reason,'surface_not_supported');
 });
+
+test('Subject entitlement revoked while resolving is rejected before final context',async()=>{
+ let checks=0;
+ const x=settings({subjectAccessAllowed:async()=>++checks===1});
+ assert.equal((await x.resolver.resolve(request('practice_result'))).reason,'context_changed');
+});
+test('Tour finalized timestamp changed between lookups cannot replay previous archive state',async()=>{
+ let reads=0;
+ const x=settings({getTourRuntime:async()=>++reads===1?runtime():runtime({finalized_at:'2026-10-12T15:00:00Z'})});
+ assert.equal((await x.resolver.resolve(request('tour_archive'))).reason,'context_changed');
+});
