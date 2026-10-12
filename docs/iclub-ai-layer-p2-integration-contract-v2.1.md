@@ -49,3 +49,23 @@ These are offline behavioral tests of the committed QA files in a JS harness. Th
 - Accumulate work for ONE necessary Vercel deployment instead of spending quota on microsteps. Preview deployment and any real beta permissions remain owner-controlled.
 
 STOP: No production/main/Supabase writes, no real AI provider calls, no payments or migrations, no new production user, no release.
+
+
+## Checkpoint — 2026-10-12, next cycle (offline only)
+
+Reviewed latest server guard source in `supabase/migrations/20261006153100_iclub_grandfather_subject_access_v1.sql`: it does check rollout, active protected assessments and subject/scope readiness. That is a real existing safety layer, **not** proof that the client subject/topic/locale is authoritative for all future screens. The new v2 adapter must add owner-bound current context and source-specific readiness, and re-check protected assessment before the provider and delivery.
+
+**TOCTOU / repeat-delivery protection staged in QA:** `qa/ai-layer-v21-preview-gateway.cjs` now checks a trusted server callback immediately after quota reservation and before the model call, before final delivery, AND before replaying a previously completed request. On a failed recheck, an in-flight learner reservation is released. When the provider call has already started, provider monetary exposure must still be accounted for even though no learner units are charged for an undeliverable reply.
+
+The synthetic pipeline obtains the recheck from trusted test services (`qa/ai-layer-v21-synthetic-pipeline.cjs`) and re-verifies contextual ownership, source version, topic, locale, feature readiness, entitlement, learner plan and provider budget where relevant. **This is mock code only: not a trusted production RPC.**
+
+- Preview gateway behavioral cases: **26/26 GREEN**.
+- Authority gate: **17/17 GREEN**.
+- Topic/locale readiness: **12/12 GREEN**.
+- Cross-subject pipeline/races: **17/17 GREEN**.
+- SQL draft source-only checks: **8/8 GREEN**.
+- Total tests actually evaluated using the exact stored GitHub JS content through an isolated V8 test harness: **80/80 GREEN**. The separate UI formal tests and initial smoke suite were prepared and partially independently checked; they are not included in 80.
+- Local PostgreSQL test is still **NOT RUN**. Native `psql`, `postgres`, `initdb` are absent here; installing PostgreSQL failed due to package repository access timeout. Do not mislabel static checks as PostgreSQL validation.
+- Vercel deployments in this work cycle: **0**. Supabase writes, paid model calls, main/production changes: **0**.
+
+**Outstanding release gates:** PostgreSQL validation, opaque request receipt/replay bound to client session, true current-assessment recheck in real Edge, applied migration review, local/native Node tests, visual e2e and explicit beta permission.
