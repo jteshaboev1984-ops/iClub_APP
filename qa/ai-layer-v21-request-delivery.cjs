@@ -5,11 +5,14 @@ const {EphemeralReplyReceipts}=require("./ai-layer-v21-reply-receipts.cjs");
 const fail=reason=>({ok:false,reason});
 const allowedText=x=>typeof x==="string"&&x.length>=6&&x.length<=200;
 class SyntheticRequestDelivery {
-  constructor({execute,authorize,resolveIdentity,receipts=new EphemeralReplyReceipts()}={}) {
+  constructor({execute,authorize,resolveIdentity,receipts=new EphemeralReplyReceipts(),maxCompletedIds=2048}={}) {
     if(typeof execute!=="function"||typeof authorize!=="function"||typeof resolveIdentity!=="function")
       throw Error("missing trusted synthetic dependencies");
+    if(!Number.isSafeInteger(maxCompletedIds)||maxCompletedIds<1||maxCompletedIds>10000)
+      throw Error("invalid completed request capacity");
     this.execute=execute;this.authorize=authorize;this.resolveIdentity=resolveIdentity;
-    this.receipts=receipts;this.completedIds=new Map();this.inFlightIds=new Set();
+    this.receipts=receipts;this.maxCompletedIds=maxCompletedIds;
+    this.completedIds=new Map();this.inFlightIds=new Set();
   }
   async submit(request) {
     const {requestId,sessionId,principal,nowMs}=request||{};
@@ -40,6 +43,10 @@ class SyntheticRequestDelivery {
         ? fail("already_processed_receipt_expired"):receipt);
     }
     if(this.inFlightIds.has(requestId))return fail("request_in_progress");
+    // Never evict completed IDs to make room: eviction could cause a second
+    // provider charge. Backpressure BEFORE model execution when at capacity.
+    if(this.completedIds.size+this.inFlightIds.size>=this.maxCompletedIds)
+      return fail("idempotency_capacity_full");
     this.inFlightIds.add(requestId);
     try {
       // Explicit second authorization AFTER the reservation decision would
