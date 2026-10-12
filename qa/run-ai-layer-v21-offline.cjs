@@ -18,7 +18,8 @@ const cases = [
  "qa/ai-layer-v21-reply-receipts.test.cjs",
  "qa/ai-layer-v21-request-delivery.test.cjs",
  "qa/ai-layer-v21-math-source-rpc-bridge.test.cjs",
- "qa/ai-layer-v21-server-context-existing-db.test.cjs"
+ "qa/ai-layer-v21-server-context-existing-db.test.cjs",
+ "qa/ai-layer-v21-unified-vertical-slice.test.cjs"
 ];
 for (const file of cases) {
  if (!existsSync(join(root,file))) {
