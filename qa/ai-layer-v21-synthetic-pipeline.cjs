@@ -11,7 +11,7 @@ class SyntheticAIPipeline {
   this.registry=registry;
   this.gateway=new PreviewGateway({sources});
  }
- submit({requestId,principal,handle,question='',promptKey='',appLocale='ru',nowMs=0,provider='success',budgetAllowed=true}) {
+ submit({requestId,principal,handle,question='',promptKey='',appLocale='ru',nowMs=0,provider='success'}) {
   const d=approveRequest({principal,handle,question,promptKey,appLocale,now:nowMs},this.services);
   if(!d.allowed)return {ok:false,reason:d.reason};
   const c=d.trusted;
@@ -25,6 +25,8 @@ class SyntheticAIPipeline {
   if(ready.sourceId!==c.sourceId||ready.sourceVersion!==c.sourceVersion)return {ok:false,reason:'governance_version_mismatch'};
   const plan=this.services.getLearnerPlan?.(c.userId);
   if(!['free','plus','pro'].includes(plan))return {ok:false,reason:'plan_not_authorized'};
+  // Runtime provider spend permission is a SERVER decision, never a learner flag.
+  const budgetAllowed=this.services.providerBudgetAllows?.(c.userId,c.subject,c.feature)===true;
   const context={surface:c.surface,subject:c.subject,feature:c.feature,topic:c.topic,capabilityEnabled:true,
     // These capabilities were checked against the trusted context by approveRequest.
     protectedAssessment:false,activeTour:false,practiceCompleted:true,archiveUnlocked:true};
