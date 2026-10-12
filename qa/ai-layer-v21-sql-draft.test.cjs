@@ -74,3 +74,27 @@ test('SQL integration assertions cover cheap remainder and one-charge replay',()
    assert.ok(sql.includes(assertion),assertion);
  }
 });
+
+test('Finalizing v2 request requires the same user and 64-char fingerprint',()=>{
+ const fn=draft.slice(draft.indexOf('create or replace function public.finalize_iclub_ai_usage_service_v2('));
+ assert.match(fn,/p_request_id uuid,\s*p_user_id uuid,\s*p_request_fingerprint text,\s*p_outcome text/);
+ assert.ok(fn.includes('v_res.user_id<>p_user_id'));
+ assert.ok(fn.includes('v_res.request_fingerprint is distinct from p_request_fingerprint'));
+ assert.ok(fn.includes("request_identity_mismatch"));
+});
+test('Expired reservation cannot be committed by late model response',()=>{
+ const fn=draft.slice(draft.indexOf('create or replace function public.finalize_iclub_ai_usage_service_v2('));
+ assert.ok(fn.includes('v_res.expires_at<=now()'));
+ assert.ok(fn.includes("p_request_id,'released','reservation_expired'"));
+ assert.ok(fn.includes("'reason','reservation_expired'"));
+ const sql=fs.readFileSync('qa/sql_drafts/iclub_ai_v21_local_pg_regression.psql','utf8');
+ assert.ok(sql.includes("expires_at=now()-interval '1 minute'"));
+ assert.ok(sql.includes("expired reservation was committed"));
+});
+test('v2 finalize preserves advisory lock, row lock and service-only permission',()=>{
+ const fn=draft.slice(draft.indexOf('create or replace function public.finalize_iclub_ai_usage_service_v2('));
+ assert.ok(fn.includes('pg_advisory_xact_lock(hashtextextended(p_user_id::text,0))'));
+ assert.match(fn,/where request_id=p_request_id for update;/);
+ assert.match(fn,/revoke all on function public\.finalize_iclub_ai_usage_service_v2\(uuid,uuid,text,text,text\)/);
+ assert.match(fn,/grant execute on function public\.finalize_iclub_ai_usage_service_v2\(uuid,uuid,text,text,text\)/);
+});
