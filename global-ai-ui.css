@@ -51,9 +51,9 @@
   display: block;
 }
 
-.iclub-global-ai-mark.is-assessment-blocked {
-  opacity: 0.58;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+/* Decision 33B: active protected assessments have NO visible AI mark. */
+.iclub-global-ai-mark[hidden] {
+  display: none !important;
 }
 
 .iclub-global-ai-panel {
