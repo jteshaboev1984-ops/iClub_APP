@@ -1,0 +1,143 @@
+-- iClub AI v2.1 — local scratch-only Practice exact question source tests.
+-- New disposable DB iclub_ai_v21_scratch_* on localhost ONLY. Fully ROLLBACK.
+-- No real learner data, never production Supabase.
+\set ON_ERROR_STOP on
+BEGIN;
+DO $guard$
+BEGIN
+ IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$' THEN
+  RAISE EXCEPTION 'STOP: Practice QA requires scratch database';
+ END IF;
+ IF inet_server_addr() IS NOT NULL AND
+  inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) THEN
+  RAISE EXCEPTION 'STOP: Practice QA requires localhost';
+ END IF;
+ IF to_regclass('public.practice_sessions_v4') IS NOT NULL
+ OR to_regclass('private.practice_ai_source_cards') IS NOT NULL THEN
+  RAISE EXCEPTION 'STOP: populated database';
+ END IF;
+END $guard$;
+CREATE SCHEMA IF NOT EXISTS private;
+DO $roles$
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN
+  CREATE ROLE service_role NOLOGIN;
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN
+  CREATE ROLE authenticated NOLOGIN;
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
+  CREATE ROLE anon NOLOGIN;
+ END IF;
+END $roles$;
+CREATE TABLE private.iclub_global_ai_runtime_config(
+ id integer primary key,kill_switch boolean not null,gateway_enabled boolean not null);
+CREATE TABLE public.subjects(id bigint primary key,subject_key text not null,is_active boolean not null);
+CREATE TABLE public.practice_sessions_v4(
+ id bigint primary key,user_id uuid not null,subject_id bigint not null,
+ status text not null,finalized_at timestamptz,question_ids bigint[] not null
+);
+CREATE TABLE public.practice_session_answers_v4(
+ session_id bigint not null,question_id bigint not null,
+ primary key(session_id,question_id));
+CREATE TABLE private.practice_ai_source_cards(
+ source_card_key text primary key,subject_key text not null,question_id bigint,
+ topic text,card_type text not null,locale text not null,source_version text not null,
+ content_hash text not null,approval_status text not null,rights_status text not null,
+ is_runtime_allowed boolean not null,approved_at timestamptz
+);
+CREATE TABLE private.iclub_scratch_protection(user_id uuid primary key,active boolean not null);
+CREATE FUNCTION private.iclub_ai_has_active_protected_assessment_v1(u uuid)
+RETURNS boolean LANGUAGE sql STABLE SET search_path=''
+AS $$ SELECT coalesce((SELECT active FROM private.iclub_scratch_protection p
+ WHERE p.user_id=u),false) $$;
+\ir iclub_ai_practice_exact_source_v21_UNAPPLIED.sql
+
+INSERT INTO private.iclub_global_ai_runtime_config VALUES (1,true,false);
+INSERT INTO public.subjects VALUES
+ (4,'chemistry',true),(7,'economics',true),(3,'biology',true);
+INSERT INTO public.practice_sessions_v4 VALUES
+ (10,'10000000-0000-4000-8000-000000000001',4,'finalized',now(),ARRAY[101,102]::bigint[]),
+ (20,'10000000-0000-4000-8000-000000000001',7,'finalized',now(),ARRAY[201,202]::bigint[]),
+ (30,'10000000-0000-4000-8000-000000000001',3,'finalized',now(),ARRAY[301]::bigint[]);
+INSERT INTO public.practice_session_answers_v4 VALUES (10,101),(20,201),(30,301);
+INSERT INTO private.practice_ai_source_cards VALUES
+ ('chem-exact-101','chemistry',101,'kinetics','answer_explanation','ru','chem-source-v2',repeat('a',64),
+  'approved','original_iclub',true,now()),
+ ('eco-exact-201','economics',201,'demand','answer_explanation','ru','eco-source-v4',repeat('b',64),
+  'approved','original_iclub',true,now()),
+ ('eco-generic-202','economics',null,'demand','answer_explanation','ru','eco-topic-v1',repeat('c',64),
+  'approved','original_iclub',true,now()),
+ ('bio-exact-301','biology',301,'cell','answer_explanation','ru','bio-source-v1',repeat('d',64),
+  'approved','original_iclub',true,now());
+
+DO $tests$
+DECLARE
+ learner uuid:='10000000-0000-4000-8000-000000000001';
+ stranger uuid:='20000000-0000-4000-8000-000000000002';
+ result jsonb;
+BEGIN
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,101,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'gateway_disabled' THEN
+  RAISE EXCEPTION 'disabled Global AI leaked: %',result;
+ END IF;
+ UPDATE private.iclub_global_ai_runtime_config SET kill_switch=false,gateway_enabled=true;
+
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,101,'ru');
+ IF result->>'allowed' IS DISTINCT FROM 'true'
+ OR result->>'subject'<>'chemistry' OR result->>'source_card_key'<>'chem-exact-101' THEN
+  RAISE EXCEPTION 'verified Chemistry wrong: %',result; END IF;
+ IF result ? 'body_text' OR result ? 'user_answer' OR result ? 'correct_answer' THEN
+  RAISE EXCEPTION 'student/answer content leaked';END IF;
+
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,20,201,'ru');
+ IF result->>'allowed' IS DISTINCT FROM 'true'
+ OR result->>'subject'<>'economics' THEN
+  RAISE EXCEPTION 'verified Economics wrong: %',result;END IF;
+
+ result:=public.get_iclub_ai_practice_question_source_service_v2(stranger,10,101,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'practice_context_not_authorized' THEN
+  RAISE EXCEPTION 'foreign student leak %',result;END IF;
+
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,102,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'practice_context_not_authorized' THEN
+  RAISE EXCEPTION 'unanswered question admitted %',result;END IF;
+
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,20,202,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'practice_context_not_authorized' THEN
+  RAISE EXCEPTION 'generic/unanswered question admitted %',result;END IF;
+
+ INSERT INTO public.practice_session_answers_v4 VALUES (20,202);
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,20,202,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'exact_source_not_ready' THEN
+  RAISE EXCEPTION 'NULL question_id source used as exact source %',result;END IF;
+
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,30,301,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'practice_context_not_authorized' THEN
+  RAISE EXCEPTION 'unreviewed Biology admitted %',result;END IF;
+
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,101,'uz');
+ IF result->>'reason' IS DISTINCT FROM 'exact_source_not_ready' THEN
+  RAISE EXCEPTION 'wrong-language source fallback %',result;END IF;
+
+ UPDATE public.practice_sessions_v4 SET status='in_progress',finalized_at=null WHERE id=10;
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,101,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'practice_context_not_authorized' THEN
+  RAISE EXCEPTION 'unfinalized attempt leaked %',result;END IF;
+ UPDATE public.practice_sessions_v4 SET status='finalized',finalized_at=now() WHERE id=10;
+
+ UPDATE private.practice_ai_source_cards SET rights_status='restricted' WHERE source_card_key='chem-exact-101';
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,101,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'exact_source_not_ready' THEN
+  RAISE EXCEPTION 'rights-restricted source leaked %',result;END IF;
+ UPDATE private.practice_ai_source_cards SET rights_status='original_iclub' WHERE source_card_key='chem-exact-101';
+
+ INSERT INTO private.iclub_scratch_protection VALUES(learner,true);
+ result:=public.get_iclub_ai_practice_question_source_service_v2(learner,10,101,'ru');
+ IF result->>'reason' IS DISTINCT FROM 'active_assessment' THEN
+  RAISE EXCEPTION 'active protected assessment ignored %',result;END IF;
+
+ RAISE NOTICE 'Practice Chemistry/Economics exact-source scratch scenarios GREEN';
+END $tests$;
+ROLLBACK;
+\echo 'Practice exact-source scratch tests rolled back. NOT a production deployment.'
