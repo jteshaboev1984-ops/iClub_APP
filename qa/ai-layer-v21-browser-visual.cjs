@@ -93,8 +93,11 @@ function chrome(){
  }
  throw Error("No actual Chrome/Chromium binary: cannot claim browser GREEN");
 }
-async function activePort(directory){
- for(let attempt=0;attempt<100;attempt++){
+async function activePort(directory,proc,getStderr){
+ for(let attempt=0;attempt<200;attempt++){
+  if(proc.exitCode!==null||proc.signalCode!==null)
+   throw Error("Chrome exited before CDP: "+proc.exitCode+"/"+proc.signalCode+
+    " stderr="+getStderr());
   const file=join(directory,"DevToolsActivePort");
   if(existsSync(file)){
    const port=Number(readFileSync(file,"utf8").split("\n")[0]);
@@ -102,7 +105,8 @@ async function activePort(directory){
   }
   await delay(100);
  }
- throw Error("Chrome CDP port missing");
+ throw Error("Chrome CDP port missing after 20s, running="+(proc.exitCode===null)+
+  ", stderr="+getStderr());
 }
 async function connect(port){
  const r=await fetch("http://127.0.0.1:"+port+"/json/new?about:blank",{method:"PUT"});
@@ -136,10 +140,14 @@ async function run(){
   "--no-first-run","--disable-background-networking","--disable-extensions",
   "--allow-file-access-from-files","--remote-debugging-port=0",
   "--user-data-dir="+dir,"about:blank"
- ],{stdio:"ignore",env:{...process.env,HOME:dir}});
+ ],{stdio:["ignore","ignore","pipe"],env:{...process.env,HOME:dir}});
+ let stderr="";
+ processChrome.stderr.on("data",chunk=>{
+  stderr=(stderr+String(chunk)).slice(-4800);
+ });
  let cdp=null;
  try{
-  cdp=await connect(await activePort(dir));
+  cdp=await connect(await activePort(dir,processChrome,()=>stderr));
   await cdp.call("Page.enable");
   await cdp.call("Runtime.enable");
   for(const size of viewports){
