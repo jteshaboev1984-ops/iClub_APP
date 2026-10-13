@@ -1,0 +1,11 @@
+/* QA annotations ONLY; original iClub DOM and production CSS stay intact. */
+.iclub-qa-ribbon{position:relative;z-index:41;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:9px;padding:8px 12px;background:#edf3fc;border-bottom:1px solid #d4e0f0;color:#355579;font-size:11px;text-align:center}
+.iclub-qa-ribbon b{color:#2768bf}.iclub-qa-ribbon select,.iclub-qa-ribbon button{font:inherit;border:1px solid #c7d7e8;background:white;color:#305582;border-radius:8px;padding:6px 9px;cursor:pointer}
+.iclub-qa-ribbon button[aria-pressed=true]{background:#dceaff}
+.iclub-qa-note{background:#f3f8ff;border:1px solid #d8e4f4;border-radius:12px;margin:12px 0;padding:12px;font-size:12px;line-height:1.5;color:#506984}
+.iclub-qa-choice{display:block;width:100%;text-align:left;background:white;border:1px solid #d9e3ef;border-radius:11px;padding:13px;margin:8px 0;color:#314962;cursor:pointer}
+.iclub-qa-choice[aria-pressed=true]{background:#eef5ff;border-color:#4981d1}
+.iclub-qa-review{padding:16px;margin:10px 0;border:1px solid #d6e3f0;border-radius:14px;background:white}
+.iclub-qa-review .btn{margin-top:10px}
+.iclub-global-ai-mark[hidden]{display:none!important}
+@media(max-width:410px){.iclub-qa-ribbon{gap:5px;padding:6px;font-size:10px}.iclub-qa-ribbon button{padding:4px 6px}}
