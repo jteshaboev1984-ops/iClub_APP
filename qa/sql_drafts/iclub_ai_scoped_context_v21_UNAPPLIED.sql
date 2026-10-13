@@ -225,7 +225,7 @@ GRANT EXECUTE ON FUNCTION public.get_iclub_ai_v21_scoped_context_service(
 CREATE OR REPLACE FUNCTION public.mint_iclub_ai_v21_lesson_context_service(
  p_user_id uuid,p_lesson_id bigint
 ) RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER
- SET search_path='' AS $
+ SET search_path='' AS $iclub_lesson_mint_v21$
 DECLARE
  v_subject text;
  v_id uuid;
@@ -285,7 +285,7 @@ BEGIN
  RETURN jsonb_build_object('allowed',true,
   'context_handle',v_id,'expires_in_seconds',90);
 END;
-$;
+$iclub_lesson_mint_v21$;
 REVOKE ALL ON FUNCTION public.mint_iclub_ai_v21_lesson_context_service(
  uuid,bigint) FROM public,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.mint_iclub_ai_v21_lesson_context_service(
