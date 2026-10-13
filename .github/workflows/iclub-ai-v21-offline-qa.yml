@@ -1,0 +1,83 @@
+name: iClub AI Layer v2.1 — isolated QA only
+
+# This workflow never builds or deploys to Vercel, never connects to Supabase,
+# never uses production secrets and never runs on main.
+on:
+  push:
+    branches:
+      - qa/iclub-ai-layer-v21-20261012
+    paths:
+      - 'qa/**'
+      - '.github/workflows/iclub-ai-v21-offline-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iclub-ai-v21-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-node-and-scratch-pg:
+    if: github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: synthetic-only
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGUSER: postgres
+      PGPASSWORD: synthetic-only
+      PGCONNECT_TIMEOUT: 5
+    steps:
+      - name: Checkout QA branch (no credentials persisted)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run complete offline QA and frozen Exam Prep regression
+        run: node qa/run-ai-layer-v21-offline.cjs
+      - name: Install ephemeral PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq postgresql-client
+          fi
+      - name: Run four independent scratch PostgreSQL suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          for suite in meter math practice release; do
+            db="iclub_ai_v21_scratch_ci_${suite}"
+            createdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
+            ICLUB_PGTEST_DB="${db}" ICLUB_PGTEST_HOST=127.0.0.1 \
+              ICLUB_PGTEST_PORT=5432 ICLUB_PGTEST_SUITE="${suite}" \
+              bash qa/run-ai-layer-v21-postgres-local.sh
+            dropdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
+          done
+      - name: Verify legacy code and migrations have no QA modifications
+        run: |
+          set -euo pipefail
+          git diff --name-only 9afc7b44aead03b2a30544e6e7d4c4eb8670efbf HEAD -- \
+            exam-prep/ supabase/functions/exam-prep-ai/ supabase/migrations/ \
+            index.html app.js > /tmp/iclub-ai-protected-files.txt
+          if [ -s /tmp/iclub-ai-protected-files.txt ]; then
+            cat /tmp/iclub-ai-protected-files.txt
+            echo "FAIL: original Mathematics Exam Prep surface changed"
+            exit 1
+          fi
