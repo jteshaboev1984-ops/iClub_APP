@@ -118,6 +118,13 @@ export function createSupabaseServices(config:BackendConfig){
     p_user_id:args.userId,p_session_id:args.sessionId,p_question_id:args.questionId
    }),{allowed:false});
   },
+  mintLessonContext:async(args:{userId:string;lessonId:number})=>{
+   if(!UUID.test(args.userId)||!Number.isSafeInteger(args.lessonId)||
+      args.lessonId<=0)return{allowed:false};
+   return safe(()=>rpc("mint_iclub_ai_v21_lesson_context_service",{
+    p_user_id:args.userId,p_lesson_id:args.lessonId
+   }),{allowed:false});
+  },
   revokeScopedContext:async(args:{userId:string;contextHandle:string})=>{
    if(!UUID.test(args.userId)||!UUID.test(args.contextHandle))return{ok:false};
    return safe(()=>rpc("revoke_iclub_ai_v21_scoped_context_service",{
