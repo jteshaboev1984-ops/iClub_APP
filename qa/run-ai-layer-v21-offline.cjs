@@ -29,6 +29,7 @@ const cases = [
  "qa/ai-layer-v21-delivery-claim-sql.test.cjs",
  "qa/ai-layer-v21-edge-request.test.cjs",
  "qa/ai-layer-v21-ui-transport.test.cjs",
+ "qa/ai-layer-v21-real-screen-preflight.test.cjs",
  "qa/ai-layer-v21-scoped-context-sql.test.cjs",
  "qa/ai-layer-v21-source-proof-sql.test.cjs",
  "qa/ai-layer-v21-editorial-ticket-sql.test.cjs",
