@@ -418,3 +418,16 @@ See `docs/iclub-ai-layer-native-qa-checkpoint-2026-10-13.md` for the exact run a
 
 See `docs/iclub-ai-layer-native-qa-checkpoint-2026-10-13.md` for the detailed verification log and limitations.
 
+
+## 25. P7 cross-worker claim and atomic quota/delivery (2026-10-13)
+
+**Large technical completion:** new **QA-only SQL** `qa/sql_drafts/iclub_ai_delivery_claim_v21_UNAPPLIED.sql` adds durable request tombstones containing only user UUID, request UUID, server-session/request SHA-256 fingerprints, route class and status/TTL (**NO prompts, questions, model replies or academic results**). It binds an authorized request to the existing temporary v2 quota reservation, allows exactly one successful claim across PostgreSQL connections, and rejects completed/released/expired reused IDs without invoking the provider. Service role only; never reroutes existing `exam-prep-ai`.
+
+**Safety fix:** delivery completion is now **one PostgreSQL transaction with v2 metering finalization**; injecting a failure after quota finalization automatically rolls back the learner charge and delivery status together. Prepared and generated routes use the existing temporary 1:3 weights; failed/released delivery commits zero units. Claiming cannot precede the matching reserved quota row. Retention/deletion of durable tombstones is deliberately NOT implemented until replay/retention is formally designed and approved.
+
+**Real execution evidence:** [GitHub Actions #38348691615](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38348691615), SUCCESS. **Native Node.js 22: 352/352** tests PASS across 21 suites; 8/8 synthetic smoke passes and legacy subject-isolation regression GREEN. **Real isolated PostgreSQL 16: six scratch suites PASS** (`meter`, `math`, `practice`, `release`, `claim`, `atomic`). Additional two **concurrent database connections** race for one UUID: exactly one claim and one denial, no double provider permission. Forced transaction failure and rollback across the actual v1+v2 usage functions PASS. Disposable databases deleted; NO production Supabase, Vercel or learner data used.
+
+**Not yet a deployed AI:** this is persistent SQL proof and a technical handoff. Need server-owned JWT context, new Edge integration, approved source publication, privacy-reviewed short-lived reply recovery, actual multi-Edge instance testing, output/provider budget quality checks, mobile/browser Preview and separate owner approval for beta and tariff finalization. A lost HTTP response after successful database completion cannot be recovered from this metadata-only ledger; retry correctly fails closed instead of calling the model again. Avoid claiming perfect network delivery. Content/card production remains in the other chat.
+
+See `docs/iclub-ai-layer-p7-distributed-delivery-handoff-v2.1.md`. Current work stays on QA branch; protected Math production files, migrations, existing progress/localStorage are not changed.
+
