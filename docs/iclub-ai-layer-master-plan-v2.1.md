@@ -478,3 +478,16 @@ See `docs/iclub-ai-layer-p7-distributed-delivery-handoff-v2.1.md`. Current work 
 
 **Handoff:** `docs/iclub-ai-layer-p2-scoped-context-practice-lessons-v2.1.md`. Never update academic or real-user progress as part of technical context wiring.
 
+
+## 29. P2/P4 independent published-source proof and scoped delivery (2026-10-13)
+
+**Focused technical completion in QA:** `qa/sql_drafts/iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql` adds a private, versioned **source receiver**, plus service-role-only read RPCs `get_iclub_ai_v21_source_proof_service` and `get_iclub_ai_v21_source_bundle_service`. Their signatures match the existing QA Deno adapter. The source receiver is independent from the topic release registry: BOTH the versioned source AND its exact surface/subject/feature/topic/locale-approved release row (with all eight gates) must pass. Proof recomputes **SHA-256 of the actual source payload** on each request and rechecks rights, QA, conflict and runtime. Source bundle revalidates a server-minted current owner/screen and publication revision, then gives only **one exact approved prepared reply**, or the permitted source-only passage for generated route. Invalid keys, unseen subjects, stale screen, another language, revoked rights and changed digest stay unavailable. **No academic content was authored here; publisher/approval writer is separate and NOT installed.**
+
+**Critical defect found by real PostgreSQL:** `jsonb_typeof(missing_key)` returns SQL NULL, so `<> 'string'` failed open for a nonexistent prepared card. Fixed using `IS DISTINCT FROM 'string'`; regression confirms unknown prepared card now safely returns unavailable/in-development without an approved null reply.
+
+**Independently verified actual QA execution:** [GitHub Actions #38354487650](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38354487650), commit `c0d95159f99e0700798d57c65f7c060ebd0777cd`, SUCCESS. Native Node.js 22 **406/406**, native Deno 2 **40/40**, real isolated PostgreSQL 16 **8/8 scratch suites**, including new source-proof coverage, plus concurrency/atomic rollback and unchanged original Mathematics Exam Prep check. No real Supabase data was queried or modified for these source tests. No provider calls, Vercel builds, production migrations or student access enabled.
+
+**Explicit next implementation gate:** separate authorized editorial publication handoff and reviewer approval protocol; real, RLS-reviewed server services for runtime/rollout/entitlement and monetary budget; genuine Supabase Edge bundling and ONE deliberate protected synthetic Preview. A verified source hash is **not** an academic correctness review, nor beta permission; current AI remains OFF. Content/questions/cards are produced only in the other chat.
+
+Technical handoff: `docs/iclub-ai-layer-p2-p4-verified-source-bridge-v2.1.md`. Protected production academic code, localStorage and existing Exam Prep AI remain untouched.
+
