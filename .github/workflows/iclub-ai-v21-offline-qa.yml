@@ -1,7 +1,7 @@
 name: iClub AI Layer v2.1 — isolated QA only
 # QA P2/P3: final Edge request security/authorization and last-read race verification.
 
-# Deno candidate: strict typecheck with the real Deno runtime plus isolated tests.
+# QA context milestone: 90s opaque screen contexts, owner/subject/attempt protection and Deno endpoints.
 # This workflow never builds or deploys to Vercel, never connects to Supabase,
 # never uses production secrets and never runs on main.
 on:
@@ -59,21 +59,21 @@ jobs:
         with:
           deno-version: v2.x
       - name: Typecheck isolated Deno Edge transport
-        run: deno check qa/edge_v21/http.ts qa/edge_v21/supabase_services.ts qa/edge_v21/runtime.ts qa/edge_v21/index.ts
+        run: deno check qa/edge_v21/http.ts qa/edge_v21/context_core.ts qa/edge_v21/supabase_services.ts qa/edge_v21/runtime.ts qa/edge_v21/index.ts
       - name: Native Deno HTTP, Auth and source-gate regression
-        run: deno test --allow-read=qa --no-check qa/edge_v21/http_test.ts qa/edge_v21/supabase_services_test.ts qa/edge_v21/runtime_test.ts
+        run: deno test --allow-read=qa --no-check qa/edge_v21/http_test.ts qa/edge_v21/supabase_services_test.ts qa/edge_v21/runtime_test.ts qa/edge_v21/context_core_test.ts
       - name: Install ephemeral PostgreSQL client
         run: |
           if ! command -v psql >/dev/null; then
             sudo apt-get update -qq
             sudo apt-get install -y -qq postgresql-client
           fi
-      - name: Run six independent scratch PostgreSQL suites
+      - name: Run seven independent scratch PostgreSQL suites
         shell: bash
         run: |
           set -euo pipefail
           failed=0
-          for suite in meter math practice release claim atomic; do
+          for suite in meter math practice release claim atomic context; do
             db="iclub_ai_v21_scratch_ci_${suite}"
             createdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
             if ICLUB_PGTEST_DB="${db}" ICLUB_PGTEST_HOST=127.0.0.1 \
