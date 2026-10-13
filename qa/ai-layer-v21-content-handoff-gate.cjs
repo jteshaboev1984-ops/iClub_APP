@@ -148,7 +148,8 @@ class ContentHandoffGate {
   // The Edge must still verify specific request/question/evidence and call
   // this again immediately before model use and before returning its answer.
   return {...localized(lang,'available'),sourceId:source.source_id,
-    sourceVersion:source.source_version,revision:source.revision};
+    sourceVersion:source.source_version,sourceHash:source.source_hash,
+    revision:source.revision};
  }
 }
 async function verifiedGeneral(S,ref){
