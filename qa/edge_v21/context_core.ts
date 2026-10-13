@@ -4,11 +4,13 @@ export type ContextServices={
  authenticate(token:string):Promise<{authenticated:boolean;userId:string}|null>;
  mintScopedContext(args:{userId:string;sessionId:number;questionId:number}):
   Promise<Record<string,unknown>>;
+ mintLessonContext(args:{userId:string;lessonId:number}):
+  Promise<Record<string,unknown>>;
  revokeScopedContext(args:{userId:string;contextHandle:string}):
   Promise<Record<string,unknown>>;
 };
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
-const KEYS=new Set(["action","sessionId","questionId","contextHandle"]);
+const KEYS=new Set(["action","sessionId","questionId","lessonId","contextHandle"]);
 const hasOwn=(o:Record<string,unknown>,k:string)=>Object.prototype.hasOwnProperty.call(o,k);
 const isObject=(v:unknown):v is Record<string,unknown>=>v!==null&&
  typeof v==="object"&&!Array.isArray(v);
@@ -28,7 +30,8 @@ export function makeContextCore(services:ContextServices){
     return result(400,{ok:false,reason:"invalid_request"});
    if(input.action==="mint"){
     if(!hasOwn(input,"sessionId")||!hasOwn(input,"questionId")||
-      hasOwn(input,"contextHandle")||!Number.isSafeInteger(input.sessionId)||
+      hasOwn(input,"contextHandle")||hasOwn(input,"lessonId")||
+      !Number.isSafeInteger(input.sessionId)||
       !Number.isSafeInteger(input.questionId)||Number(input.sessionId)<=0||
       Number(input.questionId)<=0)
       return result(400,{ok:false,reason:"invalid_context_selector"});
@@ -43,6 +46,23 @@ export function makeContextCore(services:ContextServices){
        ?data.reason:"context_unavailable"});
     return result(200,{ok:true,contextHandle:data.context_handle,
       expiresInSeconds:Math.min(90,Math.max(1,Number(data.expires_in_seconds)||90))});
+   }
+   if(input.action==="mintLesson"){
+    if(hasOwn(input,"sessionId")||hasOwn(input,"questionId")||
+      hasOwn(input,"contextHandle")||!Number.isSafeInteger(input.lessonId)||
+      Number(input.lessonId)<=0)
+      return result(400,{ok:false,reason:"invalid_context_selector"});
+    let data:Record<string,unknown>;
+    try{
+     data=await services.mintLessonContext({userId:principal.userId,
+      lessonId:Number(input.lessonId)});
+    }catch{return result(503,{ok:false,reason:"unavailable"});}
+    if(data?.allowed!==true||typeof data.context_handle!=="string"||
+      !UUID.test(data.context_handle))
+      return result(200,{ok:false,reason:typeof data?.reason==="string"?
+       data.reason:"context_unavailable"});
+    return result(200,{ok:true,contextHandle:data.context_handle,
+     expiresInSeconds:Math.min(90,Math.max(1,Number(data.expires_in_seconds)||90))});
    }
    if(input.action==="revoke"){
     if(hasOwn(input,"sessionId")||hasOwn(input,"questionId")||
