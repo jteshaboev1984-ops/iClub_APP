@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<title>iClub · AI Preview</title>
+<link rel="stylesheet" href="/preview.css">
+<link rel="stylesheet" href="/global-ai-ui.css">
+</head>
+<body>
+<div class="preview-banner"><span class="preview-dot"></span><span data-i18n="qaBanner">Защищённый просмотр · учебный пример</span></div>
+<header class="topbar">
+ <div class="brand"><span class="brand-mark">i</span><span>Club</span><span class="brand-ai">AI</span></div>
+ <div class="header-right"><span class="mock-tag" data-i18n="mock">Демонстрация</span>
+ <label class="language-switch"><span data-i18n="language">Язык</span><select id="language" aria-label="Язык"><option value="ru">RU</option><option value="uz">UZ</option><option value="en">EN</option></select></label></div>
+</header>
+<main id="app-main">
+ <section class="view is-active" data-view="home" id="view-home">
+  <div class="surface">
+   <div class="home-hero">
+    <div><span class="eyebrow" data-i18n="miniTitle">Твой учебный помощник</span>
+    <h1 data-i18n="heroTitle">Учись с ясным планом.</h1>
+    <p data-i18n="heroDesc">Пройди короткую учебную практику, посмотри результат и проверь, как iClub AI объясняет ошибки только после завершения.</p>
+    <button class="primary" id="home-start" type="button" data-i18n="start">Начать практику</button></div>
+    <div class="hero-aside"><span class="hero-aside-top">iClub</span><div class="hero-bubble">AI</div><span data-i18n="onlyAfter">Объяснение после проверки</span></div>
+   </div>
+   <div class="feature-grid">
+    <article class="feature-card"><span class="feature-number">01</span><h2 data-i18n="stepOne">Практика</h2><p data-i18n="stepOneDesc">Сначала отвечай самостоятельно.</p></article>
+    <article class="feature-card"><span class="feature-number">02</span><h2 data-i18n="stepTwo">Результат</h2><p data-i18n="stepTwoDesc">Посмотри, какие ответы требуют внимания.</p></article>
+    <article class="feature-card"><span class="feature-number">03</span><h2 data-i18n="stepThree">Объяснение</h2><p data-i18n="stepThreeDesc">Выбери ошибку и попроси короткое объяснение.</p></article>
+   </div>
+  </div>
+ </section>
+ <section class="view" data-view="courses" id="view-courses">
+  <div class="surface">
+   <div class="section-heading"><div><span class="eyebrow" data-i18n="demoSubjectLabel">Учебный пример</span><h1 id="subject-hub-title" data-i18n="subject">Экономика</h1></div><span class="course-pill" data-i18n="coursePill">Practice · пример</span></div>
+   <section class="stack-screen is-active" id="courses-subject-hub">
+    <div class="course-card">
+     <div class="course-icon">E</div><div class="course-details"><h2 data-i18n="practiceTitle">Проверка понимания</h2><p data-i18n="practiceIntro">Два коротких задания. Это пример интерфейса, не настоящий экзамен Cambridge.</p>
+     <div class="course-metadata"><span data-i18n="twoQuestions">2 вопроса</span><span data-i18n="noGrade">Без оценки и сохранения</span></div></div>
+     <button type="button" class="primary" id="course-start" data-i18n="begin">Начать</button>
+    </div>
+    <div class="quiet-note" data-i18n="noRealData">Всё происходит только в этой вкладке. Реальные результаты и данные учеников не используются.</div>
+   </section>
+   <section class="stack-screen" id="courses-practice-quiz">
+    <div class="quiz-progress"><span data-i18n="practiceInProgress">Практика</span><span id="quiz-index">1 / 2</span></div>
+    <div class="progress-track"><div id="progress-fill"></div></div>
+    <article class="question-card"><span class="eyebrow" data-i18n="chooseAnswer">Выбери ответ</span><h2 id="question-title"></h2><div id="answer-options" class="answer-options"></div><div class="quiz-controls"><button class="ghost" id="exit-quiz" type="button" data-i18n="endDemo">Завершить пример</button><button class="primary" id="submit-answer" type="button" data-i18n="nextQuestion">Далее</button></div></article>
+    <div class="quiet-note" data-i18n="aiHidden">Во время задания AI скрыт. Разбор станет доступен после завершения.</div>
+   </section>
+   <section class="stack-screen" id="courses-practice-result">
+    <article class="result-card"><span class="eyebrow" data-i18n="completed">Практика завершена</span><h2 data-i18n="results">Твой результат</h2><div class="score-ring"><span id="score-count">0 / 2</span><small data-i18n="answeredCorrectly">верно</small></div>
+    <p data-i18n="resultCopy">Теперь можно разобрать задания. AI не меняет результат, а только помогает понять объяснение.</p>
+    <div class="button-row"><button class="primary" id="open-review" data-i18n="openReview">Разобрать ответы</button><button class="ghost" id="restart-demo" data-i18n="again">Повторить пример</button></div></article>
+   </section>
+   <section class="stack-screen" id="courses-practice-review">
+     <div class="review-heading"><div><span class="eyebrow" data-i18n="reviewLabel">После завершения</span><h2 data-i18n="reviewTitle">Разбор заданий</h2></div><button class="ghost small" id="back-to-results" data-i18n="toResults">К результату</button></div>
+     <div id="review-questions" class="review-questions"></div>
+     <div class="quiet-note" data-i18n="selectTip">Нажми «Объяснить» рядом с заданием. Откроется общая панель iClub AI.</div>
+   </section>
+   <section class="stack-screen" id="courses-video"><article class="course-card"><h2 data-i18n="videoTitle">Видео-уроки</h2><p data-i18n="videoNote">Объяснение конкретного видео пока недоступно: для него нужны подтверждённые материалы.</p></article></section>
+   <div id="courses-tour-quiz"></div>
+   <div id="exam-prep-host-root" hidden aria-hidden="true"></div>
+  </div>
+ </section>
+ <section class="view" data-view="profile" id="view-profile"><div class="surface"><article class="course-card"><div><span class="eyebrow" data-i18n="profileLabel">Профиль</span><h1 data-i18n="profileTitle">Личный прогресс</h1><p data-i18n="profileNote">В этой демонстрации нет настоящего профиля и сохранённых результатов.</p></div></article></div></section>
+</main>
+<nav class="bottom-nav" aria-label="iClub navigation">
+ <button class="nav-item is-selected" type="button" data-view-target="home"><span class="nav-icon">⌂</span><span data-i18n="navHome">Главная</span></button>
+ <button class="nav-item" type="button" data-view-target="courses"><span class="nav-icon">▤</span><span data-i18n="navCourses">Обучение</span></button>
+ <button class="nav-item" type="button" data-view-target="profile"><span class="nav-icon">◯</span><span data-i18n="navProfile">Профиль</span></button>
+</nav>
+<div id="toast" class="demo-toast" role="status" aria-live="polite"></div>
+<script src="/preview-controller.js"></script>
+<script src="/transport.js"></script>
+<script src="/screen-binder.js"></script>
+<script src="/evidence-publisher.js"></script>
+<script src="/preview-glue.js"></script>
+<script src="/global-ai-ui.js"></script>
+</body>
+</html>
