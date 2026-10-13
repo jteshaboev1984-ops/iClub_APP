@@ -44,8 +44,8 @@ test("Legacy iClub index.html and app.js byte-untouched by QA page",()=>{
 });
 
 test("QA Review provides two distinct actions, one automatic, one editable",()=>{
- assert.match(js,/data\.qaAiAction="explain"/);
- assert.match(js,/data\.qaAiAction="chat"/);
+ assert.match(js,/dataset\.qaAiAction="explain"/);
+ assert.match(js,/dataset\.qaAiAction="chat"/);
  assert.match(js,/previewExplain\(/);
  assert.match(js,/previewAskInChat\(/);
  assert.match(js,/let handling=false/);
