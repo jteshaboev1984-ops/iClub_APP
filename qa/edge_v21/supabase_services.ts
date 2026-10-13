@@ -246,6 +246,40 @@ export function createSupabaseServices(config:BackendConfig){
     p_session_fingerprint:args.sessionFingerprint,
     p_request_fingerprint:args.requestFingerprint,p_route_class:args.route
    }),deny()),
+  // §34: UNAPPLIED server-encrypted receipt transport, no key or plaintext.
+  finishDeliveryWithEncryptedReceipt:async(args:{
+   requestId:string;userId:string;sessionFingerprint:string;requestFingerprint:string;
+   route:string;identityDigest:string;ciphertext:string;nonce:string;
+   authTag:string;keyRef:string
+  })=>{
+   const d=await safe(()=>rpc("finish_iclub_ai_delivery_with_receipt_service_v21",{
+    p_request_id:args.requestId,p_user_id:args.userId,
+    p_session_fingerprint:args.sessionFingerprint,
+    p_request_fingerprint:args.requestFingerprint,p_route_class:args.route,
+    p_identity_digest:args.identityDigest,p_ciphertext:args.ciphertext,
+    p_nonce:args.nonce,p_auth_tag:args.authTag,p_key_ref:args.keyRef
+   }),{ok:false});
+   return {ok:d.ok===true};
+  },
+  getEncryptedReply:async(args:{requestId:string;userId:string;
+   sessionFingerprint:string;requestFingerprint:string;route:string;
+   identityDigest:string})=>{
+   const d=await safe(()=>rpc("get_iclub_ai_v21_encrypted_reply_service",{
+    p_request_id:args.requestId,p_user_id:args.userId,
+    p_session_fingerprint:args.sessionFingerprint,
+    p_request_fingerprint:args.requestFingerprint,p_route_class:args.route,
+    p_identity_digest:args.identityDigest
+   }),{available:false});
+   if(d.available!==true||
+    typeof d.ciphertext!=="string"||d.ciphertext.length>11000||
+    !/^[A-Za-z0-9_-]{20,}$/.test(d.ciphertext)||
+    typeof d.nonce!=="string"||!/^[A-Za-z0-9_-]{16}$/.test(d.nonce)||
+    typeof d.auth_tag!=="string"||!/^[A-Za-z0-9_-]{22}$/.test(d.auth_tag)||
+    typeof d.key_ref!=="string"||!/^[A-Za-z0-9_-]{6,80}$/.test(d.key_ref))
+    return null;
+   return{ciphertext:d.ciphertext,nonce:d.nonce,
+    authTag:d.auth_tag,keyRef:d.key_ref};
+  },
   finishDelivery:async(args:{requestId:string;userId:string;sessionFingerprint:string;requestFingerprint:string;route:string;outcome:string})=>
    safe(()=>rpc("finish_iclub_ai_delivery_service_v21",{
     p_request_id:args.requestId,p_user_id:args.userId,

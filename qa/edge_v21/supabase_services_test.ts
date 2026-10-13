@@ -150,3 +150,21 @@ Deno.test("Missing atomic provider money RPCs deny payment even with a valid JWT
  for(const call of [a,b,c])
   eq(new Headers(call?.init.headers).get("authorization"),"Bearer "+config.serviceRoleKey);
 });
+
+
+Deno.test("Missing encrypted receipt RPCs deny settlement and private reply",async()=>{
+ const x=syntheticBackend(),fp="a".repeat(64),digest="b".repeat(64);
+ const args={requestId:"22222222-2222-4222-8222-222222222222",
+  userId:user,sessionFingerprint:fp,requestFingerprint:fp,
+  route:"prepared",identityDigest:digest};
+ const envelope={...args,ciphertext:"abcdefghijklmnopqrstuvwxyzABCDEFG",
+  nonce:"abcdefghijklmnop",authTag:"abcdefghijklmnopqrstuv",keyRef:"synthetic_key_v1"};
+ eq((await x.services.finishDeliveryWithEncryptedReceipt(envelope)).ok,false);
+ eq(await x.services.getEncryptedReply(args),null);
+ const finish=x.calls.find(c=>c.url.includes("finish_iclub_ai_delivery_with_receipt_service_v21"));
+ const read=x.calls.find(c=>c.url.includes("get_iclub_ai_v21_encrypted_reply_service"));
+ eq(finish?.body?.p_identity_digest,digest);
+ eq(read?.body?.p_request_id,args.requestId);
+ for(const call of [finish,read])eq(new Headers(call?.init.headers).get("authorization"),
+  "Bearer "+config.serviceRoleKey);
+});

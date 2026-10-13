@@ -19,3 +19,6 @@ No production, main, real Supabase writes, Vercel preview/deployments, actual AI
 ## Scratch PostgreSQL atomicity candidate
 
 Unlike the process-local mock, `qa/sql_drafts/iclub_ai_v21_encrypted_reply_UNAPPLIED.sql` defines an **unapplied** private ciphertext-only table and an RPC that settles v2 learner quota + durable request tombstone together with the encrypted receipt insertion in one transaction. Injecting a database error during receipt INSERT must roll back all three changes. The read RPC returns ciphertext ONLY to service_role if owner/session/fingerprint/route/digest match, the quota is completed and the receipt is not expired. It does not store AES keys or plaintext. Actual Edge authorisation, decryption, key management, physical retention and release still need separate approval. Native synthetic PostgreSQL test is `qa/sql_drafts/iclub_ai_v21_encrypted_reply_local_pg.psql`.
+
+
+Deno QA adapter adds two service-role-only RPC calls for atomic encrypted reply settlement and ciphertext-only lookup. Missing or malformed replies fail closed. No model is enabled, and the actual Edge runtime does not yet decrypt or deliver recovered content. Fresh token/source/revocation/exam/cohort verification remains mandatory before any future delivery.
