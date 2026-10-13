@@ -33,7 +33,7 @@ test('Explicit rights, integrity, QA and no conflict are independently required'
 test('Prepared reply does not return all other answers or raw source body',()=>{
  a.ok(sql.includes('prepared:=jsonb_build_object(p_prompt_key,selected_text)'));
  a.ok(sql.includes("'source_text',CASE WHEN p_route_class='generated' THEN selected_text ELSE '' END"));
- a.ok(sql.includes("jsonb_typeof(v.prepared_variants->p_prompt_key)<>'string'"));
+ a.ok(sql.includes("jsonb_typeof(v.prepared_variants->p_prompt_key) IS DISTINCT FROM 'string'"));
 });
 test('Server context resolved each source bundle request',()=>{
  a.ok(sql.includes('public.get_iclub_ai_v21_scoped_context_service(p_user_id,p_context_handle)'));
