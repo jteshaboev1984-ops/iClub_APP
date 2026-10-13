@@ -71,3 +71,11 @@ test('Native scratch PG covers missing approvals, replay, foreign locale and rev
  'Quarantined source republished'])assert.ok(pg.includes(caseName),caseName);
  assert.match(pg,/^BEGIN;/m);assert.match(pg,/^ROLLBACK;/m);
 });
+
+test('Real PostgreSQL regression injects failure between source and release then checks atomic rollback',()=>{
+ for(const needle of ['synthetic_editorial_publication_failure',
+ 'Half-published source/release or used ticket after injected failure',
+ 'DROP TRIGGER synthetic_editorial_publish_fail',
+ 'Published source bypassed runtime OFF switch'])
+  assert.ok(pg.includes(needle),needle);
+});
