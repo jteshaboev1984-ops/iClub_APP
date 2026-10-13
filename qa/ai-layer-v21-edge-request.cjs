@@ -93,7 +93,9 @@ class CandidateEdgeRequest {
    });
   }catch{return response(503,fail('source_unavailable'))}
   if(!bundle||bundle.approved!==true||bundle.rightsApproved!==true||
-     bundle.conflict===true||bundle.sourceId!==readiness.sourceId||
+     bundle.integrityVerified!==true||bundle.qaPassed!==true||
+     bundle.runtimeAllowed!==true||bundle.conflict===true||
+     bundle.sourceId!==readiness.sourceId||
      bundle.sourceVersion!==readiness.sourceVersion||
      bundle.sourceHash!==readiness.sourceHash||
      bundle.revision!==readiness.revision||
@@ -141,6 +143,15 @@ class CandidateEdgeRequest {
    }catch{return false;}
   };
   const again=async()=>{
+   // Every await may outlive the original bearer or entitlement. Re-authenticate
+   // rather than treating an old principal or a browser plan as a live grant.
+   const live=await this.services.authenticate(authorization);
+   if(live?.authenticated!==true||live.userId!==principal.userId)return false;
+   const livePolicy=await this.services.getPolicy({userId:principal.userId});
+   if(livePolicy!==policy)return false;
+   if(route==='generated'&&await this.services.providerBudgetAllows({
+     userId:principal.userId,sourceId:readiness.sourceId,route
+   })!==true)return false;
    const current=await this.gate.check({principal,contextHandle,locale});
    return same(readiness,current);
   };
