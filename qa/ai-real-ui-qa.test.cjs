@@ -82,7 +82,7 @@ test("Correct/wrong answer prompts differ and replies depend on chosen option",(
  assert.match(js,/const explanation=\{/);
  assert.match(js,/previewSelectQuestion\(item\.id\)/);
  assert.match(js,/practiceSessionId:101/);
- assert.match(js,/input\.value=""; \/\/ Selected question is named above/);
+ assert.match(shell,/input\.value=""; \/\/ Selected question is named above/);
 });
 test("Mobile controls and expand icon have real accessible styling",()=>{
  const css=fs.readFileSync("qa/ai-real-ui-qa.css","utf8");
