@@ -30,6 +30,9 @@ function core(){
     revision:source.revision,variants:{topic_main:"Synthetic test receipt only"}}),
   providerBudgetAllows:async()=>false,
   generateSynthetic:async()=>{providerCalls++;throw Error("provider_disabled");},
+  reserveProviderSpend:async()=>({allowed:false}),
+  dispatchProviderSpend:async()=>({allowed:false}),
+  finishProviderSpend:async()=>({ok:false}),
   reserveUsage:async()=>{bookings++;return{allowed:true};},
   claimDelivery:async()=>({allowed:true}),
   finishDelivery:async()=>({ok:true})

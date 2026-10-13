@@ -38,7 +38,8 @@ function response(status,body){return{status,body:{...body}};}
 class CandidateEdgeRequest {
  constructor({services,allowedOrigins=[]}={}){
   const must=['authenticate','getPolicy','getSourceBundle','providerBudgetAllows',
-   'generateSynthetic','reserveUsage','claimDelivery','finishDelivery'];
+   'generateSynthetic','reserveUsage','claimDelivery','finishDelivery',
+   'reserveProviderSpend','dispatchProviderSpend','finishProviderSpend'];
   for(const k of must)if(typeof services?.[k]!=='function')
    throw Error('Missing trusted backend '+k);
   this.services=services;
@@ -158,10 +159,49 @@ class CandidateEdgeRequest {
   try{
    if(!await again())return await this.refuseSettled(settle,'context_changed');
    if(route==='generated'){
-    output=await this.services.generateSynthetic({
-     userId:principal.userId,locale,question,sourceText:bundle.sourceText,
-     sourceHash:bundle.sourceHash,sourceId:readiness.sourceId
-    });
+    // Preflight providerBudgetAllows() is NOT a spend permit. In particular
+    // another Edge worker may exhaust the budget before we reach the model.
+    // Bind all three money-RPC steps to the ONE durable learner claim.
+    const money={requestId:body.requestId,userId:principal.userId,
+     sessionFingerprint:sessionFP,requestFingerprint:fp};
+    let held;
+    try{held=await this.services.reserveProviderSpend(money);}
+    catch{held={allowed:false};}
+    if(held?.allowed!==true)
+     return await this.refuseSettled(settle,'provider_budget_unavailable');
+    if(!await again()){
+     // Provider was definitely NOT contacted; only then no_charge is legal.
+     try{await this.services.finishProviderSpend({...money,outcome:'no_charge'});}
+     catch{/* Keep ledger held; never silently dispatch or reuse the ID. */}
+     return await this.refuseSettled(settle,'context_changed');
+    }
+    let dispatched;
+    try{dispatched=await this.services.dispatchProviderSpend(money);}
+    catch{dispatched={allowed:false};}
+    if(dispatched?.allowed!==true){
+     // Dispatch ACK could be lost *after* database commit. Do NOT mark
+     // no_charge, and do NOT send a second paid call. Held exposure remains.
+     return await this.refuseSettled(settle,'provider_dispatch_unavailable');
+    }
+    // A gate can close while the dispatch RPC is in flight. Once dispatched,
+    // the financial hold cannot be refunded without independent reconciliation.
+    let modelFailed=false;
+    try{
+     if(!await again())modelFailed=true;
+     else output=await this.services.generateSynthetic({
+      userId:principal.userId,locale,question,sourceText:bundle.sourceText,
+      sourceHash:bundle.sourceHash,sourceId:readiness.sourceId
+     });
+    }catch{modelFailed=true;}
+    // An external timeout does not prove zero provider cost. Until trusted
+    // provider usage/invoice verification exists, retain the FULL ceiling.
+    let moneyFinished=false;
+    try{
+     const final=await this.services.finishProviderSpend({...money,outcome:'unknown'});
+     moneyFinished=final?.ok===true;
+    }catch{/* Fail CLOSED. */}
+    if(!moneyFinished)return await this.refuseSettled(settle,'provider_accounting_unknown');
+    if(modelFailed)return await this.refuseSettled(settle,'processing_unavailable');
    }
    if(!validateText(output))return await this.refuseSettled(settle,'output_rejected');
    if(!await again())return await this.refuseSettled(settle,'context_changed');

@@ -11,6 +11,8 @@ function fixture({published=true,plan='plus_qa_v2',subject='biology',locale='ru'
  providerBudget:true,providerCalls:0,contentCalls:0,failProvider:false,failOutput:false,
  revokeOnProvider:false,examOnProvider:false,failFinish:false,failClaim:false,
  authRevoked:false,planOnProvider:null,budgetOnProvider:false,
+ money:new Map(),moneyReserveCalls:0,moneyDispatchCalls:0,moneyFinishCalls:0,
+ failMoneyReserve:false,failMoneyDispatch:false,failMoneyFinish:false,
  hash:HASH,revision:1,user:U,now:1000,usage:new Map(),claims:new Map(),units:new Map(),
  ctx:{ownerId:U,routeAuthority:'unified_ai',active:true,protectedAssessment:false,
  expiresAtMs:15000,contextRevision:'rev-0001',surface:'lesson',
@@ -47,6 +49,33 @@ function fixture({published=true,plan='plus_qa_v2',subject='biology',locale='ru'
    if(s.planOnProvider)s.plan=s.planOnProvider;
    if(s.budgetOnProvider)s.providerBudget=false;
    return s.failOutput?'<script>unsafe</script>':'Synthetic generated reply for checking the workflow';
+  },
+  reserveProviderSpend:async a=>{
+   s.moneyReserveCalls++;
+   if(s.failMoneyReserve)return{allowed:false};
+   if(s.money.has(a.requestId))return{allowed:false};
+   const hold={...a,state:'reserved'};
+   s.money.set(a.requestId,hold);
+   return{allowed:true};
+  },
+  dispatchProviderSpend:async a=>{
+   s.moneyDispatchCalls++;
+   const hold=s.money.get(a.requestId);
+   if(!hold||hold.state!=='reserved'||s.failMoneyDispatch)
+    return{allowed:false};
+   hold.state='dispatched';return{allowed:true};
+  },
+  finishProviderSpend:async a=>{
+   s.moneyFinishCalls++;
+   const hold=s.money.get(a.requestId);
+   if(!hold||s.failMoneyFinish)return{ok:false};
+   if(a.outcome==='no_charge'&&hold.state==='reserved'){
+    hold.state='no_charge';return{ok:true};
+   }
+   if(a.outcome==='unknown'&&hold.state==='dispatched'){
+    hold.state='unknown';return{ok:true};
+   }
+   return{ok:false};
   },
   reserveUsage:async({requestId,userId,policy,route,requestFingerprint})=>{
    if(s.usage.has(requestId))return{allowed:false,reason:'request_in_progress'};
@@ -256,4 +285,78 @@ test('JWT revoked while generating cannot deliver the answer',async()=>{
   x.s.authRevoked=true;return out;};
  const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
  assert.equal(r.body.reason,'context_changed');assert.equal(x.s.units.get(U),0);
+});
+
+
+test('Generated model is impossible unless an atomic monetary hold is granted',async()=>{
+ const x=fixture();x.s.failMoneyReserve=true;
+ const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.reason,'provider_budget_unavailable');
+ assert.equal(x.s.providerCalls,0);
+ assert.equal(x.s.moneyDispatchCalls,0);
+ assert.equal(x.s.money.size,0);
+ assert.equal(x.s.units.get(U),0);
+ assert.equal(x.s.usage.get(RID).status,'released');
+});
+test('Lost dispatch ACK never permits model or incorrectly releases possible bill',async()=>{
+ const x=fixture();x.s.failMoneyDispatch=true;
+ const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.reason,'provider_dispatch_unavailable');
+ assert.equal(x.s.providerCalls,0);
+ assert.equal(x.s.money.get(RID).state,'reserved');
+ assert.equal(x.s.moneyFinishCalls,0);
+ assert.equal(x.s.units.get(U),0);
+});
+test('Paid generation is only after one claim, money reserve and one dispatch',async()=>{
+ const x=fixture(),r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.ok,true);
+ assert.equal(x.s.moneyReserveCalls,1);
+ assert.equal(x.s.moneyDispatchCalls,1);
+ assert.equal(x.s.moneyFinishCalls,1);
+ assert.equal(x.s.money.get(RID).state,'unknown');
+ assert.equal(x.s.providerCalls,1);
+ assert.equal(x.s.units.get(U),3);
+});
+test('Unknown provider bill never becomes no_charge during outage',async()=>{
+ const x=fixture();x.s.failProvider=true;
+ const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.reason,'processing_unavailable');
+ assert.equal(x.s.units.get(U),0);
+ assert.equal(x.s.money.get(RID).state,'unknown');
+ assert.equal(x.s.moneyFinishCalls,1);
+});
+test('Provider accounting unavailable blocks response but retains monetary hold',async()=>{
+ const x=fixture();x.s.failMoneyFinish=true;
+ const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.reason,'provider_accounting_unknown');
+ assert.equal(x.s.money.get(RID).state,'dispatched');
+ assert.equal(x.s.providerCalls,1);
+ assert.equal(x.s.units.get(U),0);
+});
+test('Never dispatched if protected exam starts immediately after reserving money',async()=>{
+ const x=fixture(),reserve=x.services.reserveProviderSpend;
+ x.services.reserveProviderSpend=async a=>{
+  const x1=await reserve(a);x.s.exam=true;return x1;
+ };
+ const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.reason,'context_changed');
+ assert.equal(x.s.money.get(RID).state,'no_charge');
+ assert.equal(x.s.moneyDispatchCalls,0);
+ assert.equal(x.s.providerCalls,0);
+ assert.equal(x.s.units.get(U),0);
+});
+test('Prepared replies do not spend money even when money RPCs deny',async()=>{
+ const x=fixture();x.s.failMoneyReserve=true;
+ assert.equal((await x.send()).body.ok,true);
+ assert.equal(x.s.moneyReserveCalls,0);
+ assert.equal(x.s.moneyDispatchCalls,0);
+ assert.equal(x.s.moneyFinishCalls,0);
+});
+test('Duplicate generated request ID never spends budget or calls model twice',async()=>{
+ const x=fixture(),args={promptKey:undefined,question:'Почему это происходит?'};
+ assert.equal((await x.send(args)).body.ok,true);
+ assert.equal((await x.send(args)).body.reason,'request_in_progress');
+ assert.equal(x.s.providerCalls,1);
+ assert.equal(x.s.moneyReserveCalls,1);
+ assert.equal(x.s.moneyDispatchCalls,1);
 });

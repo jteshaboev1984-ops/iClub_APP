@@ -545,3 +545,8 @@ QA-only Part A: Two actual independent PostgreSQL sessions race for two differen
 
 
 §35 approved mobile shell refinement (QA only): mobile collapsed chat now 76vh instead of 68vh, with dynamic full-screen expand/restore, per-language accessibility labels (RU/UZ/EN), safe-area preservation and close-on-navigation collapse reset. Existing unapproved temporary logo is intentionally unchanged. UI static/regression checks are in QA; no browser Preview or production deploy authorized.
+
+
+## 36. P8 fail-closed paid route integration in original QA Edge core (2026-10-13)
+
+**QA-only hardening (no provider enabled):** The original generated-route core previously trusted `providerBudgetAllows()` as though it reserved money; it did not invoke §33 atomic money reserve/dispatch RPCs. Fixed by making all 3 money services mandatory at construction. After durable learner quota+claim it now requires monetary reserve and one-time dispatch before touching the provider; absent, denied or lost confirmation means no model. Rechecks current user/exam/subject/source after reservation and dispatch. If reserved but definitely never dispatched, requests `no_charge` (else conserva­tively retains the hold); if dispatched, always attempts `unknown` full-ceiling reconciliation, whether provider result succeeded or failed. Any uncertain outcome prevents answer and refunds learner quota without silently releasing possible external provider liability. Existing Math provider accounting remains isolated. Tests cover money refusal, lost dispatch ACK, kill/exam between steps, provider error and duplicate requests. The Deno adapter still deliberately refuses real generation. No live budgets or entitlement changes.
