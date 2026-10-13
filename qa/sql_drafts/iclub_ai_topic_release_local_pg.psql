@@ -1,0 +1,115 @@
+-- iClub AI v2.1 — SCRATCH ONLY: publication-gate lifecycle, ZERO lesson content.
+-- New EMPTY localhost database iclub_ai_v21_scratch_*. All changes ROLLBACK.
+\set ON_ERROR_STOP on
+BEGIN;
+DO $guard$
+BEGIN
+ IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
+    OR (inet_server_addr() IS NOT NULL AND
+        inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet)) THEN
+   RAISE EXCEPTION 'STOP: not an empty local AI v2.1 scratch database';
+ END IF;
+ IF to_regclass('private.iclub_ai_topic_release_v21') IS NOT NULL THEN
+   RAISE EXCEPTION 'STOP: release registry already exists';
+ END IF;
+END $guard$;
+CREATE SCHEMA IF NOT EXISTS private;
+DO $roles$
+DECLARE x text;
+BEGIN
+ FOREACH x IN ARRAY ARRAY['anon','authenticated','service_role'] LOOP
+  IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=x) THEN
+   EXECUTE format('CREATE ROLE %I NOLOGIN',x);
+  END IF;
+ END LOOP;
+END $roles$;
+CREATE TABLE private.iclub_global_ai_runtime_config(
+ id smallint primary key,ui_enabled boolean not null,
+ gateway_enabled boolean not null,kill_switch boolean not null
+);
+INSERT INTO private.iclub_global_ai_runtime_config
+ VALUES(1,true,true,false);
+\ir iclub_ai_topic_release_gate_v21_UNAPPLIED.sql
+
+DO $publish$
+DECLARE
+ r jsonb;
+ reviewer uuid:='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+BEGIN
+ -- No row cannot open topic even when general UI is already enabled.
+ r:=public.get_iclub_ai_topic_release_service_v21(
+   'lesson','biology','topic_explanation','cells','ru');
+ IF r->>'reason' IS DISTINCT FROM 'in_development' THEN
+  RAISE EXCEPTION 'Missing source accidentally ready: %',r;
+ END IF;
+ INSERT INTO private.iclub_ai_topic_release_v21(
+   surface_code,subject_key,feature_code,topic_key,locale,
+   source_id,source_version,source_hash
+ )VALUES('lesson','biology','topic_explanation','cells','ru',
+  'synthetic-source-001','v1',repeat('a',64));
+
+ r:=public.get_iclub_ai_topic_release_service_v21(
+   'lesson','biology','topic_explanation','cells','ru');
+ IF r->>'ready' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Draft opened without approval: %',r;
+ END IF;
+
+ -- Simulate a SEPARATE controlled editorial publication, not actual content.
+ UPDATE private.iclub_ai_topic_release_v21 SET
+  content_approved=true,rights_approved=true,source_version_verified=true,
+  correctness_passed=true,negative_tests_passed=true,exam_security_passed=true,
+  locale_verified=true,accessibility_passed=true,
+  approved_at=now(),approved_by=reviewer,
+  publication_state='approved',feature_enabled=true
+ WHERE subject_key='biology' AND locale='ru';
+
+ r:=public.get_iclub_ai_topic_release_service_v21(
+  'lesson','biology','topic_explanation','cells','ru');
+ IF r->>'ready' IS DISTINCT FROM 'true' OR r->>'revision'<>'1'
+    OR r->>'source_hash'<>repeat('a',64) THEN
+   RAISE EXCEPTION 'Approved RU source unavailable: %',r;
+ END IF;
+
+ -- The exact same feature with another locale remains unready.
+ r:=public.get_iclub_ai_topic_release_service_v21(
+  'lesson','biology','topic_explanation','cells','uz');
+ IF r->>'ready' IS DISTINCT FROM 'false' THEN
+   RAISE EXCEPTION 'Unapproved UZ locale silently available: %',r; END IF;
+
+ r:=public.get_iclub_ai_topic_release_service_v21(
+  'lesson','chemistry','topic_explanation','cells','ru');
+ IF r->>'ready' IS DISTINCT FROM 'false' THEN
+   RAISE EXCEPTION 'Wrong subject borrowed Biology source: %',r; END IF;
+
+ r:=public.get_iclub_ai_topic_release_service_v21(
+  'practice','biology','topic_explanation','cells','ru');
+ IF r->>'ready' IS DISTINCT FROM 'false' THEN
+   RAISE EXCEPTION 'Wrong surface borrowed lesson source: %',r; END IF;
+
+ -- Revocation takes effect on next request without deploying new UI JS.
+ UPDATE private.iclub_ai_topic_release_v21 SET
+   publication_state='suspended',feature_enabled=false,
+   publication_revision=publication_revision+1
+ WHERE subject_key='biology' AND locale='ru';
+ r:=public.get_iclub_ai_topic_release_service_v21(
+  'lesson','biology','topic_explanation','cells','ru');
+ IF r->>'ready' IS DISTINCT FROM 'false' THEN
+   RAISE EXCEPTION 'Suspended publication remained ready: %',r; END IF;
+
+ -- Global kill switch independently shuts off a published row.
+ UPDATE private.iclub_ai_topic_release_v21 SET
+  publication_state='approved',feature_enabled=true
+ WHERE subject_key='biology' AND locale='ru';
+ UPDATE private.iclub_global_ai_runtime_config SET kill_switch=true WHERE id=1;
+ r:=public.get_iclub_ai_topic_release_service_v21(
+  'lesson','biology','topic_explanation','cells','ru');
+ IF r->>'reason' IS DISTINCT FROM 'global_ai_disabled' THEN
+   RAISE EXCEPTION 'Global stop bypassed: %',r; END IF;
+ UPDATE private.iclub_global_ai_runtime_config SET kill_switch=false,ui_enabled=false WHERE id=1;
+ r:=public.get_iclub_ai_topic_release_service_v21(
+  'lesson','biology','topic_explanation','cells','ru');
+ IF r->>'reason' IS DISTINCT FROM 'global_ai_disabled' THEN
+   RAISE EXCEPTION 'UI disabled bypassed: %',r; END IF;
+END $publish$;
+ROLLBACK;
+\echo 'Synthetic publication cycle ROLLED BACK; no real content/users affected.'
