@@ -107,6 +107,23 @@ export function createSupabaseServices(config:BackendConfig){
     surface:str(c.surface),subject:str(c.subject),feature:str(c.feature),topic:str(c.topic)
    };
   },
+  // Scoped Practice context: only the server-verified learner ID is passed.
+  // Session/question IDs are selectors, never sufficient proof; the service
+  // validates ownership, finalization, answered question and enrollment.
+  mintScopedContext:async(args:{userId:string;sessionId:number;questionId:number})=>{
+   if(!UUID.test(args.userId)||!Number.isSafeInteger(args.sessionId)||
+      !Number.isSafeInteger(args.questionId)||args.sessionId<=0||
+      args.questionId<=0)return{allowed:false};
+   return safe(()=>rpc("mint_iclub_ai_v21_practice_context_service",{
+    p_user_id:args.userId,p_session_id:args.sessionId,p_question_id:args.questionId
+   }),{allowed:false});
+  },
+  revokeScopedContext:async(args:{userId:string;contextHandle:string})=>{
+   if(!UUID.test(args.userId)||!UUID.test(args.contextHandle))return{ok:false};
+   return safe(()=>rpc("revoke_iclub_ai_v21_scoped_context_service",{
+    p_user_id:args.userId,p_context_handle:args.contextHandle
+   }),{ok:false});
+  },
   // Existing verified public.subjects schema: this is READ-ONLY, never a
   // release grant. The release and source gates are independent and stricter.
   getSubjectActive:async(subject:string)=>{
