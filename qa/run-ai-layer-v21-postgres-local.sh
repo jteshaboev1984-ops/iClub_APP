@@ -20,7 +20,8 @@ case "$SUITE" in
   source) TEST_FILE="qa/sql_drafts/iclub_ai_source_proof_bundle_local_pg.psql" ;;
   publisher) TEST_FILE="qa/sql_drafts/iclub_ai_editorial_ticket_local_pg.psql" ;;
   authority) TEST_FILE="qa/sql_drafts/iclub_ai_v21_live_authority_local_pg.psql" ;;
-  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter, math, practice, release, claim, atomic, context source publisher or authority" >&2; exit 2 ;;
+  spend) TEST_FILE="qa/sql_drafts/iclub_ai_v21_provider_spend_local_pg.psql" ;;
+  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter, math, practice, release, claim, atomic, context source publisher authority or spend" >&2; exit 2 ;;
 esac
 
 if [[ ! "$DB" =~ ^iclub_ai_v21_scratch_[a-z0-9_]+$ ]]; then

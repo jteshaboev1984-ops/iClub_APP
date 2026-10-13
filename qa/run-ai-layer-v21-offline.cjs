@@ -32,7 +32,8 @@ const cases = [
  "qa/ai-layer-v21-source-proof-sql.test.cjs",
  "qa/ai-layer-v21-editorial-ticket-sql.test.cjs",
  "qa/ai-layer-v21-live-authority-sql.test.cjs",
- "qa/ai-layer-v21-editorial-evidence.test.cjs"
+ "qa/ai-layer-v21-editorial-evidence.test.cjs",
+ "qa/ai-layer-v21-provider-spend-sql.test.cjs"
 ];
 for (const file of cases) {
  if (!existsSync(join(root,file))) {
