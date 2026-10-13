@@ -526,3 +526,8 @@ The independent Global AI owner release row has no approval by default, and the 
 
 
 §33 correction (2026-10-13): Native PostgreSQL monetary suite uses the actual existing v1 runtime schema, not a shadow definition. QA Deno maps the three new independent money RPCs and treats missing services as DENY. The prior §31 budget preflight remains DENY and paid generation stays impossible until separately approved.
+
+
+## 34. P8 distributed financial concurrency and safe recovery (2026-10-13)
+
+QA-only Part A: Two actual independent PostgreSQL sessions race for two different request IDs against a single synthetic monetary cap of 80 micro-USD. The advisory lock must permit one reservation and reject the other; the money ledger must contain exactly one held ceiling. Test script `qa/run-ai-layer-v21-budget-race.sh`, in GitHub QA CI, no provider or real database access. Part B short-lived recovery is a separate QA candidate, not a live transcript store.
