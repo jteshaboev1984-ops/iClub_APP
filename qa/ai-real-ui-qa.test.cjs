@@ -50,14 +50,45 @@ test("QA Review provides two distinct actions, one automatic, one editable",()=>
  assert.match(js,/previewAskInChat\(/);
  assert.match(js,/let handling=false/);
  assert.match(js,/explain\.disabled=true;ask\.disabled=true/);
- for(const key of ["askAi:","askDraft:","explainPrompt:"])
+ for(const key of ["askAi:","explainMistake:","explainSolution:",
+  "explainPromptWrong:","explainPromptCorrect:"])
   assert.equal((js.match(new RegExp(key,"g"))||[]).length,3);
 });
 test("QA shell imports exact Exam Prep icon and auto-sends only after verified question",()=>{
  assert.match(shell,/src="assets\/iclub-ai-mark-temp\.jpg\?v=1"/);
  assert.match(shell,/function previewSelectedQuestion/);
- assert.match(shell,/if\(p\.hidden\|\|state\.busy\|\|!previewSelectedQuestion\(questionId\)\)/);
- assert.match(shell,/await sendMessage\(\{promptKey:"topic_main",displayText:prompt,userText:""\}\)/);
+ assert.match(shell,/epoch!==state\.qaQuestionEpoch/);
+ assert.match(shell,/qaQuestionId:Number\(questionId\),qaCacheKey:cacheKey/);
  assert.match(shell,/function previewAskInChat/);
  assert.doesNotMatch(shell,/window\.iClubGlobalAiShell = Object\.freeze\(\{[\s\S]*?previewAskInChat[\s\S]*?signIn/);
+});
+
+test("Question-scoped QA responses are stored ONLY in tab memory; no new DB",()=>{
+ assert.match(shell,/qaExplanationCache: new Map\(\)/);
+ assert.match(shell,/qaQuestionEpoch/);
+ assert.match(shell,/function previewSelectQuestion/);
+ assert.match(shell,/previewResetPractice/);
+ assert.match(shell,/state\.threads\.delete\("economics"\)/);
+ assert.match(shell,/const cacheKey=session\+":"\+Number\(questionId\)/);
+ assert.match(shell,/return \[\]; \/\/ No duplicate/);
+ assert.doesNotMatch(shell,/indexedDB|localStorage|sessionStorage/);
+ assert.doesNotMatch(js,/create table|insert into|UPDATE public\./i);
+});
+test("Correct/wrong answer prompts differ and replies depend on chosen option",()=>{
+ assert.match(js,/explainPromptCorrect/);
+ assert.match(js,/explainPromptWrong/);
+ assert.match(js,/chosen\[i\]===item\.correct/);
+ assert.match(js,/explanation\[language\]\[idx\]\?\.\[answer\]/);
+ assert.match(js,/const explanation=\{/);
+ assert.match(js,/previewSelectQuestion\(item\.id\)/);
+ assert.match(js,/practiceSessionId:101/);
+ assert.match(js,/input\.value=""; \/\/ Selected question is named above/);
+});
+test("Mobile controls and expand icon have real accessible styling",()=>{
+ const css=fs.readFileSync("qa/ai-real-ui-qa.css","utf8");
+ assert.match(css,/\.iclub-global-ai-expand svg/);
+ assert.match(css,/\.iclub-global-ai-panel\[data-expanded="true"\]/);
+ assert.match(css,/@media\(max-width:600px\)/);
+ assert.match(css,/min\(76dvh/);
+ assert.match(css,/\.iclub-qa-ai-message-context/);
 });

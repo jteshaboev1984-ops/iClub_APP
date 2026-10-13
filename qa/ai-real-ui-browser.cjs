@@ -87,39 +87,103 @@ async function exercise(lang){
  await sleep(90);
  check(document.querySelectorAll("#practice-review-list .iclub-qa-review").length===2,
   "native review list missing answered questions");
- const review=document.querySelector("#practice-review-list .iclub-qa-review");
+ const cards=Array.from(document.querySelectorAll("#practice-review-list .iclub-qa-review"));
+ const review=cards[0],mistake=cards[1];
  const explain=review.querySelector('[data-qa-ai-action="explain"]');
  const ask=review.querySelector('[data-qa-ai-action="chat"]');
- check(explain&&ask,"Two distinct contextual AI actions missing");
+ const mistakeExplain=mistake.querySelector('[data-qa-ai-action="explain"]');
+ check(explain&&ask&&mistakeExplain,"Review needs separate Explain and Ask buttons");
  check(review.querySelectorAll('img[src*="iclub-ai-mark-temp.jpg"]').length===2,
   "Working Exam Prep AI icon missing from contextual actions");
+ check(explain.textContent.includes({ru:"решение",uz:"Yechimni",en:"solution"}[lang]),
+  "Correct answer incorrectly described as a mistake");
+ check(mistakeExplain.textContent.includes({ru:"ошибку",uz:"Xatoni",en:"mistake"}[lang]),
+  "Incorrect answer not described as a mistake");
  explain.click();explain.click();
  await sleep(48);
  const panel=document.getElementById("iclub-global-ai-panel");
- check(panel&&!panel.hidden,"explain did not open shared AI panel");
+ check(panel&&!panel.hidden,"auto explain did not open AI panel");
  const input=panel.querySelector("[data-global-ai-input]");
- check(input.value.includes({ru:"Объясни",uz:"tushuntirib",en:"Explain"}[lang]),
-  "question prompt did not first populate visible composer");
- await sleep(460);
+ check(input.value.includes({ru:"Объясни решение",uz:"to‘g‘ri yechimini",en:"Explain the solution"}[lang]),
+  "prepared input does not match correct-answer state");
+ await sleep(470);
  const text=panel.querySelector("[data-global-ai-messages]").textContent;
  const expected={ru:"рост цены",uz:"narx oshishi",en:"price increase"}[lang];
  check(text.toLowerCase().includes(expected.toLowerCase()),
-  "automatic explanation did not arrive: "+text.slice(-180));
- const users=panel.querySelectorAll(".iclub-global-ai-message.is-user");
- check(users.length===1,"double tap dispatched more than one request");
+  "correct-answer explanation missing: "+text.slice(-160));
+ const userBubbles=()=>panel.querySelectorAll(".iclub-global-ai-message.is-user");
+ const assistantBubbles=()=>panel.querySelectorAll(".iclub-global-ai-message.is-assistant:not(.is-typing)");
+ check(userBubbles().length===1,"double-tap dispatched repeated request");
+ check(assistantBubbles().length===1,"automatic answer missing or duplicated");
+ check(panel.querySelectorAll(".iclub-global-ai-quick-btn").length===0,
+  "duplicate quick explanation action still visible");
+ check(panel.querySelector("[data-global-ai-subtitle]").textContent.includes({
+  ru:"Задание 1",uz:"Savol 1",en:"Question 1"}[lang]),
+  "selected question context missing from header");
+ check(panel.querySelectorAll('[data-qa-question-id="202"]').length===2,
+  "question identity must label both message bubbles");
+
+ // Revisiting the same completed question must not append/bill a second reply.
  window.iClubGlobalAiShell.close();
- const previousMessages=panel.querySelectorAll(".iclub-global-ai-message").length;
- ask.click();await sleep(95);
- check(!panel.hidden,"Ask AI button did not open chat");
- check(input.value.includes({ru:"Вопрос по ошибке",uz:"savolim",en:"My question"}[lang]),
-  "Ask AI did not prefill editable error context");
- check(panel.querySelectorAll(".iclub-global-ai-message").length===previousMessages,
-  "Ask AI must not auto-send a request");
- check(panel.querySelector(".iclub-global-ai-mark-logo")==null,
-  "Only the floating mark owns its image; no duplicate in chat panel");
+ explain.click();await sleep(115);
+ check(!panel.hidden,"cached explanation did not reopen");
+ check(userBubbles().length===1&&assistantBubbles().length===1,
+  "cached explanation repeated a request or response");
+ check(input.value==="","cached explanation must not repopulate composer");
+
+ // Select a different answer; its content and label cannot be Q1's answer.
+ window.iClubGlobalAiShell.close();
+ mistakeExplain.click();await sleep(450);
+ check(userBubbles().length===2&&assistantBubbles().length===2,
+  "different question must have one new response");
+ const reply2=Array.from(assistantBubbles()).at(-1).textContent;
+ check(reply2.includes({ru:"Ты выбрал",uz:"Siz",en:"You chose"}[lang]),
+  "wrong-answer reply ignored the selected wrong option");
+ check(reply2.includes({ru:"угадать",uz:"taxmin",en:"guess"}[lang]),
+  "wrong-answer reply was not specific to the student's choice");
+ check(panel.querySelector("[data-global-ai-subtitle]").textContent.includes("2"),
+  "Q2 header did not update");
+ check(panel.querySelectorAll('[data-qa-question-id="203"]').length===2,
+  "Q2 response not labeled independently from Q1");
+ window.iClubGlobalAiShell.close();
+ explain.click();await sleep(100);
+ check(userBubbles().length===2&&assistantBubbles().length===2,
+  "return to Q1 caused duplicate instead of cache hit");
+
+ // Ask AI is a separate blank chat, with an explicit question header only.
+ window.iClubGlobalAiShell.close();
+ const originalCount=panel.querySelectorAll(".iclub-global-ai-message").length;
+ ask.click();await sleep(90);
+ check(!panel.hidden&&input.value==="",
+  "Ask AI must open blank editable composer");
+ check(panel.querySelectorAll(".iclub-global-ai-message").length===originalCount,
+  "Ask AI must not automatically submit");
+ check(panel.querySelector("[data-global-ai-subtitle]").textContent.includes("1"),
+  "Ask AI lost question context");
+ input.value={ru:"Почему?",uz:"Nima uchun?",en:"Why?"}[lang];
+ input.dispatchEvent(new Event("input",{bubbles:true}));
+ const send=panel.querySelector("[data-global-ai-send]");
+ check(!send.disabled,"Manual composer did not activate");
+ send.click();await sleep(360);
+ const last=Array.from(assistantBubbles()).at(-1)?.textContent||"";
+ check(last.includes({ru:"В разработке",uz:"ishlab",en:"In development"}[lang]),
+  "Unreleased free-text route fabricated an answer");
+ check(userBubbles().length===3,"Manual question submitted more than once");
+ check(!panel.querySelector(".iclub-global-ai-mark-logo"),
+  "No extra AI logos inside chat");
+
+ // Expansion must render a styled (not empty square) icon and actually expand.
+ const expand=panel.querySelector("[data-global-ai-expand]");
+ check(expand&&getComputedStyle(expand).display==="inline-flex",
+  "Expand action is an unstyled square");
+ check(getComputedStyle(expand.querySelector("svg")).strokeWidth!=="0px",
+  "Expand SVG lacks line styling");
+ expand.click();await sleep(60);
+ check(panel.getAttribute("data-expanded")==="true",
+  "Expand button did not expand AI panel");
  const icon=document.querySelector("#iclub-global-ai-mark .iclub-global-ai-mark-logo");
  check(icon&&icon.getAttribute("src").includes("iclub-ai-mark-temp.jpg"),
-  "Global AI mark is not the current Exam Prep AI mark");
+  "Global AI icon differs from Exam Prep");
  const width=document.documentElement.scrollWidth;
  check(width<=innerWidth+2,"horizontal scroll "+width+" / "+innerWidth);
  document.querySelector('#tabbar [data-tab="home"]').click();
