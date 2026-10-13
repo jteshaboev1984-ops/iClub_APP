@@ -14,3 +14,8 @@ Test-only crypto keys are freshly generated in memory, never placed in the repos
 
 ## Guardrails
 No production, main, real Supabase writes, Vercel preview/deployments, actual AI model, academic text or existing Mathematics P1/P5 code were changed.
+
+
+## Scratch PostgreSQL atomicity candidate
+
+Unlike the process-local mock, `qa/sql_drafts/iclub_ai_v21_encrypted_reply_UNAPPLIED.sql` defines an **unapplied** private ciphertext-only table and an RPC that settles v2 learner quota + durable request tombstone together with the encrypted receipt insertion in one transaction. Injecting a database error during receipt INSERT must roll back all three changes. The read RPC returns ciphertext ONLY to service_role if owner/session/fingerprint/route/digest match, the quota is completed and the receipt is not expired. It does not store AES keys or plaintext. Actual Edge authorisation, decryption, key management, physical retention and release still need separate approval. Native synthetic PostgreSQL test is `qa/sql_drafts/iclub_ai_v21_encrypted_reply_local_pg.psql`.
