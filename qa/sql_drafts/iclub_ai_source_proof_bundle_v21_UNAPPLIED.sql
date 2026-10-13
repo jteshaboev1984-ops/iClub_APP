@@ -157,7 +157,7 @@ BEGIN
  END IF;
  IF p_route_class='prepared' THEN
   IF p_prompt_key !~ '^[a-z0-9_]{3,60}$'
-   OR jsonb_typeof(v.prepared_variants->p_prompt_key)<>'string' THEN
+   OR jsonb_typeof(v.prepared_variants->p_prompt_key) IS DISTINCT FROM 'string' THEN
    RETURN jsonb_build_object('approved',false,'reason','in_development');
   END IF;
   selected_text:=v.prepared_variants->>p_prompt_key;
