@@ -166,7 +166,7 @@ async function exercise(lang){
  check(!send.disabled,"Manual composer did not activate");
  send.click();await sleep(360);
  const last=Array.from(assistantBubbles()).at(-1)?.textContent||"";
- check(last.includes({ru:"В разработке",uz:"ishlab",en:"In development"}[lang]),
+ check(last.toLocaleLowerCase().includes({ru:"в разработке",uz:"ishlab",en:"in development"}[lang]),
   "Unreleased free-text route fabricated an answer");
  check(userBubbles().length===3,"Manual question submitted more than once");
  check(!panel.querySelector(".iclub-global-ai-mark-logo"),
