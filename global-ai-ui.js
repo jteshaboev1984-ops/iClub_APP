@@ -137,11 +137,13 @@
     serverBlocked: false,
     examPrepBlocked: false,
     tourBlocked: false,
+    practiceQuizBlocked: false,
     lastBlocked: false,
     toastTimer: null,
     bootstrapInFlight: null,
     viewObserver: null,
     tourObserver: null,
+    practiceQuizObserver: null,
     contextObserver: null,
     contextTimer: null,
     resetTimer: null,
@@ -251,7 +253,7 @@
   }
 
   function currentBlocked() {
-    return state.serverBlocked || state.examPrepBlocked || state.tourBlocked;
+    return state.serverBlocked || state.examPrepBlocked || state.tourBlocked || state.practiceQuizBlocked;
   }
 
   function root() {
@@ -809,6 +811,7 @@
     if (state.contextTimer) clearTimeout(state.contextTimer);
     state.contextTimer = setTimeout(() => {
       state.contextTimer = null;
+      reconcilePracticeQuizBlock();
       reconcileContext();
       reconcileShell();
     }, 35);
@@ -858,6 +861,18 @@
     if (blocked && changed) invalidatePendingAnswer();
     state.tourBlocked = blocked;
     reconcileShell({ announceBlock: announce && changed && blocked });
+  }
+
+  // Ordinary Practice is an active assessment until the server finalizes it.
+  // Both the floating button AND all pending AI replies must disappear.
+  function reconcilePracticeQuizBlock() {
+    const practiceQuiz = document.getElementById("courses-practice-quiz");
+    const blocked = activeViewName() === "courses" &&
+      Boolean(practiceQuiz?.classList.contains("is-active"));
+    const changed = blocked !== state.practiceQuizBlocked;
+    if (blocked && changed) invalidatePendingAnswer();
+    state.practiceQuizBlocked = blocked;
+    if (changed) reconcileShell();
   }
 
   function handleExamPrepSession(event) {
@@ -929,6 +944,7 @@
         state.resetAt = state.usageExhausted ? (data.reset_at || null) : null;
         if (state.usageExhausted) scheduleResetRefresh();
         reconcileTourBlock();
+        reconcilePracticeQuizBlock();
         reconcileContext();
         reconcileShell();
         return data;
@@ -956,6 +972,14 @@
       state.tourObserver.observe(tourQuiz, { attributes: true, attributeFilter: ["class"] });
     }
 
+    const practiceQuiz = document.getElementById("courses-practice-quiz");
+    if (practiceQuiz) {
+      state.practiceQuizObserver?.disconnect?.();
+      state.practiceQuizObserver = new MutationObserver(reconcilePracticeQuizBlock);
+      state.practiceQuizObserver.observe(practiceQuiz, {
+        attributes: true, attributeFilter: ["class", "hidden", "aria-hidden"]
+      });
+    }
     state.viewObserver?.disconnect?.();
     state.viewObserver = new MutationObserver(scheduleContextReconcile);
     document.querySelectorAll(".view[data-view]").forEach((view) => {

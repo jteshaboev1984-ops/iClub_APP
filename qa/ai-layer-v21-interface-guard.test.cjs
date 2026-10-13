@@ -145,3 +145,15 @@ test('Context or protected assessment invalidates a pending answer',()=>{
  assert.match(js,/if \(blocked && changed\) invalidatePendingAnswer\(\)/);
  assert.match(js,/state\.contextEpoch === sentContextEpoch/);
 });
+
+test('Ordinary active Practice Quiz fully hides AI and invalidates async results',()=>{
+ const match=js.slice(js.indexOf('  function reconcilePracticeQuizBlock()'),
+  js.indexOf('  function handleExamPrepSession('));
+ assert.match(match,/activeViewName\(\) === "courses"/);
+ assert.match(match,/courses-practice-quiz/);
+ assert.match(match,/classList\.contains\("is-active"\)/);
+ assert.match(match,/invalidatePendingAnswer\(\)/);
+ assert.match(js,/state\.practiceQuizBlocked/);
+ assert.match(js,/state\.practiceQuizObserver\.observe\(practiceQuiz/);
+ assert.match(js,/reconcilePracticeQuizBlock\(\)/);
+});

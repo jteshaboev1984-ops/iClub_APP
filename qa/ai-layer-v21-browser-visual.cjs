@@ -77,6 +77,36 @@ async function browserCheck(){
  window.dispatchEvent(new Event("iclub:exam-prep-session-ended"));
  await sleep(145);
  check(!mark.hidden,"icon did not recover after exam");
+ // An ACTIVE ordinary Practice question (not finalized result/review) must
+ // black out AI, and a late previous-screen answer must be discarded.
+ const quiz=document.getElementById("courses-practice-quiz");
+ const finish=document.getElementById("courses-practice-result");
+ mark.click();
+ check(!panel.hidden,"panel not available before ordinary Practice");
+ let resolveQuizReply;
+ window.__qaReplyHandler=()=>new Promise(resolve=>{resolveQuizReply=resolve;});
+ panel.querySelector(".iclub-global-ai-quick-btn").click();
+ for(let i=0;i<20&&!resolveQuizReply;i++)await sleep(10);
+ check(!!resolveQuizReply,"synthetic pre-quiz AI request not started");
+ quiz.classList.add("is-active");
+ await sleep(110);
+ check(mark.hidden,"AI icon leaked onto active Practice Quiz");
+ check(panel.hidden,"AI panel leaked onto active Practice Quiz");
+ check(getComputedStyle(mark).display==="none","CSS shows icon on Practice Quiz");
+ resolveQuizReply({data:{ok:true,message:"PRIVATE_ACTIVE_QUIZ_OLD_RESPONSE",
+  academic_state_changed:false},error:null});
+ await sleep(210);
+ quiz.classList.remove("is-active");
+ finish.classList.add("is-active");
+ await sleep(105);
+ check(!mark.hidden,"finished Practice result incorrectly blocked AI mark");
+ mark.click();
+ const resultPanel=document.getElementById("iclub-global-ai-panel");
+ check(!resultPanel.hidden,"result screen could not open panel");
+ check(!resultPanel.querySelector("[data-global-ai-messages]").textContent.includes(
+  "PRIVATE_ACTIVE_QUIZ_OLD_RESPONSE"),"stale AI answer visible after Practice");
+ resultPanel.querySelector("[data-global-ai-close]").click();
+ window.__qaReplyHandler=null;
  // Real async-response/account boundary: preserve same-user refresh, never
  // show the prior learner's messages after switching accounts.
  const uid1="11111111-1111-4111-8111-111111111111";
