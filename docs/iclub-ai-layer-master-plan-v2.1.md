@@ -506,3 +506,10 @@ Technical handoff: `docs/iclub-ai-layer-p2-p4-verified-source-bridge-v2.1.md`. P
 
 Full handoff: `docs/iclub-ai-layer-p4-editorial-ticket-publication-v2.1.md`.
 
+
+
+## 31. P8 read-only server runtime/rollout/entitlement bridge (2026-10-13)
+
+**QA-only implementation, NOT deployed:** Added scratch-guarded `qa/sql_drafts/iclub_ai_v21_live_authority_UNAPPLIED.sql` implementing five correctly shaped Deno learner RPC contracts for runtime, protected assessment, rollout, entitlement and provider budget. Actual production v1 guards and metadata were verified READ-ONLY; existing `global_ai` runtime is OFF (UI OFF, Gateway OFF, generation OFF, kill-switch ON, rollout OFF). The v2 subject/topic/locale proof remains separate from broad v1 subject-wide readiness. Reuse the real v1 cohort, enrollment, subject guard, subscription and active-assessment authority; never create substitute learner rights.
+
+The independent Global AI owner release row has no approval by default, and the provider-budget RPC deliberately DENIES until atomic monetary budget accounting has been approved/tested. No new commercial tariff, student rights, real model, old Math Tutor or real database change. New synthetic PostgreSQL + Node/Deno regression is wired into the existing QA-only workflow. See `docs/iclub-ai-layer-p8-runtime-authority-v2.1.md`. Preview and actual integration remain NO-GO.
