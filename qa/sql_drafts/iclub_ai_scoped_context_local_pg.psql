@@ -95,6 +95,10 @@ BEGIN
  OR length(result->>'context_handle')<>36 THEN
   RAISE EXCEPTION 'Finished Biology context not minted: %',result;END IF;
  first_handle:=result->>'context_handle';
+ result:=public.mint_iclub_ai_v21_practice_context_service(learner,900,901);
+ IF result->>'duplicate' IS DISTINCT FROM 'true'
+ OR result->>'context_handle' IS DISTINCT FROM first_handle THEN
+  RAISE EXCEPTION 'Same question was not idempotent: %',result;END IF;
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,first_handle);
  IF result->>'allowed' IS DISTINCT FROM 'true'
  OR result #>> '{context,subject}'<>'biology'
@@ -171,7 +175,17 @@ BEGIN
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Revoked handle remained valid: %',result;END IF;
 
- RAISE NOTICE 'Scoped Practice context mint/resolve/revoke and cross-subject race GREEN';
+ -- Abuse prevention: 30 new context rows in a minute blocks more mints.
+ INSERT INTO private.iclub_ai_v21_scoped_contexts(
+  context_handle,user_id,surface_code,subject_key,feature_code,topic_key,
+  practice_session_id,practice_question_id,context_revision)
+ SELECT gen_random_uuid(),learner,'practice','biology',
+  'answer_explanation','question_901',900,901,1
+ FROM generate_series(1,30);
+ result:=public.mint_iclub_ai_v21_practice_context_service(learner,900,901);
+ IF result->>'reason' IS DISTINCT FROM 'context_rate_limited' THEN
+  RAISE EXCEPTION 'Browser could mass mint 30+ contexts: %',result; END IF;
+ RAISE NOTICE 'Scoped Practice context mint/resolve/revoke, switch, idempotency and rate limits GREEN';
 END $cases$;
 ROLLBACK;
 \echo 'Scoped context fixture fully rolled back. NOT applied to Supabase.'
