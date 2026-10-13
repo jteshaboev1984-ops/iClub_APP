@@ -386,3 +386,19 @@ The consolidated `qa/run-ai-layer-v21-offline.cjs` now lists **18** test suites;
 
 **Production / Vercel / Supabase effect of this milestone:** none; QA branch only.
 
+
+## 23. Native Node + PostgreSQL QA gate (2026-10-13)
+
+**Milestone:** A new, dedicated **QA-branch-only** GitHub Actions workflow `.github/workflows/iclub-ai-v21-offline-qa.yml` runs with read-only repository permissions, no application secrets, no production Supabase connection and no Vercel deployment. The completed [verified run](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38346873724) is **SUCCESS**, Git commit `ec955ee8528bb23acf127f35a5c2be1db23d01d2`.
+
+**Actual native runtime gates, not simulated:**
+- Native Node 22: **338/338 tests PASS**, plus **8/8** synthetic metering smoke checks. Subject isolation across six non-Math subjects, existing Math beta and six late-response races PASS.
+- Actual ephemeral PostgreSQL 16: **4/4** scratch-only suites PASS (`meter`, `math`, `practice`, `release`). Test DBs are uniquely named `iclub_ai_v21_scratch_ci_*`, empty before use and dropped after the test. Cross-subject catalog checks, 1:3 plus cheap remainder, one-request idempotence, expired reservation release, 5h period rollover, session/evidence/approved source, generic-vs-exact Practice, owner/rights, per-topic/per-locale publication and revocation are exercised.
+- No application user data used, no real Supabase DML/DDL, no academic state mutation. CI verified original `exam-prep/`, `supabase/functions/exam-prep-ai/`, `supabase/migrations/`, `index.html`, `app.js` untouched versus production SHA `9afc7b44aead03b2a30544e6e7d4c4eb8670efbf`.
+- The local empty-Postgres checks were upgraded to permit **tagged local Docker bridge IP** while still refusing untagged/private remote hosts and non-scratch DB names. Test-only SQL remains under `qa/sql_drafts/` and is **UNAPPLIED**.
+- P3 global AI QA UI now translates any source-unready denial into a user-friendly **«В разработке» / «Ishlab chiqilmoqda» / “In development”** notice, with no quota exhaustion. Added two interface source tests; this final UI change followed the successful run, so the latest snapshot needs one final native CI verification.
+
+**Do not overstate this gate:** actual deployed authenticated Edge route, automatic editor-to-publisher workflow, cross-Edge-instance request idempotency, provider budget integration and mobile/browser end-to-end Preview remain **NOT DONE**. The working legacy Exam Prep is not migrated. Content/questions/cards are produced elsewhere; this thread delivers only the technical contract. No student rollout/paid plan changes approved.
+
+See `docs/iclub-ai-layer-native-qa-checkpoint-2026-10-13.md` for the exact run and limitations.
+
