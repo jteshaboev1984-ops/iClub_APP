@@ -48,6 +48,7 @@ test('Revoke is confined to currently selected user screen and is irreversible',
 test('All 3 context RPCs are service-role-only',()=>{
  for(const fn of ['mint_iclub_ai_v21_practice_context_service',
  'get_iclub_ai_v21_scoped_context_service',
+ 'mint_iclub_ai_v21_lesson_context_service',
  'revoke_iclub_ai_v21_scoped_context_service']){
   a.ok(sql.includes('REVOKE ALL ON FUNCTION public.'+fn),fn);
   a.ok(sql.includes('GRANT EXECUTE ON FUNCTION public.'+fn),fn);
@@ -65,4 +66,31 @@ test('Local SQL case coverage includes switching, ownership, expiring and exam',
  a.ok(pg.includes(k),k);
  a.match(pg,/^BEGIN;/m);a.match(pg,/^ROLLBACK;/m);
  a.ok(sh.includes('context) TEST_FILE="qa/sql_drafts/iclub_ai_scoped_context_local_pg.psql"'));
+});
+
+test('Lessons use existing relational topic identity, not browser-supplied text',()=>{
+ for(const k of ['FROM public.lessons l','subj.id=l.subject_id',
+  'us.user_id=p_user_id','us.subject_id=subj.id',"topic_key='lesson_'||lesson_id::text",
+  "'lesson_'||p_lesson_id::text","'topic_explanation'"])
+  a.ok(sql.includes(k),k);
+ a.equal(sql.includes('p_topic_name text'),false);
+});
+test('Live Lesson membership and existence are rechecked during async answer',()=>{
+ a.ok(sql.includes("IF v.surface_code='lesson' AND NOT EXISTS("));
+ a.ok(sql.includes('l.id=v.lesson_id'));
+ a.ok(sql.includes('subj.subject_key=v.subject_key'));
+ a.ok(sql.includes('subj.is_active=true'));
+});
+test('Lesson/Practice contexts are isolated by surface, feature and item type',()=>{
+ a.ok(sql.includes("surface_code IN ('practice','lesson')"));
+ a.ok(sql.includes("surface_code='lesson' AND lesson_id IS NOT NULL"));
+ a.ok(sql.includes("practice_session_id IS NULL AND practice_question_id IS NULL"));
+ a.ok(sql.includes("surface_code='practice' AND practice_session_id IS NOT NULL"));
+});
+test('Scratch SQL exercises existing Biology Lesson and navigation back to Practice',()=>{
+ for(const k of ['Owned Biology lesson not minted','Lesson duplicate not idempotent',
+  'Entering Lesson did not revoke previous Practice',
+  'Leaving Lesson did not revoke old context',
+  'Foreign learner minted Biology Lesson','Nonexistent lesson minted'])
+  a.ok(pg.includes(k),k);
 });
