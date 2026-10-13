@@ -54,6 +54,7 @@ DECLARE
  v_subject text;
  v_id uuid;
  v_rev bigint;
+ v_existing_handle uuid;
 BEGIN
  IF p_user_id IS NULL OR p_session_id IS NULL OR p_question_id IS NULL
    OR p_session_id<=0 OR p_question_id<=0 THEN
@@ -93,6 +94,26 @@ BEGIN
  -- For future Biology/Informatics, the exact same technical gate applies.
  -- No app-wide static subject ready list is allowed.
  PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text,303));
+ -- Same active finalized question opened twice is idempotent.
+ SELECT c.context_handle INTO v_existing_handle
+ FROM private.iclub_ai_v21_current_screen nav
+ JOIN private.iclub_ai_v21_scoped_contexts c
+   ON c.context_handle=nav.current_handle
+ WHERE nav.user_id=p_user_id AND c.user_id=p_user_id
+   AND c.context_revision=nav.revision
+   AND c.practice_session_id=p_session_id
+   AND c.practice_question_id=p_question_id
+   AND c.revoked_at IS NULL AND c.expires_at>now();
+ IF FOUND THEN
+  RETURN jsonb_build_object('allowed',true,
+   'context_handle',v_existing_handle,'expires_in_seconds',90,
+   'duplicate',true);
+ END IF;
+ -- A browser cannot generate unlimited context rows by toggling screens.
+ IF (SELECT count(*) FROM private.iclub_ai_v21_scoped_contexts
+     WHERE user_id=p_user_id AND created_at>now()-interval '1 minute')>=30 THEN
+  RETURN jsonb_build_object('allowed',false,'reason','context_rate_limited');
+ END IF;
  v_id:=gen_random_uuid();
  INSERT INTO private.iclub_ai_v21_current_screen(
   user_id,current_handle,revision,updated_at
