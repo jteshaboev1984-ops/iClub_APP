@@ -6,6 +6,7 @@ const sql=fs.readFileSync('qa/sql_drafts/iclub_ai_delivery_claim_v21_UNAPPLIED.s
 const fixture=fs.readFileSync('qa/sql_drafts/iclub_ai_delivery_claim_local_pg.psql','utf8');
 const race=fs.readFileSync('qa/run-ai-layer-v21-claim-race.sh','utf8');
 const runner=fs.readFileSync('qa/run-ai-layer-v21-postgres-local.sh','utf8');
+const atomic=fs.readFileSync('qa/sql_drafts/iclub_ai_delivery_atomic_meter_local_pg.psql','utf8');
 test('Draft has a scratch DB and local Docker safety guard',()=>{
  assert.match(sql,/current_database\(\) !~ '\^iclub_ai_v21_scratch_/);
  assert.match(sql,/inet_server_addr\(\)/);
@@ -36,8 +37,10 @@ test('Same request cannot launch another model across retries or restarts',()=>{
  assert.ok(sql.includes("'request_already_released'"));
  assert.match(sql,/Never reclaim an expired request ID/);
 });
-test('Completion requires quota finalized in same request identity',()=>{
- assert.match(sql,/v_quota_status IS DISTINCT FROM p_outcome/);
+test('Completion atomically finalizes reserved quota in same transaction',()=>{
+ assert.match(sql,/v_quota_status IS DISTINCT FROM 'reserved'/);
+ assert.match(sql,/v_result:=public\.finalize_iclub_ai_usage_service_v2\(/);
+ assert.match(sql,/UPDATE private\.iclub_ai_request_tombstones_v21\s+SET status=p_outcome/);
  assert.match(sql,/request_identity_mismatch/);
  assert.match(sql,/quota_not_finalized/);
  assert.match(sql,/claim_expires_at<=now\(\)/);
@@ -54,8 +57,8 @@ test('No unapproved cleanup can remove completed request tombstones',()=>{
 });
 test('Full PostgreSQL suite checks foreign user, retry, expiry, and quota',()=>{
  for(const marker of ['quota_reservation_unverified','request_in_progress',
- 'request_identity_mismatch','quota_not_finalized','outcome_conflict',
- 'claim_expired','no reply','Transcript column leaked'])assert.ok(fixture.toLowerCase().includes(marker.toLowerCase()),marker);
+ 'request_identity_mismatch','quota_not_reserved','outcome_conflict',
+ 'claim_expired','No reply','Transcript column leaked'])assert.ok(fixture.toLowerCase().includes(marker.toLowerCase()),marker);
  assert.match(fixture,/^BEGIN;/m);
  assert.match(fixture,/^ROLLBACK;/m);
 });
@@ -74,4 +77,18 @@ test('All test DBs are restricted to new named local scratch databases',()=>{
   assert.ok(script.includes('127.0.0.1'));
   assert.ok(script.includes('SUPABASE_SERVICE_ROLE_KEY'));
  }
+});
+
+test('Real tariff + durable request settle in a single PG transaction',()=>{
+ for(const mark of [
+ 'reserve_iclub_ai_usage_service_v2','claim_iclub_ai_delivery_service_v21',
+ 'finish_iclub_ai_delivery_service_v21','committed_units','reserved_units',
+ 'synthetic_delivery_commit_failure','half-committed quota',
+ 'released failure charged learner'
+ ])assert.ok(atomic.includes(mark),mark);
+ assert.match(atomic,/^BEGIN;/m);assert.match(atomic,/^ROLLBACK;/m);
+ assert.ok(atomic.includes('iclub_ai_delivery_claim_v21_UNAPPLIED.sql'));
+ assert.ok(atomic.includes('iclub_ai_v21_meter_v2_UNAPPLIED.sql'));
+ assert.ok(atomic.includes('20261006102000_iclub_global_ai_tariff_foundation_v1.sql'));
+ assert.ok(runner.includes('atomic) TEST_FILE="qa/sql_drafts/iclub_ai_delivery_atomic_meter_local_pg.psql"'));
 });
