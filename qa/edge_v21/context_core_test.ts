@@ -12,6 +12,11 @@ function fixture(){
    mints++;if(throwMint)throw new Error("private DB error");
    return{allowed:a.userId===U,context_handle:H,expires_in_seconds:90};
   },
+  mintLessonContext:async(a:{userId:string;lessonId:number})=>{
+   mints++;if(throwMint)throw new Error("private DB error");
+   return{allowed:a.userId===U&&a.lessonId>0,
+    context_handle:H,expires_in_seconds:90};
+  },
   revokeScopedContext:async(a:{userId:string;contextHandle:string})=>{
    revokes++;return{ok:a.userId===U&&a.contextHandle===H};
   }
@@ -73,4 +78,27 @@ Deno.test("Malformed revoke cannot call privileged service",async()=>{
   assert((await x.send(arg)).status===400);
  }
  assert(x.counts()[1]===0);
+});
+
+Deno.test("Lesson mint works for enrolled student only with verified lesson ID",async()=>{
+ const x=fixture();
+ const r=await x.send({action:"mintLesson",lessonId:47});
+ assert(r.status===200&&r.data.ok===true&&r.data.contextHandle===H);
+ assert(x.counts()[0]===1);
+});
+Deno.test("Lesson context refuses foreign subject, guessed topic and forged progress",async()=>{
+ for(const key of ["subject","topic","sourceId","userId","plan","sessionId","questionId"]){
+  const x=fixture(),r=await x.send({action:"mintLesson",lessonId:47,[key]:"forged"});
+  assert(r.status===400&&x.counts()[0]===0);
+ }
+});
+Deno.test("Lesson mint cannot spoof old Practice selectors or malformed lesson IDs",async()=>{
+ for(const fields of [
+  {action:"mintLesson",lessonId:-1},{action:"mintLesson",lessonId:0},
+  {action:"mintLesson",lessonId:"1"},{action:"mintLesson",lessonId:1.5},
+  {action:"mint",lessonId:2,sessionId:1,questionId:1}
+ ]){
+  const x=fixture();assert((await x.send(fields)).status===400);
+  assert(x.counts()[0]===0);
+ }
 });
