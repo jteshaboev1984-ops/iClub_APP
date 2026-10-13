@@ -10,12 +10,13 @@ function fixture({published=true,plan='plus_qa_v2',subject='biology',locale='ru'
  const s={published,plan,subject,locale,exam:false,runtime:true,rights:true,revoked:false,
  providerBudget:true,providerCalls:0,contentCalls:0,failProvider:false,failOutput:false,
  revokeOnProvider:false,examOnProvider:false,failFinish:false,failClaim:false,
+ authRevoked:false,planOnProvider:null,budgetOnProvider:false,
  hash:HASH,revision:1,user:U,now:1000,usage:new Map(),claims:new Map(),units:new Map(),
  ctx:{ownerId:U,routeAuthority:'unified_ai',active:true,protectedAssessment:false,
  expiresAtMs:15000,contextRevision:'rev-0001',surface:'lesson',
  subject,feature:'topic_explanation',topic:'synthetic-topic'}};
  const services={
-  authenticate:async token=>token===TOKEN?{authenticated:true,userId:s.user}:null,
+  authenticate:async token=>token===TOKEN&&!s.authRevoked?{authenticated:true,userId:s.user}:null,
   getServerTimeMs:async()=>s.now,
   isProtected:async()=>s.exam,
   getGlobalState:async()=>({uiEnabled:s.runtime,gatewayEnabled:s.runtime,
@@ -31,7 +32,8 @@ function fixture({published=true,plan='plus_qa_v2',subject='biology',locale='ru'
   getPolicy:async()=>s.plan,
   getSourceBundle:async info=>{
    s.contentCalls++;
-   return{approved:true,rightsApproved:true,conflict:false,
+   return{approved:true,rightsApproved:true,integrityVerified:true,
+    qaPassed:true,runtimeAllowed:true,conflict:false,
     sourceId:info.sourceId,sourceVersion:info.sourceVersion,
     sourceHash:s.hash,revision:info.revision,generationAllowed:true,
     sourceText:'Synthetic placeholder for testing server flow, not a lesson or card.',
@@ -42,6 +44,8 @@ function fixture({published=true,plan='plus_qa_v2',subject='biology',locale='ru'
    if(s.failProvider)throw Error('mock provider outage');
    if(s.revokeOnProvider)s.revoked=true;
    if(s.examOnProvider)s.exam=true;
+   if(s.planOnProvider)s.plan=s.planOnProvider;
+   if(s.budgetOnProvider)s.providerBudget=false;
    return s.failOutput?'<script>unsafe</script>':'Synthetic generated reply for checking the workflow';
   },
   reserveUsage:async({requestId,userId,policy,route,requestFingerprint})=>{
@@ -228,4 +232,28 @@ test('Public status does not disclose source, fingerprint, learner or tariff',as
  const raw=JSON.stringify(r.body);
  for(const forbidden of ['sourceId','sourceHash','revision','userId','fingerprint',
    'contextHandle','policy','topic'])assert.equal(raw.includes(forbidden),false,forbidden);
+});
+
+test('Source bundle must have independently verified integrity and QA status',async()=>{
+ const x=fixture(),original=x.services.getSourceBundle;
+ x.services.getSourceBundle=async opts=>({...await original(opts),integrityVerified:false});
+ const r=await x.send();
+ assert.equal(r.body.state,'in_development');assert.equal(x.s.usage.size,0);
+});
+test('Plan changed while generating prevents answer and releases quota',async()=>{
+ const x=fixture();x.s.planOnProvider='free_qa_v2';
+ const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.reason,'context_changed');assert.equal(x.s.units.get(U),0);
+});
+test('Provider budget revoked during generation prevents answer and releases quota',async()=>{
+ const x=fixture();x.s.budgetOnProvider=true;
+ const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.reason,'context_changed');assert.equal(x.s.units.get(U),0);
+});
+test('JWT revoked while generating cannot deliver the answer',async()=>{
+ const x=fixture(),original=x.services.generateSynthetic;
+ x.services.generateSynthetic=async opts=>{const out=await original(opts);
+  x.s.authRevoked=true;return out;};
+ const r=await x.send({promptKey:undefined,question:'Почему это происходит?'});
+ assert.equal(r.body.reason,'context_changed');assert.equal(x.s.units.get(U),0);
 });
