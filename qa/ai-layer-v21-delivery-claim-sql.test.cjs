@@ -42,7 +42,7 @@ test('Completion atomically finalizes reserved quota in same transaction',()=>{
  assert.match(sql,/v_result:=public\.finalize_iclub_ai_usage_service_v2\(/);
  assert.match(sql,/UPDATE private\.iclub_ai_request_tombstones_v21\s+SET status=p_outcome/);
  assert.match(sql,/request_identity_mismatch/);
- assert.match(sql,/quota_not_finalized/);
+ assert.match(sql,/quota_not_reserved/);
  assert.match(sql,/claim_expires_at<=now\(\)/);
 });
 test('No public/authenticated ability to run delivery RPCs or read tombstones',()=>{
