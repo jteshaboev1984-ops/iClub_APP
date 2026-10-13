@@ -204,7 +204,7 @@
       if(mode==="explain"){
         await window.iClubGlobalAiShell?.previewExplain({
           questionId:item.id,displayText:prompt(chosen[i]===item.correct?
-            t().explainPromptCorrect:t().explainPromptWrong),attemptId:101
+            t().explainPromptCorrect:t().explainPromptWrong),practiceSessionId:101
         });
       }else{
         window.iClubGlobalAiShell?.previewAskInChat({

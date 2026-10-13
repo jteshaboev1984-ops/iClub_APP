@@ -27,3 +27,5 @@ QA icon correction: the actual Exam Prep Tutor uses `assets/iclub-ai-mark-temp.j
 - Navigation into another question increments a QA context epoch before asynchronous mint/answer; stale replies cannot impersonate the new question. Restart, leaving the subject, or protected exam clears cached explanations. Individual messages include question labels so the single subject transcript remains intelligible.
 - Expanded panel gets real styling/accessibility; mobile panel height increased while preserving safe-area constraints. Working Exam Prep AI image retained. This is QA **only** and uses the genuine iClub index/CSS, no original app.js, production DB or provider connections.
 - Manual acceptance: Q1 correct, Q2 wrong, both automatic replies, cached Q1, Q1 Ask AI with empty composer and unavailable free-text answer, protected exam blackout, mobile expansion and no external network.
+
+§B QA correction: the cache key uses the **V4 practice session ID** `practiceSessionId` (101 in synthetic data), never the legacy attempt ID 567. Browser acceptance is a release prerequisite.
