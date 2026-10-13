@@ -2,7 +2,7 @@
 const {test}=require("node:test"),assert=require("node:assert/strict");
 const {readFileSync}=require("node:fs");
 const {resolve}=require("node:path");
-const base=resolve(__dirname,"protected-preview");
+const base=resolve(__dirname,"ai-layer-v21-protected-preview");
 const read=filename=>readFileSync(resolve(base,filename),"utf8");
 const page=read("index.html"),ui=read("preview-controller.js"),css=read("preview.css");
 test("Protected preview is self-contained: no Supabase, SDK, external calls or storage",()=>{

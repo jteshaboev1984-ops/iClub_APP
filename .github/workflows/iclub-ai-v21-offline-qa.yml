@@ -1,5 +1,5 @@
 name: iClub AI Layer v2.1 — isolated QA only
-# QA P9: one owner-approved, SSO-protected, STATIC synthetic preview; CI before deploy.
+# QA P9: full synthetic Preview real Chromium user journey and network isolation before SSO build.
 
 # QA Lesson + Practice context acceptance: robust SQL named delimiter, 7 scratch PG suites.
 # This workflow never builds or deploys to Vercel, never connects to Supabase,
@@ -59,6 +59,8 @@ jobs:
           set -euo pipefail
           command -v google-chrome || command -v chromium || command -v chromium-browser
           node qa/ai-layer-v21-browser-visual.cjs
+      - name: Synthetic Preview real Chromium practice to iClub AI journey
+        run: node qa/ai-layer-v21-protected-preview-browser.cjs
       - name: Install Deno runtime for Edge candidate verification
         uses: denoland/setup-deno@v2
         with:
