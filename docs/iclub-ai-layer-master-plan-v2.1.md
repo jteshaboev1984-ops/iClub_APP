@@ -402,3 +402,19 @@ The consolidated `qa/run-ai-layer-v21-offline.cjs` now lists **18** test suites;
 
 See `docs/iclub-ai-layer-native-qa-checkpoint-2026-10-13.md` for the exact run and limitations.
 
+
+## 24. Final green native QA — 2026-10-13
+
+**Verified authoritative run for latest tested QA snapshot:** [GitHub Actions 38347173145](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38347173145), SHA `e514cde3f72141cc9a89874410c64754dc1a0605`, **SUCCESS**.
+
+- Native Node.js 22: **340/340** tests PASS, including P3 ready/unready RU/UZ/EN UI, older Math compatibility, full cross-subject gates, payment-safe retry, 1:3 synthetic model routing and all previous safety contracts.
+- Additional synthetic tariff smoke tests: **8/8 PASS**. Legacy Math Exam Prep isolation and late-response regression: PASS.
+- Native PostgreSQL 16 disposable QA service: **4/4 full scratch SQL suites PASS**, actual compile/execution and transaction assertions for meter, Math authority, Practice exact sources and per-topic publication. Uses no real Supabase/learner rows; synthetic DB dropped after test.
+- Protected Exam Prep backend and frontend files, deployed migration directory and app entrypoints: baseline diff check PASS. No production/main or Vercel deployment.
+- **P3**: QA Global AI UI maps missing unpublished source/subject to friendly localized **«В разработке»** notice, distinct from true usage exhaustion; server-only technical publication interface remains under review and unconnected to production.
+- The automated workflow triggers by an intentional QA workflow-file change only (not on each QA file micro-update); all steps run without application secrets or any production API access.
+
+**Honest boundaries:** Green local PostgreSQL is NOT full production RLS, Edge multi-instance concurrency or live provider integration. New AI remains uninstalled in production. Independent content publishing chat remains the sole owner of academic cards/questions. Required before beta: server-minted scoped context, actual service-role publication adapter, live source hash checks, cross-Edge idempotency and atomic reserve/complete, provider cost safeguards, one protected Preview browser QA and explicit owner approval. Existing Mathematics Exam Prep continues independently.
+
+See `docs/iclub-ai-layer-native-qa-checkpoint-2026-10-13.md` for the detailed verification log and limitations.
+
