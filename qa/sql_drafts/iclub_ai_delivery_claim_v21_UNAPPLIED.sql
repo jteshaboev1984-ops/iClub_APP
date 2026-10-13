@@ -83,8 +83,9 @@ BEGIN
 END;
 $$;
 
--- Mark complete ONLY AFTER atomic usage_v2 finalization. The exact same
--- fingerprint, learner, session and route must match both durable ledgers.
+-- ATOMIC settlement: the quota v2 finalize call + tombstone status are in
+-- the SAME PostgreSQL transaction. If either fails, both changes roll back.
+-- The Edge must invoke this only AFTER fresh context/source/assessment check.
 CREATE OR REPLACE FUNCTION public.finish_iclub_ai_delivery_service_v21(
  p_request_id uuid,p_user_id uuid,p_session_fingerprint text,
  p_request_fingerprint text,p_route_class text,p_outcome text
@@ -93,6 +94,7 @@ CREATE OR REPLACE FUNCTION public.finish_iclub_ai_delivery_service_v21(
 DECLARE
  v private.iclub_ai_request_tombstones_v21%rowtype;
  v_quota_status text;
+ v_result jsonb;
 BEGIN
  IF p_request_id IS NULL OR p_user_id IS NULL
    OR p_session_fingerprint IS NULL OR p_session_fingerprint !~ '^[0-9a-f]{64}$'
@@ -118,15 +120,26 @@ BEGIN
  IF v.claim_expires_at<=now() AND p_outcome='completed' THEN
   RETURN jsonb_build_object('ok',false,'reason','claim_expired');
  END IF;
+ -- Do not settle a different quota request ID or an already completed receipt.
  SELECT r.status INTO v_quota_status FROM private.iclub_ai_usage_reservations r
  WHERE r.request_id=p_request_id AND r.user_id=p_user_id
    AND r.request_fingerprint=p_request_fingerprint AND r.route_class=p_route_class
  FOR UPDATE;
- IF v_quota_status IS DISTINCT FROM p_outcome THEN
-  RETURN jsonb_build_object('ok',false,'reason','quota_not_finalized');
+ IF v_quota_status IS DISTINCT FROM 'reserved' THEN
+  RETURN jsonb_build_object('ok',false,'reason','quota_not_reserved');
+ END IF;
+ -- The original v1 tariff functions remain untouched; the new v2 RPC checks
+ -- owner/fingerprint, TTL and atomically moves reserved to committed/released.
+ v_result:=public.finalize_iclub_ai_usage_service_v2(
+  p_request_id,p_user_id,p_request_fingerprint,p_outcome,
+  CASE WHEN p_outcome='released' THEN 'delivery_not_approved' ELSE NULL END
+ );
+ IF v_result->>'ok' IS DISTINCT FROM 'true' THEN
+  RETURN jsonb_build_object('ok',false,'reason',
+    coalesce(v_result->>'reason','quota_finalize_failed'));
  END IF;
  UPDATE private.iclub_ai_request_tombstones_v21
-  SET status=p_outcome,finished_at=now() WHERE request_id=p_request_id;
+ SET status=p_outcome,finished_at=now() WHERE request_id=p_request_id;
  RETURN jsonb_build_object('ok',true,'status',p_outcome,'duplicate',false);
 END;
 $$;
