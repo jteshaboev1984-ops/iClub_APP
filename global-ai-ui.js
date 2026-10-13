@@ -45,6 +45,7 @@
       limitReset: "Доступ восстановится в {time}.",
       limitPending: "Доступ восстановится после текущего периода.",
       routeInsufficient: "Для этого ответа сейчас недостаточно доступного лимита. Готовые объяснения могут быть доступны.",
+      inDevelopment: "В разработке. AI-помощь по этой теме пока готовится.",
       subjectNames: {
         mathematics: "Математика",
         biology: "Биология",
@@ -79,6 +80,7 @@
       limitReset: "Kirish {time} da tiklanadi.",
       limitPending: "Kirish joriy davrdan keyin tiklanadi.",
       routeInsufficient: "Bu javob uchun limit yetarli emas. Tayyor izohlar hali mavjud bo‘lishi mumkin.",
+      inDevelopment: "Ishlab chiqilmoqda. Bu mavzu bo‘yicha AI yordami hali tayyorlanmoqda.",
       subjectNames: {
         mathematics: "Matematika",
         biology: "Biologiya",
@@ -113,6 +115,7 @@
       limitReset: "Access will return at {time}.",
       limitPending: "Access will return after the current period.",
       routeInsufficient: "There is not enough allowance for this answer. Prepared explanations may still be available.",
+      inDevelopment: "In development. AI help for this topic is being prepared.",
       subjectNames: {
         mathematics: "Mathematics",
         biology: "Biology",
@@ -671,6 +674,15 @@
       if (reason === "usage_exhausted") {
         setUsageExhausted(data.reset_at || null);
         appendMessage(threadKey, "assistant", message || copy().limitTitle, "notice");
+        return;
+      }
+
+      // An unpublished topic is not a quota failure and cannot trigger
+      // a guessed model response. General Help has its own release gate.
+      if (["in_development", "subject_not_ready", "approved_source_missing",
+           "source_not_ready", "no_source", "topic_not_released"].includes(reason)
+          || data.mode === "in_development") {
+        appendMessage(threadKey, "assistant", copy().inDevelopment, "notice");
         return;
       }
 
