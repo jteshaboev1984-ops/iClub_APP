@@ -64,17 +64,23 @@ function localized(locale,state,alternatives=[]){
 class ContentHandoffGate {
  constructor(services){
   const req=['getGlobalState','isProtected','getScopedContext',
-   'getSubjectActive','isRolloutAuthorized','getPublishedRelease','getLiveSourceProof'];
+   'getSubjectActive','isRolloutAuthorized','getPublishedRelease','getLiveSourceProof',
+   'getServerTimeMs'];
   for(const name of req)if(typeof services?.[name]!=='function')
    throw Error('missing server-only service '+name);
   this.services=services;
  }
- async check({principal,contextHandle,locale,nowMs}={}){
+ async check({principal,contextHandle,locale}={}){
   if(principal?.authenticated!==true||typeof principal.userId!=='string'||
-    typeof contextHandle!=='string'||contextHandle.length<8||
-    !Number.isSafeInteger(nowMs)||nowMs<0)
+    typeof contextHandle!=='string'||contextHandle.length<8)
     return localized(locale,'unavailable');
   const lang=VALID_LOCALE.has(locale)?locale:'en',S=this.services,uid=principal.userId;
+  const serverNow=async()=>{try{
+    const n=await S.getServerTimeMs();
+    return Number.isSafeInteger(n)&&n>=0?n:null;
+   }catch{return null;}};
+  const nowMs=await serverNow();
+  if(nowMs===null)return localized(lang,'unavailable');
   const protectedNow=async()=>{try{return(await S.isProtected(uid))!==false;}catch{return true;}};
   if(await protectedNow())return localized(lang,'hidden');
   const runtime=async()=>{try{
@@ -128,8 +134,9 @@ class ContentHandoffGate {
   let latest;
   try{latest=await S.getScopedContext(uid,contextHandle);}
   catch{return localized(lang,'unavailable');}
+  const finalNow=await serverNow();
   if(!latest||latest.ownerId!==uid||latest.active!==true||
-     latest.protectedAssessment===true||latest.expiresAtMs<=nowMs||
+     latest.protectedAssessment===true||finalNow===null||latest.expiresAtMs<=finalNow||
      latest.contextRevision!==context.contextRevision||
      !sameKeys(latest,context,['surface','subject','feature','topic'])||
      !await alive()||await protectedNow()||!await runtime())
