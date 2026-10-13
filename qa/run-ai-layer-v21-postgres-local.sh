@@ -14,7 +14,8 @@ case "$SUITE" in
   math) TEST_FILE="qa/sql_drafts/iclub_ai_math_authority_local_pg.psql" ;;
   practice) TEST_FILE="qa/sql_drafts/iclub_ai_practice_exact_source_local_pg.psql" ;;
   release) TEST_FILE="qa/sql_drafts/iclub_ai_topic_release_local_pg.psql" ;;
-  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter, math, practice or release" >&2; exit 2 ;;
+  claim) TEST_FILE="qa/sql_drafts/iclub_ai_delivery_claim_local_pg.psql" ;;
+  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter, math, practice, release or claim" >&2; exit 2 ;;
 esac
 
 if [[ ! "$DB" =~ ^iclub_ai_v21_scratch_[a-z0-9_]+$ ]]; then
