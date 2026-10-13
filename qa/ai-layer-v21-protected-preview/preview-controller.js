@@ -1,5 +1,5 @@
 // The ONLY application state in this Preview is ephemeral memory.
-// NO Supabase SDK, accounts, network fetch, localStorage, provider or writes.
+// No live SDK, accounts, network requests, browser persistence or provider calls.
 "use strict";
 window.__ICLUB_AI_V21_SYNTHETIC_ONLY__=true;
 window.module={exports:{}};

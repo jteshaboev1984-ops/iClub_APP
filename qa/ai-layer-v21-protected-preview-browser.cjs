@@ -111,7 +111,10 @@ async function run(){
   if(!asset){res.writeHead(404);res.end();return;}
   res.writeHead(200,{"content-type":asset[1]+"; charset=utf-8",
    "cache-control":"no-store","x-content-type-options":"nosniff"});
-  res.end(readFileSync(resolve(root,asset[0])));
+  const contents=readFileSync(resolve(root,asset[0]),"utf8");
+  res.end(pathname==="/global-ai-ui.js"?
+   require("./ai-layer-v21-protected-preview/patch-shell.cjs").patchSyntheticGlobalShell(contents):
+   contents);
  });
  await new Promise(done=>server.listen(0,"127.0.0.1",done));
  const port=server.address().port,dir=mkdtempSync(join(tmpdir(),"iclub-static-qa-"));

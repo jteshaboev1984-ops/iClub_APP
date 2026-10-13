@@ -57,5 +57,16 @@ test("All 3 languages have complete readable UI translations and same question c
   }
  }
  for(const label of ["q1","q2","q1a","q2a","ex1","ex2"])
-  assert.equal((ui.match(new RegExp(label+':','g'))||[]).length,3,label);
+  assert.equal((ui.match(new RegExp("(?:^|,)"+label+":","g"))||[]).length,3,label);
+});
+
+test("Original shell immutable and synthetic review prompt is scoped",()=>{
+ const {patchSyntheticGlobalShell}=require("./ai-layer-v21-protected-preview/patch-shell.cjs");
+ const original=readFileSync(resolve(base,"../../global-ai-ui.js"),"utf8");
+ const patched=patchSyntheticGlobalShell(original);
+ assert.match(patched,/QA_SYNTHETIC_REVIEW_PROMPTS/);
+ assert.match(patched,/key:"topic_main",label:c.topicMain/);
+ assert.match(patched,/__ICLUB_AI_V21_SYNTHETIC_ONLY__===true/);
+ assert.doesNotMatch(original,/QA_SYNTHETIC_REVIEW_PROMPTS/);
+ assert.throws(()=>patchSyntheticGlobalShell(patched),/synthetic_shell_source_drift/);
 });
