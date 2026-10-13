@@ -491,3 +491,18 @@ See `docs/iclub-ai-layer-p7-distributed-delivery-handoff-v2.1.md`. Current work 
 
 Technical handoff: `docs/iclub-ai-layer-p2-p4-verified-source-bridge-v2.1.md`. Protected production academic code, localStorage and existing Exam Prep AI remain untouched.
 
+
+## 30. P4 governed editorial release and safety revocation (2026-10-13)
+
+**The exact next technical milestone is complete in QA, not deployed.** New `qa/sql_drafts/iclub_ai_editorial_ticket_publisher_v21_UNAPPLIED.sql` provides a scoped, atomic editorial-release transaction and emergency safety suspension. Content/cards/questions/lesson text remain entirely the other editorial workstream. Release requires an independently staged, non-expired single-use ticket covering source ID/version/hash, subject/surface/feature/topic/locale, ALL eight editorial/technical gates and **three distinct content, rights and technical reviewers**. Database enforces one reviewer identity per ticket, atomic locks, exact current payload SHA-256, and expected publication revision. It cannot automatically enable another language, an already active row, a quarantined source or a new beta.
+
+**Separation of duties:** Publication/revocation RPC privileges are revoked from `public`, `anon`, `authenticated` and even learner-serving Supabase `service_role`; only a dedicated *QA-only*, non-login editorial executor role is granted EXECUTE. Tickets/signoffs have no browser-accessible writer RPC. The existing Deno learner AI adapter has no publishing or revocation method. This sandbox role is **not** production provisioning; genuine reviewer identity and evidence intake remain a future separately authorized governance integration.
+
+**Urgent safety suspension:** an independently staged single-use safety ticket with a reason and exact expected revision disables a specific approved publication, increments revision and suspends its source in the same PostgreSQL transaction. Subsequent server source-proof/bundle requests fail closed; it does not erase lessons, answers, progress or the editor's content. A revoked/suspended version is not automatically republished.
+
+**Verified real QA:** [GitHub Actions #38355636618](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38355636618), SUCCESS. **418/418** native Node.js tests, **40/40** native Deno with strict TypeScript, **9/9** real disposable PostgreSQL 16 suites, the previous two-worker claim race and academic isolation checks PASS. Publication was deliberately interrupted between source and release writes: the transaction rolled back source, release and ticket consumption together; retry completed after the injected failure was removed. Published material remained unavailable with the global AI kill switch ON.
+
+**NO-GO still applies:** No real reviewer credentials, content-ingestion publisher, production migration, existing user data, Edge deployment, payment, provider, or student beta was changed or enabled. Do not infer beta approval from successful editorial publication. Real signature/evidence authority, secure migration and RLS, global/rollout/monetary authorization, provider safety and one protected synthetic Preview remain open.
+
+Full handoff: `docs/iclub-ai-layer-p4-editorial-ticket-publication-v2.1.md`.
+
