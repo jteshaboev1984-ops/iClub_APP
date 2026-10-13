@@ -119,3 +119,11 @@ test('Full screen is never preserved after closing or protected-screen transitio
  assert.equal(toggler.attrs.get('aria-pressed'),'false');
  assert.equal(fields.get('mark-aria-expanded'),'false');
 });
+
+test('Fullscreen panel overrides floating pop-in transform immediately',()=>{
+ const at=css.indexOf('.iclub-global-ai-panel[data-expanded="true"]');
+ const tail=css.slice(at,at+500);
+ assert.match(tail,/animation:\s*none;/);
+ assert.match(tail,/transform:\s*none;/);
+ assert.match(tail,/inset:\s*0;/);
+});

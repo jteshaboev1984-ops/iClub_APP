@@ -470,6 +470,10 @@ html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-topic-action-wrap] 
 
 /* Decision 17A: full-screen is optional, never the default mobile size. */
 .iclub-global-ai-panel[data-expanded="true"] {
+  /* Fullscreen must fill the viewport instantly, never inherit pop-in
+     translation or scaling from the compact floating panel animation. */
+  animation: none;
+  transform: none;
   inset: 0;
   width: 100vw;
   max-width: none;

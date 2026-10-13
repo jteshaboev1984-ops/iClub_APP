@@ -1,5 +1,5 @@
 name: iClub AI Layer v2.1 — isolated QA only
-# QA P3/P8: real Chromium/CDP startup diagnostics and responsive geometry; no deploy.
+# QA P3: real Chromium fullscreen pop-in transform is explicitly disabled; no deploy.
 
 # QA Lesson + Practice context acceptance: robust SQL named delimiter, 7 scratch PG suites.
 # This workflow never builds or deploys to Vercel, never connects to Supabase,
