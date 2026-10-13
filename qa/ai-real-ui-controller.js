@@ -4,9 +4,37 @@
 (()=>{
  const $=id=>document.getElementById(id),one=s=>document.querySelector(s);
  const loc={
- ru:{safe:"Настоящие экраны iClub · учебные данные · без доступа к базе",protect:"Проверить защиту AI",unprotect:"Закрыть проверку",subject:"Экономика",home:"Главная",study:"Обучение",profile:"Профиль",practice:"Практика",start:"Начать практику",next:"Следующий вопрос",finish:"Завершить",result:"Результат практики",review:"Разбор ошибок",explain:"Объяснить",askAi:"Спросить AI",askDraft:"Вопрос по ошибке в задании №{n}: ",explainPrompt:"Объясни мою ошибку в задании №{n}: {question}",note:"Тестовый пример. Ответы не сохраняются и не влияют на прогресс.",notReady:"В разработке. Для этого раздела пока нет утверждённых объяснений.",q1:"Что происходит с величиной спроса при росте цены товара, при прочих равных?",q2:"Зачем разбирать ошибки после практики?",a1:["Обычно снижается","Обычно растёт","Остаётся неизменной"],a2:["Чтобы угадать ответ","Чтобы понять причину ошибки","Чтобы изменить оценку"],exp1:"При прочих равных рост цены обычно уменьшает величину спроса. Это движение вдоль кривой спроса.",exp2:"Разбор ошибки показывает, какое рассуждение было неверным и какую тему следует повторить.",help:"Сначала выполняй задания самостоятельно. После завершения открой результат и разбор ошибок."},
- uz:{safe:"Haqiqiy iClub ekranlari · sun’iy ma’lumot · bazaga kirish yo‘q",protect:"AI himoyasini tekshirish",unprotect:"Tekshiruvni tugatish",subject:"Iqtisodiyot",home:"Bosh sahifa",study:"O‘qish",profile:"Profil",practice:"Mashq",start:"Mashqni boshlash",next:"Keyingi savol",finish:"Yakunlash",result:"Mashq natijasi",review:"Xatolar tahlili",explain:"Tushuntirish",askAi:"AIdan so‘rash",askDraft:"{n}-savoldagi xato bo‘yicha savolim: ",explainPrompt:"{n}-savoldagi xatomni tushuntirib ber: {question}",note:"Sinov namunasi. Javoblar saqlanmaydi va natijalarga ta’sir qilmaydi.",notReady:"Tayyorlanmoqda. Ushbu bo‘lim uchun tasdiqlangan izohlar mavjud emas.",q1:"Narx oshganda, boshqa sharoitlar o‘zgarmasa, talab miqdori qanday o‘zgaradi?",q2:"Mashqdan so‘ng xatoni tahlil qilish nega foydali?",a1:["Odatda kamayadi","Odatda oshadi","O‘zgarmaydi"],a2:["Javobni taxmin qilish uchun","Sababini tushunish uchun","Bahoni o‘zgartirish uchun"],exp1:"Boshqa sharoitlar o‘zgarmasa, narx oshishi odatda talab miqdorini kamaytiradi. Bu talab chizig‘i bo‘ylab harakatdir.",exp2:"Xatoni tahlil qilish noto‘g‘ri fikrlash sababini aniqlash va mavzuni takrorlashga yordam beradi.",help:"Avval savollarga mustaqil javob bering. Tugatgach natija va xatolarni ko‘ring."},
- en:{safe:"Real iClub screens · synthetic data · no database connection",protect:"Check AI protection",unprotect:"End protection test",subject:"Economics",home:"Home",study:"Study",profile:"Profile",practice:"Practice",start:"Start practice",next:"Next question",finish:"Finish",result:"Practice result",review:"Mistake review",explain:"Explain",askAi:"Ask AI",askDraft:"My question about mistake #{n}: ",explainPrompt:"Explain my mistake in question #{n}: {question}",note:"Synthetic example. Answers are not saved or included in progress.",notReady:"In development. No approved explanation is available for this section.",q1:"What usually happens to quantity demanded when price rises, all else equal?",q2:"Why review a mistake after practice?",a1:["It falls","It rises","It remains unchanged"],a2:["To guess answers","To understand the cause","To change a grade"],exp1:"All else equal, a price increase usually reduces quantity demanded. This is a movement along the demand curve.",exp2:"Reviewing an error helps identify faulty reasoning and the topic that needs further practice.",help:"Answer independently first. After finishing, check the result and review your mistakes."}
+ ru:{safe:"Настоящие экраны iClub · учебные данные · без доступа к базе",protect:"Проверить защиту AI",unprotect:"Закрыть проверку",subject:"Экономика",home:"Главная",study:"Обучение",profile:"Профиль",practice:"Практика",start:"Начать практику",next:"Следующий вопрос",finish:"Завершить",result:"Результат практики",review:"Разбор ошибок",explain:"Объяснить",explainMistake:"Объяснить ошибку",explainSolution:"Объяснить решение",askAi:"Спросить AI",explainPromptWrong:"Объясни мою ошибку в задании №{n}.",explainPromptCorrect:"Объясни решение задания №{n}.",note:"Тестовый пример. Ответы не сохраняются и не влияют на прогресс.",notReady:"В разработке. Для этого раздела пока нет утверждённых объяснений.",q1:"Что происходит с величиной спроса при росте цены товара, при прочих равных?",q2:"Зачем разбирать ошибки после практики?",a1:["Обычно снижается","Обычно растёт","Остаётся неизменной"],a2:["Чтобы угадать ответ","Чтобы понять причину ошибки","Чтобы изменить оценку"],exp1:"При прочих равных рост цены обычно уменьшает величину спроса. Это движение вдоль кривой спроса.",exp2:"Разбор ошибки показывает, какое рассуждение было неверным и какую тему следует повторить.",help:"Сначала выполняй задания самостоятельно. После завершения открой результат и разбор ошибок."},
+ uz:{safe:"Haqiqiy iClub ekranlari · sun’iy ma’lumot · bazaga kirish yo‘q",protect:"AI himoyasini tekshirish",unprotect:"Tekshiruvni tugatish",subject:"Iqtisodiyot",home:"Bosh sahifa",study:"O‘qish",profile:"Profil",practice:"Mashq",start:"Mashqni boshlash",next:"Keyingi savol",finish:"Yakunlash",result:"Mashq natijasi",review:"Xatolar tahlili",explain:"Tushuntirish",explainMistake:"Xatoni tushuntir",explainSolution:"Yechimni tushuntir",askAi:"AIdan so‘rash",explainPromptWrong:"{n}-savoldagi xatomni tushuntirib ber.",explainPromptCorrect:"{n}-savolning to‘g‘ri yechimini tushuntir.",note:"Sinov namunasi. Javoblar saqlanmaydi va natijalarga ta’sir qilmaydi.",notReady:"Tayyorlanmoqda. Ushbu bo‘lim uchun tasdiqlangan izohlar mavjud emas.",q1:"Narx oshganda, boshqa sharoitlar o‘zgarmasa, talab miqdori qanday o‘zgaradi?",q2:"Mashqdan so‘ng xatoni tahlil qilish nega foydali?",a1:["Odatda kamayadi","Odatda oshadi","O‘zgarmaydi"],a2:["Javobni taxmin qilish uchun","Sababini tushunish uchun","Bahoni o‘zgartirish uchun"],exp1:"Boshqa sharoitlar o‘zgarmasa, narx oshishi odatda talab miqdorini kamaytiradi. Bu talab chizig‘i bo‘ylab harakatdir.",exp2:"Xatoni tahlil qilish noto‘g‘ri fikrlash sababini aniqlash va mavzuni takrorlashga yordam beradi.",help:"Avval savollarga mustaqil javob bering. Tugatgach natija va xatolarni ko‘ring."},
+ en:{safe:"Real iClub screens · synthetic data · no database connection",protect:"Check AI protection",unprotect:"End protection test",subject:"Economics",home:"Home",study:"Study",profile:"Profile",practice:"Practice",start:"Start practice",next:"Next question",finish:"Finish",result:"Practice result",review:"Mistake review",explain:"Explain",explainMistake:"Explain mistake",explainSolution:"Explain solution",askAi:"Ask AI",explainPromptWrong:"Explain my mistake in question {n}.",explainPromptCorrect:"Explain the solution to question {n}.",note:"Synthetic example. Answers are not saved or included in progress.",notReady:"In development. No approved explanation is available for this section.",q1:"What usually happens to quantity demanded when price rises, all else equal?",q2:"Why review a mistake after practice?",a1:["It falls","It rises","It remains unchanged"],a2:["To guess answers","To understand the cause","To change a grade"],exp1:"All else equal, a price increase usually reduces quantity demanded. This is a movement along the demand curve.",exp2:"Reviewing an error helps identify faulty reasoning and the topic that needs further practice.",help:"Answer independently first. After finishing, check the result and review your mistakes."}
+ };
+ // Synthetic answer-specific copy: correct, wrong option 1, wrong option 2.
+ // Real source-backed explanations remain blocked until server publication.
+ const explanation={
+  ru:[
+   ["Верно: рост цены обычно уменьшает величину спроса, при прочих равных. Это движение вдоль кривой спроса.",
+    "Ты выбрал «обычно растёт», но рост цены обычно уменьшает величину спроса при прочих равных. Покупателям становится менее выгодно приобретать товар по новой цене.",
+    "Ты выбрал «остаётся неизменной», но при прочих равных рост цены обычно сокращает величину спроса. Не путай величину спроса и сам спрос."],
+   ["Ты выбрал «чтобы угадать ответ». Разбор нужен не для угадывания, а чтобы выяснить причину ошибки и повторить конкретную тему.",
+    "Верно: разбор ошибки помогает понять неверный шаг рассуждения и выбрать, что повторить перед новой проверкой.",
+    "Ты выбрал «чтобы изменить оценку», но разбор не меняет оценку. Он помогает понять ошибку и подготовиться к повторной проверке."]
+  ],
+  uz:[
+   ["To‘g‘ri: boshqa sharoitlar o‘zgarmasa, narx oshishi odatda talab miqdorini kamaytiradi. Bu talab chizig‘i bo‘ylab harakatdir.",
+    "Siz «odatda oshadi» deb javob berdingiz. Ammo boshqa sharoitlar o‘zgarmasa, narx oshishi odatda talab miqdorini kamaytiradi.",
+    "Siz «o‘zgarmaydi» deb javob berdingiz. Boshqa sharoitlar o‘zgarmasa, narx oshishi odatda talab miqdorini kamaytiradi."],
+   ["Siz «javobni taxmin qilish uchun» deb tanladingiz. Tahlil taxmin qilish emas, xato sababini aniqlash uchun kerak.",
+    "To‘g‘ri: xatoni tahlil qilish noto‘g‘ri fikrlash sababini aniqlash va mavzuni takrorlashga yordam beradi.",
+    "Siz «bahoni o‘zgartirish uchun» deb tanladingiz. Tahlil bahoni o‘zgartirmaydi; u sababini tushunishga yordam beradi."]
+  ],
+  en:[
+   ["Correct: a price increase usually reduces quantity demanded, all else equal. This is a movement along the demand curve.",
+    "You chose «it rises», but a price increase usually reduces quantity demanded, all else equal. Buyers tend to purchase less at a higher price.",
+    "You chose «it remains unchanged», but a price increase usually reduces quantity demanded, all else equal. Distinguish quantity demanded from demand."],
+   ["You chose «to guess answers». Review is for understanding the cause of an error, not improving guesses.",
+    "Correct: reviewing mistakes helps locate faulty reasoning and choose what to practise before the next assessment.",
+    "You chose «to change a grade», but reviewing cannot change the submitted result. It supports understanding and future improvement."]
+  ]
  };
  const items=[{id:202,correct:0},{id:203,correct:1}],HANDLE="11111111-1111-4111-8111-111111111111";
  let language="ru",tab="home",screen="all-subjects",subject="economics",step=0,
@@ -30,8 +58,10 @@
    if(body.intent!=="answer"||body.promptKey!=="topic_main")
     return{ok:false,reason:"in_development"};
    const question=Number(one('#courses-practice-review [data-iclub-ai-v21-selected="true"]')?.getAttribute("data-iclub-ai-v21-question-id"));
-   const text=question===202?t().exp1:question===203?t().exp2:null;
-   return text?{ok:true,reply:text+" "+t().note}:{ok:false,reason:"screen_not_verified"};
+   const idx=items.findIndex(x=>x.id===question);
+   const answer=idx>=0?chosen[idx]:null;
+   const text=idx>=0&&Number.isInteger(answer)?explanation[language][idx]?.[answer]:null;
+   return text?{ok:true,reply:text}:{ok:false,reason:"screen_not_verified"};
   }
   return{ok:false,reason:"unavailable"};
  }
@@ -59,7 +89,7 @@
  };
  function feedback(){const node=document.createElement("div");node.className="iclub-qa-note";node.textContent=t().note;return node;}
  function activeTab(name){
-  if(name!==tab){bridge?.clear();void binder?.leave();finished=false;}
+  if(name!==tab){bridge?.clear();void binder?.leave();window.iClubGlobalAiShell?.previewResetPractice();finished=false;}
   tab=name;
   document.querySelectorAll(".view[data-view]").forEach(v=>v.classList.toggle("is-active",v.dataset.view===name));
   document.querySelectorAll("#tabbar [data-tab]").forEach(v=>v.classList.toggle("is-active",v.dataset.tab===name));
@@ -125,7 +155,7 @@
  }
  function start(){
   if(subject!=="economics"){showNotice(t().notReady);return;}
-  bridge.clear();void binder.leave();step=0;chosen=[null,null];finished=false;activateScreen("practice-quiz");
+  bridge.clear();void binder.leave();window.iClubGlobalAiShell?.previewResetPractice();step=0;chosen=[null,null];finished=false;activateScreen("practice-quiz");
  }
  function sendAnswer(){
   if(chosen[step]===null)return;
@@ -146,6 +176,7 @@
   items.forEach((item,i)=>{
    const box=document.createElement("div");box.className="iclub-qa-review";
    box.setAttribute("data-practice-ai-question-id",String(item.id));
+   box.setAttribute("data-qa-question-number",String(i+1));
    const title=document.createElement("div");title.className="card-title";
    title.textContent=(i+1)+". "+t()[q(i)];
    const body=document.createElement("p");body.className="muted small";
@@ -153,10 +184,10 @@
    const actions=document.createElement("div");actions.className="iclub-qa-review-actions";
    const icon=()=>{const img=document.createElement("img");img.className="ep-ai-mark ep-ai-mark-inline";
     img.src="assets/iclub-ai-mark-temp.jpg?v=1";img.alt="";img.setAttribute("aria-hidden","true");return img;};
-   const prompt=template=>template.replace("{n}",String(i+1)).replace("{question}",t()[q(i)]);
+   const prompt=template=>template.replace("{n}",String(i+1));
    const explain=document.createElement("button");explain.className="btn primary";
    explain.type="button";explain.dataset.qaAiAction="explain";
-   explain.append(icon(),document.createTextNode(t().explain));
+   explain.append(icon(),document.createTextNode(chosen[i]===item.correct?t().explainSolution:t().explainMistake));
    const ask=document.createElement("button");ask.className="btn ghost";
    ask.type="button";ask.dataset.qaAiAction="chat";
    ask.append(icon(),document.createTextNode(t().askAi));
@@ -167,15 +198,17 @@
     handling=true;explain.disabled=true;ask.disabled=true;
     try{
       if(!bridge.selectQuestion(item.id).ok)return;
+      if(!window.iClubGlobalAiShell?.previewSelectQuestion(item.id))return;
       const result=await binder.sync();
       if(!result.ok||!finished||locked||screen!=="practice-review")return;
       if(mode==="explain"){
         await window.iClubGlobalAiShell?.previewExplain({
-          questionId:item.id,displayText:prompt(t().explainPrompt)
+          questionId:item.id,displayText:prompt(chosen[i]===item.correct?
+            t().explainPromptCorrect:t().explainPromptWrong),attemptId:101
         });
       }else{
         window.iClubGlobalAiShell?.previewAskInChat({
-          questionId:item.id,draft:prompt(t().askDraft)
+          questionId:item.id
         });
       }
     }finally{handling=false;explain.disabled=false;ask.disabled=false;}
@@ -200,7 +233,7 @@
   $("qa-protected").setAttribute("aria-pressed",String(locked));
   $("qa-protected").textContent=locked?t().unprotect:t().protect;
   if(locked){
-   bridge.clear();void binder.leave();finished=false;
+   bridge.clear();void binder.leave();window.iClubGlobalAiShell?.previewResetPractice();finished=false;
    window.dispatchEvent(new CustomEvent("iclub:exam-prep-session",{
     detail:{session:{session_type:"diagnostic",status:"active"}}
    }));

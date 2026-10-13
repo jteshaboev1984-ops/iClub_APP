@@ -1105,10 +1105,10 @@
     return selected?.getAttribute("data-iclub-ai-v21-question-id")===String(id);
   }
 
-  async function previewExplain({questionId,displayText,attemptId}={}) {
+  async function previewExplain({questionId,displayText,practiceSessionId}={}) {
     const prompt=String(displayText||"").trim().slice(0,MAX_INPUT_CHARS);
     if(!prompt||state.busy||!previewSelectQuestion(questionId))return false;
-    const session=Number(attemptId);
+    const session=Number(practiceSessionId);
     if(!Number.isSafeInteger(session)||session<=0)return false;
     const cacheKey=session+":"+Number(questionId),cached=state.qaExplanationCache.get(cacheKey);
     openPanel();

@@ -19,3 +19,23 @@
  .iclub-qa-review-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
  .iclub-qa-review-actions .btn{width:100%;font-size:12px;padding:8px 6px}
 }
+
+/* Question identity lives in RAM; each message is tagged, while one thread
+   remains per subject. Do not repeat the prepared quick action in Review. */
+.iclub-global-ai-message[data-qa-question-id]{flex-direction:column;gap:3px}
+.iclub-global-ai-message.is-user[data-qa-question-id]{align-items:flex-end}
+.iclub-global-ai-message.is-assistant[data-qa-question-id]{align-items:flex-start}
+.iclub-qa-ai-message-context{max-width:88%;color:#637994;font-size:11px;line-height:1.3;font-weight:650;padding:0 5px}
+.iclub-global-ai-quick:empty{display:none}
+/* The expand icon previously appeared as an unstyled square. */
+.iclub-global-ai-head-actions{display:flex;align-items:center;gap:6px}
+.iclub-global-ai-expand{width:36px;height:36px;min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:#edf3f9;color:#344f70;padding:0;cursor:pointer}
+.iclub-global-ai-expand svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.iclub-global-ai-panel[data-expanded="true"]{width:min(740px,calc(100vw - 24px));height:min(85dvh,calc(100dvh - 90px - var(--safe-bottom)))}
+.iclub-global-ai-panel{max-height:calc(100dvh - 88px - var(--safe-bottom))}
+.iclub-global-ai-composer textarea:focus-visible{outline:2px solid #8eb3e9;outline-offset:0}
+@media(max-width:600px){
+ .iclub-global-ai-panel{height:min(76dvh,calc(100dvh - 92px - var(--safe-bottom)));min-height:0;max-height:calc(100dvh - 92px - var(--safe-bottom))}
+ .iclub-global-ai-panel[data-expanded="true"]{left:6px;right:6px;width:auto;height:calc(100dvh - 85px - var(--safe-bottom));max-height:calc(100dvh - 85px - var(--safe-bottom))}
+}
+@media(max-height:530px){.iclub-global-ai-panel{min-height:0;height:calc(100dvh - 80px - var(--safe-bottom));max-height:calc(100dvh - 80px - var(--safe-bottom))}}
