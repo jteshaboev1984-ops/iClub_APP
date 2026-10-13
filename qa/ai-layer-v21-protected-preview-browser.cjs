@@ -14,6 +14,7 @@ const ASSETS={
  "/global-ai-ui.js":["global-ai-ui.js","text/javascript"],
  "/global-ai-ui.css":["global-ai-ui.css","text/css"],
  "/transport.js":["qa/ai-layer-v21-ui-transport.cjs","text/javascript"],
+ "/transport-expose.js":["qa/ai-layer-v21-protected-preview/transport-expose.js","text/javascript"],
  "/screen-binder.js":["qa/ai-layer-v21-screen-binding.cjs","text/javascript"],
  "/evidence-publisher.js":["qa/ai-layer-v21-evidence-publisher.cjs","text/javascript"],
  "/preview-glue.js":["qa/ai-layer-v21-preview-glue.cjs","text/javascript"]

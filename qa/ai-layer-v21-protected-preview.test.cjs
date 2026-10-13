@@ -20,7 +20,7 @@ test("Protected preview is self-contained: no Supabase, SDK, external calls or s
  assert.match(page,/script src="\/global-ai-ui\.js"/);
 });
 test("All UI assets are local, and preview imports REAL QA v2 binder/glue/publisher/transport",()=>{
- for(const path of ["global-ai-ui.css","global-ai-ui.js","transport.js","screen-binder.js",
+ for(const path of ["global-ai-ui.css","global-ai-ui.js","transport.js","transport-expose.js","screen-binder.js",
   "evidence-publisher.js","preview-glue.js"]){
   assert.ok(page.includes('="/'+path+'"'),path);
  }
@@ -69,4 +69,15 @@ test("Original shell immutable and synthetic review prompt is scoped",()=>{
  assert.match(patched,/__ICLUB_AI_V21_SYNTHETIC_ONLY__===true/);
  assert.doesNotMatch(original,/QA_SYNTHETIC_REVIEW_PROMPTS/);
  assert.throws(()=>patchSyntheticGlobalShell(patched),/synthetic_shell_source_drift/);
+});
+
+test("Browser transport is detached from CommonJS before binder/publisher/glue",()=>{
+ const html=read("index.html");
+ const list=["transport.js","transport-expose.js","screen-binder.js",
+  "evidence-publisher.js","preview-glue.js"];
+ const indices=list.map(x=>html.indexOf('src="/'+x+'"'));
+ assert.ok(indices.every(i=>i>=0));
+ assert.deepEqual([...indices].sort((a,b)=>a-b),indices);
+ assert.match(read("preview-controller.js"),/window\.iClubQaV21ScreenClient/);
+ assert.doesNotMatch(read("preview-controller.js"),/window\.module\?\.exports/);
 });

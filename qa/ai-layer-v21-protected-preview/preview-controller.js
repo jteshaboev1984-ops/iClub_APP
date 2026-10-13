@@ -172,8 +172,8 @@ const IClubSyntheticPreview=(()=>{
  }
  function setup(){
   if(initialized)return;initialized=true;
-  const C=window.module?.exports?.QaV21ScreenClient;
-  delete window.module;
+  const C=window.iClubQaV21ScreenClient;
+  delete window.iClubQaV21ScreenClient;
   if(typeof C!=="function"||typeof window.iClubQaV21ScreenBinder!=="function"||
    typeof window.iClubQaV21EvidencePublisher!=="function"||
    !window.__iclubQaV21Bridge){
