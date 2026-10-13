@@ -42,7 +42,7 @@ echo "Checking that $HOST:$PORT/$DB is a brand-new LOCAL scratch database..."
 check="$(psql -X -w -v ON_ERROR_STOP=1 -h "$HOST" -p "$PORT" -d "$DB" -Atc "
   select case when current_database() ~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
      and (inet_server_addr() is null or inet_server_addr() in ('127.0.0.1'::inet,'::1'::inet))
-     and not exists (select 1 from pg_tables where schemaname not in ('pg_catalog','information_schema'))
+     and not exists (select 1 from pg_tables where schemaname not in ('pg_catalog','information_schema') and schemaname !~ '^pg_')
     then 'SCRATCH_OK' else 'NOT_EMPTY_OR_UNSAFE' end;" 2>&1)" || {
   echo "NO-GO: cannot safely verify scratch connection: $check" >&2
   exit 4
