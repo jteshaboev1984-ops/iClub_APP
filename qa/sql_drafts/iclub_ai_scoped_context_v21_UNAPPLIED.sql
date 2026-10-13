@@ -26,17 +26,23 @@ CREATE TABLE private.iclub_ai_v21_current_screen(
 CREATE TABLE private.iclub_ai_v21_scoped_contexts(
  context_handle uuid PRIMARY KEY DEFAULT gen_random_uuid(),
  user_id uuid NOT NULL,
- surface_code text NOT NULL CHECK(surface_code IN ('practice')),
+ surface_code text NOT NULL CHECK(surface_code IN ('practice','lesson')),
  subject_key text NOT NULL,
- feature_code text NOT NULL CHECK(feature_code='answer_explanation'),
+ feature_code text NOT NULL CHECK((surface_code='practice' AND feature_code='answer_explanation') OR (surface_code='lesson' AND feature_code='topic_explanation')),
  topic_key text NOT NULL,
- practice_session_id bigint NOT NULL,
- practice_question_id bigint NOT NULL,
+ practice_session_id bigint,
+ practice_question_id bigint,
+ lesson_id bigint,
  context_revision bigint NOT NULL CHECK(context_revision>0),
  expires_at timestamptz NOT NULL DEFAULT (now()+interval '90 seconds'),
  created_at timestamptz NOT NULL DEFAULT now(),
  revoked_at timestamptz,
- CHECK(topic_key='question_'||practice_question_id::text)
+ CHECK((surface_code='practice' AND practice_session_id IS NOT NULL
+  AND practice_question_id IS NOT NULL AND lesson_id IS NULL
+  AND topic_key='question_'||practice_question_id::text)
+  OR (surface_code='lesson' AND lesson_id IS NOT NULL
+   AND practice_session_id IS NULL AND practice_question_id IS NULL
+   AND topic_key='lesson_'||lesson_id::text))
 );
 CREATE INDEX iclub_ai_v21_scoped_contexts_user_idx
  ON private.iclub_ai_v21_scoped_contexts(user_id,expires_at);
@@ -169,7 +175,7 @@ BEGIN
  WHERE user_id=p_user_id AND current_handle=v.context_handle
    AND revision=v.context_revision;
  IF NOT FOUND THEN RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');END IF;
- IF NOT EXISTS(
+ IF v.surface_code='practice' AND NOT EXISTS(
   SELECT 1
   FROM public.practice_sessions_v4 s
   JOIN public.subjects subj ON subj.id=s.subject_id
@@ -188,6 +194,16 @@ BEGIN
  ) THEN
   RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');
  END IF;
+ IF v.surface_code='lesson' AND NOT EXISTS(
+  SELECT 1 FROM public.lessons l
+  JOIN public.subjects subj ON subj.id=l.subject_id
+  WHERE l.id=v.lesson_id
+   AND subj.subject_key=v.subject_key AND subj.is_active=true
+   AND EXISTS(SELECT 1 FROM public.user_subjects us
+    WHERE us.user_id=p_user_id AND us.subject_id=subj.id)
+ ) THEN
+  RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');
+ END IF;
  RETURN jsonb_build_object('allowed',true,'context',jsonb_build_object(
   'owner_id',v.user_id,'route_authority','unified_ai','active',true,
   'protected_assessment',false,
@@ -202,6 +218,78 @@ REVOKE ALL ON FUNCTION public.get_iclub_ai_v21_scoped_context_service(
  uuid,text) FROM public,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.get_iclub_ai_v21_scoped_context_service(
  uuid,text) TO service_role;
+
+-- Lesson server context: no invented lesson title or AI content. The existing
+-- public.lessons row is the server-verifiable selector. Independent editorial
+-- release by lesson_XX and locale determines "В разработке" vs available.
+CREATE OR REPLACE FUNCTION public.mint_iclub_ai_v21_lesson_context_service(
+ p_user_id uuid,p_lesson_id bigint
+) RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+ SET search_path='' AS $
+DECLARE
+ v_subject text;
+ v_id uuid;
+ v_rev bigint;
+ v_existing_handle uuid;
+BEGIN
+ IF p_user_id IS NULL OR p_lesson_id IS NULL OR p_lesson_id<=0 THEN
+  RETURN jsonb_build_object('allowed',false,'reason','invalid_request');
+ END IF;
+ IF NOT EXISTS(
+  SELECT 1 FROM private.iclub_global_ai_runtime_config cfg
+  WHERE cfg.id=1 AND cfg.kill_switch=false
+   AND cfg.ui_enabled=true AND cfg.gateway_enabled=true
+ ) THEN
+  RETURN jsonb_build_object('allowed',false,'reason','global_ai_disabled');
+ END IF;
+ IF private.iclub_ai_has_active_protected_assessment_v1(p_user_id) THEN
+  RETURN jsonb_build_object('allowed',false,'reason','active_assessment');
+ END IF;
+ SELECT subj.subject_key INTO v_subject
+ FROM public.lessons l JOIN public.subjects subj ON subj.id=l.subject_id
+ WHERE l.id=p_lesson_id AND subj.is_active=true
+ AND EXISTS(SELECT 1 FROM public.user_subjects us
+  WHERE us.user_id=p_user_id AND us.subject_id=subj.id)
+ LIMIT 1;
+ IF v_subject IS NULL THEN
+  RETURN jsonb_build_object('allowed',false,'reason','lesson_context_not_authorized');
+ END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text,303));
+ SELECT c.context_handle INTO v_existing_handle
+ FROM private.iclub_ai_v21_current_screen nav
+ JOIN private.iclub_ai_v21_scoped_contexts c ON c.context_handle=nav.current_handle
+ WHERE nav.user_id=p_user_id AND c.user_id=p_user_id
+  AND c.context_revision=nav.revision
+  AND c.lesson_id=p_lesson_id AND c.surface_code='lesson'
+  AND c.revoked_at IS NULL AND c.expires_at>now();
+ IF FOUND THEN
+  RETURN jsonb_build_object('allowed',true,
+   'context_handle',v_existing_handle,'expires_in_seconds',90,'duplicate',true);
+ END IF;
+ IF (SELECT count(*) FROM private.iclub_ai_v21_scoped_contexts
+     WHERE user_id=p_user_id AND created_at>now()-interval '1 minute')>=30 THEN
+  RETURN jsonb_build_object('allowed',false,'reason','context_rate_limited');
+ END IF;
+ v_id:=gen_random_uuid();
+ INSERT INTO private.iclub_ai_v21_current_screen(user_id,current_handle,revision,updated_at)
+ VALUES(p_user_id,v_id,1,now())
+ ON CONFLICT(user_id) DO UPDATE
+ SET current_handle=excluded.current_handle,
+ revision=private.iclub_ai_v21_current_screen.revision+1,updated_at=now()
+ RETURNING revision INTO v_rev;
+ INSERT INTO private.iclub_ai_v21_scoped_contexts(
+  context_handle,user_id,surface_code,subject_key,feature_code,topic_key,
+  lesson_id,context_revision
+ ) VALUES(v_id,p_user_id,'lesson',v_subject,
+  'topic_explanation','lesson_'||p_lesson_id::text,p_lesson_id,v_rev);
+ RETURN jsonb_build_object('allowed',true,
+  'context_handle',v_id,'expires_in_seconds',90);
+END;
+$;
+REVOKE ALL ON FUNCTION public.mint_iclub_ai_v21_lesson_context_service(
+ uuid,bigint) FROM public,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.mint_iclub_ai_v21_lesson_context_service(
+ uuid,bigint) TO service_role;
 
 -- End of screen: invalidate the current handle at once; an old handle
 -- cannot become valid again even if a user returns to the same screen.
