@@ -59,6 +59,33 @@ CREATE TABLE private.iclub_ai_v21_ticket_signoffs(
 REVOKE ALL ON private.iclub_ai_v21_editorial_tickets FROM public,anon,authenticated,service_role;
 REVOKE ALL ON private.iclub_ai_v21_ticket_signoffs FROM public,anon,authenticated,service_role;
 
+-- Independently authenticated (offline) Ed25519 evidence importer; NO live keys.
+DO $role$
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='iclub_ai_v21_evidence_importer') THEN
+  CREATE ROLE iclub_ai_v21_evidence_importer NOLOGIN;
+ END IF;
+END $role$;
+CREATE TABLE private.iclub_ai_v21_verified_review_attestations(
+ ticket_id uuid PRIMARY KEY REFERENCES private.iclub_ai_v21_editorial_tickets(ticket_id),
+ action text NOT NULL CHECK(action IN('publish','revoke')),
+ surface_code text NOT NULL,subject_key text NOT NULL,feature_code text NOT NULL,
+ topic_key text NOT NULL,locale text NOT NULL,source_id text NOT NULL,
+ source_version text NOT NULL,source_hash text NOT NULL CHECK(source_hash~'^[a-f0-9]{64}$'),
+ expected_revision bigint NOT NULL CHECK(expected_revision>=0),
+ qa_evidence jsonb NOT NULL CHECK(jsonb_typeof(qa_evidence)='object'),
+ reason text NOT NULL DEFAULT '',
+ reviewers jsonb NOT NULL CHECK(jsonb_typeof(reviewers)='object'),
+ manifest_sha256 text NOT NULL CHECK(manifest_sha256~'^[a-f0-9]{64}$'),
+ trust_registry_revision text NOT NULL,
+ verified_at timestamptz NOT NULL DEFAULT now(),
+ expires_at timestamptz NOT NULL DEFAULT (now()+interval '15 minutes'),
+ CHECK(expires_at>verified_at AND expires_at<=verified_at+interval '24 hours')
+);
+REVOKE ALL ON TABLE private.iclub_ai_v21_verified_review_attestations
+ FROM PUBLIC,anon,authenticated,service_role,iclub_ai_v21_editorial_publisher;
+GRANT INSERT ON TABLE private.iclub_ai_v21_verified_review_attestations
+ TO iclub_ai_v21_evidence_importer;
 -- The 8 independent gate results are recorded and signed in an OUT-OF-BAND
 -- editorial review, not guessed from source presence/card count.
 -- This helper is called only after all three independent signoff rows exist.
@@ -144,6 +171,29 @@ BEGIN
   END IF;
   n:=1;
  END IF;
+ -- A reviewer UUID is not an identity proof. The imported attestation must
+ -- be independently Ed25519 verified and exactly match this one ticket.
+ IF NOT EXISTS(
+  SELECT 1 FROM private.iclub_ai_v21_verified_review_attestations a
+  WHERE a.ticket_id=t.ticket_id AND a.action='publish'
+   AND a.surface_code=t.surface_code AND a.subject_key=t.subject_key
+   AND a.feature_code=t.feature_code AND a.topic_key=t.topic_key
+   AND a.locale=t.locale AND a.source_id=t.source_id
+   AND a.source_version=t.source_version AND a.source_hash=t.source_hash
+   AND a.expected_revision=p_expected_revision AND a.qa_evidence=t.qa_evidence
+   AND a.reason=t.reason AND a.verified_at<=now() AND a.expires_at>now()
+   AND a.reviewers->>'content'=(
+    SELECT reviewer_id::text FROM private.iclub_ai_v21_ticket_signoffs
+     WHERE ticket_id=t.ticket_id AND review_domain='content')
+   AND a.reviewers->>'rights'=(
+    SELECT reviewer_id::text FROM private.iclub_ai_v21_ticket_signoffs
+     WHERE ticket_id=t.ticket_id AND review_domain='rights')
+   AND a.reviewers->>'technical'=(
+    SELECT reviewer_id::text FROM private.iclub_ai_v21_ticket_signoffs
+     WHERE ticket_id=t.ticket_id AND review_domain='technical')
+   AND (SELECT count(*) FROM jsonb_object_keys(a.reviewers))=3
+ ) THEN RETURN jsonb_build_object('ok',false,'reason','editorial_attestation_missing');
+ END IF;
  -- A signed review cannot itself override runtime OFF, beta/cohort or
  -- provider constraints: this toggles only the editorial *topic* row.
  UPDATE private.iclub_ai_v21_editorial_source_versions SET
@@ -220,6 +270,21 @@ BEGIN
  OR r.source_id<>t.source_id OR r.source_version<>t.source_version
  OR r.source_hash<>t.source_hash THEN
   RETURN jsonb_build_object('ok',false,'reason','revision_or_state_conflict');
+ END IF;
+ IF NOT EXISTS(
+  SELECT 1 FROM private.iclub_ai_v21_verified_review_attestations a
+  WHERE a.ticket_id=t.ticket_id AND a.action='revoke'
+   AND a.surface_code=t.surface_code AND a.subject_key=t.subject_key
+   AND a.feature_code=t.feature_code AND a.topic_key=t.topic_key
+   AND a.locale=t.locale AND a.source_id=t.source_id
+   AND a.source_version=t.source_version AND a.source_hash=t.source_hash
+   AND a.expected_revision=p_expected_revision AND a.qa_evidence=t.qa_evidence
+   AND a.reason=t.reason AND a.verified_at<=now() AND a.expires_at>now()
+   AND a.reviewers->>'safety'=(
+    SELECT reviewer_id::text FROM private.iclub_ai_v21_ticket_signoffs
+     WHERE ticket_id=t.ticket_id AND review_domain='safety')
+   AND (SELECT count(*) FROM jsonb_object_keys(a.reviewers))=1
+ ) THEN RETURN jsonb_build_object('ok',false,'reason','safety_attestation_missing');
  END IF;
  n:=r.publication_revision+1;
  UPDATE private.iclub_ai_topic_release_v21

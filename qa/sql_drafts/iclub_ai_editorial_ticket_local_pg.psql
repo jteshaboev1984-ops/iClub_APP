@@ -110,7 +110,12 @@ BEGIN
  OR NOT has_function_privilege('iclub_ai_v21_editorial_publisher',
   'public.publish_iclub_ai_v21_ticket(uuid,bigint)','EXECUTE') THEN
   RAISE EXCEPTION 'Unsafe publication EXECUTE GRANT detected';
- END IF;
+ END IF; IF has_table_privilege('service_role','private.iclub_ai_v21_verified_review_attestations','INSERT')
+ OR has_table_privilege('iclub_ai_v21_editorial_publisher','private.iclub_ai_v21_verified_review_attestations','INSERT')
+ OR NOT has_table_privilege('iclub_ai_v21_evidence_importer','private.iclub_ai_v21_verified_review_attestations','INSERT')
+ OR has_function_privilege('iclub_ai_v21_evidence_importer','public.publish_iclub_ai_v21_ticket(uuid,bigint)','EXECUTE')
+ THEN RAISE EXCEPTION 'Untrusted evidence importer rights';END IF;
+
  digest:=encode(sha256(convert_to(source_body||E'\n'||prepared::text,'UTF8')),'hex');
  INSERT INTO private.iclub_ai_v21_editorial_source_versions(
  surface_code,subject_key,feature_code,topic_key,locale,
@@ -146,7 +151,19 @@ BEGIN
  WHERE ticket_id=pub_ticket;
  ret:=public.publish_iclub_ai_v21_ticket(pub_ticket,5);
  IF ret->>'reason' IS DISTINCT FROM 'revision_or_state_conflict' THEN
-  RAISE EXCEPTION 'Wrong initial revision published: %',ret;END IF;
+  RAISE EXCEPTION 'Wrong initial revision published: %',ret;END IF; ret:=public.publish_iclub_ai_v21_ticket(pub_ticket,0);
+ IF ret->>'reason' IS DISTINCT FROM 'editorial_attestation_missing' THEN
+  RAISE EXCEPTION 'Bare UUID allowed editorial publication: %',ret;END IF;
+ INSERT INTO private.iclub_ai_v21_verified_review_attestations(
+  ticket_id,action,surface_code,subject_key,feature_code,topic_key,locale,
+  source_id,source_version,source_hash,expected_revision,qa_evidence,
+  reviewers,manifest_sha256,trust_registry_revision)
+ SELECT ticket_id,action,surface_code,subject_key,feature_code,topic_key,locale,
+  source_id,source_version,source_hash,0,qa_evidence,
+  jsonb_build_object('content',reviewer_content::text,'rights',reviewer_rights::text,
+  'technical',reviewer_technical::text),repeat('a',64),'synthetic_only'
+ FROM private.iclub_ai_v21_editorial_tickets WHERE ticket_id=pub_ticket;
+
  -- Deliberately interrupt the atomic operation after source status UPDATE.
  injected_failure:=false;
  BEGIN
@@ -215,7 +232,16 @@ BEGIN
  INSERT INTO private.iclub_ai_v21_ticket_signoffs(ticket_id,reviewer_id,review_domain)
  VALUES(second_ticket,reviewer_content,'content'),
  (second_ticket,reviewer_rights,'rights'),
- (second_ticket,reviewer_technical,'technical');
+ (second_ticket,reviewer_technical,'technical'); INSERT INTO private.iclub_ai_v21_verified_review_attestations(
+  ticket_id,action,surface_code,subject_key,feature_code,topic_key,locale,
+  source_id,source_version,source_hash,expected_revision,qa_evidence,
+  reviewers,manifest_sha256,trust_registry_revision)
+ SELECT ticket_id,action,surface_code,subject_key,feature_code,topic_key,locale,
+  source_id,source_version,source_hash,1,qa_evidence,
+  jsonb_build_object('content',reviewer_content::text,'rights',reviewer_rights::text,
+  'technical',reviewer_technical::text),repeat('b',64),'synthetic_only'
+ FROM private.iclub_ai_v21_editorial_tickets WHERE ticket_id=second_ticket;
+
  ret:=public.publish_iclub_ai_v21_ticket(second_ticket,1);
  IF ret->>'reason' IS DISTINCT FROM 'revision_or_state_conflict' THEN
   RAISE EXCEPTION 'Already-live topic was overwritten by another ticket: %',ret;END IF;
@@ -233,7 +259,18 @@ BEGIN
  VALUES(revoke_ticket,reviewer_safety,'safety');
  UPDATE private.iclub_ai_v21_editorial_tickets
  SET reason='Safety editor: suspend synthetic source integrity.'
- WHERE ticket_id=revoke_ticket;
+ WHERE ticket_id=revoke_ticket; ret:=public.revoke_iclub_ai_v21_ticket(revoke_ticket,1);
+ IF ret->>'reason' IS DISTINCT FROM 'safety_attestation_missing' THEN
+  RAISE EXCEPTION 'Bare UUID allowed emergency revoke: %',ret;END IF;
+ INSERT INTO private.iclub_ai_v21_verified_review_attestations(
+  ticket_id,action,surface_code,subject_key,feature_code,topic_key,locale,
+  source_id,source_version,source_hash,expected_revision,qa_evidence,
+  reason,reviewers,manifest_sha256,trust_registry_revision)
+ SELECT ticket_id,action,surface_code,subject_key,feature_code,topic_key,locale,
+  source_id,source_version,source_hash,1,qa_evidence,reason,
+  jsonb_build_object('safety',reviewer_safety::text),repeat('c',64),'synthetic_only'
+ FROM private.iclub_ai_v21_editorial_tickets WHERE ticket_id=revoke_ticket;
+
  ret:=public.revoke_iclub_ai_v21_ticket(revoke_ticket,999);
  IF ret->>'reason' IS DISTINCT FROM 'revision_or_state_conflict' THEN
   RAISE EXCEPTION 'Wrong revocation revision was accepted: %',ret;END IF;

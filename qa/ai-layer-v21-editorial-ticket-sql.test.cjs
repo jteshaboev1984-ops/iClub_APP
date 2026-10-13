@@ -22,6 +22,17 @@ test('Governance ticket and signoffs are not writable through learner APIs',()=>
  assert.match(sql,/REVOKE ALL ON private.iclub_ai_v21_ticket_signoffs FROM public,anon,authenticated,service_role/);
  assert.equal(/CREATE OR REPLACE FUNCTION public.create_iclub_ai_v21_ticket/i.test(sql),false);
 });
+test('Only cryptographically verified, scoped and unexpired reviewer attestations permit publish/revoke',()=>{
+ assert.match(sql,/CREATE ROLE iclub_ai_v21_evidence_importer NOLOGIN/);
+ assert.match(sql,/editorial_attestation_missing/);
+ assert.match(sql,/safety_attestation_missing/);
+ assert.match(sql,/a.qa_evidence=t.qa_evidence/);
+ assert.match(sql,/a.expected_revision=p_expected_revision/);
+ assert.match(sql,/REVOKE ALL ON TABLE private.iclub_ai_v21_verified_review_attestations/);
+ assert.match(sql,/GRANT INSERT ON TABLE private.iclub_ai_v21_verified_review_attestations/);
+ assert.match(pg,/Bare UUID allowed editorial publication/);
+ assert.match(pg,/Bare UUID allowed emergency revoke/);
+});
 test('Exactly three distinct review domains and signed checklist needed for publication',()=>{
  for(const name of ['content','rights','technical','accessibility_passed',
  'source_version_verified','correctness_passed','negative_tests_passed',
