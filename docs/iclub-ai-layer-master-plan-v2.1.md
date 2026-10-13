@@ -365,3 +365,24 @@ The consolidated `qa/run-ai-layer-v21-offline.cjs` now lists **18** test suites;
 
 
 **P5/P6 follow-up QA refinement:** 2026-10-12 — frozen audit subject statuses were removed as runtime authority: live server `subjects.is_active` plus source/QA gates controls future releases (Master decisions 38C and 42A). Inactive current courses remain blocked. One further regression verified future subject activation cannot bypass missing approved content. New P5/P6 tests now **40/40** in isolated committed-source execution; no production rollout.
+
+
+## 22. Editorial content produced separately — AI technical publication interface (2026-10-13)
+
+**Architect clarification (binding):** THIS chat implements **only** the technical iClub AI Layer. Cards, academic questions, theory, explanations and substantive editorial content are made and approved in **another chat/workstream**. AI engineering must NOT author dummy academic cards or repurpose generic topic content as exact question answers. Its duty is a safe, universal receiver for independently published content.
+
+**Expected behavior after approved release:** The technical system reads server-owned canonical subject / screen / function / topic / locale, verifies current editorial publication + source version/hash/rights + all eight QA gates + release authorization for this learner/cohort + protected-assessment guard. A newly published topic becomes available automatically in an **already owner-approved rollout** without changing app code or rebuilding Vercel for that topic. Revoking publication, source rights, locale approval or source hash closes that single path. New subject content alone does not approve public/beta rollout.
+
+**Expected behavior when unready:** Child sees an attractive, proofread RU/UZ/EN title (**«В разработке»** / **«Ishlab chiqilmoqda»** / **“In development”**) and one concise explanation. General iClub help is suggested only if **it independently passes live readiness and permissions**. Do NOT charge quota, call a provider or invent an explanation. Protected active assessment hides the AI surface completely; system-wide AI OFF has a separate temporary-unavailable state. No internal terms (“units”, “лесенка”, provider, SQL, routes) in learner-facing text.
+
+**Completed QA technical deliverable (not deployed):**
+- `qa/sql_drafts/iclub_ai_topic_release_gate_v21_UNAPPLIED.sql`: scratch-only private server-governed publication metadata table and service_role SELECT RPC keyed by **surface × subject × feature × topic × locale**, source version/hash and publication revision, all eight editorial/technical gates default FALSE, default draft and disabled. No content/questions or academic writes.
+- `qa/ai-layer-v21-content-handoff-gate.cjs`: server-only dynamic live availability adapter with JWT-bound scoped context contract, trusted server clock, current feature/source/rollout, two-phase revocation checking and proofread three-language unavailable responses. General Help offered only after own source gates.
+- `qa/ai-layer-v21-content-handoff-gate.test.cjs`: **32/32** synthetic behavior tests passed. `qa/ai-layer-v21-content-handoff-sql.test.cjs`: **13/13** static SQL tests passed. Combined **45/45** against GitHub source in isolated JS/V8. **NOT** real PostgreSQL or native Node/Edge/browser signoff.
+- `qa/sql_drafts/iclub_ai_topic_release_local_pg.psql`: rollback-only synthetic local publication lifecycle fixture; NOT EXECUTED. Scratch runner allowlists `ICLUB_PGTEST_SUITE=release`. Offline runner now registers **20** separate suites.
+- Complete source/publisher contract in `docs/iclub-ai-layer-content-technical-handoff-v2.1.md`.
+
+**Still NO-GO before live users:** actual local PostgreSQL execution, authenticated server adapter to new publication RPC, verified source proof for each specific domain/screen and independent owner/cohort release, security/limits under concurrent Edge instances, UI wiring and mobile RU/UZ/EN Preview, broad academic regression and explicit owner approval. A published content card/row **by itself** does not activate a beta; the approved publication workflow is not yet implemented or deployed. Keep working Mathematics Exam Prep entirely separate.
+
+**Production / Vercel / Supabase effect of this milestone:** none; QA branch only.
+
