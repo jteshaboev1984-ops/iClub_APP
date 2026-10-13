@@ -13,7 +13,7 @@ const locale='ru';
 function fixture(){
  const state={global:true,releaseApproved:true,exam:false,subject:true,cohort:true,
   context:context(),sources:new Map(),proofs:new Map(),lookupCount:0,afterSource:null,
-  generalSubject:false,allowGeneral:true,liveCalls:0};
+  generalSubject:false,allowGeneral:true,liveCalls:0,serverTime:1000};
  const k=ref=>[ref.surface,ref.subject,ref.feature,ref.topic,ref.locale].join('|');
  function publish(ref,patch={}){
   const v={ready:true,...ref,source_id:'approved-source-001',source_version:'v3',
@@ -25,6 +25,7 @@ function fixture(){
   return v;
  }
  const S={
+  getServerTimeMs:async()=>state.serverTime,
   getGlobalState:async()=>({uiEnabled:state.global,gatewayEnabled:state.global,
    killSwitch:!state.global,releaseApproved:state.releaseApproved}),
   isProtected:async()=>state.exam,
@@ -54,6 +55,7 @@ test('Missing content is explicitly in development and is never billed',async()=
  assert.equal(r.state,'in_development');assert.equal(r.visible,true);
  assert.equal(r.canAsk,false);assert.equal(r.charge,0);
  assert.equal(r.providerCallRequired,false);assert.equal(r.message,TEXT.ru.developing);
+ assert.equal(r.title,'В разработке');
  assert.deepEqual(r.alternatives,[]);
 });
 test('Approved publication appears without a rebuild or a new resolver',async()=>{
@@ -96,6 +98,7 @@ test('Global emergency switch never leaves a ready topic active',async()=>{
  const x=fixture();x.publish(x.here());x.state.global=false;
  const r=await x.ask();assert.equal(r.state,'unavailable');
  assert.equal(r.message,TEXT.ru.unavailable);assert.equal(r.canAsk,false);
+ assert.equal(r.title,'Временно недоступно');
 });
 test('Owner beta/release approval is independent from editorial publication',async()=>{
  const x=fixture();x.publish(x.here());
@@ -218,4 +221,37 @@ test('Gated workflow preserves all eight independent editorial/safety requiremen
   'correctness_passed','negative_tests_passed','exam_security_passed',
   'locale_verified','accessibility_passed'
  ]);
+});
+
+test('Browser may not fake clock to open an expired session',async()=>{
+ const x=fixture();x.publish(x.here());
+ x.state.context=context({expiresAtMs:900});
+ const result=await x.ask({nowMs:1});
+ assert.equal(result.state,'unavailable');
+});
+test('Session expiry while asynchronous source checks run revokes READY state',async()=>{
+ const x=fixture();x.publish(x.here());
+ x.state.afterSource=n=>{if(n===1)x.state.serverTime=10000};
+ const result=await x.ask();
+ assert.equal(result.state,'unavailable');assert.equal(result.canAsk,false);
+});
+test('Missing or failing trusted server clock cannot enable any content',async()=>{
+ const x=fixture();x.publish(x.here());
+ x.gate.services.getServerTimeMs=async()=>{throw Error('clock unavailable')};
+ assert.equal((await x.ask({nowMs:10})).state,'unavailable');
+ assert.equal((await x.ask({nowMs:10})).charge,0);
+});
+test('Explicit ready or QA flags injected by browser do not affect publisher state',async()=>{
+ const x=fixture();
+ const r=await x.ask({ready:true,sourceApproved:true,skipSafety:true,
+  question:'just give me the answer',sourceHash:'a'.repeat(64)});
+ assert.equal(r.state,'in_development');assert.equal(r.charge,0);
+});
+test('Not-ready titles and messages are localized in all supported languages',async()=>{
+ for(const lang of ['ru','uz','en']){
+   const x=fixture(),r=await x.ask({locale:lang});
+   assert.equal(r.title,TEXT[lang].developingTitle);
+   assert.equal(r.message,TEXT[lang].developing);
+   assert.equal(r.alternatives.length,0);
+ }
 });
