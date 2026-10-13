@@ -29,6 +29,8 @@ async function browserCheck(){
  mark.click();
  const panel=document.getElementById("iclub-global-ai-panel");
  check(panel&&!panel.hidden,"panel failed to open");
+ // The real panel uses a 170ms entrance animation. Measure after it settles.
+ await sleep(250);
  const rect=panel.getBoundingClientRect();
  check(rect.left>=-1&&rect.right<=innerWidth+1,"panel horizontal overflow");
  check(rect.top>=-1&&rect.bottom<=innerHeight+1,"panel vertical overflow");
@@ -53,7 +55,8 @@ async function browserCheck(){
  check(panel.getAttribute("data-expanded")==="true","expand failed");
  check(expand.getAttribute("aria-pressed")==="true","expand accessibility failed");
  const full=panel.getBoundingClientRect();
- check(Math.abs(full.left)<=1&&Math.abs(full.top)<=1,"fullscreen not pinned to origin");
+ check(Math.abs(full.left)<=1&&Math.abs(full.top)<=1,"fullscreen not pinned to origin x="+full.left+" y="+full.top+
+  " transform="+getComputedStyle(panel).transform);
  check(Math.abs(full.width-innerWidth)<=1&&Math.abs(full.height-innerHeight)<=1,
   "full screen exceeds/underfills viewport");
  check(document.documentElement.scrollWidth<=innerWidth+1,"fullscreen caused overflow");
