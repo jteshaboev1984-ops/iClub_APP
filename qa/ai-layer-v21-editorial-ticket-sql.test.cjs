@@ -4,6 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const sql=fs.readFileSync('qa/sql_drafts/iclub_ai_editorial_ticket_publisher_v21_UNAPPLIED.sql','utf8');
 const pg=fs.readFileSync('qa/sql_drafts/iclub_ai_editorial_ticket_local_pg.psql','utf8');
+const learnerEdge=fs.readFileSync('qa/edge_v21/supabase_services.ts','utf8');
 test('Publisher SQL cannot be installed outside dedicated scratch DB',()=>{
  assert.match(sql,/current_database\(\) !~ '\^iclub_ai_v21_scratch_/);
  assert.match(sql,/BLOCKED: editorial publisher only in local scratch/);
@@ -78,4 +79,10 @@ test('Real PostgreSQL regression injects failure between source and release then
  'DROP TRIGGER synthetic_editorial_publish_fail',
  'Published source bypassed runtime OFF switch'])
   assert.ok(pg.includes(needle),needle);
+});
+
+test('Learner-serving Supabase Edge adapter has no editorial publishing/revoke endpoint',()=>{
+ for(const rpcName of ['publish_iclub_ai_v21_ticket','revoke_iclub_ai_v21_ticket',
+ 'iclub_ai_v21_ticket_signoffs','iclub_ai_v21_editorial_tickets'])
+  assert.equal(learnerEdge.includes(rpcName),false,rpcName);
 });
