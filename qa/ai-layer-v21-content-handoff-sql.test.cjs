@@ -5,7 +5,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const sql=fs.readFileSync('qa/sql_drafts/iclub_ai_topic_release_gate_v21_UNAPPLIED.sql','utf8');
 const scratch=fs.readFileSync('qa/sql_drafts/iclub_ai_topic_release_local_pg.psql','utf8');
 const runner=fs.readFileSync('qa/run-ai-layer-v21-postgres-local.sh','utf8');
-const fn=sql.slice(sql.indexOf('create or replace function public.get_iclub_ai_topic_release_service_v21('));
+const fn=sql.slice(sql.toLowerCase().indexOf('create or replace function public.get_iclub_ai_topic_release_service_v21('));
 test('SQL draft intrinsically prevents remote or production database execution',()=>{
  assert.match(sql,/DO \$iclub_ai_v21_release_scratch_only\$/);
  assert.match(sql,/current_database\(\) !~ '\^iclub_ai_v21_scratch_/);
