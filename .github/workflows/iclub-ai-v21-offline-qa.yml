@@ -53,6 +53,14 @@ jobs:
           node-version: '22'
       - name: Run complete offline QA and frozen Exam Prep regression
         run: node qa/run-ai-layer-v21-offline.cjs
+      - name: Install Deno runtime for Edge candidate verification
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Typecheck isolated Deno Edge transport
+        run: deno check qa/edge_v21/http.ts qa/edge_v21/supabase_services.ts qa/edge_v21/runtime.ts qa/edge_v21/index.ts
+      - name: Native Deno HTTP, Auth and source-gate regression
+        run: deno test --allow-read=qa --no-check qa/edge_v21/http_test.ts qa/edge_v21/supabase_services_test.ts qa/edge_v21/runtime_test.ts
       - name: Install ephemeral PostgreSQL client
         run: |
           if ! command -v psql >/dev/null; then
