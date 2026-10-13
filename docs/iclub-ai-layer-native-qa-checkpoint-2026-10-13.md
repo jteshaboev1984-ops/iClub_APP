@@ -28,7 +28,7 @@ QA branch `global-ai-ui.js` now treats server `in_development`, `subject_not_rea
 - UZ: **«Ishlab chiqilmoqda. Bu mavzu bo‘yicha AI yordami hali tayyorlanmoqda.»**
 - EN: **“In development. AI help for this topic is being prepared.”**
 
-No call to quota-exhaustion UI is triggered by that branch. Existing expensive-route insufficiency, protected exam hiding and old Maths Exam Prep UI remain independent. Two new offline interface contract tests were added in `qa/ai-layer-v21-interface-guard.test.cjs`. **This UI patch was made AFTER the completed green CI run; a native full-suite re-run of the latest UI change is still pending.** Do not describe the later commit as already covered by the earlier CI SHA.
+No call to quota-exhaustion UI is triggered by that branch. Existing expensive-route insufficiency, protected exam hiding and old Maths Exam Prep UI remain independent. Two new offline interface contract tests were added in `qa/ai-layer-v21-interface-guard.test.cjs`. **The final UI patch was subsequently verified in native GitHub Actions:** run https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38347173145, commit `e514cde3f72141cc9a89874410c64754dc1a0605`, SUCCESS. **340/340** native Node tests passed, plus 8 smoke tests, four separate PostgreSQL scratch suites (meter/math/practice/release), and protected Exam Prep file check. Do not describe the later commit as already covered by the earlier CI SHA.
 
 ## NO-GO gates still open (no learner rollout)
 
@@ -39,3 +39,7 @@ No call to quota-exhaustion UI is triggered by that branch. Existing expensive-r
 5. Owner approval for a controlled beta and the temporary mixed 1:3 tariffs remains separately required. Never reroute existing Mathematics Exam Prep Tutor.
 
 **Production/main modifications:** 0. **Supabase writes:** 0. **Vercel deployments initiated:** 0. This checkpoint uses only GitHub Actions ephemeral infrastructure.
+
+## Final consolidated QA verification — 2026-10-13
+
+The later green run [38347173145](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38347173145) supersedes the earlier 338-test checkpoint for final technical verification. Native **Node.js 22: 340/340** PASS; additional **8/8** smoke PASS; native **PostgreSQL 16: 4/4** scratch test suites PASS; legacy Maths isolation and protected file checks PASS. All QA runners and SQL files are fully isolated from production, deployed Edge functions, real learners and working Supabase. The SHA above is the tested snapshot.
