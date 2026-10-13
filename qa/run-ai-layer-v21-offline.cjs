@@ -25,7 +25,8 @@ const cases = [
  "qa/ai-layer-v21-cross-subject-admission.test.cjs",
  "qa/ai-layer-v21-cross-subject-sql.test.cjs",
  "qa/ai-layer-v21-content-handoff-gate.test.cjs",
- "qa/ai-layer-v21-content-handoff-sql.test.cjs"
+ "qa/ai-layer-v21-content-handoff-sql.test.cjs",
+ "qa/ai-layer-v21-delivery-claim-sql.test.cjs"
 ];
 for (const file of cases) {
  if (!existsSync(join(root,file))) {
