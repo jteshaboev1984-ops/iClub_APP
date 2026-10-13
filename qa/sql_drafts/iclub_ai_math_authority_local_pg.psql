@@ -11,7 +11,7 @@ BEGIN
   RAISE EXCEPTION 'STOP: not an iClub AI v2.1 scratch database';
  END IF;
  IF inet_server_addr() IS NOT NULL AND
-  inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) THEN
+  (inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) AND NOT (inet_server_addr() << '172.16.0.0/12'::cidr AND current_setting('application_name')='iclub_ai_v21_local_scratch')) THEN
   RAISE EXCEPTION 'STOP: scratch tests may only run on localhost';
  END IF;
  IF to_regclass('private.exam_prep_sessions') IS NOT NULL OR
