@@ -446,3 +446,16 @@ See `docs/iclub-ai-layer-p7-distributed-delivery-handoff-v2.1.md`. Current work 
 
 **Handoff:** `docs/iclub-ai-layer-p2-p3-edge-candidate-handoff-v2.1.md` defines backend service APIs, trust boundaries and future Edge deployment safety checks. Continue on QA branch, without changing existing `supabase/functions/global-ai/index.ts` or the original `exam-prep-ai` handler until protected Preview acceptance and architect authorization.
 
+
+## 27. Deno/Supabase Edge technical bridge with verified fail-closed RPC wiring (2026-10-13)
+
+**Large technical milestone, QA branch only:** implemented `qa/edge_v21/{http.ts,supabase_services.ts,runtime.ts,index.ts}` and three Deno-native regression files. These supply a strict Web Request/Response transport, no-wildcard CORS, 4 KiB body limit, generic no-secret errors, verified learner JWT through Supabase Auth, narrowly scoped service-role RPC mapping, read-only live subject check, source/topic release and user-policy contracts, plus a **Deno 2** bridge to the already-tested Node/CommonJS unified AI request flow. The QA entrypoint is **OFF by default**, explicitly locked behind `ICLUB_AI_V21_EXPLICIT_QA=isolated-preview-only` with a QA-only HTTPS origin. It is **not under active `supabase/functions/`** and cannot alter existing production AI or student progress.
+
+**Critical fail-closed boundary:** Deno `generateSynthetic` intentionally always rejects and can NEVER use the paid provider. Several v21 RPC names are still **proposed interfaces, not deployed functions**: runtime, current protected state, opaque scoped context, rollout, rights-verified source proof and bundle, learner entitlement, monetary provider budget. Absence of any RPC returns denied/unavailable; there is no fallback to old Maths Tutor, client-selected skill, unapproved source or fabricated academic explanation. The scratch-only published-source/meter/claim/finish SQL drafts have **not** been installed in production Supabase. Content/cards/questions remain exclusively the separate editorial workflow; technical readiness becomes available only in an already authorized release after source/rights/cohort checks.
+
+**Real native verification:** [GitHub Actions 38351457995](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38351457995), **SUCCESS** — Node.js 22 **382/382**, Deno 2.9.7 strict typecheck GREEN and **25/25 Deno tests**, PostgreSQL 16 **6/6** local scratch SQL suites, separate concurrent two-worker delivery race + forced atomic rollback GREEN, Mathematics subject-isolation and original protected-file regression PASS. All tests use synthetic data without Supabase/provider credentials and without any Vercel or production deployment.
+
+**Next integration gates:** real DB-backed mint/verify/revoke of opaque session contexts; Auth-bound active-screen and assessment guard; separate content editor-to-publisher read-only proof and source bundle RPCs; live independent rollout/entitlement/provider-budget checks; reversible production-safe SQL migration/RLS review; real Supabase Edge bundler compatibility; controlled protected Preview browser RU/UZ/EN and explicit architect approval. Node/Deno CLI green results **do not** mean the production Supabase Edge function is ready or installed.
+
+**Detailed handoff:** `docs/iclub-ai-layer-deno-edge-qa-bridge-v2.1.md`.
+
