@@ -26,6 +26,22 @@ CREATE TABLE private.iclub_ai_usage_reservations(
  request_id uuid PRIMARY KEY,user_id uuid NOT NULL,
  request_fingerprint text NOT NULL,route_class text NOT NULL,
  status text NOT NULL,expires_at timestamptz NOT NULL);
+-- Standalone mock v2 finalizer for the tombstone contract test only.
+-- The next integrated test uses the REAL meter v1 + v2 RPCs.
+CREATE FUNCTION public.finalize_iclub_ai_usage_service_v2(
+ p_request_id uuid,p_user_id uuid,p_request_fingerprint text,
+ p_outcome text,p_release_reason text default null
+) RETURNS jsonb LANGUAGE plpgsql AS $$
+BEGIN
+ UPDATE private.iclub_ai_usage_reservations
+ SET status=p_outcome
+ WHERE request_id=p_request_id AND user_id=p_user_id
+  AND request_fingerprint=p_request_fingerprint
+  AND status='reserved' AND expires_at>now();
+ IF NOT FOUND THEN RETURN jsonb_build_object('ok',false,'reason','invalid_quota'); END IF;
+ RETURN jsonb_build_object('ok',true);
+END;
+$$;
 \ir iclub_ai_delivery_claim_v21_UNAPPLIED.sql
 DO $test$
 DECLARE
@@ -56,10 +72,11 @@ BEGIN
  x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,repeat('c',64),'generated');
  IF x->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'New source fingerprint replay allowed: %',x;END IF;
+ UPDATE private.iclub_ai_usage_reservations SET status='released' WHERE request_id=rid;
  x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','completed');
- IF x->>'reason' IS DISTINCT FROM 'quota_not_finalized' THEN
-  RAISE EXCEPTION 'Delivery completed ahead of quota: %',x;END IF;
- UPDATE private.iclub_ai_usage_reservations SET status='completed' WHERE request_id=rid;
+ IF x->>'reason' IS DISTINCT FROM 'quota_not_reserved' THEN
+  RAISE EXCEPTION 'Delivery accepted externally modified quota: %',x;END IF;
+ UPDATE private.iclub_ai_usage_reservations SET status='reserved' WHERE request_id=rid;
  x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','completed');
  IF x->>'ok' IS DISTINCT FROM 'true' THEN
   RAISE EXCEPTION 'Completed quota could not be committed: %',x;END IF;
@@ -79,7 +96,6 @@ BEGIN
  VALUES(rid,u,fp,'prepared','reserved',now()+interval '90 seconds');
  x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'prepared');
  IF x->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'Prepared claim rejected: %',x;END IF;
- UPDATE private.iclub_ai_usage_reservations SET status='released' WHERE request_id=rid;
  x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'prepared','released');
  IF x->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'Prepared release rejected: %',x;END IF;
  x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'prepared');
@@ -93,7 +109,6 @@ BEGIN
  IF x->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'Third claim denied: %',x;END IF;
  UPDATE private.iclub_ai_request_tombstones_v21
  SET claim_expires_at=now()-interval '1 second' WHERE request_id=rid;
- UPDATE private.iclub_ai_usage_reservations SET status='completed' WHERE request_id=rid;
  x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','completed');
  IF x->>'reason' IS DISTINCT FROM 'claim_expired' THEN RAISE EXCEPTION 'Expired claim completed: %',x;END IF;
  x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
