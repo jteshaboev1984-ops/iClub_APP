@@ -10,16 +10,22 @@ const GATES=['content_approved','rights_approved','source_version_verified',
   'locale_verified','accessibility_passed'];
 const TEXT={
  ru:{
+  developingTitle:'В разработке',
+  unavailableTitle:'Временно недоступно',
   developing:'AI-помощь по этой теме пока в разработке.',
   unavailable:'iClub AI временно недоступен. Попробуйте позже.',
   general:'Общая помощь iClub AI'
  },
  uz:{
+  developingTitle:'Ishlab chiqilmoqda',
+  unavailableTitle:'Vaqtincha mavjud emas',
   developing:'Bu mavzu bo‘yicha AI yordami hali tayyorlanmoqda.',
   unavailable:'iClub AI vaqtincha ishlamayapti. Keyinroq urinib ko‘ring.',
   general:'iClub AI umumiy yordami'
  },
  en:{
+  developingTitle:'In development',
+  unavailableTitle:'Temporarily unavailable',
   developing:'AI help for this topic is in development.',
   unavailable:'iClub AI is temporarily unavailable. Please try later.',
   general:'General iClub AI help'
@@ -49,7 +55,10 @@ function localized(locale,state,alternatives=[]){
  const safeLocale=VALID_LOCALE.has(locale)?locale:'en';
  const out={state,visible:true,charge:0,providerCallRequired:false};
  if(state==='available')return {...out,canAsk:true};
- return {...out,canAsk:false,message:TEXT[safeLocale][state==='in_development'?'developing':'unavailable'],
+ const developing=state==='in_development';
+ return {...out,canAsk:false,
+   title:TEXT[safeLocale][developing?'developingTitle':'unavailableTitle'],
+   message:TEXT[safeLocale][developing?'developing':'unavailable'],
    alternatives};
 }
 class ContentHandoffGate {
