@@ -255,3 +255,18 @@ test('Not-ready titles and messages are localized in all supported languages',as
    assert.equal(r.alternatives.length,0);
  }
 });
+
+test('Exam starts AFTER second publication lookup: do not expose an available AI',async()=>{
+ const x=fixture();x.publish(x.here());
+ x.state.afterSource=n=>{if(n===2)x.state.exam=true;};
+ const r=await x.ask();
+ assert.equal(r.state,'hidden');assert.equal(r.visible,false);
+});
+test('Session revision changes AFTER second publication lookup: deny stale topic',async()=>{
+ const x=fixture();x.publish(x.here());
+ x.state.afterSource=n=>{
+  if(n===2)x.state.context=context({contextRevision:'revoked-on-final-check'});
+ };
+ const r=await x.ask();
+ assert.equal(r.state,'unavailable');assert.equal(r.canAsk,false);
+});
