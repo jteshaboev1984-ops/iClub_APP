@@ -1,5 +1,5 @@
 name: iClub AI Layer v2.1 — isolated QA only
-# QA P3/P8: isolated browser-to-Edge context transport + atomic money reserve; no deployment.
+# QA P3/P8: genuine offline Chromium mobile/desktop layout + server money gates; no deployment.
 
 # QA Lesson + Practice context acceptance: robust SQL named delimiter, 7 scratch PG suites.
 # This workflow never builds or deploys to Vercel, never connects to Supabase,
@@ -54,6 +54,11 @@ jobs:
           node-version: '22'
       - name: Run complete offline QA and frozen Exam Prep regression
         run: node qa/run-ai-layer-v21-offline.cjs
+      - name: Headless Chrome actual viewport and interaction QA, synthetic only
+        run: |
+          set -euo pipefail
+          command -v google-chrome || command -v chromium || command -v chromium-browser
+          node qa/ai-layer-v21-browser-visual.cjs
       - name: Install Deno runtime for Edge candidate verification
         uses: denoland/setup-deno@v2
         with:

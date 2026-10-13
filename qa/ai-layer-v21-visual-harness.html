@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>iClub AI QA synthetic viewport</title>
+<base href="../">
+<style>
+:root{--safe-bottom:0px;--text:#14213d;--muted:#64748b;--accent:#356ed5;--bg:#f3f6fb;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6fb;font-family:Arial,sans-serif}
+.view{display:none;padding:18px;min-height:100dvh}
+.view.is-active{display:block}
+.fake-navbar{height:66px;position:fixed;bottom:0;inset-inline:0;border-top:1px solid #dbe3ef;background:white;pointer-events:none}
+.mock-content{max-width:700px;border-radius:16px;padding:15px;background:white}
+</style>
+<link rel="stylesheet" href="global-ai-ui.css">
+<script>
+"use strict";
+const lang=new URL(location.href).searchParams.get("lang")||"ru";
+window.i18n={getLang:()=>lang};
+window.sb={
+ rpc:async name=>name==="get_iclub_ai_ui_bootstrap_v1"?
+ {data:{visible:true,locale:lang,usage_exhausted:false,assessment_blocked:false},error:null}:
+ {data:null,error:{message:"synthetic_unknown_rpc"}},
+ auth:{onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},
+ functions:{invoke:async()=>({data:null,error:{message:"synthetic_provider_off"}})}
+};
+</script>
+<script src="global-ai-ui.js" defer></script>
+</head>
+<body>
+<main>
+<section class="view is-active" data-view="home"><div class="mock-content">
+<strong>iClub Home</strong><p>Synthetic visual QA only. No real student content.</p></div></section>
+<section class="view" data-view="courses"><div class="mock-content">
+<strong id="subject-hub-title">Biology</strong><p>Synthetic subject change</p></div>
+<div id="exam-prep-host-root" hidden></div><div id="courses-tour-quiz"></div></section>
+</main>
+<div class="fake-navbar" aria-hidden="true"></div><div id="toast" aria-live="polite"></div>
+</body>
+</html>
