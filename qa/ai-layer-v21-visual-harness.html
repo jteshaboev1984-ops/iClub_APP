@@ -18,12 +18,24 @@ body{margin:0;background:#f3f6fb;font-family:Arial,sans-serif}
 "use strict";
 const lang=new URL(location.href).searchParams.get("lang")||"ru";
 window.i18n={getLang:()=>lang};
+window.__qaAuthCallback=null;
+window.__qaPendingReply=null;
+window.__qaReplyHandler=null;
+window.__qaEmitAuth=(event,userId)=>{
+ const session=userId?{user:{id:userId}}:null;
+ window.__qaAuthCallback?.(event,session);
+};
 window.sb={
  rpc:async name=>name==="get_iclub_ai_ui_bootstrap_v1"?
  {data:{visible:true,locale:lang,usage_exhausted:false,assessment_blocked:false},error:null}:
  {data:null,error:{message:"synthetic_unknown_rpc"}},
- auth:{onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})},
- functions:{invoke:async()=>({data:null,error:{message:"synthetic_provider_off"}})}
+ auth:{onAuthStateChange:callback=>{
+  window.__qaAuthCallback=callback;
+  return{data:{subscription:{unsubscribe(){}}}};
+ }},
+ functions:{invoke:async(...args)=>window.__qaReplyHandler?
+  window.__qaReplyHandler(...args):
+  {data:null,error:{message:"synthetic_provider_off"}}}
 };
 </script>
 <script src="global-ai-ui.js" defer></script>

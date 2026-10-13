@@ -127,3 +127,21 @@ test('Fullscreen panel overrides floating pop-in transform immediately',()=>{
  assert.match(tail,/transform:\s*none;/);
  assert.match(tail,/inset:\s*0;/);
 });
+
+test('Auth switch wipes in-memory chat and rejects stale async answers',()=>{
+ const from=js.indexOf('  function onAuthStateChanged(');
+ const to=js.indexOf('  async function refreshBootstrap()',from);
+ assert.ok(from>0&&to>from);
+ const block=js.slice(from,to);
+ for(const guard of ['state.authEpoch += 1','state.threads.clear()',
+  'invalidatePendingAnswer()','state.bootstrap = null','destroyShell()'])
+  assert.ok(block.includes(guard),guard);
+ assert.match(js,/window\.sb\?\.auth\?\.onAuthStateChange\?\.\(onAuthStateChanged\)/);
+ assert.match(js,/if \(!isStillCurrent\(\)\) return;/);
+ assert.match(js,/if \(epoch !== state\.authEpoch\) return null;/);
+});
+test('Context or protected assessment invalidates a pending answer',()=>{
+ assert.match(js,/previous !== nextKey/);
+ assert.match(js,/if \(blocked && changed\) invalidatePendingAnswer\(\)/);
+ assert.match(js,/state\.contextEpoch === sentContextEpoch/);
+});

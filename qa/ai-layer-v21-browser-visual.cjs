@@ -77,6 +77,53 @@ async function browserCheck(){
  window.dispatchEvent(new Event("iclub:exam-prep-session-ended"));
  await sleep(145);
  check(!mark.hidden,"icon did not recover after exam");
+ // Real async-response/account boundary: preserve same-user refresh, never
+ // show the prior learner's messages after switching accounts.
+ const uid1="11111111-1111-4111-8111-111111111111";
+ const uid2="22222222-2222-4222-8222-222222222222";
+ window.__qaEmitAuth("SIGNED_IN",uid1);
+ await sleep(120);
+ const accountOneMark=document.getElementById("iclub-global-ai-mark");
+ check(accountOneMark&&!accountOneMark.hidden,"account A panel not ready");
+ accountOneMark.click();
+ const oldPanel=document.getElementById("iclub-global-ai-panel");
+ check(oldPanel&&!oldPanel.hidden,"account A cannot open chat");
+ let resolveOld;
+ window.__qaReplyHandler=()=>new Promise(resolve=>{resolveOld=resolve;});
+ oldPanel.querySelector(".iclub-global-ai-quick-btn").click();
+ for(let i=0;i<20&&!resolveOld;i++)await sleep(10);
+ check(!!resolveOld,"pending old-user synthetic response was not invoked");
+ check(oldPanel.querySelector("[data-global-ai-messages]").textContent.length>0,
+  "synthetic old user prompt not shown");
+ window.__qaEmitAuth("SIGNED_IN",uid2);
+ await sleep(120);
+ resolveOld({data:{ok:true,message:"PRIVATE_OLD_USER_REPLY",
+  academic_state_changed:false},error:null});
+ await sleep(220);
+ const accountTwoMark=document.getElementById("iclub-global-ai-mark");
+ check(accountTwoMark&&!accountTwoMark.hidden,"account B panel not ready");
+ accountTwoMark.click();
+ const newPanel=document.getElementById("iclub-global-ai-panel");
+ check(!newPanel.hidden,"account B panel did not open");
+ check(!newPanel.querySelector("[data-global-ai-messages]").textContent.includes("PRIVATE_OLD_USER_REPLY"),
+  "account B saw the old account's async reply");
+ check(newPanel.querySelectorAll(".iclub-global-ai-message").length===0,
+  "account B inherited account A conversation");
+ window.__qaReplyHandler=async()=>({data:{ok:true,message:"SAFE_SECOND_ACCOUNT_REPLY",
+  academic_state_changed:false},error:null});
+ newPanel.querySelector(".iclub-global-ai-quick-btn").click();
+ await sleep(250);
+ check(newPanel.querySelector("[data-global-ai-messages]").textContent.includes("SAFE_SECOND_ACCOUNT_REPLY"),
+  "account B answer missing");
+ window.__qaEmitAuth("TOKEN_REFRESHED",uid2);
+ await sleep(100);
+ check(newPanel.querySelector("[data-global-ai-messages]").textContent.includes("SAFE_SECOND_ACCOUNT_REPLY"),
+  "same-user token refresh unexpectedly cleared session chat");
+ window.__qaEmitAuth("SIGNED_OUT",null);
+ await sleep(100);
+ const signedOutPanel=document.getElementById("iclub-global-ai-panel");
+ if(signedOutPanel)check(!signedOutPanel.querySelector("[data-global-ai-messages]").textContent.includes("SAFE_SECOND_ACCOUNT_REPLY"),
+  "signed-out account chat still visible");
  return {width:innerWidth,height:innerHeight,lang:new URL(location.href).searchParams.get("lang"),
   panelWidth:round(rect.width),panelHeight:round(rect.height),fullscreenWidth:round(full.width),
   fullscreenHeight:round(full.height),markNavigationGap:round(nav.top-markRect.bottom),

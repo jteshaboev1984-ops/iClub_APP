@@ -147,6 +147,9 @@
     resetTimer: null,
     busy: false,
     activeRequestId: null,
+    authUserId: null,
+    authEpoch: 0,
+    contextEpoch: 0,
     context: null,
     usageExhausted: false,
     resetAt: null,
@@ -639,7 +642,18 @@
 
     appendMessage(threadKey, "user", cleanDisplay);
     state.busy = true;
-    state.activeRequestId = requestId();
+    const sentId = requestId();
+    const sentAuthEpoch = state.authEpoch;
+    const sentContextEpoch = state.contextEpoch;
+    state.activeRequestId = sentId;
+    const isStillCurrent = () => (
+      state.authEpoch === sentAuthEpoch &&
+      state.contextEpoch === sentContextEpoch &&
+      state.activeRequestId === sentId &&
+      state.bootstrap?.visible === true &&
+      !currentBlocked() &&
+      isEligibleView()
+    );
 
     const p = panel();
     const input = p?.querySelector("[data-global-ai-input]");
@@ -649,7 +663,7 @@
     const started = performance.now();
     try {
       const result = await invokeGlobalAi({
-        request_id: state.activeRequestId,
+        request_id: sentId,
         locale: locale(),
         subject_key: context.subjectKey,
         scope_code: context.scopeCode,
@@ -659,6 +673,9 @@
         skill_code: context.skillCode || ""
       });
 
+      // A response from an old account, exam or screen is NEVER rendered,
+      // even if its legacy request succeeded before navigation.
+      if (!isStillCurrent()) return;
       if (result?.__globalAiTimedOut === true) {
         appendMessage(threadKey, "assistant", copy().timeout, "notice");
         return;
@@ -718,16 +735,18 @@
 
       appendMessage(threadKey, "assistant", message || copy().unavailable, "notice");
     } catch {
-      appendMessage(threadKey, "assistant", copy().unavailable, "notice");
+      if (isStillCurrent()) appendMessage(threadKey, "assistant", copy().unavailable, "notice");
     } finally {
       const elapsed = performance.now() - started;
       if (elapsed < 180) {
         await new Promise((resolve) => setTimeout(resolve, 180 - elapsed));
       }
-      state.busy = false;
-      state.activeRequestId = null;
-      renderPanel();
-      if (state.usageExhausted) scheduleResetRefresh();
+      if (isStillCurrent()) {
+        state.busy = false;
+        state.activeRequestId = null;
+        renderPanel();
+        if (state.usageExhausted) scheduleResetRefresh();
+      }
     }
   }
 
@@ -762,15 +781,27 @@
     return host;
   }
 
+  function contextIdentity(ctx) {
+    if (!ctx) return "";
+    return [ctx.threadKey,ctx.subjectKey,ctx.scopeCode,
+      ctx.componentCode||"",ctx.skillCode||""].join("|");
+  }
+
+  function invalidatePendingAnswer() {
+    state.contextEpoch += 1;
+    state.activeRequestId = null;
+    state.busy = false;
+  }
+
   function reconcileContext() {
     const next = resolveContext();
-    const previousThread = state.context?.threadKey || "";
-    state.context = next;
-
-    if (previousThread && previousThread !== next.threadKey) {
+    const previous = contextIdentity(state.context);
+    const nextKey = contextIdentity(next);
+    if (previous && previous !== nextKey) {
+      invalidatePendingAnswer();
       closePanel();
     }
-
+    state.context = next;
     if (panel() && !panel().hidden) renderPanel();
   }
 
@@ -824,6 +855,7 @@
     const tourQuiz = document.getElementById("courses-tour-quiz");
     const blocked = Boolean(tourQuiz?.classList.contains("is-active"));
     const changed = blocked !== state.tourBlocked;
+    if (blocked && changed) invalidatePendingAnswer();
     state.tourBlocked = blocked;
     reconcileShell({ announceBlock: announce && changed && blocked });
   }
@@ -834,6 +866,7 @@
     const status = String(session?.status || "active").toLowerCase();
     const blocked = status === "active" && PROTECTED_EXAM_PREP_TYPES.has(type);
     const changed = blocked !== state.examPrepBlocked;
+    if (blocked && changed) invalidatePendingAnswer();
     state.examPrepBlocked = blocked;
     reconcileShell({ announceBlock: changed && blocked });
   }
@@ -845,8 +878,33 @@
     void refreshBootstrap();
   }
 
+  function onAuthStateChanged(event, session) {
+    const id = typeof session?.user?.id === "string" ? session.user.id : null;
+    const logout = event === "SIGNED_OUT" || event === "USER_DELETED";
+    const initialEmpty = event === "INITIAL_SESSION" && !session;
+    if (logout || initialEmpty || id) {
+      const nextUserId = logout || initialEmpty ? null : id;
+      if (logout || state.authUserId !== nextUserId) {
+        state.authUserId = nextUserId;
+        state.authEpoch += 1;
+        invalidatePendingAnswer();
+        state.threads.clear();
+        state.context = null;
+        state.bootstrap = null;
+        state.usageExhausted = false;
+        state.resetAt = null;
+        if (state.resetTimer) clearTimeout(state.resetTimer);
+        state.resetTimer = null;
+        destroyShell();
+      }
+    }
+    // TOKEN_REFRESHED for the same account preserves the current chat.
+    queueMicrotask(() => { void refreshBootstrap(); });
+  }
+
   async function refreshBootstrap() {
     if (state.bootstrapInFlight) return state.bootstrapInFlight;
+    const epoch = state.authEpoch;
     const client = window.sb;
     if (!client?.rpc) {
       state.bootstrap = null;
@@ -857,6 +915,9 @@
     state.bootstrapInFlight = (async () => {
       try {
         const { data, error } = await client.rpc("get_iclub_ai_ui_bootstrap_v1");
+        // An old account's in-flight bootstrap must not show its UI in the
+        // newly signed-in account, even when its request finishes last.
+        if (epoch !== state.authEpoch) return null;
         if (error || !data || typeof data !== "object") {
           state.bootstrap = null;
           destroyShell();
@@ -872,11 +933,15 @@
         reconcileShell();
         return data;
       } catch {
+        if (epoch !== state.authEpoch) return null;
         state.bootstrap = null;
         destroyShell();
         return null;
       } finally {
         state.bootstrapInFlight = null;
+        if (epoch !== state.authEpoch && !state.destroyed) {
+          queueMicrotask(() => { void refreshBootstrap(); });
+        }
       }
     })();
 
@@ -927,9 +992,7 @@
     });
 
     try {
-      window.sb?.auth?.onAuthStateChange?.(() => {
-        queueMicrotask(() => { void refreshBootstrap(); });
-      });
+      window.sb?.auth?.onAuthStateChange?.(onAuthStateChanged);
     } catch {}
 
     attachObservers();
