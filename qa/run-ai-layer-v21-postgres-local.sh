@@ -17,7 +17,8 @@ case "$SUITE" in
   claim) TEST_FILE="qa/sql_drafts/iclub_ai_delivery_claim_local_pg.psql" ;;
   atomic) TEST_FILE="qa/sql_drafts/iclub_ai_delivery_atomic_meter_local_pg.psql" ;;
   context) TEST_FILE="qa/sql_drafts/iclub_ai_scoped_context_local_pg.psql" ;;
-  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter, math, practice, release, claim, atomic or context" >&2; exit 2 ;;
+  source) TEST_FILE="qa/sql_drafts/iclub_ai_source_proof_bundle_local_pg.psql" ;;
+  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter, math, practice, release, claim, atomic, context or source" >&2; exit 2 ;;
 esac
 
 if [[ ! "$DB" =~ ^iclub_ai_v21_scratch_[a-z0-9_]+$ ]]; then
