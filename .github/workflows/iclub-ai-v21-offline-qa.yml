@@ -1,5 +1,5 @@
 name: iClub AI Layer v2.1 — isolated QA only
-# QA P2/P3: final Edge request security/authorization and last-read race verification.
+# QA P2/P4: source proof + prepared missing-card NULL-safe PostgreSQL check.
 
 # QA Lesson + Practice context acceptance: robust SQL named delimiter, 7 scratch PG suites.
 # This workflow never builds or deploys to Vercel, never connects to Supabase,
