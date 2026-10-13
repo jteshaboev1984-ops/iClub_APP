@@ -431,3 +431,18 @@ See `docs/iclub-ai-layer-native-qa-checkpoint-2026-10-13.md` for the detailed ve
 
 See `docs/iclub-ai-layer-p7-distributed-delivery-handoff-v2.1.md`. Current work stays on QA branch; protected Math production files, migrations, existing progress/localStorage are not changed.
 
+
+## 26. P2/P3 unified server request candidate and late-revocation hardening (2026-10-13)
+
+**Scope:** New **QA-only** `qa/ai-layer-v21-edge-request.cjs` composes the approved-source/content handoff gate, JWT principal dependency, expiring server-owned context, per-topic/locale availability, server-selected Free/Plus/Pro policy, exact prepared or approved source-backed generated path, monetary budget, SHA-256 source/route/session request identity, P7 atomic usage reservation, durable one-worker delivery claim and atomic settlement/refund. It is NOT imported by deployed `global-ai` or the existing Mathematics `exam-prep-ai`.
+
+**User experience contract:** A missing/unapproved Biology, Chemistry, Economics, Informatics or other lesson topic returns **«В разработке»** (RU), **«Ishlab chiqilmoqda»** (UZ), **“In development”** (EN); no allowance reserved and no model used. A protected assessment hides the AI function. Published content can be picked up automatically in a previously approved cohort without rebuilding the application. Cards, questions and explanations are authored only in the *other* workstream; this technical chat creates no subject materials.
+
+**Technical improvements:** Client is prohibited from providing authoritative subject, skill, plan, entitlement, quota or source identity. The current JWT is revalidated before and after provider use; current plan, monetary budget, published source hash/revision, rights, active exam/screen/cohort are checked again. The content handoff gate revalidates even after its second asynchronous source lookup, denying an exam starting or topic revision changing in that final window. Approved source bundle must carry independently verified integrity and QA readiness rather than rely on source identifiers alone. HTTP response never exposes learner progress, source hash or quota weights.
+
+**Real successful native verification:** [QA run 38350530047](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38350530047), SHA `3daf24e60379c1837f77be53e11a554c811931b0`: **382/382 Node.js 22 tests** PASS across 22 test suites; **8/8** extra synthetic metering smoke; Maths subject isolation and late-response regression PASS. **6/6 real ephemeral PostgreSQL 16 scratch suites** PASS, plus two-connection durable claim race and forced mid-finalization rollback. No Vercel Preview or working Supabase modifications. All original Math Exam Prep files, active migrations and app entrypoints still match protected production baseline.
+
+**What is NOT done:** `qa/ai-layer-v21-edge-request.cjs` is a platform-independent Node/CommonJS candidate with mocked backend dependencies, not a deployed Deno Edge Function. Real Auth SDK/JWT adapters, server context minting, existing schema-compatible protected screen bridge, live editorial publication RPC, exact source content verification and RLS, provider/model integration, durable encrypted reply recovery, Preview UI/device QA and explicit beta approval remain blockers. No live plan/price/rollout can be enabled on the basis of these QA tests alone.
+
+**Handoff:** `docs/iclub-ai-layer-p2-p3-edge-candidate-handoff-v2.1.md` defines backend service APIs, trust boundaries and future Edge deployment safety checks. Continue on QA branch, without changing existing `supabase/functions/global-ai/index.ts` or the original `exam-prep-ai` handler until protected Preview acceptance and architect authorization.
+
