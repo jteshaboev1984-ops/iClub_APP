@@ -1,0 +1,111 @@
+-- Real PostgreSQL, synthetic test fixture. Scratch-only and rollback.
+\set ON_ERROR_STOP on
+BEGIN;
+DO $guard$
+BEGIN
+ IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
+ OR (inet_server_addr() IS NOT NULL AND
+    inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet)
+    AND NOT (inet_server_addr() << '172.16.0.0/12'::cidr
+       AND current_setting('application_name')='iclub_ai_v21_local_scratch')) THEN
+  RAISE EXCEPTION 'STOP: delivery SQL only in local scratch';
+ END IF;
+ IF to_regclass('private.iclub_ai_request_tombstones_v21') IS NOT NULL THEN
+  RAISE EXCEPTION 'STOP: prior delivery table already exists';
+ END IF;
+END $guard$;
+CREATE SCHEMA IF NOT EXISTS private;
+DO $roles$
+DECLARE x text;
+BEGIN
+ FOREACH x IN ARRAY ARRAY['anon','authenticated','service_role'] LOOP
+  IF NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=x) THEN EXECUTE format('CREATE ROLE %I NOLOGIN',x);END IF;
+ END LOOP;
+END $roles$;
+CREATE TABLE private.iclub_ai_usage_reservations(
+ request_id uuid PRIMARY KEY,user_id uuid NOT NULL,
+ request_fingerprint text NOT NULL,route_class text NOT NULL,
+ status text NOT NULL,expires_at timestamptz NOT NULL);
+\ir iclub_ai_delivery_claim_v21_UNAPPLIED.sql
+DO $test$
+DECLARE
+ u uuid:='11111111-1111-4111-8111-111111111111';
+ other uuid:='22222222-2222-4222-8222-222222222222';
+ rid uuid:='33333333-3333-4333-8333-333333333333';
+ sid text:=repeat('a',64);
+ fp text:=repeat('b',64);
+ x jsonb;
+BEGIN
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
+ IF x->>'reason' IS DISTINCT FROM 'quota_reservation_unverified' THEN
+  RAISE EXCEPTION 'Claim allowed without atomic v2 quota reservation: %',x;END IF;
+ INSERT INTO private.iclub_ai_usage_reservations
+ VALUES(rid,u,fp,'generated','reserved',now()+interval '90 seconds');
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
+ IF x->>'allowed' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'First claim denied: %',x;END IF;
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
+ IF x->>'reason' IS DISTINCT FROM 'request_in_progress' THEN
+  RAISE EXCEPTION 'Duplicate provider permitted: %',x;END IF;
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,other,sid,fp,'generated');
+ IF x->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Foreign claimant permitted: %',x;END IF;
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,repeat('c',64),fp,'generated');
+ IF x->>'reason' IS DISTINCT FROM 'request_identity_mismatch' THEN
+  RAISE EXCEPTION 'Other session reused claim: %',x;END IF;
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,repeat('c',64),'generated');
+ IF x->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'New source fingerprint replay allowed: %',x;END IF;
+ x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','completed');
+ IF x->>'reason' IS DISTINCT FROM 'quota_not_finalized' THEN
+  RAISE EXCEPTION 'Delivery completed ahead of quota: %',x;END IF;
+ UPDATE private.iclub_ai_usage_reservations SET status='completed' WHERE request_id=rid;
+ x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','completed');
+ IF x->>'ok' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Completed quota could not be committed: %',x;END IF;
+ x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','completed');
+ IF x->>'duplicate' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Idempotent confirmation missing: %',x;END IF;
+ x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','released');
+ IF x->>'reason' IS DISTINCT FROM 'outcome_conflict' THEN
+  RAISE EXCEPTION 'Delivered request falsely released: %',x;END IF;
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
+ IF x->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Completed request started model twice: %',x;END IF;
+
+ -- A second request can release after the quota reservation was released.
+ rid:='44444444-4444-4444-8444-444444444444';
+ INSERT INTO private.iclub_ai_usage_reservations
+ VALUES(rid,u,fp,'prepared','reserved',now()+interval '90 seconds');
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'prepared');
+ IF x->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'Prepared claim rejected: %',x;END IF;
+ UPDATE private.iclub_ai_usage_reservations SET status='released' WHERE request_id=rid;
+ x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'prepared','released');
+ IF x->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'Prepared release rejected: %',x;END IF;
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'prepared');
+ IF x->>'allowed' IS DISTINCT FROM 'false' THEN RAISE EXCEPTION 'Released ID was reclaimed: %',x;END IF;
+
+ -- A third request becomes expired: it cannot complete after the lease.
+ rid:='55555555-5555-4555-8555-555555555555';
+ INSERT INTO private.iclub_ai_usage_reservations
+ VALUES(rid,u,fp,'generated','reserved',now()+interval '90 seconds');
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
+ IF x->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'Third claim denied: %',x;END IF;
+ UPDATE private.iclub_ai_request_tombstones_v21
+ SET claim_expires_at=now()-interval '1 second' WHERE request_id=rid;
+ UPDATE private.iclub_ai_usage_reservations SET status='completed' WHERE request_id=rid;
+ x:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','completed');
+ IF x->>'reason' IS DISTINCT FROM 'claim_expired' THEN RAISE EXCEPTION 'Expired claim completed: %',x;END IF;
+ x:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
+ IF x->>'allowed' IS DISTINCT FROM 'false' THEN RAISE EXCEPTION 'Expired request provider replayed: %',x;END IF;
+
+ -- No reply or raw educational content may be persisted.
+ IF EXISTS(
+ SELECT 1 FROM information_schema.columns
+ WHERE table_schema='private' AND table_name='iclub_ai_request_tombstones_v21'
+ AND column_name IN ('reply','prompt','question','answer','message','provider_reply')
+ ) THEN RAISE EXCEPTION 'Transcript column leaked';END IF;
+ RAISE NOTICE 'Delivery claim: all sequential scratch assertions GREEN';
+END $test$;
+ROLLBACK;
+\echo 'Delivery claim synthetic fixtures rolled back.'
