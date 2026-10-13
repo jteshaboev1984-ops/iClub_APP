@@ -174,10 +174,15 @@ async function exercise(lang){
 
  // Expansion must render a styled (not empty square) icon and actually expand.
  const expand=panel.querySelector("[data-global-ai-expand]");
- check(expand&&getComputedStyle(expand).display==="inline-flex",
-  "Expand action is an unstyled square");
- check(getComputedStyle(expand.querySelector("svg")).strokeWidth!=="0px",
-  "Expand SVG lacks line styling");
+ check(!!expand,"Expand button absent");
+ const symbol=expand.querySelector("svg"),bounds=expand.getBoundingClientRect();
+ const ink=symbol?getComputedStyle(symbol):null;
+ check(bounds.width>=32&&bounds.height>=32&&
+       symbol?.getBoundingClientRect().width>=15&&
+       ink?.stroke!=="none"&&Number.parseFloat(ink.strokeWidth)>=1,
+  "Expand visual is missing: "+JSON.stringify({width:bounds.width,
+   height:bounds.height,stroke:ink?.stroke,line:ink?.strokeWidth,
+   display:getComputedStyle(expand).display}));
  expand.click();await sleep(60);
  check(panel.getAttribute("data-expanded")==="true",
   "Expand button did not expand AI panel");
