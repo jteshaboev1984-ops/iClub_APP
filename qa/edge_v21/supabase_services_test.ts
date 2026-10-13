@@ -122,3 +122,13 @@ Deno.test("No credentials, prompts or provider transcripts are placed in backend
  const data=JSON.stringify(r);
  ok(!data.includes(config.serviceRoleKey));
 });
+
+Deno.test("Missing Lesson mint RPC is denied and passes only verified user and lesson id",async()=>{
+ const x=syntheticBackend();
+ const r=await x.services.mintLessonContext({userId:user,lessonId:34});
+ eq(r.allowed,false);
+ const call=x.calls.find(c=>c.url.includes("mint_iclub_ai_v21_lesson_context_service"));
+ eq(call?.body?.p_user_id,user);
+ eq(call?.body?.p_lesson_id,34);
+ eq(await x.services.mintLessonContext({userId:user,lessonId:-1}).then(v=>v.allowed),false);
+});
