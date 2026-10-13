@@ -25,3 +25,9 @@ test("Read response is ciphertext-only and matching identity, finalized, unexpir
  assert.match(pg,/Expired cipher visible/);
  assert.match(pg,/Duplicate receipt committed/);
 });
+
+test("Ciphertext length validation is PostgreSQL-compatible",()=>{
+ assert.doesNotMatch(s,/\{20,11000\}/);
+ assert.match(s,/length\(ciphertext\) BETWEEN 20 AND 11000/);
+ assert.match(s,/length\(p_ciphertext\) NOT BETWEEN 20 AND 11000/);
+});
