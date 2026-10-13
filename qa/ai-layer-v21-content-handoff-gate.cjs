@@ -144,6 +144,21 @@ class ContentHandoffGate {
   const second=await verified();
   if(!second||!sameKeys(source,second,SAME_KEYS))
     return localized(lang,'in_development');
+  // The final publication query is asynchronous: assess exam, revision and
+  // authenticated screen AGAIN after it completes, not only before it began.
+  if(await protectedNow())return localized(lang,'hidden');
+  if(!await runtime()||!await alive())return localized(lang,'unavailable');
+  let finalContext;
+  try{finalContext=await S.getScopedContext(uid,contextHandle);}
+  catch{return localized(lang,'unavailable');}
+  const finalClock=await serverNow();
+  if(finalClock===null||!finalContext||
+     finalContext.ownerId!==uid||finalContext.active!==true||
+     finalContext.protectedAssessment===true||
+     finalContext.expiresAtMs<=finalClock||
+     finalContext.contextRevision!==context.contextRevision||
+     !sameKeys(finalContext,context,['surface','subject','feature','topic']))
+    return localized(lang,'unavailable');
   // This is only an eligibility result, NOT authorization to debit/generate.
   // The Edge must still verify specific request/question/evidence and call
   // this again immediately before model use and before returning its answer.
