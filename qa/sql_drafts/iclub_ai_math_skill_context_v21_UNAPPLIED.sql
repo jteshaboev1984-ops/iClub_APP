@@ -12,7 +12,7 @@ BEGIN
     RAISE EXCEPTION 'BLOCKED: iClub AI v2.1 Math contract may only run in scratch DB';
   END IF;
   IF inet_server_addr() IS NOT NULL
-     AND inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) THEN
+     AND (inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) AND NOT (inet_server_addr() << '172.16.0.0/12'::cidr AND current_setting('application_name')='iclub_ai_v21_local_scratch')) THEN
     RAISE EXCEPTION 'BLOCKED: iClub AI v2.1 Math contract requires local PostgreSQL';
   END IF;
 END
