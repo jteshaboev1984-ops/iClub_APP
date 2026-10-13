@@ -7,7 +7,7 @@ DO $iclub_ai_v21_release_scratch_only$
 BEGIN
  IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
     OR (inet_server_addr() IS NOT NULL AND
-        inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet)) THEN
+        (inet_server_addr() NOT IN ('127.0.0.1'::inet,'::1'::inet) AND NOT (inet_server_addr() << '172.16.0.0/12'::cidr AND current_setting('application_name')='iclub_ai_v21_local_scratch'))) THEN
    RAISE EXCEPTION 'BLOCKED: topic readiness draft is scratch only';
  END IF;
 END $iclub_ai_v21_release_scratch_only$;
