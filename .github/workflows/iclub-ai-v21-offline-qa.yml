@@ -7,7 +7,6 @@ on:
     branches:
       - qa/iclub-ai-layer-v21-20261012
     paths:
-      - 'qa/**'
       - '.github/workflows/iclub-ai-v21-offline-qa.yml'
   workflow_dispatch:
 
@@ -46,6 +45,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Node 22
         uses: actions/setup-node@v4
         with:
@@ -62,15 +62,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          failed=0
           for suite in meter math practice release; do
             db="iclub_ai_v21_scratch_ci_${suite}"
             createdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
-            ICLUB_PGTEST_DB="${db}" ICLUB_PGTEST_HOST=127.0.0.1 \
-              ICLUB_PGTEST_PORT=5432 ICLUB_PGTEST_SUITE="${suite}" \
-              bash qa/run-ai-layer-v21-postgres-local.sh
+            if ICLUB_PGTEST_DB="${db}" ICLUB_PGTEST_HOST=127.0.0.1 \
+                ICLUB_PGTEST_PORT=5432 ICLUB_PGTEST_SUITE="${suite}" \
+                bash qa/run-ai-layer-v21-postgres-local.sh; then
+              echo "PASS: scratch suite ${suite}"
+            else
+              echo "FAIL: scratch suite ${suite}"
+              failed=1
+            fi
             dropdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
           done
+          exit "$failed"
       - name: Verify legacy code and migrations have no QA modifications
+        if: always()
         run: |
           set -euo pipefail
           git diff --name-only 9afc7b44aead03b2a30544e6e7d4c4eb8670efbf HEAD -- \
