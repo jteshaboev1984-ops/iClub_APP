@@ -27,6 +27,7 @@
       close: "Закрыть iClub AI",
       expand: "Развернуть на весь экран",
       restore: "Обычный размер",
+      qaQuestion: "Задание",
       emptyTitle: "Чем помочь?",
       emptyCopy: "Выбери быстрый запрос или напиши свой вопрос.",
       input: "Спросить iClub AI…",
@@ -64,6 +65,7 @@
       close: "iClub AI'ni yopish",
       expand: "To‘liq ekranga ochish",
       restore: "Odatdagi o‘lcham",
+      qaQuestion: "Savol",
       emptyTitle: "Qanday yordam beray?",
       emptyCopy: "Tezkor so‘rovni tanla yoki o‘z savolingni yoz.",
       input: "iClub AI'dan so‘rash…",
@@ -101,6 +103,7 @@
       close: "Close iClub AI",
       expand: "Expand to full screen",
       restore: "Restore panel size",
+      qaQuestion: "Question",
       emptyTitle: "How can I help?",
       emptyCopy: "Choose a quick prompt or type your own question.",
       input: "Ask iClub AI…",
@@ -156,6 +159,9 @@
     usageExhausted: false,
     resetAt: null,
     threads: new Map(),
+    qaQuestionId: null,
+    qaQuestionEpoch: 0,
+    qaExplanationCache: new Map(),
     destroyed: false
   };
 
@@ -288,12 +294,14 @@
     return state.threads.get(threadKey);
   }
 
-  function appendMessage(threadKey, role, text, kind = "message") {
+  function appendMessage(threadKey, role, text, kind = "message", metadata = null) {
     const target = thread(threadKey);
     target.messages.push({
       role,
       kind,
-      text: String(text || "").trim()
+      text: String(text || "").trim(),
+      questionId: metadata?.questionId || null,
+      questionLabel: metadata?.questionLabel || ""
     });
     if (target.messages.length > MAX_THREAD_MESSAGES) {
       target.messages.splice(0, target.messages.length - MAX_THREAD_MESSAGES);
@@ -368,10 +376,11 @@
 
   function quickPrompts(ctx) {
     const c = copy();
-    // Synthetic QA only: prepared explanation on finished Practice review.
-    if(window.__ICLUB_AI_V21_SYNTHETIC_ONLY__===true && activeViewName()==="courses" &&
-       document.querySelector('#courses-practice-review.is-active [data-iclub-ai-v21-selected="true"]'))
-      return [{key:"topic_main",label:c.topicMain}];
+    // "Explain" already dispatched the contextual prompt; never offer it again.
+    if (window.__ICLUB_AI_V21_SYNTHETIC_ONLY__ === true &&
+        activeViewName() === "courses" &&
+        document.querySelector('#courses-practice-review.is-active [data-iclub-ai-v21-selected="true"]'))
+      return [];
     if (ctx?.subjectKey === "mathematics"
         && ctx?.scopeCode === "exam_prep"
         && ctx?.componentCode
@@ -406,6 +415,13 @@
     const bubble = document.createElement("div");
     bubble.className = "iclub-global-ai-bubble";
     bubble.textContent = message.text;
+    if (message.questionId) {
+      row.dataset.qaQuestionId = String(message.questionId);
+      const label = document.createElement("span");
+      label.className = "iclub-qa-ai-message-context";
+      label.textContent = message.questionLabel || (copy().qaQuestion + " " + message.questionId);
+      row.appendChild(label);
+    }
     row.appendChild(bubble);
     return row;
   }
@@ -504,7 +520,13 @@
       expand.setAttribute("aria-label", expanded ? copy().restore : copy().expand);
     }
     if (title) title.textContent = state.context.academic ? copy().titleAcademic : copy().titleGeneral;
-    if (subtitle) subtitle.textContent = state.context.subtitle || copy().subtitleGeneral;
+    if (subtitle) {
+      const id = state.qaQuestionId;
+      const label = id && previewSelectedQuestion(id) ? qaQuestionLabel(id) : "";
+      subtitle.textContent = label
+        ? (state.context.subtitle || copy().subtitleGeneral) + " · " + label
+        : (state.context.subtitle || copy().subtitleGeneral);
+    }
     if (close) close.setAttribute("aria-label", copy().close);
   }
 
@@ -590,11 +612,13 @@
       if (event.key !== "Enter" || event.shiftKey || event.isComposing) return;
       event.preventDefault();
       const text = String(input.value || "").trim();
-      if (text) void sendMessage({ promptKey: "", displayText: text, userText: text });
+      if (text) void sendMessage({ promptKey: "", displayText: text, userText: text,
+          qaQuestionId: state.qaQuestionId });
     });
     send?.addEventListener("click", () => {
       const text = String(input?.value || "").trim();
-      if (text) void sendMessage({ promptKey: "", displayText: text, userText: text });
+      if (text) void sendMessage({ promptKey: "", displayText: text, userText: text,
+          qaQuestionId: state.qaQuestionId });
     });
 
     host.appendChild(p);
@@ -637,7 +661,7 @@
     ]);
   }
 
-  async function sendMessage({ promptKey, displayText, userText }) {
+  async function sendMessage({ promptKey, displayText, userText, qaQuestionId = null, qaCacheKey = "" }) {
     if (state.busy || currentBlocked() || state.usageExhausted || !state.context) return;
 
     const context = { ...state.context };
@@ -646,7 +670,11 @@
     const cleanText = String(userText || "").trim().slice(0, MAX_INPUT_CHARS);
     if (!cleanDisplay) return;
 
-    appendMessage(threadKey, "user", cleanDisplay);
+    const qaInfo = qaQuestionId && previewSelectedQuestion(qaQuestionId)
+      ? { questionId: qaQuestionId, questionLabel: qaQuestionLabel(qaQuestionId) }
+      : null;
+    const sentQaEpoch = state.qaQuestionEpoch;
+    appendMessage(threadKey, "user", cleanDisplay, "message", qaInfo);
     state.busy = true;
     const sentId = requestId();
     const sentAuthEpoch = state.authEpoch;
@@ -656,6 +684,8 @@
       state.authEpoch === sentAuthEpoch &&
       state.contextEpoch === sentContextEpoch &&
       state.activeRequestId === sentId &&
+      (!qaInfo || (state.qaQuestionEpoch === sentQaEpoch &&
+       previewSelectedQuestion(qaInfo.questionId))) &&
       state.bootstrap?.visible === true &&
       !currentBlocked() &&
       isEligibleView()
@@ -702,7 +732,13 @@
       const message = String(data.message || "").trim();
 
       if (data.ok === true && message) {
-        appendMessage(threadKey, "assistant", message);
+        appendMessage(threadKey, "assistant", message, "message", qaInfo);
+        if (qaCacheKey && qaInfo) {
+          state.qaExplanationCache.set(qaCacheKey, { text: message,
+            questionId: qaInfo.questionId, questionLabel: qaInfo.questionLabel });
+          if (state.qaExplanationCache.size > 40)
+            state.qaExplanationCache.delete(state.qaExplanationCache.keys().next().value);
+        }
         if (data.usage_exhausted === true) {
           setUsageExhausted(data.reset_at || null);
         }
@@ -735,7 +771,7 @@
       if (["in_development", "subject_not_ready", "approved_source_missing",
            "source_not_ready", "no_source", "topic_not_released"].includes(reason)
           || data.mode === "in_development") {
-        appendMessage(threadKey, "assistant", copy().inDevelopment, "notice");
+        appendMessage(threadKey, "assistant", copy().inDevelopment, "notice", qaInfo);
         return;
       }
 
@@ -1028,6 +1064,35 @@
     setTimeout(() => { void refreshBootstrap(); }, 0);
   }
 
+  // Session memory only: one subject conversation, no per-question database.
+  function qaQuestionLabel(questionId) {
+    const row=document.querySelector(
+      '#courses-practice-review.is-active .iclub-qa-review[data-practice-ai-question-id="' + Number(questionId) + '"]');
+    const n=Number(row?.getAttribute("data-qa-question-number"));
+    return copy().qaQuestion + " " + (Number.isSafeInteger(n) && n>0 ? n : questionId);
+  }
+
+  function previewResetPractice() {
+    invalidatePendingAnswer();
+    state.qaQuestionId=null;
+    state.qaQuestionEpoch+=1;
+    state.qaExplanationCache.clear();
+    state.threads.delete("economics");
+    closePanel();
+    return true;
+  }
+
+  function previewSelectQuestion(questionId) {
+    if(!previewSelectedQuestion(questionId))return false;
+    if(state.qaQuestionId!==Number(questionId)){
+      invalidatePendingAnswer();
+      state.qaQuestionId=Number(questionId);
+      state.qaQuestionEpoch+=1;
+      closePanel();
+    }
+    return true;
+  }
+
   // Preview-only actions. Only a finished, selected question can dispatch.
   function previewSelectedQuestion(questionId) {
     if (window.__ICLUB_AI_V21_SYNTHETIC_ONLY__ !== true ||
@@ -1040,39 +1105,56 @@
     return selected?.getAttribute("data-iclub-ai-v21-question-id")===String(id);
   }
 
-  async function previewExplain({questionId,displayText}={}) {
+  async function previewExplain({questionId,displayText,attemptId}={}) {
     const prompt=String(displayText||"").trim().slice(0,MAX_INPUT_CHARS);
-    if(!prompt||state.busy||!previewSelectedQuestion(questionId))return false;
+    if(!prompt||state.busy||!previewSelectQuestion(questionId))return false;
+    const session=Number(attemptId);
+    if(!Number.isSafeInteger(session)||session<=0)return false;
+    const cacheKey=session+":"+Number(questionId),cached=state.qaExplanationCache.get(cacheKey);
     openPanel();
     const p=panel(),input=p?.querySelector("[data-global-ai-input]");
     if(!p||p.hidden||!input)return false;
-    // 1. Show the populated input. 2. Automatically send once.
-    // 3. Existing shell shows user request, typing, then mock response.
-    input.value=prompt;
+    if(cached){
+      input.value="";
+      const existing=thread(state.context?.threadKey).messages.some(m=>
+        m.role==="assistant"&&m.questionId===cached.questionId&&m.text===cached.text);
+      if(!existing)appendMessage(state.context.threadKey,"assistant",cached.text,"message",cached);
+      renderPanel();
+      queueMicrotask(()=>{
+        const target=Array.from(p.querySelectorAll('.iclub-global-ai-message.is-assistant[data-qa-question-id]'))
+          .reverse().find(node=>node.dataset.qaQuestionId===String(questionId));
+        target?.scrollIntoView({block:"nearest"});
+      });
+      return true;
+    }
+    input.value=prompt; // Visible prepared request, one automatic dispatch.
     renderComposer();
+    const epoch=state.qaQuestionEpoch;
     await new Promise(resolve=>setTimeout(resolve,100));
-    if(p.hidden||state.busy||!previewSelectedQuestion(questionId))return false;
-    await sendMessage({promptKey:"topic_main",displayText:prompt,userText:""});
+    if(p.hidden||state.busy||epoch!==state.qaQuestionEpoch||
+       !previewSelectedQuestion(questionId))return false;
+    await sendMessage({promptKey:"topic_main",displayText:prompt,userText:"",
+      qaQuestionId:Number(questionId),qaCacheKey:cacheKey});
     return true;
   }
 
-  function previewAskInChat({questionId,draft}={}) {
-    if(state.busy||!previewSelectedQuestion(questionId))return false;
+  function previewAskInChat({questionId}={}) {
+    if(state.busy||!previewSelectQuestion(questionId))return false;
     openPanel();
     const p=panel(),input=p?.querySelector("[data-global-ai-input]");
     if(!p||p.hidden||!input)return false;
-    input.value=String(draft||"").slice(0,MAX_INPUT_CHARS);
+    input.value=""; // Selected question is named above, not duplicated.
     renderComposer();
     input.focus();
-    input.setSelectionRange(input.value.length,input.value.length);
-    // Chat opening only prepares an editable question, never sends it.
-    return true;
+    return true; // Free-answer route is currently "In development".
   }
 
   window.iClubGlobalAiShell = Object.freeze({
     version: "global_ai_conversations_v1",
     previewExplain,
     previewAskInChat,
+    previewSelectQuestion,
+    previewResetPractice,
     refresh: () => refreshBootstrap(),
     close: () => closePanel(),
     context: () => ({ ...(state.context || resolveContext()) })
