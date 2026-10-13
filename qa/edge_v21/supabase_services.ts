@@ -104,7 +104,7 @@ export function createSupabaseServices(config:BackendConfig){
     ownerId:userId,routeAuthority:c.route_authority,
     active:c.active,protectedAssessment:c.protected_assessment,
     expiresAtMs:toInt(c.expires_at_ms),contextRevision:c.context_revision,
-    surface:c.surface,subject:c.subject,feature:c.feature,topic:c.topic
+    surface:str(c.surface),subject:str(c.subject),feature:str(c.feature),topic:str(c.topic)
    };
   },
   // Existing verified public.subjects schema: this is READ-ONLY, never a
