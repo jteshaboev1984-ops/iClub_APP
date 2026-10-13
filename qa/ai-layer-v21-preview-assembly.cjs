@@ -13,6 +13,10 @@ function one(source,anchor,replacement,label){
 function assemble({app,index}={}){
  if(typeof app!=="string"||typeof index!=="string")
   throw Error("QA_SOURCE_MISSING");
+ if(app.includes("__iclubQaV21Bridge")||
+    index.includes("qa/ai-layer-v21-preview-glue.cjs")||
+    index.includes("__ICLUB_AI_V21_SYNTHETIC_ONLY__"))
+  throw Error("QA_SOURCE_DRIFT already_assembled");
  const before={app:sha(app),index:sha(index)};
  const hooks=[
   ["  function showCoursesScreen(screenName) {\n    COURSES_SCREENS.forEach(sc => {",
