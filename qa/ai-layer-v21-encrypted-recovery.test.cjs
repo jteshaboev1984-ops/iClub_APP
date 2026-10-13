@@ -60,7 +60,7 @@ test("Wrong owner, session, source digest, locale, revision or route never retur
 test("Authenticated GCM tampering and missing cryptographic key deny",async()=>{
  const f=fixture();await f.create().store({identity:identity(),reply:"Safe QA",...gates()});
  const id=identity().requestId,old=f.rows.get(id);
- f.rows.set(id,{...old,ciphertext:"A"+old.ciphertext.slice(1)});
+ f.rows.set(id,{...old,ciphertext:(old.ciphertext[0]==="A"?"B":"A")+old.ciphertext.slice(1)});
  assert.equal((await f.create().recover({identity:identity(),...gates()})).ok,false);
  f.rows.set(id,old);
  f.keys.delete("synthetic-key-v1");
