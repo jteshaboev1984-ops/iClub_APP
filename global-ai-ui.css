@@ -37,6 +37,7 @@
 
 .iclub-global-ai-mark:focus-visible,
 .iclub-global-ai-close:focus-visible,
+.iclub-global-ai-expand:focus-visible,
 .iclub-global-ai-quick-btn:focus-visible,
 .iclub-global-ai-send:focus-visible,
 .iclub-global-ai-composer textarea:focus-visible {
@@ -112,7 +113,16 @@
   text-overflow: ellipsis;
 }
 
-.iclub-global-ai-close {
+.iclub-global-ai-head-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.iclub-global-ai-close,
+.iclub-global-ai-expand {
   width: 38px;
   height: 38px;
   flex: 0 0 38px;
@@ -127,7 +137,8 @@
   padding: 0;
 }
 
-.iclub-global-ai-close svg {
+.iclub-global-ai-close svg,
+.iclub-global-ai-expand svg {
   width: 18px;
   height: 18px;
   fill: none;
@@ -446,7 +457,7 @@ html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-topic-action-wrap] 
     right: 10px;
     bottom: calc(74px + var(--safe-bottom));
     width: auto;
-    height: min(68vh, calc(100vh - 110px - var(--safe-bottom)));
+    height: min(76vh, calc(100vh - 110px - var(--safe-bottom)));
     min-height: 330px;
     border-radius: 22px;
     transform-origin: center bottom;
@@ -454,6 +465,28 @@ html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-topic-action-wrap] 
 
   .iclub-global-ai-bubble {
     max-width: 86%;
+  }
+}
+
+/* Decision 17A: full-screen is optional, never the default mobile size. */
+.iclub-global-ai-panel[data-expanded="true"] {
+  inset: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transform-origin: center center;
+}
+
+@media (max-height: 500px) {
+  .iclub-global-ai-panel:not([data-expanded="true"]) {
+    min-height: 0;
+    height: calc(100dvh - 110px - var(--safe-bottom));
   }
 }
 

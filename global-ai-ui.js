@@ -25,6 +25,8 @@
       subtitleGeneral: "Помощник по iClub",
       open: "Открыть iClub AI",
       close: "Закрыть iClub AI",
+      expand: "Развернуть на весь экран",
+      restore: "Обычный размер",
       emptyTitle: "Чем помочь?",
       emptyCopy: "Выбери быстрый запрос или напиши свой вопрос.",
       input: "Спросить iClub AI…",
@@ -60,6 +62,8 @@
       subtitleGeneral: "iClub bo‘yicha yordamchi",
       open: "iClub AI'ni ochish",
       close: "iClub AI'ni yopish",
+      expand: "To‘liq ekranga ochish",
+      restore: "Odatdagi o‘lcham",
       emptyTitle: "Qanday yordam beray?",
       emptyCopy: "Tezkor so‘rovni tanla yoki o‘z savolingni yoz.",
       input: "iClub AI'dan so‘rash…",
@@ -95,6 +99,8 @@
       subtitleGeneral: "iClub assistant",
       open: "Open iClub AI",
       close: "Close iClub AI",
+      expand: "Expand to full screen",
+      restore: "Restore panel size",
       emptyTitle: "How can I help?",
       emptyCopy: "Choose a quick prompt or type your own question.",
       input: "Ask iClub AI…",
@@ -339,9 +345,20 @@
 
   function closePanel() {
     const p = panel();
-    if (!p || p.hidden) return;
+    if (!p) return;
+    p.setAttribute("data-expanded", "false");
+    p.querySelector("[data-global-ai-expand]")?.setAttribute("aria-pressed", "false");
+    if (p.hidden) return;
     p.hidden = true;
     mark()?.setAttribute("aria-expanded", "false");
+  }
+
+  function togglePanelExpanded() {
+    const p = panel();
+    if (!p || p.hidden || currentBlocked()) return;
+    const expanded = p.getAttribute("data-expanded") !== "true";
+    p.setAttribute("data-expanded", expanded ? "true" : "false");
+    renderHeader();
   }
 
   function quickPrompts(ctx) {
@@ -471,6 +488,12 @@
     const title = p.querySelector("[data-global-ai-title]");
     const subtitle = p.querySelector("[data-global-ai-subtitle]");
     const close = p.querySelector("[data-global-ai-close]");
+    const expand = p.querySelector("[data-global-ai-expand]");
+    if (expand) {
+      const expanded = p.getAttribute("data-expanded") === "true";
+      expand.setAttribute("aria-pressed", expanded ? "true" : "false");
+      expand.setAttribute("aria-label", expanded ? copy().restore : copy().expand);
+    }
     if (title) title.textContent = state.context.academic ? copy().titleAcademic : copy().titleGeneral;
     if (subtitle) subtitle.textContent = state.context.subtitle || copy().subtitleGeneral;
     if (close) close.setAttribute("aria-label", copy().close);
@@ -508,6 +531,7 @@
     const p = document.createElement("section");
     p.id = PANEL_ID;
     p.className = "iclub-global-ai-panel";
+    p.setAttribute("data-expanded", "false");
     p.setAttribute("role", "dialog");
     p.setAttribute("aria-modal", "false");
     p.setAttribute("aria-label", "iClub AI");
@@ -518,9 +542,14 @@
           <div class="iclub-global-ai-title" data-global-ai-title></div>
           <div class="iclub-global-ai-subtitle" data-global-ai-subtitle></div>
         </div>
-        <button class="iclub-global-ai-close" type="button" data-global-ai-close>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
-        </button>
+        <div class="iclub-global-ai-head-actions">
+          <button class="iclub-global-ai-expand" type="button" data-global-ai-expand aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/></svg>
+          </button>
+          <button class="iclub-global-ai-close" type="button" data-global-ai-close>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg>
+          </button>
+        </div>
       </header>
       <div class="iclub-global-ai-scroll" data-global-ai-scroll>
         <div class="iclub-global-ai-empty" data-global-ai-empty>
@@ -543,6 +572,7 @@
     `;
 
     p.querySelector("[data-global-ai-close]")?.addEventListener("click", closePanel);
+    p.querySelector("[data-global-ai-expand]")?.addEventListener("click", togglePanelExpanded);
     const input = p.querySelector("[data-global-ai-input]");
     const send = p.querySelector("[data-global-ai-send]");
 

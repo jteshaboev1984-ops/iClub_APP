@@ -77,3 +77,45 @@ test('Not-ready mode is not treated as exhausted quota or a provider answer',()=
  assert.ok(!part.includes('setUsageExhausted('));
  assert.ok(!part.includes('topicMain'));
 });
+
+
+test('Mobile chat is 76% height with optional full screen safe-area',()=>{
+ assert.match(css,/height:\s*min\(76vh,\s*calc\(100vh - 110px - var\(--safe-bottom\)\)\)/);
+ assert.match(css,/\.iclub-global-ai-panel\[data-expanded="true"\]\s*\{/);
+ for(const rule of [
+  'height: 100dvh;', 'padding-top: env(safe-area-inset-top, 0px);',
+  'padding-bottom: env(safe-area-inset-bottom, 0px);','max-height: 100dvh;',
+  'min-height: 0;', 'border-radius: 0;'
+ ])assert.ok(css.includes(rule),rule);
+ assert.match(css,/@media \(max-height: 500px\)/);
+});
+test('Expand action has localized accessible labels and does not finalize AI logo',()=>{
+ for(const text of ['Развернуть на весь экран','Обычный размер',
+  'To‘liq ekranga ochish','Odatdagi o‘lcham',
+  'Expand to full screen','Restore panel size'])assert.ok(js.includes(text),text);
+ assert.match(js,/data-global-ai-expand aria-pressed="false"/);
+ assert.match(js,/addEventListener\("click", togglePanelExpanded\)/);
+ assert.match(js,/expand.setAttribute\("aria-pressed"/);
+ assert.match(css,/\.iclub-global-ai-expand:focus-visible/);
+ assert.match(js,/src="logo.png"/,'Unapproved temp brand mark cannot be silently replaced');
+});
+test('Full screen is never preserved after closing or protected-screen transition',()=>{
+ const start=js.indexOf('  function closePanel()');
+ const end=js.indexOf('  function quickPrompts(',start);
+ assert.ok(start>0&&end>start);
+ const part=js.slice(start,end);
+ const fields=new Map([['data-expanded','true']]);
+ const toggler={attrs:new Map(),setAttribute(k,v){this.attrs.set(k,v)}};
+ const p={hidden:false,attrs:fields,
+   setAttribute(k,v){this.attrs.set(k,v)},
+   getAttribute(k){return this.attrs.get(k)},
+   querySelector:()=>toggler};
+ const button={setAttribute(k,v){fields.set('mark-'+k,v)}};
+ const scope={panel:()=>p,mark:()=>button,currentBlocked:()=>false,
+  renderHeader:()=>{}};
+ vm.runInNewContext(part+';togglePanelExpanded();closePanel();',scope);
+ assert.equal(p.hidden,true);
+ assert.equal(p.getAttribute('data-expanded'),'false');
+ assert.equal(toggler.attrs.get('aria-pressed'),'false');
+ assert.equal(fields.get('mark-aria-expanded'),'false');
+});
