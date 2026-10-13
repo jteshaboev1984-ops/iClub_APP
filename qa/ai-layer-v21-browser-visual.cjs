@@ -154,6 +154,51 @@ async function browserCheck(){
  const signedOutPanel=document.getElementById("iclub-global-ai-panel");
  if(signedOutPanel)check(!signedOutPanel.querySelector("[data-global-ai-messages]").textContent.includes("SAFE_SECOND_ACCOUNT_REPLY"),
   "signed-out account chat still visible");
+ // QA-only V2 screen-binding contract. Original iClub app lacks these
+ // markers: only this synthetic fixture attaches selectors for browser QA.
+ const Binder=window.iClubQaV21ScreenBinder;
+ check(typeof Binder==="function","QA-only binder was not injected");
+ const screenCalls=[];
+ const fakeClient={
+  leave:async()=>{screenCalls.push(["revoke"]);return{ok:true};},
+  openLesson:async id=>{screenCalls.push(["lesson",id]);return{ok:true};},
+  openPractice:async(s,q)=>{screenCalls.push(["practice",s,q]);return{ok:true};},
+  status:async()=>({ok:false,state:"in_development"}),
+  askPrepared:async()=>({ok:false,state:"in_development"})
+ };
+ const binder=new Binder({client:fakeClient,document});
+ const video=document.getElementById("courses-video");
+ const review=document.getElementById("courses-practice-review");
+ video.classList.add("is-active");
+ check((await binder.sync()).reason==="screen_not_verified",
+  "Real app without numeric V2 selector was incorrectly admitted");
+ check(!screenCalls.some(x=>x[0]==="lesson"),"untrusted Lesson admitted");
+ video.setAttribute("data-iclub-ai-v21-lesson-id","101");
+ check((await binder.sync()).ok===true,"verified synthetic Lesson selector refused");
+ check(screenCalls.some(x=>x[0]==="lesson"&&x[1]===101),
+  "Lesson exact server-owned mint selector missing");
+ video.classList.remove("is-active");
+ review.classList.add("is-active");
+ review.setAttribute("data-practice-ai-attempt-id","11");
+ const question=document.createElement("span");
+ question.setAttribute("data-iclub-ai-v21-question-id","202");
+ question.setAttribute("data-iclub-ai-v21-selected","true");
+ review.appendChild(question);
+ check((await binder.sync()).reason==="screen_not_verified",
+  "legacy Practice attempt ID was misused as V4 session");
+ check(!screenCalls.some(x=>x[0]==="practice"),"legacy Practice was admitted");
+ review.setAttribute("data-iclub-ai-v21-session-id","11");
+ check((await binder.sync()).ok===true,"synthetic complete V4 Practice selector refused");
+ check(screenCalls.some(x=>x[0]==="practice"&&x[1]===11&&x[2]===202),
+  "V4 Practice exact pair missing");
+ quiz.classList.add("is-active");
+ check((await binder.sync()).reason==="screen_not_verified",
+  "active quiz allowed V2 answer");
+ quiz.classList.remove("is-active");
+ await binder.disconnect();
+ review.classList.remove("is-active");
+ video.removeAttribute("data-iclub-ai-v21-lesson-id");
+ review.removeAttribute("data-iclub-ai-v21-session-id");
  return {width:innerWidth,height:innerHeight,lang:new URL(location.href).searchParams.get("lang"),
   panelWidth:round(rect.width),panelHeight:round(rect.height),fullscreenWidth:round(full.width),
   fullscreenHeight:round(full.height),markNavigationGap:round(nav.top-markRect.bottom),
