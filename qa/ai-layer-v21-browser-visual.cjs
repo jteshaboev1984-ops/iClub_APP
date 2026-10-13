@@ -199,6 +199,49 @@ async function browserCheck(){
  review.classList.remove("is-active");
  video.removeAttribute("data-iclub-ai-v21-lesson-id");
  review.removeAttribute("data-iclub-ai-v21-session-id");
+ // QA isolated evidence from the exact actual V4 lifecycle, not the legacy
+ // Practice attempt ID. All numbers are synthetic.
+ const Evidence=window.iClubQaV21EvidencePublisher;
+ check(typeof Evidence==="function","QA reviewed-evidence publisher missing");
+ const publisher=new Evidence();
+ question.remove();
+ review.classList.add("is-active");
+ const q202=document.createElement("div"),q203=document.createElement("div");
+ q202.setAttribute("data-practice-ai-question-id","202");
+ q203.setAttribute("data-practice-ai-question-id","203");
+ review.append(q202,q203);
+ const incomplete=publisher.acceptFinalization({
+  quiz:{mode:"practice",safeSessionId:101,_safeFinalizeComplete:false,
+    questions:[{id:202},{id:203}]},finalResult:{attempt_id:567}});
+ check(incomplete.ok===false,"incomplete V4 session gained AI");
+ check(!review.hasAttribute("data-iclub-ai-v21-session-id"),
+  "incomplete V4 session leaked selector");
+ const good=publisher.acceptFinalization({
+  quiz:{mode:"practice",safeSessionId:101,_safeFinalizeComplete:true,
+    drillType:null,questions:[{id:202},{id:203}]},
+  finalResult:{attempt_id:567}
+ });
+ check(good.ok===true,"finalized synthetic V4 proof refused");
+ check(publisher.mountReview({token:good.token,screen:review,
+  reviewRows:[{question_id:202},{question_id:203}]}).ok===true,
+  "reviewed V4 questions not bound");
+ check(review.getAttribute("data-iclub-ai-v21-session-id")==="101",
+  "old attempt ID substituted for real V4 session ID");
+ check((await binder.sync()).reason==="screen_not_verified",
+  "unselected question was admitted to AI");
+ check(publisher.selectQuestion({token:good.token,questionId:202}).ok===true,
+  "server-reviewed exact question could not be selected");
+ check((await binder.sync()).ok===true,"exact V4 screen binder refused reviewed question");
+ check(screenCalls.some(x=>x[0]==="practice"&&x[1]===101&&x[2]===202),
+  "client did not receive exact reviewed V4 IDs");
+ check(!screenCalls.some(x=>x[0]==="practice"&&x[1]===567),
+  "client received legacy attempt ID as V4 session ID");
+ publisher.clear();
+ check((await binder.sync()).reason==="screen_not_verified",
+  "old AI context survived the proof being revoked");
+ check(!review.hasAttribute("data-iclub-ai-v21-session-id"),
+  "review proof not cleared after screen transition");
+ review.classList.remove("is-active");
  return {width:innerWidth,height:innerHeight,lang:new URL(location.href).searchParams.get("lang"),
   panelWidth:round(rect.width),panelHeight:round(rect.height),fullscreenWidth:round(full.width),
   fullscreenHeight:round(full.height),markNavigationGap:round(nav.top-markRect.bottom),

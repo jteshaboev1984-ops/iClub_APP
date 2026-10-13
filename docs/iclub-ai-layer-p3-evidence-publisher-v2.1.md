@@ -11,3 +11,7 @@ Any navigation, different result, logout or incomplete review MUST invoke clear(
 Lessons remain intentionally DENIED: renderVideo() changes state.courses.lessonId to the first lesson of the subject regardless of the selected lesson, and Telegram video is a SUBJECT-level resource. Do not attach a lesson-specific AI selector until the product screen genuinely identifies the lesson.
 
 All fixtures are synthetic and contain no academic answers, messages, model calls, secrets or real student data.
+
+## Genuine Chromium proof (synthetic DOM)
+
+The 320×568 RU, 390×844 UZ, desktop 1366×768 EN and 390×480 RU harness now imports the evidence publisher separately from original UI. It demonstrates that incomplete V4 finalization yields no selector, server-reviewed questions produce exact `101/202` to the V2 binder (never legacy attempt `567`), no question is admitted before explicit selection, and clearing proof immediately revokes the binder. No actual iClub app file is patched or loaded with this publisher in production.
