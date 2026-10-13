@@ -49,3 +49,13 @@ The context draft remains **UNAPPLIED** in `qa/sql_drafts`. The preview candidat
 - Rollout flags, protected Preview and effective subject-specific audience remain OFF until explicit architect authorization.
 - Separate production-safe migration/RLS/GRANT review, expiry-retention policy for minimal technical records, Supabase Edge bundler verification, actual browser RU/UZ/EN and cross-worker reauthorization are required.
 - No paid provider or production integration is run by these tests. Original Math Exam Prep is not migrated.
+
+
+## Verified native acceptance — 2026-10-13
+
+[**GitHub Actions run 38353225903**](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38353225903) **SUCCESS**, tested QA commit `9b0e081ae1e5be04146194189841ea29d3990e1a`. Native Node.js **396/396**, Deno 2 **36/36** with strict TypeScript check, PostgreSQL 16 **7/7** independent disposable scratch suites (`meter`, `math`, `practice`, `release`, `claim`, `atomic`, `context`). Two-connection request race, forced atomic quota rollback, legacy Mathematics subject isolation and protected original-file check also succeeded. The new SQL functions executed on PostgreSQL and the rollback-only fixtures were discarded.
+
+The tested context suite covers: Biology Practice, Economics Practice, Informatics Practice and Biology Lessons; foreign/nonexistent Lesson denial; authenticated enrollment; stale screen invalidation in both directions; same-screen idempotence; protected exam, subject deactivation, expired handles, unauthorized revocation, current browser navigation and 30-context rate limit. The same relational query is generic across any enrolled active subject with existing Lesson/Practice records.
+
+**Important:** the test proves only source-independent **context validity**. It does not claim editorial source approval, a deployed AI endpoint, authenticated live browser journey, or working AI for students. The whole context/meter/publisher migration remains in `qa/sql_drafts`, uninstalled and production-independent.
+
