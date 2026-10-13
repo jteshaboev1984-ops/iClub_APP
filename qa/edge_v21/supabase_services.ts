@@ -205,6 +205,30 @@ export function createSupabaseServices(config:BackendConfig){
    }),deny());
    return d.allowed===true;
   },
+  // Independent v21 provider money liability RPCs; absent means DENY.
+  // Paid model calls stay globally disabled in this QA Deno adapter.
+  reserveProviderSpend:async(args:{requestId:string;userId:string;sessionFingerprint:string;requestFingerprint:string})=>{
+   const d=await safe(()=>rpc("reserve_iclub_ai_v21_provider_spend_service",{
+    p_request_id:args.requestId,p_user_id:args.userId,
+    p_session_fingerprint:args.sessionFingerprint,p_request_fingerprint:args.requestFingerprint
+   }),deny());
+   return {allowed:d.allowed===true};
+  },
+  dispatchProviderSpend:async(args:{requestId:string;userId:string;sessionFingerprint:string;requestFingerprint:string})=>{
+   const d=await safe(()=>rpc("dispatch_iclub_ai_v21_provider_spend_service",{
+    p_request_id:args.requestId,p_user_id:args.userId,
+    p_session_fingerprint:args.sessionFingerprint,p_request_fingerprint:args.requestFingerprint
+   }),deny());
+   return {allowed:d.allowed===true};
+  },
+  finishProviderSpend:async(args:{requestId:string;userId:string;sessionFingerprint:string;requestFingerprint:string;outcome:string;actualMicrousd?:number|null})=>{
+   const d=await safe(()=>rpc("finish_iclub_ai_v21_provider_spend_service",{
+    p_request_id:args.requestId,p_user_id:args.userId,
+    p_session_fingerprint:args.sessionFingerprint,p_request_fingerprint:args.requestFingerprint,
+    p_outcome:args.outcome,p_actual_microusd:args.actualMicrousd??null
+   }),{ok:false});
+   return {ok:d.ok===true};
+  },
   // Intentionally no real provider adapter or academic generation. Even if
   // v2 release metadata were accidentally seeded, this rejects paid model use.
   generateSynthetic:async(_args:Json):Promise<never>=>{

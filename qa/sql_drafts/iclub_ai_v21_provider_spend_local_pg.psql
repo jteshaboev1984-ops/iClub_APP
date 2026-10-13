@@ -24,11 +24,7 @@ CREATE TABLE public.users(id uuid PRIMARY KEY);
 \ir ../../supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql
 \ir iclub_ai_v21_meter_v2_UNAPPLIED.sql
 \ir iclub_ai_delivery_claim_v21_UNAPPLIED.sql
-CREATE TABLE private.iclub_global_ai_runtime_config(
- id smallint PRIMARY KEY,kill_switch boolean NOT NULL,
- ui_enabled boolean NOT NULL,gateway_enabled boolean NOT NULL,
- generation_enabled boolean NOT NULL);
-INSERT INTO private.iclub_global_ai_runtime_config VALUES(1,true,false,false,false);
+-- Use actual v1 private.iclub_global_ai_runtime_config installed above.
 CREATE TABLE private.iclub_ai_v21_release_control(
  id smallint PRIMARY KEY,release_approved boolean NOT NULL DEFAULT false);
 CREATE TABLE private.synthetic_protected_exam(user_id uuid PRIMARY KEY,active boolean NOT NULL);

@@ -132,3 +132,21 @@ Deno.test("Missing Lesson mint RPC is denied and passes only verified user and l
  eq(call?.body?.p_lesson_id,34);
  eq(await x.services.mintLessonContext({userId:user,lessonId:-1}).then(v=>v.allowed),false);
 });
+
+Deno.test("Missing atomic provider money RPCs deny payment even with a valid JWT",async()=>{
+ const x=syntheticBackend(),fp="a".repeat(64);
+ const requestId="22222222-2222-4222-8222-222222222222";
+ const args={requestId,userId:user,sessionFingerprint:fp,requestFingerprint:fp};
+ eq((await x.services.reserveProviderSpend(args)).allowed,false);
+ eq((await x.services.dispatchProviderSpend(args)).allowed,false);
+ eq((await x.services.finishProviderSpend({...args,outcome:"unknown"})).ok,false);
+ const a=x.calls.find(c=>c.url.includes("reserve_iclub_ai_v21_provider_spend_service"));
+ const b=x.calls.find(c=>c.url.includes("dispatch_iclub_ai_v21_provider_spend_service"));
+ const c=x.calls.find(c=>c.url.includes("finish_iclub_ai_v21_provider_spend_service"));
+ eq(a?.body?.p_request_id,requestId);
+ eq(b?.body?.p_session_fingerprint,fp);
+ eq(c?.body?.p_outcome,"unknown");
+ eq(c?.body?.p_actual_microusd,null);
+ for(const call of [a,b,c])
+  eq(new Headers(call?.init.headers).get("authorization"),"Bearer "+config.serviceRoleKey);
+});
