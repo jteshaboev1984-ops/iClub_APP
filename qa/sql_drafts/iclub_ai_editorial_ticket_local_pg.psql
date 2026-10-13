@@ -76,6 +76,17 @@ UPDATE private.iclub_global_ai_runtime_config
  SET kill_switch=false,ui_enabled=true,gateway_enabled=true;
 
 \ir iclub_ai_editorial_ticket_publisher_v21_UNAPPLIED.sql
+-- Synthetic release INSERT error fires AFTER the editorial source UPDATE
+-- inside the same publish function. Catch outside to assert full rollback.
+CREATE FUNCTION private.synthetic_editorial_publication_failure()
+ RETURNS trigger LANGUAGE plpgsql AS $synthetic_failure$
+BEGIN
+ RAISE EXCEPTION 'synthetic_editorial_publication_failure';
+END;
+$synthetic_failure$;
+CREATE TRIGGER synthetic_editorial_publish_fail
+ BEFORE INSERT ON private.iclub_ai_topic_release_v21
+ FOR EACH ROW EXECUTE FUNCTION private.synthetic_editorial_publication_failure();
 DO $ticket_test$
 DECLARE
  learner uuid:='11111111-1111-4111-8111-111111111111';
@@ -89,7 +100,7 @@ DECLARE
  source_body text:='Synthetic technical payload, NOT an approved educational lesson.';
  prepared jsonb:='{"topic_main":"Synthetic prepared result, not academic content."}'::jsonb;
  h text;digest text;
- ret jsonb;missing_evidence jsonb;
+ ret jsonb;missing_evidence jsonb;injected_failure boolean;
 BEGIN
  -- Publication executor role intentionally has NO session/academic privileges.
  IF has_function_privilege('service_role',
@@ -136,6 +147,28 @@ BEGIN
  ret:=public.publish_iclub_ai_v21_ticket(pub_ticket,5);
  IF ret->>'reason' IS DISTINCT FROM 'revision_or_state_conflict' THEN
   RAISE EXCEPTION 'Wrong initial revision published: %',ret;END IF;
+ -- Deliberately interrupt the atomic operation after source status UPDATE.
+ injected_failure:=false;
+ BEGIN
+  ret:=public.publish_iclub_ai_v21_ticket(pub_ticket,0);
+ EXCEPTION WHEN OTHERS THEN
+  IF SQLERRM NOT LIKE '%synthetic_editorial_publication_failure%' THEN
+   RAISE;
+  END IF;
+  injected_failure:=true;
+ END;
+ IF NOT injected_failure THEN
+  RAISE EXCEPTION 'Synthetic publication failure did not execute';END IF;
+ IF EXISTS(SELECT 1 FROM private.iclub_ai_topic_release_v21
+  WHERE subject_key='biology' AND topic_key='lesson_101')
+ OR NOT EXISTS(SELECT 1 FROM private.iclub_ai_v21_editorial_source_versions
+  WHERE subject_key='biology' AND source_id='synthetic-review-01'
+   AND record_state='draft')
+ OR EXISTS(SELECT 1 FROM private.iclub_ai_v21_editorial_tickets
+  WHERE ticket_id=pub_ticket AND used_at IS NOT NULL) THEN
+  RAISE EXCEPTION 'Half-published source/release or used ticket after injected failure';
+ END IF;
+ EXECUTE 'DROP TRIGGER synthetic_editorial_publish_fail ON private.iclub_ai_topic_release_v21';
  ret:=public.publish_iclub_ai_v21_ticket(pub_ticket,0);
  IF ret->>'ok' IS DISTINCT FROM 'true'
  OR ret->>'publication_revision'<>'1' THEN
@@ -150,6 +183,15 @@ BEGIN
  'lesson','biology','topic_explanation','lesson_101','ru');
  IF ret->>'approved' IS DISTINCT FROM 'true' THEN
   RAISE EXCEPTION 'Valid independent source/proof still not ready: %',ret;END IF;
+ -- Editorial ready does NOT override independent owner-owned AI kill switch.
+ UPDATE private.iclub_global_ai_runtime_config
+ SET kill_switch=true,ui_enabled=false,gateway_enabled=false WHERE id=1;
+ ret:=public.get_iclub_ai_v21_source_proof_service(
+ 'lesson','biology','topic_explanation','lesson_101','ru');
+ IF ret->>'approved' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Published source bypassed runtime OFF switch: %',ret;END IF;
+ UPDATE private.iclub_global_ai_runtime_config
+ SET kill_switch=false,ui_enabled=true,gateway_enabled=true WHERE id=1;
  ret:=public.get_iclub_ai_topic_release_service_v21(
  'lesson','biology','topic_explanation','lesson_101','uz');
  IF ret->>'ready' IS DISTINCT FROM 'false' THEN
