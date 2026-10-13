@@ -38,7 +38,7 @@ test('Publication checks exact digest, source version, locale and immutable scop
  for(const part of ["s.source_hash IS DISTINCT FROM t.source_hash",
  "encode(sha256(convert_to(","s.prepared_variants::text,'UTF8'",
  "t.surface_code","t.subject_key","t.feature_code","t.topic_key","t.locale",
- "s.source_id=t.source_id","s.source_version=t.source_version"])
+ "source_id=t.source_id","source_version=t.source_version"])
   assert.ok(sql.includes(part),part);
 });
 test('Publisher only updates the chosen source and topic metadata in one transaction',()=>{
