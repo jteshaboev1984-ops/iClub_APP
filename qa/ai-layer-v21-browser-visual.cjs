@@ -300,7 +300,20 @@ async function run(){
  }finally{
   try{cdp?.close()}catch{}
   processChrome.kill("SIGKILL");
-  rmSync(dir,{recursive:true,force:true});
+  // Chrome may still be writing its temporary profile when SIGKILL is issued.
+  // Await actual child exit, then remove only this synthetic profile with
+  // bounded retries. Never mask a browser assertion failure in cleanup.
+  if(processChrome.exitCode===null&&processChrome.signalCode===null){
+   await Promise.race([
+    new Promise(resolve=>processChrome.once("exit",resolve)),
+    delay(2000)
+   ]);
+  }
+  try{
+   rmSync(dir,{recursive:true,force:true,maxRetries:12,retryDelay:150});
+  }catch(error){
+   console.warn("BROWSER_CLEANUP_WARNING "+String(error?.code||error));
+  }
  }
  console.log("GREEN: genuine Chrome CSS/layout/interaction smoke, no remote services");
 }
