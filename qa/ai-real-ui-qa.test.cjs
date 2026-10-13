@@ -42,3 +42,22 @@ test("Legacy iClub index.html and app.js byte-untouched by QA page",()=>{
  assert.doesNotMatch(original,/iclub-qa-ribbon/);
  assert.ok(fs.existsSync("app.js"));
 });
+
+test("QA Review provides two distinct actions, one automatic, one editable",()=>{
+ assert.match(js,/data\.qaAiAction="explain"/);
+ assert.match(js,/data\.qaAiAction="chat"/);
+ assert.match(js,/previewExplain\(/);
+ assert.match(js,/previewAskInChat\(/);
+ assert.match(js,/let handling=false/);
+ assert.match(js,/explain\.disabled=true;ask\.disabled=true/);
+ for(const key of ["askAi:","askDraft:","explainPrompt:"])
+  assert.equal((js.match(new RegExp(key,"g"))||[]).length,3);
+});
+test("QA shell imports exact Exam Prep icon and auto-sends only after verified question",()=>{
+ assert.match(shell,/src="assets\/iclub-ai-mark-temp\.jpg\?v=1"/);
+ assert.match(shell,/function previewSelectedQuestion/);
+ assert.match(shell,/if\(p\.hidden\|\|state\.busy\|\|!previewSelectedQuestion\(questionId\)\)/);
+ assert.match(shell,/await sendMessage\(\{promptKey:"topic_main",displayText:prompt,userText:""\}\)/);
+ assert.match(shell,/function previewAskInChat/);
+ assert.doesNotMatch(shell,/window\.iClubGlobalAiShell = Object\.freeze\(\{[\s\S]*?previewAskInChat[\s\S]*?signIn/);
+});

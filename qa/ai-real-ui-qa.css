@@ -9,3 +9,13 @@
 .iclub-qa-review .btn{margin-top:10px}
 .iclub-global-ai-mark[hidden]{display:none!important}
 @media(max-width:410px){.iclub-qa-ribbon{gap:5px;padding:6px;font-size:10px}.iclub-qa-ribbon button{padding:4px 6px}}
+/* Same source mark as Exam Prep; one automatic explanation action and one
+   editable-chat action. No new UI decorations or changes to iClub layout. */
+.iclub-qa-review-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:13px}
+.iclub-qa-review-actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;margin:0;white-space:normal;text-align:center}
+.iclub-qa-review-actions .btn .ep-ai-mark{width:21px;height:21px;border-radius:7px;flex-shrink:0;object-fit:cover}
+.iclub-qa-review-actions .btn:disabled{opacity:.5;cursor:wait}
+@media(max-width:410px){
+ .iclub-qa-review-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+ .iclub-qa-review-actions .btn{width:100%;font-size:12px;padding:8px 6px}
+}

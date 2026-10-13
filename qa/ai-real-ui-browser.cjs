@@ -87,18 +87,39 @@ async function exercise(lang){
  await sleep(90);
  check(document.querySelectorAll("#practice-review-list .iclub-qa-review").length===2,
   "native review list missing answered questions");
- document.querySelector("#practice-review-list button").click();
- await sleep(155);
+ const review=document.querySelector("#practice-review-list .iclub-qa-review");
+ const explain=review.querySelector('[data-qa-ai-action="explain"]');
+ const ask=review.querySelector('[data-qa-ai-action="chat"]');
+ check(explain&&ask,"Two distinct contextual AI actions missing");
+ check(review.querySelectorAll('img[src*="iclub-ai-mark-temp.jpg"]').length===2,
+  "Working Exam Prep AI icon missing from contextual actions");
+ explain.click();explain.click();
+ await sleep(48);
  const panel=document.getElementById("iclub-global-ai-panel");
- check(panel&&!panel.hidden,"native AI panel did not open on review");
- const prompt=panel.querySelector(".iclub-global-ai-quick-btn");
- check(prompt&&/объясни|tushuntir|explain/i.test(prompt.textContent),
-  "native AI prepared explanation missing");
- prompt.click();await sleep(370);
+ check(panel&&!panel.hidden,"explain did not open shared AI panel");
+ const input=panel.querySelector("[data-global-ai-input]");
+ check(input.value.includes({ru:"Объясни",uz:"tushuntirib",en:"Explain"}[lang]),
+  "question prompt did not first populate visible composer");
+ await sleep(460);
  const text=panel.querySelector("[data-global-ai-messages]").textContent;
  const expected={ru:"рост цены",uz:"narx oshishi",en:"price increase"}[lang];
  check(text.toLowerCase().includes(expected.toLowerCase()),
-  "prepared response not surfaced in real iClub panel: "+text.slice(-170));
+  "automatic explanation did not arrive: "+text.slice(-180));
+ const users=panel.querySelectorAll(".iclub-global-ai-message.is-user");
+ check(users.length===1,"double tap dispatched more than one request");
+ window.iClubGlobalAiShell.close();
+ const previousMessages=panel.querySelectorAll(".iclub-global-ai-message").length;
+ ask.click();await sleep(95);
+ check(!panel.hidden,"Ask AI button did not open chat");
+ check(input.value.includes({ru:"Вопрос по ошибке",uz:"savolim",en:"My question"}[lang]),
+  "Ask AI did not prefill editable error context");
+ check(panel.querySelectorAll(".iclub-global-ai-message").length===previousMessages,
+  "Ask AI must not auto-send a request");
+ check(panel.querySelector(".iclub-global-ai-mark-logo")==null,
+  "Only the floating mark owns its image; no duplicate in chat panel");
+ const icon=document.querySelector("#iclub-global-ai-mark .iclub-global-ai-mark-logo");
+ check(icon&&icon.getAttribute("src").includes("iclub-ai-mark-temp.jpg"),
+  "Global AI mark is not the current Exam Prep AI mark");
  const width=document.documentElement.scrollWidth;
  check(width<=innerWidth+2,"horizontal scroll "+width+" / "+innerWidth);
  document.querySelector('#tabbar [data-tab="home"]').click();

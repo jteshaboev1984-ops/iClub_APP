@@ -771,7 +771,7 @@
     button.type = "button";
     button.setAttribute("aria-haspopup", "dialog");
     button.setAttribute("aria-expanded", "false");
-    button.innerHTML = '<img class="iclub-global-ai-mark-logo" src="logo.png" alt="" aria-hidden="true">';
+    button.innerHTML = '<img class="iclub-global-ai-mark-logo" src="assets/iclub-ai-mark-temp.jpg?v=1" alt="" aria-hidden="true">';
     button.addEventListener("click", () => {
       if (currentBlocked()) {
         showToast(copy().assessmentTap);
@@ -1028,8 +1028,51 @@
     setTimeout(() => { void refreshBootstrap(); }, 0);
   }
 
+  // Preview-only actions. Only a finished, selected question can dispatch.
+  function previewSelectedQuestion(questionId) {
+    if (window.__ICLUB_AI_V21_SYNTHETIC_ONLY__ !== true ||
+        currentBlocked() || !isEligibleView() ||
+        activeViewName() !== "courses") return false;
+    const id=Number(questionId);
+    if(!Number.isSafeInteger(id)||id<=0)return false;
+    const selected=document.querySelector(
+      '#courses-practice-review.is-active [data-iclub-ai-v21-selected="true"]');
+    return selected?.getAttribute("data-iclub-ai-v21-question-id")===String(id);
+  }
+
+  async function previewExplain({questionId,displayText}={}) {
+    const prompt=String(displayText||"").trim().slice(0,MAX_INPUT_CHARS);
+    if(!prompt||state.busy||!previewSelectedQuestion(questionId))return false;
+    openPanel();
+    const p=panel(),input=p?.querySelector("[data-global-ai-input]");
+    if(!p||p.hidden||!input)return false;
+    // 1. Show the populated input. 2. Automatically send once.
+    // 3. Existing shell shows user request, typing, then mock response.
+    input.value=prompt;
+    renderComposer();
+    await new Promise(resolve=>setTimeout(resolve,100));
+    if(p.hidden||state.busy||!previewSelectedQuestion(questionId))return false;
+    await sendMessage({promptKey:"topic_main",displayText:prompt,userText:""});
+    return true;
+  }
+
+  function previewAskInChat({questionId,draft}={}) {
+    if(state.busy||!previewSelectedQuestion(questionId))return false;
+    openPanel();
+    const p=panel(),input=p?.querySelector("[data-global-ai-input]");
+    if(!p||p.hidden||!input)return false;
+    input.value=String(draft||"").slice(0,MAX_INPUT_CHARS);
+    renderComposer();
+    input.focus();
+    input.setSelectionRange(input.value.length,input.value.length);
+    // Chat opening only prepares an editable question, never sends it.
+    return true;
+  }
+
   window.iClubGlobalAiShell = Object.freeze({
     version: "global_ai_conversations_v1",
+    previewExplain,
+    previewAskInChat,
     refresh: () => refreshBootstrap(),
     close: () => closePanel(),
     context: () => ({ ...(state.context || resolveContext()) })
