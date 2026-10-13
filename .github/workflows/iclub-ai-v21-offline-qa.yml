@@ -1,5 +1,5 @@
 name: iClub AI Layer v2.1 — isolated QA only
-# QA technical integration: native suites + atomic cross-worker delivery proof.
+# QA technical integration: atomic quota+delivery, injected rollback and parallel PG claim.
 
 # This workflow never builds or deploys to Vercel, never connects to Supabase,
 # never uses production secrets and never runs on main.
@@ -59,12 +59,12 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y -qq postgresql-client
           fi
-      - name: Run four independent scratch PostgreSQL suites
+      - name: Run six independent scratch PostgreSQL suites
         shell: bash
         run: |
           set -euo pipefail
           failed=0
-          for suite in meter math practice release claim; do
+          for suite in meter math practice release claim atomic; do
             db="iclub_ai_v21_scratch_ci_${suite}"
             createdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
             if ICLUB_PGTEST_DB="${db}" ICLUB_PGTEST_HOST=127.0.0.1 \
