@@ -59,3 +59,21 @@ test('Global UI code still refuses action during protected assessment',()=>{
  assert.match(js,/if \(state\.busy \|\| currentBlocked\(\) \|\| state\.usageExhausted \|\| !state\.context\) return;/);
  assert.match(js,/if \(currentBlocked\(\)\)\s*\{\s*showToast/);
 });
+
+test('Unpublished topic displays proofread three-language In development notice',()=>{
+ for(const text of [
+  'В разработке. AI-помощь по этой теме пока готовится.',
+  'Ishlab chiqilmoqda. Bu mavzu bo‘yicha AI yordami hali tayyorlanmoqda.',
+  'In development. AI help for this topic is being prepared.'
+ ])assert.ok(js.includes(text),text);
+});
+test('Not-ready mode is not treated as exhausted quota or a provider answer',()=>{
+ const from=js.indexOf('if (["in_development", "subject_not_ready"');
+ const to=js.indexOf('} catch {',from);
+ assert.ok(from>0&&to>from);
+ const part=js.slice(from,to);
+ assert.ok(part.includes('copy().inDevelopment'));
+ assert.ok(part.includes('data.mode === "in_development"'));
+ assert.ok(!part.includes('setUsageExhausted('));
+ assert.ok(!part.includes('topicMain'));
+});
