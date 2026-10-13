@@ -459,3 +459,22 @@ See `docs/iclub-ai-layer-p7-distributed-delivery-handoff-v2.1.md`. Current work 
 
 **Detailed handoff:** `docs/iclub-ai-layer-deno-edge-qa-bridge-v2.1.md`.
 
+
+## 28. P2 server-minted temporary screen context for Lessons and Practice (2026-10-13)
+
+**Architect intent preserved:** this chat develops **ONLY the technical AI subsystem**. Academic cards, questions, tutor explanations and editorial publication are completed in a different chat. Until the exact published source for a verified topic, function and language is ready, the unified AI must show localized **«В разработке»** with zero units and no provider calls. Existing Math P1/P5 Exam Prep Tutor is never rerouted.
+
+**Production schema verified READ-ONLY, metadata only:** existing `public.lessons`, `public.subjects`, `public.user_subjects`, `public.practice_sessions_v4` (finalized attempt + question IDs), `public.practice_session_answers_v4`, private protected-assessment guard and global AI OFF flags. This is a factual verified integration basis across all active subjects; no source-card editing or speculative user progress was used.
+
+**New QA-only server contract:**
+- `qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql` creates private, short-lived opaque context handles and **service-role-only** mint/resolve/revoke RPCs. The frontend only selects an existing Lesson ID or a completed Practice session+answered question. The server independently derives the active enrolled subject, canonical Lesson `lesson_<id>` / Practice `question_<id>` topic, feature, owner and 90-second expiry. The source publisher independently decides if the topic/locale is ready.
+- One active new-AI screen per learner; minting a different Lesson/Practice makes the previous handle invalid even across tabs. Repeated mint of the same still-current screen reuses the handle; creation limited to 30 distinct handles/minute. Revoke invalidates current handle; foreign/old handles cannot revoke a newer one. Live read rechecks ownership, enrollment, activity, academic completion and protected exam (not just a snapshot).
+- Deno preview candidate `qa/edge_v21/{context_core.ts,index.ts,supabase_services.ts}` implements service-token-confined `/context` mint/revoke next to `/answer`. Browser cannot assert a source, subject, topic, quota, plan or academic progress. **No deployed Edge function or production database change**.
+- No lesson body, academic answer, prompt, grade, chat transcript, certificate or student progress stored; only owner UUID, resource IDs, revision, timestamps and canonical subject/topic keys.
+
+**Native verification:** [successful GitHub QA run 38353225903](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38353225903), tested commit `9b0e081ae1e5be04146194189841ea29d3990e1a`: **396/396 Node.js** tests, **36/36 Deno** tests with strict TS check, **7/7 actual PostgreSQL 16** synthetic scratch suites, separate two-worker request race and injected billing rollback PASS. Multi-surface scenario proves Biology Lesson/Practice, Economics and Informatics Practice, immediate switch revocation, student subject change, expired handles, protected exam and rate limiting. Existing original Math Exam Prep, active migrations and main app entrypoints unchanged in CI protection check.
+
+**No deployment approval inferred:** the current production UI does not yet call the new mint/revoke endpoints. Abrupt navigation without new mint or revoke leaves an old handle for at most 90 seconds; future UI/Edge routing must explicitly revoke on screen switch and continually validate active context. The local SQL contract has not been migrated and the editorial publisher/source/rights RPCs remain uninstalled. General Help, Tours, Home/Profile require independently verified server authority before granting contexts. Full production-safe RLS/migration, privacy cleanup policy and protected Preview mobile RU/UZ/EN are still required.
+
+**Handoff:** `docs/iclub-ai-layer-p2-scoped-context-practice-lessons-v2.1.md`. Never update academic or real-user progress as part of technical context wiring.
+
