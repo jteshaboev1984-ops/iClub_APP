@@ -12584,7 +12584,7 @@ function bindRatingsUI() {
   } else if (next === "my-rec-topic-review") {
     window.iClubPracticeTopicHistoryV1?.renderReview?.(currentLang());
   } else if (next === "my-rec-topic-history") {
-    window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),state?.courses?.subjectKey);
+    loadTopicHistoryScreen().catch(e=>logClientError("topic_history_back_load",e));
   }
 
   return;
@@ -13108,7 +13108,7 @@ if (state.tab === "courses") {
   else if (top === "books") { if (typeof renderBooks === "function") renderBooks(); }
   else if (top === "my-recs") { if (typeof renderMyRecs === "function") renderMyRecs(); }
   else if (top === "my-rec-topic-review") { window.iClubPracticeTopicHistoryV1?.renderReview?.(currentLang()); }
-  else if (top === "my-rec-topic-history") { window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),state?.courses?.subjectKey); }
+  else if (top === "my-rec-topic-history") { loadTopicHistoryScreen().catch(e=>logClientError("topic_history_language_load",e)); }
   else if (top === "practice-start") { if (typeof renderPracticeStart === "function") renderPracticeStart(); }
   else if (top === "practice-review") { if (typeof renderPracticeReview === "function") renderPracticeReview(); }
   else if (top === "practice-recs") { if (typeof renderPracticeRecs === "function") renderPracticeRecs(); }
@@ -20649,11 +20649,30 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
    
+async function loadTopicHistoryScreen(){
+  const key=String(state?.courses?.subjectKey||"");
+  const holder=document.getElementById("my-rec-topic-history-body");
+  if(!holder||!key||getCoursesTopScreen()!=="my-rec-topic-history")return;
+  holder.textContent=tr3("Загружаем историю…","Tarix yuklanmoqda…","Loading history…");
+  let data=null,unavailable=false;
+  try{
+    const uid=await getAuthUid();
+    if(!uid||!window.sb?.rpc)throw new Error("not_authenticated");
+    const result=await window.sb.rpc("get_practice_topic_history_safe_v1",{p_subject_key:key});
+    if(result.error||result.data?.ok!==true||String(result.data.subject_key)!==key)throw result.error||new Error("history_invalid");
+    data=result.data;
+  }catch(error){
+    unavailable=true;
+    logClientError("topic_history_load_failed",error);
+  }
+  if(key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-rec-topic-history")return;
+  window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),key,data,unavailable);
+}
 window.addEventListener("iclub-practice-open-history-list",event=>{
   const key=String(event?.detail?.subjectKey||"");
   if(!key||key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-recs")return;
   pushCourses("my-rec-topic-history");
-  window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),key);
+  loadTopicHistoryScreen().catch(e=>logClientError("topic_history_navigation_load",e));
 });
 window.addEventListener("iclub-practice-open-history-review",event=>{
   const key=String(event?.detail?.subjectKey||"");
