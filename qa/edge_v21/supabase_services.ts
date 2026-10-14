@@ -140,6 +140,12 @@ export function createSupabaseServices(config:BackendConfig){
   // release grant. The release and source gates are independent and stricter.
   getSubjectActive:async(subject:string)=>{
    if(!VALID_SUBJECT.test(subject))return false;
+   // General Help is NOT a course/subject row. Use an independent server
+   // capability; missing/unpublished general scope remains fail-closed.
+   if(subject==="general"){
+    const d=await safe(()=>rpc("get_iclub_ai_v21_general_scope_service",{}),deny());
+    return d.allowed===true&&d.scope==="general"&&d.release_approved===true;
+   }
    return safe(async()=>{
     const q="?select=subject_key,is_active&subject_key=eq."+encodeURIComponent(subject)+"&limit=2";
     const list=await call("/rest/v1/subjects"+q,{method:"GET"});
