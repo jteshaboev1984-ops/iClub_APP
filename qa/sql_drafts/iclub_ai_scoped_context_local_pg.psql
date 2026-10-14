@@ -369,7 +369,7 @@ BEGIN
  result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'navigation',p_view=>'about');
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Unapproved navigation instructions released: %',result;END IF;
- INSERT INTO private.context_qa_exam_flags VALUES(learner,true);
+ UPDATE private.context_qa_exam_flags SET active=true WHERE user_id=learner;
  result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Global AI screen available during protected assessment: %',result;END IF;
