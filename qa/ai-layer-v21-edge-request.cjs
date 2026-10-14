@@ -18,7 +18,7 @@ const validateText=reply=>typeof reply==='string'&&reply.trim().length>0&&
  reply.length<=3000&&!/<\s*script\b|javascript\s*:|<\s*iframe\b/i.test(reply);
 const same=(a,b)=>a?.state==='available'&&b?.state==='available'&&
  ['sourceId','sourceVersion','sourceHash','revision','contextRevision',
-   'route','surface','subject','proofRevision'].every(k=>a[k]===b[k]);
+   'route','surface','subject','proofRevision','proofHash'].every(k=>a[k]===b[k]);
 function parseBody(input){
  if(typeof input!=='string'||Buffer.byteLength(input,'utf8')>LIMIT_BYTES)return null;
  let body;try{body=JSON.parse(input)}catch{return null;}
