@@ -19538,7 +19538,6 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
   const renderPracticeList = () => {
     // The recent topic-session summary is presented below current recommendations.
     if (!practiceRows.length) {
-      if(practiceMode==="topics" && Number(topicHistory?.completed_sessions||0)>0)return "";
       return `<div class="empty muted" style="margin-top:8px">${escapeHTML(practiceMode==="topics"
         ?tr3("Пока нет активных рекомендаций по темам.","Mavzular bo‘yicha faol tavsiyalar yo‘q.","No active topic recommendations yet.")
         :(t("my_recs_practice_empty")||"Рекомендаций по практике пока нет."))}</div>`;
@@ -19552,7 +19551,7 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
         groups.get(topic).push({rec,index});
       });
       return Array.from(groups.entries()).map(([topic,items])=>{
-        const n=items.length;
+        const n=new Set(items.map(({rec})=>String(rec.subtopic||"").trim()||topic)).size;
         const noun=tr3(n%10===1&&n%100!==11?"подтема":n%10>=2&&n%10<=4&&!(n%100>=12&&n%100<=14)?"подтемы":"подтем",
           "kichik mavzu",n===1?"subtopic":"subtopics");
         const entries=items.map(({rec,index})=>{
