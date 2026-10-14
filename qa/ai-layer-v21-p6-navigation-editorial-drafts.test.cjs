@@ -87,3 +87,11 @@ test("Prepared draft cannot invent private academic next steps or release itself
    ["id","targetView","kind","entryView","selector","labelKey","replies"].sort());
  }
 });
+
+test('§69 review sheet copy matches the editorial draft',()=>{
+ const sheet=read('docs/iclub-ai-layer-p6-editorial-review-sheet-v2.1.md');
+ for(const entry of draft.entrypoints){
+  for(const locale of languages)assert.ok(sheet.includes(entry.replies[locale]));
+ }
+ assert.equal(draft.releaseAllowed,false);
+});
