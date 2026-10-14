@@ -20496,20 +20496,26 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
 
    async function startPracticeRetryMistakes(options={}) {
   const fromAttempt=options?.fromAttempt===true;
+  const fromHistory=options?.fromHistory===true;
   const ctx=state?.courses?.practiceContext||"main";
   const attempt=ctx==="topic"||ctx==="drill" ? state.practiceLastDrillAttempt:state.practiceLastAttempt;
   const firstWrong=Array.isArray(attempt?.details)?attempt.details.find(x=>!x.isCorrect):null;
-  const rec=fromAttempt
-    ?{topic:firstWrong?.topic||null,subtopic:ctx==="topic"?null:(firstWrong?.subtopic||null)}
-    :state?.courses?.myRecCurrent;
+  const rec=fromHistory
+    ?{topic:String(options?.topic||""),subtopic:null}
+    :fromAttempt
+      ?{topic:firstWrong?.topic||null,subtopic:ctx==="topic"?null:(firstWrong?.subtopic||null)}
+      :state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
   const owner = await window.iClubPracticeDraftIdentityV1?.bind();
   if (!owner) { showToast(t("not_available")); return; }
   if (loadPracticeDraft()) { showToast(t("practice_resume_prompt")); return; }
-  const qids=fromAttempt
-    ?Array.from(new Set((Array.isArray(attempt?.details)?attempt.details:[])
-        .filter(x=>!x.isCorrect).map(x=>Number(x.id||0)).filter(x=>x>0))).slice(0,10)
-    :(Array.isArray(state?.courses?.myRecMistakeQids)?state.courses.myRecMistakeQids.slice(0,10):[]);
+  const qids=fromHistory
+    ?Array.from(new Set((Array.isArray(options?.questionIds)?options.questionIds:[])
+        .map(x=>Number(x)).filter(x=>Number.isSafeInteger(x)&&x>0))).slice(0,10)
+    :fromAttempt
+      ?Array.from(new Set((Array.isArray(attempt?.details)?attempt.details:[])
+          .filter(x=>!x.isCorrect).map(x=>Number(x.id||0)).filter(x=>x>0))).slice(0,10)
+      :(Array.isArray(state?.courses?.myRecMistakeQids)?state.courses.myRecMistakeQids.slice(0,10):[]);
   if(!rec||!subjectKey) return;
   if (!qids.length) { showToast(t("rec_retry_empty") || "Нет ошибок для повтора."); return; }
   const api = getPracticeSafeApi()?.drill;
@@ -20518,6 +20524,20 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   let started = null, rows = [];
   showAsyncOverlay(tr3("Загружаем ошибки для повтора…", "Xatolarni takrorlash yuklanmoqda…", "Loading mistakes to retry…"));
   try {
+    if(fromHistory){
+      const sessionId=Number(options?.sourceSessionId||0);
+      if(!Number.isSafeInteger(sessionId)||sessionId<=0||!rec.topic)throw new Error("invalid_history_source");
+      const sourceRows=await api.questions(sessionId);
+      const verified=new Set((Array.isArray(sourceRows)?sourceRows:[])
+        .filter(x=>x.was_answered===true && x.saved_is_correct===false)
+        .map(x=>Number(x.id||0)));
+      if(qids.length===0||qids.some(id=>!verified.has(id)))
+        throw new Error("history_wrong_answers_unverified");
+      const currentSubjectId=await getSubjectIdByKey(subjectKey);
+      if((Array.isArray(sourceRows)?sourceRows:[])
+        .some(x=>Number(x.subject_id||0)!==Number(currentSubjectId||0)))
+        throw new Error("history_subject_scope_mismatch");
+    }
     started = await dbWriteWithRetry(() => api.startMistakes({ subjectKey, questionIds: qids, clientSessionId }), { tries: 3, baseDelayMs: 350 });
     rows = await dbWriteWithRetry(() => api.questions(Number(started?.session_id)), { tries: 3, baseDelayMs: 350 });
   } catch(error) {
@@ -20539,14 +20559,26 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   }, rows);
   if (!quiz) return;
   if (!state.courses) state.courses = {};
-  state.courses.myRecReturnTarget=fromAttempt?"practice-result":"my-rec-detail";
-  if(fromAttempt){state.courses.myRecMistakeQids=qids;state.courses.practiceErrorRetryOrigin=ctx;}
+  state.courses.myRecReturnTarget=(fromAttempt||fromHistory)?"practice-result":"my-rec-detail";
+  if(fromAttempt||fromHistory){
+    state.courses.myRecMistakeQids=qids;
+    state.courses.practiceErrorRetryOrigin=fromHistory?"topic":ctx;
+    if(fromHistory)state.courses.practiceTopicSelection={topic:rec.topic,subtopic:null};
+  }
   if ((await window.iClubPracticeDraftIdentityV1?.bind()) !== owner) return;
   quiz.practiceOwnerUid = owner;
   state.quizLock = "practice"; state.quiz = quiz; saveState();
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
    
+// Topic-history correction uses the same protected Practice retry flow.
+window.addEventListener("iclub-practice-correct-history",event=>{
+  const detail=event?.detail;
+  if(!detail||String(detail.subjectKey||"")!==String(state?.courses?.subjectKey||""))return;
+  startPracticeRetryMistakes({fromHistory:true,sourceSessionId:detail.sessionId,
+    questionIds:detail.questionIds,topic:detail.topic});
+});
+
 async function renderBooks() {
   const wrap = $("#books-list");
   if (!wrap) return;
