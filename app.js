@@ -19436,33 +19436,14 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
   if (!isCurrent()) return;
   // Independent Practice lanes: past normal Practice vs voluntary topic Practice.
   const modeTabs=activeTab==="practice" ? `
-    <div role="group" aria-label="${escapeHTML(tr3("Режим практики","Amaliyot turi","Practice mode"))}"
-      style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;padding:5px;
-      border:1px solid var(--line,rgba(127,127,127,.24));border-radius:14px;margin-bottom:16px;
-      background:var(--surface-2,rgba(127,127,127,.04))">
-      <button type="button" class="btn ${practiceMode==="tours"?"primary":""}"
-        aria-pressed="${practiceMode==="tours"}" data-myrecs-mode="tours"
-        style="min-width:0;font-size:13px;padding:10px 7px;white-space:normal">
-        ${escapeHTML(tr3("По турам","Turlar bo‘yicha","By tours"))}
-      </button>
-      <button type="button" class="btn ${practiceMode==="topics"?"primary":""}"
-        aria-pressed="${practiceMode==="topics"}" data-myrecs-mode="topics"
-        style="min-width:0;font-size:13px;padding:10px 7px;white-space:normal">
-        ${escapeHTML(tr3("По темам","Mavzular bo‘yicha","By topics"))}
-      </button>
-    </div>` : "";
-  const tabBtn = (key, label, isActive) => `
-    <button
-      type="button"
-      class="btn ${isActive ? "primary" : ""}"
-      data-myrecs-tab="${escapeHTML(key)}"
-      style="flex:1 1 0"
-    >
-      ${escapeHTML(label)}
-    </button>
+    <nav class="iclub-sx-subtabs" role="group" aria-label="${escapeHTML(tr3("Режим практики","Amaliyot turi","Practice mode"))}">
+      <button type="button" aria-pressed="${practiceMode==="topics"}" class="${practiceMode==="topics"?"selected":""}" data-myrecs-mode="topics">${escapeHTML(tr3("По темам","Mavzular bo‘yicha","By topic"))}</button>
+      <button type="button" aria-pressed="${practiceMode==="tours"}" class="${practiceMode==="tours"?"selected":""}" data-myrecs-mode="tours">${escapeHTML(tr3("По турам","Turlar bo‘yicha","By tour"))}</button>
+    </nav>` : "";
+  const tabBtn = (key,label,isActive) => `
+    <button type="button" class="iclub-sx-main-tab ${isActive?"selected":""}" aria-selected="${isActive}" role="tab" data-myrecs-tab="${escapeHTML(key)}">${escapeHTML(label)}</button>
   `;
-
-  const renderSeasonControl = () => {
+    const renderSeasonControl = () => {
     if (
       activeTab !== "tour" ||
       seasonRows.length <= 1
@@ -19550,23 +19531,40 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
         if(!groups.has(topic))groups.set(topic,[]);
         groups.get(topic).push({rec,index});
       });
+      const historyItems=Array.isArray(topicHistory?.recent)?topicHistory.recent:[];
       return Array.from(groups.entries()).map(([topic,items])=>{
-        const n=new Set(items.map(({rec})=>String(rec.subtopic||"").trim()||topic)).size;
-        const noun=tr3(n%10===1&&n%100!==11?"подтема":n%10>=2&&n%10<=4&&!(n%100>=12&&n%100<=14)?"подтемы":"подтем",
-          "kichik mavzu",n===1?"subtopic":"subtopics");
-        const entries=items.map(({rec,index})=>{
-          const sub=String(rec.subtopic||"").trim(),book=String(rec.book_reference||"").trim();
-          return '<button type="button" class="iclub-myrec-topic-entry" data-open-rec="practice" data-rec-index="'+index+'">'+
-            '<span class="iclub-myrec-topic-entry-text"><strong>'+escapeHTML(sub||topic)+'</strong>'+
-            (book?'<small class="muted">📘 '+escapeHTML(book)+'</small>':'')+
-            '</span><span class="iclub-topic-history-arrow" aria-hidden="true">›</span></button>';
+        const matching=historyItems.find(a=>String(a?.topic||"").trim()===topic &&
+          Number(a?.total)>Number(a?.correct) && Number(a?.session_id)>0);
+        const errorCount=matching?Math.max(0,Number(matching.total)-Number(matching.correct)):0;
+        const attemptIndex=matching?historyItems.indexOf(matching):-1;
+        const entries=items.map(({rec,index},k)=>{
+          const sub=String(rec.subtopic||"").trim();
+          const book=String(rec.book_reference||"").trim();
+          return '<button type="button" class="iclub-sx-topic-entry" data-open-rec="practice" data-rec-index="'+index+'" '+(k>=3?'hidden data-sx-extra="1"':'')+'>'+
+            '<span class="iclub-sx-topic-number">'+String(k+1).padStart(2,"0")+'</span>'+
+            '<span class="iclub-sx-topic-entry-text"><strong>'+escapeHTML(sub||topic)+'</strong>'+
+            (book?'<small>'+escapeHTML(book)+'</small>':'')+
+            '</span><span class="iclub-sx-arrow" aria-hidden="true">›</span></button>';
         }).join("");
-        return '<section class="list-item iclub-myrec-topic-group"><div class="iclub-myrec-topic-header"><strong>'+
-          escapeHTML(topic)+'</strong><span class="muted small">'+n+' '+escapeHTML(noun)+
-          '</span></div><div class="iclub-myrec-topic-items">'+entries+'</div></section>';
+        const correctAction=matching?'<button type="button" class="iclub-sx-primary" data-sx-open-attempt="'+attemptIndex+'">'+
+          escapeHTML(tr3("Разобрать ошибки","Xatolarni tahlil qilish","Review mistakes"))+' ('+errorCount+')</button>':"";
+        const count=items.length;
+        const countText=tr3("к повторению","takrorlash","to review");
+        return '<section class="iclub-sx-topic-group" data-sx-topic-group="1">'+
+          '<div class="iclub-sx-topic-head"><div class="iclub-sx-topic-headline">'+
+          '<span class="iclub-sx-kicker">'+escapeHTML(tr3("ПРАКТИКА ПО ТЕМАМ","MAVZULAR BO‘YICHA AMALIYOT","PRACTICE BY TOPIC"))+'</span>'+
+          '<span class="iclub-sx-tag">'+count+' '+escapeHTML(countText)+'</span></div>'+
+          '<h3>'+escapeHTML(topic)+'</h3>'+
+          '<p>'+escapeHTML(tr3("Рекомендации сгруппированы по подтемам. Каждую можно открыть отдельно.",
+          "Tavsiyalar kichik mavzular bo‘yicha guruhlangan. Har birini alohida ochish mumkin.",
+          "Recommendations are grouped by subtopic. Open each separately."))+'</p>'+correctAction+'</div>'+
+          '<div class="iclub-sx-topic-entries">'+entries+'</div>'+
+          (count>3?'<button type="button" class="iclub-sx-more" data-sx-expand="1" aria-expanded="false">'+
+          escapeHTML(tr3("Показать ещё","Yana ko‘rsatish","Show more"))+' '+(count-3)+' <span aria-hidden="true">⌄</span></button>':'')+
+          '</section>';
       }).join("");
     }
-    return practiceRows.map(rec => {
+        return practiceRows.map(rec => {
       const dt=rec.created_at?formatDateTime(rec.created_at):"";
       const sub=rec.subtopic?String(rec.subtopic):"",book=String(rec.book_reference||"").trim();
       return '<div class="list-item" data-open-rec="practice"><div style="font-weight:900">'+escapeHTML(rec.topic||"General")+'</div>'+
@@ -19629,31 +19627,24 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
   };
 
   wrap.innerHTML = `
-    <div style="display:flex;gap:10px;margin-bottom:12px">
-      ${tabBtn(
-        "practice",
-        t("my_recs_tab_practice") ||
-        "Практика",
-        activeTab === "practice"
-      )}
-
-      ${tabBtn(
-        "tour",
-        t("my_recs_tab_tour") ||
-        "Туры",
-        activeTab === "tour"
-      )}
+    <div class="iclub-sx-main-tabs" role="tablist" aria-label="${escapeHTML(tr3("Раздел рекомендаций","Tavsiyalar bo‘limi","Recommendations section"))}">
+      ${tabBtn("practice",t("my_recs_tab_practice")||"Практика",activeTab==="practice")}
+      ${tabBtn("tour",t("my_recs_tab_tour")||"Туры",activeTab==="tour")}
     </div>
-
     ${modeTabs}
     ${renderSeasonControl()}
     ${activeTab==="practice"&&practiceMode==="topics"
-      ? `<section id="my-recs-topic-history" class="iclub-myrec-topic-holder" aria-label="${escapeHTML(tr3("История практики","Amaliyot tarixi","Practice history"))}"></section>`
+      ? `<div id="my-recs-topic-latest"></div>`
       :""}
     ${activeTab==="practice"&&practiceMode==="topics"
-      ? `<div class="iclub-myrec-review-heading">${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</div>`
+      ? `<div class="iclub-sx-heading"><h2>${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</h2><span class="iclub-sx-total">${practiceRows.length} ${escapeHTML(tr3("рекомендаций","tavsiya","recommendations"))}</span></div>`
       :""}
-    ${activeTab==="tour" ? renderTourList() : renderPracticeList()}
+    <div class="${activeTab==="practice"&&practiceMode==="topics"?"iclub-sx-groups":""}">
+      ${activeTab==="tour" ? renderTourList() : renderPracticeList()}
+    </div>
+    ${activeTab==="practice"&&practiceMode==="topics"
+      ? `<section id="my-recs-topic-history" class="iclub-sx-history-preview"></section>`
+      :""}
   `;
 
   wrap.querySelectorAll("[data-myrecs-tab]").forEach(btn => {
@@ -19677,11 +19668,33 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
       await renderMyRecs();
     });
   });
-  if (activeTab === "practice" && practiceMode==="topics") {
-    window.iClubPracticeTopicHistoryV1?.render?.(
-      wrap.querySelector("#my-recs-topic-history"),
-      topicHistory, topicHistoryUnavailable, currentLang()
+  if(activeTab==="practice"&&practiceMode==="topics"){
+    window.iClubPracticeTopicHistoryV1?.renderLatest?.(
+      wrap.querySelector("#my-recs-topic-latest"),topicHistory,topicHistoryUnavailable,currentLang()
     );
+    window.iClubPracticeTopicHistoryV1?.render?.(
+      wrap.querySelector("#my-recs-topic-history"),topicHistory,topicHistoryUnavailable,currentLang(),true
+    );
+    wrap.querySelectorAll("[data-sx-expand]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const group=button.closest("[data-sx-topic-group]");
+        if(!group)return;
+        const open=button.getAttribute("aria-expanded")!=="true";
+        group.querySelectorAll("[data-sx-extra]").forEach(row=>{row.hidden=!open;});
+        button.setAttribute("aria-expanded",String(open));
+        button.innerHTML=open
+          ?escapeHTML(tr3("Свернуть","Yig‘ish","Show less"))+" ⌃"
+          :escapeHTML(tr3("Показать ещё","Yana ko‘rsatish","Show more"))+
+            " "+group.querySelectorAll("[data-sx-extra]").length+" ⌄";
+      });
+    });
+    wrap.querySelectorAll("[data-sx-open-attempt]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const index=Number(button.dataset.sxOpenAttempt);
+        const attempt=Array.isArray(topicHistory?.recent)?topicHistory.recent[index]:null;
+        if(attempt)window.iClubPracticeTopicHistoryV1?.openAttempt?.(attempt,subjectKey);
+      });
+    });
   }
   const seasonSelect =
     wrap.querySelector(
