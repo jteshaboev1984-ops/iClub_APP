@@ -348,6 +348,83 @@ REVOKE ALL ON FUNCTION public.revoke_iclub_ai_v21_scoped_context_service(
 GRANT EXECUTE ON FUNCTION public.revoke_iclub_ai_v21_scoped_context_service(
  uuid,text) TO service_role;
 
+-- Reuse the same active screen, TTL, revision and rate-limit for Tour Archive.
+-- Domain selectors are never authorization: archived review must be open NOW.
+CREATE OR REPLACE FUNCTION public.mint_iclub_ai_v21_tour_archive_context_service(
+ p_user_id uuid,p_attempt_id bigint
+) RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path='' AS $iclub_tour_mint_v21$
+DECLARE
+ v_subject text;
+ v_tour_id bigint;
+ v_id uuid;
+ v_rev bigint;
+ v_previous uuid;
+BEGIN
+ IF p_user_id IS NULL OR p_attempt_id IS NULL OR p_attempt_id<=0 THEN
+  RETURN jsonb_build_object('allowed',false,'reason','invalid_request');
+ END IF;
+ IF NOT EXISTS(
+  SELECT 1 FROM private.iclub_global_ai_runtime_config cfg
+  WHERE cfg.id=1 AND cfg.kill_switch=false
+   AND cfg.ui_enabled=true AND cfg.gateway_enabled=true
+ ) THEN RETURN jsonb_build_object('allowed',false,'reason','global_ai_disabled'); END IF;
+ IF private.iclub_ai_has_active_protected_assessment_v1(p_user_id) THEN
+  RETURN jsonb_build_object('allowed',false,'reason','active_assessment'); END IF;
+ SELECT subj.subject_key,ta.tour_id INTO v_subject,v_tour_id
+ FROM public.tour_attempts ta
+ JOIN public.tours t ON t.id=ta.tour_id
+ JOIN public.tour_session_runtime_v4 rt
+  ON rt.attempt_id=ta.id AND rt.user_id=ta.user_id
+   AND rt.tour_id=ta.tour_id AND rt.finalized_at IS NOT NULL
+ JOIN public.subjects subj ON subj.id=t.subject_id AND subj.is_active=true
+ JOIN public.user_subjects us ON us.user_id=p_user_id AND us.subject_id=subj.id
+ WHERE ta.id=p_attempt_id AND ta.user_id=p_user_id
+  AND ta.status IN ('submitted','time_expired')
+  AND t.end_date IS NOT NULL
+  AND (now() AT TIME ZONE 'Asia/Tashkent')::date > t.end_date
+ LIMIT 1;
+ IF v_subject IS NULL THEN
+  RETURN jsonb_build_object('allowed',false,'reason','tour_archive_not_authorized');
+ END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text,303));
+ SELECT c.context_handle INTO v_previous
+ FROM private.iclub_ai_v21_current_screen nav
+ JOIN private.iclub_ai_v21_scoped_contexts c
+  ON c.context_handle=nav.current_handle
+ WHERE nav.user_id=p_user_id AND c.user_id=p_user_id
+  AND c.context_revision=nav.revision
+  AND c.surface_code='tour_archive' AND c.tour_attempt_id=p_attempt_id
+  AND c.tour_id=v_tour_id AND c.revoked_at IS NULL AND c.expires_at>now();
+ IF FOUND THEN
+  RETURN jsonb_build_object('allowed',true,
+   'context_handle',v_previous,'expires_in_seconds',90,'duplicate',true);
+ END IF;
+ IF (SELECT count(*) FROM private.iclub_ai_v21_scoped_contexts
+     WHERE user_id=p_user_id AND created_at>now()-interval '1 minute')>=30 THEN
+  RETURN jsonb_build_object('allowed',false,'reason','context_rate_limited');
+ END IF;
+ v_id:=gen_random_uuid();
+ INSERT INTO private.iclub_ai_v21_current_screen(user_id,current_handle,revision,updated_at)
+ VALUES(p_user_id,v_id,1,now())
+ ON CONFLICT(user_id) DO UPDATE
+ SET current_handle=excluded.current_handle,
+     revision=private.iclub_ai_v21_current_screen.revision+1,
+     updated_at=now()
+ RETURNING revision INTO v_rev;
+ INSERT INTO private.iclub_ai_v21_scoped_contexts(
+  context_handle,user_id,surface_code,subject_key,feature_code,topic_key,
+  tour_attempt_id,tour_id,context_revision
+ ) VALUES (v_id,p_user_id,'tour_archive',v_subject,'archive_explanation',
+  'tour_'||v_tour_id::text||'_archive',p_attempt_id,v_tour_id,v_rev);
+ RETURN jsonb_build_object('allowed',true,'context_handle',v_id,'expires_in_seconds',90);
+END;
+$iclub_tour_mint_v21$;
+REVOKE ALL ON FUNCTION public.mint_iclub_ai_v21_tour_archive_context_service(
+ uuid,bigint) FROM public,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.mint_iclub_ai_v21_tour_archive_context_service(
+ uuid,bigint) TO service_role;
+
 -- The protected academic tables are SELECTed only; no writes to Practice,
 -- Tours, Exam Prep, users, user_subjects or learner local progress.
 -- No response text, answers, grades or school identifiers stored here.
