@@ -214,7 +214,8 @@ BEGIN
  END IF;
  -- Read-time revalidation: Tour archive must still be open and owned.
  -- Strictly AFTER end_date, as in get_tour_review_full_safe_v4.
- IF v.surface_code='tour_archive' AND NOT EXISTS (
+ IF v.surface_code='tour_archive' THEN
+  IF NOT EXISTS (
   SELECT 1 FROM public.tour_attempts ta
   JOIN public.tours t ON t.id=ta.tour_id
   JOIN public.tour_session_runtime_v4 rt
@@ -228,7 +229,8 @@ BEGIN
    AND t.end_date IS NOT NULL
    AND (now() AT TIME ZONE 'Asia/Tashkent')::date > t.end_date
  ) THEN
-  RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');
+   RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');
+  END IF;
  END IF;
  RETURN jsonb_build_object('allowed',true,'context',jsonb_build_object(
   'owner_id',v.user_id,'route_authority','unified_ai','active',true,
