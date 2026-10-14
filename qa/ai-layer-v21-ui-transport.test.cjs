@@ -67,6 +67,11 @@ test("Mint returning after navigation is revoked rather than adopted",async()=>{
  const f=fixture({postOverride:r=>r.body.action==="mintLesson"?
   pending.promise:{ok:true}});
  const open=f.client.openLesson(101);
+ // Wait until the synthetic /context POST actually exists: navigation
+ // BEFORE dispatch is now cancelled by §72's stronger JWT race guard.
+ for(let k=0;k<8&&f.calls.length===0;k++)await Promise.resolve();
+ assert.equal(f.calls[0]?.body.action,"mintLesson",
+  "This case must cover a dispatched but still-pending mint response");
  await f.client.leave();
  pending.resolve({ok:true,contextHandle:HANDLE2,expiresInSeconds:90});
  assert.equal((await open).reason,"context_changed");
