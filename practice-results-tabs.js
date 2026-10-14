@@ -100,7 +100,9 @@
     }
     const heading=node('div','iclub-topic-history-header');
     heading.append(node('strong','',c.heading),
-      node('span','iclub-topic-history-count',count+' '+c.attempts));
+      node('span','iclub-topic-history-count',count+' '+(locale==='ru'
+        ?(count%10===1&&count%100!==11?'попытка':count%10>=2&&count%10<=4&&!(count%100>=12&&count%100<=14)?'попытки':'попыток')
+        :locale==='uz'?'ta urinish':count===1?'attempt':'attempts')));
     holder.append(heading);
     const metrics=node('div','iclub-topic-history-metrics');
     const safeScore = row => {
@@ -123,61 +125,81 @@
       const list=node('div','iclub-topic-history-recent');
       for(const attempt of recent) {
         if(safeScore(attempt)==='—') continue;
-        const row=node('div','iclub-topic-history-row');
+        const saved=Array.isArray(attempt.review)?attempt.review:[];
+        const errors=Math.max(0,Number(attempt.mistakes)||0);
+        const row=node('button','iclub-topic-history-row');
+        row.type='button';
+        row.style.width='100%';
+        row.style.fontFamily='inherit';
+        row.style.textAlign='left';
+        row.style.cursor='pointer';
+        row.style.display='flex';
+        row.style.alignItems='center';
+        row.style.justifyContent='space-between';
+        row.style.gap='12px';
+        row.setAttribute('aria-expanded','false');
         const info=node('div','iclub-topic-history-row-info');
         info.append(node('strong','',String(attempt.topic||c.heading).slice(0,200)));
         const date=new Date(String(attempt.finished_at||''));
         if(Number.isFinite(date.getTime())) info.append(node('small','',date.toLocaleDateString(locale)));
-        row.append(info,node('span','iclub-topic-history-row-score',safeScore(attempt)));
-        list.append(row);
-        const saved=Array.isArray(attempt.review)?attempt.review:[];
-        if(Number(attempt.session_id)>0) {
-          const button=node('button','btn',locale==='ru'?'Посмотреть разбор':
-            locale==='uz'?'Tahlilni ko‘rish':'View review');
-          button.type='button';
-          button.style.margin='6px 0 10px';
-          const detail=node('div','iclub-topic-history-review');
-          detail.hidden=true;
-          detail.style.display='none';
-          detail.style.padding='12px';
-          detail.style.borderRadius='12px';
-          detail.style.marginBottom='12px';
-          detail.style.border='1px solid var(--line, rgba(127,127,127,.24))';
-          button.addEventListener('click',()=>{
-            const nowOpen=detail.hidden;
-            detail.hidden=!nowOpen;detail.style.display=nowOpen?'grid':'none';
-            if(!nowOpen)return;
-            detail.replaceChildren();
-            if(!saved.length){
-              detail.append(node('div','muted',locale==='ru'?'Ошибок не было.':
-                locale==='uz'?'Xatolar yo‘q.':'No mistakes in this attempt.'));
-              return;
-            }
-            for(let i=0;i<saved.length;i++) {
-              const d=saved[i],card=node('div','list-item');
-              card.style.padding='10px 0';
-              const loc=locale==='uz'?'uz':locale==='en'?'en':'ru';
-              const stem=d['question_'+loc]||d.question_en||'';
-              const answer=d.user_answer||'—',correct=d.correct_answer||'—';
-              const rawOptions=d['options_'+loc]||d.options_en||'';
-              let options=[];
-              try{const val=JSON.parse(rawOptions);if(Array.isArray(val))options=val;}catch{}
-              const showAnswer=(letter)=>{
-                const ix=String(letter||'').trim().toUpperCase().charCodeAt(0)-65;
-                return ix>=0&&ix<options.length?String(letter)+' — '+String(options[ix]):String(letter||'—');
-              };
-              card.append(node('strong','',String(i+1)+'. '+stem));
-              card.append(node('div','muted small',
-                (locale==='ru'?'Ваш ответ: ':locale==='uz'?'Javobingiz: ':'Your answer: ')+showAnswer(answer)));
-              card.append(node('div','muted small',
-                (locale==='ru'?'Правильный ответ: ':locale==='uz'?'To‘g‘ri javob: ':'Correct answer: ')+showAnswer(correct)));
-              const why=d['feedback_'+loc]||d['explanation_'+loc]||d.explanation_en||'';
-              if(why) card.append(node('div','muted small',why));
-              detail.append(card);
-            }
-          });
-          list.append(button,detail);
-        }
+        const score=node('span','iclub-topic-history-row-score',safeScore(attempt));
+        const arrow=node('span','', '⌄');
+        arrow.style.opacity='.65';
+        row.append(info,score,arrow);
+        const detail=node('div','iclub-topic-history-review');
+        detail.hidden=true;
+        detail.style.display='none';
+        detail.style.padding='12px';
+        detail.style.borderRadius='12px';
+        detail.style.marginBottom='12px';
+        detail.style.border='1px solid var(--line, rgba(127,127,127,.24))';
+        detail.style.gap='10px';
+        const fillReview=()=>{
+          detail.replaceChildren();
+          if(!saved.length){
+            const hasErrors=errors>0;
+            detail.append(node('div','muted',hasErrors
+              ?(locale==='ru'?'Не удалось загрузить разбор этой попытки. Попробуйте позже.':
+                locale==='uz'?'Ushbu urinish tahlili yuklanmadi. Keyinroq qayta urinib ko‘ring.':
+                'Review for this attempt could not be loaded. Please try later.')
+              :(locale==='ru'?'В этой попытке ошибок не было.':
+                locale==='uz'?'Bu urinishda xatolar bo‘lmagan.':
+                'No mistakes in this attempt.')));
+            return;
+          }
+          const langCode=locale==='uz'?'uz':locale==='en'?'en':'ru';
+          for(let i=0;i<saved.length;i++){
+            const d=saved[i],card=node('div','list-item');
+            card.style.padding='10px 0';
+            const stem=d['question_'+langCode]||d.question_en||'';
+            const answer=d.user_answer||'—',correct=d.correct_answer||'—';
+            const rawOptions=d['options_'+langCode]||d.options_en||'';
+            let options=[];
+            try{const val=typeof rawOptions==='string'?JSON.parse(rawOptions):rawOptions;if(Array.isArray(val))options=val;}catch{}
+            const showAnswer=(letter)=>{
+              const key=String(letter||'').trim();
+              const ix=key.toUpperCase().charCodeAt(0)-65;
+              return ix>=0&&ix<options.length?key+' — '+String(options[ix]):key||'—';
+            };
+            card.append(node('strong','',String(i+1)+'. '+stem));
+            card.append(node('div','muted small',
+              (locale==='ru'?'Ваш ответ: ':locale==='uz'?'Javobingiz: ':'Your answer: ')+showAnswer(answer)));
+            card.append(node('div','muted small',
+              (locale==='ru'?'Правильный ответ: ':locale==='uz'?'To‘g‘ri javob: ':'Correct answer: ')+showAnswer(correct)));
+            const why=d['feedback_'+langCode]||d['explanation_'+langCode]||d.explanation_en||'';
+            if(why)card.append(node('div','muted small',why));
+            detail.append(card);
+          }
+        };
+        row.addEventListener('click',()=>{
+          const open=detail.hidden;
+          detail.hidden=!open;
+          detail.style.display=open?'grid':'none';
+          row.setAttribute('aria-expanded',String(open));
+          arrow.textContent=open?'⌃':'⌄';
+          if(open)fillReview();
+        });
+        list.append(row,detail);
       }
       holder.append(list);
     }
