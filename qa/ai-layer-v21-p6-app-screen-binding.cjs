@@ -31,15 +31,9 @@ class QaV21AppScreenBinder{
   if(active.length!==1||!activeDom||activeDom.length!==1||
      activeDom[0]?.dataset?.view!==active[0])return null;
   if(active[0]==="courses"){
-   // Course review/result/video may have an independent Tutor and source
-   // policy. Basic global navigation must NEVER hijack its scope.
-   for(const id of ["courses-video","courses-practice-start",
-    "courses-practice-result","courses-practice-review",
-    "courses-practice-recs","courses-tour-rules",
-    "courses-tour-result","courses-tour-review",
-    "courses-my-rec-detail"]){
-    if(el(id)?.classList?.contains("is-active"))return null;
-   }
+   const stack=this.document.querySelectorAll?.(
+    '#view-courses .stack-screen.is-active');
+   if(!stack||stack.length!==1||stack[0]?.id!=="courses-all-subjects")return null;
   }
   return active[0];
  }
