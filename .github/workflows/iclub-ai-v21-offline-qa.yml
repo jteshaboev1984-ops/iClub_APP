@@ -12,10 +12,12 @@ on:
       - '.github/workflows/iclub-ai-v21-offline-qa.yml'
       - 'qa/ai-layer-v21-trusted-server-adapter.cjs'
       - 'qa/ai-layer-v21-trusted-server-adapter.test.cjs'
+      - 'qa/ai-layer-v21-app-wide-admission.cjs'
       - 'qa/ai-layer-v21-edge-request.cjs'
       - 'qa/edge_v21/**'
       - 'qa/run-ai-layer-v21-offline.cjs'
       - 'docs/iclub-ai-layer-trusted-server-adapter-v2.1.md'
+      - 'docs/iclub-ai-layer-app-wide-edge-binding-v2.1.md'
   workflow_dispatch:
 
 permissions:
