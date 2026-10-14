@@ -8,12 +8,14 @@ const LOCALES=new Set(["ru","uz","en"]);
 const fail=reason=>({ok:false,reason});
 const validIndex=x=>Number.isSafeInteger(x)&&x>0;
 class QaV21ScreenClient{
- constructor({post,readJwt,newRequestId}={}){
+ constructor({post,readJwt,newRequestId,nowMs=Date.now}={}){
   if(typeof post!=="function"||typeof readJwt!=="function"||
-   typeof newRequestId!=="function")throw Error("unconfigured_qa_transport");
+   typeof newRequestId!=="function"||typeof nowMs!=="function")throw Error("unconfigured_qa_transport");
   this.post=post;
   this.readJwt=readJwt;
   this.newRequestId=newRequestId;
+  this.nowMs=nowMs;
+  this.expiresAtMs=0;
   this.epoch=0;
   this.handle=null;
   this.inFlight=false;
@@ -39,6 +41,7 @@ class QaV21ScreenClient{
   ++this.epoch;
   const old=this.handle;
   this.handle=null;
+  this.expiresAtMs=0;
   this.inFlight=false;
   if(old)await this.revoke(old);
   return {ok:true};
@@ -66,28 +69,48 @@ class QaV21ScreenClient{
   const seq=this.epoch;
   const prev=this.handle;
   this.handle=null;
+  this.expiresAtMs=0;
   this.inFlight=false;
   if(prev)await this.revoke(prev);
   if(seq!==this.epoch)return fail("context_changed");
   const r=await this.authenticatedPost("/context",body);
   if(r?.ok!==true||!UUID.test(r.contextHandle||""))
    return fail(r?.reason||"context_unavailable");
+  // An arbitrary boolean from /context does not grant an unlimited lease.
+  // The QA Edge contract returns 1..90 seconds for every successful mint.
+  if(!Number.isInteger(r.expiresInSeconds)||r.expiresInSeconds<1||
+     r.expiresInSeconds>90){
+   await this.revoke(r.contextHandle);
+   return fail("invalid_context_expiry");
+  }
   if(seq!==this.epoch){
    // Mint finished AFTER navigation; revoke that handle, never display it.
    await this.revoke(r.contextHandle);
    return fail("context_changed");
   }
+  const now=this.nowMs();
+  if(!Number.isSafeInteger(now)||now<0){
+   await this.revoke(r.contextHandle);return fail("invalid_context_clock");
+  }
   this.handle=r.contextHandle;
+  this.expiresAtMs=now+r.expiresInSeconds*1000;
   return {ok:true};
+ }
+ isCurrent(){
+  const now=this.nowMs();
+  return Boolean(this.handle)&&Number.isSafeInteger(now)&&
+   now<this.expiresAtMs;
  }
  async status(locale){
   if(!LOCALES.has(locale)||!this.handle)return fail("context_unavailable");
+  if(!this.isCurrent())return fail("context_expired");
   const seq=this.epoch;
   const handle=this.handle;
   const r=await this.authenticatedPost("/answer",{
    intent:"status",contextHandle:handle,appLocale:locale
   });
-  return seq===this.epoch&&this.handle===handle?r:fail("context_changed");
+  return seq===this.epoch&&this.handle===handle?
+   this.isCurrent()?r:fail("context_expired"):fail("context_changed");
  }
  async askPrepared(promptKey,locale){
   if(typeof promptKey!=="string"||!/^[a-z0-9_]{3,60}$/.test(promptKey))
@@ -101,6 +124,7 @@ class QaV21ScreenClient{
  }
  async ask(input,locale){
   if(!LOCALES.has(locale)||!this.handle)return fail("context_unavailable");
+  if(!this.isCurrent())return fail("context_expired");
   if(this.inFlight)return fail("request_in_progress");
   const requestId=this.newRequestId();
   if(!UUID.test(requestId||""))return fail("invalid_request_id");
@@ -115,6 +139,7 @@ class QaV21ScreenClient{
    // Do not issue any automatic retries (the server might already have billed).
    if(seq!==this.epoch||this.handle!==contextHandle)
     return fail("context_changed");
+   if(!this.isCurrent())return fail("context_expired");
    return r;
   }finally{
    if(seq===this.epoch)this.inFlight=false;
