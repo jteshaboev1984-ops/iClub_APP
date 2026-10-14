@@ -77,7 +77,7 @@ test("Exact server-proved single router covers global, Home, Profile, Lessons, P
   const f=fixture(k);
   const r=await f.check();
   assert.equal(r.state,"available",k+":"+JSON.stringify(r));
-  assert.equal(r.route,k);
+  assert.equal(r.route,k==="general_help"?"global_help":k);
   assert.equal(r.canAsk,true);
   assert.equal(r.charge,0);assert.equal(r.providerCallRequired,false);
  }
@@ -124,7 +124,7 @@ test("No releases or rights/locale/entitlement blocks all surfaces without a bil
 test("Exact resource and authorization checks fail closed across all surfaces",()=>{
  for(const k of Object.keys(examples)){
   const {ctx,proof}=match(k);
-  assert.equal(routeFor(ctx,proof),k);
+  assert.equal(routeFor(ctx,proof),k==="general_help"?"global_help":k);
   for(const patch of [{ownerId:OTHER},{proofHash:"not-a-hash"},
    {proofRevision:0},{contextRevision:"old"},{surface:"practice"},
    {subject:"mathematics"}]){
@@ -203,4 +203,26 @@ test("Real app DOM keeps all screens; QA router does not alter production files"
   assert.ok(app.includes('id="'+id+'"'),id);
  const source=fs.readFileSync("qa/ai-layer-v21-app-wide-admission.cjs","utf8");
  assert.doesNotMatch(source,/supabase-js|createClient|service_role|localStorage|sessionStorage/);
+});
+
+test("Asynchronous Home/Profile aggregate revision drift invalidates readiness",async()=>{
+ for(const kind of ["home_next","profile_progress"]){
+  const f=fixture(kind);
+  f.state.mutate=state=>{
+   if(state.calls===2)state.proof={...state.proof,aggregateRevision:9};
+  };
+  const result=await f.check();
+  assert.equal(result.state,"unavailable",kind);
+  assert.equal(result.charge,0);
+ }
+});
+test("Asynchronous server evidence verification flag change is rejected",async()=>{
+ for(const kind of ["general_help","subject_overview","home_next","profile_progress"]){
+  const f=fixture(kind);
+  f.state.mutate=state=>{
+   if(state.calls===2)state.proof={...state.proof,verified:false};
+  };
+  const result=await f.check();
+  assert.equal(result.state,"unavailable",kind);
+ }
 });

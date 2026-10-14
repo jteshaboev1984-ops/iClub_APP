@@ -27,7 +27,7 @@ const same=(a,b)=>a&&b&&[
  "kind","proofId","proofRevision","proofHash","currentView",
  "lessonId","practiceSessionId","questionId","tourAttemptId",
  "archiveUnlockRevision","aggregateRevision","sourceVersion",
- "finalized","answerVerified","archiveUnlocked",
+ "verified","finalized","answerVerified","archiveUnlocked",
  "lessonSpecific","isVideo"
 ].every(x=>a[x]===b[x]);
 function routeFor(ctx,proof){
