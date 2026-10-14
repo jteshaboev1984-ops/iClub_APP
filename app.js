@@ -18597,24 +18597,30 @@ if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
 const recsCountEl = $("#practice-recs-count");
 if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
-// A self-chosen topic is an independent short drill. Do not offer unrelated
-// "My recommendations" actions or claim it changed the main Practice result.
-const recsAction = document.querySelector('#courses-practice-result [data-action="practice-recommendations"]');
-if (recsAction) {
-  recsAction.hidden = false;
-  recsAction.style.display = "";
-  const recsTitle = recsAction.querySelector('[data-i18n="practice_recs_title"]');
-  const recsSubtitle = recsAction.querySelector('[data-i18n="practice_recs_sub"]');
-  const recsCountBadge = recsAction.querySelector("#practice-recs-count");
-  if (recsTitle) recsTitle.textContent = tr3(
-    "Мои рекомендации", "Mening tavsiyalarim", "My recommendations"
-  );
-  if (recsSubtitle) recsSubtitle.textContent = tr3(
-    "Подробнее о результатах — в «Моих рекомендациях»",
-    "Natijalar haqida batafsil — «Mening tavsiyalarim» bo‘limida",
-    "More about your results in My recommendations"
-  );
-  if (recsCountBadge) recsCountBadge.hidden = true;
+// Topic practice keeps its own follow-up actions and scores.
+const recsAction=document.querySelector('#courses-practice-result [data-action="practice-recommendations"],#courses-practice-result [data-action="practice-fix-mistakes"]');
+if(recsAction){
+  const topicMode=quiz?.topicChoiceOrigin===true;
+  // The existing Review card is the required first step for topic errors.
+  // Hide the unrelated Recommendations card for topic and error-retry drills.
+  recsAction.dataset.action='practice-recommendations';
+  recsAction.hidden=topicMode || quiz?.drillType==='rec_mistakes';
+  recsAction.disabled=topicMode || quiz?.drillType==='rec_mistakes';
+  recsAction.style.display=recsAction.hidden?'none':'';
+  const reviewAction=document.querySelector('#courses-practice-result [data-action="practice-review"]');
+  if(reviewAction) reviewAction.style.gridColumn=recsAction.hidden?'1 / -1':'';
+  const title=recsAction.querySelector('[data-i18n="practice_recs_title"]');
+  const subtitle=recsAction.querySelector('[data-i18n="practice_recs_sub"]');
+  const count=recsAction.querySelector('#practice-recs-count');
+  if(title) title.textContent=tr3("Мои рекомендации","Mening tavsiyalarim","My recommendations");
+  if(subtitle) subtitle.textContent=topicMode
+    ?tr3("Отдельная тренировка по ошибкам этой попытки",
+      "Ushbu urinishdagi xatolar bo‘yicha alohida mashq",
+      "Separate practice on this attempt's mistakes")
+    :tr3("Подробнее о результатах — в «Моих рекомендациях»",
+      "Natijalar haqida batafs — «Mening tavsiyalarim» bo‘limida",
+      "More about your results in My recommendations");
+  if(count){count.hidden=true;count.textContent='';}
 }
 
 // ✅ set “exit” button label based on context (main vs drill)
@@ -18719,6 +18725,17 @@ const attempt =
   // Helper: render from "details" array in one place
   const renderFromDetails = (details) => {
     if (pending && !pending.active()) return;
+    const actions=document.querySelector('#courses-practice-review .actions-row');
+    if(actions){
+      let retry=actions.querySelector('[data-action="practice-fix-mistakes"]');
+      if(!retry){
+        retry=document.createElement('button');retry.type='button';
+        retry.className='btn primary';retry.dataset.action='practice-fix-mistakes';
+        actions.insertBefore(retry,actions.firstChild);
+      }
+      retry.textContent=tr3('Исправить ошибки','Xatolarni tuzatish','Correct mistakes');
+      retry.hidden=!(Array.isArray(details)&&details.some(x=>!x.isCorrect));
+    }
     if (!Array.isArray(details) || !details.length) {
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_empty"))}</div>`;
   return;
@@ -19071,7 +19088,7 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
       return await window.sb
       .from("recommendations")
       .select(
-        "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at"
+        "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at, practice_session_id, practice_drill_session_id"
       )
       .eq("user_id", uid)
       .eq("subject_id", subjectId)
@@ -19718,6 +19735,22 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
    async function fetchRecentMistakesByRec(subjectKey, rec) {
   try {
     const api = getPracticeSafeApi();
+    const sourceSessionId=Number(rec?.practice_drill_session_id||0);
+    if(sourceSessionId>0) {
+      const rows=await api?.drill?.questions?.(sourceSessionId);
+      return (Array.isArray(rows)?rows:[])
+        .filter(row=>row.was_answered===true && row.saved_is_correct===false)
+        .slice(0,10).map(row=>({
+          attempt_id:-sourceSessionId,
+          question_id:Number(row.id||0),
+          user_answer:String(row.saved_user_answer||""),
+          is_correct:false,time_spent:Number(row.saved_time_spent||0),
+          created_at:null,
+          q:{...row,id:Number(row.id||0),topic:row.topic||null,
+            subtopic:row.subtopic||null,qtype:row.qtype||"mcq",
+            correct_answer:row.correct_answer||null}
+        }));
+    }
     if (!api?.recentMistakes) return [];
     const rows = await api.recentMistakes({ subjectKey, topic: rec?.topic || null, subtopic: rec?.subtopic || null, limit: 10 });
     return (Array.isArray(rows) ? rows : []).map(row => ({
@@ -20103,46 +20136,56 @@ body.innerHTML = isTourRec ? `
 
 async function deleteMyRecCurrent() {
   try {
-    const rec = state?.courses?.myRecCurrent;
-    const subjectKey = state?.courses?.subjectKey;
-    if (!rec || !subjectKey) return;
-
-    const ok = await uiConfirm({
-      title: t("rec_delete_title") || "Отметить как освоено?",
-      message: t("rec_delete_text") || "Рекомендация будет удалена из списка.",
-      okText: t("rec_delete_ok") || "Удалить",
-      cancelText: t("rec_delete_cancel") || (t("cancel") || "Отмена")
+    const rec=state?.courses?.myRecCurrent;
+    const subjectKey=state?.courses?.subjectKey;
+    if(!rec||!subjectKey||deleteMyRecCurrent._pending) return;
+    const ok=await uiConfirm({
+      title:t("rec_delete_title")||"Отметить как освоено?",
+      message:t("rec_delete_text")||"Рекомендация будет убрана из списка. Результаты сохранятся.",
+      okText:t("rec_delete_ok")||"Удалить",
+      cancelText:t("rec_delete_cancel")||(t("cancel")||"Отмена")
     });
-
-    if (!ok) return;
-
-    // DB delete (only this record)
+    if(!ok) return;
+    deleteMyRecCurrent._pending=true;
     try {
-      const uid = await getAuthUid().catch(() => null);
-      if (window.sb && uid && rec?.id) {
-        const { error } = await window.sb
-          .from("recommendations")
-          .delete()
-          .eq("id", rec.id)
-          .eq("user_id", uid);
-
-        if (error) logClientError("myrec_delete_db_error", error);
+      const uid=await getAuthUid().catch(()=>null);
+      if(!uid) throw new Error("not_authenticated");
+      if(Number(rec.id)>0) {
+        if(!window.sb) throw new Error("offline");
+        const {data,error}=await window.sb.from("recommendations")
+          .delete().eq("id",Number(rec.id)).eq("user_id",uid)
+          .select("id");
+        if(error||!Array.isArray(data)||data.length!==1)
+          throw error||new Error("recommendation_delete_not_confirmed");
+      } else {
+        // Old locally stored recommendations have no server record; remove
+        // only the selected local display item, never Practice or Tour history.
+        const store=String(rec.source_type||"practice")==="tour"
+          ?loadMyTourRecs():loadMyRecs();
+        const list=store?.bySubject?.[subjectKey];
+        if(!Array.isArray(list)) throw new Error("local_recommendation_not_found");
+        const next=list.filter(x=>!(String(x.topic||"")===String(rec.topic||"") &&
+          String(x.subtopic||"")===String(rec.subtopic||"") &&
+          (String(rec.source_type||"practice")!=="tour" ||
+            (Number(x.tourNo||x.tour_no||0)===Number(rec.tourNo||rec.tour_no||0) &&
+             Number(x.seasonId||x.season_id||0)===Number(rec.seasonId||rec.season_id||0)))));
+        if(next.length===list.length) throw new Error("local_recommendation_not_found");
+        store.bySubject[subjectKey]=next;
+        if(String(rec.source_type||"practice")==="tour") saveMyTourRecs(store);
+        else saveMyRecs(store);
       }
-    } catch (e) {
-      logClientError("myrec_delete_db_exception", e);
-    }
-
-    showToast(t("rec_deleted_toast") || "Рекомендация удалена.");
-
-    // go back to list + refresh
-    state.courses.myRecCurrent = null;
-    saveState();
-
-    replaceCourses("my-recs");
-    renderMyRecs();
-  } catch (e) {
-    logClientError("myrec_delete_exception", e);
-  }
+      showToast(t("rec_deleted_toast")||"Рекомендация удалена.");
+      state.courses.myRecCurrent=null;
+      saveState();
+      replaceCourses("my-recs");
+      await renderMyRecs();
+    } catch(error) {
+      logClientError("myrec_delete_unconfirmed",error);
+      showToast(tr3("Не удалось убрать рекомендацию. Попробуйте ещё раз.",
+        "Tavsiyani olib tashlab bo‘lmadi. Qayta urinib ko‘ring.",
+        "Could not remove the recommendation. Please retry."));
+    } finally {deleteMyRecCurrent._pending=false;}
+  } catch(error) {logClientError("myrec_delete_exception",error);}
 }
 
 // helper: content language pick
@@ -20413,14 +20456,23 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
 
-   async function startPracticeRetryMistakes() {
-  const rec = state?.courses?.myRecCurrent;
+   async function startPracticeRetryMistakes(options={}) {
+  const fromAttempt=options?.fromAttempt===true;
+  const ctx=state?.courses?.practiceContext||"main";
+  const attempt=ctx==="topic"||ctx==="drill" ? state.practiceLastDrillAttempt:state.practiceLastAttempt;
+  const firstWrong=Array.isArray(attempt?.details)?attempt.details.find(x=>!x.isCorrect):null;
+  const rec=fromAttempt
+    ?{topic:firstWrong?.topic||null,subtopic:ctx==="topic"?null:(firstWrong?.subtopic||null)}
+    :state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
   const owner = await window.iClubPracticeDraftIdentityV1?.bind();
   if (!owner) { showToast(t("not_available")); return; }
   if (loadPracticeDraft()) { showToast(t("practice_resume_prompt")); return; }
-  const qids = Array.isArray(state?.courses?.myRecMistakeQids) ? state.courses.myRecMistakeQids.slice(0, 10) : [];
-  if (!rec || !subjectKey) return;
+  const qids=fromAttempt
+    ?Array.from(new Set((Array.isArray(attempt?.details)?attempt.details:[])
+        .filter(x=>!x.isCorrect).map(x=>Number(x.id||0)).filter(x=>x>0))).slice(0,10)
+    :(Array.isArray(state?.courses?.myRecMistakeQids)?state.courses.myRecMistakeQids.slice(0,10):[]);
+  if(!rec||!subjectKey) return;
   if (!qids.length) { showToast(t("rec_retry_empty") || "Нет ошибок для повтора."); return; }
   const api = getPracticeSafeApi()?.drill;
   if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
@@ -20443,7 +20495,8 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   }, rows);
   if (!quiz) return;
   if (!state.courses) state.courses = {};
-  state.courses.myRecReturnTarget = "my-rec-detail";
+  state.courses.myRecReturnTarget=fromAttempt?"practice-result":"my-rec-detail";
+  if(fromAttempt){state.courses.myRecMistakeQids=qids;state.courses.practiceErrorRetryOrigin=ctx;}
   if ((await window.iClubPracticeDraftIdentityV1?.bind()) !== owner) return;
   quiz.practiceOwnerUid = owner;
   state.quizLock = "practice"; state.quiz = quiz; saveState();
@@ -23638,6 +23691,11 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
   return;
 }
 
+if (action === "practice-fix-mistakes") {
+  await startPracticeRetryMistakes({fromAttempt:true});
+  return;
+}
+
 if (action === "practice-recommendations") {
   state.courses = state.courses || {};
   state.courses.myRecsActiveTab = "practice";
@@ -23695,8 +23753,15 @@ if (action === "practice-exit") {
     startPracticeByRec(state.courses.practiceTopicSelection, "practice");
     return;
   }
+  // After correcting errors, run a new check in the same Practice mode.
+  const d=state?.courses?.myRecDrillLast;
+  if(state?.courses?.myRecReturnTarget==="practice-result" && d?.drillType==="rec_mistakes") {
+    if(state?.courses?.practiceErrorRetryOrigin==="topic" && state?.courses?.practiceTopicSelection?.topic)
+      startPracticeByRec(state.courses.practiceTopicSelection,"practice");
+    else startPracticeNew();
+    return;
+  }
   // ✅ if last finished was a drill — repeat that drill
-  const d = state?.courses?.myRecDrillLast;
   if (d?.drillType === "rec_mistakes") {
     startPracticeRetryMistakes();
     return;
