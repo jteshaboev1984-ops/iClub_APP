@@ -22,6 +22,10 @@ function fixture(){
    return{allowed:a.userId===U&&a.attemptId===401,
     context_handle:H,expires_in_seconds:90};
   },
+  mintAppViewContext:async(a:{userId:string;view:string})=>{
+   mints++;if(throwMint)throw new Error("private DB error");
+   return{allowed:a.userId===U,context_handle:H,expires_in_seconds:90};
+  },
   revokeScopedContext:async(a:{userId:string;contextHandle:string})=>{
    revokes++;return{ok:a.userId===U&&a.contextHandle===H};
   }
@@ -130,4 +134,33 @@ Deno.test("Tour selector cannot impersonate user, topic, answer, plan or legacy 
  }
  const t=fixture(),r=await t.send({action:"mintTourArchive",tourAttemptId:402});
  assert(r.data.ok===false);
+});
+
+Deno.test("Home, Profile and basic General Help use one JWT-bound context mint",async()=>{
+ for(const view of ["home","profile","courses","ratings","about","support"]){
+  const x=fixture(),r=await x.send({action:"mintAppView",view});
+  assert(r.status===200&&r.data.ok===true&&r.data.contextHandle===H);
+  assert(x.counts()[0]===1);
+ }
+});
+Deno.test("Browser cannot forge app-view status, topic, progress, account or plan",async()=>{
+ for(const data of [
+  {action:"mintAppView",view:""},
+  {action:"mintAppView",view:"unknown"},
+  {action:"mintAppView",view:12},
+  {action:"mintAppView",view:"profile",userId:U},
+  {action:"mintAppView",view:"profile",plan:"plus"},
+  {action:"mintAppView",view:"home",subject:"economics"},
+  {action:"mintAppView",view:"home",nextActions:[1]},
+  {action:"mintAppView",view:"profile",questionId:123},
+  {action:"mintAppView",view:"profile",tourAttemptId:401}
+ ]){
+  const x=fixture();assert((await x.send(data)).status===400&&x.counts()[0]===0);
+ }
+ const x=fixture();x.switchUser();
+ const foreign=await x.send({action:"mintAppView",view:"profile"});
+ assert(foreign.data.ok===false);
+ const y=fixture();y.badMint();
+ const fail=await y.send({action:"mintAppView",view:"home"});
+ assert(fail.status===503&&!JSON.stringify(fail.data).includes("private DB"));
 });
