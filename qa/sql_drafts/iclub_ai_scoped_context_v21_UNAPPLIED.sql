@@ -26,23 +26,31 @@ CREATE TABLE private.iclub_ai_v21_current_screen(
 CREATE TABLE private.iclub_ai_v21_scoped_contexts(
  context_handle uuid PRIMARY KEY DEFAULT gen_random_uuid(),
  user_id uuid NOT NULL,
- surface_code text NOT NULL CHECK(surface_code IN ('practice','lesson')),
+ surface_code text NOT NULL CHECK(surface_code IN ('practice','lesson','tour_archive')),
  subject_key text NOT NULL,
- feature_code text NOT NULL CHECK((surface_code='practice' AND feature_code='answer_explanation') OR (surface_code='lesson' AND feature_code='topic_explanation')),
+ feature_code text NOT NULL CHECK((surface_code='practice' AND feature_code='answer_explanation') OR (surface_code='lesson' AND feature_code='topic_explanation') OR (surface_code='tour_archive' AND feature_code='archive_explanation')),
  topic_key text NOT NULL,
  practice_session_id bigint,
  practice_question_id bigint,
  lesson_id bigint,
+ tour_attempt_id bigint,
+ tour_id bigint,
  context_revision bigint NOT NULL CHECK(context_revision>0),
  expires_at timestamptz NOT NULL DEFAULT (now()+interval '90 seconds'),
  created_at timestamptz NOT NULL DEFAULT now(),
  revoked_at timestamptz,
  CHECK((surface_code='practice' AND practice_session_id IS NOT NULL
   AND practice_question_id IS NOT NULL AND lesson_id IS NULL
+  AND tour_attempt_id IS NULL AND tour_id IS NULL
   AND topic_key='question_'||practice_question_id::text)
   OR (surface_code='lesson' AND lesson_id IS NOT NULL
    AND practice_session_id IS NULL AND practice_question_id IS NULL
-   AND topic_key='lesson_'||lesson_id::text))
+   AND tour_attempt_id IS NULL AND tour_id IS NULL
+   AND topic_key='lesson_'||lesson_id::text)
+  OR (surface_code='tour_archive' AND tour_attempt_id IS NOT NULL
+   AND tour_id IS NOT NULL AND lesson_id IS NULL
+   AND practice_session_id IS NULL AND practice_question_id IS NULL
+   AND topic_key='tour_'||tour_id::text||'_archive'))
 );
 CREATE INDEX iclub_ai_v21_scoped_contexts_user_idx
  ON private.iclub_ai_v21_scoped_contexts(user_id,expires_at);
@@ -214,7 +222,7 @@ BEGIN
   'topic',v.topic_key,
   'practice_session_id',v.practice_session_id,
   'question_id',v.practice_question_id,
-  'lesson_id',v.lesson_id,'tour_attempt_id',NULL
+  'lesson_id',v.lesson_id,'tour_attempt_id',v.tour_attempt_id
  ));
 END;
 $$;
