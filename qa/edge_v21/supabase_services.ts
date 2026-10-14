@@ -1,3 +1,4 @@
+import {createReadOnlyScreenProofReaders} from "./screen_proof_services.ts";
 // iClub AI v2.1 — Deno-native Supabase backend adapter. QA branch ONLY.
 // This is NOT a deployed Edge Function and is intentionally not referenced
 // by any active app, Edge entrypoint, Vercel config or existing Math Tutor.
@@ -72,6 +73,7 @@ export function createSupabaseServices(config:BackendConfig){
   try{return await fn();}catch{return fallback;}
  };
  return {
+  ...createReadOnlyScreenProofReaders(rpc),
   // Actual Supabase Auth verification: the learner JWT, not admin credentials.
   authenticate:async(authorization:string)=>{
    if(!/^Bearer [A-Za-z0-9._-]{8,2048}$/.test(authorization))
@@ -104,7 +106,10 @@ export function createSupabaseServices(config:BackendConfig){
     ownerId:userId,routeAuthority:c.route_authority,
     active:c.active,protectedAssessment:c.protected_assessment,
     expiresAtMs:toInt(c.expires_at_ms),contextRevision:c.context_revision,
-    surface:str(c.surface),subject:str(c.subject),feature:str(c.feature),topic:str(c.topic)
+    surface:str(c.surface),subject:str(c.subject),feature:str(c.feature),
+    topic:str(c.topic),currentView:str(c.current_view),
+    lessonId:toInt(c.lesson_id),practiceSessionId:toInt(c.practice_session_id),
+    questionId:toInt(c.question_id),tourAttemptId:toInt(c.tour_attempt_id)
    };
   },
   // Scoped Practice context: only the server-verified learner ID is passed.
