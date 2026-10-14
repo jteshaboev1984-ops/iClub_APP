@@ -1,0 +1,47 @@
+{
+  "schema": "iclub_ai_owner_product_decisions_v1",
+  "date": "2026-10-14",
+  "scope": "QA_AND_PROTECTED_PREVIEW_PREPARATION_ONLY",
+  "navigationCopy": {
+    "productApproved": true,
+    "exactDraftGitBlobSha": "ab94d7ca03bbdf521acc95dedafd0dba43c45f7e",
+    "localeSet": [
+      "ru",
+      "uz",
+      "en"
+    ],
+    "entries": 6
+  },
+  "accessibility": {
+    "productApproved": true,
+    "tabAccessibleName": "VISIBLE_LOCALIZED_CAPTION",
+    "landmarkLabels": {
+      "ru": "Нижнее меню",
+      "uz": "Pastki menyu",
+      "en": "Bottom navigation"
+    },
+    "legacyHtmlEditAuthorized": false
+  },
+  "homeNextActions": {
+    "productApproved": true,
+    "policyVersion": "home_next_actions_20261014_v1",
+    "order": [
+      "review_finalized_practice",
+      "review_open_tour_archive",
+      "continue_enrolled_subject"
+    ],
+    "evidencePolicy": "SERVER_CONFIRMED_ONLY",
+    "samePriorityTie": "RETURN_CHOICES_WITHOUT_AUTO_RANKING",
+    "missingEvidence": "NO_RECOMMENDATION",
+    "changesAcademicProgress": false
+  },
+  "release": {
+    "editorialRightsSignoff": false,
+    "sourcePublicationApproved": false,
+    "supabaseWritesApproved": false,
+    "liveAiApproved": false,
+    "providerSpendApproved": false,
+    "realCohortBetaApproved": false,
+    "productionDeployApproved": false
+  }
+}
