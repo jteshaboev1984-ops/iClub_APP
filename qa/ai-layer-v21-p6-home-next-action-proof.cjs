@@ -64,10 +64,25 @@ class QAHomeNextActionProof{
    if(after?.ownerId!==before.ownerId||after.contextHandle!==before.contextHandle||
      after.revision!==before.revision||after.expiresAtMs!==before.expiresAtMs||
      after.surface!==before.surface||after.currentView!==before.currentView||
-     !Number.isSafeInteger(end)||end>=before.expiresAtMs||end>=plan.expiresAtMs)return deny();
+     !Number.isSafeInteger(end)||end<now||
+     end>=before.expiresAtMs||end>=plan.expiresAtMs)return deny();
+   // The owner-approved PRIORITY policy may run only on a planner with
+   // authority-signed evidence that all three categories were enumerated.
+   // A boolean from the browser or an unsigned display tile is insufficient.
+   const coverage=plan.priorityCoverage;
+   const canRank=plan.policyVersion==="home_next_actions_20261014_v1"&&
+    coverage&&typeof coverage==="object"&&!Array.isArray(coverage)&&
+    Object.keys(coverage).sort().join(",")===
+     "activeEnrollments,finalizedPractice,openTourArchives,ownerScope"&&
+    Object.values(coverage).every(x=>x===true);
    return{ready:true,ownerId:userId,screenRevision:before.revision,
     planRevision:plan.planRevision,authorityHash:plan.authorityHash,
-    actionIds:[...seen],expiresAtMs:plan.expiresAtMs};
+    actionIds:[...seen],expiresAtMs:plan.expiresAtMs,
+    priorityPolicyReady:canRank===true,
+    // Metadata only: never include grades, content, answer keys or personal data.
+    priorityCandidates:canRank===true?plan.actions.map(a=>({
+     actionId:a.actionId,actionCode:a.actionCode,subjectKey:a.subjectKey
+    })):[]};
   }catch{return deny();}
  }
 }
