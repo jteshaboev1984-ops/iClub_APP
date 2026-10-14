@@ -125,6 +125,31 @@ async function browserTest(){
  ok(credentials(),"Client supplied untrusted owner/plan/progress");
  await binder.disconnect();
  await pause(10);
+ // Observe the NATIVE MutationObserver path, not a mocked observer:
+ // a screen switch must revoke without a manual sync() caller.
+ activate("home");clock=500000;
+ const client2=new window.QaV21ScreenClient({
+  post:async req=>{
+   calls.push({path:req.path,body:req.body,authorization:req.authorization});
+   if(req.path==="/context")
+    return req.body.action==="revoke"?{ok:true}:
+      {ok:true,contextHandle:uuid(),expiresInSeconds:90};
+   return{ok:false,reason:"source_in_development"};
+  },readJwt:async()=>"synthetic-only-jwt-token",
+  newRequestId:()=>uuid(),nowMs:()=>clock
+ });
+ const observerBinder=new window.QaV21AppScreenBinder({client:client2,document});
+ observerBinder.attach();await pause(50);
+ ok(observerBinder.ready&&observerBinder.key==="home",
+  "Native MutationObserver did not acquire initial Home context");
+ activate("support");await pause(70);
+ ok(observerBinder.ready&&observerBinder.key==="support",
+  "Native MutationObserver failed to rebind on navigation");
+ const revokedBefore=count("revoke");
+ el("view-certificates").classList.add("is-active");await pause(70);
+ ok(observerBinder.ready===false&&count("revoke")>revokedBefore,
+  "Native MutationObserver did not revoke an unsupported overlay");
+ await observerBinder.disconnect();
  return{viewport:innerWidth+"x"+innerHeight,nativeDom:true,
   routes:7,nestedScreens:17,issued:minted,revoked:count("revoke"),
   noPaidAnswers:calls.filter(x=>x.path==="/answer").length===0,
