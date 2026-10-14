@@ -18425,7 +18425,9 @@ try {
   total,
   percent,
   durationSec,
-  details
+  details,
+  sourceSessionId: Number(quiz.safeDrillSessionId||0)||null,
+  practiceOrigin: quiz.topicChoiceOrigin===true?"topic":(quiz.drillType?"drill":"tour")
 };
 
     // ✅ Save "My recommendations" + sync to DB right here (always, no UI dependency)
@@ -19626,16 +19628,22 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
 
     ${modeTabs}
     ${renderSeasonControl()}
-    ${activeTab==="practice"&&practiceMode==="topics"
-      ?'<div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>':""}
     ${activeTab==="practice"&&practiceMode==="topics"&&practiceRows.length
-      ?`<div style="font-weight:800;margin:16px 0 9px">${escapeHTML(tr3("Рекомендации по темам","Mavzular bo‘yicha tavsiyalar","Topic recommendations"))}</div>`
+      ?`<div style="font-weight:800;margin:12px 0 9px">${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</div>`
       :""}
     ${
       activeTab === "tour"
         ? renderTourList()
         : renderPracticeList()
     }
+    ${activeTab==="practice"&&practiceMode==="topics"
+      ?`<details id="my-recs-topic-history-fold" style="margin-top:18px;border-top:1px solid var(--line,rgba(127,127,127,.2));padding-top:12px">
+          <summary style="cursor:pointer;font-weight:800;padding:8px 0">
+            ${escapeHTML(tr3("История практики по темам","Mavzular bo‘yicha amaliyot tarixi","Topic practice history"))}
+          </summary>
+          <div id="my-recs-topic-history" class="iclub-myrec-topic-holder" style="padding-top:10px"></div>
+        </details>`
+      :""}
   `;
 
   wrap.querySelectorAll("[data-myrecs-tab]").forEach(btn => {
@@ -20509,16 +20517,43 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   const owner = await window.iClubPracticeDraftIdentityV1?.bind();
   if (!owner) { showToast(t("not_available")); return; }
   if (loadPracticeDraft()) { showToast(t("practice_resume_prompt")); return; }
-  const qids=fromHistory
+  let qids=fromHistory
     ?Array.from(new Set((Array.isArray(options?.questionIds)?options.questionIds:[])
         .map(x=>Number(x)).filter(x=>Number.isSafeInteger(x)&&x>0))).slice(0,10)
     :fromAttempt
       ?Array.from(new Set((Array.isArray(attempt?.details)?attempt.details:[])
           .filter(x=>!x.isCorrect).map(x=>Number(x.id||0)).filter(x=>x>0))).slice(0,10)
       :(Array.isArray(state?.courses?.myRecMistakeQids)?state.courses.myRecMistakeQids.slice(0,10):[]);
+  const api=getPracticeSafeApi()?.drill;
+  // The authenticated server session is authoritative for a topic retry.
+  // Never infer 'no errors' from a stale local screen or from a cached review.
+  if(fromAttempt && ctx==="topic"){
+    const sourceId=Number(attempt?.sourceSessionId||state?.quiz?.safeDrillSessionId||0);
+    if(Number.isSafeInteger(sourceId)&&sourceId>0&&api?.questions){
+      try{
+        const originalRows=await api.questions(sourceId);
+        const verifiedWrong=(Array.isArray(originalRows)?originalRows:[])
+          .filter(x=>x.was_answered===true&&x.saved_is_correct===false)
+          .map(x=>Number(x.id||x.question_id||0)).filter(Number.isSafeInteger);
+        qids=Array.from(new Set(verifiedWrong)).slice(0,10);
+      }catch(e){
+        logClientError("practice_topic_wrong_answers_read_failed",e);
+        showToast(tr3("Не удалось загрузить ошибки. Ответы сохранены. Попробуйте ещё раз.",
+          "Xatolarni yuklab bo‘lmadi. Javoblar saqlangan. Qayta urinib ko‘ring.",
+          "Could not load mistakes. Your answers are saved. Please retry."));
+        return;
+      }
+    }
+  }
   if(!rec||!subjectKey) return;
-  if (!qids.length) { showToast(t("rec_retry_empty") || "Нет ошибок для повтора."); return; }
-  const api = getPracticeSafeApi()?.drill;
+  if (!qids.length) {
+    showToast(fromAttempt
+      ?tr3("Не удалось подтвердить ошибки этой попытки. Откройте разбор из истории.",
+        "Urinishdagi xatolarni tekshirib bo‘lmadi. Tarixdan tahlilni oching.",
+        "Could not verify this attempt's mistakes. Open its review from history.")
+      :(t("rec_retry_empty")||"Нет ошибок для повтора."));
+    return;
+  }
   if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
   const clientSessionId = window.iclubSafeAssessment.makeClientSessionId("practice_mistakes");
   let started = null, rows = [];
