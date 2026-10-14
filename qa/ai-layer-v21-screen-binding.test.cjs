@@ -28,7 +28,7 @@ function fixture({server}={}){
   calls.push(req);
   if(server)return server(req);
   if(req.path==="/context")
-   return req.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:H};
+   return req.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:H,expiresInSeconds:90};
   return req.body.intent==="status"?{ok:true,state:"in_development"}:
    {ok:false,state:"in_development"};
  };
@@ -111,7 +111,7 @@ test("Leaving Lesson revokes handle before another Practice screen can mint",asy
 test("Stale answer from old screen is never returned by binder",async()=>{
  const wait=defer(),f=fixture({server:r=>
   r.path==="/answer"?wait.promise:
-  r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:H}});
+  r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:H,expiresInSeconds:90}});
  lesson(f);await f.binder.sync();
  const result=f.binder.askPrepared("topic_main","ru");
  await Promise.resolve();
@@ -129,7 +129,7 @@ test("Late mint must not open abandoned Lesson after navigation",async()=>{
  await Promise.resolve();
  f.elements["courses-video"].classList.active=false;
  await f.binder.sync();
- wait.resolve({ok:true,contextHandle:H});
+ wait.resolve({ok:true,contextHandle:H,expiresInSeconds:90});
  assert.equal((await pending).reason,"context_changed");
  assert.equal(f.binder.ready,false);
  assert.equal(f.binder.screenKey,"");
