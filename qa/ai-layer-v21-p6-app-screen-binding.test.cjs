@@ -158,6 +158,21 @@ test("Race: late mint does not grant abandoned view and revoked answer does not 
  wait2.resolve({ok:true,reply:"OLD_USER_SCREEN"});
  a.equal((await ans).reason,"context_changed");
 });
+test("§62 expired server lease invalidates UI readiness and does not silently remint",async()=>{
+ const f=fixture();let clock=100000;
+ f.client.nowMs=()=>clock;
+ f.set("support");a.equal((await f.binder.sync()).ok,true);
+ const issued=f.calls.length;
+ clock=190000;
+ a.equal((await f.binder.askPrepared("nav_support","ru")).reason,"context_expired");
+ a.equal((await f.binder.status("ru")).reason,"context_expired");
+ a.equal(f.calls.length,issued,"No answer is sent after expiry");
+ a.equal((await f.binder.sync()).reason,"context_expired");
+ a.equal(f.binder.ready,false);
+ a.deepEqual(f.calls.at(-1).body,{action:"revoke",contextHandle:handle});
+ a.equal((await f.binder.sync()).reason,"screen_not_verified");
+ a.equal(f.calls.filter(x=>x.body.action==="mintAppView").length,1);
+});
 test("Logout/account switch invalidates QA scope, unrecognized prepared key denied",async()=>{
  const f=fixture();f.set("home");
  await f.binder.authChanged("SIGNED_IN",{user:{id:"synthetic-a"}});
