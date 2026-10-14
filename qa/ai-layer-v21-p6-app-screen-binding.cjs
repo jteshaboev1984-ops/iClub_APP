@@ -39,7 +39,12 @@ class QaV21AppScreenBinder{
  }
  async sync(){
   const next=this.read(),key=next||"";
-  if(key===this.key)return this.ready?{ok:true}:fail("screen_not_verified");
+  if(key===this.key){
+   if(this.ready&&this.client.isCurrent&&!this.client.isCurrent()){
+    this.ready=false;await this.client.leave();return fail("context_expired");
+   }
+   return this.ready?{ok:true}:fail("screen_not_verified");
+  }
   const seq=++this.epoch;this.key=key;this.ready=false;
   await this.client.leave();
   if(seq!==this.epoch)return fail("context_changed");
