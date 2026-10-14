@@ -102,8 +102,13 @@ class QaV21ScreenClient{
   const begunAt=this.safeNow();
   if(begunAt===null)
    return fail("invalid_context_clock");
-  const r=await this.authenticatedPost("/context",body,
-   ()=>seq===this.epoch&&this.safeNow()!==null);
+  const r=await this.authenticatedPost("/context",body,()=>{
+   // A 90-second maximum lease cannot justify a mint after an even longer
+   // asynchronous token wait. Never send that stale mint to the Edge.
+   if(seq!==this.epoch)return false;
+   const latest=begunAt+90000,now=this.safeNow();
+   return now!==null&&Number.isSafeInteger(latest)&&now<latest;
+  });
   if(r?.ok!==true||!UUID.test(r.contextHandle||""))
    return fail(r?.reason||"context_unavailable");
   // An arbitrary boolean from /context does not grant an unlimited lease.
