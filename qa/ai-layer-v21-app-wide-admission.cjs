@@ -143,7 +143,8 @@ class QAAppWideFeatureAdmission {
   // The verdict is read-only. The REAL Edge must rerun source/ownership
   // proof, reserve atomic quota and validate delivery before any answer.
   return {...available,route,surface:before.surface,subject:before.subject,
-   locale:lang,proofRevision:evidence.proofRevision};
+   locale:lang,proofRevision:evidence.proofRevision,
+    proofHash:evidence.proofHash};
  }
 }
 module.exports={QAAppWideFeatureAdmission,routeFor,APP_VIEWS,PROOFS,SUBJECTS};
