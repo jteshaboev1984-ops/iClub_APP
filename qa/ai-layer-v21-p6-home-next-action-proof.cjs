@@ -26,6 +26,9 @@ class QAHomeNextActionProof{
      plan.expiresAtMs-plan.issuedAtMs>90000||
      !Array.isArray(plan.actions)||plan.actions.length<1||
      plan.actions.length>3)return deny();
+   // Snapshot before ANY asynchronous signer, academic or locale checks.
+   // Re-reading only the screen does not catch planner/release revocation.
+   const signedPlanSnapshot=JSON.stringify(plan);
    if(await s.verifyPlanAuthority(userId,before,plan)!==true)return deny();
    const seen=new Set();
    for(const a of plan.actions){
@@ -35,6 +38,21 @@ class QAHomeNextActionProof{
       !positive(a.evidenceRevision)||!hash(a.evidenceHash)||
       !hash(a.sourceHash)||typeof a.sourceVersion!=="string")return deny();
     seen.add(a.actionId);
+    const evidence=await s.verifyAcademicEvidence(userId,a);
+    if(evidence?.allowed!==true||evidence.evidenceHash!==a.evidenceHash||
+       evidence.evidenceRevision!==a.evidenceRevision)return deny();
+    const release=await s.verifyEditorialRelease(locale,a);
+    if(release?.ready!==true||release.sourceHash!==a.sourceHash||
+       release.sourceVersion!==a.sourceVersion)return deny();
+   }
+   // A released/reprioritized plan or revoked source can change DURING
+   // the initial checks. Reject if the authoritative plan is no longer exact,
+   // or any rights/accreditation changed while those checks were pending.
+   const lastPlan=await s.readServerPlan(userId,contextHandle);
+   if(JSON.stringify(plan)!==signedPlanSnapshot||
+     JSON.stringify(lastPlan)!==signedPlanSnapshot||
+     await s.verifyPlanAuthority(userId,before,lastPlan)!==true)return deny();
+   for(const a of lastPlan.actions){
     const evidence=await s.verifyAcademicEvidence(userId,a);
     if(evidence?.allowed!==true||evidence.evidenceHash!==a.evidenceHash||
        evidence.evidenceRevision!==a.evidenceRevision)return deny();
