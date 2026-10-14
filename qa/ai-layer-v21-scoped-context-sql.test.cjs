@@ -81,8 +81,10 @@ test('Live Lesson membership and existence are rechecked during async answer',()
  a.ok(sql.includes('subj.subject_key=v.subject_key'));
  a.ok(sql.includes('subj.is_active=true'));
 });
-test('Lesson/Practice contexts are isolated by surface, feature and item type',()=>{
- a.ok(sql.includes("surface_code IN ('practice','lesson')"));
+test('Lesson/Practice/Tour contexts remain isolated by surface, feature and item type',()=>{
+ a.ok(sql.includes("surface_code IN ('practice','lesson','tour_archive')"));
+  a.ok(sql.includes("surface_code='tour_archive' AND tour_attempt_id IS NOT NULL"));
+  a.ok(sql.includes("feature_code='archive_explanation'"));
  a.ok(sql.includes("surface_code='lesson' AND lesson_id IS NOT NULL"));
  a.ok(sql.includes("practice_session_id IS NULL AND practice_question_id IS NULL"));
  a.ok(sql.includes("surface_code='practice' AND practice_session_id IS NOT NULL"));
