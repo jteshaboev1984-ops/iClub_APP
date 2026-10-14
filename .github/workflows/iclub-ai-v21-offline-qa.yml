@@ -73,6 +73,13 @@ on:
       - 'qa/run-ai-layer-v21-offline.cjs'
       - 'docs/iclub-ai-layer-trusted-server-adapter-v2.1.md'
       - 'docs/iclub-ai-layer-app-wide-edge-binding-v2.1.md'
+  pull_request:
+    branches:
+      - qa/iclub-ai-layer-v21-20261012
+    paths:
+      - 'qa/**'
+      - 'docs/iclub-ai-layer-master-plan-v2.1.md'
+      - '.github/workflows/iclub-ai-v21-offline-qa.yml'
   workflow_dispatch:
 
 permissions:
@@ -84,7 +91,10 @@ concurrency:
 
 jobs:
   offline-node-and-scratch-pg:
-    if: github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012'
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012') ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'qa/iclub-ai-layer-v21-20261012' && startsWith(github.head_ref, 'qa/iclub-ai-v21-ci-verification-'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     services:
