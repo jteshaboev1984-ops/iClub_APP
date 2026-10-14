@@ -190,6 +190,29 @@
             if(why)card.append(node('div','muted small',why));
             detail.append(card);
           }
+          const sourceSessionId=Number(attempt.session_id||0);
+          const wrongIds=Array.from(new Set(saved.map(x=>Number(x.question_id||0))
+            .filter(x=>Number.isSafeInteger(x)&&x>0))).slice(0,10);
+          if(sourceSessionId>0&&wrongIds.length){
+            const retry=node('button','btn primary',
+              locale==='ru'?'Исправить ошибки':locale==='uz'?'Xatolarni tuzatish':'Correct mistakes');
+            retry.type='button';
+            retry.style.width='100%';
+            retry.style.marginTop='8px';
+            retry.addEventListener('click',event=>{
+              event.stopPropagation();
+              window.dispatchEvent(new CustomEvent('iclub-practice-correct-history',{
+                detail:{
+                  subjectKey:String(data.subject_key||''),
+                  sourceSessionId,
+                  sessionId:sourceSessionId,
+                  questionIds:wrongIds,
+                  topic:String(attempt.topic||'')
+                }
+              }));
+            });
+            detail.append(retry);
+          }
         };
         row.addEventListener('click',()=>{
           const open=detail.hidden;
