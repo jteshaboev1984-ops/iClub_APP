@@ -1,0 +1,142 @@
+-- iClub unified AI §83: self-contained EMPTY PostgreSQL 16 scratch test.
+-- Every statement rolled back; no live Supabase connection or data.
+\set ON_ERROR_STOP on
+BEGIN;
+DO $guard$
+BEGIN
+ IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
+ OR to_regclass('public.tour_attempts') IS NOT NULL
+ THEN RAISE EXCEPTION 'STOP: only virgin scratch database allowed'; END IF;
+END $guard$;
+DO $roles$
+DECLARE r text;
+BEGIN
+ FOREACH r IN ARRAY ARRAY['anon','authenticated','service_role'] LOOP
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname=r)
+  THEN EXECUTE format('CREATE ROLE %I NOLOGIN',r); END IF;
+ END LOOP;
+END $roles$;
+CREATE SCHEMA private;
+CREATE TABLE private.iclub_global_ai_runtime_config(
+ id int PRIMARY KEY,kill_switch boolean,gateway_enabled boolean);
+CREATE TABLE private.exam_qa(user_id uuid PRIMARY KEY,active boolean NOT NULL);
+CREATE FUNCTION private.iclub_ai_has_active_protected_assessment_v1(u uuid)
+ RETURNS boolean LANGUAGE sql STABLE SET search_path='' AS
+ $$SELECT coalesce((SELECT active FROM private.exam_qa WHERE user_id=u),false)$$;
+CREATE TABLE private.iclub_ai_v21_current_screen(
+ user_id uuid PRIMARY KEY,current_handle uuid,revision bigint NOT NULL);
+CREATE TABLE private.iclub_ai_v21_scoped_contexts(
+ context_handle uuid PRIMARY KEY,user_id uuid NOT NULL,context_revision bigint NOT NULL,
+ surface_code text,app_view_code text,feature_code text,topic_key text,
+ subject_key text,expires_at timestamptz,revoked_at timestamptz);
+CREATE FUNCTION public.get_iclub_ai_v21_scoped_context_service(u uuid,h text)
+ RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
+ SELECT jsonb_build_object('allowed',exists(
+  SELECT 1 FROM private.iclub_ai_v21_current_screen n
+  JOIN private.iclub_ai_v21_scoped_contexts c
+   ON c.context_handle=n.current_handle AND c.user_id=n.user_id
+   AND c.context_revision=n.revision
+  WHERE n.user_id=u AND c.context_handle::text=h AND c.surface_code='home'
+    AND c.revoked_at IS NULL AND c.expires_at>now()
+ ))$$;
+CREATE TABLE public.subjects(
+ id bigint PRIMARY KEY,subject_key text,is_active boolean);
+CREATE TABLE public.user_subjects(
+ id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,user_id uuid,subject_id bigint);
+CREATE TABLE public.practice_sessions_v4(
+ id bigint PRIMARY KEY,user_id uuid,subject_id bigint,status text,
+ finalized_at timestamptz,question_ids bigint[]);
+CREATE TABLE public.practice_session_answers_v4(
+ session_id bigint,question_id bigint,is_correct boolean,answered_at timestamptz);
+CREATE TABLE public.tours(
+ id bigint PRIMARY KEY,subject_id bigint,end_date date,is_active boolean);
+CREATE TABLE public.tour_attempts(
+ id bigint PRIMARY KEY,user_id uuid,tour_id bigint,status text);
+CREATE TABLE public.tour_session_runtime_v4(
+ attempt_id bigint PRIMARY KEY,user_id uuid,tour_id bigint,finalized_at timestamptz);
+\ir iclub_ai_v21_home_scan_scratch_UNAPPLIED.sql
+INSERT INTO private.iclub_global_ai_runtime_config VALUES(1,false,true);
+INSERT INTO public.subjects VALUES(10,'economics',true),(11,'biology',true),(12,'chemistry',true);
+INSERT INTO public.user_subjects(user_id,subject_id) VALUES
+ ('11111111-1111-4111-8111-111111111111',10),
+ ('11111111-1111-4111-8111-111111111111',11),
+ ('22222222-2222-4222-8222-222222222222',12);
+INSERT INTO private.iclub_ai_v21_current_screen VALUES
+ ('11111111-1111-4111-8111-111111111111','33333333-3333-4333-8333-333333333333',12);
+INSERT INTO private.iclub_ai_v21_scoped_contexts VALUES
+ ('33333333-3333-4333-8333-333333333333','11111111-1111-4111-8111-111111111111',12,
+ 'home','home','next_step','next_actions','general',now()+interval '90 seconds',NULL);
+INSERT INTO private.iclub_ai_v21_home_synthetic_access VALUES
+ ('11111111-1111-4111-8111-111111111111',true),
+ ('22222222-2222-4222-8222-222222222222',false);
+INSERT INTO public.practice_sessions_v4 VALUES
+ (901,'11111111-1111-4111-8111-111111111111',10,'finalized',now(),ARRAY[77]),
+ (902,'11111111-1111-4111-8111-111111111111',11,'active',NULL,ARRAY[78]),
+ (903,'22222222-2222-4222-8222-222222222222',12,'finalized',now(),ARRAY[79]);
+INSERT INTO public.practice_session_answers_v4 VALUES
+ (901,77,false,now()),(902,78,false,now()),(903,79,false,now());
+INSERT INTO public.tours VALUES
+ (30,10,(now() AT TIME ZONE 'Asia/Tashkent')::date-1,false),
+ (31,11,(now() AT TIME ZONE 'Asia/Tashkent')::date,false),
+ (32,12,(now() AT TIME ZONE 'Asia/Tashkent')::date+1,true);
+INSERT INTO public.tour_attempts VALUES
+ (100,'11111111-1111-4111-8111-111111111111',30,'submitted'),
+ (101,'11111111-1111-4111-8111-111111111111',31,'submitted'),
+ (102,'22222222-2222-4222-8222-222222222222',32,'submitted'),
+ (103,'11111111-1111-4111-8111-111111111111',30,'anti_cheat');
+INSERT INTO public.tour_session_runtime_v4 VALUES
+ (100,'11111111-1111-4111-8111-111111111111',30,now()),
+ (101,'11111111-1111-4111-8111-111111111111',31,now()),
+ (102,'22222222-2222-4222-8222-222222222222',32,now()),
+ (103,'11111111-1111-4111-8111-111111111111',30,now());
+DO $cases$
+DECLARE
+ u uuid:='11111111-1111-4111-8111-111111111111';
+ other uuid:='22222222-2222-4222-8222-222222222222';
+ h uuid:='33333333-3333-4333-8333-333333333333';
+ r jsonb;
+BEGIN
+ r:=public.get_iclub_ai_v21_home_scan_scratch_service(u,h);
+ IF r->>'allowed'<>'true' OR r#>>'{candidates,0,actionCode}'<>'review_finalized_practice'
+  OR r#>>'{candidates,0,subjectKey}'<>'economics' THEN
+  RAISE EXCEPTION 'Practice priority not grounded: %',r;END IF;
+ IF r::text ~* 'correct_answer|user_answer|is_correct|score|percent' THEN
+  RAISE EXCEPTION 'Sensitive answer/grade information leaked';END IF;
+ IF public.get_iclub_ai_v21_home_scan_scratch_service(other,h)->>'allowed'<>'false' THEN
+  RAISE EXCEPTION 'Foreign owner accepted'; END IF;
+ IF public.get_iclub_ai_v21_home_scan_scratch_service(u,
+  '44444444-4444-4444-8444-444444444444')->>'allowed'<>'false' THEN
+  RAISE EXCEPTION 'Borrowed handle accepted'; END IF;
+ UPDATE public.practice_session_answers_v4 SET is_correct=true WHERE session_id=901;
+ r:=public.get_iclub_ai_v21_home_scan_scratch_service(u,h);
+ IF r#>>'{candidates,0,actionCode}'<>'review_open_tour_archive'
+  OR r#>>'{candidates,0,evidenceId}'<>'100' THEN
+  RAISE EXCEPTION 'Open archive should outrank continuation: %',r;END IF;
+ UPDATE public.tour_session_runtime_v4 SET finalized_at=NULL WHERE attempt_id=100;
+ r:=public.get_iclub_ai_v21_home_scan_scratch_service(u,h);
+ IF r#>>'{candidates,0,actionCode}'<>'continue_enrolled_subject' THEN
+  RAISE EXCEPTION 'Unfinalized/locked/anti-cheat Tour must never lead: %',r;END IF;
+ IF jsonb_array_length(r->'candidates')<>2 THEN
+  RAISE EXCEPTION 'Both enrolled subjects must remain choices: %',r;END IF;
+ UPDATE private.iclub_ai_v21_home_synthetic_access SET allowed=false WHERE user_id=u;
+ IF public.get_iclub_ai_v21_home_scan_scratch_service(u,h)->>'allowed'<>'false' THEN
+  RAISE EXCEPTION 'Entitlement revoked but scan allowed';END IF;
+ UPDATE private.iclub_ai_v21_home_synthetic_access SET allowed=true WHERE user_id=u;
+ INSERT INTO private.exam_qa VALUES(u,true);
+ IF public.get_iclub_ai_v21_home_scan_scratch_service(u,h)->>'allowed'<>'false' THEN
+  RAISE EXCEPTION 'Protected assessment bypass';END IF;
+ DELETE FROM private.exam_qa;
+ UPDATE private.iclub_ai_v21_scoped_contexts SET revoked_at=now() WHERE context_handle=h;
+ IF public.get_iclub_ai_v21_home_scan_scratch_service(u,h)->>'allowed'<>'false' THEN
+  RAISE EXCEPTION 'Revoked Home handle bypass';END IF;
+ RAISE NOTICE 'Home actual-schema read-only source scan positive and negative checks passed';
+END $cases$;
+DO $priv$
+BEGIN
+ IF has_function_privilege('anon','public.get_iclub_ai_v21_home_scan_scratch_service(uuid,uuid)','EXECUTE')
+ OR has_function_privilege('authenticated','public.get_iclub_ai_v21_home_scan_scratch_service(uuid,uuid)','EXECUTE')
+ OR NOT has_function_privilege('service_role','public.get_iclub_ai_v21_home_scan_scratch_service(uuid,uuid)','EXECUTE')
+ THEN RAISE EXCEPTION 'Home must be service-role only'; END IF;
+END $priv$;
+ROLLBACK;
+\echo 'Home scanner scratch regression rolled back, no live data touched.'
