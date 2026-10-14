@@ -23,6 +23,7 @@ const cases = [
  "qa/ai-layer-v21-math-authority-service.test.cjs",
  "qa/ai-layer-v21-math-authority-sql.test.cjs",
  "qa/ai-layer-v21-cross-subject-admission.test.cjs",
+ "qa/ai-layer-v21-app-wide-admission.test.cjs",
  "qa/ai-layer-v21-cross-subject-sql.test.cjs",
  "qa/ai-layer-v21-content-handoff-gate.test.cjs",
  "qa/ai-layer-v21-content-handoff-sql.test.cjs",

@@ -593,3 +593,8 @@ The remaining milestone is one coherent UI candidate, NOT more isolated adapter 
 ## 44. P9 single owner-approved, SSO-protected SYNTHETIC Preview (2026-10-13)
 
 Owner explicitly approved exactly ONE protected Preview. Vercel `i-club-app` SSO protection verified enabled for noncustom Preview URLs. Candidate source in `qa/ai-layer-v21-protected-preview/` uses true QA global-ai-ui.js/CSS and verified QA V2 transport + binder/publisher/glue but ONLY a static in-memory synthetic Economics Practice and mock `/context` `/answer`; CSP blocks network and external resources. No real app.js/index.html, Supabase SDK, provider keys, storage writes, production targets or user data in the deployment. It demonstrates synthetic Home → active Practice blackout → finalized result → reviewed question → real AI visual shell. P9 public/beta GO remains NO-GO until separate authorization and actual backend contracts are approved. See `docs/iclub-ai-layer-p9-protected-synthetic-preview-v2.1.md`.
+
+
+## 45. Единый допуск для ВСЕГО iClub (QA-only)
+
+Один `QAAppWideFeatureAdmission` объединяет реальные surface types global help (включая навигационные разделы), subject overview по **всем предметам**, Home, Profile, Lessons, завершённый Practice, открытый архив Tours через существующий `ContentHandoffGate`. Все доказательства только из injected authenticated server services; авторизация проверяется дважды после async. Legacy Mathematics Tutor строго изолирован и его маршрут не меняется. Все тесты синтетические; Preview не является реальным AI backend. Ни одна незрелая функция/предмет не открывается на основании старого inventory. См. `docs/iclub-ai-layer-app-wide-admission-v2.1.md`.
