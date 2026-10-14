@@ -1,0 +1,100 @@
+{
+  "schema": "iclub_ai_p6_prepared_navigation_editorial_draft_v1",
+  "status": "EDITORIAL_DRAFT_NOT_APPROVED",
+  "releaseAllowed": false,
+  "sourceFiles": [
+    "app.js",
+    "index.html",
+    "i18n.js"
+  ],
+  "localePolicy": "all_three_required_no_auto_translation",
+  "entrypoints": [
+    {
+      "id": "nav_home",
+      "targetView": "home",
+      "kind": "tab",
+      "entryView": null,
+      "selector": "[data-tab=\"home\"]",
+      "labelKey": "tab_home",
+      "replies": {
+        "ru": "В нижнем меню выберите «Главная».",
+        "uz": "Pastki menyudan «Bosh sahifa»ni tanlang.",
+        "en": "In the bottom menu, choose “Home”."
+      }
+    },
+    {
+      "id": "nav_courses",
+      "targetView": "courses",
+      "kind": "tab",
+      "entryView": null,
+      "selector": "[data-tab=\"courses\"]",
+      "labelKey": "tab_study",
+      "replies": {
+        "ru": "В нижнем меню выберите «Учёба».",
+        "uz": "Pastki menyudan «O‘qish»ni tanlang.",
+        "en": "In the bottom menu, choose “Study”."
+      }
+    },
+    {
+      "id": "nav_ratings",
+      "targetView": "ratings",
+      "kind": "tab",
+      "entryView": null,
+      "selector": "[data-tab=\"ratings\"]",
+      "labelKey": "tab_ratings",
+      "replies": {
+        "ru": "В нижнем меню выберите «Рейтинг».",
+        "uz": "Pastki menyudan «Reyting»ni tanlang.",
+        "en": "In the bottom menu, choose “Ratings”."
+      }
+    },
+    {
+      "id": "nav_profile",
+      "targetView": "profile",
+      "kind": "tab",
+      "entryView": null,
+      "selector": "[data-tab=\"profile\"]",
+      "labelKey": "tab_profile",
+      "replies": {
+        "ru": "В нижнем меню выберите «Профиль».",
+        "uz": "Pastki menyudan «Profil»ni tanlang.",
+        "en": "In the bottom menu, choose “Profile”."
+      }
+    },
+    {
+      "id": "nav_about",
+      "targetView": "about",
+      "kind": "global",
+      "entryView": "home",
+      "selector": "[data-action=\"open-about\"]",
+      "labelKey": "profile_settings_about",
+      "replies": {
+        "ru": "На Главной выберите «О проекте».",
+        "uz": "Bosh sahifada «Loyiha haqida» bo‘limini tanlang.",
+        "en": "On Home, choose “About project”."
+      }
+    },
+    {
+      "id": "nav_support",
+      "targetView": "support",
+      "kind": "global",
+      "entryView": "profile",
+      "selector": "[data-action=\"open-support\"]",
+      "labelKey": "profile_support_title",
+      "replies": {
+        "ru": "Откройте «Профиль» и выберите «Поддержка».",
+        "uz": "«Profil» bo‘limini oching va «Yordam»ni tanlang.",
+        "en": "Open “Profile” and choose “Support”."
+      }
+    }
+  ],
+  "editorialControls": {
+    "approvedBy": null,
+    "approvedAt": null,
+    "contentCorrectnessVerified": false,
+    "languageReviewVerified": false,
+    "accessibilityVerified": false,
+    "releaseApproved": false,
+    "rightsApproved": false
+  }
+}
