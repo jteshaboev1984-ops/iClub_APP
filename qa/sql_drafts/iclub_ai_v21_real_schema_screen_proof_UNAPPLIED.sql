@@ -60,7 +60,7 @@ BEGIN
    ON c.context_handle=nav.current_handle
     AND c.user_id=nav.user_id AND c.context_revision=nav.revision
   WHERE nav.user_id=p_user_id AND nav.current_handle IS NOT NULL
-   AND c.surface_code IN ('practice','lesson')
+   AND c.surface_code IN ('practice','lesson','tour_archive')
    AND c.revoked_at IS NULL AND c.expires_at>now()
    AND public.get_iclub_ai_v21_scoped_context_service(
         p_user_id,c.context_handle::text)->>'allowed'='true';
