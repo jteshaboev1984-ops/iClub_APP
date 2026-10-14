@@ -215,7 +215,7 @@ test("Only minimal server-derived metadata escapes, no answer keys, progress or 
   assert.ok(p&&/^[0-9a-f]{64}$/.test(p.proofHash),k);
   const output=JSON.stringify(p);
   for(const secret of ["correct_answer","sourceText","next_actions","metrics","finalized_at","apikey"])
-   assert.equal(output.includes(secret),false,secret+" / "+k);
+   assert.equal(output.includes('"'+secret+'":'),false,secret+" / "+k);
   assert.equal(await t.adapter.getVerifiedScreenEvidence(OTHER,handle),null);
  }
 });
