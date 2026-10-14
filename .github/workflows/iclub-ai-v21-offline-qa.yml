@@ -15,6 +15,8 @@ on:
       - 'qa/ai-layer-v21-app-wide-admission.cjs'
       - 'qa/ai-layer-v21-edge-request.cjs'
       - 'qa/edge_v21/**'
+      - 'qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql'
+      - 'qa/sql_drafts/iclub_ai_scoped_context_local_pg.psql'
       - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql'
       - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_local_pg.psql'
       - 'qa/run-ai-layer-v21-postgres-local.sh'
