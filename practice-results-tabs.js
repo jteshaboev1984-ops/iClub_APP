@@ -68,12 +68,13 @@
     top.append(score,ring);
     hero.append(kicker,top);
     const metrics = node('div','iclub-result-metrics');
-    for (const [label,value] of [
+    const visibleMetrics=[
       [c.correct,correct+' / '+total],
       [c.mistakes,errors],
-      [c.duration,time],
-      [c.topics,topics]
-    ]) {
+      [c.duration,time]
+    ];
+    if(!topicChoice) visibleMetrics.push([c.topics,topics]);
+    for (const [label,value] of visibleMetrics) {
       const card = node('div','iclub-result-metric');
       card.append(node('span','iclub-result-metric-label',label),
                   node('strong','iclub-result-metric-value',value));
@@ -107,16 +108,15 @@
       const yes=Number(row.correct),all=Number(row.total);
       return yes>=0 && all>0 && yes<=all ? yes+' / '+all : '—';
     };
-    for (const [label,value] of [
-      [c.last,safeScore(data.last)],[c.best,safeScore(data.best)],
-      [c.cumulative,String(Math.max(0,Number(data.total_correct_answers)||0))+' / '+
-        String(Math.max(0,Number(data.total_answered)||0))]
-    ]) {
+    for (const [label,value] of (count > 1 ? [
+      [c.last,safeScore(data.last)],
+      [c.best,safeScore(data.best)]
+    ] : [])) {
       const card=node('div','iclub-topic-history-metric');
       card.append(node('span','',label),node('strong','',value));
       metrics.append(card);
     }
-    holder.append(metrics);
+    if(count > 1) holder.append(metrics);
     const recent=Array.isArray(data.recent)?data.recent.slice(0,5):[];
     if (recent.length) {
       holder.append(node('div','iclub-topic-history-recent-label',c.recent));
@@ -130,6 +130,54 @@
         if(Number.isFinite(date.getTime())) info.append(node('small','',date.toLocaleDateString(locale)));
         row.append(info,node('span','iclub-topic-history-row-score',safeScore(attempt)));
         list.append(row);
+        const saved=Array.isArray(attempt.review)?attempt.review:[];
+        if(Number(attempt.session_id)>0) {
+          const button=node('button','btn',locale==='ru'?'Посмотреть разбор':
+            locale==='uz'?'Tahlilni ko‘rish':'View review');
+          button.type='button';
+          button.style.margin='6px 0 10px';
+          const detail=node('div','iclub-topic-history-review');
+          detail.hidden=true;
+          detail.style.display='none';
+          detail.style.padding='12px';
+          detail.style.borderRadius='12px';
+          detail.style.marginBottom='12px';
+          detail.style.border='1px solid var(--line, rgba(127,127,127,.24))';
+          button.addEventListener('click',()=>{
+            const nowOpen=detail.hidden;
+            detail.hidden=!nowOpen;detail.style.display=nowOpen?'grid':'none';
+            if(!nowOpen)return;
+            detail.replaceChildren();
+            if(!saved.length){
+              detail.append(node('div','muted',locale==='ru'?'Ошибок не было.':
+                locale==='uz'?'Xatolar yo‘q.':'No mistakes in this attempt.'));
+              return;
+            }
+            for(let i=0;i<saved.length;i++) {
+              const d=saved[i],card=node('div','list-item');
+              card.style.padding='10px 0';
+              const loc=locale==='uz'?'uz':locale==='en'?'en':'ru';
+              const stem=d['question_'+loc]||d.question_en||'';
+              const answer=d.user_answer||'—',correct=d.correct_answer||'—';
+              const rawOptions=d['options_'+loc]||d.options_en||'';
+              let options=[];
+              try{const val=JSON.parse(rawOptions);if(Array.isArray(val))options=val;}catch{}
+              const showAnswer=(letter)=>{
+                const ix=String(letter||'').trim().toUpperCase().charCodeAt(0)-65;
+                return ix>=0&&ix<options.length?String(letter)+' — '+String(options[ix]):String(letter||'—');
+              };
+              card.append(node('strong','',String(i+1)+'. '+stem));
+              card.append(node('div','muted small',
+                (locale==='ru'?'Ваш ответ: ':locale==='uz'?'Javobingiz: ':'Your answer: ')+showAnswer(answer)));
+              card.append(node('div','muted small',
+                (locale==='ru'?'Правильный ответ: ':locale==='uz'?'To‘g‘ri javob: ':'Correct answer: ')+showAnswer(correct)));
+              const why=d['feedback_'+loc]||d['explanation_'+loc]||d.explanation_en||'';
+              if(why) card.append(node('div','muted small',why));
+              detail.append(card);
+            }
+          });
+          list.append(button,detail);
+        }
       }
       holder.append(list);
     }
