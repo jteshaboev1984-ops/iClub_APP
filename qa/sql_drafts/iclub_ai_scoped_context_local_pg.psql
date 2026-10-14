@@ -45,6 +45,12 @@ CREATE TABLE public.practice_sessions_v4(
 CREATE TABLE public.practice_session_answers_v4(
  session_id bigint not null,question_id bigint not null,
  primary key(session_id,question_id));
+CREATE TABLE public.tours(id bigint primary key,subject_id bigint not null,
+ end_date date,is_active boolean);
+CREATE TABLE public.tour_attempts(id bigint primary key,user_id uuid not null,
+ tour_id bigint not null,status text not null);
+CREATE TABLE public.tour_session_runtime_v4(attempt_id bigint primary key,
+ user_id uuid not null,tour_id bigint not null,finalized_at timestamptz);
 CREATE TABLE private.context_qa_exam_flags(
  user_id uuid primary key,active boolean not null);
 CREATE FUNCTION private.iclub_ai_has_active_protected_assessment_v1(p_user_id uuid)
@@ -69,6 +75,21 @@ INSERT INTO public.practice_sessions_v4 VALUES
  (930,'11111111-1111-4111-8111-111111111111',13,'finalized',now(),ARRAY[931]);
 INSERT INTO public.practice_session_answers_v4 VALUES
  (900,901),(910,911),(920,921),(930,931);
+INSERT INTO public.tours VALUES
+ (40,12,(now() AT TIME ZONE 'Asia/Tashkent')::date-1,false),
+ (41,12,(now() AT TIME ZONE 'Asia/Tashkent')::date,true);
+INSERT INTO public.tour_attempts VALUES
+ (401,'11111111-1111-4111-8111-111111111111',40,'submitted'),
+ (402,'11111111-1111-4111-8111-111111111111',41,'submitted'),
+ (403,'11111111-1111-4111-8111-111111111111',40,'in_progress'),
+ (404,'22222222-2222-4222-8222-222222222222',40,'submitted'),
+ (405,'11111111-1111-4111-8111-111111111111',40,'time_expired');
+INSERT INTO public.tour_session_runtime_v4 VALUES
+ (401,'11111111-1111-4111-8111-111111111111',40,now()),
+ (402,'11111111-1111-4111-8111-111111111111',41,now()),
+ (403,'11111111-1111-4111-8111-111111111111',40,NULL),
+ (404,'22222222-2222-4222-8222-222222222222',40,now()),
+ (405,'11111111-1111-4111-8111-111111111111',40,NULL);
 
 DO $cases$
 DECLARE
@@ -79,6 +100,7 @@ DECLARE
  second_handle text;
  econ_handle text;
  lesson_handle text;
+ tour_handle text;
 BEGIN
  result:=public.mint_iclub_ai_v21_practice_context_service(learner,900,901);
  IF result->>'reason' IS DISTINCT FROM 'global_ai_disabled' THEN
@@ -235,6 +257,51 @@ BEGIN
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,second_handle);
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Revoked handle remained valid: %',result;END IF;
+
+ -- Tour archive has the SAME owner-bound current-screen handle lifecycle.
+ FOR result IN
+  SELECT public.mint_iclub_ai_v21_tour_archive_context_service(stranger,401)
+  UNION ALL SELECT public.mint_iclub_ai_v21_tour_archive_context_service(learner,402)
+  UNION ALL SELECT public.mint_iclub_ai_v21_tour_archive_context_service(learner,403)
+  UNION ALL SELECT public.mint_iclub_ai_v21_tour_archive_context_service(learner,405)
+  UNION ALL SELECT public.mint_iclub_ai_v21_tour_archive_context_service(learner,404)
+ LOOP IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Closed, active, foreign or nonfinal Tour minted AI: %',result;END IF;END LOOP;
+ result:=public.mint_iclub_ai_v21_tour_archive_context_service(learner,401);
+ IF result->>'allowed' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Open owned Tour not minted: %',result;END IF;
+ tour_handle:=result->>'context_handle';
+ result:=public.get_iclub_ai_v21_scoped_context_service(learner,tour_handle);
+ IF result->>'allowed' IS DISTINCT FROM 'true'
+ OR result#>>'{context,surface}'<>'tour_archive'
+ OR result#>>'{context,topic}'<>'tour_40_archive'
+ OR result#>>'{context,tour_attempt_id}'<>'401'
+ OR result#>>'{context,current_view}'<>'courses' THEN
+  RAISE EXCEPTION 'Tour scoped metadata invalid: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'true'
+ OR result#>>'{evidence,context_handle}' IS DISTINCT FROM tour_handle THEN
+  RAISE EXCEPTION 'Tour current-screen proof missing: %',result;END IF;
+ result:=public.mint_iclub_ai_v21_tour_archive_context_service(learner,401);
+ IF result->>'duplicate' IS DISTINCT FROM 'true'
+ OR result->>'context_handle' IS DISTINCT FROM tour_handle THEN
+  RAISE EXCEPTION 'Tour mint not idempotent: %',result;END IF;
+ UPDATE public.tour_session_runtime_v4 SET finalized_at=NULL WHERE attempt_id=401;
+ result:=public.get_iclub_ai_v21_scoped_context_service(learner,tour_handle);
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Tour lost finalization but AI remained active: %',result;END IF;
+ UPDATE public.tour_session_runtime_v4 SET finalized_at=now() WHERE attempt_id=401;
+ UPDATE public.tours SET end_date=(now() AT TIME ZONE 'Asia/Tashkent')::date WHERE id=40;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Reclosed Tour archive still has AI proof: %',result;END IF;
+ UPDATE public.tours SET end_date=(now() AT TIME ZONE 'Asia/Tashkent')::date-1 WHERE id=40;
+ result:=public.revoke_iclub_ai_v21_scoped_context_service(learner,tour_handle);
+ IF result->>'ok' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Tour owner unable to revoke handle: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Revoked Tour current-screen still live: %',result;END IF;
 
  -- Abuse prevention: 30 new context rows in a minute blocks more mints.
  INSERT INTO private.iclub_ai_v21_scoped_contexts(
