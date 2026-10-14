@@ -14,6 +14,11 @@ const action=(code,subject,evidenceId)=>({
 const P=action("review_finalized_practice","economics",901);
 const T=action("review_open_tour_archive","mathematics",100);
 const C=action("continue_enrolled_subject","biology",10);
+const access=(user,subject,intent,allowed=true)=>({
+ allowed,verified:true,userId:user,subjectKey:subject,intent,
+ revision:4,source:"server_enforced_subject_access_v1",
+ mode:"commercial",competitiveSelectionVerified:intent==="competitive"
+});
 function fixture(candidates=[P]){
  const t={
   now:100000,authorized:true,academic:true,editorial:true,releaseRights:true,
@@ -33,7 +38,7 @@ function fixture(candidates=[P]){
    if(t.changeScan&&++t.readCounts===2)scan.candidates=[];
    return scan;
   },
-  verifySubjectAccess:async()=>t.authorized,
+  verifySubjectAccess:async(user,subject,intent)=>access(user,subject,intent,t.authorized),
   verifyAcademicEvidence:async(_,candidate)=>({
    allowed:t.academic,evidenceId:candidate.evidenceId,
    evidenceRevision:candidate.evidenceRevision,
@@ -65,7 +70,7 @@ test("§88 exactly verified commercial study/competitive intents are required",a
  const intents=[];
  const x=fixture([T,C]);
  x.s.verifySubjectAccess=async(_,subject,intent)=>{
-  intents.push([subject,intent]);return true;
+  intents.push([subject,intent]);return access(U,subject,intent);
  };
  const r=await x.run();
  a.equal(r.ready,true);
@@ -97,6 +102,32 @@ test("§88 deny if any authorization, academic, publication or integrity check i
  }
  const x=fixture();x.s.signingKey=Buffer.alloc(8);
  a.equal((await x.run()).ready,false);
+});
+test("§89 shadow, legacy passthrough, wrong subject/owner and unverified competitive access deny",async()=>{
+ for(const mutate of [
+  p=>{p.mode="shadow"},
+  p=>{p.mode="legacy_passthrough"},
+  p=>{p.mode="grandfathered"},
+  p=>{p.verified=false},
+  p=>{p.userId="22222222-2222-4222-8222-222222222222"},
+  p=>{p.subjectKey="mathematics"},
+  p=>{p.revision=0},
+  p=>{p.source="browser_cache"},
+  p=>{p.intent="competitive"},
+  p=>{p.allowed=false}
+ ]){
+  const x=fixture();
+  x.s.verifySubjectAccess=async(u,subject,intent)=>{
+   const p=access(u,subject,intent);mutate(p);return p;
+  };
+  a.equal((await x.run()).ready,false,mutate.toString().slice(0,70));
+ }
+ const x=fixture([T]);
+ x.s.verifySubjectAccess=async(u,subject,intent)=>({
+  ...access(u,subject,intent),competitiveSelectionVerified:false
+ });
+ a.equal((await x.run()).ready,false,
+  "Competitive Tour requires independent current subject selection proof");
 });
 test("§88 a changing server scan across awaits cannot be signed",async()=>{
  const x=fixture();x.t.changeScan=true;
