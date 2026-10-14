@@ -4,16 +4,23 @@ const {QaV21AppScreenBinder}=require("./ai-layer-v21-p6-app-screen-binding.cjs")
 const {QaV21ScreenClient}=require("./ai-layer-v21-ui-transport.cjs");
 const handle="11111111-1111-4111-8111-111111111111",req="33333333-3333-4333-8333-333333333333";
 const views=["home","courses","ratings","profile","about","support","certificates"];
+const courseScreensForTest=[
+ "courses-subject-hub","courses-lessons","courses-video",
+ "courses-practice-start","courses-practice-quiz","courses-practice-result",
+ "courses-practice-review","courses-practice-recs","courses-tours",
+ "courses-tour-rules","courses-tour-quiz","courses-tour-result",
+ "courses-tour-review","courses-books","courses-my-recs","courses-my-rec-detail"
+];
 const defer=()=>{let resolve;const promise=new Promise(r=>resolve=r);return{promise,resolve};};
 function fixture(postOverride){
  const calls=[],els={};
  for(const v of views)els["view-"+v]={active:false};
- for(const x of ["courses-practice-quiz","courses-tour-quiz",
-  "courses-video","courses-practice-start","courses-practice-result",
-  "courses-practice-review","courses-practice-recs",
-  "courses-tour-rules","courses-tour-result","courses-tour-review",
-  "courses-my-rec-detail"])
-  els[x]={active:false};
+ const courseScreens=["all-subjects","subject-hub","lessons","video",
+  "practice-start","practice-quiz","practice-result","practice-review",
+  "practice-recs","tours","tour-rules","tour-quiz","tour-result",
+  "tour-review","books","my-recs","my-rec-detail"];
+ for(const x of courseScreens)
+  els["courses-"+x]={active:x==="all-subjects"};
  els["exam-prep-host-root"]={active:false,hidden:true,attrs:{}};
  els.main={active:false};
  const mk=id=>({
@@ -24,8 +31,12 @@ function fixture(postOverride){
  const doc={
   visibilityState:"visible",getElementById:k=>els[k]?mk(k):null,
   querySelectorAll(selector){
-   if(selector!==".view.is-active")return [];
-   return views.filter(v=>els["view-"+v].active).map(v=>({dataset:{view:v}}));
+   if(selector===".view.is-active")
+    return views.filter(v=>els["view-"+v].active).map(v=>({dataset:{view:v}}));
+   if(selector==="#view-courses .stack-screen.is-active")
+    return courseScreens.filter(v=>els["courses-"+v].active)
+      .map(v=>({id:"courses-"+v}));
+   return [];
   }
  };
  const post=async request=>{
@@ -66,19 +77,23 @@ test("Unlisted pages, overlapping views, hidden browser and all protected quiz s
   if(event==="unknown")f.set("certificates");
   if(event==="overlap")f.els["view-profile"].active=true;
   if(event==="hidden")f.doc.visibilityState="hidden";
-  if(event==="practice")f.els["courses-practice-quiz"].active=true;
-  if(event==="tour")f.els["courses-tour-quiz"].active=true;
+  if(event==="practice"){
+   f.els["courses-all-subjects"].active=false;
+   f.els["courses-practice-quiz"].active=true;
+  }
+  if(event==="tour"){
+   f.els["courses-all-subjects"].active=false;
+   f.els["courses-tour-quiz"].active=true;
+  }
   if(event==="exam")f.els["exam-prep-host-root"].hidden=false;
   a.equal((await f.binder.sync()).reason,"screen_not_verified",event);
   a.equal(f.calls.length,0,event);
  }
 });
 test("§58 active nested lessons/reviews or unknown overlay cannot steal independent AI scope",async()=>{
- for(const id of ["courses-video","courses-practice-start",
-  "courses-practice-result","courses-practice-review",
-  "courses-practice-recs","courses-tour-rules","courses-tour-result",
-  "courses-tour-review","courses-my-rec-detail"]){
-  const f=fixture();f.set("courses");f.els[id].active=true;
+ for(const id of courseScreensForTest){
+  const f=fixture();f.set("courses");
+  f.els["courses-all-subjects"].active=false;f.els[id].active=true;
   a.equal((await f.binder.sync()).reason,"screen_not_verified",id);
   a.equal(f.calls.length,0,id);
  }
