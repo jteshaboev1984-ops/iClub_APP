@@ -25,10 +25,22 @@ class QaV21AppScreenBinder{
    if(el(id)?.classList?.contains("is-active"))return null;
   }
   const active=VIEWS.filter(v=>el("view-"+v)?.classList?.contains("is-active"));
-  // Unknown global view, quiz/registration and overlapping view transitions
-  // must never fall back to an old Home or General AI context.
-  const unknown=this.document.querySelector?.(".view.is-active");
-  if(active.length!==1||unknown?.dataset?.view!==active[0])return null;
+  // Read ALL active views: querySelector(first) alone overlooks an unknown
+  // certificate/payment/registration overlay behind a permitted Home view.
+  const activeDom=this.document.querySelectorAll?.(".view.is-active");
+  if(active.length!==1||!activeDom||activeDom.length!==1||
+     activeDom[0]?.dataset?.view!==active[0])return null;
+  if(active[0]==="courses"){
+   // Course review/result/video may have an independent Tutor and source
+   // policy. Basic global navigation must NEVER hijack its scope.
+   for(const id of ["courses-video","courses-practice-start",
+    "courses-practice-result","courses-practice-review",
+    "courses-practice-recs","courses-tour-rules",
+    "courses-tour-result","courses-tour-review",
+    "courses-my-rec-detail"]){
+    if(el(id)?.classList?.contains("is-active"))return null;
+   }
+  }
   return active[0];
  }
  async sync(){
@@ -58,6 +70,11 @@ class QaV21AppScreenBinder{
  async askPrepared(intent,locale){
   const key=this.key,seq=this.epoch;
   if(!this.ready||!key||this.read()!==key)return fail("screen_not_verified");
+  // Home's personal next-action planner and Profile's explanation are
+  // NOT approved navigation sources. Only the current General Help scope
+  // may request a deterministic prepared navigation response.
+  if(!["courses","ratings","about","support"].includes(key))
+   return fail("source_in_development");
   if(!["nav_home","nav_courses","nav_ratings","nav_profile","nav_about","nav_support"].includes(intent))
    return fail("invalid_prompt");
   const value=await this.client.askPrepared(intent,locale);
