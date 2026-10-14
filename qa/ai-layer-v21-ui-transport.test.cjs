@@ -11,7 +11,7 @@ function fixture({postOverride,readJwt=async()=> "synthetic-jwt-token"}={}){
   calls.push(request);
   if(postOverride)return postOverride(request);
   if(request.path==="/context")
-   return request.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:HANDLE};
+   return request.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:HANDLE,expiresInSeconds:90};
   return request.body.intent==="status"?{ok:true,state:"available"}:
    {ok:true,reply:"Synthetic QA reply only"};
  };
@@ -25,7 +25,7 @@ test("Lessons mint server-owned handle and prepared answer omits user, progress,
  assert.deepEqual(f.calls.map(x=>x.path),["/context","/answer"]);
  assert.deepEqual(f.calls[0].body,{action:"mintLesson",lessonId:101});
  assert.deepEqual(f.calls[1].body,{intent:"answer",requestId:REQUEST,
-  contextHandle:HANDLE,appLocale:"ru",promptKey:"topic_main"});
+  contextHandle:HANDLE,expiresInSeconds:90,appLocale:"ru",promptKey:"topic_main"});
  for(const call of f.calls){
   assert.equal(call.authorization,"Bearer synthetic-jwt-token");
   for(const forbidden of ["subject","plan","userId","progress","sourceHash","answerKey"])
@@ -45,13 +45,13 @@ test("RU/UZ/EN status is answer-free, no client quota/subject flag",async()=>{
   const f=fixture();await f.client.openLesson(101);
   const r=await f.client.status(locale);
   assert.equal(r.state,"available");
-  assert.deepEqual(f.calls[1].body,{intent:"status",contextHandle:HANDLE,appLocale:locale});
+  assert.deepEqual(f.calls[1].body,{intent:"status",contextHandle:HANDLE,expiresInSeconds:90,appLocale:locale});
  }
 });
 test("Leaving exam/navigation revokes handle and discards late answer",async()=>{
  const pending=deferred();
  const f=fixture({postOverride:r=>r.path==="/context"?
-  r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:HANDLE}:
+  r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:HANDLE,expiresInSeconds:90}:
   pending.promise});
  await f.client.openLesson(101);
  const ask=f.client.askPrepared("topic_main","ru");
@@ -59,7 +59,7 @@ test("Leaving exam/navigation revokes handle and discards late answer",async()=>
  await f.client.leave();
  pending.resolve({ok:true,reply:"SHOULD_NEVER_RENDER"});
  assert.equal((await ask).reason,"context_changed");
- assert.deepEqual(f.calls.at(-1).body,{action:"revoke",contextHandle:HANDLE});
+ assert.deepEqual(f.calls.at(-1).body,{action:"revoke",contextHandle:HANDLE,expiresInSeconds:90});
  assert.equal((await f.client.status("ru")).reason,"context_unavailable");
 });
 test("Mint returning after navigation is revoked rather than adopted",async()=>{
@@ -68,9 +68,9 @@ test("Mint returning after navigation is revoked rather than adopted",async()=>{
   pending.promise:{ok:true}});
  const open=f.client.openLesson(101);
  await f.client.leave();
- pending.resolve({ok:true,contextHandle:HANDLE2});
+ pending.resolve({ok:true,contextHandle:HANDLE2,expiresInSeconds:90});
  assert.equal((await open).reason,"context_changed");
- assert.deepEqual(f.calls.at(-1).body,{action:"revoke",contextHandle:HANDLE2});
+ assert.deepEqual(f.calls.at(-1).body,{action:"revoke",contextHandle:HANDLE2,expiresInSeconds:90});
  assert.equal((await f.client.askPrepared("topic_main","ru")).reason,"context_unavailable");
 });
 test("No session / invalid JWT / transport exception fail CLOSED",async()=>{
@@ -84,7 +84,7 @@ test("No session / invalid JWT / transport exception fail CLOSED",async()=>{
 test("Two clicks cannot make parallel paid requests, no automated retry on timeout",async()=>{
  const pending=deferred();const f=fixture({
   postOverride:r=>r.body.intent==="answer"?pending.promise:
-   {ok:true,contextHandle:HANDLE}
+   {ok:true,contextHandle:HANDLE,expiresInSeconds:90}
  });
  await f.client.openLesson(101);
  const ask=f.client.askQuestion("Почему это происходит?","ru");
@@ -120,7 +120,7 @@ test("§57 reuses one authenticated UI transport for app-view and Tour archive s
  assert.equal((await f.client.openAppView("home")).ok,true);
  assert.deepEqual(f.calls[0].body,{action:"mintAppView",view:"home"});
  assert.equal((await f.client.openAppView("profile")).ok,true);
- assert.deepEqual(f.calls[1].body,{action:"revoke",contextHandle:HANDLE});
+ assert.deepEqual(f.calls[1].body,{action:"revoke",contextHandle:HANDLE,expiresInSeconds:90});
  assert.deepEqual(f.calls[2].body,{action:"mintAppView",view:"profile"});
  assert.equal((await f.client.openTourArchive(401)).ok,true);
  assert.deepEqual(f.calls[4].body,{action:"mintTourArchive",tourAttemptId:401});
