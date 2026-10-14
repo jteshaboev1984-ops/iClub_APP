@@ -52,6 +52,7 @@ RETURNS boolean LANGUAGE sql STABLE SET search_path=''
 AS $$SELECT coalesce((SELECT active FROM private.context_qa_exam_flags
  WHERE user_id=p_user_id),false)$$;
 \ir iclub_ai_scoped_context_v21_UNAPPLIED.sql
+\ir iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql
 
 INSERT INTO public.subjects VALUES
  (10,'biology',true),(11,'chemistry',true),(12,'economics',true),(13,'informatics',true);
@@ -84,6 +85,9 @@ BEGIN
   RAISE EXCEPTION 'Kill switch failed: %',result;END IF;
  UPDATE private.iclub_global_ai_runtime_config
  SET kill_switch=false,ui_enabled=true,gateway_enabled=true;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'No current screen may be available before mint: %',result;END IF;
  result:=public.mint_iclub_ai_v21_practice_context_service(stranger,900,901);
  IF result->>'reason' IS DISTINCT FROM 'practice_context_not_authorized' THEN
   RAISE EXCEPTION 'Foreign session minted: %',result;END IF;
@@ -98,6 +102,16 @@ BEGIN
  OR length(result->>'context_handle')<>36 THEN
   RAISE EXCEPTION 'Finished Biology context not minted: %',result;END IF;
  first_handle:=result->>'context_handle';
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'true'
+ OR result#>>'{evidence,context_handle}' IS DISTINCT FROM first_handle
+ OR result#>>'{evidence,context_revision}' IS DISTINCT FROM 'screen_1'
+ OR result#>>'{evidence,current_view}' IS DISTINCT FROM 'courses'
+ OR (result#>>'{evidence,revision}')::bigint<>1 THEN
+  RAISE EXCEPTION 'Owner-bound first screen proof mismatch: %',result; END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(stranger,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Foreign account read another active screen: %',result; END IF;
  result:=public.mint_iclub_ai_v21_practice_context_service(learner,900,901);
  IF result->>'duplicate' IS DISTINCT FROM 'true'
  OR result->>'context_handle' IS DISTINCT FROM first_handle THEN
@@ -106,7 +120,11 @@ BEGIN
  IF result->>'allowed' IS DISTINCT FROM 'true'
  OR result #>> '{context,subject}'<>'biology'
  OR result #>> '{context,topic}'<>'question_901'
- OR result #>> '{context,feature}'<>'answer_explanation' THEN
+ OR result #>> '{context,feature}'<>'answer_explanation'
+ OR result #>> '{context,current_view}'<>'courses'
+ OR result #>> '{context,practice_session_id}'<>'900'
+ OR result #>> '{context,question_id}'<>'901'
+ OR result #>> '{context,lesson_id}' IS NOT NULL THEN
   RAISE EXCEPTION 'Wrong server context: %',result;END IF;
  IF result::text ~* 'user_answer|picked_index|correct_answer|grade|score' THEN
   RAISE EXCEPTION 'Academic answer/progress leaked';END IF;
@@ -129,6 +147,11 @@ BEGIN
  IF result->>'allowed' IS DISTINCT FROM 'true' THEN
   RAISE EXCEPTION 'Owned Biology lesson not minted: %',result;END IF;
  lesson_handle:=result->>'context_handle';
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'true'
+ OR result#>>'{evidence,context_handle}' IS DISTINCT FROM lesson_handle
+ OR result#>>'{evidence,context_revision}' IS DISTINCT FROM 'screen_2' THEN
+  RAISE EXCEPTION 'Navigation did not atomically replace current screen: %',result;END IF;
  result:=public.mint_iclub_ai_v21_lesson_context_service(learner,101);
  IF result->>'duplicate' IS DISTINCT FROM 'true'
  OR result->>'context_handle' IS DISTINCT FROM lesson_handle THEN
@@ -136,7 +159,9 @@ BEGIN
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,lesson_handle);
  IF result #>> '{context,surface}'<>'lesson'
  OR result #>> '{context,topic}'<>'lesson_101'
- OR result #>> '{context,feature}'<>'topic_explanation' THEN
+ OR result #>> '{context,feature}'<>'topic_explanation'
+ OR result #>> '{context,lesson_id}'<>'101'
+ OR result #>> '{context,practice_session_id}' IS NOT NULL THEN
   RAISE EXCEPTION 'Incorrect verified Biology Lesson context: %',result;END IF;
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,first_handle);
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
@@ -187,6 +212,9 @@ BEGIN
  UPDATE private.iclub_ai_v21_scoped_contexts
  SET expires_at=now()-interval '1 second'
  WHERE context_handle=econ_handle::uuid;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Expired screen still live: %',result; END IF;
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,econ_handle);
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Expired AI context reopened: %',result;END IF;
@@ -201,6 +229,9 @@ BEGIN
  result:=public.revoke_iclub_ai_v21_scoped_context_service(learner,second_handle);
  IF result->>'ok' IS DISTINCT FROM 'true' THEN
   RAISE EXCEPTION 'Owner could not leave screen: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Revoked handle left live current screen: %',result;END IF;
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,second_handle);
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Revoked handle remained valid: %',result;END IF;
