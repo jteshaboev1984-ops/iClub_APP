@@ -123,7 +123,7 @@ test("Race: late mint does not grant abandoned view and revoked answer does not 
  a.ok(f.calls.some(x=>x.body.action==="revoke"&&x.body.contextHandle===handle));
  const g=fixture(r=>r.path==="/answer"?wait2.promise:
    r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:handle});
- const wait2=defer();g.set("profile");await g.binder.sync();
+ const wait2=defer();g.set("support");await g.binder.sync();
  const ans=g.binder.askPrepared("nav_profile","ru");await Promise.resolve();
  g.set("about");await g.binder.sync();
  wait2.resolve({ok:true,reply:"OLD_USER_SCREEN"});
@@ -133,7 +133,7 @@ test("Logout/account switch invalidates QA scope, unrecognized prepared key deni
  const f=fixture();f.set("home");
  await f.binder.authChanged("SIGNED_IN",{user:{id:"synthetic-a"}});
  await f.binder.sync();
- a.equal((await f.binder.askPrepared("profile_password","ru")).reason,"invalid_prompt");
+ a.equal((await f.binder.askPrepared("profile_password","ru")).reason,"source_in_development");
  a.equal((await f.binder.authChanged("SIGNED_OUT",null)).ok,true);
  a.equal(f.binder.ready,false);
  a.equal(f.calls.at(-1).body.action,"revoke");
