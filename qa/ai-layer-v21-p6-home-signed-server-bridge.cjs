@@ -15,6 +15,18 @@ const digest=x=>typeof x==="string"&&/^[a-f0-9]{64}$/.test(x);
 const positive=x=>Number.isSafeInteger(x)&&x>0;
 const denied=()=>Object.freeze({ready:false,reason:"in_development"});
 const cleanTime=x=>Number.isSafeInteger(x)&&x>=0;
+// Commercial check MUST bind a server-side owner, subject, intended action
+// and a versioned entitlement. Plain allowed=true from a shadow/legacy
+// passthrough fallback cannot grant new Global AI recommendations.
+function accessApproved(proof,userId,subjectKey,intent){
+ return isObject(proof)&&proof.allowed===true&&proof.verified===true&&
+  proof.userId===userId&&proof.subjectKey===subjectKey&&
+  proof.intent===intent&&positive(proof.revision)&&
+  proof.source==="server_enforced_subject_access_v1"&&
+  (proof.mode==="commercial"||
+   (proof.mode==="grandfathered"&&proof.legacyOwnerVerified===true))&&
+  (intent!=="competitive"||proof.competitiveSelectionVerified===true);
+}
 const matching=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const policyVersion="home_next_actions_20261014_v1";
 function mac(key,data){
@@ -62,7 +74,8 @@ async function buildHomePlan(s,{userId,contextHandle,locale}={}){
    const actionId="next_"+v.actionCode+"_"+v.subjectKey+"_"+v.evidenceId;
    if(actionId.length>72||seen.has(actionId))return denied();
    seen.add(actionId);
-   if(await s.verifySubjectAccess(userId,v.subjectKey,intent)!==true)
+   const access=await s.verifySubjectAccess(userId,v.subjectKey,intent);
+   if(!accessApproved(access,userId,v.subjectKey,intent))
     return denied();
    const ev=await s.verifyAcademicEvidence(userId,v);
    if(ev?.allowed!==true||ev.evidenceId!==v.evidenceId||
@@ -86,7 +99,8 @@ async function buildHomePlan(s,{userId,contextHandle,locale}={}){
    !cleanTime(end)||end<now||end>=screen.expiresAtMs)return denied();
   for(const v of scan.candidates){
    const intent=CODE_INTENT[v.actionCode];
-   if(await s.verifySubjectAccess(userId,v.subjectKey,intent)!==true)
+   const lastAccess=await s.verifySubjectAccess(userId,v.subjectKey,intent);
+   if(!accessApproved(lastAccess,userId,v.subjectKey,intent))
     return denied();
   }
   const expiresAtMs=Math.min(screen.expiresAtMs,end+30000);
