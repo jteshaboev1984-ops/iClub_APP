@@ -384,18 +384,6 @@ BEGIN
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Revoked General Help context remained live: %',result;END IF;
 
- -- Abuse prevention: 30 new context rows in a minute blocks more mints.
- INSERT INTO private.iclub_ai_v21_scoped_contexts(
-  context_handle,user_id,surface_code,subject_key,feature_code,topic_key,
-  practice_session_id,practice_question_id,context_revision)
- SELECT gen_random_uuid(),learner,'practice','biology',
-  'answer_explanation','question_901',900,901,1
- FROM generate_series(1,30);
- result:=public.mint_iclub_ai_v21_practice_context_service(learner,900,901);
- IF result->>'reason' IS DISTINCT FROM 'context_rate_limited' THEN
-  RAISE EXCEPTION 'Browser could mass mint 30+ contexts: %',result; END IF;
- RAISE NOTICE 'Scoped Practice context mint/resolve/revoke, switch, idempotency and rate limits GREEN';
-
  -- §51: one signed navigation source must pass ALL THREE locale gates.
  -- Only fabricated content in the SCRATCH transaction is used here.
  result:=public.mint_iclub_ai_v21_app_view_context_service(learner,'about');
@@ -484,6 +472,19 @@ BEGIN
   IF result->>'allowed' IS DISTINCT FROM 'false' THEN
    RAISE EXCEPTION 'Stale content version incorrectly passed navigation gate: %',result;END IF;
  END locale_test;
+
+ -- Abuse prevention: 30 new context rows in a minute blocks more mints.
+ INSERT INTO private.iclub_ai_v21_scoped_contexts(
+  context_handle,user_id,surface_code,subject_key,feature_code,topic_key,
+  practice_session_id,practice_question_id,context_revision)
+ SELECT gen_random_uuid(),learner,'practice','biology',
+  'answer_explanation','question_901',900,901,1
+ FROM generate_series(1,30);
+ result:=public.mint_iclub_ai_v21_practice_context_service(learner,900,901);
+ IF result->>'reason' IS DISTINCT FROM 'context_rate_limited' THEN
+  RAISE EXCEPTION 'Browser could mass mint 30+ contexts: %',result; END IF;
+ RAISE NOTICE 'Scoped Practice context mint/resolve/revoke, switch, idempotency and rate limits GREEN';
+
 END $cases$;
 ROLLBACK;
 \echo 'Scoped context fixture fully rolled back. NOT applied to Supabase.'
