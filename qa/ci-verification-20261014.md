@@ -7,3 +7,5 @@ Re-run requested after fixing the exact two source QA tests observed in workflow
 CI proof re-run for additional QA-only signed Home-plan bridge, no rollout or production changes.
 
 Another full CI run: bounded cleanup for short-lived Chromium profile subprocesses. QA-only change; retain no-merge/no-production scope.
+
+Final QA-to-QA run for owner-subject-intent commercial access proof, exact source hashes and signed Home authorization. Never merge to main.
