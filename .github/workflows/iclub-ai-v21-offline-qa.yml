@@ -64,6 +64,7 @@ on:
       - 'docs/iclub-ai-layer-p7-current-screen-authority-v2.1.md'
       - 'docs/iclub-ai-layer-p6-home-profile-general-trusted-scope-v2.1.md'
       - 'docs/iclub-ai-layer-master-plan-v2.1.md'
+      - 'docs/iclub-ai-layer-owner-approved-qa-next-actions-20261014.md'
       - 'qa/run-ai-layer-v21-offline.cjs'
       - 'docs/iclub-ai-layer-trusted-server-adapter-v2.1.md'
       - 'docs/iclub-ai-layer-app-wide-edge-binding-v2.1.md'
@@ -183,7 +184,7 @@ jobs:
           set -euo pipefail
           git diff --name-only 9afc7b44aead03b2a30544e6e7d4c4eb8670efbf HEAD -- \
             exam-prep/ supabase/functions/exam-prep-ai/ supabase/migrations/ \
-            index.html app.js > /tmp/iclub-ai-protected-files.txt
+            index.html app.js i18n.js style.css > /tmp/iclub-ai-protected-files.txt
           if [ -s /tmp/iclub-ai-protected-files.txt ]; then
             cat /tmp/iclub-ai-protected-files.txt
             echo "FAIL: original Mathematics Exam Prep surface changed"
