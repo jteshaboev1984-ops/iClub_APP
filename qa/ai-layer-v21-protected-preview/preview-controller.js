@@ -62,7 +62,7 @@ const IClubSyntheticPreview=(()=>{
      view!=="courses"||screen!=="practice-review"||
      !bridge?.proof||$("courses-practice-quiz").classList.contains("is-active"))
      return{ok:false,reason:"screen_not_verified"};
-   return{ok:true,contextHandle:HANDLE};
+   return{ok:true,contextHandle:HANDLE,expiresInSeconds:90};
   }
   if(path==="/answer"){
    if(!finishReady||screen!=="practice-review"||!client?.handle||
