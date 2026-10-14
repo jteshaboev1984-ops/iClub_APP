@@ -399,7 +399,7 @@ BEGIN
  <<locale_test>>
  DECLARE
   loc text;txt text:='SYNTHETIC navigation integration only; not a user-facing text.';
-  variants jsonb:='{"nav_about":"SYNTHETIC independent approved test route only."}'::jsonb;
+  variants jsonb:='{"nav_about":"SYNTHETIC independent approved test route only.","nav_billing":"SYNTHETIC deliberately unrecognized content MUST NEVER be served"}'::jsonb;
   digest text;
   independent_source text;
  BEGIN
@@ -451,6 +451,10 @@ BEGIN
     'qa-only-nav-ru','qa-syn-v1',digest,1,'ru','generated','');
   IF result->>'approved' IS DISTINCT FROM 'false' THEN
    RAISE EXCEPTION 'Generated navigation instructions bypassed deterministic rule: %',result;END IF;
+  result:=public.get_iclub_ai_v21_source_bundle_service(learner,view_handle,
+    'qa-only-nav-ru','qa-syn-v1',digest,1,'ru','prepared','nav_billing');
+  IF result->>'approved' IS DISTINCT FROM 'false' THEN
+   RAISE EXCEPTION 'Unrecognized navigation intent bypassed safe allowlist: %',result;END IF;
   result:=public.get_iclub_ai_v21_source_bundle_service(learner,view_handle,
     'qa-only-nav-ru','qa-syn-v1',digest,1,'ru','prepared','nav_about');
   IF result->>'approved' IS DISTINCT FROM 'true' THEN
