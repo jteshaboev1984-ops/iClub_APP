@@ -20,7 +20,7 @@ test("§74 preview removes only 4 conflicting tab aria-label overrides",()=>{
   a.ok(original);a.ok(updated);
   a.match(original,/aria-label="/);
   a.doesNotMatch(updated,/aria-label="/);
-  a.equal(updated,original.replace(/\\saria-label="[^"]*"/,""),
+  a.equal(updated,original.replace(/\saria-label="[^"]*"/,""),
    "Only accessible-name override may be removed");
  }
  const navStart=index.indexOf('<nav id="tabbar"');
