@@ -159,7 +159,11 @@ BEGIN
  END IF;
  -- Navigation assistance is deterministic and editorially prepared ONLY.
  -- Never forward unreviewed navigation text to a model to improvise UI steps.
- IF ref->>'surface'='global' AND p_route_class<>'prepared' THEN
+ IF ref->>'surface'='global' AND (
+   ref->>'subject'<>'general' OR ref->>'feature'<>'app_help'
+   OR ref->>'topic'<>'navigation' OR p_route_class<>'prepared'
+   OR p_prompt_key NOT IN ('nav_home','nav_courses','nav_ratings',
+     'nav_profile','nav_about','nav_support')) THEN
   RETURN jsonb_build_object('approved',false,'reason','route_unavailable');
  END IF;
  IF p_route_class='prepared' THEN
