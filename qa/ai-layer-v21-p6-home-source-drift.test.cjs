@@ -45,14 +45,23 @@ test("§71 Home current UI data are display-only, not signed AI recommendations"
   "Unapproved Home planning validator unexpectedly embedded in app");
 });
 test("§71 a changed status/calendar/fallback triggers an explicit new source audit",()=>{
+ const mutateCompetitive=(needle,replacement)=>{
+  const start="async function computeHomeCompetitiveStats(";
+  const end="async function updateHomeCompetitiveCard(";
+  const a=app.indexOf(start),b=app.indexOf(end,a+start.length);
+  assert(a>=0&&b>a,"actual Home function boundaries required");
+  const section=app.slice(a,b);
+  assert(section.includes(needle),"test mutation must be inside Home");
+  return app.slice(0,a)+section.replace(needle,replacement)+app.slice(b);
+ };
  const cases=[
-  app.replace('.in("status", ["submitted", "time_expired", "anti_cheat"])',
+  mutateCompetitive('.in("status", ["submitted", "time_expired", "anti_cheat"])',
    '.in("status", ["submitted", "time_expired"])'),
-  app.replace("const d0 = new Date();","const d0 = getServerDate();"),
-  app.replace("progressPct: 0,","progressPct: null,")
+  mutateCompetitive("const d0 = new Date();","const d0 = getServerDate();"),
+  mutateCompetitive("progressPct: 0,","progressPct: null,")
  ];
  for(const modified of cases){
-  assert.notEqual(modified,app,"test must actually change the source");
+  assert.notEqual(modified,app,"test must actually change Home");
   assert.throws(()=>legacyBoundary(modified),/re-audit|semantics changed/);
  }
 });
