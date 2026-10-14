@@ -84,152 +84,140 @@
     meta.replaceChildren(hero,metrics);
     return true;
   }
-  function topicHistory(holder, data, unavailable, language) {
-    if (!holder) return false;
-    const locale = ['ru','uz','en'].includes(language) ? language : lang();
-    const c = HISTORY_COPY[locale];
+
+  let activeTopicReview=null;
+  function topicHistory(holder,data,unavailable,language) {
+    if(!holder)return false;
+    const locale=['ru','uz','en'].includes(language)?language:lang();
+    const c=HISTORY_COPY[locale];
     holder.replaceChildren();
-    if (unavailable || !data || data.ok!==true) {
+    const heading=node('div','iclub-topic-history-header');
+    heading.append(node('strong','',c.heading));
+    holder.append(heading);
+    if(unavailable||!data||data.ok!==true){
       holder.append(node('div','iclub-topic-history-empty',c.error));
       return false;
     }
-    const count = Math.max(0, Math.trunc(Number(data.completed_sessions)||0));
-    if (!count) {
+    const count=Math.max(0,Math.trunc(Number(data.completed_sessions)||0));
+    const attemptNoun=locale==='ru'?
+      (count%10===1&&count%100!==11?'попытка':count%10>=2&&count%10<=4&&!(count%100>=12&&count%100<=14)?'попытки':'попыток'):
+      locale==='uz'?'ta urinish':count===1?'attempt':'attempts';
+    heading.append(node('span','iclub-topic-history-count',count+' '+attemptNoun));
+    if(!count){
       holder.append(node('div','iclub-topic-history-empty',c.empty));
       return true;
     }
-    const heading=node('div','iclub-topic-history-header');
-    heading.append(node('strong','',c.heading),
-      node('span','iclub-topic-history-count',count+' '+(locale==='ru'
-        ?(count%10===1&&count%100!==11?'попытка':count%10>=2&&count%10<=4&&!(count%100>=12&&count%100<=14)?'попытки':'попыток')
-        :locale==='uz'?'ta urinish':count===1?'attempt':'attempts')));
-    holder.append(heading);
-    const metrics=node('div','iclub-topic-history-metrics');
-    const safeScore = row => {
-      if (!row || !Number.isInteger(Number(row.correct)) || !Number.isInteger(Number(row.total))) return '—';
-      const yes=Number(row.correct),all=Number(row.total);
-      return yes>=0 && all>0 && yes<=all ? yes+' / '+all : '—';
+    const score=row=>{
+      const good=Number(row?.correct),all=Number(row?.total);
+      return Number.isInteger(good)&&Number.isInteger(all)&&all>0&&good>=0&&good<=all?good+' / '+all:'—';
     };
-    for (const [label,value] of (count > 1 ? [
-      [c.last,safeScore(data.last)],
-      [c.best,safeScore(data.best)]
-    ] : [])) {
-      const card=node('div','iclub-topic-history-metric');
-      card.append(node('span','',label),node('strong','',value));
-      metrics.append(card);
+    const list=node('div','iclub-topic-history-recent');
+    for(const attempt of (Array.isArray(data.recent)?data.recent.slice(0,5):[])){
+      if(score(attempt)==='—')continue;
+      const button=node('button','iclub-topic-history-row');
+      button.type='button';
+      button.setAttribute('aria-label',(locale==='ru'?'Разбор: ':locale==='uz'?'Tahlil: ':'Review: ')+String(attempt.topic||'')+', '+score(attempt));
+      const info=node('div','iclub-topic-history-row-info');
+      info.append(node('strong','',String(attempt.topic||c.heading).slice(0,200)));
+      const dt=new Date(String(attempt.finished_at||''));
+      if(Number.isFinite(dt.getTime()))info.append(node('small','',dt.toLocaleDateString(locale)));
+      const right=node('span','iclub-topic-history-row-meta');
+      right.append(node('span','iclub-topic-history-row-score',score(attempt)));
+      right.append(node('span','iclub-topic-history-arrow','›'));
+      button.append(info,right);
+      button.addEventListener('click',()=>{
+        activeTopicReview={attempt,subjectKey:String(data.subject_key||'')};
+        window.dispatchEvent(new CustomEvent('iclub-practice-open-history-review',{
+          detail:{subjectKey:activeTopicReview.subjectKey}
+        }));
+      });
+      list.append(button);
     }
-    if(count > 1) holder.append(metrics);
-    const recent=Array.isArray(data.recent)?data.recent.slice(0,5):[];
-    if (recent.length) {
-      holder.append(node('div','iclub-topic-history-recent-label',c.recent));
-      const list=node('div','iclub-topic-history-recent');
-      for(const attempt of recent) {
-        if(safeScore(attempt)==='—') continue;
-        const saved=Array.isArray(attempt.review)?attempt.review:[];
-        const errors=Math.max(0,Number(attempt.mistakes)||0);
-        const row=node('button','iclub-topic-history-row');
-        row.type='button';
-        row.style.width='100%';
-        row.style.fontFamily='inherit';
-        row.style.textAlign='left';
-        row.style.cursor='pointer';
-        row.style.display='flex';
-        row.style.alignItems='center';
-        row.style.justifyContent='space-between';
-        row.style.gap='12px';
-        row.setAttribute('aria-expanded','false');
-        const info=node('div','iclub-topic-history-row-info');
-        info.append(node('strong','',String(attempt.topic||c.heading).slice(0,200)));
-        const date=new Date(String(attempt.finished_at||''));
-        if(Number.isFinite(date.getTime())) info.append(node('small','',date.toLocaleDateString(locale)));
-        const score=node('span','iclub-topic-history-row-score',safeScore(attempt));
-        const arrow=node('span','', '⌄');
-        arrow.style.opacity='.65';
-        row.append(info,score,arrow);
-        const detail=node('div','iclub-topic-history-review');
-        detail.hidden=true;
-        detail.style.display='none';
-        detail.style.padding='12px';
-        detail.style.borderRadius='12px';
-        detail.style.marginBottom='12px';
-        detail.style.border='1px solid var(--line, rgba(127,127,127,.24))';
-        detail.style.gap='10px';
-        const fillReview=()=>{
-          detail.replaceChildren();
-          if(!saved.length){
-            const hasErrors=errors>0;
-            detail.append(node('div','muted',hasErrors
-              ?(locale==='ru'?'Не удалось загрузить разбор этой попытки. Попробуйте позже.':
-                locale==='uz'?'Ushbu urinish tahlili yuklanmadi. Keyinroq qayta urinib ko‘ring.':
-                'Review for this attempt could not be loaded. Please try later.')
-              :(locale==='ru'?'В этой попытке ошибок не было.':
-                locale==='uz'?'Bu urinishda xatolar bo‘lmagan.':
-                'No mistakes in this attempt.')));
-            return;
-          }
-          const langCode=locale==='uz'?'uz':locale==='en'?'en':'ru';
-          for(let i=0;i<saved.length;i++){
-            const d=saved[i],card=node('div','list-item');
-            card.style.padding='10px 0';
-            const stem=d['question_'+langCode]||d.question_en||'';
-            const answer=d.user_answer||'—',correct=d.correct_answer||'—';
-            const rawOptions=d['options_'+langCode]||d.options_en||'';
-            let options=[];
-            try{const val=typeof rawOptions==='string'?JSON.parse(rawOptions):rawOptions;if(Array.isArray(val))options=val;}catch{}
-            const showAnswer=(letter)=>{
-              const key=String(letter||'').trim();
-              const ix=key.toUpperCase().charCodeAt(0)-65;
-              return ix>=0&&ix<options.length?key+' — '+String(options[ix]):key||'—';
-            };
-            card.append(node('strong','',String(i+1)+'. '+stem));
-            card.append(node('div','muted small',
-              (locale==='ru'?'Ваш ответ: ':locale==='uz'?'Javobingiz: ':'Your answer: ')+showAnswer(answer)));
-            card.append(node('div','muted small',
-              (locale==='ru'?'Правильный ответ: ':locale==='uz'?'To‘g‘ri javob: ':'Correct answer: ')+showAnswer(correct)));
-            const why=d['feedback_'+langCode]||d['explanation_'+langCode]||d.explanation_en||'';
-            if(why)card.append(node('div','muted small',why));
-            detail.append(card);
-          }
-          const sourceSessionId=Number(attempt.session_id||0);
-          const wrongIds=Array.from(new Set(saved.map(x=>Number(x.question_id||0))
-            .filter(x=>Number.isSafeInteger(x)&&x>0))).slice(0,10);
-          if(sourceSessionId>0&&wrongIds.length){
-            const retry=node('button','btn primary',
-              locale==='ru'?'Исправить ошибки':locale==='uz'?'Xatolarni tuzatish':'Correct mistakes');
-            retry.type='button';
-            retry.style.width='100%';
-            retry.style.marginTop='8px';
-            retry.addEventListener('click',event=>{
-              event.stopPropagation();
-              window.dispatchEvent(new CustomEvent('iclub-practice-correct-history',{
-                detail:{
-                  subjectKey:String(data.subject_key||''),
-                  sourceSessionId,
-                  sessionId:sourceSessionId,
-                  questionIds:wrongIds,
-                  topic:String(attempt.topic||'')
-                }
-              }));
-            });
-            detail.append(retry);
-          }
-        };
-        row.addEventListener('click',()=>{
-          const open=detail.hidden;
-          detail.hidden=!open;
-          detail.style.display=open?'grid':'none';
-          row.setAttribute('aria-expanded',String(open));
-          arrow.textContent=open?'⌃':'⌄';
-          if(open)fillReview();
-        });
-        list.append(row,detail);
-      }
-      holder.append(list);
+    holder.append(list);
+    return true;
+  }
+  function renderTopicReview(language) {
+    const title=document.getElementById('my-rec-topic-review-title');
+    const subtitle=document.getElementById('my-rec-topic-review-subtitle');
+    const body=document.getElementById('my-rec-topic-review-body');
+    if(!body)return false;
+    const locale=['ru','uz','en'].includes(language)?language:lang();
+    const tr=(ru,uz,en)=>locale==='uz'?uz:locale==='en'?en:ru;
+    body.replaceChildren();
+    const selected=activeTopicReview;
+    if(title)title.textContent=tr('Разбор попытки','Urinish tahlili','Attempt review');
+    if(!selected?.attempt){
+      if(subtitle)subtitle.textContent='';
+      body.append(node('div','iclub-topic-history-empty',tr('Выберите попытку в истории практики.','Amaliyot tarixidan urinishni tanlang.','Select an attempt from practice history.')));
+      return false;
     }
+    const attempt=selected.attempt;
+    const topic=String(attempt.topic||'').slice(0,200);
+    if(subtitle)subtitle.textContent=topic;
+    const correct=Number(attempt.correct),total=Number(attempt.total);
+    const errorCount=Number(attempt.mistakes);
+    const mistakes=Number.isInteger(errorCount)&&errorCount>=0?errorCount:Math.max(0,total-correct);
+    const summary=node('div','iclub-topic-review-overview');
+    const stats=node('div','iclub-topic-review-stats');
+    stats.append(node('span','',tr('Результат','Natija','Score')+': '+correct+' / '+total));
+    stats.append(node('span','',tr('Ошибки','Xatolar','Mistakes')+': '+mistakes));
+    summary.append(stats);
+    const date=new Date(String(attempt.finished_at||''));
+    if(Number.isFinite(date.getTime()))summary.append(node('div','muted small',date.toLocaleDateString(locale)));
+    body.append(summary);
+    const saved=Array.isArray(attempt.review)?attempt.review:[];
+    const wrongIds=Array.from(new Set(saved.map(d=>Number(d.question_id||0)).filter(id=>Number.isSafeInteger(id)&&id>0))).slice(0,10);
+    const sessionId=Number(attempt.session_id||0);
+    if(mistakes>0&&wrongIds.length>0&&Number.isSafeInteger(sessionId)&&sessionId>0){
+      const retry=node('button','btn primary iclub-topic-review-retry',
+        tr('Исправить ошибки','Xatolarni tuzatish','Correct mistakes'));
+      retry.type='button';
+      retry.addEventListener('click',()=>{
+        window.dispatchEvent(new CustomEvent('iclub-practice-correct-history',{
+          detail:{subjectKey:selected.subjectKey,sourceSessionId:sessionId,questionIds:wrongIds,topic}
+        }));
+      });
+      body.append(retry);
+    }
+    if(!mistakes){
+      body.append(node('div','iclub-topic-history-empty',tr('В этой попытке ошибок не было.','Bu urinishda xatolar bo‘lmagan.','No mistakes in this attempt.')));
+      return true;
+    }
+    if(!saved.length){
+      body.append(node('div','iclub-topic-history-empty',tr('Разбор этой попытки сейчас недоступен.','Bu urinish tahlili hozircha mavjud emas.','This attempt review is currently unavailable.')));
+      return true;
+    }
+    if(saved.length<mistakes)body.append(node('div','muted small',tr('Часть старых вопросов недоступна для разбора.','Ba’zi eski savollar tahlil uchun mavjud emas.','Some older questions cannot be reviewed.')));
+    const questions=node('div','iclub-topic-review-questions');
+    for(let i=0;i<saved.length;i++){
+      const d=saved[i];
+      const stem=String(d['question_'+locale]||d.question_en||'');
+      const raw=d['options_'+locale]||d.options_en||'';
+      let options=[];
+      try{const values=typeof raw==='string'?JSON.parse(raw):raw;if(Array.isArray(values))options=values;}catch{}
+      const answer=value=>{
+        const key=String(value??'').trim();
+        const ix=/^[A-Z]$/i.test(key)?key.toUpperCase().charCodeAt(0)-65:-1;
+        return ix>=0&&ix<options.length?key+' — '+String(options[ix]):key||'—';
+      };
+      const card=node('details','iclub-topic-review-question');
+      const head=node('summary','iclub-topic-review-question-head');
+      head.append(node('span','iclub-topic-review-number',tr('Ошибка ','Xato ','Mistake ')+(i+1)));
+      head.append(node('span','iclub-topic-review-stem',stem||tr('Вопрос','Savol','Question')));
+      card.append(head);
+      const detail=node('div','iclub-topic-review-answer');
+      detail.append(node('div','',tr('Ваш ответ: ','Javobingiz: ','Your answer: ')+answer(d.user_answer)));
+      detail.append(node('div','',tr('Правильный ответ: ','To‘g‘ri javob: ','Correct answer: ')+answer(d.correct_answer)));
+      const why=d['feedback_'+locale]||d['explanation_'+locale]||d.explanation_en||'';
+      if(why)detail.append(node('p','',String(why)));
+      card.append(detail);
+      questions.append(card);
+    }
+    body.append(questions);
     return true;
   }
   window.iClubPracticePremiumResult = Object.freeze({render:premiumResult});
-  window.iClubPracticeTopicHistoryV1 = Object.freeze({render:topicHistory});
+  window.iClubPracticeTopicHistoryV1 = Object.freeze({render:topicHistory,renderReview:renderTopicReview});
 
   function install() {
     const root = document.getElementById(ROOT_ID);
