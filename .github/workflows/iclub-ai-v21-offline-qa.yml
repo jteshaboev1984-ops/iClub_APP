@@ -20,6 +20,7 @@ on:
       - 'qa/ai-layer-v21-p6-navigation-candidates.snapshot.json'
       - 'qa/ai-layer-v21-p6-navigation-editorial-drafts.snapshot.json'
       - 'docs/iclub-ai-layer-p6-editorial-review-sheet-v2.1.md'
+      - 'docs/iclub-ai-layer-p6-navigation-locale-a11y-review-v2.1.md'
       - 'docs/iclub-ai-layer-p6-home-evidence-reconciliation-v2.1.md'
       - 'qa/ai-layer-v21-p6-navigation-editorial-drafts.test.cjs'
       - 'qa/ai-layer-v21-p6-navigation-semantic-review.cjs'
