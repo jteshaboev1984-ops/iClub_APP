@@ -14,11 +14,21 @@ const allowed=Object.freeze({
  support:{kind:"global",entryView:"profile",selector:'[data-action="open-support"]',labelKey:"profile_support_title"}
 });
 const denied=reason=>({ready:false,reason});
+const expectedEditorialKeys=[
+ "approvedBy","approvedAt","contentCorrectnessVerified",
+ "languageReviewVerified","accessibilityVerified",
+ "releaseApproved","rightsApproved"
+].sort();
 function candidatePacket(draft){
  if(!draft||draft.status!=="EDITORIAL_DRAFT_NOT_APPROVED"||
     draft.releaseAllowed!==false||!draft.editorialControls||
-    Object.keys(draft.editorialControls).length!==7||
-    Object.values(draft.editorialControls).some(x=>x!==false&&x!==null)||
+    JSON.stringify(Object.keys(draft.editorialControls).sort())!==
+      JSON.stringify(expectedEditorialKeys)||
+    draft.editorialControls.approvedBy!==null||
+    draft.editorialControls.approvedAt!==null||
+    ["contentCorrectnessVerified","languageReviewVerified",
+     "accessibilityVerified","releaseApproved","rightsApproved"].some(
+      key=>draft.editorialControls[key]!==false)||
     !Array.isArray(draft.entrypoints)||draft.entrypoints.length!==6||
     draft.localePolicy!=="all_three_required_no_auto_translation")
   return denied("review_required");
