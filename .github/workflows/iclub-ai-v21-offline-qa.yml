@@ -15,6 +15,9 @@ on:
       - 'qa/ai-layer-v21-app-wide-admission.cjs'
       - 'qa/ai-layer-v21-edge-request.cjs'
       - 'qa/edge_v21/**'
+      - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql'
+      - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_local_pg.psql'
+      - 'qa/run-ai-layer-v21-postgres-local.sh'
       - 'qa/run-ai-layer-v21-offline.cjs'
       - 'docs/iclub-ai-layer-trusted-server-adapter-v2.1.md'
       - 'docs/iclub-ai-layer-app-wide-edge-binding-v2.1.md'
@@ -83,12 +86,12 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y -qq postgresql-client
           fi
-      - name: Run twelve independent scratch PostgreSQL suites
+      - name: Run thirteen independent scratch PostgreSQL suites
         shell: bash
         run: |
           set -euo pipefail
           failed=0
-          for suite in meter math practice release claim atomic context source publisher authority spend receipt; do
+          for suite in meter math practice release claim atomic context source publisher authority spend receipt realproof; do
             db="iclub_ai_v21_scratch_ci_${suite}"
             createdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
             if ICLUB_PGTEST_DB="${db}" ICLUB_PGTEST_HOST=127.0.0.1 \
