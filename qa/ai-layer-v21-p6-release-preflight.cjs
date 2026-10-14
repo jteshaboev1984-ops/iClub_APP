@@ -33,6 +33,11 @@ function p6ReleasePreflight(){
   current.checkedReplies!==18||preview.checkedReplies!==18||
   preview.accessibilityIssueCount!==0)
   return deny("navigation_candidate_review_failed");
+ // A future change to the landmark requires fresh localization policy; the
+ // review report may not describe an already-changed label as still English.
+ if(current.tabbarAccessibleName!=="Bottom navigation"||
+   preview.tabbarAccessibleName!==current.tabbarAccessibleName)
+  return deny("navigation_landmark_reaudit_required");
  // Technical candidates ≠ rights or rollout. A future review must separately
  // prove current UI, immutable database source, JWT owner, screen revision,
  // published source in three locales, cohort and explicit architect approval.
