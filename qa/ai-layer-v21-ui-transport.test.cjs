@@ -114,3 +114,24 @@ test("QA adapter does not persist sessions, transcripts or signing keys",async()
   "apiKey","secret","history","provider","progress"])assert.ok(!keys.includes(forbidden));
  assert.ok(!JSON.stringify(f.client).includes("Synthetic QA reply only"));
 });
+
+test("§57 reuses one authenticated UI transport for app-view and Tour archive selection",async()=>{
+ const f=fixture();
+ assert.equal((await f.client.openAppView("home")).ok,true);
+ assert.deepEqual(f.calls[0].body,{action:"mintAppView",view:"home"});
+ assert.equal((await f.client.openAppView("profile")).ok,true);
+ assert.deepEqual(f.calls[1].body,{action:"revoke",contextHandle:HANDLE});
+ assert.deepEqual(f.calls[2].body,{action:"mintAppView",view:"profile"});
+ assert.equal((await f.client.openTourArchive(401)).ok,true);
+ assert.deepEqual(f.calls[4].body,{action:"mintTourArchive",tourAttemptId:401});
+ for(const c of f.calls)assert.equal(c.body.userId,undefined);
+});
+test("§57 unknown app view and invalid Tour selector never reach the Edge",async()=>{
+ const f=fixture();
+ for(const bad of ["",null,"notifications","support-topic","practice",13]){
+  assert.equal((await f.client.openAppView(bad)).reason,"invalid_screen");
+ }
+ for(const bad of [0,-1,"401",1.7,Number.MAX_SAFE_INTEGER+1])
+  assert.equal((await f.client.openTourArchive(bad)).reason,"invalid_screen");
+ assert.equal(f.calls.length,0);
+});
