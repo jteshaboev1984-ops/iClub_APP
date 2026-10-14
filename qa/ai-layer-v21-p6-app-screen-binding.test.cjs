@@ -43,7 +43,7 @@ function fixture(postOverride){
   calls.push(request);
   if(postOverride)return postOverride(request);
   if(request.path==="/context")return request.body.action==="revoke"?
-   {ok:true}:{ok:true,contextHandle:handle};
+   {ok:true}:{ok:true,contextHandle:handle,expiresInSeconds:90};
   return request.body.intent==="status"?{ok:true,state:"in_development"}:
    {ok:false,state:"in_development"};
  };
@@ -137,21 +137,21 @@ test("Changing tabs or document visibility drops local authority and remote hand
 test("Race: late mint does not grant abandoned view and revoked answer does not display",async()=>{
  const wait=defer(),newHandle="22222222-2222-4222-8222-222222222222";
  const f=fixture(r=>r.body.action==="mintAppView"?
-   r.body.view==="home"?wait.promise:{ok:true,contextHandle:newHandle}:{ok:true});
+   r.body.view==="home"?wait.promise:{ok:true,contextHandle:newHandle,expiresInSeconds:90}:{ok:true});
  f.set("home");
  const p=f.binder.sync();
  for(let i=0;i<6;i++)await Promise.resolve();
  a.equal(f.calls[0].body.view,"home");
  f.set("profile");const changed=f.binder.sync();
  for(let i=0;i<6;i++)await Promise.resolve();
- wait.resolve({ok:true,contextHandle:handle});
+ wait.resolve({ok:true,contextHandle:handle,expiresInSeconds:90});
  a.equal((await p).reason,"context_changed");
  a.equal((await changed).ok,true);
  a.equal(f.binder.ready,true);
  a.equal(f.client.handle,newHandle);
  a.ok(f.calls.some(x=>x.body.action==="revoke"&&x.body.contextHandle===handle));
  const g=fixture(r=>r.path==="/answer"?wait2.promise:
-   r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:handle});
+   r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:handle,expiresInSeconds:90});
  const wait2=defer();g.set("support");await g.binder.sync();
  const ans=g.binder.askPrepared("nav_profile","ru");await Promise.resolve();
  g.set("about");await g.binder.sync();
