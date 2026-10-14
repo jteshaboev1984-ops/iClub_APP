@@ -22,6 +22,8 @@ on:
       - 'docs/iclub-ai-layer-p6-editorial-review-sheet-v2.1.md'
       - 'docs/iclub-ai-layer-p6-home-evidence-reconciliation-v2.1.md'
       - 'qa/ai-layer-v21-p6-navigation-editorial-drafts.test.cjs'
+      - 'qa/ai-layer-v21-p6-navigation-semantic-review.cjs'
+      - 'qa/ai-layer-v21-p6-navigation-semantic-review.test.cjs'
       - 'qa/ai-layer-v21-p6-editorial-source-packet.cjs'
       - 'qa/ai-layer-v21-p6-editorial-source-packet.test.cjs'
       - 'qa/ai-layer-v21-p6-release-preflight.cjs'
