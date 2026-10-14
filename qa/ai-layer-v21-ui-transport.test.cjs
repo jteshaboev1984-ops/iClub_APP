@@ -181,3 +181,34 @@ test("§62 replies crossing the context expiry deadline are discarded even on sa
  assert.equal(f.calls.filter(x=>x.path==="/answer").length,1,
   "No second provider billing attempt");
 });
+test("§63 delayed /context responses do not extend the original server TTL",async()=>{
+ const pending=deferred();let clock=100000;
+ const f=fixture({postOverride:r=>r.body.action==="revoke"?{ok:true}:pending.promise});
+ f.client.nowMs=()=>clock;
+ const opening=f.client.openAppView("about");
+ for(let k=0;k<8;k++)await Promise.resolve();
+ clock=190001;
+ pending.resolve({ok:true,contextHandle:HANDLE,expiresInSeconds:90});
+ assert.equal((await opening).reason,"context_expired");
+ assert.equal(f.client.handle,null);
+ assert.deepEqual(f.calls.at(-1).body,{action:"revoke",contextHandle:HANDLE});
+ assert.equal(f.calls.some(x=>x.path==="/answer"),false);
+});
+test("§63 clock regressions fail closed before adopting any returned handle",async()=>{
+ for(const invalid of [-1,NaN,Infinity,1.2]){
+  const f=fixture();f.client.nowMs=()=>invalid;
+  assert.equal((await f.client.openAppView("about")).reason,"invalid_context_clock");
+  assert.equal(f.client.handle,null);
+  assert.equal(f.calls.length,0);
+ }
+ const f=fixture();let clock=400000;
+ f.client.nowMs=()=>clock;
+ const pending=deferred();
+ f.client.post=r=>r.body.action==="revoke"?{ok:true}:pending.promise;
+ const opening=f.client.openAppView("profile");
+ for(let k=0;k<8;k++)await Promise.resolve();
+ clock=399999;
+ pending.resolve({ok:true,contextHandle:HANDLE,expiresInSeconds:90});
+ assert.equal((await opening).reason,"context_expired");
+ assert.equal(f.client.handle,null);
+});
