@@ -195,3 +195,19 @@ Deno.test("Tour scoped context uses only verified principal and exact attempt ID
  eq((await x.services.mintTourArchiveContext({userId:user,attemptId:2.5})).allowed,false);
  eq(x.calls.length,before);
 });
+
+Deno.test("App-wide current view mint is exactly service-role scoped and missing RPC denies",async()=>{
+ const x=syntheticBackend();
+ const r=await x.services.mintAppViewContext({userId:user,view:"profile"});
+ eq(r.allowed,false);
+ const call=x.calls.find(c=>c.url.includes("mint_iclub_ai_v21_app_view_context_service"));
+ ok(call);
+ eq(call?.body?.p_user_id,user);
+ eq(call?.body?.p_view,"profile");
+ eq(new Headers(call?.init.headers).get("authorization"),
+   "Bearer "+config.serviceRoleKey);
+ const n=x.calls.length;
+ eq((await x.services.mintAppViewContext({userId:user,view:"billing"})).allowed,false);
+ eq((await x.services.mintAppViewContext({userId:"foreign",view:"home"})).allowed,false);
+ eq(x.calls.length,n);
+});
