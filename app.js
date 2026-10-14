@@ -12583,6 +12583,8 @@ function bindRatingsUI() {
     renderMyRecDetail();
   } else if (next === "my-rec-topic-review") {
     window.iClubPracticeTopicHistoryV1?.renderReview?.(currentLang());
+  } else if (next === "my-rec-topic-history") {
+    window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),state?.courses?.subjectKey);
   }
 
   return;
@@ -13106,6 +13108,7 @@ if (state.tab === "courses") {
   else if (top === "books") { if (typeof renderBooks === "function") renderBooks(); }
   else if (top === "my-recs") { if (typeof renderMyRecs === "function") renderMyRecs(); }
   else if (top === "my-rec-topic-review") { window.iClubPracticeTopicHistoryV1?.renderReview?.(currentLang()); }
+  else if (top === "my-rec-topic-history") { window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),state?.courses?.subjectKey); }
   else if (top === "practice-start") { if (typeof renderPracticeStart === "function") renderPracticeStart(); }
   else if (top === "practice-review") { if (typeof renderPracticeReview === "function") renderPracticeReview(); }
   else if (top === "practice-recs") { if (typeof renderPracticeRecs === "function") renderPracticeRecs(); }
@@ -20630,9 +20633,16 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
    
-window.addEventListener("iclub-practice-open-history-review",event=>{
+window.addEventListener("iclub-practice-open-history-list",event=>{
   const key=String(event?.detail?.subjectKey||"");
   if(!key||key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-recs")return;
+  pushCourses("my-rec-topic-history");
+  window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),key);
+});
+window.addEventListener("iclub-practice-open-history-review",event=>{
+  const key=String(event?.detail?.subjectKey||"");
+  if(!key||key!==String(state?.courses?.subjectKey||""))return;
+  if(!["my-recs","my-rec-topic-history"].includes(getCoursesTopScreen()))return;
   pushCourses("my-rec-topic-review");
   window.iClubPracticeTopicHistoryV1?.renderReview?.(currentLang());
 });
