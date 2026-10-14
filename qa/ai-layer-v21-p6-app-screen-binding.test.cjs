@@ -82,16 +82,21 @@ test("Changing tabs or document visibility drops local authority and remote hand
  a.equal(f.calls.at(-1).body.action,"revoke");
 });
 test("Race: late mint does not grant abandoned view and revoked answer does not display",async()=>{
- const wait=defer(),f=fixture(r=>r.body.action==="mintAppView"?
-   wait.promise:{ok:true});
+ const wait=defer(),newHandle="22222222-2222-4222-8222-222222222222";
+ const f=fixture(r=>r.body.action==="mintAppView"?
+   r.body.view==="home"?wait.promise:{ok:true,contextHandle:newHandle}:{ok:true});
  f.set("home");
- const p=f.binder.sync();await Promise.resolve();
- f.set("profile");const changed=f.binder.sync();await Promise.resolve();
+ const p=f.binder.sync();
+ for(let i=0;i<6;i++)await Promise.resolve();
+ a.equal(f.calls[0].body.view,"home");
+ f.set("profile");const changed=f.binder.sync();
+ for(let i=0;i<6;i++)await Promise.resolve();
  wait.resolve({ok:true,contextHandle:handle});
  a.equal((await p).reason,"context_changed");
- // A profile sync may mint from the same synthetic server. It is a new view.
- a.equal((await changed).reason,"context_changed");
- a.equal(f.binder.ready,false);
+ a.equal((await changed).ok,true);
+ a.equal(f.binder.ready,true);
+ a.equal(f.client.handle,newHandle);
+ a.ok(f.calls.some(x=>x.body.action==="revoke"&&x.body.contextHandle===handle));
  const g=fixture(r=>r.path==="/answer"?wait2.promise:
    r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:handle});
  const wait2=defer();g.set("profile");await g.binder.sync();
