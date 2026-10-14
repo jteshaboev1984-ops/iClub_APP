@@ -19955,6 +19955,7 @@ async function renderMyRecDetail() {
   if (!body || !rec || !subjectKey) return;
 
   const isTourRec = String(rec?.source_type || "practice") === "tour";
+  const isTopicRec = !isTourRec && Number(rec?.practice_drill_session_id||0)>0;
   const topic = rec.topic || "General";
   const subtopic = rec.subtopic ? String(rec.subtopic) : "";
 
@@ -20026,12 +20027,13 @@ async function renderMyRecDetail() {
     )
   };
 
-   if (titleEl) titleEl.textContent = topic;
+   if (titleEl) titleEl.textContent = isTopicRec ? (subtopic || topic) : topic;
 if (subEl) {
-  subEl.textContent = isTourRec
+  subEl.textContent = isTopicRec ? topic : isTourRec
     ? (subtopic || recText.subtitleTour)
     : (subtopic ? subtopic : recText.subtitlePractice);
 }
+body.classList.toggle("iclub-sx-detail",isTopicRec);
 
    // ✅ mini result (only for current rec/topic)
 let drillMiniHtml = "";
@@ -20106,6 +20108,17 @@ const mistakesHtml = totalMistakes
       const caDisp = formatAnswerForDisplay(q, q.correct_answer);
 
       const num = `${idx + 1}/${totalMistakes}`;
+      if(isTopicRec){
+        return `<details class="iclub-sx-detail-question">
+          <summary><span class="iclub-sx-detail-number">${escapeHTML(tr3("Ошибка","Xato","Mistake"))} ${idx+1}</span>
+            <span class="iclub-sx-detail-stem">${escapeHTML(qText||"")}</span></summary>
+          <div class="iclub-sx-detail-answer">
+            <div><strong>${escapeHTML(recText.yourAnswer)}:</strong> ${escapeHTML(uaDisp)}</div>
+            <div><strong>${escapeHTML(recText.correctAnswer)}:</strong> ${escapeHTML(caDisp)}</div>
+            ${expl?`<div class="iclub-sx-detail-explanation"><strong>${escapeHTML(recText.explanation)}:</strong> ${escapeHTML(expl)}</div>`:""}
+          </div>
+        </details>`;
+      }
 
       return `
         <div class="list-item">
