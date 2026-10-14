@@ -86,7 +86,6 @@
   }
 
   let activeTopicReview=null;
-  let activeTopicHistory=null;
   function openTopicAttempt(attempt,subjectKey) {
     if (!attempt || !String(subjectKey||'').trim()) return;
     activeTopicReview={attempt,subjectKey:String(subjectKey)};
@@ -98,7 +97,6 @@
     if(!holder)return false;
     const locale=['ru','uz','en'].includes(language)?language:lang();
     const c=HISTORY_COPY[locale];
-    if (data?.ok===true) activeTopicHistory={data,subjectKey:String(data.subject_key||'')};
     holder.replaceChildren();
     const heading=node('div','iclub-topic-history-header');
     heading.append(node('strong','',compact
@@ -265,16 +263,19 @@
     footer.append(link);card.append(footer);holder.append(card);
     return true;
   }
-  function topicHistoryPage(language,subjectKey) {
+  function topicHistoryPage(language,subjectKey,data,unavailable=false) {
     const holder=document.getElementById('my-rec-topic-history-body');
     if(!holder)return false;
-    if(!activeTopicHistory||activeTopicHistory.subjectKey!==String(subjectKey||'')){
-      holder.replaceChildren(node('div','iclub-topic-history-empty','История не загружена. Вернитесь к рекомендациям.'));
+    if(unavailable||data?.ok!==true||String(data.subject_key||'')!==String(subjectKey||'')){
+      holder.replaceChildren(node('div','iclub-topic-history-empty',
+        language==='uz'?'Tarixni yuklab bo‘lmadi. Keyinroq qayta urinib ko‘ring.':
+        language==='en'?'Could not load history. Please retry later.':
+        'Не удалось загрузить историю. Попробуйте ещё раз позже.'));
       return false;
     }
-    return topicHistory(holder,activeTopicHistory.data,false,language,false);
+    return topicHistory(holder,data,false,language,false);
   }
-  window.iClubPracticePremiumResult = Object.freeze({render:premiumResult});
+    window.iClubPracticePremiumResult = Object.freeze({render:premiumResult});
   window.iClubPracticeTopicHistoryV1 = Object.freeze({render:topicHistory,renderReview:renderTopicReview,renderLatest:topicLatest,renderHistoryPage:topicHistoryPage,openAttempt:openTopicAttempt});
 
   function install() {
