@@ -41,7 +41,9 @@ CREATE TABLE private.iclub_ai_v21_editorial_source_versions(
  CHECK(length(source_version) BETWEEN 1 AND 100),
  CHECK(length(topic_key) BETWEEN 1 AND 160),
  CHECK((surface_code='lesson' AND feature_code='topic_explanation')
-    OR (surface_code='practice' AND feature_code='answer_explanation'))
+    OR (surface_code='practice' AND feature_code='answer_explanation')
+    OR (surface_code='global' AND subject_key='general'
+      AND feature_code='app_help' AND topic_key='navigation'))
 );
 REVOKE ALL ON TABLE private.iclub_ai_v21_editorial_source_versions
  FROM public,anon,authenticated;
@@ -154,6 +156,11 @@ BEGIN
  AND s.source_version=p_source_version AND s.source_hash=p_source_hash;
  IF NOT FOUND THEN
   RETURN jsonb_build_object('approved',false,'reason','source_unavailable');
+ END IF;
+ -- Navigation assistance is deterministic and editorially prepared ONLY.
+ -- Never forward unreviewed navigation text to a model to improvise UI steps.
+ IF ref->>'surface'='global' AND p_route_class<>'prepared' THEN
+  RETURN jsonb_build_object('approved',false,'reason','route_unavailable');
  END IF;
  IF p_route_class='prepared' THEN
   IF p_prompt_key !~ '^[a-z0-9_]{3,60}$'
