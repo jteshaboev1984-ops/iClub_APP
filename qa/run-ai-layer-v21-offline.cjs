@@ -27,6 +27,7 @@ const cases = [
  "qa/ai-layer-v21-p6-navigation-candidates.test.cjs",
  "qa/ai-layer-v21-p6-navigation-editorial-drafts.test.cjs",
  "qa/ai-layer-v21-p6-navigation-semantic-review.test.cjs",
+ "qa/ai-layer-v21-p6-nav-a11y-preview.test.cjs",
  "qa/ai-layer-v21-p6-editorial-source-packet.test.cjs",
  "qa/ai-layer-v21-p6-release-preflight.test.cjs",
  "qa/ai-layer-v21-p6-home-next-action-proof.test.cjs",
