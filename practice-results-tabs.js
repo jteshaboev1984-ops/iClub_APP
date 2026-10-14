@@ -86,13 +86,32 @@
   }
 
   let activeTopicReview=null;
-  function topicHistory(holder,data,unavailable,language) {
+  let activeTopicHistory=null;
+  function openTopicAttempt(attempt,subjectKey) {
+    if (!attempt || !String(subjectKey||'').trim()) return;
+    activeTopicReview={attempt,subjectKey:String(subjectKey)};
+    window.dispatchEvent(new CustomEvent('iclub-practice-open-history-review',{
+      detail:{subjectKey:activeTopicReview.subjectKey}
+    }));
+  }
+  function topicHistory(holder,data,unavailable,language,compact=false) {
     if(!holder)return false;
     const locale=['ru','uz','en'].includes(language)?language:lang();
     const c=HISTORY_COPY[locale];
+    if (!compact && data?.ok===true) activeTopicHistory={data,subjectKey:String(data.subject_key||'')};
     holder.replaceChildren();
     const heading=node('div','iclub-topic-history-header');
-    heading.append(node('strong','',c.heading));
+    heading.append(node('strong','',compact
+      ? (locale==='uz'?'Amaliyot tarixi':locale==='en'?'Practice history':'История практики')
+      : (locale==='uz'?'So‘nggi urinishlar':locale==='en'?'Recent attempts':'Последние попытки')));
+    if(compact && data?.ok===true){
+      const link=node('button','iclub-sx-history-link',locale==='uz'?'Oxirgi urinishlar':locale==='en'?'Recent attempts':'Последние попытки');
+      link.type='button';
+      link.addEventListener('click',()=>window.dispatchEvent(new CustomEvent('iclub-practice-open-history-list',{
+        detail:{subjectKey:String(data.subject_key||'')}
+      })));
+      heading.append(link);
+    }
     holder.append(heading);
     if(unavailable||!data||data.ok!==true){
       holder.append(node('div','iclub-topic-history-empty',c.error));
@@ -112,7 +131,7 @@
       return Number.isInteger(good)&&Number.isInteger(all)&&all>0&&good>=0&&good<=all?good+' / '+all:'—';
     };
     const list=node('div','iclub-topic-history-recent');
-    for(const attempt of (Array.isArray(data.recent)?data.recent.slice(0,5):[])){
+    for(const attempt of (Array.isArray(data.recent)?data.recent.slice(0,compact?2:5):[])){
       if(score(attempt)==='—')continue;
       const button=node('button','iclub-topic-history-row');
       button.type='button';
@@ -125,12 +144,7 @@
       right.append(node('span','iclub-topic-history-row-score',score(attempt)));
       right.append(node('span','iclub-topic-history-arrow','›'));
       button.append(info,right);
-      button.addEventListener('click',()=>{
-        activeTopicReview={attempt,subjectKey:String(data.subject_key||'')};
-        window.dispatchEvent(new CustomEvent('iclub-practice-open-history-review',{
-          detail:{subjectKey:activeTopicReview.subjectKey}
-        }));
-      });
+      button.addEventListener('click',()=>openTopicAttempt(attempt,data.subject_key));
       list.append(button);
     }
     holder.append(list);
@@ -216,8 +230,48 @@
     body.append(questions);
     return true;
   }
+  function topicLatest(holder,data,unavailable,language) {
+    if(!holder)return false;
+    holder.replaceChildren();
+    if(unavailable||data?.ok!==true)return false;
+    const attempt=data.last?.total?data.last:(Array.isArray(data.recent)?data.recent[0]:null);
+    const correct=Number(attempt?.correct),total=Number(attempt?.total);
+    if(!Number.isInteger(correct)||!Number.isInteger(total)||total<=0||correct<0||correct>total)return false;
+    const locale=['ru','uz','en'].includes(language)?language:lang();
+    const txt=(ru,uz,en)=>locale==='uz'?uz:locale==='en'?en:ru;
+    const card=node('section','iclub-sx-last');
+    const head=node('div','iclub-sx-last-head');
+    head.append(node('span','iclub-sx-kicker',txt('ПОСЛЕДНЯЯ ПОПЫТКА','OXIRGI URINISH','LATEST ATTEMPT')));
+    const dt=new Date(String(attempt.finished_at||''));
+    if(Number.isFinite(dt.getTime()))head.append(node('small','',dt.toLocaleDateString(locale)));
+    card.append(head);
+    const middle=node('div','iclub-sx-last-body');
+    const left=node('div','iclub-sx-last-info');
+    left.append(node('strong','',String(attempt.topic||'—')));
+    left.append(node('small','',txt('Практика по темам','Mavzular bo‘yicha amaliyot','Practice by topic')+' · '+total+' '+txt('вопросов','savol','questions')));
+    const score=node('span','iclub-sx-last-result',correct+' / '+total);
+    if(correct===total)score.classList.add('good');
+    else if(correct/total<0.3)score.classList.add('bad');
+    middle.append(left,score);card.append(middle);
+    const footer=node('div','iclub-sx-last-footer');
+    const errors=total-correct;
+    footer.append(node('span','iclub-sx-last-errors',errors+' '+txt('ошибок','xato','mistakes')));
+    const link=node('button','iclub-sx-link',txt('Разбор попытки','Urinishni tahlil qilish','Review attempt')+' →');
+    link.type='button';link.addEventListener('click',()=>openTopicAttempt(attempt,data.subject_key));
+    footer.append(link);card.append(footer);holder.append(card);
+    return true;
+  }
+  function topicHistoryPage(language,subjectKey) {
+    const holder=document.getElementById('my-rec-topic-history-body');
+    if(!holder)return false;
+    if(!activeTopicHistory||activeTopicHistory.subjectKey!==String(subjectKey||'')){
+      holder.replaceChildren(node('div','iclub-topic-history-empty','История не загружена. Вернитесь к рекомендациям.'));
+      return false;
+    }
+    return topicHistory(holder,activeTopicHistory.data,false,language,false);
+  }
   window.iClubPracticePremiumResult = Object.freeze({render:premiumResult});
-  window.iClubPracticeTopicHistoryV1 = Object.freeze({render:topicHistory,renderReview:renderTopicReview});
+  window.iClubPracticeTopicHistoryV1 = Object.freeze({render:topicHistory,renderReview:renderTopicReview,renderLatest:topicLatest,renderHistoryPage:topicHistoryPage,openAttempt:openTopicAttempt});
 
   function install() {
     const root = document.getElementById(ROOT_ID);
