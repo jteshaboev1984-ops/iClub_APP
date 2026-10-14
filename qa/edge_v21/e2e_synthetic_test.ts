@@ -33,7 +33,8 @@ function scenario({subject="biology",surface="lesson",locale="ru",ready=true}:
  const state={
   ready,rights:true,rollout:true,kill:false,exam:false,active:true,
   user:UID,plan:"plus_qa_v2",locale,rev:4,networkDown:"",
-  authOn:true,sourceChangedOnBundle:false,authenticatedUser:UID,
+  authOn:true,sourceChangedOnBundle:false,screenChangedOnBundle:false,
+  screenRevision:1,authenticatedUser:UID,
   publishedLocales:new Set<string>([locale]),activeSubjects:new Set<string>(SUBJECTS),
   reservations:new Map<string,Reservation>(),claims:new Set<string>(),
   settled:new Map<string,string>(),logs:[] as {endpoint:string;args:RecordData}[],
@@ -102,7 +103,7 @@ function scenario({subject="biology",surface="lesson",locale="ru",ready=true}:
     if(kind==="current_screen")
      evidence={...base,active:true,context_handle:HANDLE,
       context_revision:"synthetic-context-revision-v1",
-      revision:1,current_view:"courses"};
+      revision:state.screenRevision,current_view:"courses"};
     if(screen.surface==="lesson"&&kind==="lesson"&&args.p_lesson_id===101)
      evidence={...base,id:101,subject_key:screen.subject,topic_key:screen.topic,
       is_active:true,lesson_specific:true,is_video:false,
@@ -139,6 +140,7 @@ function scenario({subject="biology",surface="lesson",locale="ru",ready=true}:
       generation_allowed:false,source_text:"",
       prepared_variants:{topic_main:"Synthetic workflow acknowledgement — QA only"}});
     if(state.sourceChangedOnBundle){state.sourceChangedOnBundle=false;state.ready=false;}
+    if(state.screenChangedOnBundle){state.screenChangedOnBundle=false;state.screenRevision++;}
     return response;
    }
    case "get_iclub_ai_v21_provider_budget_service":
@@ -248,6 +250,14 @@ Deno.test("Source revocation after bundle returns no answer and releases quota",
  equal(f.state.settled.get(REQUEST),"released");
  ok(!Object.hasOwn(r.data,"reply"),"revoked reply delivered");
 });
+Deno.test("Changed server screen while source awaits releases hold without a reply",async()=>{
+ const f=scenario();f.state.screenChangedOnBundle=true;
+ const r=await f.send("answer",f.body("answer"));
+ equal(r.data.ok,false);
+ equal(f.count("reserve_iclub_ai_usage_service_v2"),1);
+ equal(f.state.settled.get(REQUEST),"released");
+ ok(!Object.hasOwn(r.data,"reply"),"stale screen response leaked");
+});
 Deno.test("Exam, rollout, kill switch and unenrolled subject never reserve",async()=>{
  for(const kind of ["exam","rollout","kill","subject","inactive"]){
   const f=scenario();
@@ -284,7 +294,8 @@ Deno.test("Network loss and missing runtime/protected/content RPC DENY, never as
   "get_iclub_ai_v21_runtime_service","get_iclub_ai_v21_protected_service",
   "get_iclub_ai_v21_rollout_service","get_iclub_ai_topic_release_service_v21",
   "get_iclub_ai_v21_source_proof_service","get_iclub_ai_v21_scoped_context_service",
-  "get_iclub_ai_v21_entitlement_service","get_iclub_ai_v21_source_bundle_service"]){
+  "get_iclub_ai_v21_entitlement_service","get_iclub_ai_v21_source_bundle_service",
+   "get_iclub_ai_v21_screen_evidence_service"]){
   const f=scenario();f.state.networkDown=endpoint;
   const r=await f.send("answer",f.body("answer"));
   equal(r.data.ok,false,endpoint);
