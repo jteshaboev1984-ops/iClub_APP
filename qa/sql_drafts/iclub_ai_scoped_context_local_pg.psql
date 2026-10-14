@@ -224,7 +224,7 @@ BEGIN
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,econ_handle);
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Removed subject membership retained AI: %',result;END IF;
- INSERT INTO public.user_subjects(user_id,subject_id) VALUES (learner,12);
+ INSERT INTO public.user_subjects(user_id,subject_id,mode,is_pinned) VALUES (learner,12,'competitive',false);
  INSERT INTO private.context_qa_exam_flags VALUES(learner,true);
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,econ_handle);
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
