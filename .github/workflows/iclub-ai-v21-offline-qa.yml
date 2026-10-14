@@ -23,6 +23,7 @@ on:
       - 'qa/run-ai-layer-v21-postgres-local.sh'
       - 'docs/iclub-ai-layer-p7-real-schema-proof-audit-v2.1.md'
       - 'docs/iclub-ai-layer-p7-current-screen-authority-v2.1.md'
+      - 'docs/iclub-ai-layer-p6-home-profile-general-trusted-scope-v2.1.md'
       - 'docs/iclub-ai-layer-master-plan-v2.1.md'
       - 'qa/run-ai-layer-v21-offline.cjs'
       - 'docs/iclub-ai-layer-trusted-server-adapter-v2.1.md'
