@@ -27,7 +27,7 @@ DECLARE
  v_current_date date := (now() AT TIME ZONE 'Asia/Tashkent')::date;
 BEGIN
  IF p_user_id IS NULL OR p_kind IS NULL OR
-    p_kind NOT IN ('practice_session_v4','practice_answer_v4',
+    p_kind NOT IN ('current_screen','practice_session_v4','practice_answer_v4',
                    'tour_attempt','tour_runtime','tour_archive_access')
     OR (p_kind LIKE 'practice_%' AND (p_session_id IS NULL OR p_session_id<=0))
     OR (p_kind='practice_answer_v4' AND (p_question_id IS NULL OR p_question_id<=0))
@@ -41,6 +41,32 @@ BEGIN
   WHERE x.id=1 AND x.kill_switch=false AND x.gateway_enabled=true
  ) OR private.iclub_ai_has_active_protected_assessment_v1(p_user_id)
  THEN RETURN jsonb_build_object('allowed',false); END IF;
+
+ -- The screen is server-minted ONLY through the existing short-lived
+ -- practice/lesson context service. Mere browser view strings never count.
+ -- Missing scoped context schema means NO screen authority (standalone proof QA).
+ IF p_kind='current_screen' THEN
+  IF to_regclass('private.iclub_ai_v21_current_screen') IS NULL
+    OR to_regclass('private.iclub_ai_v21_scoped_contexts') IS NULL
+  THEN RETURN jsonb_build_object('allowed',false); END IF;
+  SELECT jsonb_build_object(
+   'user_id',nav.user_id,'evidence_kind','current_screen',
+   'active',true,'context_handle',c.context_handle,
+   'context_revision','screen_'||nav.revision::text,
+   'revision',nav.revision,'current_view','courses')
+  INTO v_evidence
+  FROM private.iclub_ai_v21_current_screen nav
+  JOIN private.iclub_ai_v21_scoped_contexts c
+   ON c.context_handle=nav.current_handle
+    AND c.user_id=nav.user_id AND c.context_revision=nav.revision
+  WHERE nav.user_id=p_user_id AND nav.current_handle IS NOT NULL
+   AND c.surface_code IN ('practice','lesson')
+   AND c.revoked_at IS NULL AND c.expires_at>now()
+   AND public.get_iclub_ai_v21_scoped_context_service(
+        p_user_id,c.context_handle::text)->>'allowed'='true';
+  IF v_evidence IS NULL THEN RETURN jsonb_build_object('allowed',false); END IF;
+  RETURN jsonb_build_object('allowed',true,'evidence',v_evidence);
+ END IF;
 
  IF p_kind='practice_session_v4' THEN
   SELECT jsonb_build_object(
