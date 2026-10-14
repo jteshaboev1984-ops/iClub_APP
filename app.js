@@ -19519,6 +19519,12 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
     `;
   };
 
+  const practiceRecCount=practiceRows.length;
+  const practiceRecCountNoun=tr3(
+    practiceRecCount%10===1&&practiceRecCount%100!==11?"рекомендация":
+    practiceRecCount%10>=2&&practiceRecCount%10<=4&&!(practiceRecCount%100>=12&&practiceRecCount%100<=14)?"рекомендации":"рекомендаций",
+    "tavsiya",practiceRecCount===1?"recommendation":"recommendations");
+
   const renderPracticeList = () => {
     // The recent topic-session summary is presented below current recommendations.
     if (!practiceRows.length) {
@@ -19640,7 +19646,7 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
       ? `<div id="my-recs-topic-latest"></div>`
       :""}
     ${activeTab==="practice"&&practiceMode==="topics"
-      ? `<div class="iclub-sx-heading"><h2>${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</h2><span class="iclub-sx-total">${practiceRows.length} ${escapeHTML(tr3("рекомендаций","tavsiya","recommendations"))}</span></div>`
+      ? `<div class="iclub-sx-heading"><h2>${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</h2><span class="iclub-sx-total">${practiceRecCount} ${escapeHTML(practiceRecCountNoun)}</span></div>`
       :""}
     <div class="${activeTab==="practice"&&practiceMode==="topics"?"iclub-sx-groups":""}">
       ${activeTab==="tour" ? renderTourList() : renderPracticeList()}
@@ -20001,9 +20007,9 @@ async function renderMyRecDetail() {
       "Your answer"
     ),
     correctAnswer: tc3(
-      "Правильный",
+      "Правильный ответ",
       "To‘g‘ri javob",
-      "Correct"
+      "Correct answer"
     ),
     explanation: tc3(
       "Пояснение",
