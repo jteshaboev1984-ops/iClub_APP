@@ -50,13 +50,16 @@ function checkNavigationEditorial({draft,inventory,html,app,i18n}={}){
    if(!match||!match[2].includes('data-i18n="'+targetKey+'"'))
     return fail("visible_tab_binding_changed");
    const aria=/\baria-label="([^"]+)"/.exec(match[1]);
-   if(!aria)return fail("missing_tab_accessible_name");
-   // Visible translation may be correct even while the screen-reader name
-   // is still hard-coded in English. A reviewer must not approve accessibility.
+   // Two forms are reviewed: CURRENT app has a literal aria-label; a detached
+   // preview may rely on the exact translated visible child. Neither grants
+   // release permission. A native Chromium AX-tree test is still mandatory.
+   if(!aria&&(!match[2].includes('class="tab-ico" aria-hidden="true"')||
+    !match[2].includes('class="tab-txt"')))
+    return fail("missing_native_tab_name_source");
    for(const locale of LOCALES){
     const shown=label(i18n,locale,targetKey);
     if(!shown)return fail("missing_i18n_caption");
-    if(aria[1]!==shown)
+    if(aria&&aria[1]!==shown)
      discrepancies.push({view,locale,visibleLabel:shown,accessibleName:aria[1]});
    }
   }else{
