@@ -5,6 +5,14 @@ const {createHash}=require("node:crypto");
 const file="qa/ai-layer-v21-p6-navigation-editorial-drafts.snapshot.json";
 const locales=["ru","uz","en"];
 const views=["home","courses","ratings","profile","about","support"];
+const allowed=Object.freeze({
+ home:{kind:"tab",entryView:null,selector:'[data-tab="home"]',labelKey:"tab_home"},
+ courses:{kind:"tab",entryView:null,selector:'[data-tab="courses"]',labelKey:"tab_study"},
+ ratings:{kind:"tab",entryView:null,selector:'[data-tab="ratings"]',labelKey:"tab_ratings"},
+ profile:{kind:"tab",entryView:null,selector:'[data-tab="profile"]',labelKey:"tab_profile"},
+ about:{kind:"global",entryView:"home",selector:'[data-action="open-about"]',labelKey:"profile_settings_about"},
+ support:{kind:"global",entryView:"profile",selector:'[data-action="open-support"]',labelKey:"profile_support_title"}
+});
 const denied=reason=>({ready:false,reason});
 function candidatePacket(draft){
  if(!draft||draft.status!=="EDITORIAL_DRAFT_NOT_APPROVED"||
@@ -17,7 +25,11 @@ function candidatePacket(draft){
  const seen=new Set();
  const payload=Object.fromEntries(locales.map(locale=>[locale,{}]));
  for(const entry of draft.entrypoints){
+  const expected=allowed[entry?.targetView];
   if(entry?.id!=="nav_"+entry.targetView||
+     !expected||entry.kind!==expected.kind||
+     entry.entryView!==expected.entryView||
+     entry.selector!==expected.selector||entry.labelKey!==expected.labelKey||
      !views.includes(entry.targetView)||seen.has(entry.targetView)||
      !entry.replies||Object.keys(entry.replies).sort().join(",")!=="en,ru,uz"||
      Object.values(entry.replies).some(x=>typeof x!=="string"||
