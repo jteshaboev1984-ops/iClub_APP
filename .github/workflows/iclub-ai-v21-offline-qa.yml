@@ -27,6 +27,7 @@ on:
       - 'qa/ai-layer-v21-p6-app-screen-binding.cjs'
       - 'qa/ai-layer-v21-p6-app-screen-binding.test.cjs'
       - 'qa/ai-layer-v21-p6-real-ui-contract.test.cjs'
+      - 'qa/ai-layer-v21-p6-native-browser.cjs'
       - 'docs/iclub-ai-layer-p6-app-binding-threat-model-v2.1.md'
       - 'qa/ai-layer-v21-ui-transport.cjs'
       - 'qa/ai-layer-v21-ui-transport.test.cjs'
@@ -97,6 +98,8 @@ jobs:
           set -euo pipefail
           command -v google-chrome || command -v chromium || command -v chromium-browser
           node qa/ai-layer-v21-browser-visual.cjs
+      - name: Offline P6 native Chromium navigation and context-scope QA
+        run: node qa/ai-layer-v21-p6-native-browser.cjs
       - name: Synthetic Preview real Chromium practice to iClub AI journey
         run: node qa/ai-layer-v21-protected-preview-browser.cjs
       - name: Install Deno runtime for Edge candidate verification
