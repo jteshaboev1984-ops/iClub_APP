@@ -179,3 +179,19 @@ Deno.test("Missing encrypted receipt RPCs deny settlement and private reply",asy
  for(const call of [finish,read])eq(new Headers(call?.init.headers).get("authorization"),
   "Bearer "+config.serviceRoleKey);
 });
+
+Deno.test("Tour scoped context uses only verified principal and exact attempt ID",async()=>{
+ const x=syntheticBackend();
+ const r=await x.services.mintTourArchiveContext({userId:user,attemptId:401});
+ eq(r.allowed,false);
+ const call=x.calls.find(c=>c.url.includes("mint_iclub_ai_v21_tour_archive_context_service"));
+ ok(call);
+ eq(call?.body?.p_user_id,user);
+ eq(call?.body?.p_attempt_id,401);
+ eq(new Headers(call?.init.headers).get("authorization"),
+  "Bearer "+config.serviceRoleKey);
+ const before=x.calls.length;
+ eq((await x.services.mintTourArchiveContext({userId:user,attemptId:-1})).allowed,false);
+ eq((await x.services.mintTourArchiveContext({userId:user,attemptId:2.5})).allowed,false);
+ eq(x.calls.length,before);
+});
