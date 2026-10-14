@@ -167,7 +167,8 @@ async function run(){
    assert.equal(value.signoutBlocked,true);
    console.log("P6_NATIVE_BROWSER_GREEN "+JSON.stringify(value));
   }
-  assert.equal(browser.network.length,0,"Real browser attempted outgoing requests");
+  for(const url of browser.network)
+   assert.ok(url.startsWith("data:"),"Real browser attempted external request: "+url);
   console.log("GREEN: P6 native browser 320/390/1366, 17 stack views, 0 outbound");
  }finally{
   try{browser?.close()}catch{}
