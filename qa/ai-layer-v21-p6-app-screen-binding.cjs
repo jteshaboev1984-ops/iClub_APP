@@ -13,9 +13,11 @@ class QaV21AppScreenBinder{
    throw Error("missing_qa_document");
   this.client=client;this.document=document;this.epoch=0;
   this.key="";this.ready=false;this.userId=null;this.observer=null;
+  // After an explicit sign-out, old JWTs or unobserved tab changes may NOT remint.
+  this.suspended=false;
  }
  read(){
-  if(this.document.visibilityState==="hidden")return null;
+  if(this.suspended||this.document.visibilityState==="hidden")return null;
   const el=x=>this.document.getElementById(x);
   const exam=el("exam-prep-host-root");
   if(exam&&!exam.hidden&&exam.getAttribute?.("aria-hidden")!=="true")return null;
@@ -69,11 +71,15 @@ class QaV21AppScreenBinder{
   const id=typeof session?.user?.id==="string"?session.user.id:null;
   const logout=event==="SIGNED_OUT"||event==="USER_DELETED"||
     (event==="INITIAL_SESSION"&&!id);
-  if(logout||(id&&this.userId&&id!==this.userId)){
-   this.userId=logout?null:id;
+  if(logout){
+   this.suspended=true;this.userId=null;
    return this.leave();
   }
-  if(id)this.userId=id;
+  if(id&&this.userId&&id!==this.userId){
+   this.userId=id;this.suspended=false;
+   return this.leave();
+  }
+  if(id){this.userId=id;this.suspended=false;}
   return{ok:true};
  }
  attach(){
