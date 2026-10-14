@@ -150,6 +150,37 @@ async function browserTest(){
  ok(observerBinder.ready===false&&count("revoke")>revokedBefore,
   "Native MutationObserver did not revoke an unsupported overlay");
  await observerBinder.disconnect();
+ // Real browser promise scheduling + identity loss: a pending prepared reply
+ // must never become visible after auth sign-out or a second user's login.
+ el("view-certificates").classList.remove("is-active");
+ activate("support");clock=700000;
+ let answerFinish=null;const delayedCalls=[];
+ const client3=new window.QaV21ScreenClient({
+  post:async req=>{
+   delayedCalls.push(req);
+   if(req.path==="/answer")
+    return await new Promise(resolve=>{answerFinish=resolve;});
+   if(req.body.action==="revoke")return{ok:true};
+   return{ok:true,contextHandle:uuid(),expiresInSeconds:90};
+  },
+  readJwt:async()=>"synthetic-only-jwt-token",newRequestId:()=>uuid(),
+  nowMs:()=>clock
+ });
+ const authBinder=new window.QaV21AppScreenBinder({client:client3,document});
+ await authBinder.authChanged("SIGNED_IN",{user:{id:"account-1"}});
+ ok((await authBinder.sync()).ok,"Fresh account failed to bind Help");
+ const pending=authBinder.askPrepared("nav_about","ru");
+ for(let i=0;i<20&&!answerFinish;i++)await pause(1);
+ ok(typeof answerFinish==="function","Synthetic old-account request did not start");
+ await authBinder.authChanged("SIGNED_OUT",null);
+ answerFinish({ok:true,reply:"PRIVATE_PREVIOUS_ACCOUNT"});
+ const old=await pending;
+ ok(old.reason==="context_changed","Stale account reply surfaced");
+ ok((await authBinder.sync()).reason==="screen_not_verified",
+  "Logged-out account reopened context");
+ await authBinder.authChanged("SIGNED_IN",{user:{id:"account-2"}});
+ ok((await authBinder.sync()).ok,"New account failed to bind independently");
+ await authBinder.disconnect();
  return{viewport:innerWidth+"x"+innerHeight,nativeDom:true,
   routes:7,nestedScreens:17,issued:minted,revoked:count("revoke"),
   noPaidAnswers:calls.filter(x=>x.path==="/answer").length===0,
