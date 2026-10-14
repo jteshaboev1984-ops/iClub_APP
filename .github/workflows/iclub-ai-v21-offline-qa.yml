@@ -10,6 +10,9 @@ on:
       - qa/iclub-ai-layer-v21-20261012
     paths:
       - '.github/workflows/iclub-ai-v21-offline-qa.yml'
+      - 'qa/ai-layer-v21-trusted-server-adapter.cjs'
+      - 'qa/ai-layer-v21-trusted-server-adapter.test.cjs'
+      - 'qa/run-ai-layer-v21-offline.cjs'
   workflow_dispatch:
 
 permissions:
