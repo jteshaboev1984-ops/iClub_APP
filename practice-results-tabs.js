@@ -266,6 +266,11 @@
   function topicHistoryPage(language,subjectKey,data,unavailable=false) {
     const holder=document.getElementById('my-rec-topic-history-body');
     if(!holder)return false;
+    const title=document.getElementById('my-rec-topic-history-title');
+    const subtitle=document.getElementById('my-rec-topic-history-subtitle');
+    if(title)title.textContent=language==='uz'?'Amaliyot tarixi':language==='en'?'Practice history':'История практики';
+    if(subtitle)subtitle.textContent=language==='uz'?'So‘nggi yakunlangan urinishlar':
+      language==='en'?'Recent completed attempts':'Последние завершённые попытки';
     if(unavailable||data?.ok!==true||String(data.subject_key||'')!==String(subjectKey||'')){
       holder.replaceChildren(node('div','iclub-topic-history-empty',
         language==='uz'?'Tarixni yuklab bo‘lmadi. Keyinroq qayta urinib ko‘ring.':
