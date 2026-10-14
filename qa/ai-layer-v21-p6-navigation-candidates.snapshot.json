@@ -1,0 +1,94 @@
+{
+  "schema": "iclub_ai_p6_navigation_candidate_v1",
+  "status": "DRAFT_ONLY_NOT_EDITORIALLY_APPROVED",
+  "sourceFiles": [
+    "app.js",
+    "index.html",
+    "i18n.js"
+  ],
+  "releaseAllowed": false,
+  "requiresIndependentReview": [
+    "route_correctness",
+    "locale_editorial",
+    "rights",
+    "accessibility",
+    "screen_proof",
+    "source_integrity",
+    "release",
+    "rollout"
+  ],
+  "views": [
+    {
+      "view": "home",
+      "route": "tab",
+      "labelKey": "tab_home",
+      "labels": {
+        "ru": "Главная",
+        "uz": "Bosh sahifa",
+        "en": "Home"
+      },
+      "target": "[data-tab=\"home\"]",
+      "readiness": "IN_DEVELOPMENT"
+    },
+    {
+      "view": "courses",
+      "route": "tab",
+      "labelKey": "tab_study",
+      "labels": {
+        "ru": "Учёба",
+        "uz": "O‘qish",
+        "en": "Study"
+      },
+      "target": "[data-tab=\"courses\"]",
+      "readiness": "IN_DEVELOPMENT"
+    },
+    {
+      "view": "ratings",
+      "route": "tab",
+      "labelKey": "tab_ratings",
+      "labels": {
+        "ru": "Рейтинг",
+        "uz": "Reyting",
+        "en": "Ratings"
+      },
+      "target": "[data-tab=\"ratings\"]",
+      "readiness": "IN_DEVELOPMENT"
+    },
+    {
+      "view": "profile",
+      "route": "tab",
+      "labelKey": "tab_profile",
+      "labels": {
+        "ru": "Профиль",
+        "uz": "Profil",
+        "en": "Profile"
+      },
+      "target": "[data-tab=\"profile\"]",
+      "readiness": "IN_DEVELOPMENT"
+    },
+    {
+      "view": "about",
+      "route": "global",
+      "labelKey": "about_title",
+      "labels": {
+        "ru": "О проекте",
+        "uz": "Loyiha haqida",
+        "en": "About"
+      },
+      "target": "[data-view=\"about\"]",
+      "readiness": "IN_DEVELOPMENT"
+    },
+    {
+      "view": "support",
+      "route": "global",
+      "labelKey": "support_title",
+      "labels": {
+        "ru": "Поддержка",
+        "uz": "Yordam",
+        "en": "Support"
+      },
+      "target": "[data-view=\"support\"]",
+      "readiness": "IN_DEVELOPMENT"
+    }
+  ]
+}
