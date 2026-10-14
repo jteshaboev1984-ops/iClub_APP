@@ -38,6 +38,7 @@ const cases = [
  "qa/ai-layer-v21-ui-transport.test.cjs",
  "qa/ai-layer-v21-real-screen-preflight.test.cjs",
  "qa/ai-layer-v21-screen-binding.test.cjs",
+ "qa/ai-layer-v21-p6-app-screen-binding.test.cjs",
  "qa/ai-layer-v21-evidence-publisher.test.cjs",
  "qa/ai-layer-v21-preview-assembly.test.cjs",
  "qa/ai-layer-v21-protected-preview.test.cjs",
