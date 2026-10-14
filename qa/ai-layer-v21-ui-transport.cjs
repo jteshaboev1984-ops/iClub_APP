@@ -24,12 +24,19 @@ class QaV21ScreenClient{
  }
  // Authentication acquisition is part of the trusted operation. A
  // rejected token reader must never escape as an unhandled promise.
- async authenticatedPost(path,body){
+ async authenticatedPost(path,body,shouldSend){
   let token;
   try{token=await this.readJwt();}
   catch{return fail("authentication_required");}
   if(typeof token!=="string"||!TOKEN.test(token))
    return fail("authentication_required");
+  // JWT retrieval may wait asynchronously. A logout, screen switch or expired
+  // lease during that wait MUST cancel the request BEFORE it reaches the Edge.
+  if(typeof shouldSend==="function"){
+   let stillAuthorized=false;
+   try{stillAuthorized=shouldSend()===true;}catch{}
+   if(!stillAuthorized)return fail("context_changed");
+  }
   try{
    const res=await this.post({path,authorization:"Bearer "+token,body});
    return res&&typeof res==="object"&&!Array.isArray(res)?
@@ -95,7 +102,8 @@ class QaV21ScreenClient{
   const begunAt=this.safeNow();
   if(begunAt===null)
    return fail("invalid_context_clock");
-  const r=await this.authenticatedPost("/context",body);
+  const r=await this.authenticatedPost("/context",body,
+   ()=>seq===this.epoch&&this.safeNow()!==null);
   if(r?.ok!==true||!UUID.test(r.contextHandle||""))
    return fail(r?.reason||"context_unavailable");
   // An arbitrary boolean from /context does not grant an unlimited lease.
@@ -130,7 +138,7 @@ class QaV21ScreenClient{
   const handle=this.handle;
   const r=await this.authenticatedPost("/answer",{
    intent:"status",contextHandle:handle,appLocale:locale
-  });
+  },()=>seq===this.epoch&&this.handle===handle&&this.isCurrent());
   return seq===this.epoch&&this.handle===handle?
    this.isCurrent()?r:fail("context_expired"):fail("context_changed");
  }
@@ -156,7 +164,7 @@ class QaV21ScreenClient{
   try{
    const r=await this.authenticatedPost("/answer",{
     intent:"answer",requestId,contextHandle,appLocale:locale,...input
-   });
+   },()=>seq===this.epoch&&this.handle===contextHandle&&this.isCurrent());
    // Do not display a reply after route, learner, account or screen switch.
    // Do not issue any automatic retries (the server might already have billed).
    if(seq!==this.epoch||this.handle!==contextHandle)
