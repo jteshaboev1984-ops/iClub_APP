@@ -44,7 +44,11 @@ function scenario({subject="biology",surface="lesson",locale="ru",ready=true}:
   protected_assessment:state.exam,expires_at_ms:4102444800000,
   context_revision:"synthetic-context-revision-v1",
   surface:screen.surface,subject:screen.subject,
-  feature:screen.feature,topic:screen.topic
+  feature:screen.feature,topic:screen.topic,current_view:"courses",
+  lesson_id:screen.surface==="lesson"?101:null,
+  practice_session_id:screen.surface==="practice"?11:null,
+  question_id:screen.surface==="practice"?202:null,
+  tour_attempt_id:null
  });
  const exactTopic=(args:RecordData)=>args.p_surface===screen.surface&&
    args.p_subject===screen.subject&&args.p_feature===screen.feature&&
@@ -88,6 +92,30 @@ function scenario({subject="biology",surface="lesson",locale="ru",ready=true}:
    case "get_iclub_ai_v21_scoped_context_service":
     return Response.json({allowed:args.p_user_id===UID&&
       args.p_context_handle===HANDLE,context:context()});
+   case "get_iclub_ai_v21_screen_evidence_service":{
+    // Proposed RPC is simulated, never connected to real students.
+    if(args.p_user_id!==UID||!state.active)return Response.json({allowed:false});
+    const kind=String(args.p_kind||"");
+    const base={user_id:UID,evidence_kind:kind,
+     requested_view:args.p_view,requested_subject:args.p_subject};
+    let evidence:RecordData|null=null;
+    if(kind==="current_screen")
+     evidence={...base,active:true,context_handle:HANDLE,
+      context_revision:"synthetic-context-revision-v1",
+      revision:1,current_view:"courses"};
+    if(screen.surface==="lesson"&&kind==="lesson"&&args.p_lesson_id===101)
+     evidence={...base,id:101,subject_key:screen.subject,topic_key:screen.topic,
+      is_active:true,lesson_specific:true,is_video:false,
+      access_authorized:true,source_revision:1};
+    if(screen.surface==="practice"&&kind==="practice_session_v4"&&args.p_session_id===11)
+     evidence={...base,id:11,session_id:11,user_id:UID,status:"finalized",
+      subject_key:screen.subject,finalized_at:"2026-10-14T00:00:00Z",question_ids:[202]};
+    if(screen.surface==="practice"&&kind==="practice_answer_v4"&&
+       args.p_session_id===11&&args.p_question_id===202)
+     evidence={...base,session_id:11,question_id:202,
+      server_checked:true,is_final:true,topic_key:screen.topic,revision:1};
+    return Response.json({allowed:evidence!==null,evidence});
+   }
    case "get_iclub_ai_v21_rollout_service":
     return Response.json({allowed:args.p_user_id===UID&&state.rollout&&
       state.active&&state.activeSubjects.has(screen.subject)&&exactTopic(args)});
