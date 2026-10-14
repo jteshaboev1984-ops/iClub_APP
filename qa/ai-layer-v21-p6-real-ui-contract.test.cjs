@@ -8,9 +8,10 @@ const script=readFileSync("qa/ai-layer-v21-p6-app-screen-binding.cjs","utf8");
 const supported=["home","courses","ratings","profile","about","support"];
 const forbidden=["splash","registration","notifications","community",
  "support-topic","certificates","certificate-verify","archive","resources","news"];
-const nested=["courses-video","courses-practice-start","courses-practice-result",
- "courses-practice-review","courses-practice-recs","courses-tour-rules",
- "courses-tour-result","courses-tour-review","courses-my-rec-detail"];
+const ALL_NESTED=["all-subjects","subject-hub","lessons","video",
+ "practice-start","practice-quiz","practice-result","practice-review",
+ "practice-recs","tours","tour-rules","tour-quiz","tour-result",
+ "tour-review","books","my-recs","my-rec-detail"];
 test("§59 candidate selectors match app's real route registry and unchanged DOM",()=>{
  assert.ok(app.includes('function showView(viewName)'));
  assert.ok(app.includes('el.classList.toggle("is-active", v === viewName)'));
@@ -25,15 +26,25 @@ test("§59 candidate selectors match app's real route registry and unchanged DOM
    "Potential unsupported page became a user-facing allowlisted view: "+view);
  }
 });
-test("§59 every active nested educational result is excluded from global Help",()=>{
- for(const screen of nested){
-  assert.ok(html.includes('id="'+screen+'"'),"real source changed: "+screen);
-  assert.ok(script.includes('"'+screen+'"'),"dangerous nested view not blocked "+screen);
+test("§61 ALL real nested Courses routes are isolated from General Help",()=>{
+ const routes=/const COURSES_SCREENS = \[([\s\S]*?)\];/.exec(app);
+ assert.ok(routes,"actual Courses route registry changed");
+ const actual=[...routes[1].matchAll(/"([a-z-]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(actual,ALL_NESTED,"new or rearranged Courses routes need QA review");
+ assert.equal(actual.length,17);
+ for(const name of actual){
+  assert.ok(html.includes('id="courses-'+name+'"'),
+   "missing Courses stack screen "+name);
  }
- for(const active of ["courses-practice-quiz","courses-tour-quiz","exam-prep-host-root"])
-  assert.ok(script.includes('"'+active+'"'));
+ assert.ok(script.includes('#view-courses .stack-screen.is-active'),
+  "global helper no longer checks the entire nested academic stack");
+ assert.ok(script.includes('stack.length!==1'),
+  "global helper fails to reject two active nested pages");
+ assert.ok(script.includes('stack[0]?.id!=="courses-all-subjects"'),
+  "Global Help must be restricted to the non-academic subject list");
  assert.ok(script.includes('querySelectorAll?.(".view.is-active")'),
-  "cannot detect second hidden active global view");
+  "unknown global overlay must be rejected");
+ assert.ok(script.includes('"exam-prep-host-root"'),"Exam Prep protected host drift");
 });
 test("§59 no detached integration source is loaded or auto-enabled in production",()=>{
  for(const file of ["ai-layer-v21-p6-app-screen-binding.cjs",
