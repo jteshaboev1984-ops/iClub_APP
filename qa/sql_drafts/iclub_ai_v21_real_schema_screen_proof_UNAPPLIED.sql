@@ -27,7 +27,7 @@ DECLARE
  v_current_date date := (now() AT TIME ZONE 'Asia/Tashkent')::date;
 BEGIN
  IF p_user_id IS NULL OR p_kind IS NULL OR
-    p_kind NOT IN ('current_screen','profile_aggregate','practice_session_v4','practice_answer_v4',
+    p_kind NOT IN ('current_screen','navigation','profile_aggregate','practice_session_v4','practice_answer_v4',
                    'tour_attempt','tour_runtime','tour_archive_access')
     OR (p_kind LIKE 'practice_%' AND (p_session_id IS NULL OR p_session_id<=0))
     OR (p_kind='practice_answer_v4' AND (p_question_id IS NULL OR p_question_id<=0))
@@ -73,6 +73,43 @@ BEGIN
  -- Profile proof is a minimal verified ACTIVITY snapshot, not an
  -- academic mastery/readiness metric, trend or AI lesson recommendation.
  -- Its values are calculated ONLY from actual owner-enrolled DB rows.
+ -- Navigation source is not a UI label lookup. It requires an active
+ -- authenticated server-minted global view AND independently published,
+ -- integrity-checked, locale-complete editorial navigation source.
+ IF p_kind='navigation' THEN
+  IF p_view IS NULL OR p_view NOT IN ('courses','ratings','about','support')
+    OR to_regprocedure('public.get_iclub_ai_v21_general_scope_service()') IS NULL
+    OR to_regclass('private.iclub_ai_v21_scoped_contexts') IS NULL THEN
+   RETURN jsonb_build_object('allowed',false);END IF;
+  SELECT jsonb_build_object(
+    'user_id',nav.user_id,'evidence_kind','navigation',
+    'requested_view',p_view,'view',p_view,'approved',true,
+    'current',true,'version',scope.source_version||':'||
+      left(scope.source_fingerprint,20))
+  INTO v_evidence
+  FROM private.iclub_ai_v21_current_screen nav
+  JOIN private.iclub_ai_v21_scoped_contexts c
+   ON c.context_handle=nav.current_handle AND c.user_id=nav.user_id
+    AND c.context_revision=nav.revision
+  CROSS JOIN LATERAL (
+    SELECT public.get_iclub_ai_v21_general_scope_service() AS result
+  ) raw
+  CROSS JOIN LATERAL (
+    SELECT raw.result->>'source_version' AS source_version,
+           raw.result->>'source_fingerprint' AS source_fingerprint,
+           raw.result->>'allowed' AS allowed
+  ) scope
+  WHERE nav.user_id=p_user_id AND c.surface_code='global'
+   AND c.subject_key='general' AND c.feature_code='app_help'
+   AND c.topic_key='navigation' AND c.app_view_code=p_view
+   AND c.revoked_at IS NULL AND c.expires_at>now()
+   AND scope.allowed='true'
+   AND public.get_iclub_ai_v21_scoped_context_service(
+     p_user_id,c.context_handle::text)->>'allowed'='true';
+  IF v_evidence IS NULL THEN RETURN jsonb_build_object('allowed',false);END IF;
+  RETURN jsonb_build_object('allowed',true,'evidence',v_evidence);
+ END IF;
+
  IF p_kind='profile_aggregate' THEN
   IF to_regclass('private.iclub_ai_v21_scoped_contexts') IS NULL THEN
    RETURN jsonb_build_object('allowed',false);END IF;
