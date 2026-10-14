@@ -49,6 +49,8 @@ on:
       - 'qa/ai-layer-v21-owner-product-gate.test.cjs'
       - 'qa/ai-layer-v21-p6-home-approved-priority.cjs'
       - 'qa/ai-layer-v21-p6-home-approved-priority.test.cjs'
+      - 'qa/ai-layer-v21-p6-home-signed-server-bridge.cjs'
+      - 'qa/ai-layer-v21-p6-home-signed-server-bridge.test.cjs'
       - 'qa/ai-layer-v21-p6-nav-approved-locale.cjs'
       - 'qa/ai-layer-v21-p6-nav-approved-locale.test.cjs'
       - 'qa/ai-layer-v21-p6-approved-copy-bundle.cjs'
