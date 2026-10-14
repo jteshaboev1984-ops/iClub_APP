@@ -90,13 +90,13 @@ BEGIN
      AND c.context_revision=nav.revision
   JOIN public.users person ON person.id=nav.user_id
   CROSS JOIN LATERAL (
-   SELECT count(*)::integer AS n
+   SELECT count(DISTINCT us.subject_id)::integer AS n
    FROM public.user_subjects us
    JOIN public.subjects subj ON subj.id=us.subject_id AND subj.is_active=true
    WHERE us.user_id=nav.user_id AND us.mode='competitive'
   ) cs
   CROSS JOIN LATERAL (
-   SELECT count(*)::integer AS n
+   SELECT count(DISTINCT us.subject_id)::integer AS n
    FROM public.user_subjects us
    JOIN public.subjects subj ON subj.id=us.subject_id AND subj.is_active=true
    WHERE us.user_id=nav.user_id AND us.mode='study' AND us.is_pinned=true
