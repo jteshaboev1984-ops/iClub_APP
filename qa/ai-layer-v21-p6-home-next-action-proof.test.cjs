@@ -83,3 +83,45 @@ test("One unverified locale blocks Home; fallback cannot bypass it",async()=>{
   a.equal((await new QAHomeNextActionProof(x.svc).check({userId:uid,
    contextHandle:handle,locale})).ready,false);
 });
+
+test("Revoked source, planner signature or academic proof during a long check blocks Home",async()=>{
+ for(const domain of ["plan","source","academic"]){
+  const x=setup(),original=x.svc;
+  let count=0;
+  if(domain==="plan"){
+   original.verifyPlanAuthority=async()=>++count===1;
+  }else if(domain==="source"){
+   original.verifyEditorialRelease=async()=>({
+    ready:++count===1,sourceHash:source,sourceVersion:"v1"});
+  }else{
+   original.verifyAcademicEvidence=async()=>({
+    allowed:++count===1,evidenceHash:hash,evidenceRevision:4});
+  }
+  a.equal((await x.run()).ready,false,domain);
+ }
+});
+test("Server re-reads immutable Home plan after checks; changed priority/version/hash denies",async()=>{
+ for(const key of ["planRevision","authorityHash","sourceHash"]){
+  const x=setup();let count=0;
+  x.svc.readServerPlan=async()=>{
+   count++;
+   const result=structuredClone(x.t.plan);
+   if(count===2){
+    if(key==="planRevision")result.planRevision=9;
+    if(key==="authorityHash")result.authorityHash="c".repeat(64);
+    if(key==="sourceHash")result.actions[0].sourceHash="c".repeat(64);
+   }
+   return result;
+  };
+  a.equal((await x.run()).ready,false,key);
+  a.equal(count,2);
+ }
+});
+test("Mutating a shared plan reference while verifying evidence cannot pass",async()=>{
+ const x=setup();
+ x.svc.verifyAcademicEvidence=async()=>{
+  x.t.plan.actions[0].evidenceRevision=99;
+  return{allowed:true,evidenceHash:hash,evidenceRevision:99};
+ };
+ a.equal((await x.run()).ready,false);
+});
