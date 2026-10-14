@@ -94,6 +94,20 @@ test("§58 Home/Profile never dispatch unapproved General Help prompt",async()=>
   a.equal(f.calls.length,length);
  }
 });
+test("§60 leaving an already minted Home or Courses for unsupported overlay revokes authority",async()=>{
+ for(const transition of ["certificates","course-review","dual-view"]){
+  const f=fixture();f.set(transition==="course-review"?"courses":"home");
+  a.equal((await f.binder.sync()).ok,true,transition);
+  if(transition==="certificates")f.set("certificates");
+  if(transition==="course-review")f.els["courses-practice-review"].active=true;
+  if(transition==="dual-view")f.els["view-profile"].active=true;
+  a.equal((await f.binder.sync()).reason,"screen_not_verified",transition);
+  a.equal(f.binder.ready,false,transition);
+  a.deepEqual(f.calls.map(x=>x.body.action),["mintAppView","revoke"],transition);
+  a.equal((await f.binder.status("ru")).reason,"screen_not_verified");
+  a.equal(f.calls.length,2,"Old context must not be reused for "+transition);
+ }
+});
 test("Changing tabs or document visibility drops local authority and remote handle",async()=>{
  const f=fixture();f.set("home");await f.binder.sync();
  f.doc.visibilityState="hidden";
