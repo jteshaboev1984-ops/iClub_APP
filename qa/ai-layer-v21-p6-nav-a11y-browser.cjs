@@ -7,22 +7,25 @@ const {join,resolve}=require("node:path");
 const {tmpdir}=require("node:os");
 const {setTimeout:delay}=require("node:timers/promises");
 const assert=require("node:assert/strict");
-const {makeAccessibleNavPreview}=require("./ai-layer-v21-p6-nav-a11y-preview.cjs");
+const {makeApprovedAccessibleNavPreview,approvedLabel}=require("./ai-layer-v21-p6-nav-approved-locale.cjs");
 const root=resolve(__dirname,"..");
 const read=file=>readFileSync(join(root,file),"utf8");
-const original=read("index.html"),candidate=makeAccessibleNavPreview(original).html;
+const original=read("index.html");
 const i18n=read("i18n.js"),app=read("app.js");
 assert.match(app,/function applyStaticI18n\(\)\s*\{/);
 assert.match(app,/document\.querySelectorAll\("\[data-i18n\]"\)\.forEach/);
-const start=candidate.indexOf('<nav id="tabbar"');
-const end=candidate.indexOf("</nav>",start);
-assert(start>0&&end>start);
-const nav=candidate.slice(start,end+6);
-const documentHtml='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+
+function documentHtmlFor(locale){
+ const candidate=makeApprovedAccessibleNavPreview(original,locale).html;
+ const start=candidate.indexOf('<nav id="tabbar"');
+ const end=candidate.indexOf("</nav>",start);
+ assert(start>0&&end>start);
+ const nav=candidate.slice(start,end+6);
+ return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+
  'body{margin:0;font-family:Arial,sans-serif}.tabbar{display:grid;grid-template-columns:repeat(4,1fr);height:64px}'+
  '.tab{border:0;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}'+
  '.tab-ico{height:24px;width:24px}.tab-ico svg{height:24px;width:24px}.tab-txt{font-size:11px}'+
  '</style></head><body>'+nav+'</body></html>';
+}
 function chromeExe(){
  if(process.env.ICLUB_AI_CHROME)return process.env.ICLUB_AI_CHROME;
  for(const exe of ["google-chrome","google-chrome-stable","chromium","chromium-browser"]){
@@ -79,7 +82,7 @@ async function run(){
    await browser.send("Emulation.setDeviceMetricsOverride",{width:cfg.w,
     height:cfg.h,deviceScaleFactor:1,mobile:cfg.w<600});
    await browser.send("Page.navigate",{url:"data:text/html;charset=utf-8,"+
-    encodeURIComponent(documentHtml)});
+    encodeURIComponent(documentHtmlFor(cfg.lang))});
    // CDP Page.navigate signals navigation acceptance, not DOM completion.
    let settled=false;
    for(let attempt=0;attempt<50;attempt++){
@@ -114,6 +117,9 @@ async function run(){
     !x.ignored).map(x=>x.name?.value).filter(x=>typeof x==="string");
    assert.deepEqual(accessible,visible.labels,
     "Accessibility tree must exactly match visible "+cfg.lang+" button captions");
+   const landmark=(tree.nodes||[]).find(x=>!x.ignored&&x.role?.value==="navigation");
+   assert.equal(landmark?.name?.value,approvedLabel(cfg.lang),
+    "Navigation landmark must match the approved RU/UZ/EN label");
    const bounds=await browser.send("Runtime.evaluate",{expression:
     "[...document.querySelectorAll('button[data-tab]')].map(x=>"+ 
     "{const r=x.getBoundingClientRect();return {left:r.left,width:r.width,right:r.right};})",
@@ -124,7 +130,8 @@ async function run(){
     "No preview bottom tab should clip outside viewport");
    console.log("P6_NAV_A11Y_BROWSER_GREEN "+
     JSON.stringify({locale:cfg.lang,viewport:cfg.w+"x"+cfg.h,
-     accessibleNames:accessible,tabButtons:4,focus:true}));
+     accessibleNames:accessible,landmark:approvedLabel(cfg.lang),
+     tabButtons:4,focus:true}));
   }
   for(const url of browser.network)
    assert(url.startsWith("data:"),"Unexpected outbound request: "+url);
