@@ -15,13 +15,19 @@ class QaV21ScreenClient{
   this.readJwt=readJwt;
   this.newRequestId=newRequestId;
   this.nowMs=nowMs;
+  this.lastClockMs=-1;
+  this.clockUnsafe=false;
   this.expiresAtMs=0;
   this.epoch=0;
   this.handle=null;
   this.inFlight=false;
  }
+ // Authentication acquisition is part of the trusted operation. A
+ // rejected token reader must never escape as an unhandled promise.
  async authenticatedPost(path,body){
-  const token=await this.readJwt();
+  let token;
+  try{token=await this.readJwt();}
+  catch{return fail("authentication_required");}
   if(typeof token!=="string"||!TOKEN.test(token))
    return fail("authentication_required");
   try{
@@ -29,6 +35,18 @@ class QaV21ScreenClient{
    return res&&typeof res==="object"&&!Array.isArray(res)?
     res:fail("unavailable");
   }catch{return fail("unavailable");}
+ }
+ safeNow(){
+  let now;
+  try{now=this.nowMs();}catch{this.clockUnsafe=true;return null;}
+  // Wall-clock rollback after authorization must not extend a granted TTL.
+  // Once unsafe, remain closed until a new client/verified session is built.
+  if(this.clockUnsafe||!Number.isSafeInteger(now)||now<0||
+     now<this.lastClockMs){
+   this.clockUnsafe=true;return null;
+  }
+  this.lastClockMs=now;
+  return now;
  }
  async revoke(handle){
   if(!UUID.test(handle||""))return fail("invalid_context");
@@ -74,8 +92,8 @@ class QaV21ScreenClient{
   if(prev)await this.revoke(prev);
   if(seq!==this.epoch)return fail("context_changed");
   // Conservative lease bound starts BEFORE JWT/network awaits.
-  const begunAt=this.nowMs();
-  if(!Number.isSafeInteger(begunAt)||begunAt<0)
+  const begunAt=this.safeNow();
+  if(begunAt===null)
    return fail("invalid_context_clock");
   const r=await this.authenticatedPost("/context",body);
   if(r?.ok!==true||!UUID.test(r.contextHandle||""))
@@ -92,10 +110,9 @@ class QaV21ScreenClient{
    await this.revoke(r.contextHandle);
    return fail("context_changed");
   }
-  const now=this.nowMs();
+  const now=this.safeNow();
   const deadline=begunAt+r.expiresInSeconds*1000;
-  if(!Number.isSafeInteger(now)||!Number.isSafeInteger(deadline)||
-     now<begunAt||now>=deadline){
+  if(now===null||!Number.isSafeInteger(deadline)||now>=deadline){
    await this.revoke(r.contextHandle);return fail("context_expired");
   }
   this.handle=r.contextHandle;
@@ -103,9 +120,8 @@ class QaV21ScreenClient{
   return {ok:true};
  }
  isCurrent(){
-  const now=this.nowMs();
-  return Boolean(this.handle)&&Number.isSafeInteger(now)&&
-   now<this.expiresAtMs;
+  const now=this.safeNow();
+  return Boolean(this.handle)&&now!==null&&now<this.expiresAtMs;
  }
  async status(locale){
   if(!LOCALES.has(locale)||!this.handle)return fail("context_unavailable");
