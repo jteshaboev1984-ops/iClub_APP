@@ -80,6 +80,16 @@ async function run(){
     height:cfg.h,deviceScaleFactor:1,mobile:cfg.w<600});
    await browser.send("Page.navigate",{url:"data:text/html;charset=utf-8,"+
     encodeURIComponent(documentHtml)});
+   // CDP Page.navigate signals navigation acceptance, not DOM completion.
+   let settled=false;
+   for(let attempt=0;attempt<50;attempt++){
+    const state=await browser.send("Runtime.evaluate",{expression:
+     'document.readyState==="complete" && !!document.querySelector("#tabbar button")',
+     returnByValue:true});
+    if(state.result?.value===true){settled=true;break;}
+    await delay(20);
+   }
+   assert(settled,"Isolated accessible-nav DOM did not finish loading");
    // Original i18n code is executed against an isolated static data document,
    // not against the real app or a production Supabase session.
    let result=await browser.send("Runtime.evaluate",{expression:i18n,
