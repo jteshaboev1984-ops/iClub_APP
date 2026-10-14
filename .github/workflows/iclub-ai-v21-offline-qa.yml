@@ -25,6 +25,9 @@ on:
       - 'qa/ai-layer-v21-p6-navigation-editorial-drafts.test.cjs'
       - 'qa/ai-layer-v21-p6-navigation-semantic-review.cjs'
       - 'qa/ai-layer-v21-p6-navigation-semantic-review.test.cjs'
+      - 'qa/ai-layer-v21-p6-nav-a11y-preview.cjs'
+      - 'qa/ai-layer-v21-p6-nav-a11y-preview.test.cjs'
+      - 'qa/ai-layer-v21-p6-nav-a11y-browser.cjs'
       - 'qa/ai-layer-v21-p6-editorial-source-packet.cjs'
       - 'qa/ai-layer-v21-p6-editorial-source-packet.test.cjs'
       - 'qa/ai-layer-v21-p6-release-preflight.cjs'
@@ -106,6 +109,8 @@ jobs:
           node qa/ai-layer-v21-browser-visual.cjs
       - name: Offline P6 native Chromium navigation and context-scope QA
         run: node qa/ai-layer-v21-p6-native-browser.cjs
+      - name: QA-only P6 accessible tab names native Chromium in RU UZ EN
+        run: node qa/ai-layer-v21-p6-nav-a11y-browser.cjs
       - name: Synthetic Preview real Chromium practice to iClub AI journey
         run: node qa/ai-layer-v21-protected-preview-browser.cjs
       - name: Install Deno runtime for Edge candidate verification
