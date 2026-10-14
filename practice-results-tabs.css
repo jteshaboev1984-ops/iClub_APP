@@ -268,3 +268,243 @@
   .iclub-visual-v3 #courses-my-recs .iclub-myrec-topic-header {flex-wrap:wrap;}
   .iclub-visual-v3 #courses-my-recs .iclub-topic-history-row {padding:11px;}
 }
+
+
+/* STITCH APPROVED PRACTICE UX — presentation only; scoped to recommendations.
+   Never changes old Tours or Practice data, triggers, persistence or academic states. */
+.iclub-visual-v3 #courses-my-recs,
+.iclub-visual-v3 #courses-my-rec-topic-history,
+.iclub-visual-v3 #courses-my-rec-topic-review {
+  --sx-blue:#1a43bf;--sx-ink:#172135;--sx-muted:#6c788c;
+  --sx-line:#e5eaf2;--sx-soft:#ecf2ff;--sx-canvas:#f6f8fb;
+  color:var(--sx-ink);min-width:0;
+}
+.iclub-visual-v3 #courses-my-recs #my-recs-list,
+.iclub-visual-v3 #courses-my-rec-topic-history #my-rec-topic-history-body,
+.iclub-visual-v3 #courses-my-rec-topic-review #my-rec-topic-review-body {
+  min-width:0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-main-tabs{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;
+  margin:4px 0 13px;padding:4px;border-radius:14px;background:#e8ebf0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-main-tab {
+  min-width:0;min-height:43px;padding:9px 7px;border:0;border-radius:10px;
+  font:inherit;font-size:13px;font-weight:760;color:#596476;
+  background:transparent;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-main-tab.selected {
+  background:#fff;color:var(--sx-blue);box-shadow:0 1px 5px rgba(36,56,95,.10);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-subtabs{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  margin:0 0 18px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-subtabs button{
+  min-height:37px;max-width:100%;border:0;border-radius:22px;
+  padding:8px 15px;background:#ecf0f5;color:#667085;
+  font:inherit;font-size:12px;font-weight:760;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-subtabs button.selected{
+  background:var(--sx-blue);color:#fff;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last {
+  margin:2px 0 22px;padding:17px;background:#fff;
+  border:1px solid var(--sx-line);border-radius:17px;
+  box-shadow:0 2px 6px rgba(22,39,79,.035);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-head,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-body,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-footer {
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-head{
+  margin-bottom:12px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-kicker {
+  color:var(--sx-blue);font-size:10px;font-weight:830;
+  line-height:1.4;letter-spacing:.035em;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-head small,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-info small {
+  color:var(--sx-muted);font-size:12px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-body {
+  align-items:center;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-info{
+  flex:1;min-width:0;display:grid;gap:6px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-info strong {
+  font-weight:780;font-size:17px;letter-spacing:-.025em;
+  line-height:1.3;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-result {
+  flex:none;white-space:nowrap;color:var(--sx-blue);
+  font-size:clamp(23px,6.9vw,29px);font-weight:870;
+  letter-spacing:-.05em;font-variant-numeric:tabular-nums;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-result.bad{color:#c83d40;}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-result.good{color:#15825f;}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-footer {
+  margin-top:15px;padding-top:11px;border-top:1px solid var(--sx-line);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-last-errors {
+  color:#c83d40;font-size:12px;font-weight:770;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-link,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-link {
+  border:0;background:transparent;padding:5px 0;color:var(--sx-blue);
+  font:inherit;font-size:12px;font-weight:760;text-align:right;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;margin:21px 0 12px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-heading h2 {
+  font-size:17px;font-weight:840;letter-spacing:-.02em;
+  line-height:1.3;margin:0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-total {
+  flex:none;max-width:50%;padding:7px 9px;border-radius:8px;
+  background:#ecf1f7;color:#51617a;
+  font-size:11px;font-weight:720;text-align:center;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-groups{
+  display:grid;gap:14px;min-width:0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-group {
+  border:1px solid var(--sx-line);background:#fff;overflow:hidden;
+  border-radius:17px;box-shadow:0 2px 6px rgba(22,39,79,.035);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-head {
+  padding:17px 16px 15px;
+  background:linear-gradient(180deg,#fff 0%,#f9fbff 100%);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-headline {
+  display:flex;align-items:start;justify-content:space-between;gap:8px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tag {
+  flex:none;max-width:55%;padding:6px 8px;border-radius:8px;
+  background:#fff0ef;color:#bf3e42;font-size:10px;
+  line-height:1.25;font-weight:770;text-align:center;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-head h3 {
+  margin:11px 0 6px;color:var(--sx-ink);
+  font-size:17px;line-height:1.28;font-weight:800;
+  letter-spacing:-.025em;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-head p{
+  color:var(--sx-muted);font-size:12px;line-height:1.55;
+  margin:0 0 6px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-primary{
+  display:block;min-height:44px;width:100%;margin-top:13px;
+  padding:11px 12px;border:0;border-radius:10px;
+  background:var(--sx-blue);color:#fff;
+  font:inherit;font-size:13px;font-weight:780;
+  text-align:center;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-entries {border-top:1px solid var(--sx-line);}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-entry {
+  display:flex;align-items:center;gap:12px;width:100%;
+  min-height:53px;padding:11px 16px;border:0;background:#fff;
+  text-align:left;font:inherit;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-entry+.iclub-sx-topic-entry {
+  border-top:1px solid var(--sx-line);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-entry[hidden] {display:none!important;}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-number {
+  color:var(--sx-blue);font-size:11px;font-weight:830;
+  font-variant-numeric:tabular-nums;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-entry-text {
+  display:grid;gap:3px;min-width:0;flex:1;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-entry-text strong {
+  font-size:12.5px;font-weight:740;line-height:1.4;
+  overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-topic-entry-text small {
+  font-size:11px;color:var(--sx-muted);overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-arrow {
+  flex:none;color:#8b99af;font-size:22px;line-height:1;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-more {
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;min-height:42px;padding:9px 12px;background:#fff;
+  color:var(--sx-blue);font:inherit;font-size:12px;font-weight:780;
+  border:0;border-top:1px solid var(--sx-line);cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview {
+  margin-top:23px;min-width:0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview .iclub-topic-history-header {
+  display:flex;justify-content:space-between;align-items:center;
+  gap:9px;flex-wrap:wrap;margin-bottom:11px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview .iclub-topic-history-header>strong {
+  font-size:16px;font-weight:830;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview .iclub-topic-history-count {display:none;}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview .iclub-topic-history-recent {
+  display:grid;gap:0;border:1px solid var(--sx-line);
+  border-radius:15px;background:#fff;overflow:hidden;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview .iclub-topic-history-row {
+  border:0;border-radius:0;min-height:60px;
+  padding:13px;gap:10px;background:#fff;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview .iclub-topic-history-row+.iclub-topic-history-row {border-top:1px solid var(--sx-line);}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview .iclub-topic-history-row-score {background:#fff0ef;color:#c83d40;}
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-header {
+  justify-content:space-between;gap:10px;
+}
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-recent {display:grid;gap:9px;}
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row {
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  min-height:64px;padding:14px;border:1px solid var(--sx-line);
+  border-radius:13px;background:#fff;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row-info {
+  display:grid;gap:4px;min-width:0;
+}
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row-info strong{
+  font-size:13px;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row-info small{color:var(--sx-muted);}
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row-meta {
+  flex:none;display:flex;align-items:center;gap:9px;
+}
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row-score {
+  border-radius:10px;background:#f1f4fa;color:var(--sx-blue);
+  font-size:13px;font-weight:800;padding:7px 10px;
+}
+.iclub-visual-v3 #courses-my-rec-topic-review .iclub-topic-review-retry {
+  background:var(--sx-blue);color:white;border-radius:11px;
+  font-size:13px;font-weight:780;
+}
+.iclub-visual-v3 #courses-my-rec-topic-review .iclub-topic-review-question{
+  border-radius:13px;border:1px solid var(--sx-line);
+}
+.iclub-visual-v3 #courses-my-rec-topic-review .iclub-topic-review-stem{font-size:13px;line-height:1.5;}
+.iclub-visual-v3 #courses-my-rec-topic-review .iclub-topic-review-overview{
+  border-radius:15px;border-color:var(--sx-line);box-shadow:0 2px 6px rgba(22,39,79,.035);
+}
+.iclub-visual-v3 #courses-my-rec-topic-review .iclub-topic-review-stats span{
+  background:var(--sx-soft);color:var(--sx-blue);
+}
+.iclub-visual-v3 #courses-my-recs button:focus-visible,
+.iclub-visual-v3 #courses-my-rec-topic-history button:focus-visible,
+.iclub-visual-v3 #courses-my-rec-topic-review button:focus-visible{
+  outline:3px solid #598aff;outline-offset:2px;
+}
+@media(max-width:359px){
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-topic-head {padding:14px 12px;}
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-topic-entry {padding:10px 12px;}
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tag {max-width:46%;font-size:9.5px;}
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-last {padding:13px;}
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-main-tab {min-height:42px;}
+}
