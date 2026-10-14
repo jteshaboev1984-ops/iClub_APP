@@ -309,3 +309,16 @@ test("§72 context expiration during JWT lookup prevents even status/answer disp
   assert.equal(f.calls.filter(c=>c.path==="/answer").length,0);
  }
 });
+
+test("§72 delayed JWT beyond maximum context lease rejects mint without Edge request",async()=>{
+ const jwt=deferred();let clock=100000;
+ const f=fixture({readJwt:async()=>jwt.promise});
+ f.client.nowMs=()=>clock;
+ const pending=f.client.openAppView("about");
+ await Promise.resolve();
+ clock=190001;
+ jwt.resolve("synthetic-jwt-token");
+ assert.equal((await pending).reason,"context_changed");
+ assert.equal(f.calls.length,0);
+ assert.equal(f.client.handle,null);
+});
