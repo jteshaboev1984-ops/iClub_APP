@@ -22,6 +22,8 @@ on:
       - 'qa/ai-layer-v21-p6-navigation-editorial-drafts.test.cjs'
       - 'qa/ai-layer-v21-p6-editorial-source-packet.cjs'
       - 'qa/ai-layer-v21-p6-editorial-source-packet.test.cjs'
+      - 'qa/ai-layer-v21-p6-release-preflight.cjs'
+      - 'qa/ai-layer-v21-p6-release-preflight.test.cjs'
       - 'docs/iclub-ai-layer-p6-editorial-packet-and-proof-hardening-v2.1.md'
       - 'qa/ai-layer-v21-p6-home-next-action-proof.cjs'
       - 'qa/ai-layer-v21-p6-home-next-action-proof.test.cjs'
