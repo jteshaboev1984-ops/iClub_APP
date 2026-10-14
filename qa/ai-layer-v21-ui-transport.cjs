@@ -73,6 +73,10 @@ class QaV21ScreenClient{
   this.inFlight=false;
   if(prev)await this.revoke(prev);
   if(seq!==this.epoch)return fail("context_changed");
+  // Conservative lease bound starts BEFORE JWT/network awaits.
+  const begunAt=this.nowMs();
+  if(!Number.isSafeInteger(begunAt)||begunAt<0)
+   return fail("invalid_context_clock");
   const r=await this.authenticatedPost("/context",body);
   if(r?.ok!==true||!UUID.test(r.contextHandle||""))
    return fail(r?.reason||"context_unavailable");
@@ -89,11 +93,13 @@ class QaV21ScreenClient{
    return fail("context_changed");
   }
   const now=this.nowMs();
-  if(!Number.isSafeInteger(now)||now<0){
-   await this.revoke(r.contextHandle);return fail("invalid_context_clock");
+  const deadline=begunAt+r.expiresInSeconds*1000;
+  if(!Number.isSafeInteger(now)||!Number.isSafeInteger(deadline)||
+     now<begunAt||now>=deadline){
+   await this.revoke(r.contextHandle);return fail("context_expired");
   }
   this.handle=r.contextHandle;
-  this.expiresAtMs=now+r.expiresInSeconds*1000;
+  this.expiresAtMs=deadline;
   return {ok:true};
  }
  isCurrent(){
