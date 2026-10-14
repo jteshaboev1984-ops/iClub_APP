@@ -140,7 +140,20 @@ async function run(){
   try{browser?.close()}catch{}
   child.kill("SIGKILL");
   await Promise.race([new Promise(r=>child.once("exit",r)),delay(1000)]);
-  rmSync(dir,{recursive:true,force:true,maxRetries:3});
+  // Headless Chromium may spawn short-lived children which still touch
+  // Default/ after the parent process exits. Retry bounded cleanup instead
+  // of converting an otherwise GREEN accessibility test into a flaky ENOTEMPTY.
+  let clean=false;
+  for(let attempt=0;attempt<12;attempt++){
+   try{rmSync(dir,{recursive:true,force:true,maxRetries:3,retryDelay:80});
+    clean=true;break;
+   }catch(e){
+    if(!["ENOTEMPTY","EBUSY","EPERM"].includes(e?.code)||attempt===11)
+     throw e;
+    await delay(180);
+   }
+  }
+  assert(clean,"Temporary isolated Chromium profile was not removed");
  }
 }
 run().catch(err=>{console.error(err);process.exitCode=1;});
