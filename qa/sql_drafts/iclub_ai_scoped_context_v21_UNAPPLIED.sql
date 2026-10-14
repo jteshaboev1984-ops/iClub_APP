@@ -26,15 +26,16 @@ CREATE TABLE private.iclub_ai_v21_current_screen(
 CREATE TABLE private.iclub_ai_v21_scoped_contexts(
  context_handle uuid PRIMARY KEY DEFAULT gen_random_uuid(),
  user_id uuid NOT NULL,
- surface_code text NOT NULL CHECK(surface_code IN ('practice','lesson','tour_archive')),
+ surface_code text NOT NULL CHECK(surface_code IN ('practice','lesson','tour_archive','home','profile','global')),
  subject_key text NOT NULL,
- feature_code text NOT NULL CHECK((surface_code='practice' AND feature_code='answer_explanation') OR (surface_code='lesson' AND feature_code='topic_explanation') OR (surface_code='tour_archive' AND feature_code='archive_explanation')),
+ feature_code text NOT NULL CHECK((surface_code='practice' AND feature_code='answer_explanation') OR (surface_code='lesson' AND feature_code='topic_explanation') OR (surface_code='tour_archive' AND feature_code='archive_explanation') OR (surface_code='home' AND feature_code='next_step') OR (surface_code='profile' AND feature_code='progress_explanation') OR (surface_code='global' AND feature_code='app_help')),
  topic_key text NOT NULL,
  practice_session_id bigint,
  practice_question_id bigint,
  lesson_id bigint,
  tour_attempt_id bigint,
  tour_id bigint,
+ app_view_code text,
  context_revision bigint NOT NULL CHECK(context_revision>0),
  expires_at timestamptz NOT NULL DEFAULT (now()+interval '90 seconds'),
  created_at timestamptz NOT NULL DEFAULT now(),
@@ -42,15 +43,22 @@ CREATE TABLE private.iclub_ai_v21_scoped_contexts(
  CHECK((surface_code='practice' AND practice_session_id IS NOT NULL
   AND practice_question_id IS NOT NULL AND lesson_id IS NULL
   AND tour_attempt_id IS NULL AND tour_id IS NULL
-  AND topic_key='question_'||practice_question_id::text)
+  AND app_view_code IS NULL AND topic_key='question_'||practice_question_id::text)
   OR (surface_code='lesson' AND lesson_id IS NOT NULL
    AND practice_session_id IS NULL AND practice_question_id IS NULL
    AND tour_attempt_id IS NULL AND tour_id IS NULL
-   AND topic_key='lesson_'||lesson_id::text)
+   AND app_view_code IS NULL AND topic_key='lesson_'||lesson_id::text)
   OR (surface_code='tour_archive' AND tour_attempt_id IS NOT NULL
    AND tour_id IS NOT NULL AND lesson_id IS NULL
    AND practice_session_id IS NULL AND practice_question_id IS NULL
-   AND topic_key='tour_'||tour_id::text||'_archive'))
+   AND app_view_code IS NULL AND topic_key='tour_'||tour_id::text||'_archive')
+  OR (surface_code IN ('home','profile','global') AND subject_key='general'
+   AND practice_session_id IS NULL AND practice_question_id IS NULL
+   AND lesson_id IS NULL AND tour_attempt_id IS NULL AND tour_id IS NULL
+   AND ((surface_code='home' AND app_view_code='home' AND topic_key='next_actions')
+    OR (surface_code='profile' AND app_view_code='profile' AND topic_key='progress')
+    OR (surface_code='global' AND app_view_code IN ('courses','ratings','about','support')
+     AND topic_key='navigation'))))
 );
 CREATE INDEX iclub_ai_v21_scoped_contexts_user_idx
  ON private.iclub_ai_v21_scoped_contexts(user_id,expires_at);
@@ -232,12 +240,23 @@ BEGIN
    RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');
   END IF;
  END IF;
+ IF v.surface_code IN ('home','profile','global') THEN
+  IF NOT EXISTS(SELECT 1 FROM public.users u WHERE u.id=p_user_id)
+   OR v.subject_key<>'general'
+   OR (v.surface_code='home' AND v.app_view_code<>'home')
+   OR (v.surface_code='profile' AND v.app_view_code<>'profile')
+   OR (v.surface_code='global' AND v.app_view_code NOT IN
+      ('courses','ratings','about','support')) THEN
+   RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');
+  END IF;
+ END IF;
  RETURN jsonb_build_object('allowed',true,'context',jsonb_build_object(
   'owner_id',v.user_id,'route_authority','unified_ai','active',true,
   'protected_assessment',false,
   'expires_at_ms',floor(extract(epoch from v.expires_at)*1000)::bigint,
   'context_revision','screen_'||v.context_revision::text,
-  'current_view','courses',
+  'current_view',CASE WHEN v.surface_code IN ('home','profile','global')
+    THEN v.app_view_code ELSE 'courses' END,
   'surface',v.surface_code,'subject',v.subject_key,'feature',v.feature_code,
   'topic',v.topic_key,
   'practice_session_id',v.practice_session_id,
@@ -426,6 +445,64 @@ REVOKE ALL ON FUNCTION public.mint_iclub_ai_v21_tour_archive_context_service(
  uuid,bigint) FROM public,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.mint_iclub_ai_v21_tour_archive_context_service(
  uuid,bigint) TO service_role;
+
+
+-- §50: a verified short-lived app screen, NOT approved explanations or actions.
+CREATE OR REPLACE FUNCTION public.mint_iclub_ai_v21_app_view_context_service(
+ p_user_id uuid,p_view text
+) RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $iclub_app_view_mint_v21$
+DECLARE
+ v_surface text;v_feature text;v_topic text;
+ v_id uuid;v_rev bigint;v_previous uuid;
+BEGIN
+ IF p_user_id IS NULL OR p_view NOT IN
+  ('home','profile','courses','ratings','about','support') THEN
+  RETURN jsonb_build_object('allowed',false,'reason','invalid_request');END IF;
+ IF NOT EXISTS(SELECT 1 FROM private.iclub_global_ai_runtime_config cfg
+  WHERE cfg.id=1 AND cfg.kill_switch=false AND cfg.ui_enabled=true
+    AND cfg.gateway_enabled=true)
+ THEN RETURN jsonb_build_object('allowed',false,'reason','global_ai_disabled');END IF;
+ IF private.iclub_ai_has_active_protected_assessment_v1(p_user_id) THEN
+  RETURN jsonb_build_object('allowed',false,'reason','active_assessment');END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.users u WHERE u.id=p_user_id) THEN
+  RETURN jsonb_build_object('allowed',false,'reason','app_profile_not_authorized');END IF;
+ v_surface:=CASE p_view WHEN 'home' THEN 'home'
+  WHEN 'profile' THEN 'profile' ELSE 'global' END;
+ v_feature:=CASE v_surface WHEN 'home' THEN 'next_step'
+  WHEN 'profile' THEN 'progress_explanation' ELSE 'app_help' END;
+ v_topic:=CASE v_surface WHEN 'home' THEN 'next_actions'
+  WHEN 'profile' THEN 'progress' ELSE 'navigation' END;
+ PERFORM pg_advisory_xact_lock(hashtextextended(p_user_id::text,303));
+ SELECT c.context_handle INTO v_previous
+ FROM private.iclub_ai_v21_current_screen nav
+ JOIN private.iclub_ai_v21_scoped_contexts c
+  ON c.context_handle=nav.current_handle AND c.user_id=nav.user_id
+ WHERE nav.user_id=p_user_id AND c.context_revision=nav.revision
+  AND c.surface_code=v_surface AND c.app_view_code=p_view
+  AND c.revoked_at IS NULL AND c.expires_at>now();
+ IF FOUND THEN RETURN jsonb_build_object('allowed',true,
+  'context_handle',v_previous,'expires_in_seconds',90,'duplicate',true);END IF;
+ IF (SELECT count(*) FROM private.iclub_ai_v21_scoped_contexts
+   WHERE user_id=p_user_id AND created_at>now()-interval '1 minute')>=30 THEN
+  RETURN jsonb_build_object('allowed',false,'reason','context_rate_limited');END IF;
+ v_id:=gen_random_uuid();
+ INSERT INTO private.iclub_ai_v21_current_screen(user_id,current_handle,revision,updated_at)
+ VALUES(p_user_id,v_id,1,now())
+ ON CONFLICT(user_id) DO UPDATE SET current_handle=excluded.current_handle,
+  revision=private.iclub_ai_v21_current_screen.revision+1,updated_at=now()
+ RETURNING revision INTO v_rev;
+ INSERT INTO private.iclub_ai_v21_scoped_contexts(
+  context_handle,user_id,surface_code,subject_key,feature_code,topic_key,
+  app_view_code,context_revision)
+ VALUES(v_id,p_user_id,v_surface,'general',v_feature,v_topic,p_view,v_rev);
+ RETURN jsonb_build_object('allowed',true,'context_handle',v_id,'expires_in_seconds',90);
+END;
+$iclub_app_view_mint_v21$;
+REVOKE ALL ON FUNCTION public.mint_iclub_ai_v21_app_view_context_service(
+ uuid,text) FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.mint_iclub_ai_v21_app_view_context_service(
+ uuid,text) TO service_role;
 
 -- The protected academic tables are SELECTed only; no writes to Practice,
 -- Tours, Exam Prep, users, user_subjects or learner local progress.
