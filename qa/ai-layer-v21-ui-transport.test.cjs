@@ -262,3 +262,50 @@ test("§68 rejection during answer is contained, and no data/credential is emitt
  assert.equal(f.calls.length,1,"invalid JWT must prevent any answer post");
  assert.equal(JSON.stringify(reply).includes("SYNTHETIC_JWT_PRIVATE"),false);
 });
+
+
+test("§72 late JWT on context mint cannot send to Edge after sign-out",async()=>{
+ const jwt=deferred();let reads=0;
+ const f=fixture({readJwt:async()=>++reads===1?jwt.promise:"synthetic-jwt-token"});
+ const mint=f.client.openAppView("home");
+ await Promise.resolve();
+ await f.client.leave();
+ jwt.resolve("synthetic-jwt-token");
+ assert.equal((await mint).reason,"context_changed");
+ assert.equal(f.calls.length,0,"Abandoned mint must never post or reserve capacity");
+ assert.equal(f.client.handle,null);
+});
+test("§72 delayed JWT on prepared answer or status cannot post after logout or screen switch",async()=>{
+ for(const intent of ["answer","status"]){
+  for(const mode of ["logout","screen_switch"]){
+   const jwt=deferred();let reads=0;
+   const f=fixture({readJwt:async()=>++reads===2?jwt.promise:"synthetic-jwt-token"});
+   assert.equal((await f.client.openAppView("support")).ok,true);
+   const pending=intent==="answer"?f.client.askPrepared("nav_home","ru"):
+    f.client.status("ru");
+   await Promise.resolve();
+   if(mode==="logout")await f.client.leave();
+   else assert.equal((await f.client.openAppView("ratings")).ok,true);
+   jwt.resolve("synthetic-jwt-token");
+   assert.equal((await pending).reason,"context_changed",intent+":"+mode);
+   assert.equal(f.calls.filter(c=>c.path==="/answer").length,0,
+    "Late JWT must not dispatch a stale paid or prepared request");
+  }
+ }
+});
+test("§72 context expiration during JWT lookup prevents even status/answer dispatch",async()=>{
+ for(const intent of ["answer","status"]){
+  let clock=100000,reads=0;
+  const jwt=deferred();
+  const f=fixture({readJwt:async()=>++reads===2?jwt.promise:"synthetic-jwt-token"});
+  f.client.nowMs=()=>clock;
+  assert.equal((await f.client.openAppView("support")).ok,true);
+  const pending=intent==="answer"?f.client.askPrepared("nav_support","uz"):
+   f.client.status("uz");
+  await Promise.resolve();
+  clock=190000;
+  jwt.resolve("synthetic-jwt-token");
+  assert.equal((await pending).reason,"context_expired",intent);
+  assert.equal(f.calls.filter(c=>c.path==="/answer").length,0);
+ }
+});
