@@ -135,3 +135,49 @@ test("§57 unknown app view and invalid Tour selector never reach the Edge",asyn
   assert.equal((await f.client.openTourArchive(bad)).reason,"invalid_screen");
  assert.equal(f.calls.length,0);
 });
+
+test("§62 server-defined context TTL expires locally before any new answer or status",async()=>{
+ let clock=100000;
+ const f=fixture({postOverride:r=>r.path==="/context"?
+  r.body.action==="revoke"?{ok:true}:{ok:true,contextHandle:HANDLE,expiresInSeconds:2}:
+  {ok:true,reply:"MUST_NOT_DELIVER"}});
+ f.client.nowMs=()=>clock;
+ assert.equal((await f.client.openAppView("about")).ok,true);
+ assert.equal(f.client.isCurrent(),true);
+ clock=102000;
+ assert.equal(f.client.isCurrent(),false);
+ assert.equal((await f.client.status("ru")).reason,"context_expired");
+ assert.equal((await f.client.askPrepared("nav_about","ru")).reason,"context_expired");
+ assert.deepEqual(f.calls.map(x=>x.path),["/context"],"No billed answer after TTL");
+ await f.client.leave();
+ assert.equal(f.client.expiresAtMs,0);
+});
+test("§62 malformed or missing lease from /context cannot establish any client authority",async()=>{
+ for(const lease of [undefined,0,-1,91,1.2,"90",null,NaN,Infinity]){
+  const f=fixture({postOverride:r=>r.body.action==="revoke"?{ok:true}:{
+   ok:true,contextHandle:HANDLE,expiresInSeconds:lease
+  }});
+  assert.equal((await f.client.openAppView("profile")).reason,
+   "invalid_context_expiry",String(lease));
+  assert.equal(f.client.handle,null);
+  assert.equal(f.client.expiresAtMs,0);
+  assert.deepEqual(f.calls.at(-1).body,{action:"revoke",contextHandle:HANDLE});
+ }
+});
+test("§62 replies crossing the context expiry deadline are discarded even on same view",async()=>{
+ let clock=300000;
+ const pending=deferred();
+ const f=fixture({postOverride:r=>r.path==="/answer"?pending.promise:
+  r.body.action==="revoke"?{ok:true}:{
+   ok:true,contextHandle:HANDLE,expiresInSeconds:1
+  }});
+ f.client.nowMs=()=>clock;
+ assert.equal((await f.client.openAppView("support")).ok,true);
+ const reply=f.client.askPrepared("nav_support","uz");
+ await Promise.resolve();
+ clock=301000;
+ pending.resolve({ok:true,reply:"STALE_MUST_NOT_DISPLAY"});
+ assert.equal((await reply).reason,"context_expired");
+ assert.equal(f.calls.filter(x=>x.path==="/answer").length,1,
+  "No second provider billing attempt");
+});
