@@ -113,7 +113,13 @@ test("Logout/account switch invalidates QA scope, unrecognized prepared key deni
  a.equal((await f.binder.authChanged("SIGNED_OUT",null)).ok,true);
  a.equal(f.binder.ready,false);
  a.equal(f.calls.at(-1).body.action,"revoke");
- f.set("profile");await f.binder.sync();
+ f.set("profile");
+ const oldCount=f.calls.length;
+ a.equal((await f.binder.sync()).reason,"screen_not_verified");
+ a.equal(f.calls.length,oldCount,"logged-out user re-minted a context");
+ await f.binder.authChanged("SIGNED_IN",{user:{id:"synthetic-a"}});
+ a.equal((await f.binder.sync()).ok,true);
+ a.equal(f.calls.at(-1).body.view,"profile");
  a.equal((await f.binder.authChanged("SIGNED_IN",{user:{id:"synthetic-b"}})).ok,true);
  a.equal(f.calls.at(-1).body.action,"revoke");
  a.equal(f.binder.ready,false);
