@@ -209,8 +209,12 @@ BEGIN
   'protected_assessment',false,
   'expires_at_ms',floor(extract(epoch from v.expires_at)*1000)::bigint,
   'context_revision','screen_'||v.context_revision::text,
+  'current_view','courses',
   'surface',v.surface_code,'subject',v.subject_key,'feature',v.feature_code,
-  'topic',v.topic_key
+  'topic',v.topic_key,
+  'practice_session_id',v.practice_session_id,
+  'question_id',v.practice_question_id,
+  'lesson_id',v.lesson_id,'tour_attempt_id',NULL
  ));
 END;
 $$;
