@@ -19312,7 +19312,7 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
       ?Number(rec.practice_drill_session_id||0)>0
       :Number(rec.practice_drill_session_id||0)===0);
   }
-    if (activeTab === "practice" && practiceRows.length) {
+    if (activeTab === "practice" && practiceMode!=="topics" && practiceRows.length) {
     const checks = await Promise.all(
       practiceRows.map(async (rec) => {
         try {
@@ -19813,6 +19813,9 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
       const rows=await api?.drill?.questions?.(sourceSessionId);
       return (Array.isArray(rows)?rows:[])
         .filter(row=>row.was_answered===true && row.saved_is_correct===false)
+        .filter(row=>String(row.topic||"").trim()===String(rec?.topic||"").trim())
+        .filter(row=>!String(rec?.subtopic||"").trim() ||
+          String(row.subtopic||"").trim()===String(rec.subtopic).trim())
         .slice(0,10).map(row=>({
           attempt_id:-sourceSessionId,
           question_id:Number(row.id||0),
