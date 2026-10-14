@@ -5,3 +5,5 @@ QA-to-QA draft PR, no merge to main, no deployment, no production secrets, no li
 Re-run requested after fixing the exact two source QA tests observed in workflow #203. No product release or protected app modifications.
 
 CI proof re-run for additional QA-only signed Home-plan bridge, no rollout or production changes.
+
+Another full CI run: bounded cleanup for short-lived Chromium profile subprocesses. QA-only change; retain no-merge/no-production scope.
