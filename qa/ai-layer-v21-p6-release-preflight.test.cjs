@@ -6,6 +6,10 @@ test("§56 review does not promote editor candidates into deployed Global AI",()
  a.equal(q.status,"NO_GO");a.equal(q.reviewOnly,true);
  a.equal(q.candidateLanguages,3);a.equal(q.candidateDraftReplies,18);
  a.equal(q.navigation,"NOT_EDITORIALLY_PUBLISHED");
+ a.equal(q.ownerProductState,"THREE_CHOICES_APPROVED_FOR_QA_ONLY");
+ a.equal(q.ownerApprovedCopy,"18_EXACT_TEXTS_QA_ONLY");
+ a.equal(q.homePriorityPolicy,"APPROVED_QA_ONLY_SERVER_PLANNER_MISSING");
+ a.equal(q.navLandmarkPreview,"APPROVED_QA_ONLY_RU_UZ_EN");
  a.equal(q.copySourceAudit,"18_DRAFT_REPLIES_VERIFIED_NOT_APPROVED");
  a.equal(q.currentAccessibleNameMismatches,9);
  a.equal(q.candidateAccessibleNameMismatches,0);
