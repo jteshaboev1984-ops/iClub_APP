@@ -17,9 +17,9 @@ The latest direct QA checks covered source-bound copy integrity, negative source
 | Gate | Authority and objective proof needed | Current verdict |
 |---|---|---|
 | R1. Original Mathematics Tutor | Fresh production snapshot, retained 243 Tutor cards, 45 P1 + 36 P5 independent evidence, no double billing | Protected; final parity at release time still required |
-| R2. General Help | Human-reviewed 18 RU/UZ/EN lines, source rights, hashes/versions, independent publication signoff | **BLOCKED — drafts only** |
-| R3. Accessibility | Confirm tab names in authorized Preview with real assistive-technology QA; review RU/UZ/EN landmark language and role | **BLOCKED — candidate only** |
-| R4. Home next-actions | Architect-approved academic action classes, priorities/tie rules, owner-scoped server proof, current entitlement and server time | **BLOCKED — no authority/policy** |
+| R2. General Help | Human-reviewed 18 RU/UZ/EN lines, source rights, hashes/versions, independent publication signoff | **BLOCKED — owner-approved product copy; independent editorial, rights and source publication pending** |
+| R3. Accessibility | Confirm tab names in authorized Preview with real assistive-technology QA; review RU/UZ/EN landmark language and role | **BLOCKED — owner-approved QA navigation labels; live integration/assistive-tech test pending** |
+| R4. Home next-actions | Architect-approved academic action classes, priorities/tie rules, owner-scoped server proof, current entitlement and server time | **BLOCKED — architect-approved order; real signed server planner and evidence completeness missing** |
 | R5. P6 server integration | Governed source bundles, real service-role-only current-screen/evidence RPCs in isolated approved environment, revoked-source/current-exam negative tests | **BLOCKED — QA-only SQL** |
 | R6. UI/Edge | Authorized and protected Preview, 320/390/desktop path/keyboard/mobile/safe-area, no active exam help, no stale token/profile bleed | **BLOCKED — latest complete integrated verification needed** |
 | R7. Financial policy | Confirm provider cost model, negotiated final allowances and weights, worst-case spend and provider reserve protection | **BLOCKED — 1:3 remains TEST ONLY** |
@@ -38,3 +38,8 @@ No branch promotion, PR, deployment, real account creation, production database 
 A reviewer can independently evaluate the [18 copy directions](./iclub-ai-layer-p6-editorial-review-sheet-v2.1.md) and [accessible names report](./iclub-ai-layer-p6-navigation-locale-a11y-review-v2.1.md), then the architect can settle the Home priority policy. After those gates and a verified isolated source release, implement the same QA-tested contracts in a separately approved Preview with the least privileged credentials and rerun all current tests; a new explicit owner decision must precede any real-user beta or provider spend.
 
 **Final current verdict: Global AI OFF / NO-GO. Existing production Mathematics Tutor and student histories are preserved.**
+
+
+## 2026-10-14 owner approval addendum (supersedes only R2–R4 decision-state wording)
+
+The architect explicitly approved the existing exact 18 RU/UZ/EN navigation draft texts as product copy, the QA/Preview method for matching accessible tab names and localizing the navigation landmark, and the Home category order **finalized Practice mistakes → server-opened Tour archive → enrolled subject**. The source text is pinned to blob `ab94d7ca03bbdf521acc95dedafd0dba43c45f7e` in `qa/ai-layer-v21-owner-product-decisions-20261014.json`. QA code/tests exist in `qa/ai-layer-v21-p6-home-approved-priority.cjs`, `qa/ai-layer-v21-p6-nav-approved-locale.cjs`, and the owner product gate. These decisions **do not** sign rights, publish source bundles, install the missing owner-scoped cross-subject server planner, confirm latest full CI, enable providers or permit an actual Preview deploy/beta. General AI remains NO-GO. Full new checkpoint: `docs/iclub-ai-layer-owner-approved-qa-next-actions-20261014.md`.
