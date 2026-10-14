@@ -63,12 +63,14 @@ class QaV21AppScreenBinder{
  async status(locale){
   const key=this.key,seq=this.epoch;
   if(!this.ready||!key||this.read()!==key)return fail("screen_not_verified");
+  if(this.client.isCurrent&&!this.client.isCurrent())return fail("context_expired");
   const value=await this.client.status(locale);
   return seq===this.epoch&&this.read()===key?value:fail("context_changed");
  }
  async askPrepared(intent,locale){
   const key=this.key,seq=this.epoch;
   if(!this.ready||!key||this.read()!==key)return fail("screen_not_verified");
+  if(this.client.isCurrent&&!this.client.isCurrent())return fail("context_expired");
   // Home's personal next-action planner and Profile's explanation are
   // NOT approved navigation sources. Only the current General Help scope
   // may request a deterministic prepared navigation response.
