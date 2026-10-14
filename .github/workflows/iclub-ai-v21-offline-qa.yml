@@ -18,6 +18,7 @@ on:
       - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql'
       - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_local_pg.psql'
       - 'qa/run-ai-layer-v21-postgres-local.sh'
+      - 'docs/iclub-ai-layer-p7-real-schema-proof-audit-v2.1.md'
       - 'qa/run-ai-layer-v21-offline.cjs'
       - 'docs/iclub-ai-layer-trusted-server-adapter-v2.1.md'
       - 'docs/iclub-ai-layer-app-wide-edge-binding-v2.1.md'
