@@ -4,7 +4,7 @@ const ok=(x:unknown,msg="assertion failed")=>{if(!x)throw Error(msg)};
 const user="11111111-1111-4111-8111-111111111111";
 const config={supabaseUrl:"http://127.0.0.1:54321",
  anonKey:"synthetic-anon-public",serviceRoleKey:"synthetic-service-private"};
-function syntheticBackend(){
+function syntheticBackend({generalReady=false}:{generalReady?:boolean}={}){
  const calls:{url:string;init:RequestInit;body:Record<string,unknown>|null}[]=[];
  const fetcher=(async(url:URL|string|Request,init?:RequestInit)=>{
   const uri=String(url);const data=init?.body?JSON.parse(String(init.body)):null;
@@ -14,6 +14,8 @@ function syntheticBackend(){
     return new Response('{"error":"invalid"}',{status:401});
    return Response.json({id:user});
   }
+  if(uri.includes("get_iclub_ai_v21_general_scope_service"))
+   return Response.json({allowed:generalReady,scope:"general",release_approved:generalReady});
   if(uri.includes("/rest/v1/subjects")){
    if(uri.includes("subject_key=eq.biology"))return Response.json([{subject_key:"biology",is_active:true}]);
    return Response.json([]);
@@ -68,6 +70,15 @@ Deno.test("Live subjects status is read only and independently not an AI release
  eq(await x.services.getSubjectActive("biology?select=*"),false);
  const list=x.calls.filter(v=>v.url.includes("/rest/v1/subjects"));
  ok(list.every(v=>v.init.method==="GET"));
+});
+Deno.test("General Help requires a separate server capability, not a fictional subject row",async()=>{
+ const off=syntheticBackend(),on=syntheticBackend({generalReady:true});
+ eq(await off.services.getSubjectActive("general"),false);
+ eq(await on.services.getSubjectActive("general"),true);
+ const call=on.calls.find(c=>c.url.includes("get_iclub_ai_v21_general_scope_service"));
+ ok(call);
+ eq(new Headers(call?.init.headers).get("authorization"),"Bearer "+config.serviceRoleKey);
+ ok(!on.calls.some(c=>c.url.includes("subject_key=eq.general")));
 });
 Deno.test("Unpublished topic return stays absent, no generic content fallback",async()=>{
  const x=syntheticBackend();
