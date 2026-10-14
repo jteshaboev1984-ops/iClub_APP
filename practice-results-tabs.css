@@ -508,3 +508,70 @@
   .iclub-visual-v3 #courses-my-recs .iclub-sx-last {padding:13px;}
   .iclub-visual-v3 #courses-my-recs .iclub-sx-main-tab {min-height:42px;}
 }
+
+
+/* Focused per-subtopic recommendation details: only current Practice By Topic. */
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail {
+  min-width:0;gap:10px;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-detail) .section #my-rec-title {
+  font-size:clamp(21px,5.7vw,26px);font-weight:810;line-height:1.24;
+  letter-spacing:-.035em;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-detail) .section #my-rec-subtitle{
+  color:var(--v3-primary,#2457d6);font-size:12px;font-weight:720;
+  margin-top:9px;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-question{
+  display:block;background:#fff;border:1px solid #e5eaf2;
+  border-radius:14px;overflow:hidden;min-width:0;
+}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-question summary{
+  display:grid;gap:6px;padding:13px 14px;
+  cursor:pointer;min-width:0;list-style:none;
+}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-question summary::-webkit-details-marker{display:none;}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-question summary:after{
+  content:"⌄";justify-self:end;color:#8d9aaa;
+  font-size:17px;font-weight:800;line-height:1;
+}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-question[open] summary:after{content:"⌃";}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-number {
+  color:#2457d6;font-size:11px;font-weight:810;
+}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-stem {
+  color:#172135;font-size:13px;line-height:1.5;
+  overflow-wrap:anywhere;display:-webkit-box;
+  -webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-question[open] .iclub-sx-detail-stem {
+  display:block;-webkit-line-clamp:unset;
+}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-answer {
+  display:grid;gap:10px;padding:0 14px 14px;
+  font-size:12px;line-height:1.5;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-answer strong{color:#526277;}
+.iclub-visual-v3 #courses-my-rec-detail .iclub-sx-detail-explanation{
+  padding:10px;border-radius:10px;background:#edf3ff;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-detail) .actions-row {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;align-items:stretch;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-detail) .actions-row .btn {
+  width:100%;min-width:0;min-height:43px;
+  white-space:normal;overflow-wrap:anywhere;
+  text-align:center;font-size:12px;padding:10px 7px;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-detail) .actions-row [data-action="my-rec-delete"] {
+  background:#fff;color:#b23f42;border:1px solid #f1cccc;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-detail) .actions-row [data-action="my-rec-train"]{
+  background:#1a43bf;color:#fff;
+}
+@media(max-width:359px) {
+ .iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-detail) .actions-row {
+   grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
