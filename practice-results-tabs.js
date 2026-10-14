@@ -98,7 +98,7 @@
     if(!holder)return false;
     const locale=['ru','uz','en'].includes(language)?language:lang();
     const c=HISTORY_COPY[locale];
-    if (!compact && data?.ok===true) activeTopicHistory={data,subjectKey:String(data.subject_key||'')};
+    if (data?.ok===true) activeTopicHistory={data,subjectKey:String(data.subject_key||'')};
     holder.replaceChildren();
     const heading=node('div','iclub-topic-history-header');
     heading.append(node('strong','',compact
@@ -255,7 +255,11 @@
     middle.append(left,score);card.append(middle);
     const footer=node('div','iclub-sx-last-footer');
     const errors=total-correct;
-    footer.append(node('span','iclub-sx-last-errors',errors+' '+txt('ошибок','xato','mistakes')));
+    const noun=locale==='ru'?
+      (errors%10===1&&errors%100!==11?'ошибка':
+       errors%10>=2&&errors%10<=4&&!(errors%100>=12&&errors%100<=14)?'ошибки':'ошибок'):
+       txt('ошибок','xato',errors===1?'mistake':'mistakes');
+    footer.append(node('span','iclub-sx-last-errors',errors+' '+noun));
     const link=node('button','iclub-sx-link',txt('Разбор попытки','Urinishni tahlil qilish','Review attempt')+' →');
     link.type='button';link.addEventListener('click',()=>openTopicAttempt(attempt,data.subject_key));
     footer.append(link);card.append(footer);holder.append(card);
