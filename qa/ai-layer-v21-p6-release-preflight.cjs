@@ -3,10 +3,15 @@
 const {fromDisk}=require("./ai-layer-v21-p6-editorial-source-packet.cjs");
 const {checkNavigationEditorial}=require("./ai-layer-v21-p6-navigation-semantic-review.cjs");
 const {makeAccessibleNavPreview}=require("./ai-layer-v21-p6-nav-a11y-preview.cjs");
+const {ownerProductDecisionGate}=require("./ai-layer-v21-owner-product-gate.cjs");
+const {makeApprovedAccessibleNavPreview}=require("./ai-layer-v21-p6-nav-approved-locale.cjs");
 const {readFileSync}=require("node:fs");
 const read=p=>readFileSync(p,"utf8");
 const deny=reason=>Object.freeze({status:"NO_GO",reason});
 function p6ReleasePreflight(){
+ const owner=ownerProductDecisionGate();
+ if(owner.ownerProductState!=="THREE_CHOICES_APPROVED_FOR_QA_ONLY")
+  return deny("product_copy_or_owner_policy_changed");
  const packet=fromDisk();
  if(!Array.isArray(packet.packets)||packet.packets.length!==3)
   return deny("source_packet_incomplete");
@@ -28,6 +33,14 @@ function p6ReleasePreflight(){
   current=checkNavigationEditorial(sources);
   preview=checkNavigationEditorial({...sources,
    html:makeAccessibleNavPreview(sources.html).html});
+  // Independent product signoff permits locale-sensitive nav NAMES in QA,
+  // never publication: verified against all three existing route labels.
+  for(const locale of ["ru","uz","en"]){
+   const candidate=makeApprovedAccessibleNavPreview(sources.html,locale);
+   const review=checkNavigationEditorial({...sources,html:candidate.html});
+   if(review.copyIntegrity!==true||review.accessibilityIssueCount!==0)
+    return deny("approved_nav_locale_reaudit_required");
+  }
  }catch{return deny("navigation_source_reaudit_required");}
  if(current?.copyIntegrity!==true||preview?.copyIntegrity!==true||
   current.checkedReplies!==18||preview.checkedReplies!==18||
@@ -43,6 +56,10 @@ function p6ReleasePreflight(){
  // published source in three locales, cohort and explicit architect approval.
  return Object.freeze({
   status:"NO_GO",reviewOnly:true,candidateLanguages:3,
+  ownerProductState:owner.ownerProductState,
+  ownerApprovedCopy:"18_EXACT_TEXTS_QA_ONLY",
+  homePriorityPolicy:"APPROVED_QA_ONLY_SERVER_PLANNER_MISSING",
+  navLandmarkPreview:"APPROVED_QA_ONLY_RU_UZ_EN",
   candidateDraftReplies:18,productionChanged:false,
   navigation:"NOT_EDITORIALLY_PUBLISHED",
   copySourceAudit:"18_DRAFT_REPLIES_VERIFIED_NOT_APPROVED",
