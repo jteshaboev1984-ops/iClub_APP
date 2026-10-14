@@ -32,11 +32,13 @@ CREATE TABLE private.iclub_global_ai_runtime_config(
  ui_enabled boolean not null,gateway_enabled boolean not null);
 INSERT INTO private.iclub_global_ai_runtime_config
  VALUES (1,true,false,false);
+CREATE TABLE public.users(id uuid primary key,first_name text);
 CREATE TABLE public.subjects(
  id bigint primary key,subject_key text not null,is_active boolean not null);
 CREATE TABLE public.lessons(id bigint primary key,subject_id bigint not null);
 CREATE TABLE public.user_subjects(
  user_id uuid not null,subject_id bigint not null,
+ mode text not null DEFAULT 'study',is_pinned boolean not null DEFAULT false,
  primary key(user_id,subject_id));
 CREATE TABLE public.practice_sessions_v4(
  id bigint primary key,user_id uuid not null,subject_id bigint not null,
@@ -60,14 +62,18 @@ AS $$SELECT coalesce((SELECT active FROM private.context_qa_exam_flags
 \ir iclub_ai_scoped_context_v21_UNAPPLIED.sql
 \ir iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql
 
+INSERT INTO public.users VALUES
+ ('11111111-1111-4111-8111-111111111111','PRIVATE_NAME_EXAMPLE');
 INSERT INTO public.subjects VALUES
  (10,'biology',true),(11,'chemistry',true),(12,'economics',true),(13,'informatics',true);
 INSERT INTO public.lessons VALUES (101,10),(102,11),(103,12),(104,13);
-INSERT INTO public.user_subjects VALUES
+INSERT INTO public.user_subjects(user_id,subject_id) VALUES
  ('11111111-1111-4111-8111-111111111111',10),
  ('11111111-1111-4111-8111-111111111111',11),
  ('11111111-1111-4111-8111-111111111111',12),
  ('11111111-1111-4111-8111-111111111111',13);
+UPDATE public.user_subjects SET mode='competitive' WHERE subject_id=12;
+UPDATE public.user_subjects SET mode='study',is_pinned=true WHERE subject_id=10;
 INSERT INTO public.practice_sessions_v4 VALUES
  (900,'11111111-1111-4111-8111-111111111111',10,'finalized',now(),ARRAY[901,902]),
  (910,'11111111-1111-4111-8111-111111111111',12,'finalized',now(),ARRAY[911]),
@@ -101,6 +107,7 @@ DECLARE
  econ_handle text;
  lesson_handle text;
  tour_handle text;
+ view_handle text;
 BEGIN
  result:=public.mint_iclub_ai_v21_practice_context_service(learner,900,901);
  IF result->>'reason' IS DISTINCT FROM 'global_ai_disabled' THEN
@@ -217,7 +224,7 @@ BEGIN
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,econ_handle);
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Removed subject membership retained AI: %',result;END IF;
- INSERT INTO public.user_subjects VALUES (learner,12);
+ INSERT INTO public.user_subjects(user_id,subject_id) VALUES (learner,12);
  INSERT INTO private.context_qa_exam_flags VALUES(learner,true);
  result:=public.get_iclub_ai_v21_scoped_context_service(learner,econ_handle);
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
@@ -302,6 +309,77 @@ BEGIN
  result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Revoked Tour current-screen still live: %',result;END IF;
+
+ -- §50: one existing current-screen lifecycle for Profile, Home and Help.
+ result:=public.mint_iclub_ai_v21_app_view_context_service(stranger,'profile');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Unknown/foreign profile minted: %',result;END IF;
+ result:=public.mint_iclub_ai_v21_app_view_context_service(learner,'invented_tab');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Unrecognized screen minted: %',result;END IF;
+ result:=public.mint_iclub_ai_v21_app_view_context_service(learner,'profile');
+ IF result->>'allowed' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Existing profile failed mint: %',result;END IF;
+ view_handle:=result->>'context_handle';
+ result:=public.get_iclub_ai_v21_scoped_context_service(learner,view_handle);
+ IF result->>'allowed' IS DISTINCT FROM 'true'
+ OR result#>>'{context,surface}'<>'profile'
+ OR result#>>'{context,subject}'<>'general'
+ OR result#>>'{context,current_view}'<>'profile'
+ OR result#>>'{context,topic}'<>'progress' THEN
+  RAISE EXCEPTION 'Profile screen scope incorrect: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result#>>'{evidence,current_view}' IS DISTINCT FROM 'profile'
+ OR result#>>'{evidence,context_handle}' IS DISTINCT FROM view_handle THEN
+  RAISE EXCEPTION 'Profile screen revision or handle incorrect: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'profile_aggregate');
+ IF result->>'allowed' IS DISTINCT FROM 'true'
+ OR result#>>'{evidence,verified}'<>'true'
+ OR result#>>'{evidence,metrics,0,count}'<>'1'
+ OR result#>>'{evidence,metrics,1,count}'<>'1'
+ OR result#>>'{evidence,metrics,2,count}'<>'2' THEN
+  RAISE EXCEPTION 'Factual profile counters wrong: %',result;END IF;
+ IF result::text ~* 'PRIVATE_NAME_EXAMPLE|first_name|login|user_answer|grade|score|percent|trend|stability' THEN
+  RAISE EXCEPTION 'Private or unverified profile data leaked: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(stranger,'profile_aggregate');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Foreign profile metrics visible: %',result;END IF;
+ result:=public.mint_iclub_ai_v21_app_view_context_service(learner,'profile');
+ IF result->>'duplicate' IS DISTINCT FROM 'true'
+ OR result->>'context_handle' IS DISTINCT FROM view_handle THEN
+  RAISE EXCEPTION 'Profile duplicate mint not idempotent: %',result;END IF;
+ result:=public.mint_iclub_ai_v21_app_view_context_service(learner,'home');
+ IF result->>'allowed' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Home screen context failed: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'profile_aggregate');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Profile proof survived navigation: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'home_next_actions');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Unapproved Home next-action plan created: %',result;END IF;
+ result:=public.mint_iclub_ai_v21_app_view_context_service(learner,'about');
+ IF result->>'allowed' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Navigation help handle failed: %',result;END IF;
+ view_handle:=result->>'context_handle';
+ result:=public.get_iclub_ai_v21_scoped_context_service(learner,view_handle);
+ IF result#>>'{context,surface}'<>'global'
+ OR result#>>'{context,feature}'<>'app_help'
+ OR result#>>'{context,current_view}'<>'about' THEN
+  RAISE EXCEPTION 'General Help context misrouted: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'navigation',p_view=>'about');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Unapproved navigation instructions released: %',result;END IF;
+ INSERT INTO private.context_qa_exam_flags VALUES(learner,true);
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Global AI screen available during protected assessment: %',result;END IF;
+ DELETE FROM private.context_qa_exam_flags WHERE user_id=learner;
+ result:=public.revoke_iclub_ai_v21_scoped_context_service(learner,view_handle);
+ IF result->>'ok' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'General Help handle failed to revoke: %',result;END IF;
+ result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
+ IF result->>'allowed' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Revoked General Help context remained live: %',result;END IF;
 
  -- Abuse prevention: 30 new context rows in a minute blocks more mints.
  INSERT INTO private.iclub_ai_v21_scoped_contexts(
