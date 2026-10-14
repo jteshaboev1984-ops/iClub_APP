@@ -67,7 +67,8 @@ function browserSource(file,exportsName){
  assert.ok(s.includes(exportLine),"Detached candidate export changed: "+file);
  return "(()=>{"+s.replace(exportLine,"window."+exportsName+"="+exportsName+";")+"})()";
 }
-async function browserTest(){
+async function browserTest(locale){
+ if(!["ru","uz","en"].includes(locale))throw Error("unknown locale");
  const ok=(a,why)=>{if(!a)throw Error(why);};
  const pause=ms=>new Promise(r=>setTimeout(r,ms));
  const el=id=>document.getElementById(id);
@@ -169,7 +170,7 @@ async function browserTest(){
  const authBinder=new window.QaV21AppScreenBinder({client:client3,document});
  await authBinder.authChanged("SIGNED_IN",{user:{id:"account-1"}});
  ok((await authBinder.sync()).ok,"Fresh account failed to bind Help");
- const pending=authBinder.askPrepared("nav_about","ru");
+ const pending=authBinder.askPrepared("nav_about",locale);
  for(let i=0;i<20&&!answerFinish;i++)await pause(1);
  ok(typeof answerFinish==="function","Synthetic old-account request did not start");
  await authBinder.authChanged("SIGNED_OUT",null);
@@ -181,7 +182,7 @@ async function browserTest(){
  await authBinder.authChanged("SIGNED_IN",{user:{id:"account-2"}});
  ok((await authBinder.sync()).ok,"New account failed to bind independently");
  await authBinder.disconnect();
- return{viewport:innerWidth+"x"+innerHeight,nativeDom:true,
+ return{locale,viewport:innerWidth+"x"+innerHeight,nativeDom:true,
   routes:7,nestedScreens:17,issued:minted,revoked:count("revoke"),
   noPaidAnswers:calls.filter(x=>x.path==="/answer").length===0,
   signoutBlocked:true};
@@ -200,7 +201,8 @@ async function run(){
   await browser.send("Network.enable");
   const transport=browserSource("qa/ai-layer-v21-ui-transport.cjs","QaV21ScreenClient");
   const binding=browserSource("qa/ai-layer-v21-p6-app-screen-binding.cjs","QaV21AppScreenBinder");
-  for(const size of [{w:320,h:568},{w:390,h:844},{w:1366,h:768}]){
+  for(const size of [{w:320,h:568,lang:"ru"},{w:390,h:844,lang:"uz"},
+   {w:1366,h:768,lang:"en"}]){
    await browser.send("Emulation.setDeviceMetricsOverride",{
     width:size.w,height:size.h,deviceScaleFactor:1,mobile:size.w<600
    });
@@ -214,13 +216,14 @@ async function run(){
       JSON.stringify(result.exceptionDetails).slice(0,900));
    }
    const test=await browser.send("Runtime.evaluate",{
-    expression:"("+browserTest.toString()+")()",awaitPromise:true,
+    expression:"("+browserTest.toString()+")("+JSON.stringify(size.lang)+")",awaitPromise:true,
     returnByValue:true
    });
    if(test.exceptionDetails)throw Error("P6 Chromium "+size.w+"x"+size.h+
      ": "+JSON.stringify(test.exceptionDetails).slice(0,1500));
    const value=test.result?.value;assert.equal(value?.noPaidAnswers,true);
    assert.equal(value.signoutBlocked,true);
+   assert.equal(value.locale,size.lang);
    console.log("P6_NATIVE_BROWSER_GREEN "+JSON.stringify(value));
   }
   for(const url of browser.network)
