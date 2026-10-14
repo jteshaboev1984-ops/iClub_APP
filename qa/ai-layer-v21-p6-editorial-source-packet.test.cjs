@@ -28,6 +28,8 @@ test("Never mistake content, rights or reviewer status for publication permissio
   d=>{d.releaseAllowed=true},
   d=>{d.status="PUBLISHED"},
   d=>{d.editorialControls.approvedBy="fake_editor"},
+  d=>{delete d.editorialControls.approvedAt;d.editorialControls.fakeFlag=false},
+  d=>{d.editorialControls.approvedBy=false},
   d=>{d.editorialControls.contentCorrectnessVerified=true},
   d=>{d.editorialControls.releaseApproved=true},
   d=>{delete d.editorialControls},
