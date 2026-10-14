@@ -66,3 +66,21 @@ test("§73 approving flags in a QA draft never grants a source or rights publica
  const f=fixture();f.draft.releaseAllowed=true;
  assert.equal(checkNavigationEditorial(f).copyIntegrity,false);
 });
+
+test("§74 candidate native captions clear tab label mismatches but NEVER auto-approve AI",()=>{
+ const {makeAccessibleNavPreview}=require("./ai-layer-v21-p6-nav-a11y-preview.cjs");
+ const data=fixture();
+ const before=checkNavigationEditorial(data);
+ assert.equal(before.accessibilityIssueCount,9);
+ data.html=makeAccessibleNavPreview(data.html).html;
+ const after=checkNavigationEditorial(data);
+ assert.equal(after.copyIntegrity,true);
+ assert.equal(after.accessibilityIssueCount,0);
+ assert.equal(after.tabbarAccessibleName,"Bottom navigation",
+  "The nav landmark still needs independent locale review");
+ assert.equal(after.independentLanguageAndAccessibilityReview,"REQUIRED");
+ assert.equal(after.status,"NO_GO");
+ assert.equal(after.contentApproval,false);
+ assert.equal(after.sourcePublication,false);
+ assert.equal(after.betaPermission,false);
+});
