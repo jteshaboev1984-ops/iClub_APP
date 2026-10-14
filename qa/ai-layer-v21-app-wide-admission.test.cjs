@@ -126,7 +126,7 @@ test("Exact resource and authorization checks fail closed across all surfaces",(
   const {ctx,proof}=match(k);
   assert.equal(routeFor(ctx,proof),k==="general_help"?"global_help":k);
   for(const patch of [{ownerId:OTHER},{proofHash:"not-a-hash"},
-   {proofRevision:0},{contextRevision:"old"},{surface:"practice"},
+   {proofRevision:0},{contextRevision:"old"},{surface:"forged_screen"},
    {subject:"mathematics"}]){
    const forged={...proof,...patch};
    assert.equal(routeFor(ctx,forged),null,k+":"+JSON.stringify(patch));
