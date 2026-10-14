@@ -130,4 +130,4 @@ Deno.test("Tour selector cannot impersonate user, topic, answer, plan or legacy 
  }
  const t=fixture(),r=await t.send({action:"mintTourArchive",tourAttemptId:402});
  assert(r.data.ok===false);
-}
+});
