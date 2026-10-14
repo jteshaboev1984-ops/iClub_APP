@@ -58,6 +58,8 @@ on:
       - 'qa/sql_drafts/iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql'
       - 'qa/sql_drafts/iclub_ai_v21_p6_navigation_gate_UNAPPLIED.sql'
       - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql'
+      - 'qa/sql_drafts/iclub_ai_v21_home_scan_scratch_UNAPPLIED.sql'
+      - 'qa/sql_drafts/iclub_ai_v21_home_scan_local_pg.psql'
       - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_local_pg.psql'
       - 'qa/run-ai-layer-v21-postgres-local.sh'
       - 'docs/iclub-ai-layer-p7-real-schema-proof-audit-v2.1.md'
@@ -137,12 +139,12 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y -qq postgresql-client
           fi
-      - name: Run thirteen independent scratch PostgreSQL suites
+      - name: Run fourteen independent scratch PostgreSQL suites
         shell: bash
         run: |
           set -euo pipefail
           failed=0
-          for suite in meter math practice release claim atomic context source publisher authority spend receipt realproof; do
+          for suite in meter math practice release claim atomic context source publisher authority spend receipt realproof home; do
             db="iclub_ai_v21_scratch_ci_${suite}"
             createdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
             if ICLUB_PGTEST_DB="${db}" ICLUB_PGTEST_HOST=127.0.0.1 \
