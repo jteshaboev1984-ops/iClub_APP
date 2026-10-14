@@ -8,7 +8,11 @@ const defer=()=>{let resolve;const promise=new Promise(r=>resolve=r);return{prom
 function fixture(postOverride){
  const calls=[],els={};
  for(const v of views)els["view-"+v]={active:false};
- for(const x of ["courses-practice-quiz","courses-tour-quiz"])
+ for(const x of ["courses-practice-quiz","courses-tour-quiz",
+  "courses-video","courses-practice-start","courses-practice-result",
+  "courses-practice-review","courses-practice-recs",
+  "courses-tour-rules","courses-tour-result","courses-tour-review",
+  "courses-my-rec-detail"])
   els[x]={active:false};
  els["exam-prep-host-root"]={active:false,hidden:true,attrs:{}};
  els.main={active:false};
@@ -19,10 +23,9 @@ function fixture(postOverride){
  });
  const doc={
   visibilityState:"visible",getElementById:k=>els[k]?mk(k):null,
-  querySelector(selector){
-   if(selector!==".view.is-active")return null;
-   const v=views.find(v=>els["view-"+v].active);
-   return v?{dataset:{view:v}}:null;
+  querySelectorAll(selector){
+   if(selector!==".view.is-active")return [];
+   return views.filter(v=>els["view-"+v].active).map(v=>({dataset:{view:v}}));
   }
  };
  const post=async request=>{
@@ -68,6 +71,27 @@ test("Unlisted pages, overlapping views, hidden browser and all protected quiz s
   if(event==="exam")f.els["exam-prep-host-root"].hidden=false;
   a.equal((await f.binder.sync()).reason,"screen_not_verified",event);
   a.equal(f.calls.length,0,event);
+ }
+});
+test("§58 active nested lessons/reviews or unknown overlay cannot steal independent AI scope",async()=>{
+ for(const id of ["courses-video","courses-practice-start",
+  "courses-practice-result","courses-practice-review",
+  "courses-practice-recs","courses-tour-rules","courses-tour-result",
+  "courses-tour-review","courses-my-rec-detail"]){
+  const f=fixture();f.set("courses");f.els[id].active=true;
+  a.equal((await f.binder.sync()).reason,"screen_not_verified",id);
+  a.equal(f.calls.length,0,id);
+ }
+ const overlay=fixture();overlay.set("home");overlay.els["view-certificates"].active=true;
+ a.equal((await overlay.binder.sync()).reason,"screen_not_verified");
+ a.equal(overlay.calls.length,0);
+});
+test("§58 Home/Profile never dispatch unapproved General Help prompt",async()=>{
+ for(const view of ["home","profile"]){
+  const f=fixture();f.set(view);a.equal((await f.binder.sync()).ok,true);
+  const length=f.calls.length;
+  a.equal((await f.binder.askPrepared("nav_about","ru")).reason,"source_in_development");
+  a.equal(f.calls.length,length);
  }
 });
 test("Changing tabs or document visibility drops local authority and remote handle",async()=>{
