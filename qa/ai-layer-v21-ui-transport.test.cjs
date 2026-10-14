@@ -212,3 +212,53 @@ test("§63 clock regressions fail closed before adopting any returned handle",as
  assert.equal((await opening).reason,"context_expired");
  assert.equal(f.client.handle,null);
 });
+
+test("§67 wall-clock rollback AFTER mint cannot extend context or deliver answers",async()=>{
+ let clock=100000;
+ const f=fixture();f.client.nowMs=()=>clock;
+ assert.equal((await f.client.openAppView("support")).ok,true);
+ assert.equal(f.client.isCurrent(),true);
+ clock=109000;assert.equal(f.client.isCurrent(),true);
+ clock=108999;
+ assert.equal(f.client.isCurrent(),false,"clock rollback must invalidate the lease");
+ clock=110000;
+ assert.equal(f.client.isCurrent(),false,"clock cannot revive a poisoned lease");
+ assert.equal((await f.client.status("ru")).reason,"context_expired");
+ assert.equal((await f.client.askPrepared("nav_support","ru")).reason,"context_expired");
+ assert.equal(f.calls.filter(x=>x.path==="/answer").length,0);
+ await f.client.leave();
+ assert.equal((await f.client.openAppView("support")).reason,"invalid_context_clock");
+ assert.equal(f.calls.filter(x=>x.body.action==="mintAppView").length,1);
+});
+test("§67 clock provider throws safely without leaking or sending a network request",async()=>{
+ const f=fixture();
+ f.client.nowMs=()=>{throw Error("SYNTHETIC_CLOCK_PRIVATE")};
+ assert.equal((await f.client.openAppView("home")).reason,"invalid_context_clock");
+ assert.equal(f.client.isCurrent(),false);
+ assert.equal(f.calls.length,0);
+});
+test("§68 rejected JWT reader never throws or forwards a stale credential",async()=>{
+ let reads=0;
+ const f=fixture({readJwt:async()=>{
+  reads++;throw Error("SYNTHETIC_JWT_PRIVATE");
+ }});
+ assert.equal((await f.client.openAppView("profile")).reason,
+  "authentication_required");
+ assert.equal(f.client.handle,null);
+ assert.equal(f.calls.length,0);
+ assert.equal(reads,1);
+ assert.equal((await f.client.revoke(HANDLE)).reason,"authentication_required");
+ assert.equal(f.calls.length,0);
+});
+test("§68 rejection during answer is contained, and no data/credential is emitted",async()=>{
+ let tokenReads=0;
+ const f=fixture({readJwt:async()=>{
+  if(++tokenReads===1)return "synthetic-jwt-token";
+  throw Error("SYNTHETIC_JWT_PRIVATE");
+ }});
+ assert.equal((await f.client.openAppView("about")).ok,true);
+ const reply=await f.client.askPrepared("nav_about","uz");
+ assert.equal(reply.reason,"authentication_required");
+ assert.equal(f.calls.length,1,"invalid JWT must prevent any answer post");
+ assert.equal(JSON.stringify(reply).includes("SYNTHETIC_JWT_PRIVATE"),false);
+});
