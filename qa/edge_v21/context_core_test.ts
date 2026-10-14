@@ -17,6 +17,11 @@ function fixture(){
    return{allowed:a.userId===U&&a.lessonId>0,
     context_handle:H,expires_in_seconds:90};
   },
+  mintTourArchiveContext:async(a:{userId:string;attemptId:number})=>{
+   mints++;if(throwMint)throw new Error("private DB error");
+   return{allowed:a.userId===U&&a.attemptId===401,
+    context_handle:H,expires_in_seconds:90};
+  },
   revokeScopedContext:async(a:{userId:string;contextHandle:string})=>{
    revokes++;return{ok:a.userId===U&&a.contextHandle===H};
   }
@@ -102,3 +107,27 @@ Deno.test("Lesson mint cannot spoof old Practice selectors or malformed lesson I
   assert(x.counts()[0]===0);
  }
 });
+
+Deno.test("Opened Tour is the same protected /context lifecycle, not a new AI",async()=>{
+ const x=fixture(),r=await x.send({action:"mintTourArchive",tourAttemptId:401});
+ assert(r.status===200&&r.data.ok===true&&r.data.contextHandle===H);
+ assert(x.counts()[0]===1);
+ assert((await x.send({action:"revoke",contextHandle:H})).data.ok===true);
+});
+Deno.test("Tour selector cannot impersonate user, topic, answer, plan or legacy Practice",async()=>{
+ for(const x of [
+  {action:"mintTourArchive",tourAttemptId:0},
+  {action:"mintTourArchive",tourAttemptId:"401"},
+  {action:"mintTourArchive",tourAttemptId:401.5},
+  {action:"mintTourArchive",tourAttemptId:401,sessionId:8},
+  {action:"mintTourArchive",tourAttemptId:401,lessonId:2},
+  {action:"mintTourArchive",tourAttemptId:401,subject:"economics"},
+  {action:"mintTourArchive",tourAttemptId:401,topic:"guessed"},
+  {action:"mintTourArchive",tourAttemptId:401,plan:"plus"},
+  {action:"mintTourArchive",tourAttemptId:401,userId:U}
+ ]){
+  const t=fixture();assert((await t.send(x)).status===400&&t.counts()[0]===0);
+ }
+ const t=fixture(),r=await t.send({action:"mintTourArchive",tourAttemptId:402});
+ assert(r.data.ok===false);
+}
