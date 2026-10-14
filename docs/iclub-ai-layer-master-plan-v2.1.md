@@ -852,3 +852,24 @@ Home next-actions остаётся без серверного планиров�
 ## 86. Release/CI граница после Preview (2026-10-14)
 
 Node copy/preview tests, 14-й PostgreSQL suite и QA Vercel Preview добавлены только в изолированный контур. GitHub Actions результат полного запуска не удалось получить через доступные GitHub функции; отсутствие PR-run и commit statuses не равно GREEN. Дальнейший реальный release требует законного governed-source publishing в отдельной непроизводственной БД, реализации owner-scoped commercial authority, целостной серверной подписи Home плана, end-to-end интеграции и полного GREEN оригинального Mathematics Tutor + всех UI/PG/Deno tests. Подробный фактологический отчёт: `docs/iclub-ai-layer-qa-home-preview-ci-handoff-20261014.md`. **Production/Main/Supabase/ученики/локальные данные/платные вызовы без изменений, Global AI — NO-GO.**
+
+
+## 87. Проверяемый полный QA CI впервые получен (2026-10-14; GREEN для зафиксированного commit)
+
+Для получения фактических логов создан исключительно QA→QA черновой PR [#342](https://github.com/jteshaboev1984-ops/iClub_APP/pull/342), не связанный с `main`. Из первоначального workflow #203 выявлены две реальные ошибки тестов; обе устранены без ослабления auth/academic protection. [GitHub Actions #206](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38589514037) вернул **GREEN**: 619/619 Node, Chromium, Deno TypeScript + regression, 14 PostgreSQL scratch suites включая Home, две параллельные гонки и проверка защищённых файлов. Ранее из-за ограничения PR-only GitHub connector полный CI ошибочно был «неподтверждён»; теперь есть прямые логи и URL.
+
+## 88. Подписанный read-only Home plan: независимые owner/evidence/source gates (2026-10-14; QA ONLY)
+
+`qa/ai-layer-v21-p6-home-signed-server-bridge.cjs` реализует независимый серверный кандидат: проверяет owner-bound Home, exact plan version/complete scan, ограниченный TTL и неизменность SQL scanner после `await`; требует отдельный академический proof, коммерческое разрешение для каждого действия и отдельный published rights-approved locale source; только после повторной проверки предметных прав подписывает минимальный plan с server-only HMAC. Изменённые source/subject данные не могут сохранять прежнюю подпись. QA тест вызывает этот модуль вместе с существующим `QAHomeNextActionProof` и утверждённым приоритетом. Все успешные сценарии используют синтетические independently mocked server services, а не публикацию неутверждённых источников в реальную базу. **Это пока не deployed Supabase/Edge функция.**
+
+## 89. Обязательная разница между legacy разрешением и реальными AI-правами (2026-10-14)
+
+READ-ONLY проверкой сигнатуры и определения `public.get_iclub_subject_access_guard_service_v1(uuid,text,text)` подтверждено: `allowed=true` может сопровождаться переходным режимом `shadow` или `legacy_passthrough`, а `select_competitive` проверяет место, не факт реального выбора предмета. Существующий клиентский `commercial-access-ui.js` тоже не может быть самостоятельным AI-разрешением при ошибке RPC. В §88 добавлена обязательная форма полного service-bound access proof (пользователь, предмет, разрешённый intent, версия, проверенный commercial/grandfathered, отдельная competitive selection). Shadow/passthrough и отсутствие этой формы fail closed. Production права и тарифы не менялись. Переход к реальному Edge требует заверенной серверной реализации этой формы, не клиентского bool-флага.
+
+## 90. Chromium cleanup и второй полный Green (2026-10-14)
+
+Run #209 успешно прошёл обновлённые Node-тесты, но затем упал после успешных трёх локалей Chromium на `ENOTEMPTY` при удалении временного профиля. В `qa/ai-layer-v21-p6-nav-a11y-browser.cjs` добавлено ожидание завершения Chrome и ограниченная повторная очистка каталога (настоящие a11y asserts сохранены). [GitHub Actions #211](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38590672176) затем завершился **GREEN** для тех изменений. Важно: §89 добавлен после фиксации соответствующего PR merge commit; его итог отдельно должен быть подтверждён следующим CI, а не подставлен под успешную историю #211.
+
+## 91. Текущая граница выпуска после real CI
+
+Доказательство: `docs/iclub-ai-layer-p6-signed-home-ci-proof-20261014.md`. Архитектура и QA тесты продвинулись, но настоящее коммерческое разрешение на новый AI, rights/source publication, production-grade atomic Home planner, реальная интеграция Vercel Preview + независимая Supabase и разрешение beta/provider/live migration отсутствуют. Общий **Global AI NO-GO**, даже если очередной offline CI GREEN. `main`, действующая Supabase, пользовательский прогресс, Mathematics Tutor и production домены не затронуты.
