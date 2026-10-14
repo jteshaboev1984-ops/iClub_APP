@@ -52,6 +52,15 @@ class QaV21ScreenClient{
    return fail("invalid_screen");
   return this.open({action:"mint",sessionId,questionId});
  }
+ async openTourArchive(tourAttemptId){
+  if(!validIndex(tourAttemptId))return fail("invalid_screen");
+  return this.open({action:"mintTourArchive",tourAttemptId});
+ }
+ async openAppView(view){
+  if(!["home","profile","courses","ratings","about","support"].includes(view))
+   return fail("invalid_screen");
+  return this.open({action:"mintAppView",view});
+ }
  async open(body){
   ++this.epoch;
   const seq=this.epoch;
