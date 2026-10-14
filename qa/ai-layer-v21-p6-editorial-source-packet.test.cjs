@@ -48,6 +48,9 @@ test("Missing locale, spoofed nav ID and cross-locale injection always fail clos
   d=>{d.entrypoints[2].replies.ru="a".repeat(181)},
   d=>{d.entrypoints[3].id="nav_foo"},
   d=>{d.entrypoints[3].targetView="fake_route"},
+  d=>{d.entrypoints[3].selector='[data-tab="home"]'},
+  d=>{d.entrypoints[4].entryView="profile"},
+  d=>{d.entrypoints[5].kind="tab"},
   d=>{d.entrypoints[4].id=d.entrypoints[3].id}
  ]){
   const d=clone();mutate(d);a.equal("packets" in candidatePacket(d),false);
