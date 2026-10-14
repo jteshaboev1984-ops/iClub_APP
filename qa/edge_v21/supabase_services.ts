@@ -130,6 +130,14 @@ export function createSupabaseServices(config:BackendConfig){
     p_user_id:args.userId,p_lesson_id:args.lessonId
    }),{allowed:false});
   },
+  mintAppViewContext:async(args:{userId:string;view:string})=>{
+   if(!UUID.test(args.userId)||
+      !["home","profile","courses","ratings","about","support"].includes(args.view))
+     return{allowed:false};
+   return safe(()=>rpc("mint_iclub_ai_v21_app_view_context_service",{
+    p_user_id:args.userId,p_view:args.view
+   }),{allowed:false});
+  },
   mintTourArchiveContext:async(args:{userId:string;attemptId:number})=>{
    if(!UUID.test(args.userId)||!Number.isSafeInteger(args.attemptId)||
       args.attemptId<=0)return{allowed:false};
