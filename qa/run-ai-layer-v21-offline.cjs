@@ -27,6 +27,7 @@ const cases = [
  "qa/ai-layer-v21-p6-navigation-candidates.test.cjs",
  "qa/ai-layer-v21-p6-navigation-editorial-drafts.test.cjs",
  "qa/ai-layer-v21-p6-editorial-source-packet.test.cjs",
+ "qa/ai-layer-v21-p6-release-preflight.test.cjs",
  "qa/ai-layer-v21-p6-home-next-action-proof.test.cjs",
  "qa/ai-layer-v21-trusted-server-adapter.test.cjs",
  "qa/ai-layer-v21-cross-subject-sql.test.cjs",
