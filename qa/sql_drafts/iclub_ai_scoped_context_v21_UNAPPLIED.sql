@@ -212,6 +212,24 @@ BEGIN
  ) THEN
   RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');
  END IF;
+ -- Read-time revalidation: Tour archive must still be open and owned.
+ -- Strictly AFTER end_date, as in get_tour_review_full_safe_v4.
+ IF v.surface_code='tour_archive' AND NOT EXISTS (
+  SELECT 1 FROM public.tour_attempts ta
+  JOIN public.tours t ON t.id=ta.tour_id
+  JOIN public.tour_session_runtime_v4 rt
+   ON rt.attempt_id=ta.id AND rt.user_id=ta.user_id
+    AND rt.tour_id=ta.tour_id AND rt.finalized_at IS NOT NULL
+  JOIN public.subjects subj ON subj.id=t.subject_id AND subj.is_active=true
+  JOIN public.user_subjects us ON us.user_id=p_user_id AND us.subject_id=subj.id
+  WHERE ta.id=v.tour_attempt_id AND ta.user_id=p_user_id
+   AND ta.tour_id=v.tour_id AND subj.subject_key=v.subject_key
+   AND ta.status IN ('submitted','time_expired')
+   AND t.end_date IS NOT NULL
+   AND (now() AT TIME ZONE 'Asia/Tashkent')::date > t.end_date
+ ) THEN
+  RETURN jsonb_build_object('allowed',false,'reason','context_unavailable');
+ END IF;
  RETURN jsonb_build_object('allowed',true,'context',jsonb_build_object(
   'owner_id',v.user_id,'route_authority','unified_ai','active',true,
   'protected_assessment',false,
