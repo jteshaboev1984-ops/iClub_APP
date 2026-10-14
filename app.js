@@ -19542,8 +19542,11 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
       });
       const historyItems=Array.isArray(topicHistory?.recent)?topicHistory.recent:[];
       return Array.from(groups.entries()).map(([topic,items])=>{
-        const matching=historyItems.find(a=>String(a?.topic||"").trim()===topic &&
-          Number(a?.total)>Number(a?.correct) && Number(a?.session_id)>0);
+        const sourceIds=new Set(items.map(({rec})=>Number(rec?.practice_drill_session_id||0))
+          .filter(id=>Number.isSafeInteger(id)&&id>0));
+        const matching=historyItems.find(a=>sourceIds.has(Number(a?.session_id||0)) &&
+          String(a?.topic||"").trim()===topic &&
+          Number(a?.total)>Number(a?.correct));
         const errorCount=matching?Math.max(0,Number(matching.total)-Number(matching.correct)):0;
         const attemptIndex=matching?historyItems.indexOf(matching):-1;
         const entries=items.map(({rec,index},k)=>{
