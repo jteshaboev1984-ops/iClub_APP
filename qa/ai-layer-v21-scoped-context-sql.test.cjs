@@ -82,7 +82,7 @@ test('Live Lesson membership and existence are rechecked during async answer',()
  a.ok(sql.includes('subj.is_active=true'));
 });
 test('Lesson/Practice/Tour contexts remain isolated by surface, feature and item type',()=>{
- a.ok(sql.includes("surface_code IN ('practice','lesson','tour_archive')"));
+ a.ok(sql.includes("surface_code IN ('practice','lesson','tour_archive','home','profile','global')"));
   a.ok(sql.includes("surface_code='tour_archive' AND tour_attempt_id IS NOT NULL"));
   a.ok(sql.includes("feature_code='archive_explanation'"));
  a.ok(sql.includes("surface_code='lesson' AND lesson_id IS NOT NULL"));
@@ -95,4 +95,15 @@ test('Scratch SQL exercises existing Biology Lesson and navigation back to Pract
   'Leaving Lesson did not revoke old context',
   'Foreign learner minted Biology Lesson','Nonexistent lesson minted'])
   a.ok(pg.includes(k),k);
+});
+
+test('App-wide view scopes cannot impersonate Practice, lessons or Tour records',()=>{
+ for(const marker of [
+  "surface_code IN ('home','profile','global')",
+  "app_view_code IN ('courses','ratings','about','support')",
+  "app_view_code='home' AND topic_key='next_actions'",
+  "app_view_code='profile' AND topic_key='progress'",
+  "p_view NOT IN","public.users u WHERE u.id=p_user_id",
+  "mint_iclub_ai_v21_app_view_context_service"
+ ])a.ok(sql.includes(marker),marker);
 });
