@@ -226,3 +226,26 @@ test("late prepared answer is not displayed after navigation",async()=>{
  assert.equal(res.ok,false);
  assert.notEqual(res.message,"STALE ANSWER");
 });
+
+test("source readiness and explanation are bound to exact selected locale",async()=>{
+ for(const locale of ["ru","uz","en"]){
+  const x=fixture();
+  const selected=await x.bridge.chooseReviewQuestion(x.row,locale);
+  assert.equal(selected.ok,true,locale);
+  assert.deepEqual(x.calls.find(y=>y[0]==="status"),["status",locale]);
+  assert.equal((await x.bridge.explainSelectedError(locale)).ok,true);
+  for(const different of ["ru","uz","en"].filter(v=>v!==locale)){
+   const before=x.calls.filter(y=>y[0]==="ask").length;
+   assert.equal((await x.bridge.explainSelectedError(different)).ok,false);
+   assert.equal(x.calls.filter(y=>y[0]==="ask").length,before);
+  }
+ }
+});
+test("unsupported locale is denied before any server resolver or mint",async()=>{
+ for(const locale of ["", "de", "RU", null, 1]){
+  const x=fixture();
+  const result=await x.bridge.chooseReviewQuestion(x.row,locale);
+  assert.equal(result.ok,false,String(locale));
+  assert.equal(x.calls.filter(y=>["resolve","mint","status"].includes(y[0])).length,0);
+ }
+});
