@@ -75,6 +75,9 @@ on:
       - 'qa/edge_v21/qa_startup_guard.ts'
       - 'qa/edge_v21/qa_startup_guard_test.ts'
       - 'qa/edge_v21/auth_trust_boundary_test.ts'
+      - 'qa/ai-layer-v21-p9-http-to-pg-fullstack.cjs'
+      - 'qa/sql_drafts/iclub_ai_v21_http_owner_seed_LOCAL_ONLY.psql'
+      - 'qa/edge_v21/qa_local_pg_http_test.ts'
       - 'qa/ai-layer-v21-p9-rpc-draft-manifest.json'
       - 'qa/ai-layer-v21-p9-policy-fingerprint-snapshot.json'
       - 'qa/ai-layer-v21-p9-draft-contract-gate.cjs'
@@ -216,6 +219,10 @@ jobs:
             dropdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
           done
           exit "$failed"
+      - name: Full-stack synthetic Auth to real ten-draft PostgreSQL, owner, kill and money proof
+        env:
+          ICLUB_QA_ALLOW_FULLSTACK: synthetic-only
+        run: node qa/ai-layer-v21-p9-http-to-pg-fullstack.cjs
       - name: Local-only HTTP to real scratch PostgreSQL signed Home integration
         shell: bash
         run: |
