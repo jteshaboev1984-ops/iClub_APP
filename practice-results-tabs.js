@@ -160,50 +160,108 @@
     if(title)title.textContent=tr('Разбор попытки','Urinish tahlili','Attempt review');
     if(!selected?.attempt){
       if(subtitle)subtitle.textContent='';
-      body.append(node('div','iclub-topic-history-empty',tr('Выберите попытку в истории практики.','Amaliyot tarixidan urinishni tanlang.','Select an attempt from practice history.')));
+      body.append(node('div','iclub-topic-history-empty',
+        tr('Выберите попытку в истории практики.','Amaliyot tarixidan urinishni tanlang.','Select an attempt from practice history.')));
       return false;
     }
     const attempt=selected.attempt;
     const topic=String(attempt.topic||'').slice(0,200);
-    if(subtitle)subtitle.textContent=topic;
     const correct=Number(attempt.correct),total=Number(attempt.total);
+    if(!Number.isInteger(correct)||!Number.isInteger(total)||total<1||correct<0||correct>total){
+      body.append(node('div','iclub-topic-history-empty',
+        tr('Результат попытки недоступен.','Urinish natijasi mavjud emas.','This attempt result is unavailable.')));
+      return false;
+    }
     const errorCount=Number(attempt.mistakes);
-    const mistakes=Number.isInteger(errorCount)&&errorCount>=0?errorCount:Math.max(0,total-correct);
-    const summary=node('div','iclub-topic-review-overview');
-    const stats=node('div','iclub-topic-review-stats');
-    stats.append(node('span','',tr('Результат','Natija','Score')+': '+correct+' / '+total));
-    stats.append(node('span','',tr('Ошибки','Xatolar','Mistakes')+': '+mistakes));
-    summary.append(stats);
+    const mistakes=Number.isInteger(errorCount)&&errorCount>=0&&errorCount<=total?errorCount:total-correct;
+    const errorsNoun=n=>locale==='ru'
+      ? (n%10===1&&n%100!==11?'ошибка':
+         n%10>=2&&n%10<=4&&!(n%100>=12&&n%100<=14)?'ошибки':'ошибок')
+      :locale==='uz'?'xato':n===1?'mistake':'mistakes';
     const date=new Date(String(attempt.finished_at||''));
-    if(Number.isFinite(date.getTime()))summary.append(node('div','muted small',date.toLocaleDateString(locale)));
-    body.append(summary);
+    const printedDate=Number.isFinite(date.getTime())?date.toLocaleDateString(locale):'';
+    const percent=Math.round(correct*100/total);
+    if(subtitle)subtitle.textContent='';
+    const intro=node('header','iclub-sx-attempt-intro');
+    intro.append(node('span','iclub-sx-kicker',tr('ЗАВЕРШЁННАЯ ПОПЫТКА','YAKUNLANGAN URINISH','COMPLETED ATTEMPT')+
+      (printedDate?' · '+printedDate:'')));
+    intro.append(node('h2','iclub-sx-attempt-title',topic||tr('Практика по темам','Mavzular bo‘yicha amaliyot','Practice by topic')));
+    intro.append(node('p','iclub-sx-attempt-mode',
+      tr('По темам','Mavzular bo‘yicha','By topic')+' · '+total+' '+tr('вопросов','savol','questions')));
+    body.append(intro);
+
+    const panel=node('section','iclub-sx-attempt-panel');
+    const metrics=node('div','iclub-sx-attempt-metrics');
+    const left=node('div','iclub-sx-attempt-score');
+    left.append(node('span','iclub-sx-kicker',tr('ИТОГОВЫЙ РЕЗУЛЬТАТ','YAKUNIY NATIJA','FINAL RESULT')));
+    const big=node('strong','iclub-sx-attempt-number',correct+'/'+total);
+    if(mistakes===0)big.classList.add('good');
+    left.append(big);
+    left.append(node('span','iclub-sx-attempt-percent',percent+'% '+
+      tr('правильных ответов','to‘g‘ri javoblar','correct answers')));
+    const emblem=node('div','iclub-sx-attempt-emblem'+(mistakes===0?' good':''),mistakes?'!':'✓');
+    emblem.setAttribute('aria-hidden','true');
+    metrics.append(left,emblem);panel.append(metrics);
+    const chips=node('div','iclub-sx-attempt-chips');
+    chips.append(node('span','iclub-sx-attempt-chip'+(mistakes?' bad':' good'),mistakes+' '+errorsNoun(mistakes)));
+    chips.append(node('span','iclub-sx-attempt-chip',tr('Исходный результат','Dastlabki natija','Original result')));
+    panel.append(chips);
+
     const saved=Array.isArray(attempt.review)?attempt.review:[];
-    const wrongIds=Array.from(new Set(saved.map(d=>Number(d.question_id||0)).filter(id=>Number.isSafeInteger(id)&&id>0))).slice(0,10);
+    const wrongIds=Array.from(new Set(saved.map(d=>Number(d.question_id||0))
+      .filter(id=>Number.isSafeInteger(id)&&id>0))).slice(0,10);
     const sessionId=Number(attempt.session_id||0);
-    if(mistakes>0&&wrongIds.length>0&&Number.isSafeInteger(sessionId)&&sessionId>0){
-      const retry=node('button','btn primary iclub-topic-review-retry',
-        tr('Исправить ошибки','Xatolarni tuzatish','Correct mistakes'));
+    const canRetry=mistakes>0&&wrongIds.length>0&&Number.isSafeInteger(sessionId)&&sessionId>0;
+    if(canRetry){
+      const retry=node('button','btn primary iclub-sx-attempt-retry',
+        tr('Исправить ','Tuzatish: ','Correct ')+mistakes+' '+errorsNoun(mistakes));
       retry.type='button';
       retry.addEventListener('click',()=>{
         window.dispatchEvent(new CustomEvent('iclub-practice-correct-history',{
           detail:{subjectKey:selected.subjectKey,sourceSessionId:sessionId,questionIds:wrongIds,topic}
         }));
       });
-      body.append(retry);
+      panel.append(retry);
     }
+    const note=node('div','iclub-sx-attempt-note',mistakes
+      ?tr('Исправление запускает отдельную тренировку. Исходный результат остаётся без изменений.',
+          'Tuzatish alohida mashg‘ulotni boshlaydi. Dastlabki natija o‘zgarmaydi.',
+          'Correction starts a separate practice session. The original result stays unchanged.')
+      :tr('В этой попытке ошибок не было. Результат сохранён в истории.',
+          'Bu urinishda xato yo‘q. Natija tarixda saqlangan.',
+          'No mistakes in this attempt. The result remains in history.'));
+    panel.append(note);
+    body.append(panel);
+
+    const heading=node('div','iclub-sx-attempt-list-head');
+    heading.append(node('h3','',mistakes
+      ?tr('Разбор ошибок','Xatolar tahlili','Mistake review')
+      :tr('Разбор попытки','Urinish tahlili','Attempt review')));
+    heading.append(node('span','iclub-sx-attempt-count',
+      mistakes+' '+tr('из','tadan','of')+' '+total));
+    body.append(heading);
     if(!mistakes){
-      body.append(node('div','iclub-topic-history-empty',tr('В этой попытке ошибок не было.','Bu urinishda xatolar bo‘lmagan.','No mistakes in this attempt.')));
+      body.append(node('div','iclub-sx-attempt-empty',
+        tr('Все ответы правильные. Исправлять нечего.',
+          'Barcha javoblar to‘g‘ri. Tuzatish kerak emas.',
+          'All answers were correct. No mistakes to correct.')));
       return true;
     }
     if(!saved.length){
-      body.append(node('div','iclub-topic-history-empty',tr('Разбор этой попытки сейчас недоступен.','Bu urinish tahlili hozircha mavjud emas.','This attempt review is currently unavailable.')));
+      body.append(node('div','iclub-sx-attempt-empty',
+        tr('Разбор этой попытки сейчас недоступен.',
+          'Bu urinish tahlili hozircha mavjud emas.',
+          'This attempt review is currently unavailable.')));
       return true;
     }
-    if(saved.length<mistakes)body.append(node('div','muted small',tr('Часть старых вопросов недоступна для разбора.','Ba’zi eski savollar tahlil uchun mavjud emas.','Some older questions cannot be reviewed.')));
-    const questions=node('div','iclub-topic-review-questions');
+    if(saved.length<mistakes)body.append(node('p','iclub-sx-attempt-partial',
+      tr('Часть старых вопросов недоступна для разбора.',
+        'Ba’zi eski savollar tahlil uchun mavjud emas.',
+        'Some older questions cannot be reviewed.')));
+    const questions=node('div','iclub-sx-attempt-questions');
     for(let i=0;i<saved.length;i++){
       const d=saved[i];
-      const stem=String(d['question_'+locale]||d.question_en||'');
+      const stem=String(d['question_'+locale]||d.question_en||'').trim();
       const raw=d['options_'+locale]||d.options_en||'';
       let options=[];
       try{const values=typeof raw==='string'?JSON.parse(raw):raw;if(Array.isArray(values))options=values;}catch{}
@@ -212,16 +270,32 @@
         const ix=/^[A-Z]$/i.test(key)?key.toUpperCase().charCodeAt(0)-65:-1;
         return ix>=0&&ix<options.length?key+' — '+String(options[ix]):key||'—';
       };
-      const card=node('details','iclub-topic-review-question');
-      const head=node('summary','iclub-topic-review-question-head');
-      head.append(node('span','iclub-topic-review-number',tr('Ошибка ','Xato ','Mistake ')+(i+1)));
-      head.append(node('span','iclub-topic-review-stem',stem||tr('Вопрос','Savol','Question')));
-      card.append(head);
-      const detail=node('div','iclub-topic-review-answer');
-      detail.append(node('div','',tr('Ваш ответ: ','Javobingiz: ','Your answer: ')+answer(d.user_answer)));
-      detail.append(node('div','',tr('Правильный ответ: ','To‘g‘ri javob: ','Correct answer: ')+answer(d.correct_answer)));
+      const card=node('details','iclub-sx-attempt-question');
+      const summary=node('summary','iclub-sx-attempt-question-head');
+      summary.append(node('span','iclub-sx-attempt-question-no',String(i+1)));
+      summary.append(node('span','iclub-sx-attempt-question-label',
+        stem||tr('Вопрос','Savol','Question')));
+      const chevron=node('span','iclub-sx-attempt-question-arrow','⌄');
+      chevron.setAttribute('aria-hidden','true');
+      summary.append(chevron);
+      card.append(summary);
+      const detail=node('div','iclub-sx-attempt-question-body');
+      detail.append(node('p','iclub-sx-attempt-question-full',stem||tr('Вопрос','Savol','Question')));
+      const wrong=node('div','iclub-sx-attempt-answer bad');
+      wrong.append(node('strong','',tr('ВАШ ОТВЕТ','SIZNING JAVOBINGIZ','YOUR ANSWER')));
+      wrong.append(node('div','',answer(d.user_answer)));
+      detail.append(wrong);
+      const correctAnswer=node('div','iclub-sx-attempt-answer good');
+      correctAnswer.append(node('strong','',tr('ПРАВИЛЬНЫЙ ОТВЕТ','TO‘G‘RI JAVOB','CORRECT ANSWER')));
+      correctAnswer.append(node('div','',answer(d.correct_answer)));
+      detail.append(correctAnswer);
       const why=d['feedback_'+locale]||d['explanation_'+locale]||d.explanation_en||'';
-      if(why)detail.append(node('p','',String(why)));
+      if(why){
+        const explanation=node('div','iclub-sx-attempt-explanation');
+        explanation.append(node('strong','',tr('Пояснение','Izoh','Explanation')));
+        explanation.append(node('div','',String(why)));
+        detail.append(explanation);
+      }
       card.append(detail);
       questions.append(card);
     }
