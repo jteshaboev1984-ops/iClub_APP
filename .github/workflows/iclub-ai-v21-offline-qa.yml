@@ -59,6 +59,7 @@ on:
       - 'qa/ai-layer-v21-p6-home-action-race.cjs'
       - 'qa/ai-layer-v21-p6-study-route.cjs'
       - 'qa/ai-layer-v21-p6-study-route-http.test.cjs'
+      - 'qa/ai-layer-v21-p6-study-route-race.cjs'
       - 'qa/sql_drafts/iclub_ai_v21_study_route_scratch_UNAPPLIED.sql'
       - 'qa/sql_drafts/iclub_ai_v21_home_action_handoff_scratch_UNAPPLIED.sql'
       - 'qa/sql_drafts/iclub_ai_v21_home_atomic_delivery_READ_ONLY.sql'
@@ -230,6 +231,7 @@ jobs:
             -f qa/sql_drafts/iclub_ai_v21_home_http_fixture_local_pg.psql
           node qa/ai-layer-v21-p6-home-pg-chromium.cjs
           node --test qa/ai-layer-v21-p6-study-route-http.test.cjs
+          node qa/ai-layer-v21-p6-study-route-race.cjs
       - name: Independent one-use Home action claim race in disposable PostgreSQL
         shell: bash
         run: |
