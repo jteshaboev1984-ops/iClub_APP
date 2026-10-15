@@ -8,7 +8,7 @@ const {join}=require("node:path");
 const {tmpdir}=require("node:os");
 const {setTimeout:delay}=require("node:timers/promises");
 const assert=require("node:assert/strict");
-const {makeGateway}=require("./ai-layer-v21-p6-home-pg-http-gateway.cjs");
+const {makeGateway,scratchSql}=require("./ai-layer-v21-p6-home-pg-http-gateway.cjs");
 function chromeExecutable(){
  if(process.env.ICLUB_AI_CHROME)return process.env.ICLUB_AI_CHROME;
  for(const exe of ["google-chrome","chromium","chromium-browser"]){
@@ -119,6 +119,40 @@ async function run(){
    console.log("HOME_PG_CHROME_GREEN "+JSON.stringify({
     locale:v.lang,viewport:v.w+"x"+v.h,action:state.action,
     navLandmark:state.landmark,overflow:false}));
+  }
+  // The highest-priority category is now absent. Render BOTH authorized
+  // equal-priority subject names with original i18n captions, NOT internal IDs.
+  scratchSql("UPDATE public.practice_session_answers_v4 "+
+   "SET is_correct=true WHERE session_id=901");
+  try{
+   const names={ru:["Биология","Экономика"],
+    uz:["Biologiya","Iqtisodiyot"],en:["Biology","Economics"]};
+   for(const language of ["ru","uz","en"]){
+    await cdp.send("Page.navigate",{url:url+"/qa/home/demo"});
+    await waitForPage(cdp);
+    const js='(async()=>{'+
+     'const select=document.querySelector("#locale");'+
+     'select.value='+JSON.stringify(language)+';'+
+     'select.dispatchEvent(new Event("change"));'+
+     'document.querySelector("#check").click();'+
+     'for(let i=0;i<180;i++){'+
+     'const s=window.__qaHomeState();if(s.state==="ready")break;'+
+     'if(s.state==="denied")throw Error("Tie rejected");'+
+     'await new Promise(resolve=>setTimeout(resolve,40));}'+
+     'return window.__qaHomeState()})()';
+    const response=await cdp.send("Runtime.evaluate",{
+     expression:js,awaitPromise:true,returnByValue:true});
+    if(response.exceptionDetails)throw Error("Tie UI exception "+language);
+    const actual=response.result?.value;
+    assert.equal(actual?.state,"ready",language);
+    assert.equal(actual.action,"selection_required");
+    assert.deepEqual(actual.visibleChoices,names[language]);
+    assert.equal(JSON.stringify(actual).includes("next_continue_"),false);
+    console.log("HOME_PG_CHROME_TIE_GREEN: "+language+" approved translated subjects, no IDs");
+   }
+  }finally{
+   scratchSql("UPDATE public.practice_session_answers_v4 "+
+    "SET is_correct=false WHERE session_id=901");
   }
   // Browser should stop displaying a once-valid recommendation when the
   // signed server deadline passes, even with no click, navigation or network.
