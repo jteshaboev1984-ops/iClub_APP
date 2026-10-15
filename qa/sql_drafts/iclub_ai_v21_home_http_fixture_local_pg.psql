@@ -120,6 +120,7 @@ CROSS JOIN (VALUES
  ('continue_enrolled_subject','economics'),
  ('continue_enrolled_subject','biology')
 ) AS p(action_code,subject_key);
+\ir iclub_ai_v21_commercial_contract_fixture_local_pg.psql
 DO $verify$
 BEGIN
  IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$' THEN
