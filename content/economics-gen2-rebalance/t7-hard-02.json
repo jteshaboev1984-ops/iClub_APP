@@ -1,0 +1,332 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-032",
+    "n": 32,
+    "d": "hard",
+    "k": "D",
+    "sec": 195,
+    "en": "A foreign-owned factory in a host country employs 1,000 local workers earning $20,000 each annually. Its annual operating profit is $30m, of which 40% is repatriated abroad. Ignoring other income flows, what are local wage income and the direct annual primary-income outflow from profit repatriation?",
+    "ru": "Иностранный завод в принимающей стране нанимает 1 000 местных работников с годовой оплатой $20 000 каждому. Годовая операционная прибыль $30 млн, из неё 40% переводится за границу. Игнорируя другие доходы, найдите заработную плату местных работников и ежегодный отток первичных доходов из-за репатриации прибыли.",
+    "uz": "Qabul qiluvchi mamlakatdagi xorijiy zavod 1000 mahalliy ishchini yiliga $20 000 dan yollaydi. Yillik operatsion foyda $30 mln, uning 40% i chetga chiqariladi. Boshqa daromad oqimlarini hisoblamasdan mahalliy ish haqi va foydani olib chiqishdagi yillik birlamchi daromad chiqimini toping.",
+    "options_en": [
+      "Wages $2m; primary-income outflow $30m",
+      "Wages $20m; primary-income outflow $18m",
+      "Wages $30m; primary-income outflow $12m",
+      "Wages $20m; primary-income outflow $12m"
+    ],
+    "options_ru": [
+      "Зарплаты $2 млн; отток первичных доходов $30 млн",
+      "Зарплаты $20 млн; отток $18 млн",
+      "Зарплаты $30 млн; отток $12 млн",
+      "Зарплаты $20 млн; отток $12 млн"
+    ],
+    "options_uz": [
+      "Ish haqi $2 mln; birlamchi daromad chiqimi $30 mln",
+      "Ish haqi $20 mln; chiqim $18 mln",
+      "Ish haqi $30 mln; chiqim $12 mln",
+      "Ish haqi $20 mln; chiqim $12 mln"
+    ],
+    "why": [
+      "Local wage earnings are 1,000×$20,000=$20m. Profit repatriation is 40%×$30m=$12m, a primary-income outflow in the host economy's current account.",
+      "Местные зарплаты 1 000×$20 000=$20 млн. Репатриация прибыли 40%×$30 млн=$12 млн отражается как отток первичных доходов.",
+      "Mahalliy ish haqi 1000×$20 000=$20 mln. Foyda olib chiqilishi 40%×$30 mln=$12 mln, joriy hisobda birlamchi daromad chiqimi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-033",
+    "n": 33,
+    "d": "hard",
+    "k": "C",
+    "sec": 180,
+    "en": "A country defending a fixed currency peg starts with $750m of usable FX reserves and average monthly imports of $150m. Its central bank sells $150m of FX reserves, without replenishment. What happens to reserve import cover, and which comparison with floating exchange rates is accurate?",
+    "ru": "Страна защищает фиксированную валютную привязку, имея $750 млн доступных резервов при среднемесячном импорте $150 млн. Центральный банк продаёт $150 млн валютных резервов без восполнения. Как меняется покрытие импорта и какое сравнение с плавающим курсом верно?",
+    "uz": "Mamlakat qat’iy valuta kursini himoya qiladi: zaxiralar $750 mln, oylik import $150 mln. Markaziy bank $150 mln valuta zaxirasini sotadi va to‘ldirmaydi. Import qoplash muddati qanday o‘zgaradi va suzuvchi kurs bilan qaysi taqqoslash to‘g‘ri?",
+    "options_en": [
+      "From 5 to 6 months; floating rates never move",
+      "From 5 to 1 month; a peg uses no reserves",
+      "From 5 to 4 months; a floating rate can absorb market pressure through price movement without defending a fixed parity",
+      "From 5 to 4 months; both regimes guarantee the identical exchange rate"
+    ],
+    "options_ru": [
+      "С 5 до 6 месяцев; плавающий курс никогда не меняется",
+      "С 5 до 1 месяца; фиксированный курс не расходует резервы",
+      "С 5 до 4 месяцев; при плавающем курсе давление может отражаться в изменении цены валюты без защиты заданного паритета",
+      "С 5 до 4 месяцев; оба режима гарантируют одинаковый курс"
+    ],
+    "options_uz": [
+      "5 oydan 6 oyga; suzuvchi kurs hech o‘zgarmaydi",
+      "5 oydan 1 oyga; qat’iy kurs zaxira sarflamaydi",
+      "5 oydan 4 oyga; suzuvchi kursda bosim kurs o‘zgarishi orqali yutilishi mumkin, qat’iy paritet himoyasi shart emas",
+      "5 oydan 4 oyga; ikkala tizim ayni kursni kafolatlaydi"
+    ],
+    "why": [
+      "Reserve cover falls from 750/150=5 to 600/150=4 months. Under a floating system an exchange-rate price change can absorb pressure; it does not require the same fixed-price intervention.",
+      "Резервы после продажи $600 млн, покрытие 600/150=4 месяца вместо 5. Плавающий курс может реагировать изменением цены, а не обязательной защитой паритета.",
+      "Sotuvdan keyin zaxira $600 mln, qoplash 600/150=4 oy, avval 5 oy. Suzuvchi kursda bosim almashuv narxi bilan moslashishi mumkin."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-035",
+    "n": 35,
+    "d": "hard",
+    "k": "B",
+    "sec": 180,
+    "en": "Country A has nominal GNI per person of $6,000 but a domestic price-level index of 150 relative to a benchmark of 100. Country B has nominal GNI per person of $5,000 and a price-level index of 100. In a simplified price-adjusted comparison, what are their benchmark-price incomes per person and which is higher?",
+    "ru": "В стране A номинальный ВНД на человека $6 000 при индексе внутренних цен 150 относительно базы 100. В стране B ВНД $5 000 при индексе цен 100. В упрощённом сравнении с учётом цен чему равны доходы на человека в базовых ценах и в какой стране они выше?",
+    "uz": "A mamlakatda jon boshiga nominal YAMD $6000, ichki narx indeksi 150 (baza 100). B mamlakatda nominal YAMD $5000, narx indeksi 100. Narxga tuzatilgan soddalashtirilgan taqqoslashda bazaviy narxlardagi jon boshiga daromad qancha va qaysi biri yuqori?",
+    "options_en": [
+      "A $6,000; B $5,000, so A higher",
+      "A $4,000; B $5,000, so B higher",
+      "A $9,000; B $5,000, so A higher",
+      "A $4,000; B $3,333, so A higher"
+    ],
+    "options_ru": [
+      "A $6 000, B $5 000; выше A",
+      "A $4 000, B $5 000; выше B",
+      "A $9 000, B $5 000; выше A",
+      "A $4 000, B $3 333; выше A"
+    ],
+    "options_uz": [
+      "A $6000, B $5000; A yuqori",
+      "A $4000, B $5000; B yuqori",
+      "A $9000, B $5000; A yuqori",
+      "A $4000, B $3333; A yuqori"
+    ],
+    "why": [
+      "Price adjustment gives A=$6,000/(150/100)=$4,000 and B=$5,000/(100/100)=$5,000. Higher nominal income need not mean greater real purchasing power.",
+      "Корректировка A: $6 000/(150/100)=$4 000; B: $5 000. Более высокий номинальный доход не гарантирует большей покупательной способности.",
+      "A tuzatilgan daromadi $6000/(150/100)=$4000, B daromadi $5000. Nominal daromadning kattaligi real xarid quvvatini kafolatlamaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-036",
+    "n": 36,
+    "d": "hard",
+    "k": "A",
+    "sec": 195,
+    "en": "Before joining a customs union, importers buy 2,000 units from the lowest-cost non-member supplier at a resource cost of $40 per unit plus a $4 import tariff. A union member produces the identical good at a resource cost of $42. After union entry, the common external tariff raises the non-member's landed price to $48, while member imports enter tariff-free at $42, so trade shifts to the member. What is the effect and extra real resource cost relative to the original supplier?",
+    "ru": "До вступления в таможенный союз импортёры покупают 2 000 единиц у поставщика вне союза с ресурсной себестоимостью $40 за единицу плюс пошлина $4. Участник союза производит такой же товар с себестоимостью $42. После вступления общий внешний тариф повышает цену внешнего поставщика до $48, а товар участника поступает без пошлины по $42; закупки переключаются. Каков эффект и дополнительные реальные ресурсные затраты относительно прежнего поставщика?",
+    "uz": "Bojxona ittifoqiga kirishdan oldin importchilar 2000 birlikni ittifoqdan tashqari eng arzon ishlab chiqaruvchidan resurs xarajati $40 va boj $4 bilan oladi. Ittifoq a’zosi ayni tovarni $42 resurs xarajatida ishlab chiqaradi. Yangi umumiy tashqi boj tashqi narxni $48 qiladi, a’zo $42 da bojsiz yetkazadi, xarid a’zoga o‘tadi. Bu qanday hodisa va avvalgi manbaga nisbatan qo‘shimcha real resurs xarajati qancha?",
+    "options_en": [
+      "Trade diversion; $4,000 extra real resource cost",
+      "Trade creation; $4,000 resource saving",
+      "Trade diversion; $8,000 extra real resource cost",
+      "Trade creation; no resource difference"
+    ],
+    "options_ru": [
+      "Отклонение торговли; дополнительные реальные затраты $4 000",
+      "Создание торговли; экономия ресурсов $4 000",
+      "Отклонение торговли; дополнительные затраты $8 000",
+      "Создание торговли; разницы ресурсов нет"
+    ],
+    "options_uz": [
+      "Savdoning og‘ishi; qo‘shimcha real xarajat $4000",
+      "Savdo yaratilishi; $4000 resurs tejaladi",
+      "Savdo og‘ishi; qo‘shimcha xarajat $8000",
+      "Savdo yaratilishi; resurs farqi yo‘q"
+    ],
+    "why": [
+      "The non-member's underlying resource cost $40 is lower than the member's $42. Tariff preferences divert imports to a higher-cost producer, adding ($42−$40)×2,000=$4,000 real resource cost. Tax receipts are transfers, not resource costs.",
+      "Производственные затраты вне союза $40 ниже союзных $42. Преференция перенаправляет закупки к более дорогому источнику, увеличение реальных затрат ($42−$40)×2 000=$4 000. Пошлина — трансферт.",
+      "Ittifoqdan tashqari resurs xarajati $40, a’zoda $42. Boj imtiyozi yuqoriroq xarajatli manbaga yo‘naltiradi: ($42−$40)×2000=$4000 haqiqiy qo‘shimcha xarajat. Boj tushumi transfert."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-039",
+    "n": 39,
+    "d": "hard",
+    "k": "C",
+    "sec": 185,
+    "en": "In year one, a country has 420 deaths before age one among 28,000 live births. In year two it records 300 such deaths among 24,000 live births. By how much does the infant mortality rate per 1,000 live births change?",
+    "ru": "В первый год в стране зарегистрировано 420 смертей детей до одного года при 28 000 живорождений. Во второй год — 300 смертей при 24 000 живорождений. Как изменяется коэффициент младенческой смертности на 1 000 живорождений?",
+    "uz": "Birinchi yilda mamlakatda 28 000 tirik tug‘ilishdan bir yoshgacha 420 o‘lim, ikkinchi yilda 24 000 tug‘ilishdan 300 o‘lim qayd etildi. Har 1000 tirik tug‘ilishga chaqaloq o‘lim koeffitsienti qanchaga o‘zgaradi?",
+    "options_en": [
+      "Increases from 12.5 to 15.0, by 2.5",
+      "Falls from 15.0 to 10.7, by 4.3",
+      "Falls from 15.0 to 12.5, by 2.5",
+      "Falls from 1.5 to 1.25, by 0.25"
+    ],
+    "options_ru": [
+      "Растёт с 12,5 до 15,0, на 2,5",
+      "Падает с 15,0 до 10,7, на 4,3",
+      "Падает с 15,0 до 12,5, на 2,5",
+      "Падает с 1,5 до 1,25, на 0,25"
+    ],
+    "options_uz": [
+      "12,5 dan 15,0 ga, 2,5 oshadi",
+      "15,0 dan 10,7 ga, 4,3 tushadi",
+      "15,0 dan 12,5 ga, 2,5 tushadi",
+      "1,5 dan 1,25 ga, 0,25 tushadi"
+    ],
+    "why": [
+      "Rates are 420/28,000×1,000=15.0 and 300/24,000×1,000=12.5. The infant mortality rate falls by 2.5 deaths per 1,000 live births.",
+      "Коэффициенты 420/28 000×1 000=15,0 и 300/24 000×1 000=12,5. Снижение составляет 2,5 случая на 1 000 живорождений.",
+      "Koeffitsientlar 420/28 000×1000=15,0 va 300/24 000×1000=12,5. Har 1000 tug‘ilishga 2,5 ta kamayish."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-041",
+    "n": 41,
+    "d": "hard",
+    "k": "D",
+    "sec": 180,
+    "en": "Domestic machinery exporters need two tonnes of imported steel for each machine. A 20% tariff raises imported steel's price from $400 to $480 per tonne and is fully passed through to input buyers. If 100 machines are made with all other prices unchanged, what is the additional steel-input cost, and which policy trade-off does it reveal?",
+    "ru": "Отечественные экспортёры оборудования используют по две тонны импортной стали на машину. Пошлина 20% повышает цену импортной стали с $400 до $480 за тонну и полностью переносится на покупателей ресурсов. При выпуске 100 машин и неизменных прочих ценах каковы дополнительные затраты на сталь и какой компромисс это выявляет?",
+    "uz": "Mahalliy uskuna eksportchilari har mashina uchun ikki tonna import po‘lat ishlatadi. 20% boj po‘lat narxini $400 dan $480 ga oshiradi va xaridorga to‘liq o‘tadi. Boshqa narxlar o‘zgarmasdan 100 mashina tayyorlansa, po‘lat uchun qo‘shimcha xarajat qancha va qanday siyosiy muvozanat ko‘rinadi?",
+    "options_en": [
+      "$8,000; steel protection necessarily increases machine exports",
+      "$16,000; the tariff has no effect on exporters",
+      "$80,000; machines automatically become cheaper abroad",
+      "$16,000; upstream producer protection can damage downstream export competitiveness"
+    ],
+    "options_ru": [
+      "$8 000; защита стали обязательно повышает экспорт машин",
+      "$16 000; пошлина не влияет на экспортёров",
+      "$80 000; машины автоматически дешевеют за границей",
+      "$16 000; защита поставщиков ресурсов может снизить конкурентоспособность экспортёров"
+    ],
+    "options_uz": [
+      "$8000; po‘lat himoyasi uskuna eksportini albatta oshiradi",
+      "$16 000; boj eksportchiga ta’sir qilmaydi",
+      "$80 000; mashina chetda avtomatik arzonlashadi",
+      "$16 000; yuqori bosqichdagi himoya keyingi mahsulot eksportiga zarar berishi mumkin"
+    ],
+    "why": [
+      "Each machine uses 2 tonnes, so 100 use 200 tonnes. The tariff adds $80 per tonne, increasing costs by 200×$80=$16,000. Protecting steel firms can harm downstream exporters.",
+      "100 ta mashina 200 tonna po‘lat ishlatadi. Har tonnaga $80 qo‘shimcha, jami $16 000. Po‘lat ishlab chiqaruvchilarni himoyalash keyingi eksportchilar xarajatini oshiradi.",
+      "100 машин требуют 200 тонн стали. Удорожание $80 за тонну повышает затраты на $16 000. Защита сталелитейщиков способна ухудшить конкурентоспособность машиностроения."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-043",
+    "n": 43,
+    "d": "hard",
+    "k": "A",
+    "sec": 180,
+    "en": "A resource-dependent country has an export-price index of 100 and an import-price index of 100 in the base period. Cocoa export prices later fall to an index of 80 while machinery import prices rise to 120. What is its new terms-of-trade index and approximate percentage deterioration?",
+    "ru": "В стране, зависящей от сырьевого экспорта, индексы экспортных и импортных цен базового периода равны 100. Позднее индекс экспортных цен какао падает до 80, индекс цен импортируемого оборудования растёт до 120. Каков новый индекс условий торговли и примерный процент ухудшения?",
+    "uz": "Xomashyo eksportiga bog‘liq mamlakatda bazaviy eksport va import narx indekslari 100. Keyin kakao eksport narx indeksi 80 ga tushadi, import uskuna narxi indeksi 120 ga oshadi. Yangi savdo shartlari indeksi va taxminiy yomonlashish foizi qancha?",
+    "options_en": [
+      "66.7; deterioration about 33.3%",
+      "150; improvement about 50%",
+      "80; deterioration about 20%",
+      "120; improvement about 20%"
+    ],
+    "options_ru": [
+      "66,7; ухудшение примерно на 33,3%",
+      "150; улучшение примерно на 50%",
+      "80; ухудшение примерно на 20%",
+      "120; улучшение примерно на 20%"
+    ],
+    "options_uz": [
+      "66,7; taxminan 33,3% yomonlashish",
+      "150; taxminan 50% yaxshilanish",
+      "80; taxminan 20% yomonlashish",
+      "120; taxminan 20% yaxshilanish"
+    ],
+    "why": [
+      "Terms of trade=export-price index/import-price index×100=80/120×100≈66.7 versus 100 initially. That is a fall of about 33.3% and reduces purchasing power of exports over imports.",
+      "Условия торговли =80/120×100≈66,7 вместо 100. Снижение около 33,3% уменьшает количество импорта, приобретаемого на экспортную выручку при прочих равных.",
+      "Savdo shartlari 80/120×100≈66,7, avval 100 edi. Taxminan 33,3% yomonlashish eksportning import xarid quvvatini pasaytiradi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-045",
+    "n": 45,
+    "d": "hard",
+    "k": "B",
+    "sec": 180,
+    "en": "After currency depreciation, estimated long-run price elasticities of demand for exports and imports are respectively 0.6 and 0.7 in absolute value. Quantities initially respond slowly because contracts are fixed. What do the Marshall–Lerner condition and adjustment delay jointly suggest?",
+    "ru": "После обесценения валюты долгосрочные ценовые эластичности спроса на экспорт и импорт по модулю оцениваются как 0,6 и 0,7. Сначала объёмы медленно меняются из-за фиксированных контрактов. Что совместно предполагают условие Маршалла–Лернера и задержка адаптации?",
+    "uz": "Valuta qadrsizlangach eksport va import talabining uzoq muddatli narx elastikliklari mutlaq 0,6 va 0,7. Dastlab hajmlar qat’iy shartnomalar sabab sekin moslashadi. Marshall–Lerner sharti va moslashish kechikishi birga nimani ko‘rsatadi?",
+    "options_en": [
+      "Elasticities sum to 0.1, so the balance must worsen forever",
+      "Elasticities sum to 1.3; long-run improvement is possible after an initial worsening (J-curve), other things equal",
+      "Elasticities sum to 1.3, so improvement must be immediate",
+      "Elasticities do not matter when the nominal exchange rate changes"
+    ],
+    "options_ru": [
+      "Сумма эластичностей 0,1; сальдо обязано ухудшаться всегда",
+      "Сумма 1,3; со временем улучшение возможно после первоначального ухудшения (J-кривая), при прочих равных",
+      "Сумма 1,3; улучшение обязано быть немедленным",
+      "Эластичности не имеют значения при изменении курса"
+    ],
+    "options_uz": [
+      "Elastikliklar yig‘indisi 0,1; balans doim yomonlashishi shart",
+      "Yig‘indi 1,3; dastlab J-egri bo‘yicha yomonlashib, keyin yaxshilanishi mumkin, boshqa shartlar teng",
+      "Yig‘indi 1,3; darhol yaxshilanish shart",
+      "Nominal kurs o‘zgarganda elastiklik ahamiyatsiz"
+    ],
+    "why": [
+      "Absolute elasticities sum to 0.6+0.7=1.3>1, satisfying the Marshall–Lerner condition for a potential eventual trade-balance improvement. Slow quantity adjustment can create initial J-curve deterioration.",
+      "Сумма модулей 0,6+0,7=1,3>1 выполняет условие Маршалла–Лернера для возможного последующего улучшения. Запаздывающая реакция объёмов допускает начальное ухудшение.",
+      "Mutlaq elastikliklar yig‘indisi 0,6+0,7=1,3>1. Marshall–Lerner sharti keyingi yaxshilanishga mos, hajm sekin moslashsa avval J-egri yomonlashishi mumkin."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-063",
+    "n": 63,
+    "d": "hard",
+    "k": "C",
+    "sec": 190,
+    "en": "A country starts with a current-account surplus of $20m. A rate cut raises domestic income and induces $10m extra imports, but an exchange-rate depreciation independently raises exports by $12m and reduces imports by another $5m. With no other changes or overlap, what is the new current-account balance?",
+    "ru": "Первоначальный профицит текущего счёта $20 млн. Снижение ставки повышает внутренний доход и вызывает дополнительные импортные закупки на $10 млн. Но связанное с курсом обесценение независимо увеличивает экспорт на $12 млн и уменьшает импорт ещё на $5 млн. Прочих эффектов и пересечений нет. Каково новое сальдо?",
+    "uz": "Mamlakat joriy hisobida dastlab $20 mln profitsit bor. Stavka pasayishi daromadni oshirib, qo‘shimcha $10 mln import yaratadi. Valuta qadrsizlanishi mustaqil ravishda eksportni $12 mln oshirib, importni yana $5 mln kamaytiradi. Boshqa ta’sir va takror yo‘q. Yangi balans qancha?",
+    "options_en": [
+      "+$3m; the surplus disappears",
+      "+$13m; interest cuts always remove surpluses",
+      "+$27m; exchange-rate effects more than offset higher income-induced imports",
+      "−$7m; depreciation necessarily causes a deficit"
+    ],
+    "options_ru": [
+      "+$3 млн; профицит исчезает",
+      "+$13 млн; снижение ставки всегда устраняет профицит",
+      "+$27 млн; валютный эффект более чем компенсирует импорт из-за роста дохода",
+      "−$7 млн; обесценение обязательно создаёт дефицит"
+    ],
+    "options_uz": [
+      "+$3 mln; profitsit yo‘qoladi",
+      "+$13 mln; stavka pasayishi doim profitsitni yo‘q qiladi",
+      "+$27 mln; kurs ta’siri daromad sabab qo‘shimcha importni ortig‘i bilan qoplaydi",
+      "−$7 mln; qadrsizlanish albatta taqchillik yaratadi"
+    ],
+    "why": [
+      "Net change to the current account is −$10m+$12m+$5m=+$7m. The surplus rises from $20m to $27m rather than falling as policymakers intended.",
+      "Текущий счёт меняется на −$10+$12+$5=+$7 млн. Профицит растёт с $20 до $27 млн вопреки исходной цели.",
+      "Joriy hisob o‘zgarishi −$10+$12+$5=+$7 mln. Profitsit maqsadga zid ravishda $20 mln dan $27 mln ga oshadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-065",
+    "n": 65,
+    "d": "hard",
+    "k": "D",
+    "sec": 185,
+    "en": "A government owes $100m in foreign-currency debt with an annual interest rate of 5%. The exchange rate depreciates from 10,000 to 12,000 local units per foreign unit. Annual export receipts fall from $9m to $7m in foreign currency. What are the new annual interest bill in local currency and the interest bill as a share of export receipts?",
+    "ru": "Государство должно $100 млн валютного долга под 5% годовых. Курс национальной валюты ослабевает с 10 000 до 12 000 местных единиц за иностранную. Годовая экспортная выручка падает с $9 млн до $7 млн. Какова новая годовая сумма процентов в местной валюте и доля процентных выплат в экспортной выручке?",
+    "uz": "Davlat $100 mln xorijiy valuta qarziga yiliga 5% foiz to‘laydi. Kurs bir xorijiy birlik uchun 10 000 dan 12 000 mahalliy birlikka qadrsizlanadi. Yillik eksport tushumi $9 mln dan $7 mln ga tushadi. Yangi yillik foiz to‘lovi mahalliy valutada qancha va eksport tushumiga nisbati qanday?",
+    "options_en": [
+      "50bn local units; about 55.6%",
+      "60bn local units; exactly 5%",
+      "12bn local units; about 71.4%",
+      "60bn local units; about 71.4%"
+    ],
+    "options_ru": [
+      "50 млрд местных единиц; около 55,6%",
+      "60 млрд местных единиц; ровно 5%",
+      "12 млрд местных единиц; около 71,4%",
+      "60 млрд местных единиц; около 71,4%"
+    ],
+    "options_uz": [
+      "50 mlrd mahalliy birlik; taxminan 55,6%",
+      "60 mlrd mahalliy birlik; aynan 5%",
+      "12 mlrd mahalliy birlik; taxminan 71,4%",
+      "60 mlrd mahalliy birlik; taxminan 71,4%"
+    ],
+    "why": [
+      "Foreign-currency annual interest is 5%×$100m=$5m. In local units it is $5m×12,000=60bn. Relative to $7m export receipts, interest is 5/7≈71.4%, indicating heightened external debt-service stress.",
+      "Валютные проценты 5%×$100 млн=$5 млн, в местной валюте $5 млн×12 000=60 млрд единиц. К экспортной выручке доля 5/7≈71,4%.",
+      "Yillik xorijiy foiz $100 mln×5%=$5 mln. Mahalliy to‘lov $5 mln×12 000=60 mlrd birlik, eksport tushumiga nisbati 5/7≈71,4%."
+    ]
+  }
+]

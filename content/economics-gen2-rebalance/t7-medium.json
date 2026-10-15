@@ -1,0 +1,266 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-009",
+    "n": 9,
+    "d": "medium",
+    "k": "B",
+    "sec": 155,
+    "en": "A country's population at the start of a year is 2 million. During the year there are 40,000 births, 25,000 deaths, 15,000 immigrants and 25,000 emigrants. Assuming no other changes, what are its natural increase, net migration and overall population growth rate?",
+    "ru": "На начало года население страны 2 млн. За год было 40 000 рождений, 25 000 смертей, 15 000 иммигрантов и 25 000 эмигрантов. Без прочих изменений найдите естественный прирост, миграционное сальдо и общий темп прироста населения.",
+    "uz": "Yil boshida mamlakat aholisi 2 mln. Yil davomida 40 000 tug‘ilish, 25 000 o‘lim, 15 000 immigratsiya va 25 000 emigratsiya bo‘ldi. Boshqa ta’sirsiz tabiiy o‘sish, sof migratsiya va umumiy aholi o‘sish sur’ati qancha?",
+    "options_en": [
+      "+15,000; +10,000; 1.25%",
+      "+15,000; −10,000; 0.25%",
+      "−15,000; +10,000; −0.25%",
+      "+40,000; −25,000; 0.75%"
+    ],
+    "options_ru": [
+      "+15 000; +10 000; 1,25%",
+      "+15 000; −10 000; 0,25%",
+      "−15 000; +10 000; −0,25%",
+      "+40 000; −25 000; 0,75%"
+    ],
+    "options_uz": [
+      "+15 000; +10 000; 1,25%",
+      "+15 000; −10 000; 0,25%",
+      "−15 000; +10 000; −0,25%",
+      "+40 000; −25 000; 0,75%"
+    ],
+    "why": [
+      "Natural increase is 40,000−25,000=15,000; net migration 15,000−25,000=−10,000. Total increase 5,000/2,000,000=0.25%.",
+      "Естественный прирост 40 000−25 000=15 000, миграционное сальдо 15 000−25 000=−10 000. Общий прирост 5 000/2 000 000=0,25%.",
+      "Tabiiy o‘sish 40 000−25 000=15 000, migratsiya 15 000−25 000=−10 000. Jami o‘sish 5 000/2 000 000=0,25%."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-010",
+    "n": 10,
+    "d": "medium",
+    "k": "D",
+    "sec": 145,
+    "en": "Country A has 9,000 births among 600,000 people; country B has 10,800 births among 675,000 people in the same year. Which comparison of crude birth rates per 1,000 population is correct?",
+    "ru": "В стране A за год зарегистрировано 9 000 рождений при населении 600 000, в стране B — 10 800 при населении 675 000. Как верно сопоставить общие коэффициенты рождаемости на 1 000 жителей?",
+    "uz": "A mamlakatda yil davomida 600 000 aholiga 9000 tug‘ilish, B mamlakatda 675 000 aholiga 10 800 tug‘ilish to‘g‘ri keladi. Har 1000 kishiga umumiy tug‘ilish koeffitsientlarini qaysi javob to‘g‘ri taqqoslaydi?",
+    "options_en": [
+      "A 15; B 14, so A is higher",
+      "A 9; B 10.8, so B is higher",
+      "A 16; B 15, so A is higher",
+      "A 15; B 16, so B is higher by one per 1,000"
+    ],
+    "options_ru": [
+      "A — 15; B — 14, выше A",
+      "A — 9; B — 10,8, выше B",
+      "A — 16; B — 15, выше A",
+      "A — 15; B — 16, B выше на единицу на 1 000"
+    ],
+    "options_uz": [
+      "A — 15; B — 14, A yuqori",
+      "A — 9; B — 10,8, B yuqori",
+      "A — 16; B — 15, A yuqori",
+      "A — 15; B — 16, B har 1000 da birga yuqori"
+    ],
+    "why": [
+      "A has 9,000/600,000×1,000=15 births per 1,000; B has 10,800/675,000×1,000=16. The larger birth count alone does not establish the rate.",
+      "A: 9 000/600 000×1 000=15, B: 10 800/675 000×1 000=16. Само абсолютное число рождений не заменяет коэффициент.",
+      "A: 9000/600 000×1000=15, B: 10 800/675 000×1000=16. Faqat tug‘ilish soni koeffitsientni bildirmaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-021",
+    "n": 21,
+    "d": "medium",
+    "k": "C",
+    "sec": 155,
+    "en": "A region has 400,000 residents, of whom 100,000 live in urban areas. New export factories attract 20,000 rural residents to cities, without changing the region's total population. What is the new urban share and the increase in percentage points?",
+    "ru": "В регионе проживает 400 000 человек, из них 100 000 — в городах. Новые экспортные заводы привлекают 20 000 сельских жителей в города, общая численность населения региона не меняется. Какова новая доля городского населения и её увеличение в процентных пунктах?",
+    "uz": "Hududda 400 000 kishi yashaydi, ulardan 100 000 shaharda. Yangi eksport zavodlari 20 000 qishloq aholisini shaharga jalb qiladi, umumiy aholi o‘zgarmaydi. Yangi shahar ulushi va foiz punktdagi o‘sish qancha?",
+    "options_en": [
+      "25%; increase 5 points",
+      "30%; increase 20 points",
+      "30%; increase 5 points",
+      "35%; increase 10 points"
+    ],
+    "options_ru": [
+      "25%; рост на 5 п.п.",
+      "30%; рост на 20 п.п.",
+      "30%; рост на 5 п.п.",
+      "35%; рост на 10 п.п."
+    ],
+    "options_uz": [
+      "25%; 5 foiz punkt oshadi",
+      "30%; 20 foiz punkt oshadi",
+      "30%; 5 foiz punkt oshadi",
+      "35%; 10 foiz punkt oshadi"
+    ],
+    "why": [
+      "Initial urban share is 100,000/400,000=25%. New urban population 120,000/400,000=30%, five percentage points higher. This is internal rural-to-urban migration.",
+      "Исходная доля 100 000/400 000=25%. После миграции 120 000/400 000=30%, рост на пять процентных пунктов.",
+      "Dastlab shahar ulushi 100 000/400 000=25%. Keyin 120 000/400 000=30%, besh foiz punkt oshadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-024",
+    "n": 24,
+    "d": "medium",
+    "k": "B",
+    "sec": 150,
+    "en": "Two countries have similar PPP-adjusted income per person. Country X has more years of schooling on average but lower life expectancy than Country Y. Which conclusion about their overall Human Development Index follows without the precise normalised component scores?",
+    "ru": "Две страны имеют сходный доход на человека с учётом ППС. В стране X средняя продолжительность обучения выше, но ожидаемая продолжительность жизни ниже, чем в Y. Какой вывод об их общем индексе человеческого развития возможен без точных нормализованных значений компонентов?",
+    "uz": "Ikki mamlakatning PPP bo‘yicha jon boshiga daromadi o‘xshash. X mamlakatda o‘qish yillari ko‘proq, ammo umr davomiyligi Y dan past. Aniq normallashtirilgan komponent ballarisiz umumiy Inson Taraqqiyoti Indeksi haqida qanday xulosa chiqarish mumkin?",
+    "options_en": [
+      "X must have the higher HDI because education always dominates",
+      "The overall HDI ranking is not determined; health and education differences must be combined with the income component",
+      "Y must have the higher HDI because health alone determines it",
+      "Equal PPP income forces identical HDI scores"
+    ],
+    "options_ru": [
+      "У X индекс обязательно выше, поскольку образование всегда доминирует",
+      "Общий рейтинг не определён: показатели здоровья и образования нужно объединить с доходным компонентом",
+      "У Y индекс обязательно выше, поскольку его определяет только здоровье",
+      "Равенство доходов по ППС гарантирует одинаковый ИЧР"
+    ],
+    "options_uz": [
+      "X HDI albatta yuqori, chunki ta’lim doim ustun",
+      "Umumiy HDI tartibi noma’lum; sog‘liq va ta’lim ko‘rsatkichlarini daromad bilan birlashtirish kerak",
+      "Y HDI albatta yuqori, chunki uni faqat sog‘liq belgilaydi",
+      "PPP daromadi teng bo‘lsa HDI ham ayni bo‘ladi"
+    ],
+    "why": [
+      "HDI combines education, health and income dimensions. Better education but poorer health creates offsetting effects, so relative HDI cannot be inferred without the component values and weighting method.",
+      "ИЧР объединяет образование, здоровье и доход. Улучшение одного измерения при ухудшении другого не позволяет определить общий рейтинг без значений компонентов.",
+      "HDI ta’lim, sog‘liq va daromadni birlashtiradi. Ta’lim yaxshiroq, sog‘liq yomonroq bo‘lsa komponentlar qiymatisiz umumiy reyting aniqlanmaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-040",
+    "n": 40,
+    "d": "medium",
+    "k": "A",
+    "sec": 160,
+    "en": "In Country A, the nominal monthly wage is $1,000 and a standard food basket costs $250. In Country B, the nominal monthly wage is $900 and the identical basket costs $180. Ignoring other goods, how many such baskets can each wage buy, and which country has greater purchasing power measured in this basket?",
+    "ru": "В стране A номинальная зарплата $1 000 в месяц, стандартная продуктовая корзина стоит $250. В стране B зарплата $900, идентичная корзина — $180. Игнорируя прочие товары, сколько таких корзин можно купить и где покупательная способность относительно данной корзины выше?",
+    "uz": "A mamlakatda nominal oylik $1000, standart oziq-ovqat savati $250. B mamlakatda oylik $900, ayni savat $180. Boshqa tovarlarni hisoblamasdan har oylikka necha savat olish mumkin va shu savat bo‘yicha xarid quvvati qayerda yuqori?",
+    "options_en": [
+      "A 4 baskets; B 5 baskets, so B has greater basket-specific purchasing power",
+      "A 5 baskets; B 4, so A has greater purchasing power",
+      "Both 4 baskets because wages are broadly similar",
+      "A 4 baskets; B 5, proving B has higher welfare in every dimension"
+    ],
+    "options_ru": [
+      "A — 4 корзины, B — 5; по данной корзине покупательная способность выше в B",
+      "A — 5, B — 4; выше в A",
+      "В обеих странах по 4 корзины из-за сходства зарплат",
+      "A — 4, B — 5; это доказывает превосходство B по всем аспектам благосостояния"
+    ],
+    "options_uz": [
+      "A 4 savat, B 5 savat; ayni savat bo‘yicha B xarid quvvati yuqori",
+      "A 5, B 4; A yuqori",
+      "Ikkalasida 4 savat, chunki ish haqi yaqin",
+      "A 4, B 5; bu B har tomonlama farovonligi yuqoriligini isbotlaydi"
+    ],
+    "why": [
+      "A can buy $1,000/$250=4 baskets; B can buy $900/$180=5. This supports only a basket-specific purchasing-power comparison, not an overall welfare ranking.",
+      "В A можно купить $1 000/$250=4 корзины, в B $900/$180=5. Вывод относится к данной корзине, а не ко всем аспектам благосостояния.",
+      "A $1000/$250=4 savat, B $900/$180=5 savat oladi. Bu faqat shu savat bo‘yicha xarid quvvatini taqqoslaydi, umumiy farovonlikni emas."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-047",
+    "n": 47,
+    "d": "medium",
+    "k": "D",
+    "sec": 160,
+    "en": "A factory can buy a crucial part domestically for $60 or import it for $50. Imports face an independently estimated expected disruption cost of $8 per part, while domestic sourcing has negligible disruption cost. Assuming risks can be valued in money and there are no other differences, which sourcing choice minimises expected total cost, and what does it illustrate?",
+    "ru": "Завод может покупать ключевую деталь внутри страны за $60 или импортировать за $50. Для импорта независимая оценка ожидаемых потерь от сбоев составляет $8 на деталь, для местных поставок потери пренебрежимо малы. Если риски допустимо оценивать в деньгах и прочих отличий нет, какой выбор минимизирует ожидаемые затраты и что это иллюстрирует?",
+    "uz": "Zavod muhim detalni mahalliy ishlab chiqaruvchidan $60 ga yoki import qilib $50 ga olishi mumkin. Import uzilishining pulda baholangan kutilgan zarari har detalga $8, mahalliy ta’minotda deyarli nol. Boshqa farqlar bo‘lmasa qaysi xarid kutilgan jami xarajatni minimallashtiradi va nimani ko‘rsatadi?",
+    "options_en": [
+      "Domestic, because imported input costs $68 after the risk adjustment",
+      "Domestic, because foreign trade always has higher costs",
+      "Both are equally costly at $60",
+      "Import at $58 expected cost; global sourcing can remain cheaper even after accounting for disruption risk"
+    ],
+    "options_ru": [
+      "Внутри страны, поскольку импорт с риском обходится в $68",
+      "Внутри страны, поскольку внешняя торговля всегда дороже",
+      "Оба варианта стоят $60",
+      "Импорт с ожидаемыми затратами $58; глобальные закупки могут быть выгодны даже с риском сбоев"
+    ],
+    "options_uz": [
+      "Mahalliy, chunki import xavf bilan $68 turadi",
+      "Mahalliy, chunki tashqi savdo doim qimmat",
+      "Ikkalasi $60 turadi",
+      "Importning kutilgan xarajati $58; uzilish xavfini hisobga olganda ham global ta’minot arzon bo‘lishi mumkin"
+    ],
+    "why": [
+      "Imported expected cost is $50+$8=$58, below the $60 domestic alternative. This illustrates a cost advantage tempered by supply-chain risk, not proof that imports are always better.",
+      "Ожидаемые затраты импорта $50+$8=$58 ниже местных $60. Преимущество международного снабжения сохраняется в данном случае, но сопровождается риском сбоев.",
+      "Import kutilgan xarajati $50+$8=$58, mahalliy $60 dan past. Global ta’minot bu misolda arzon, lekin uzilish xavfi mavjud."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-061",
+    "n": 61,
+    "d": "medium",
+    "k": "C",
+    "sec": 150,
+    "en": "A foreign company invests $100m to build a new factory. Of this, $40m purchases imported machinery and $60m pays for domestic construction and installation. Another investor instead spends $100m buying shares from an existing domestic factory owner. Which comparison of immediate host-economy effects is best supported?",
+    "ru": "Иностранная компания вкладывает $100 млн в строительство нового завода: $40 млн идут на импортное оборудование, $60 млн — на местные строительные и монтажные работы. Другой инвестор тратит $100 млн на покупку акций у прежнего владельца действующего завода. Какое сравнение немедленных эффектов для принимающей экономики наиболее обоснованно?",
+    "uz": "Xorijiy kompaniya $100 mln ga yangi zavod quradi: $40 mln import uskuna, $60 mln mahalliy qurilish va montajga ketadi. Boshqa investor $100 mln ga mavjud zavod egasidan aksiyalar sotib oladi. Qabul qiluvchi iqtisodiyot uchun darhol ta’sirlar qanday farqlanadi?",
+    "options_en": [
+      "Both transactions necessarily add identical new factories",
+      "The share purchase directly creates $100m of new physical capital",
+      "The new factory creates additional productive assets and domestic construction demand, while buying existing shares mainly changes ownership",
+      "Neither can be classed as direct investment under any circumstances"
+    ],
+    "options_ru": [
+      "Оба вложения обязательно создают одинаковые новые заводы",
+      "Покупка акций непосредственно создаёт $100 млн нового физического капитала",
+      "Строительство создаёт новые производственные активы и спрос на местные работы, покупка существующих акций преимущественно меняет владельца",
+      "Ни один вариант не может относиться к ПИИ"
+    ],
+    "options_uz": [
+      "Ikkala bitim bir xil yangi zavod yaratadi",
+      "Aksiya xaridi bevosita $100 mln yangi jismoniy kapital yaratadi",
+      "Yangi zavod qo‘shimcha ishlab chiqarish aktivlari va mahalliy qurilish talabi yaratadi, mavjud aksiyani olish asosan egalikni o‘zgartiradi",
+      "Ikkala bitim ham PII bo‘la olmaydi"
+    ],
+    "why": [
+      "Greenfield investment builds new capacity and purchases domestic construction services, whereas buying existing shares transfers ownership and does not by itself create a new plant. Control criteria determine FDI classification.",
+      "Строительство нового завода расширяет физические мощности и спрос на местные работы. Покупка существующих акций меняет собственность и сама по себе не строит завод; ПИИ зависит от участия и контроля.",
+      "Yangi zavod yangi quvvat va mahalliy qurilish talabi yaratadi; mavjud aksiyani olish egalikni o‘zgartiradi, avtomatik yangi zavod qurmaydi. PII tasnifi nazoratga bog‘liq."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-062",
+    "n": 62,
+    "d": "medium",
+    "k": "B",
+    "sec": 145,
+    "en": "A country's real GDP rises by 6% while its population grows by 8% over the same period. Using exact index ratios, what is the approximate change in real GDP per person?",
+    "ru": "Реальный ВВП страны вырос на 6%, а население за тот же период — на 8%. Используя точное отношение индексов, найдите приблизительное изменение реального ВВП на человека.",
+    "uz": "Mamlakat real YaIMi 6%, aholisi esa shu davrda 8% oshdi. Indekslarning aniq nisbatidan foydalanib jon boshiga real YaIMning taxminiy o‘zgarishini toping.",
+    "options_en": [
+      "+2.0%",
+      "−1.85%",
+      "+14.0%",
+      "−2.0% exactly"
+    ],
+    "options_ru": [
+      "+2,0%",
+      "−1,85%",
+      "+14,0%",
+      "Ровно −2,0%"
+    ],
+    "options_uz": [
+      "+2,0%",
+      "−1,85%",
+      "+14,0%",
+      "Aynan −2,0%"
+    ],
+    "why": [
+      "Real GDP per person changes by the factor 1.06/1.08≈0.98148, a fall of about 1.85%, not exactly the two-percentage-point approximation.",
+      "Коэффициент 1,06/1,08≈0,98148 означает снижение реального ВВП на человека примерно на 1,85%, а не ровно на два процентных пункта.",
+      "Jon boshiga real YaIM koeffitsienti 1,06/1,08≈0,98148, taxminan 1,85% kamayish. Ikki foiz punktni ayirish faqat yaqinlashish."
+    ]
+  }
+]
