@@ -1,0 +1,332 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-028",
+    "n": 28,
+    "k": "C",
+    "d": "hard",
+    "sec": 185,
+    "en": "At output Q, marginal social benefit is MSB=100−2Q and marginal social cost is MSC=10+Q. Production is currently Q=20. What is the efficient quantity, and is one additional unit at Q=20 socially worthwhile at the margin?",
+    "ru": "При выпуске Q предельная общественная выгода MSB=100−2Q, а предельные общественные затраты MSC=10+Q. Сейчас Q=20. Найдите эффективный объём и определите, выгодна ли обществу ещё одна единица при текущем Q.",
+    "uz": "Q miqdorda chegaraviy ijtimoiy foyda MSB=100−2Q, chegaraviy ijtimoiy xarajat MSC=10+Q. Hozir Q=20. Samarali miqdor qancha va Q=20 darajada qo‘shimcha birlik jamiyat uchun foydalimi?",
+    "options_en": [
+      "Efficient Q=20; additional production causes a $30 social loss",
+      "Efficient Q=45; no additional production is desirable",
+      "Efficient Q=30; at Q=20 marginal net benefit is +$30",
+      "Efficient Q=30; at Q=20 marginal net benefit is −$30"
+    ],
+    "options_ru": [
+      "Оптимум Q=20; новая единица даёт общественный убыток $30",
+      "Оптимум Q=45; новый выпуск не нужен",
+      "Оптимум Q=30; при Q=20 чистая предельная выгода +$30",
+      "Оптимум Q=30; при Q=20 чистая предельная выгода −$30"
+    ],
+    "options_uz": [
+      "Optimal Q=20; qo‘shimcha birlik $30 ijtimoiy zarar beradi",
+      "Optimal Q=45; qo‘shimcha mahsulot kerak emas",
+      "Optimal Q=30; Q=20 da sof chegaraviy foyda +$30",
+      "Optimal Q=30; Q=20 da sof chegaraviy foyda −$30"
+    ],
+    "why": [
+      "Set MSB=MSC: 100−2Q=10+Q, Q=30. At Q=20, benefit=60 and cost=30, so net social gain=+$30.",
+      "MSB=MSC: 100−2Q=10+Q, Q=30. При Q=20 выгода 60, затраты 30, чистый общественный выигрыш +$30.",
+      "MSB=MSC: 100−2Q=10+Q, Q=30. Q=20 da foyda 60, xarajat 30, sof ijtimoiy foyda +$30."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-031",
+    "n": 31,
+    "k": "B",
+    "d": "hard",
+    "sec": 175,
+    "en": "For a proposed extra unit, marginal social cost is $70 and marginal external cost is $18. The unit brings consumers a marginal benefit of $60, with no external benefit. What are marginal private cost and the social net gain/loss, and might a private producer still supply it?",
+    "ru": "Для предлагаемой дополнительной единицы предельные общественные затраты $70, внешние предельные затраты $18. Предельная выгода потребителей $60, внешней выгоды нет. Найдите частные затраты и чистый общественный эффект. Может ли частный производитель всё же предложить эту единицу?",
+    "uz": "Taklif etilgan qo‘shimcha birlikning chegaraviy ijtimoiy xarajati $70, tashqi xarajati $18. Xaridorlarning chegaraviy foydasi $60, tashqi foyda yo‘q. Xususiy xarajat va sof ijtimoiy natija qanday? Xususiy ishlab chiqaruvchi uni baribir taklif qilishi mumkinmi?",
+    "options_en": [
+      "Private cost $88; social gain +$10; private supply impossible",
+      "Private cost $52; social loss $10; private supply may still occur",
+      "Private cost $52; social gain +$8; social production must expand",
+      "Private cost $18; social loss $70; private supply impossible"
+    ],
+    "options_ru": [
+      "Частные затраты $88; общественная выгода +$10; частный выпуск невозможен",
+      "Частные затраты $52; общественный убыток $10; частный выпуск возможен",
+      "Частные затраты $52; общественная выгода +$8; выпуск обязательно надо увеличить",
+      "Частные затраты $18; общественный убыток $70; частный выпуск невозможен"
+    ],
+    "options_uz": [
+      "Xususiy xarajat $88; ijtimoiy foyda +$10; xususiy taklif mumkin emas",
+      "Xususiy xarajat $52; ijtimoiy zarar $10; xususiy taklif bo‘lishi mumkin",
+      "Xususiy xarajat $52; ijtimoiy foyda +$8; ishlab chiqarish albatta ko‘payishi kerak",
+      "Xususiy xarajat $18; ijtimoiy zarar $70; xususiy taklif mumkin emas"
+    ],
+    "why": [
+      "MPC=MSC−MEC=70−18=$52. Private margin is 60−52=+$8, but social margin 60−70=−$10; overproduction can occur.",
+      "MPC=70−18=$52. Частный результат 60−52=+$8, но общественный 60−70=−$10; возможен избыточный выпуск.",
+      "MPC=70−18=$52. Xususiy foyda 60−52=+$8, ijtimoiy natija 60−70=−$10; ortiqcha ishlab chiqarish mumkin."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-033",
+    "n": 33,
+    "k": "A",
+    "d": "hard",
+    "sec": 185,
+    "en": "A business sells 100 units at $20 each. Explicit fixed cost is $250 and variable cost is $14 per unit. The owner's next-best alternative use of resources would earn $500. What are accounting profit and economic profit?",
+    "ru": "Фирма продаёт 100 изделий по $20. Явные постоянные затраты $250, переменные затраты $14 на изделие. Лучшее альтернативное использование ресурсов владельца принесло бы $500. Найдите бухгалтерскую и экономическую прибыль.",
+    "uz": "Firma 100 ta mahsulotni $20 dan sotadi. Aniq doimiy xarajat $250, o‘zgaruvchi xarajat har birlik uchun $14. Egasi resurslarining eng yaxshi muqobil ishlatilishi $500 foyda keltirishi mumkin edi. Buxgalteriya va iqtisodiy foyda qancha?",
+    "options_en": [
+      "Accounting profit +$350; economic profit −$150",
+      "Accounting profit +$600; economic profit +$100",
+      "Accounting profit −$150; economic profit +$350",
+      "Accounting profit +$350; economic profit +$850"
+    ],
+    "options_ru": [
+      "Бухгалтерская прибыль +$350; экономическая −$150",
+      "Бухгалтерская прибыль +$600; экономическая +$100",
+      "Бухгалтерская прибыль −$150; экономическая +$350",
+      "Бухгалтерская прибыль +$350; экономическая +$850"
+    ],
+    "options_uz": [
+      "Buxgalteriya foydasi +$350; iqtisodiy foyda −$150",
+      "Buxgalteriya foydasi +$600; iqtisodiy foyda +$100",
+      "Buxgalteriya foydasi −$150; iqtisodiy foyda +$350",
+      "Buxgalteriya foydasi +$350; iqtisodiy foyda +$850"
+    ],
+    "why": [
+      "Revenue =100×$20=$2,000. Explicit costs=$250+100×$14=$1,650, so accounting profit=$350. Economic profit=$350−$500=−$150.",
+      "Выручка $2 000, явные затраты $250+$1 400=$1 650, бухгалтерская прибыль $350. После неявной альтернативной стоимости $500 экономическая прибыль −$150.",
+      "Tushum $2000, aniq xarajat $250+$1400=$1650, buxgalteriya foydasi $350. $500 muqobil xarajat hisoblangach iqtisodiy foyda −$150."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-035",
+    "n": 35,
+    "k": "D",
+    "d": "hard",
+    "sec": 165,
+    "en": "A workshop with five workers makes 200 loaves daily; with six workers it makes 228; with seven it makes 245, with capital unchanged. What are the marginal products of the sixth and seventh workers, and what pattern do they illustrate?",
+    "ru": "Пекарня при пяти работниках выпускает 200 буханок в день, при шести — 228, при семи — 245; капитал неизменен. Найдите предельную производительность шестого и седьмого работников и определите закономерность.",
+    "uz": "Nonvoyxonada besh ishchi kuniga 200 non, olti ishchi 228, yetti ishchi 245 non tayyorlaydi; kapital o‘zgarmaydi. Oltinchi va yettinchi ishchining chegaraviy mahsuloti qancha va qanday qonuniyat kuzatiladi?",
+    "options_en": [
+      "28 and 45; increasing marginal returns",
+      "38 and 35; constant returns",
+      "28 and 17; increasing marginal returns",
+      "28 and 17; diminishing marginal returns"
+    ],
+    "options_ru": [
+      "28 и 45; возрастающая предельная отдача",
+      "38 и 35; постоянная отдача",
+      "28 и 17; возрастающая предельная отдача",
+      "28 и 17; убывающая предельная отдача"
+    ],
+    "options_uz": [
+      "28 va 45; chegaraviy qaytim o‘sadi",
+      "38 va 35; qaytim o‘zgarmaydi",
+      "28 va 17; chegaraviy qaytim o‘sadi",
+      "28 va 17; chegaraviy qaytim kamayadi"
+    ],
+    "why": [
+      "Sixth worker contributes 228−200=28; seventh 245−228=17. Marginal product falls as more labour uses fixed capital.",
+      "Шестой работник добавляет 228−200=28, седьмой 245−228=17. Предельная отдача снижается при неизменном капитале.",
+      "Oltinchi ishchi 228−200=28, yettinchi 245−228=17 birlik qo‘shadi. Kapital o‘zgarmaganda chegaraviy mahsulot kamayadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-042",
+    "n": 42,
+    "k": "C",
+    "d": "hard",
+    "sec": 175,
+    "en": "A printer has weekly fixed costs of $150 and variable cost $9 per poster; posters sell for $15 each. How many posters must be sold to break even, and what is profit if 40 are sold, ignoring other costs?",
+    "ru": "У типографии недельные постоянные затраты $150, переменные $9 на плакат, цена продажи $15 за плакат. Сколько плакатов нужно продать для безубыточности и какова прибыль от продажи 40 плакатов, без других затрат?",
+    "uz": "Bosmaxonaning haftalik doimiy xarajati $150, har plakat o‘zgaruvchi xarajati $9, sotuv narxi $15. Zararsizlik uchun nechta plakat sotish kerak va 40 tasi sotilsa boshqa xarajatlarsiz foyda qancha?",
+    "options_en": [
+      "15 posters; profit $240",
+      "25 posters; profit $240",
+      "25 posters; profit $90",
+      "40 posters; profit $90"
+    ],
+    "options_ru": [
+      "15 плакатов; прибыль $240",
+      "25 плакатов; прибыль $240",
+      "25 плакатов; прибыль $90",
+      "40 плакатов; прибыль $90"
+    ],
+    "options_uz": [
+      "15 plakat; foyda $240",
+      "25 plakat; foyda $240",
+      "25 plakat; foyda $90",
+      "40 plakat; foyda $90"
+    ],
+    "why": [
+      "Contribution margin =15−9=$6 per poster. Break-even 150/6=25; profit at 40 is 40×6−150=$90.",
+      "Маржинальный доход на плакат 15−9=$6. Безубыточность 150/6=25; прибыль при 40: 40×6−150=$90.",
+      "Har plakat hissasi 15−9=$6. Zararsizlik 150/6=25; 40 ta sotilganda foyda 40×6−150=$90."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-045",
+    "n": 45,
+    "k": "A",
+    "d": "hard",
+    "sec": 175,
+    "en": "At the current margin, a vaccination costs $45 to provide and the consumer's private benefit is $40. Reduced infections create an additional $15 benefit for others. With no other effects, what is the net social benefit of that marginal vaccination, and can private demand be too low?",
+    "ru": "На данном пределе вакцинация обходится в $45, личная выгода получателя $40, снижение заражений создаёт дополнительную выгоду другим людям $15. Других эффектов нет. Какова чистая общественная выгода этой прививки и может ли частный спрос быть недостаточным?",
+    "uz": "Ushbu chegarada emlash xarajati $45, oluvchining shaxsiy foydasi $40, yuqtirishning kamayishi boshqalarga qo‘shimcha $15 foyda beradi. Boshqa ta’sir yo‘q. Shu emlashning sof ijtimoiy foydasi qancha va xususiy talab yetarli bo‘lmasligi mumkinmi?",
+    "options_en": [
+      "+$10; yes, private demand can underprovide it",
+      "−$5; no, private demand always matches the optimum",
+      "+55; no, private benefits equal social benefits",
+      "+15; yes, cost is irrelevant to efficiency"
+    ],
+    "options_ru": [
+      "+ $10; да, частный спрос может недооценивать полезный выпуск",
+      "−$5; нет, частный спрос всегда оптимален",
+      "+$55; нет, личная и общественная выгоды равны",
+      "+$15; да, затраты не важны для эффективности"
+    ],
+    "options_uz": [
+      "+ $10; ha, xususiy talab yetarli bo‘lmasligi mumkin",
+      "−$5; yo‘q, xususiy talab har doim optimal",
+      "+$55; yo‘q, shaxsiy va ijtimoiy foyda teng",
+      "+$15; ha, xarajat samaradorlik uchun muhim emas"
+    ],
+    "why": [
+      "Social benefit=40+15=$55; cost=$45, so marginal net benefit=+$10. Private benefit $40 is below cost and may lead to underconsumption.",
+      "Общественная выгода 40+15=$55 при затратах $45, чистая выгода +$10. Личная выгода $40 ниже издержек, поэтому возможно недопотребление.",
+      "Ijtimoiy foyda 40+15=$55, xarajat $45, sof foyda +$10. Shaxsiy foyda $40 xarajatdan pastligi kam iste’molga olib kelishi mumkin."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-053",
+    "n": 53,
+    "k": "B",
+    "d": "hard",
+    "sec": 195,
+    "en": "Successive pastries have money-valued marginal utilities $12, $8, $5 and $2. Initially each costs $6; later the price falls to $4. Assume no income constraint. By how much does the consumer's maximum net utility (total willingness to pay minus expenditure) increase?",
+    "ru": "Денежная оценка предельной полезности последовательных пирожных равна $12, $8, $5 и $2. Первоначально цена $6 за штуку, затем снижается до $4. Доход не ограничивает выбор. На сколько возрастает максимальная чистая полезность (готовность платить минус расходы)?",
+    "uz": "Ketma-ket pishiriqlarning puldagi chegaraviy foydaliligi $12, $8, $5 va $2. Dastlab narx $6, keyin $4 ga tushadi. Daromad cheklovi yo‘q. Maksimal sof foydalilik (to‘lashga tayyorlik minus xarajat) qanchaga ortadi?",
+    "options_en": [
+      "$2",
+      "$5",
+      "$8",
+      "$13"
+    ],
+    "options_ru": [
+      "$2",
+      "$5",
+      "$8",
+      "$13"
+    ],
+    "options_uz": [
+      "$2",
+      "$5",
+      "$8",
+      "$13"
+    ],
+    "why": [
+      "At $6 buy 2: surplus=(12−6)+(8−6)=$8. At $4 buy 3: (12−4)+(8−4)+(5−4)=$13. Gain=$5.",
+      "При цене $6 покупаются 2 пирожных: излишек $8. При $4 покупаются 3: излишек $13. Прирост $5.",
+      "$6 narxda 2 ta olinadi: ortiqchalik $8. $4 narxda 3 ta olinadi: ortiqchalik $13. Oshish $5."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-058",
+    "n": 58,
+    "k": "D",
+    "d": "hard",
+    "sec": 195,
+    "en": "Supplying a city's 100 households through a water network costs $1,000 fixed plus $2 per household. If two duplicate networks each serve 50 households, each incurs the same fixed cost. How much does one network save relative to two, and which structure does the calculation support?",
+    "ru": "Сеть водоснабжения для 100 домохозяйств требует постоянных затрат $1 000 и $2 на подключённый дом. Если две дублирующие сети обслуживают по 50 домов, каждая несёт такие же постоянные затраты. Какова экономия одной сети и какую структуру рынка подтверждает расчёт?",
+    "uz": "Shaharning 100 xonadonini suv bilan ta’minlash uchun tarmoq $1000 doimiy xarajat va har xonadonga $2 sarf talab qiladi. Ikki takroriy tarmoq 50 tadan xonadonga xizmat qilsa, har biri bir xil doimiy xarajatni qiladi. Bitta tarmoq qancha tejaydi va bu qaysi bozor tuzilmasini qo‘llab-quvvatlaydi?",
+    "options_en": [
+      "$200 saving; perfect competition",
+      "$0 saving; monopolistic competition",
+      "$2,000 saving; price-taking monopoly",
+      "$1,000 saving; natural-monopoly cost advantage"
+    ],
+    "options_ru": [
+      "Экономия $200; совершенная конкуренция",
+      "Экономия $0; монополистическая конкуренция",
+      "Экономия $2 000; монополия-ценополучатель",
+      "Экономия $1 000; преимущество естественной монополии"
+    ],
+    "options_uz": [
+      "$200 tejaladi; mukammal raqobat",
+      "$0 tejaladi; monopolistik raqobat",
+      "$2000 tejaladi; narx qabul qiluvchi monopoliya",
+      "$1000 tejaladi; tabiiy monopoliya xarajat ustunligi"
+    ],
+    "why": [
+      "One network costs 1000+2×100=$1,200; two cost 2×(1000+2×50)=$2,200. The $1,000 saving supports natural monopoly.",
+      "Одна сеть обходится в $1 200, две — в 2×$1 100=$2 200. Экономия $1 000 указывает на издержечное преимущество естественной монополии.",
+      "Bitta tarmoq $1200, ikkita tarmoq 2×$1100=$2200 turadi. $1000 tejamkorlik tabiiy monopoliya xarajat ustunligini ko‘rsatadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-060",
+    "n": 60,
+    "k": "C",
+    "d": "hard",
+    "sec": 205,
+    "en": "Demand is P=80−Q and marginal private supply cost P=20+Q. Production creates marginal external harm of $10 per unit. In the simple competitive model, what are the unregulated market quantity, socially efficient quantity and Pigouvian tax per unit?",
+    "ru": "Спрос задан P=80−Q, предельные частные затраты предложения P=20+Q. Производство каждой единицы создаёт внешний ущерб $10. В простой конкурентной модели найдите нерегулируемый рыночный объём, общественно эффективный объём и корректирующий налог на единицу.",
+    "uz": "Talab P=80−Q, taklifning chegaraviy xususiy xarajati P=20+Q. Har birlik ishlab chiqarish $10 tashqi zarar yetkazadi. Oddiy raqobat modelida tartibga solinmagan bozor miqdori, ijtimoiy optimal miqdor va birlik uchun Pigou solig‘i qancha?",
+    "options_en": [
+      "30; 30; $10",
+      "25; 30; $5",
+      "30; 25; $10",
+      "30; 20; $20"
+    ],
+    "options_ru": [
+      "30; 30; $10",
+      "25; 30; $5",
+      "30; 25; $10",
+      "30; 20; $20"
+    ],
+    "options_uz": [
+      "30; 30; $10",
+      "25; 30; $5",
+      "30; 25; $10",
+      "30; 20; $20"
+    ],
+    "why": [
+      "Without tax 80−Q=20+Q gives Q=30. With MSC=30+Q, 80−Q=30+Q yields Q=25. Corrective tax equals marginal harm $10.",
+      "Без налога 80−Q=20+Q даёт Q=30. При общественных затратах 30+Q оптимум Q=25. Корректирующий налог равен ущербу $10.",
+      "Soliqsiz 80−Q=20+Q dan Q=30. MSC=30+Q bilan samarali Q=25. Tuzatuvchi soliq tashqi zararga, $10 ga teng."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-065",
+    "n": 65,
+    "k": "B",
+    "d": "hard",
+    "sec": 160,
+    "en": "A price-taking producer sells each unit for $12. Its marginal costs for the 6th, 7th and 8th units are $10, $11 and $14 respectively, and the firm currently produces five units. Assuming no other changes, how many extra units should it produce to maximise profit and what additional profit do they generate?",
+    "ru": "Фирма-ценополучатель продаёт каждое изделие по $12. Предельные затраты шестого, седьмого и восьмого изделий равны $10, $11 и $14. Сейчас фирма выпускает пять изделий. Сколько дополнительных изделий следует произвести для максимизации прибыли и каков прирост прибыли?",
+    "uz": "Narx qabul qiluvchi firma har mahsulotni $12 dan sotadi. Oltinchi, yettinchi va sakkizinchi birlikning chegaraviy xarajati $10, $11, $14. Firma hozir beshta ishlab chiqaradi. Foydani maksimallashtirish uchun yana nechta chiqarish va qo‘shimcha foyda qancha bo‘ladi?",
+    "options_en": [
+      "3 units; $3 additional profit",
+      "2 units; $3 additional profit",
+      "2 units; $24 additional profit",
+      "1 unit; $2 additional profit"
+    ],
+    "options_ru": [
+      "3 изделия; прирост прибыли $3",
+      "2 изделия; прирост прибыли $3",
+      "2 изделия; прирост прибыли $24",
+      "1 изделие; прирост прибыли $2"
+    ],
+    "options_uz": [
+      "3 birlik; qo‘shimcha foyda $3",
+      "2 birlik; qo‘shimcha foyda $3",
+      "2 birlik; qo‘shimcha foyda $24",
+      "1 birlik; qo‘shimcha foyda $2"
+    ],
+    "why": [
+      "The sixth adds $12−$10=$2, the seventh adds $12−$11=$1; the eighth would reduce profit by $2. Add two units for $3.",
+      "Шестое изделие добавляет $2 прибыли, седьмое $1, восьмое снизило бы прибыль на $2. Нужны две дополнительные единицы и прирост $3.",
+      "Oltinchi birlik +$2, yettinchi +$1, sakkizinchi −$2 foyda keltiradi. Ikki birlik qo‘shib $3 foyda olinadi."
+    ]
+  }
+]

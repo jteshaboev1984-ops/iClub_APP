@@ -1,0 +1,332 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-005",
+    "n": 5,
+    "k": "B",
+    "d": "hard",
+    "sec": 195,
+    "en": "Seven firms have market shares of 25%, 20%, 15%, 10%, 10%, 10% and 10%. Two firms each with 10% merge and no shares otherwise change. How does the four-firm concentration ratio change?",
+    "ru": "Семь компаний имеют доли рынка 25%, 20%, 15%, 10%, 10%, 10% и 10%. Две фирмы с долями по 10% объединяются, прочие доли не меняются. Как изменяется коэффициент концентрации четырёх крупнейших компаний?",
+    "uz": "Yetti firmaning bozor ulushi 25%, 20%, 15%, 10%, 10%, 10% va 10%. Har biri 10% ulushga ega ikki firma birlashadi, boshqa ulushlar o‘zgarmaydi. Eng yirik to‘rtta firma konsentratsiya ko‘rsatkichi qanday o‘zgaradi?",
+    "options_en": [
+      "Falls from 70% to 60%",
+      "Rises from 70% to 80%",
+      "Rises from 70% to 90%",
+      "Remains at 70%"
+    ],
+    "options_ru": [
+      "Падает с 70% до 60%",
+      "Растёт с 70% до 80%",
+      "Растёт с 70% до 90%",
+      "Остаётся 70%"
+    ],
+    "options_uz": [
+      "70% dan 60% ga tushadi",
+      "70% dan 80% ga oshadi",
+      "70% dan 90% ga oshadi",
+      "70% bo‘lib qoladi"
+    ],
+    "why": [
+      "Initially the four largest shares total 25+20+15+10=70%. After merger they are 25,20,20,15, totalling 80%.",
+      "Сначала сумма четырёх крупнейших долей 25+20+15+10=70%; после объединения — 25+20+20+15=80%.",
+      "Dastlab eng katta to‘rt ulush 25+20+15+10=70%; birlashuvdan keyin 25+20+20+15=80%."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-007",
+    "n": 7,
+    "k": "C",
+    "d": "hard",
+    "sec": 180,
+    "en": "The money-valued marginal utilities of four successive snack portions are $18, $14, $10 and $6. Every portion costs $9, with no binding income constraint. How many should a utility-maximising consumer buy, and what is total consumer surplus on those portions?",
+    "ru": "Предельная полезность четырёх последовательных порций закуски в денежном выражении равна $18, $14, $10 и $6. Каждая порция стоит $9, доход не ограничивает выбор. Сколько порций купит потребитель, максимизирующий полезность, и каков общий потребительский излишек?",
+    "uz": "Yegulikning ketma-ket to‘rtta porsiyasi pulda baholangan chegaraviy foydaliligi $18, $14, $10 va $6. Har porsiya $9 turadi, daromad cheklovi yo‘q. Foydalilikni maksimallashtiruvchi iste’molchi nechta oladi va jami iste’molchi ortiqchaligi qancha?",
+    "options_en": [
+      "4 portions; $12",
+      "2 portions; $14",
+      "3 portions; $15",
+      "3 portions; $42"
+    ],
+    "options_ru": [
+      "4 порции; $12",
+      "2 порции; $14",
+      "3 порции; $15",
+      "3 порции; $42"
+    ],
+    "options_uz": [
+      "4 porsiya; $12",
+      "2 porsiya; $14",
+      "3 porsiya; $15",
+      "3 porsiya; $42"
+    ],
+    "why": [
+      "Buy units with marginal value at least $9: three units. Surplus (18−9)+(14−9)+(10−9)=$15.",
+      "Следует купить три порции с оценкой не ниже $9. Излишек (18−9)+(14−9)+(10−9)=$15.",
+      "Chegaraviy qiymati $9 dan kam bo‘lmagan uch porsiya olinadi. Ortiqchalik (18−9)+(14−9)+(10−9)=$15."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-008",
+    "n": 8,
+    "k": "D",
+    "d": "hard",
+    "sec": 195,
+    "en": "A consumer has a $5 budget. Good X costs $2 per unit and has marginal utilities of 10, 8, 4 for successive units. Good Y costs $1 and has marginal utilities of 6, 3, 1. Assume whole units, at most three of each, and total utility equal to the sum of selected marginal utilities. Which affordable bundle maximises total utility?",
+    "ru": "У потребителя бюджет $5. Товар X стоит $2 за единицу и даёт последовательные предельные полезности 10, 8, 4. Товар Y стоит $1 и даёт 6, 3, 1. Можно покупать только целые единицы, максимум по три каждого товара, общая полезность — сумма предельных. Какой доступный набор даёт наибольшую полезность?",
+    "uz": "Iste’molchining budjeti $5. X mahsulot birligi $2, ketma-ket chegaraviy foydaliliklari 10, 8, 4. Y mahsulot $1, foydaliliklari 6, 3, 1. Faqat butun birlik, har biridan ko‘pi bilan uchtadan olish mumkin. Jami foydalilik chegaraviy foydaliliklar yig‘indisi. Qaysi arzon to‘plam uni maksimallashtiradi?",
+    "options_en": [
+      "1 X and 3 Y",
+      "1 X and 2 Y",
+      "2 X and 0 Y",
+      "2 X and 1 Y"
+    ],
+    "options_ru": [
+      "1 X и 3 Y",
+      "1 X и 2 Y",
+      "2 X и 0 Y",
+      "2 X и 1 Y"
+    ],
+    "options_uz": [
+      "1 ta X va 3 ta Y",
+      "1 ta X va 2 ta Y",
+      "2 ta X va 0 ta Y",
+      "2 ta X va 1 ta Y"
+    ],
+    "why": [
+      "Two X cost $4 and yield 18 utils; one Y costs $1 and adds 6. Total is 24, exceeding other affordable listed combinations.",
+      "Две X стоят $4 и дают 18 единиц полезности; одна Y стоит $1 и добавляет 6. Всего 24 — больше других указанных доступных наборов.",
+      "Ikki X $4 turadi va 18 foydalilik beradi; bitta Y $1 turib yana 6 beradi. Jami 24, boshqa keltirilgan to‘plamlardan yuqori."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-009",
+    "n": 9,
+    "k": "A",
+    "d": "hard",
+    "sec": 175,
+    "en": "A consumer has $120 to spend on notebooks (X) and pens (Y). A notebook costs $12 and a pen initially $6, then rises to $10. What happens to the maximum affordable number of pens, and to the absolute slope of the budget line when X is on the horizontal axis?",
+    "ru": "Потребитель располагает $120 на тетради X и ручки Y. Тетрадь стоит $12, ручка первоначально $6, затем дорожает до $10. Как изменяется максимально доступное число ручек и модуль наклона бюджетной линии при X на горизонтальной оси?",
+    "uz": "Iste’molchida X daftar va Y ruchka uchun $120 bor. Daftar $12, ruchka avval $6, keyin $10 turadi. Xarid qilish mumkin bo‘lgan eng ko‘p ruchka soni va X gorizontal o‘qda bo‘lganda budjet chizig‘i qiyaligining moduli qanday o‘zgaradi?",
+    "options_en": [
+      "Pens 20→12; slope 2→1.2",
+      "Pens 20→12; slope 1.2→2",
+      "Pens 10→12; slope 2→1.2",
+      "Pens 20→20; slope unchanged"
+    ],
+    "options_ru": [
+      "Ручки 20→12; наклон 2→1,2",
+      "Ручки 20→12; наклон 1,2→2",
+      "Ручки 10→12; наклон 2→1,2",
+      "Ручки 20→20; наклон неизменен"
+    ],
+    "options_uz": [
+      "Ruchka 20→12; qiyalik 2→1,2",
+      "Ruchka 20→12; qiyalik 1,2→2",
+      "Ruchka 10→12; qiyalik 2→1,2",
+      "Ruchka 20→20; qiyalik o‘zgarmaydi"
+    ],
+    "why": [
+      "Y intercept falls from 120/6=20 to 120/10=12; absolute slope Px/Py changes from 12/6=2 to 12/10=1.2.",
+      "Пересечение оси Y падает с 120/6=20 до 120/10=12; модуль наклона Px/Py меняется с 2 до 1,2.",
+      "Y o‘qidagi kesishish 120/6=20 dan 120/10=12 ga tushadi; qiyalik moduli Px/Py 2 dan 1,2 ga o‘zgaradi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-014",
+    "n": 14,
+    "k": "B",
+    "d": "hard",
+    "sec": 165,
+    "en": "A manufacturer cannot change plant size this month but can add workers. Over three years it builds a larger plant; output doubles from 100 to 200 units while total cost rises from $1,200 to $2,000 at unchanged factor prices. What is the best interpretation?",
+    "ru": "Производитель в течение месяца не может изменить размеры завода, но может нанимать работников. За три года он строит более крупный завод: выпуск растёт со 100 до 200 изделий, общие затраты — с $1 200 до $2 000 при неизменных ценах ресурсов. Какая интерпретация верна?",
+    "uz": "Korxona bir oyda zavod hajmini o‘zgartira olmaydi, ammo ishchi qo‘sha oladi. Uch yil ichida katta zavod quradi: ishlab chiqarish 100 dan 200 taga, jami xarajat $1200 dan $2000 ga oshadi, omil narxlari o‘zgarmaydi. Qaysi talqin to‘g‘ri?",
+    "options_en": [
+      "Short-run expansion; average cost rises by $2",
+      "Long-run expansion; average cost falls from $12 to $10",
+      "Long-run expansion; average cost rises from $10 to $12",
+      "Short-run movement; total fixed cost necessarily becomes zero"
+    ],
+    "options_ru": [
+      "Краткосрочное расширение; средние затраты растут на $2",
+      "Долгосрочное расширение; средние затраты падают с $12 до $10",
+      "Долгосрочное расширение; средние затраты растут с $10 до $12",
+      "Краткосрочное изменение; постоянные затраты становятся нулевыми"
+    ],
+    "options_uz": [
+      "Qisqa muddatli kengayish; o‘rtacha xarajat $2 ga oshadi",
+      "Uzoq muddatli kengayish; o‘rtacha xarajat $12 dan $10 ga tushadi",
+      "Uzoq muddatli kengayish; o‘rtacha xarajat $10 dan $12 ga oshadi",
+      "Qisqa muddatli o‘zgarish; doimiy xarajat nol bo‘ladi"
+    ],
+    "why": [
+      "Plant size changes only in the long run. Average cost falls from 1200/100=$12 to 2000/200=$10, consistent with economies of scale.",
+      "Размер завода меняется в долгосрочном периоде. Средние затраты падают с 1200/100=$12 до 2000/200=$10 — эффект масштаба.",
+      "Zavod hajmi uzoq muddatda o‘zgaradi. O‘rtacha xarajat 1200/100=$12 dan 2000/200=$10 ga tushadi; miqyos tejamkorligi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-016",
+    "n": 16,
+    "k": "D",
+    "d": "hard",
+    "sec": 175,
+    "en": "Bundles A (4 units of X and 8 of Y) and B (8 of X and 4 of Y) lie on the same indifference curve. Prices are Px=$10 and Py=$5; the consumer's budget is $80. Which conclusion follows about utility and affordability?",
+    "ru": "Наборы A (4 единицы X и 8 единиц Y) и B (8 единиц X и 4 единицы Y) лежат на одной кривой безразличия. Цены Px=$10, Py=$5, бюджет $80. Какой вывод следует о полезности и доступности?",
+    "uz": "A (4 ta X va 8 ta Y) hamda B (8 ta X va 4 ta Y) to‘plamlari bir befarqlik egri chizig‘ida. Px=$10, Py=$5, budjet $80. Foydalilik va xarid qilish imkoni haqida qaysi xulosa to‘g‘ri?",
+    "options_en": [
+      "B gives higher utility and both bundles are affordable",
+      "A gives higher utility, but neither bundle is affordable",
+      "Utility is equal and both bundles cost $80",
+      "Utility is equal, A costs $80 and B costs $100, so only A is affordable"
+    ],
+    "options_ru": [
+      "B полезнее, оба набора доступны",
+      "A полезнее, но ни один набор недоступен",
+      "Полезность одинакова, оба стоят $80",
+      "Полезность одинакова; A стоит $80, B — $100, доступен только A"
+    ],
+    "options_uz": [
+      "B foydaliroq, ikkalasini ham olish mumkin",
+      "A foydaliroq, ikkalasini ham olish mumkin emas",
+      "Foydalilik teng, ikkalasi $80 turadi",
+      "Foydalilik teng; A $80, B $100, faqat A arzon"
+    ],
+    "why": [
+      "Equal indifference curve implies equal preference rank. Cost A=4×10+8×5=$80; cost B=8×10+4×5=$100.",
+      "Одна кривая безразличия означает равную полезность. Стоимость A=4×10+8×5=$80; B=8×10+4×5=$100.",
+      "Bir befarqlik egri chizig‘i bir xil foydalilikni bildiradi. A=4×10+8×5=$80, B=8×10+4×5=$100."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-017",
+    "n": 17,
+    "k": "C",
+    "d": "hard",
+    "sec": 190,
+    "en": "For one extra unit of output, a factory's marginal private cost is $30 and marginal external harm $12. Buyers' marginal private benefit is $45, and the unit also generates a marginal external benefit of $4. Assuming no other effects, what are marginal social cost and marginal net social benefit of producing this unit?",
+    "ru": "При выпуске дополнительной единицы продукции предельные частные затраты завода $30, внешний ущерб $12. Предельная частная выгода покупателей $45, дополнительная внешняя выгода $4. Других эффектов нет. Найдите предельные общественные затраты и чистую предельную общественную выгоду выпуска этой единицы.",
+    "uz": "Qo‘shimcha mahsulot birligi uchun zavodning chegaraviy xususiy xarajati $30, tashqi zarari $12. Xaridorlarning chegaraviy xususiy foydasi $45, qo‘shimcha tashqi foyda $4. Boshqa ta’sir yo‘q. Ushbu birlikning chegaraviy ijtimoiy xarajati va sof chegaraviy ijtimoiy foydasi qancha?",
+    "options_en": [
+      "Social cost $18; net benefit $27",
+      "Social cost $42; net benefit −$3",
+      "Social cost $42; net benefit +$7",
+      "Social cost $30; net benefit +$19"
+    ],
+    "options_ru": [
+      "Общественные затраты $18; чистая выгода $27",
+      "Общественные затраты $42; чистая выгода −$3",
+      "Общественные затраты $42; чистая выгода +$7",
+      "Общественные затраты $30; чистая выгода +$19"
+    ],
+    "options_uz": [
+      "Ijtimoiy xarajat $18; sof foyda $27",
+      "Ijtimoiy xarajat $42; sof foyda −$3",
+      "Ijtimoiy xarajat $42; sof foyda +$7",
+      "Ijtimoiy xarajat $30; sof foyda +$19"
+    ],
+    "why": [
+      "MSC=30+12=$42; MSB=45+4=$49. Net social marginal benefit=49−42=$7.",
+      "MSC=30+12=$42; MSB=45+4=$49. Чистая предельная выгода=49−42=$7.",
+      "MSC=30+12=$42; MSB=45+4=$49. Sof chegaraviy foyda=49−42=$7."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-021",
+    "n": 21,
+    "k": "A",
+    "d": "hard",
+    "sec": 175,
+    "en": "A loud outdoor concert gives an extra attendee marginal private benefit valued at $60; private marginal cost is $20, but added noise imposes $50 in harm on neighbours. Ignore other effects. What is the net social benefit of admitting one more attendee, and what follows at this margin?",
+    "ru": "Дополнительный посетитель уличного концерта получает предельную личную выгоду $60, предельные частные издержки равны $20, но шум наносит соседям ущерб $50. Других эффектов нет. Какова чистая общественная выгода ещё одного посетителя и какой вывод следует?",
+    "uz": "Ochiq konsertga yana bir tashrif buyuruvchining chegaraviy shaxsiy foydasi $60, xususiy xarajati $20, ammo shovqin qo‘shnilarga $50 zarar yetkazadi. Boshqa ta’sir yo‘q. Yana bir kishini kiritishning sof ijtimoiy foydasi qancha va qanday xulosa kelib chiqadi?",
+    "options_en": [
+      "−$10; the extra attendance is socially undesirable at this margin",
+      "+$40; private gain proves social efficiency",
+      "+$90; all benefits and costs must be added",
+      "−$50; private benefits cannot count toward social welfare"
+    ],
+    "options_ru": [
+      "−$10; дополнительный посетитель на этом пределе нежелателен для общества",
+      "+$40; личная выгода доказывает общественную эффективность",
+      "+$90; следует сложить все выгоды и затраты",
+      "−$50; личные выгоды нельзя учитывать в общественном благосостоянии"
+    ],
+    "options_uz": [
+      "−$10; yana bir tashrif ijtimoiy jihatdan nomaqbul",
+      "+$40; shaxsiy foyda ijtimoiy samaradorlikni isbotlaydi",
+      "+$90; barcha foyda va xarajat qo‘shiladi",
+      "−$50; shaxsiy foyda ijtimoiy farovonlikka kiritilmaydi"
+    ],
+    "why": [
+      "Marginal social benefit net of costs is 60−20−50=−$10. Private gain (60−20) is positive but ignores neighbours' losses.",
+      "Чистая предельная общественная выгода 60−20−50=−$10. Положительная личная выгода игнорирует ущерб соседям.",
+      "Sof chegaraviy ijtimoiy foyda 60−20−50=−$10. Shaxsiy foyda musbat, lekin qo‘shni zarari hisobga olinmagan."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-025",
+    "n": 25,
+    "k": "B",
+    "d": "hard",
+    "sec": 180,
+    "en": "A firm compares three long-run plants at unchanged input prices: plant A produces 100 units for total cost $1,000; plant B 200 units for $1,800; plant C 300 units for $3,300. Which cost pattern is supported?",
+    "ru": "Фирма сравнивает три завода в долгосрочном периоде при неизменных ценах ресурсов: A выпускает 100 единиц при затратах $1 000; B — 200 при $1 800; C — 300 при $3 300. Какой характер изменения средних затрат подтверждается?",
+    "uz": "Firma uzoq muddatda resurs narxlari o‘zgarmaganda uch zavodni solishtiradi: A 100 birlikni $1000 ga, B 200 birlikni $1800 ga, C 300 birlikni $3300 ga ishlab chiqaradi. O‘rtacha xarajat qanday o‘zgaradi?",
+    "options_en": [
+      "Average cost always falls as scale rises",
+      "Average cost falls from $10 to $9, then rises to $11",
+      "Average cost rises from $10 to $18, then to $33",
+      "Average cost remains $10 at all three sizes"
+    ],
+    "options_ru": [
+      "Средние затраты всегда падают с масштабом",
+      "Средние затраты падают с $10 до $9, затем растут до $11",
+      "Средние затраты растут с $10 до $18, затем до $33",
+      "Средние затраты остаются $10 для всех заводов"
+    ],
+    "options_uz": [
+      "Miqyos oshganda o‘rtacha xarajat doim tushadi",
+      "O‘rtacha xarajat $10 dan $9 ga tushib, keyin $11 ga oshadi",
+      "O‘rtacha xarajat $10 dan $18 ga, keyin $33 ga oshadi",
+      "Hamma zavodda o‘rtacha xarajat $10 bo‘ladi"
+    ],
+    "why": [
+      "ATC is 1000/100=$10, 1800/200=$9, and 3300/300=$11. The firm first gains and then loses economies of scale.",
+      "Средние затраты 1000/100=$10, 1800/200=$9 и 3300/300=$11. Сначала экономия от масштаба, затем отрицательный эффект масштаба.",
+      "O‘rtacha xarajat 1000/100=$10, 1800/200=$9, 3300/300=$11. Avval miqyos tejamkorligi, keyin tejamkorlikning yo‘qolishi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-027",
+    "n": 27,
+    "k": "D",
+    "d": "hard",
+    "sec": 205,
+    "en": "Demand for vaccinations based only on private benefit is Qd=80−P, and marginal private supply cost is given by P=20+Q. Each vaccination generates an additional constant external benefit of $20. In this simplified competitive model, what are the market quantity, socially efficient quantity and corrective per-unit subsidy?",
+    "ru": "Спрос на вакцинацию на основе лишь личной выгоды Qd=80−P, предельные частные затраты предложения P=20+Q. Каждая прививка создаёт постоянную дополнительную внешнюю выгоду $20. В упрощённой конкурентной модели найдите рыночный объём, общественно эффективный объём и корректирующую субсидию на единицу.",
+    "uz": "Emlashga faqat shaxsiy foydaga asoslangan talab Qd=80−P, taklifning chegaraviy xususiy xarajati P=20+Q. Har emlash doimiy $20 qo‘shimcha tashqi foyda yaratadi. Soddalashtirilgan raqobat modelida bozor miqdori, ijtimoiy samarali miqdor va birlik subsidiyasi qancha?",
+    "options_en": [
+      "30; 30; $20",
+      "40; 50; $10",
+      "30; 50; $10",
+      "30; 40; $20"
+    ],
+    "options_ru": [
+      "30; 30; $20",
+      "40; 50; $10",
+      "30; 50; $10",
+      "30; 40; $20"
+    ],
+    "options_uz": [
+      "30; 30; $20",
+      "40; 50; $10",
+      "30; 50; $10",
+      "30; 40; $20"
+    ],
+    "why": [
+      "Inverse private demand is P=80−Q; equating with 20+Q gives Q=30. With external benefit, MSB=100−Q, giving efficient Q=40. Corrective subsidy equals $20.",
+      "Обратный частный спрос P=80−Q. При равенстве с 20+Q рынок Q=30. При внешней выгоде MSB=100−Q, общественный оптимум Q=40; субсидия $20.",
+      "Teskari xususiy talab P=80−Q; 20+Q bilan tenglashtirib Q=30. Tashqi foyda bilan MSB=100−Q, samarali Q=40, subsidiya $20."
+    ]
+  }
+]

@@ -1,0 +1,266 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-004",
+    "n": 4,
+    "d": "medium",
+    "sec": 145,
+    "k": "C",
+    "en": "In a perfectly competitive wheat market the price is $18 per tonne. One small farm sells 100 tonnes at this price. Its manager considers charging $20 while rivals still sell identical wheat for $18. If buyers can switch without cost, which comparison is most plausible?",
+    "ru": "На совершенно конкурентном рынке пшеницы цена составляет $18 за тонну. Небольшая ферма продаёт 100 тонн по этой цене. Управляющий собирается поднять цену до $20, хотя конкуренты продают идентичную пшеницу по $18 и покупатели могут свободно переключаться. Какой результат наиболее вероятен?",
+    "uz": "Mukammal raqobatli bug‘doy bozorida narx bir tonnaga $18. Kichik fermer 100 tonnani shu narxda sotadi. Raqiblar bir xil bug‘doyni $18 dan sotayotganida menejer narxni $20 ga oshirmoqchi; xaridorlar hech qanday xarajatsiz boshqa sotuvchiga o‘ta oladi. Qaysi natija eng ehtimoliy?",
+    "options_en": [
+      "Revenue rises from $1,800 to $2,000 with unchanged sales",
+      "The farm creates an industry monopoly by raising its price",
+      "The farm risks losing almost all sales rather than gaining $200 revenue",
+      "Every other farm must raise its price to $20"
+    ],
+    "options_ru": [
+      "Выручка возрастёт с $1 800 до $2 000 без изменения продаж",
+      "Ферма станет монополистом, подняв цену",
+      "Ферма рискует потерять почти все продажи вместо получения дополнительных $200",
+      "Все конкуренты обязаны повысить цены до $20"
+    ],
+    "options_uz": [
+      "Tushum savdo o‘zgarmasdan $1800 dan $2000 ga oshadi",
+      "Fermer narxni oshirib monopoliya yaratadi",
+      "Fermer qo‘shimcha $200 olish o‘rniga deyarli barcha savdoni yo‘qotishi mumkin",
+      "Barcha raqiblar narxni $20 ga oshirishi shart"
+    ],
+    "why": [
+      "At the common price revenue is 100×$18=$1,800. A single price-taking seller cannot sustainably charge more for identical goods when buyers can switch.",
+      "При общей цене выручка 100×$18=$1 800. Отдельный продавец-ценополучатель не сможет удержать более высокую цену на одинаковый товар при свободном переходе покупателей.",
+      "Umumiy narxda tushum 100×$18=$1800. Narx qabul qiluvchi sotuvchi bir xil tovar uchun raqiblardan qimmatroq narxni ushlab turolmaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-012",
+    "n": 12,
+    "d": "medium",
+    "sec": 145,
+    "k": "B",
+    "en": "A food company builds two new bakeries using retained profits and also buys an existing flour mill. How should these two expansion decisions be classified, in the order described?",
+    "ru": "Продовольственная компания строит две новые пекарни за счёт нераспределённой прибыли, а также покупает действующую мельницу, которая поставляет муку. Как классифицировать два решения о росте в указанном порядке?",
+    "uz": "Oziq-ovqat firmasi taqsimlanmagan foydasi hisobiga ikkita yangi nonvoyxona quradi va un yetkazib beruvchi mavjud tegirmonni sotib oladi. Ushbu ikki kengayish usuli ketma-ket qanday tasniflanadi?",
+    "options_en": [
+      "Horizontal integration; internal growth",
+      "Organic growth; backward vertical integration",
+      "Forward vertical integration; organic growth",
+      "Conglomerate integration; horizontal integration"
+    ],
+    "options_ru": [
+      "Горизонтальная интеграция; внутренний рост",
+      "Органический рост; обратная вертикальная интеграция",
+      "Прямая вертикальная интеграция; органический рост",
+      "Конгломератная интеграция; горизонтальная интеграция"
+    ],
+    "options_uz": [
+      "Gorizontal integratsiya; ichki o‘sish",
+      "Organik o‘sish; orqaga vertikal integratsiya",
+      "Oldinga vertikal integratsiya; organik o‘sish",
+      "Konglomerat integratsiya; gorizontal integratsiya"
+    ],
+    "why": [
+      "Building new owned capacity is organic growth; buying a supplier upstream in the production chain is backward vertical integration.",
+      "Строительство собственных новых объектов — органический рост; покупка поставщика на предыдущем этапе цепочки — обратная вертикальная интеграция.",
+      "Yangi o‘z quvvatini qurish organik o‘sish, ta’minotchini sotib olish esa orqaga vertikal integratsiyadir."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-015",
+    "n": 15,
+    "d": "medium",
+    "sec": 155,
+    "k": "A",
+    "en": "A city has many cafés offering different menus and atmospheres with relatively easy entry. One café introduces a unique menu and raises its price modestly, while some customers still prefer it. Which combination best describes the market structure and source of limited price-setting power?",
+    "ru": "В городе много кафе с разными меню и атмосферой, вход на рынок относительно свободен. Одно кафе создаёт уникальное меню и немного повышает цену, но часть клиентов остаётся. Какая пара лучше описывает структуру рынка и источник ограниченной ценовой власти?",
+    "uz": "Shaharda turli menyu va muhitga ega ko‘plab kafelar bor, bozorga kirish nisbatan oson. Bitta kafe noyob menyu yaratib narxini biroz oshiradi, lekin ayrim mijozlar baribir qoladi. Bozor tuzilmasi va cheklangan narx belgilash kuchi manbai qanday?",
+    "options_en": [
+      "Monopolistic competition; product differentiation",
+      "Perfect competition; identical products",
+      "Pure monopoly; legal exclusion of all rivals",
+      "Monopsony; a single buyer sets café prices"
+    ],
+    "options_ru": [
+      "Монополистическая конкуренция; дифференциация продукта",
+      "Совершенная конкуренция; идентичный продукт",
+      "Чистая монополия; законодательно исключены все конкуренты",
+      "Монопсония; один покупатель устанавливает цены кафе"
+    ],
+    "options_uz": [
+      "Monopolistik raqobat; mahsulot tabaqalanishi",
+      "Mukammal raqobat; bir xil mahsulotlar",
+      "Sof monopoliya; raqiblar qonuniy taqiqlangan",
+      "Monopsoniya; bitta xaridor kafe narxini belgilaydi"
+    ],
+    "why": [
+      "Many sellers and ease of entry are consistent with monopolistic competition; differentiation creates some customer loyalty and limited pricing discretion.",
+      "Множество продавцов и свободный вход соответствуют монополистической конкуренции; различия продукта создают лояльность и ограниченную возможность менять цену.",
+      "Ko‘p sotuvchi va oson kirish monopolistik raqobatga mos; mahsulot farqlanishi mijoz sadoqatini va cheklangan narx kuchini yaratadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-034",
+    "n": 34,
+    "d": "medium",
+    "sec": 160,
+    "k": "D",
+    "en": "Many software firms cluster in one district. A specialist college opens and lowers the cost of recruiting trained workers for existing firms, even though each firm keeps the same output and size. Which classification and reason are consistent with this development?",
+    "ru": "Многие IT-компании работают в одном районе. Там открывается специализированный колледж, снижающий стоимость найма подготовленных работников, хотя размеры и выпуск каждой компании неизменны. Какая классификация и причина соответствуют ситуации?",
+    "uz": "Ko‘plab dasturiy ta’minot firmalari bir hududda jamlangan. Maxsus kollej ochilib, malakali ishchilarni yollash xarajatini kamaytiradi, ammo har firmaning hajmi va ishlab chiqarishi o‘zgarmaydi. Bu qanday hodisa va nega?",
+    "options_en": [
+      "Internal purchasing economies, because each firm doubles its output",
+      "Internal technical economies, because each firm buys a larger machine",
+      "Diseconomies of scale, because recruiting becomes more expensive",
+      "External economies of scale, because industry clustering provides shared skills"
+    ],
+    "options_ru": [
+      "Внутренняя экономия закупок, потому что выпуск каждой фирмы удвоился",
+      "Внутренняя технологическая экономия, потому что каждая фирма купила большой станок",
+      "Отрицательный эффект масштаба, поскольку найм дорожает",
+      "Внешняя экономия от масштаба, поскольку кластер даёт доступ к общим навыкам"
+    ],
+    "options_uz": [
+      "Ichki xarid tejamkorligi, chunki har firma mahsuloti ikki baravar oshdi",
+      "Ichki texnik tejamkorlik, chunki har firma katta uskuna sotib oldi",
+      "Miqyos samarasizligi, chunki yollash qimmatlashdi",
+      "Tashqi miqyos tejamkorligi, chunki tarmoq klasteri umumiy malakalarni yaratadi"
+    ],
+    "why": [
+      "The source of lower costs is the surrounding industry and training infrastructure, not an individual firm's enlargement. That is an external economy.",
+      "Затраты падают благодаря отраслевому кластеру и образовательной инфраструктуре, а не расширению отдельной фирмы: это внешняя экономия от масштаба.",
+      "Xarajat pasayishi alohida firma kattalashgani emas, tarmoq klasteri va ta’lim infratuzilmasidan keladi: tashqi tejamkorlik."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-038",
+    "n": 38,
+    "d": "medium",
+    "sec": 150,
+    "k": "C",
+    "en": "A smartphone company keeps its list price unchanged but adds free technical support and a distinctive design, seeking repeat customers. A rival instead lowers its price without changing the product. Which comparison correctly identifies their competitive methods?",
+    "ru": "Компания сохраняет цену смартфона, но добавляет бесплатную техническую поддержку и уникальный дизайн ради повторных покупок. Конкурент вместо этого снижает цену, не меняя продукт. Как правильно классифицировать оба способа конкуренции?",
+    "uz": "Smartfon firmasi narxni o‘zgartirmay bepul texnik yordam va noyob dizayn qo‘shadi, takror xaridni rag‘batlantiradi. Raqibi esa mahsulotni o‘zgartirmasdan narxni tushiradi. Ularning raqobat usullari qanday farqlanadi?",
+    "options_en": [
+      "Both compete solely by lowering price",
+      "First uses predatory pricing; second uses product differentiation",
+      "First uses non-price differentiation; second uses price competition",
+      "Both automatically create a legal monopoly"
+    ],
+    "options_ru": [
+      "Обе конкурируют исключительно снижением цены",
+      "Первая применяет хищнические цены, вторая — дифференциацию",
+      "Первая использует неценовую дифференциацию, вторая — ценовую конкуренцию",
+      "Обе автоматически создают законную монополию"
+    ],
+    "options_uz": [
+      "Ikkalasi faqat narxni tushirib raqobat qiladi",
+      "Birinchisi demping narx qo‘llaydi, ikkinchisi mahsulotni farqlaydi",
+      "Birinchisi narxsiz tabaqalanish, ikkinchisi narx raqobatini qo‘llaydi",
+      "Ikkalasi avtomatik qonuniy monopoliya yaratadi"
+    ],
+    "why": [
+      "Design and support change customer value without a list-price cut (non-price competition); the rival's unchanged product and lower price are price competition.",
+      "Дизайн и поддержка повышают ценность товара без снижения цены: неценовая конкуренция. Соперник снижает цену — ценовая конкуренция.",
+      "Dizayn va xizmat narxni tushirmasdan qiymat yaratadi — narxsiz raqobat. Raqibning narxni kamaytirishi narx raqobatidir."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-043",
+    "n": 43,
+    "d": "medium",
+    "sec": 155,
+    "k": "B",
+    "en": "A juice manufacturer purchases a chain of retail shops that sell its drinks, while a rival juice manufacturer purchases an orchard supplying its fruit. Which pair identifies the direction of integration for the first and second manufacturers?",
+    "ru": "Производитель сока покупает сеть розничных магазинов, продающих его напитки. Конкурирующий производитель сока приобретает фруктовый сад — источник сырья. Каковы направления интеграции первого и второго производителей?",
+    "uz": "Sharbat ishlab chiqaruvchi uning ichimliklarini sotuvchi chakana do‘konlar tarmog‘ini sotib oladi. Raqib sharbat ishlab chiqaruvchi esa meva yetkazib beruvchi bog‘ni sotib oladi. Birinchi va ikkinchi firmaning integratsiya yo‘nalishi qanday?",
+    "options_en": [
+      "Both backward vertical integration",
+      "Forward vertical; backward vertical",
+      "Backward vertical; forward vertical",
+      "Both horizontal integration"
+    ],
+    "options_ru": [
+      "Обе — обратная вертикальная интеграция",
+      "Прямая вертикальная; обратная вертикальная",
+      "Обратная вертикальная; прямая вертикальная",
+      "Обе — горизонтальная интеграция"
+    ],
+    "options_uz": [
+      "Ikkalasi orqaga vertikal integratsiya",
+      "Oldinga vertikal; orqaga vertikal",
+      "Orqaga vertikal; oldinga vertikal",
+      "Ikkalasi gorizontal integratsiya"
+    ],
+    "why": [
+      "Buying retailers moves downstream towards customers (forward); buying a fruit supplier moves upstream (backward).",
+      "Покупка магазинов — движение к покупателю по цепочке (прямая интеграция), покупка сада — к поставщику (обратная).",
+      "Do‘konlarni olish mijozga tomon (oldinga), meva yetkazib beruvchini olish ta’minotga tomon (orqaga) integratsiyadir."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-057",
+    "n": 57,
+    "d": "medium",
+    "sec": 160,
+    "k": "A",
+    "en": "A four-firm concentration ratio declines from 80% to 55% after smaller competitors expand. Meanwhile product prices remain unchanged. Which interpretation can be supported by those observations alone?",
+    "ru": "После роста небольших конкурентов коэффициент концентрации четырёх крупнейших фирм падает с 80% до 55%. При этом цены товаров не меняются. Какой вывод подтверждается только этими наблюдениями?",
+    "uz": "Kichik raqiblar kengaygach, eng yirik to‘rtta firmaning konsentratsiya ko‘rsatkichi 80% dan 55% ga tushdi. Shu bilan birga mahsulot narxlari o‘zgarmadi. Faqat shu ma’lumotlardan qaysi xulosa kelib chiqadi?",
+    "options_en": [
+      "Market share has become less concentrated among the four largest firms, but price and conduct effects cannot be inferred",
+      "Prices must have fallen by exactly 25 percentage points",
+      "All collusion must have disappeared by definition",
+      "There are now precisely four firms in the market"
+    ],
+    "options_ru": [
+      "Доля крупнейших четырёх фирм снизилась, но вывод об изменении цен и поведения сделать нельзя",
+      "Цены обязательно упали ровно на 25 процентных пунктов",
+      "Любой сговор по определению исчез",
+      "Теперь на рынке ровно четыре фирмы"
+    ],
+    "options_uz": [
+      "Eng yirik to‘rt firma ulushi kamaydi, ammo narx va xulq-atvorga ta’sirini aniqlab bo‘lmaydi",
+      "Narxlar albatta aynan 25 foiz punktga kamaydi",
+      "Har qanday til biriktirish ta’rif bo‘yicha yo‘qoldi",
+      "Endi bozorda aynan to‘rtta firma bor"
+    ],
+    "why": [
+      "CR4 measures the combined market share of the four largest firms. A lower ratio indicates less concentration, not by itself proof of lower prices or no collusion.",
+      "CR4 измеряет суммарную долю четырёх крупнейших. Его снижение свидетельствует о меньшей концентрации, но не доказывает падение цен или исчезновение сговора.",
+      "CR4 eng yirik to‘rt firmaning jami bozor ulushini o‘lchaydi. Pasayishi konsentratsiya kamayganini bildiradi, narx yoki til biriktirishni isbotlamaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T4-P-069",
+    "n": 69,
+    "d": "medium",
+    "sec": 160,
+    "k": "D",
+    "en": "A bakery produces 200 loaves with five workers, 228 with six and 245 with seven, using the same equipment. What is the marginal product of the seventh worker, and what happens to marginal product between the sixth and seventh workers?",
+    "ru": "Пекарня на неизменном оборудовании выпускает 200 буханок при пяти работниках, 228 при шести и 245 при семи. Какова предельная производительность седьмого работника и как она меняется по сравнению с шестым?",
+    "uz": "Nonvoyxona bir xil uskunada besh ishchi bilan 200, olti ishchi bilan 228 va yetti ishchi bilan 245 ta non tayyorlaydi. Yettinchi ishchining chegaraviy mahsuloti qancha va oltinchi ishchiga nisbatan qanday o‘zgaradi?",
+    "options_en": [
+      "45 loaves; marginal product increases",
+      "28 loaves; marginal product is unchanged",
+      "17 loaves; marginal product increases",
+      "17 loaves; marginal product falls from 28"
+    ],
+    "options_ru": [
+      "45 буханок; предельная отдача растёт",
+      "28 буханок; предельная отдача неизменна",
+      "17 буханок; предельная отдача растёт",
+      "17 буханок; предельная отдача падает с 28"
+    ],
+    "options_uz": [
+      "45 non; chegaraviy mahsulot oshadi",
+      "28 non; chegaraviy mahsulot o‘zgarmaydi",
+      "17 non; chegaraviy mahsulot oshadi",
+      "17 non; chegaraviy mahsulot 28 dan tushadi"
+    ],
+    "why": [
+      "Sixth worker adds 228−200=28 loaves; seventh adds 245−228=17. Marginal labour product decreases with fixed equipment.",
+      "Шестой работник добавляет 28 буханок, седьмой 17. При неизменном оборудовании предельная производительность труда снижается.",
+      "Oltinchi ishchi 28 ta, yettinchi 17 ta non qo‘shadi. Uskuna o‘zgarmaganda mehnatning chegaraviy mahsuloti kamayadi."
+    ]
+  }
+]
