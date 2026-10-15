@@ -13,3 +13,5 @@ Final QA-to-QA run for owner-subject-intent commercial access proof, exact sourc
 QA CI rerun 2026-10-15: verify Home source priority by real enrolment mode, subject-level synthetic authorization, independent academic/editorial rechecks and final owner screen/scan stability. No paid Supabase branch or production changes. NEVER MERGE.
 
 QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.js and plans-ui.js against trusted QA baseline without altering original production surfaces. NO MERGE.
+
+2026-10-15 §96: verify localhost HTTP->scratch PostgreSQL->signed Home policy, no live Supabase and no product release; never merge.
