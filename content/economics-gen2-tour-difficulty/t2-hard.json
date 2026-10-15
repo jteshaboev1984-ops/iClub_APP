@@ -70,31 +70,31 @@
     "d": "hard",
     "k": "D",
     "sec": 135,
-    "en": "In an open-economy circular flow with unused capacity, the combined marginal leakage rate for saving, taxes and imports is 0.40. A government increases purchases by $24m, but a separate fall in export orders reduces autonomous spending by $8m. Assume a fixed price level and a constant multiplier. What is the predicted net change in equilibrium national income?",
-    "ru": "В кругообороте открытой экономики с незагруженными мощностями суммарная предельная доля изъятий в сбережения, налоги и импорт — 0,40. Государство увеличивает закупки на $24 млн, но падение экспортных заказов отдельно сокращает автономные расходы на $8 млн. Уровень цен фиксирован, мультипликатор постоянен. Как изменится равновесный национальный доход?",
-    "uz": "Bo‘sh quvvatli ochiq iqtisodiyotda jamg‘arma, soliq va importga chegaraviy chiqimlar jami 0,40. Davlat xaridini $24 mln oshiradi, eksport buyurtmalari pasayishi esa avtonom xarajatni alohida $8 mln kamaytiradi. Narx o‘zgarmas va multiplikator doimiy. Muvozanat milliy daromadi qanday o‘zgaradi?",
+    "en": "In a circular-flow model with households, government and foreign trade, planned saving is $45m, taxes $30m and imports $25m. Planned investment is $35m, government purchases $40m and exports $25m. Afterwards, government purchases rise by $9m while imports independently rise by $4m. What is the initial injection-leakage balance, and what is the direction of pressure on national income after the changes?",
+    "ru": "В модели кругооборота с государством и внешней торговлей планируемые сбережения $45 млн, налоги $30 млн, импорт $25 млн. Планируемые инвестиции $35 млн, госзакупки $40 млн, экспорт $25 млн. Затем госзакупки увеличиваются на $9 млн, а импорт независимо растёт на $4 млн. Каково исходное равенство инъекций и изъятий и каким будет давление на национальный доход после изменений?",
+    "uz": "Davlat va tashqi savdoli doiraviy oqim modelida rejalangan jamg‘arma $45 mln, soliq $30 mln, import $25 mln. Rejalangan investitsiya $35 mln, davlat xaridi $40 mln, eksport $25 mln. Keyin davlat xaridi $9 mln, import alohida $4 mln oshadi. Dastlab kirim va chiqimlar muvozanati qanday va o‘zgarishdan so‘ng milliy daromadga qanday bosim bo‘ladi?",
     "options_en": [
-      "Rises $60m",
-      "Rises $24m",
-      "Rises $16m",
-      "Rises $40m"
+      "Initially leakages exceed injections by $25m; later income is under downward pressure",
+      "Initially injections exceed leakages by $5m; later income is under downward pressure",
+      "Initially injections equal leakages; later leakages exceed injections by $5m, pushing income down",
+      "Initially injections equal leakages at $100m; afterwards injections exceed leakages by $5m, pushing income up"
     ],
     "options_ru": [
-      "Растёт на $60 млн",
-      "Растёт на $24 млн",
-      "Растёт на $16 млн",
-      "Растёт на $40 млн"
+      "Изначально изъятия превышают инъекции на $25 млн; затем доход снижается",
+      "Изначально инъекции превышают изъятия на $5 млн; затем доход снижается",
+      "Изначально равновесие; затем изъятия превышают инъекции на $5 млн, доход снижается",
+      "Изначально инъекции и изъятия равны $100 млн; затем инъекции выше изъятий на $5 млн, доход растёт"
     ],
     "options_uz": [
-      "$60 mln oshadi",
-      "$24 mln oshadi",
-      "$16 mln oshadi",
-      "$40 mln oshadi"
+      "Dastlab chiqimlar kirimdan $25 mln ko‘p; keyin daromad pasayish bosimida",
+      "Dastlab kirimlar chiqimdan $5 mln ko‘p; keyin daromad pasayadi",
+      "Dastlab teng; keyin chiqim $5 mln ko‘proq bo‘lib daromad tushadi",
+      "Dastlab kirim va chiqim $100 mln ga teng; keyin kirim $5 mln yuqori bo‘lib daromad oshish bosimida"
     ],
     "why": [
-      "The multiplier equals 1/0.40=2.5. Autonomous expenditure rises net by $24m−$8m=$16m, so equilibrium income rises by 2.5×$16m=$40m.",
-      "Мультипликатор 1/0,40=2,5. Чистое увеличение автономных расходов $24−$8=$16 млн. Равновесный доход вырастет на 2,5×$16=$40 млн.",
-      "Multiplikator 1/0,40=2,5. Avtonom xarajatning sof o‘sishi $24−$8=$16 mln. Daromad 2,5×$16=$40 mln oshadi."
+      "Initially injections I+G+X=35+40+25=$100m, and leakages S+T+M=45+30+25=$100m. Later injections=$109m and leakages=$104m; the $5m planned injection surplus puts upward pressure on output and income.",
+      "Сначала инъекции 35+40+25=$100 млн и изъятия 45+30+25=$100 млн. Затем инъекции $109 млн, изъятия $104 млн: превышение инъекций на $5 млн создаёт повышательное давление на выпуск и доход.",
+      "Avval kirimlar 35+40+25=$100 mln, chiqimlar 45+30+25=$100 mln. Keyin kirim $109 mln, chiqim $104 mln: $5 mln ortiqcha kirim ishlab chiqarish va daromadni oshirishga bosim beradi."
     ],
     "ref": "EC9708:G2:EC9708-G2-T2-T-019"
   },
