@@ -1,0 +1,573 @@
+{
+  "schema": "iclub_ai_v21_p9_draft_contract_bundle_v1",
+  "observedOn": "2026-10-15",
+  "status": "UNAPPLIED_QA_CANDIDATE",
+  "releaseAllowed": false,
+  "requiresIndependentOwnerApproval": true,
+  "requiresProductionCompatibilityReview": true,
+  "noProductionDatabaseWrites": true,
+  "stages": [
+    {
+      "path": "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql",
+      "dependsOn": []
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_topic_release_gate_v21_UNAPPLIED.sql",
+      "dependsOn": []
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql",
+      "dependsOn": [
+        "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql",
+        "qa/sql_drafts/iclub_ai_topic_release_gate_v21_UNAPPLIED.sql"
+      ]
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_v21_live_authority_UNAPPLIED.sql",
+      "dependsOn": []
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_v21_meter_v2_UNAPPLIED.sql",
+      "dependsOn": []
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_delivery_claim_v21_UNAPPLIED.sql",
+      "dependsOn": [
+        "qa/sql_drafts/iclub_ai_v21_meter_v2_UNAPPLIED.sql"
+      ]
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_v21_provider_spend_UNAPPLIED.sql",
+      "dependsOn": [
+        "qa/sql_drafts/iclub_ai_v21_live_authority_UNAPPLIED.sql",
+        "qa/sql_drafts/iclub_ai_v21_meter_v2_UNAPPLIED.sql",
+        "qa/sql_drafts/iclub_ai_delivery_claim_v21_UNAPPLIED.sql"
+      ]
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_v21_encrypted_reply_UNAPPLIED.sql",
+      "dependsOn": [
+        "qa/sql_drafts/iclub_ai_delivery_claim_v21_UNAPPLIED.sql"
+      ]
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_v21_p6_navigation_gate_UNAPPLIED.sql",
+      "dependsOn": [
+        "qa/sql_drafts/iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql"
+      ]
+    }
+  ],
+  "contracts": [
+    {
+      "name": "claim_iclub_ai_delivery_service_v21",
+      "draft": "qa/sql_drafts/iclub_ai_delivery_claim_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_request_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_session_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_request_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_route_class",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "dispatch_iclub_ai_v21_provider_spend_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_provider_spend_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_request_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_session_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_request_fingerprint",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "finish_iclub_ai_delivery_service_v21",
+      "draft": "qa/sql_drafts/iclub_ai_delivery_claim_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_request_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_session_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_request_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_route_class",
+          "type": "text"
+        },
+        {
+          "name": "p_outcome",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "finish_iclub_ai_delivery_with_receipt_service_v21",
+      "draft": "qa/sql_drafts/iclub_ai_v21_encrypted_reply_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_request_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_session_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_request_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_route_class",
+          "type": "text"
+        },
+        {
+          "name": "p_identity_digest",
+          "type": "text"
+        },
+        {
+          "name": "p_ciphertext",
+          "type": "text"
+        },
+        {
+          "name": "p_nonce",
+          "type": "text"
+        },
+        {
+          "name": "p_auth_tag",
+          "type": "text"
+        },
+        {
+          "name": "p_key_ref",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "finish_iclub_ai_v21_provider_spend_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_provider_spend_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_request_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_session_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_request_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_outcome",
+          "type": "text"
+        },
+        {
+          "name": "p_actual_microusd",
+          "type": "bigint"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_topic_release_service_v21",
+      "draft": "qa/sql_drafts/iclub_ai_topic_release_gate_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_surface",
+          "type": "text"
+        },
+        {
+          "name": "p_subject",
+          "type": "text"
+        },
+        {
+          "name": "p_feature",
+          "type": "text"
+        },
+        {
+          "name": "p_topic",
+          "type": "text"
+        },
+        {
+          "name": "p_locale",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_encrypted_reply_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_encrypted_reply_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_request_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_session_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_request_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_route_class",
+          "type": "text"
+        },
+        {
+          "name": "p_identity_digest",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_entitlement_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_live_authority_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_general_scope_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_p6_navigation_gate_UNAPPLIED.sql",
+      "args": [],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_protected_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_live_authority_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_provider_budget_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_live_authority_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_source_id",
+          "type": "text"
+        },
+        {
+          "name": "p_route_class",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_rollout_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_live_authority_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_surface",
+          "type": "text"
+        },
+        {
+          "name": "p_subject",
+          "type": "text"
+        },
+        {
+          "name": "p_feature",
+          "type": "text"
+        },
+        {
+          "name": "p_topic",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_runtime_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_live_authority_UNAPPLIED.sql",
+      "args": [],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_scoped_context_service",
+      "draft": "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_context_handle",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_source_bundle_service",
+      "draft": "qa/sql_drafts/iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_context_handle",
+          "type": "text"
+        },
+        {
+          "name": "p_source_id",
+          "type": "text"
+        },
+        {
+          "name": "p_source_version",
+          "type": "text"
+        },
+        {
+          "name": "p_source_hash",
+          "type": "text"
+        },
+        {
+          "name": "p_publication_revision",
+          "type": "bigint"
+        },
+        {
+          "name": "p_locale",
+          "type": "text"
+        },
+        {
+          "name": "p_route_class",
+          "type": "text"
+        },
+        {
+          "name": "p_prompt_key",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_source_proof_service",
+      "draft": "qa/sql_drafts/iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_surface",
+          "type": "text"
+        },
+        {
+          "name": "p_subject",
+          "type": "text"
+        },
+        {
+          "name": "p_feature",
+          "type": "text"
+        },
+        {
+          "name": "p_topic",
+          "type": "text"
+        },
+        {
+          "name": "p_locale",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "mint_iclub_ai_v21_app_view_context_service",
+      "draft": "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_view",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "mint_iclub_ai_v21_lesson_context_service",
+      "draft": "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_lesson_id",
+          "type": "bigint"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "mint_iclub_ai_v21_practice_context_service",
+      "draft": "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_session_id",
+          "type": "bigint"
+        },
+        {
+          "name": "p_question_id",
+          "type": "bigint"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "mint_iclub_ai_v21_tour_archive_context_service",
+      "draft": "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_attempt_id",
+          "type": "bigint"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "reserve_iclub_ai_usage_service_v2",
+      "draft": "qa/sql_drafts/iclub_ai_v21_meter_v2_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_request_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_usage_policy_code",
+          "type": "text"
+        },
+        {
+          "name": "p_route_class",
+          "type": "text"
+        },
+        {
+          "name": "p_request_fingerprint",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "reserve_iclub_ai_v21_provider_spend_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_provider_spend_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_request_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_session_fingerprint",
+          "type": "text"
+        },
+        {
+          "name": "p_request_fingerprint",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "revoke_iclub_ai_v21_scoped_context_service",
+      "draft": "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_context_handle",
+          "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    }
+  ]
+}

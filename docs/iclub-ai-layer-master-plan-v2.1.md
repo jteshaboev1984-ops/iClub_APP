@@ -1024,3 +1024,12 @@ Home также не сохраняет бессрочный устаревши�
 [GitHub Actions #335](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38695206769) — **GREEN**: 656/656 Node (включая 7 новых fail-closed P9 checks), 14/14 scratch PostgreSQL, localhost HTTP, отдельный Study workflow, Chromium RU/UZ/EN, Deno, независимые двухпоточные гонки и protected file gates. Ожидаемый production preflight: **23 missing RPC, NO-GO**.
 
 **Следующий крупный допуск:** подлинное owner/subject/intent + RLS/security review для всех server endpoints; одобренная независимая source-rights publication, реальное trusted Edge/Supabase implementation и отдельный защищённый интегрированный Preview, с проверкой Core AI OFF/Math parity, rollback, тарифной экономики и отдельным разрешением архитектора на cohort/provider/live spend. На существующей production Supabase **никаких миграций**, новых тестовых пользователей, данных, платных вызовов или новых Supabase branch. `main`, работающий Mathematics Tutor, сертификаты, тарифные экраны, локальный и серверный прогресс не изменялись. **Global AI OFF / NO-GO**.
+
+
+## 115. Единая сверка 23 готовых QA SQL-контрактов и 7 live RLS policy (2026-10-15; QA ONLY)
+
+Определено, что **все 23 RPC имени** будущего `qa/edge_v21/supabase_services.ts` уже имеют SQL определения в **9 существующих** `*_UNAPPLIED.sql`. Не создавать дублирующие заглушки. `qa/ai-layer-v21-p9-rpc-draft-manifest.json` и `qa/ai-layer-v21-p9-draft-contract-gate.cjs` автоматически проверяют точные аргументы, соответствие Edge-контрактам, защищённый SECURITY DEFINER/search_path, запреты PUBLIC/anon/authenticated, service_role-only grants, scratch DB guard и граф SQL-зависимостей. Отрицательные проверки встроены в офлайн CI.
+
+Metadata-only `pg_catalog.pg_policy` подтвердил семь политик: публичный каталог `subjects`, owner `auth.uid()` для `tour_attempts` и пяти политик `user_subjects`. Датированные отпечатки хранятся в `qa/ai-layer-v21-p9-policy-fingerprint-snapshot.json`. Это не подтверждение корректной работы нового service-role Edge, не live authorization и не разрешение миграции.
+
+**23/23 SQL черновиков != 23/23 live функций.** На действующей Supabase по предыдущему метаданному аудиту по-прежнему 0/23 новых v2.1 RPC. Применение к production запрещено, реальный интегрированный Preview не создан, права на источник/смета/миграции/rollout не утверждены. Полный отчёт: `docs/iclub-ai-layer-p9-rpc-draft-and-rls-contract-audit-20261015.md`. **Global AI OFF / NO-GO**.

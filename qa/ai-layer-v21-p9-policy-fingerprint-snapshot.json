@@ -1,0 +1,65 @@
+{
+  "schema": "iclub_ai_v21_live_rls_expression_metadata_v1",
+  "capturedOn": "2026-10-15",
+  "metadataOnly": true,
+  "releaseAllowed": false,
+  "source": "read-only pg_catalog.pg_policy; no user rows",
+  "policies": [
+    {
+      "schema": "public",
+      "table": "subjects",
+      "policy": "subjects_public_read",
+      "command": "r",
+      "expressionMd5": "eb28d87532d6edd9b635727493ef89f7",
+      "semantic": "public_catalog"
+    },
+    {
+      "schema": "public",
+      "table": "tour_attempts",
+      "policy": "tour_attempts_select_own",
+      "command": "r",
+      "expressionMd5": "5eebdfba311617743b110b29a41f23a0",
+      "semantic": "owner_auth_uid"
+    },
+    {
+      "schema": "public",
+      "table": "user_subjects",
+      "policy": "user_subjects_delete_own",
+      "command": "d",
+      "expressionMd5": "5eebdfba311617743b110b29a41f23a0",
+      "semantic": "owner_auth_uid"
+    },
+    {
+      "schema": "public",
+      "table": "user_subjects",
+      "policy": "user_subjects_insert_own",
+      "command": "a",
+      "expressionMd5": "f2ddbc79e24daf371a14e31c92b8402a",
+      "semantic": "owner_auth_uid"
+    },
+    {
+      "schema": "public",
+      "table": "user_subjects",
+      "policy": "user_subjects_rw_own",
+      "command": "*",
+      "expressionMd5": "7ea2326acd7022f54ccb7566a1d93f26",
+      "semantic": "owner_auth_uid"
+    },
+    {
+      "schema": "public",
+      "table": "user_subjects",
+      "policy": "user_subjects_select_own",
+      "command": "r",
+      "expressionMd5": "5eebdfba311617743b110b29a41f23a0",
+      "semantic": "owner_auth_uid"
+    },
+    {
+      "schema": "public",
+      "table": "user_subjects",
+      "policy": "user_subjects_update_own",
+      "command": "w",
+      "expressionMd5": "7ea2326acd7022f54ccb7566a1d93f26",
+      "semantic": "owner_auth_uid"
+    }
+  ]
+}
