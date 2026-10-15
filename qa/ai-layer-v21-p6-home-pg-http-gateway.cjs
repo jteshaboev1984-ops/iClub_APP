@@ -11,6 +11,7 @@ const {buildHomePlan,verifySignedPlan}=require("./ai-layer-v21-p6-home-signed-se
 const {QAHomeApprovedPriority}=require("./ai-layer-v21-p6-home-approved-priority.cjs");
 const {makeCommercialProofAdapter}=require("./ai-layer-v21-p6-commercial-contract-adapter.cjs");
 const {validateBeforeHomeDelivery}=require("./ai-layer-v21-p6-home-delivery-gate.cjs");
+const {issueSyntheticHandoff,claimSyntheticHandoff}=require("./ai-layer-v21-p6-home-action-handoff.cjs");
 const OWNER="11111111-1111-4111-8111-111111111111";
 const FOREIGN="22222222-2222-4222-8222-222222222222";
 const HANDLE="33333333-3333-4333-8333-333333333333";
@@ -207,7 +208,10 @@ async function evaluateOwnerAction(services,user,handle,locale,beforeDelivery){
   userId:user,contextHandle:handle,locale,plan:proposed.plan,choice
  });
  if(delivered.ready!==true)return null;
- const out={ok:true,status:delivered.status,
+ const handoff=issueSyntheticHandoff({sql,signingKey:services.signingKey,
+  userId:user,contextHandle:handle,locale,plan:proposed.plan,delivered});
+ if(handoff.ok!==true)return null;
+ const out={ok:true,status:delivered.status,handoffToken:handoff.handoffToken,
   reviewOnly:true,releaseAllowed:false,expiresAtMs:delivered.expiresAtMs};
  if(delivered.status==="candidate_only"){
   out.actionCode=delivered.actionCode;out.subjectKey=delivered.subjectKey;
@@ -250,7 +254,9 @@ function makeGateway({beforeDelivery,beforeAtomicRead}={}){
    res.writeHead(status,{"Content-Type":"application/json","Cache-Control":"no-store"});
    res.end(JSON.stringify({ok:false,reason}));
   };
-  if(req.url!=="/qa/home/next"||req.method!=="POST")
+  const isNext=req.url==="/qa/home/next";
+  const isConfirm=req.url==="/qa/home/confirm";
+  if((!isNext&&!isConfirm)||req.method!=="POST")
    return reject(404,"not_found");
   const origin="http://127.0.0.1:"+server.address().port;
   if(req.headers.origin!==origin)return reject(403,"origin_not_authorized");
@@ -268,6 +274,21 @@ function makeGateway({beforeDelivery,beforeAtomicRead}={}){
     if(Buffer.byteLength(raw)>256)return reject(413,"body_too_large");
    }
    const body=JSON.parse(raw),keys=Object.keys(body||{}).sort().join(",");
+   if(isConfirm){
+    if(keys!=="actionCode,contextHandle,handoffToken,locale,subjectKey"||
+     !UUID.test(body.contextHandle||"")||
+     !["ru","uz","en"].includes(body.locale))
+     return reject(400,"invalid_request");
+    const claimed=claimSyntheticHandoff({sql,signingKey:services.signingKey,
+     userId:user,contextHandle:body.contextHandle,locale:body.locale,
+     handoffToken:body.handoffToken,actionCode:body.actionCode,
+     subjectKey:body.subjectKey});
+    if(claimed.ok!==true)return reject(403,"in_development");
+    res.writeHead(200,{"Content-Type":"application/json",
+     "Cache-Control":"no-store","Access-Control-Allow-Origin":origin,
+     "X-Content-Type-Options":"nosniff"});
+    return res.end(JSON.stringify(claimed));
+   }
    if(keys!=="contextHandle,locale"||!UUID.test(body.contextHandle||"")||
     !["ru","uz","en"].includes(body.locale))return reject(400,"invalid_request");
    const out=await evaluateOwnerAction(services,user,body.contextHandle,body.locale,beforeDelivery);
