@@ -1,0 +1,266 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-049",
+    "n": 49,
+    "d": "medium",
+    "sec": 165,
+    "k": "A",
+    "en": "A commercial bank pays 3% annual interest on $80m of deposits and earns 8% annual interest on $60m of loans. Ignore bad debts, fees, reserve interest and other expenses. What is its annual gross interest margin in dollars, and which role of a bank does it illustrate?",
+    "ru": "Коммерческий банк платит 3% годовых по депозитам $80 млн и получает 8% годовых по кредитам $60 млн. Игнорируйте дефолты, комиссии, процент по резервам и другие затраты. Чему равна годовая валовая процентная маржа в долларах и какую функцию банка это иллюстрирует?",
+    "uz": "Tijorat banki $80 mln depozitga yillik 3% foiz to‘laydi, $60 mln kreditdan yillik 8% oladi. Defolt, komissiya, zaxira foizi va boshqa xarajatni hisoblamang. Yillik yalpi foiz marjasi dollarda qancha va bankning qanday vazifasini ko‘rsatadi?",
+    "options_en": [
+      "$2.4m; financial intermediation between savers and borrowers",
+      "$4.8m; issuing domestic currency",
+      "$7.2m; collecting income taxes",
+      "$2.4m; eliminating all credit risk"
+    ],
+    "options_ru": [
+      "$2,4 млн; финансовое посредничество между вкладчиками и заёмщиками",
+      "$4,8 млн; выпуск национальной валюты",
+      "$7,2 млн; сбор подоходного налога",
+      "$2,4 млн; полное устранение кредитного риска"
+    ],
+    "options_uz": [
+      "$2,4 mln; jamg‘aruvchi va qarz oluvchi o‘rtasidagi vositachilik",
+      "$4,8 mln; milliy valuta chiqarish",
+      "$7,2 mln; daromad solig‘i yig‘ish",
+      "$2,4 mln; barcha kredit xavfini yo‘qotish"
+    ],
+    "why": [
+      "Loan interest is 0.08×$60m=$4.8m; deposit interest 0.03×$80m=$2.4m; spread in dollars=$2.4m. This illustrates financial intermediation, not risk elimination.",
+      "Проценты по кредитам 0,08×$60 млн=$4,8 млн, по депозитам 0,03×$80 млн=$2,4 млн; разница $2,4 млн. Это финансовое посредничество.",
+      "Kredit foizi 0,08×$60 mln=$4,8 mln, depozit foizi 0,03×$80 mln=$2,4 mln; farq $2,4 mln. Bu moliyaviy vositachilikdir."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-051",
+    "n": 51,
+    "d": "medium",
+    "sec": 155,
+    "k": "B",
+    "en": "A displaced textile worker has qualifications that no longer match local vacancies. After accredited nursing training, she becomes eligible for hospital jobs, while aggregate spending is unchanged. Which paired economic effects are most plausible?",
+    "ru": "Уволенный текстильщик не обладает квалификацией для открытых местных вакансий. После аккредитованного обучения сестринскому делу он получает право претендовать на работу в больнице; совокупные расходы не меняются. Какая пара экономических эффектов наиболее вероятна?",
+    "uz": "Ishdan bo‘shatilgan to‘qimachilik ishchisining malakasi mahalliy vakansiyalarga mos emas. Akkreditatsiyalangan hamshiralik kursidan keyin u shifoxona ishlariga mos bo‘ladi, yalpi xarajatlar o‘zgarmaydi. Qaysi ikki iqtisodiy ta’sir ehtimolli?",
+    "options_en": [
+      "Cyclical unemployment rises and human capital necessarily falls",
+      "Structural unemployment may fall as human capital becomes more relevant to vacancies",
+      "Frictional unemployment disappears permanently for all workers",
+      "The central bank must raise the money supply to validate the training"
+    ],
+    "options_ru": [
+      "Циклическая безработица растёт, человеческий капитал обязательно падает",
+      "Структурная безработица может снизиться благодаря навыкам, соответствующим вакансиям",
+      "Фрикционная безработица навсегда исчезает у всех работников",
+      "Центральный банк обязан увеличить денежную массу для обучения"
+    ],
+    "options_uz": [
+      "Davriy ishsizlik oshib, inson kapitali albatta kamayadi",
+      "Vakansiyaga mos malaka oshgani uchun tarkibiy ishsizlik kamayishi mumkin",
+      "Barcha ishchilarda friksion ishsizlik abadiy yo‘qoladi",
+      "Markaziy bank o‘qitish uchun pul massasini oshirishi shart"
+    ],
+    "why": [
+      "Training changes the supply of relevant skills and reduces the mismatch between workers and vacancies, potentially lowering structural unemployment without an AD boost.",
+      "Обучение повышает пригодность навыков для вакансий и может уменьшать структурную безработицу без стимулирования AD.",
+      "Ta’lim ko‘nikmani bo‘sh ishga moslashtirib, yalpi talab oshmasdan ham tarkibiy ishsizlikni kamaytirishi mumkin."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-054",
+    "n": 54,
+    "d": "medium",
+    "sec": 155,
+    "k": "D",
+    "en": "Labour demand is Ld=1500−30w and labour supply is Ls=600+20w, where w is hourly wage. The government sets an enforceable minimum wage of $20. Compared with the market-clearing wage, what are employment and excess labour supply at the minimum wage?",
+    "ru": "Спрос на труд Ld=1500−30w, предложение Ls=600+20w, где w — почасовая зарплата. Государство вводит обязательный минимум $20. Каковы занятость и избыточное предложение труда при этой ставке по сравнению с рыночным равновесием?",
+    "uz": "Mehnat talabi Ld=1500−30w, taklif Ls=600+20w, bunda w soatlik ish haqi. Davlat majburiy eng kam ish haqini $20 belgilaydi. Muvozanatga nisbatan shu ish haqida bandlik va ortiqcha mehnat taklifi qancha?",
+    "options_en": [
+      "Employment 1,000; excess supply zero",
+      "Employment 960; excess supply 40",
+      "Employment 900; excess supply zero",
+      "Employment 900; excess supply 100"
+    ],
+    "options_ru": [
+      "Занятость 1 000; избыточного предложения нет",
+      "Занятость 960; излишек 40",
+      "Занятость 900; избыточного предложения нет",
+      "Занятость 900; излишек 100"
+    ],
+    "options_uz": [
+      "Bandlik 1000; ortiqcha taklif nol",
+      "Bandlik 960; ortiqcha taklif 40",
+      "Bandlik 900; ortiqcha taklif nol",
+      "Bandlik 900; ortiqcha taklif 100"
+    ],
+    "why": [
+      "Market clearing gives 1500−30w=600+20w, w=18, L=960. At w=20, demand=900, supply=1000, so actual employment is 900 and excess supply 100.",
+      "Рынок: w=18, L=960. При минимуме w=20 спрос на труд 900, предложение 1 000; занято 900, излишек труда 100.",
+      "Muvozanatda w=18, L=960. w=20 da talab 900, taklif 1000; bandlik 900, ortiqcha taklif 100."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-058",
+    "n": 58,
+    "d": "medium",
+    "sec": 150,
+    "k": "C",
+    "en": "Eighty unemployed skilled workers live in a region with no suitable vacancies; another region has 100 matching vacancies. Each worker would gain $500 monthly income but face an extra $600 monthly housing and commuting cost if moving. A relocation grant offsets $200 of those costs monthly. Assume other conditions are unchanged. What is the net monthly incentive to move per worker?",
+    "ru": "В одном регионе 80 квалифицированных безработных и нет подходящих вакансий; в другом есть 100 соответствующих вакансий. Каждый после переезда получит дополнительно $500 в месяц, но расходы на жильё и дорогу увеличатся на $600. Субсидия на переезд компенсирует $200 этих расходов ежемесячно. При прочих равных каков чистый месячный стимул переехать для одного работника?",
+    "uz": "Bir hududda mos ish yo‘q, 80 nafar malakali ishsiz bor; boshqa hududda 100 mos vakansiya bor. Har ishchi ko‘chganda oyiga $500 ko‘proq topadi, lekin uy-joy va qatnov xarajati $600 oshadi. Ko‘chish granti oyiga $200 ni qoplaydi. Boshqa shartlar o‘zgarmasa, har ishchi uchun sof oylik rag‘bat qancha?",
+    "options_en": [
+      "−$100; relocation is still financially unattractive",
+      "+$500; mobility costs do not matter",
+      "+$100; support can make relocation financially attractive",
+      "+ $700; every vacant job must be filled"
+    ],
+    "options_ru": [
+      "−$100; переезд по-прежнему невыгоден",
+      "+$500; затраты мобильности не имеют значения",
+      "+$100; поддержка может сделать переезд выгодным",
+      "+$700; все вакансии обязательно заполнятся"
+    ],
+    "options_uz": [
+      "−$100; ko‘chish hali foydasiz",
+      "+$500; ko‘chish xarajati ahamiyatsiz",
+      "+$100; yordam ko‘chishni moliyaviy jozibador qilishi mumkin",
+      "+$700; barcha vakansiyalar albatta to‘ladi"
+    ],
+    "why": [
+      "Incremental monthly net benefit = higher pay $500 − higher expenses $600 + grant $200 = +$100. Mobility support can overcome a cost barrier, although not all workers must move.",
+      "Чистый месячный результат $500−$600+$200=+$100. Поддержка может устранить финансовый барьер, но не гарантирует переезд каждого.",
+      "Sof oylik natija $500−$600+$200=+$100. Yordam xarajat to‘sig‘ini yengishi mumkin, ammo barcha ishchi ko‘chishi shart emas."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-061",
+    "n": 61,
+    "d": "medium",
+    "sec": 150,
+    "k": "A",
+    "en": "A government compares two equally costly policies: one funds technical training and reliable transport links; the other provides a one-month rebate on household spending. Holding other factors constant, which distinction is most defensible?",
+    "ru": "Государство сравнивает две равные по стоимости меры: финансирование технической подготовки и надёжного транспорта либо разовую месячную скидку на покупки домохозяйств. При прочих равных какое различие наиболее обоснованно?",
+    "uz": "Davlat bir xil xarajatli ikki siyosatni solishtiradi: texnik malaka va ishonchli transportni moliyalashtirish yoki oilalarning bir oylik xaridiga chegirma berish. Boshqa sharoit o‘zgarmasa, qaysi farq eng asosli?",
+    "options_en": [
+      "Training and infrastructure can increase productive capacity over time; the rebate more directly boosts short-run spending",
+      "Both measures must shift long-run supply right by exactly the same amount",
+      "The rebate necessarily increases available skilled labour permanently",
+      "Infrastructure always reduces real output because its initial costs are positive"
+    ],
+    "options_ru": [
+      "Подготовка и инфраструктура способны увеличить производственный потенциал; скидка прежде всего стимулирует краткосрочные расходы",
+      "Обе меры обязательно одинаково сдвигают долгосрочное предложение",
+      "Скидка навсегда повышает квалификацию рабочей силы",
+      "Инфраструктура всегда снижает выпуск из-за первоначальных затрат"
+    ],
+    "options_uz": [
+      "Malaka va infratuzilma vaqt o‘tib salohiyatni oshirishi mumkin, chegirma esa ko‘proq qisqa muddatli xarajatni rag‘batlantiradi",
+      "Ikkalasi uzoq muddatli taklifni aynan teng siljitadi",
+      "Chegirma ishchilar malakasini doimiy oshiradi",
+      "Boshlang‘ich xarajati borligi uchun infratuzilma doim mahsulotni kamaytiradi"
+    ],
+    "why": [
+      "Skills and productive infrastructure primarily change supply capacity over time; a temporary consumer rebate operates mainly through short-term aggregate spending.",
+      "Навыки и инфраструктура могут повысить долгосрочный потенциал; временная скидка действует прежде всего через текущие расходы и AD.",
+      "Ko‘nikma va infratuzilma uzoq muddatli salohiyatni o‘zgartirishi mumkin; vaqtinchalik chegirma joriy ADga ta’sir qiladi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-066",
+    "n": 66,
+    "d": "medium",
+    "sec": 160,
+    "k": "B",
+    "en": "The labour force remains 1,250 people. Before an effective skills programme, 1,000 are employed; after, 1,100 are employed, with all new jobs going to previously unemployed members of the same labour force. What happens to the measured unemployment rate?",
+    "ru": "Численность рабочей силы остаётся 1 250 человек. До эффективной программы переподготовки заняты 1 000, после неё — 1 100; все новые рабочие места получают ранее безработные из той же рабочей силы. Как изменяется измеряемый уровень безработицы?",
+    "uz": "Ishchi kuchi 1250 kishi bo‘lib qoladi. Samarali malaka dasturigacha 1000 kishi ishlaydi, keyin 1100; yangi ishlarning barchasi shu ishchi kuchidagi avvalgi ishsizlarga tegadi. O‘lchanadigan ishsizlik darajasi qanday o‘zgaradi?",
+    "options_en": [
+      "From 20% to 20%",
+      "From 20% to 12%",
+      "From 12% to 20%",
+      "From 20% to 8%"
+    ],
+    "options_ru": [
+      "С 20% до 20%",
+      "С 20% до 12%",
+      "С 12% до 20%",
+      "С 20% до 8%"
+    ],
+    "options_uz": [
+      "20% dan 20% ga",
+      "20% dan 12% ga",
+      "12% dan 20% ga",
+      "20% dan 8% ga"
+    ],
+    "why": [
+      "Unemployed initially 1250−1000=250 (20%). Afterwards 1250−1100=150 (12%), a fall of eight percentage points.",
+      "Сначала безработных 250/1250=20%, после — 150/1250=12%. Снижение на 8 процентных пунктов.",
+      "Dastlab ishsizlar 250/1250=20%, keyin 150/1250=12%. Pasayish 8 foiz punkt."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-069",
+    "n": 69,
+    "d": "medium",
+    "sec": 165,
+    "k": "D",
+    "en": "A government expected 2,000 applicants for a subsidy of $50 each and set an initial budget of $100,000. Actual eligible take-up reaches 6,000 applicants with no change to the grant amount. By how much is the programme over budget, and what public-finance risk is illustrated?",
+    "ru": "Государство ожидало 2 000 заявителей на субсидию по $50 каждому и выделило $100 000. Фактически право на выплату получили 6 000 заявителей при неизменном размере субсидии. На сколько программа превышает бюджет и какой риск государственных финансов иллюстрирует?",
+    "uz": "Davlat har biriga $50 subsidiyaga 2000 ariza kutilib, $100 000 budjet ajratgan. Amalda subsidiya olish huquqiga ega 6000 arizachi bo‘ldi, miqdor o‘zgarmadi. Budjet qancha oshib ketadi va davlat moliyasida qanday xavfni ko‘rsatadi?",
+    "options_en": [
+      "$100,000; all forecasts were exact",
+      "$200,000; take-up uncertainty can crowd out other public services",
+      "$300,000; an overspend can never affect other programmes",
+      "$400,000; government debt must automatically vanish"
+    ],
+    "options_ru": [
+      "$100 000; прогноз был точным",
+      "$200 000; неопределённость участия способна вытеснить другие бюджетные услуги",
+      "$300 000; перерасход не влияет на другие программы",
+      "$400 000; госдолг автоматически исчезает"
+    ],
+    "options_uz": [
+      "$100 000; prognoz aniq edi",
+      "$200 000; talab noaniqligi boshqa davlat xizmatlarini siqib chiqarishi mumkin",
+      "$300 000; ortiqcha xarajat boshqa dasturga ta’sir qilmaydi",
+      "$400 000; davlat qarzi o‘z-o‘zidan yo‘qoladi"
+    ],
+    "why": [
+      "Actual subsidy spending 6,000×$50=$300,000 compared with $100,000 planned, an overspend of $200,000. Under a constrained budget, funding gaps may displace higher-priority services.",
+      "Фактические расходы 6 000×$50=$300 000 вместо $100 000: перерасход $200 000. При ограниченном бюджете могут пострадать другие услуги.",
+      "Amaldagi xarajat 6000×$50=$300 000, reja $100 000; ortiqcha $200 000. Cheklangan budjetda boshqa xizmatlar siqilishi mumkin."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-070",
+    "n": 70,
+    "d": "medium",
+    "sec": 155,
+    "k": "C",
+    "en": "A household holds an instantly accessible $3,000 cash buffer for unforeseen emergency bills instead of an insured savings account paying 4% interest annually. Assume no fees, tax or other effects. What is the annual interest opportunity cost of its liquidity choice and the motive for money holding?",
+    "ru": "Семья держит доступный в любой момент запас наличных $3 000 на непредвиденные расходы вместо застрахованного сберегательного счёта с доходностью 4% годовых. Комиссий, налогов и других эффектов нет. Какова годовая альтернативная стоимость ликвидности в виде потерянных процентов и каков мотив хранения денег?",
+    "uz": "Oila kutilmagan xarajat uchun darhol ishlatish mumkin bo‘lgan $3000 naqd zaxira saqlaydi, yiliga 4% beradigan sug‘urtalangan omonatga qo‘ymaydi. Komissiya, soliq va boshqa ta’sir yo‘q. Likvidlik tanlovining yillik yo‘qotilgan foiz qiymati va pul saqlash sababi qanday?",
+    "options_en": [
+      "$12; speculative motive",
+      "$3,000; transactions motive only",
+      "$120; precautionary motive",
+      "$120; proof that cash is an investment asset yielding 4%"
+    ],
+    "options_ru": [
+      "$12; спекулятивный мотив",
+      "$3 000; только трансакционный мотив",
+      "$120; мотив предосторожности",
+      "$120; доказательство доходности наличных 4%"
+    ],
+    "options_uz": [
+      "$12; spekulyativ sabab",
+      "$3000; faqat tranzaksiya sababi",
+      "$120; ehtiyotkorlik sababi",
+      "$120; naqd pul 4% daromadli aktiv ekanining isboti"
+    ],
+    "why": [
+      "Forgone interest=$3,000×0.04=$120 annually. The cash is held for unpredictable emergencies, a precautionary demand for money despite its opportunity cost.",
+      "Упущенные проценты $3 000×0,04=$120 в год. Наличные держат на непредвиденные расходы — мотив предосторожности.",
+      "Yo‘qotilgan foiz $3000×0,04=$120/yil. Pul kutilmagan ehtiyoj uchun saqlanmoqda — ehtiyotkorlik motivi."
+    ]
+  }
+]
