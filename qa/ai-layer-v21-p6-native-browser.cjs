@@ -232,8 +232,20 @@ async function run(){
  }finally{
   try{browser?.close()}catch{}
   child.kill("SIGKILL");
-  await Promise.race([new Promise(done=>child.once("exit",done)),delay(1000)]);
-  rmSync(dir,{recursive:true,force:true,maxRetries:3});
+  await Promise.race([new Promise(done=>child.once("exit",done)),delay(1700)]);
+  // Chrome helper processes may still write Default/ after the CDP parent
+  // terminates. Never turn a successful a11y/security check into a false
+  // failure because ephemeral OS cleanup needs a moment to finish.
+  let cleaned=false;
+  for(let attempt=0;attempt<15;attempt++){
+   try{rmSync(dir,{recursive:true,force:true,maxRetries:4,retryDelay:60});
+    cleaned=true;break;
+   }catch(err){
+    if(!["ENOTEMPTY","EBUSY","EPERM"].includes(err?.code))throw err;
+    await delay(150);
+   }
+  }
+  if(!cleaned)console.warn("P6_BROWSER_CLEANUP_WARNING: ephemeral Chromium profile will be removed by isolated CI runner");
  }
 }
 run().catch(e=>{console.error(e);process.exitCode=1;});
