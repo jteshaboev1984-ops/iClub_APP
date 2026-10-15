@@ -49,3 +49,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §108 correction: PostgreSQL INSERT token digest must be returned by SELECT CTE, not psql command-tag output; verify localhost issuer+claim end to end; QA only.
 
 2026-10-15 §108 final: normalize psql text-count assertion, run real concurrent independent worker-thread/psql claims against separate scratch PostgreSQL; strictly QA-only NO MERGE.
+
+2026-10-15 §108 full CI: two independent postgres claim workers must set PGAPPNAME=iclub_ai_v21_local_scratch for Docker-local scratch SQL guard; no real database/production. No merge.
