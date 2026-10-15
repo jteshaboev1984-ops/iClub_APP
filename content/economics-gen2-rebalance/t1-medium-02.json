@@ -145,9 +145,9 @@
     "d": "medium",
     "sec": 135,
     "k": "C",
-    "en": "Natural sunlight is freely available in a village, but purified bottled water must be produced, packaged and delivered using scarce resources. What is the most accurate classification in this setting?",
-    "ru": "Солнечный свет в деревне доступен без ограничений, а очищенную питьевую воду нужно производить, разливать и доставлять с использованием ограниченных ресурсов. Какова наиболее точная классификация в этой ситуации?",
-    "uz": "Qishloqda quyosh nuri erkin mavjud, ammo tozalangan ichimlik suvini ishlab chiqarish, qadoqlash va yetkazish uchun tanqis resurslar kerak. Ushbu sharoitda eng to‘g‘ri tasnif qaysi?",
+    "en": "A village has abundant untreated spring water available without a scarcity cost at the source, but a nearby city needs scarce labour, filters and vehicles to make and deliver safe drinking water. Which statement correctly interprets the status of water in these two settings?",
+    "ru": "В деревне необработанная родниковая вода доступна у источника без альтернативной стоимости, но соседнему городу нужны ограниченные труд, фильтры и транспорт, чтобы очищать и доставлять безопасную воду. Какое утверждение правильно описывает экономический статус воды в двух условиях?",
+    "uz": "Qishloqda buloqning tozalanmagan suvi manbada tanqislik xarajatisiz mavjud, ammo yaqin shaharga xavfsiz suvni tozalash va yetkazish uchun cheklangan mehnat, filtr hamda transport kerak. Ikki sharoitda suvning iqtisodiy maqomi qanday?",
     "opt_en": [
       "Both are free goods because neither is manufactured by consumers.",
       "Bottled water is a free good because water is a natural substance.",
@@ -167,28 +167,28 @@
       "Quyosh nuri faqat harorat oshganda iqtisodiy ne’mat bo‘ladi."
     ],
     "why": [
-      "The relevant difference is scarcity and opportunity cost of resources used, not whether the substance exists naturally.",
-      "Ключевой критерий — ограниченность и альтернативная стоимость используемых ресурсов, а не природное происхождение вещества.",
-      "Asosiy mezon resurs tanqisligi va muqobil qiymati; moddaning tabiiy kelib chiqishi emas."
+      "Scarcity and opportunity cost depend on the setting and production process: treating and delivering safe water uses scarce inputs, even when raw water at its source is abundant.",
+      "Ограниченность зависит от условий: очистка и доставка безопасной воды расходуют редкие ресурсы, даже если исходная вода у источника изобильна.",
+      "Tanqislik sharoitga bog‘liq: suvni tozalash va yetkazish cheklangan resurslarni ishlatadi, manbadagi xom suv mo‘l bo‘lsa ham."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-035",
     "options_en": [
-      "Both are free goods because neither is manufactured by consumers.",
-      "Bottled water is a free good because water is a natural substance.",
-      "Sunlight is free in this setting; delivered bottled water is an economic good.",
-      "Sunlight is an economic good only if the temperature rises."
+      "Water is always a free good regardless of treatment or delivery.",
+      "Only the city’s water is a free good because it is sold.",
+      "Water at the village source may be free, while delivered safe water in the city is an economic good.",
+      "Water at the village source becomes an economic good solely because the city exists."
     ],
     "options_ru": [
-      "Оба являются свободными благами, потому что потребители их не производят.",
-      "Бутилированная вода — свободное благо, поскольку вода природного происхождения.",
-      "Солнечный свет здесь — свободное благо, доставленная вода — экономическое благо.",
-      "Солнечный свет становится экономическим благом только при повышении температуры."
+      "Вода всегда свободное благо, независимо от очистки и доставки.",
+      "Только городская вода свободна, поскольку продаётся.",
+      "Вода у деревенского источника может быть свободным благом, а доставленная безопасная вода в городе — экономическим.",
+      "Вода у деревенского источника становится экономическим благом лишь потому, что существует город."
     ],
     "options_uz": [
-      "Ikkalasi erkin ne’mat, chunki iste’molchilar ularni yaratmagan.",
-      "Shisha suv erkin ne’mat, chunki suv tabiiy modda.",
-      "Quyosh nuri bu sharoitda erkin, yetkazilgan ichimlik suvi esa iqtisodiy ne’mat.",
-      "Quyosh nuri faqat harorat oshganda iqtisodiy ne’mat bo‘ladi."
+      "Suv tozalash yoki yetkazishdan qat’i nazar har doim erkin ne’mat.",
+      "Faqat shahardagi suv erkin ne’mat, chunki u sotiladi.",
+      "Qishloq manbasidagi suv erkin bo‘lishi mumkin, shaharga yetkazilgan xavfsiz suv esa iqtisodiy ne’mat.",
+      "Shahar mavjudligi sababli qishloq manbasidagi suv ham avtomatik iqtisodiy ne’mat bo‘ladi."
     ]
   },
   {
