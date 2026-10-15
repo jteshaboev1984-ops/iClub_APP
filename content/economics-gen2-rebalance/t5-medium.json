@@ -1,0 +1,266 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-034",
+    "n": 34,
+    "d": "medium",
+    "sec": 155,
+    "k": "C",
+    "en": "A pension programme changes from voluntary sign-up to automatic enrolment with a simple, free opt-out. Contribution rates, investment options and wages remain unchanged. Which explanation best describes a possible increase in enrolment?",
+    "ru": "Пенсионная программа переходит от добровольной подачи заявления к автоматическому подключению с простым и бесплатным отказом. Размер взносов, варианты инвестиций и зарплаты неизменны. Что лучше объясняет возможный рост участия?",
+    "uz": "Pensiya dasturi ixtiyoriy ro‘yxatdan o‘tishdan bepul va oson rad etish huquqi bilan avtomatik qo‘shishga o‘tadi. Badal, investitsiya tanlovi va ish haqi o‘zgarmaydi. Ishtirok oshishini qaysi omil yaxshiroq tushuntiradi?",
+    "options_en": [
+      "The legal right to opt out is removed",
+      "The government directly raises every worker's income",
+      "A changed default can exploit inertia while preserving choice",
+      "The opportunity cost of all consumption becomes zero"
+    ],
+    "options_ru": [
+      "Право отказаться отменяется",
+      "Государство непосредственно повышает доход всех работников",
+      "Изменение варианта по умолчанию учитывает инерцию выбора, сохраняя свободу решения",
+      "Альтернативная стоимость любого потребления становится нулевой"
+    ],
+    "options_uz": [
+      "Rad etish huquqi bekor qilinadi",
+      "Davlat barcha ishchilar daromadini bevosita oshiradi",
+      "Standart tanlov o‘zgarib, odatiy inersiyaga ta’sir qiladi, ammo tanlash erkinligi saqlanadi",
+      "Har qanday iste’molning muqobil qiymati nolga tushadi"
+    ],
+    "why": [
+      "Automatic enrolment changes the default, so some inert workers remain signed up, but the opt-out preserves freedom. No wage or price change is needed.",
+      "Автоматическое подключение меняет настройку по умолчанию: часть пассивных работников остаётся участниками при сохранении права отказа.",
+      "Avtomatik qo‘shilish standart tanlovni o‘zgartiradi, ayrim passiv ishchilar qatnashib qoladi, rad etish erkinligi saqlanadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-051",
+    "n": 51,
+    "d": "medium",
+    "sec": 145,
+    "k": "B",
+    "en": "A remote village lacks a private clinic because a small population makes user fees insufficient to cover fixed operating costs. The government funds a local clinic providing essential vaccinations. Which pair correctly describes the access problem and policy response?",
+    "ru": "В отдалённой деревне нет частной клиники: из-за малочисленности населения платежи пациентов не покрывают постоянные расходы. Государство финансирует местную клинику для базовой вакцинации. Какая пара верно описывает проблему доступности и решение?",
+    "uz": "Olis qishloqda xususiy klinika yo‘q, chunki aholi kam va bemor to‘lovi doimiy xarajatni qoplamaydi. Davlat zarur emlash uchun mahalliy klinikani moliyalashtiradi. Kirish muammosi va siyosiy javobning to‘g‘ri juftligi qaysi?",
+    "options_en": [
+      "Excess private competition; export subsidy",
+      "Low commercial viability and geographic access; direct public provision",
+      "A binding export quota; currency intervention",
+      "Excessively high private vaccination demand; price ceiling"
+    ],
+    "options_ru": [
+      "Избыточная частная конкуренция; экспортная субсидия",
+      "Низкая коммерческая окупаемость и территориальный барьер; прямое государственное предоставление",
+      "Ограничение экспорта; валютная интервенция",
+      "Избыточный частный спрос на прививки; потолок цен"
+    ],
+    "options_uz": [
+      "Ortiqcha xususiy raqobat; eksport subsidiyasi",
+      "Tijoriy rentabellik pastligi va hududiy to‘siq; davlatning bevosita xizmat ko‘rsatishi",
+      "Eksport kvotasi; valuta aralashuvi",
+      "Ortiqcha emlash talabi; narx chegarasi"
+    ],
+    "why": [
+      "Low-density demand may not cover clinic fixed costs despite medical needs. Public provision directly finances local access, although efficiency still requires evaluation.",
+      "Малый рынок может не покрывать постоянные затраты клиники. Государственное предоставление расширяет территориальную доступность, однако эффективность требует оценки.",
+      "Aholi kam bo‘lganda klinika doimiy xarajatlarini qoplash qiyin. Davlat xizmati hududiy kirishni kengaytiradi, lekin samaradorlik baholanishi kerak."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-054",
+    "n": 54,
+    "d": "medium",
+    "sec": 160,
+    "k": "D",
+    "en": "A firm's labour supply schedule is Ls=5+2w, where L is worker-hours and w is hourly pay. The firm raises the offered wage from $10 to $13, and workers' preferences do not shift. What is the modelled change in worker-hours supplied, and is it a movement along or shift of the supply curve?",
+    "ru": "Предложение труда фирме задано Ls=5+2w, где L — человеко-часы, w — почасовая оплата. Фирма повышает ставку с $10 до $13, предпочтения работников не меняются. На сколько увеличатся предлагаемые часы и будет ли это движение вдоль кривой или её сдвиг?",
+    "uz": "Firmaga mehnat taklifi Ls=5+2w, bunda L ishchi-soat, w soatlik ish haqi. Firma ish haqini $10 dan $13 ga oshiradi, ishchilar afzalligi o‘zgarmaydi. Taklif etilgan soatlar qanchaga o‘zgaradi va bu egri chiziq bo‘ylab harakatmi yoki siljishmi?",
+    "options_en": [
+      "+3 hours; rightward shift",
+      "−6 hours; movement along",
+      " +6 hours; rightward shift",
+      " +6 hours; movement along existing labour supply"
+    ],
+    "options_ru": [
+      "+3 часа; сдвиг вправо",
+      "−6 часов; движение вдоль",
+      " +6 часов; сдвиг вправо",
+      " +6 часов; движение вдоль существующей кривой предложения труда"
+    ],
+    "options_uz": [
+      "+3 soat; o‘ngga siljish",
+      "−6 soat; chiziq bo‘ylab harakat",
+      " +6 soat; o‘ngga siljish",
+      " +6 soat; mavjud mehnat taklifi chizig‘i bo‘ylab harakat"
+    ],
+    "why": [
+      "At w=10, L=25; at w=13, L=31, a rise of six hours. Since only wage changes, the movement is along the original supply curve.",
+      "При w=10 предложение 25 часов, при w=13 — 31; увеличение на 6 часов. Меняется только ставка, поэтому движение вдоль прежней кривой.",
+      "w=10 da L=25, w=13 da L=31, 6 soat ko‘payadi. Faqat ish haqi o‘zgargani uchun mavjud egri chiziq bo‘ylab harakat."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-061",
+    "n": 61,
+    "d": "medium",
+    "sec": 155,
+    "k": "C",
+    "en": "Solar-panel orders rise, increasing installers' expected marginal revenue product, while a vocational college simultaneously qualifies more electricians. In a competitive labour market, what can be predicted about employment and wages if both labour demand and labour supply shift right?",
+    "ru": "Заказы на солнечные панели растут, увеличивая ожидаемую MRP установщиков. Одновременно профессиональный колледж выпускает больше квалифицированных электриков. На конкурентном рынке труда спрос и предложение труда сдвигаются вправо. Каков наиболее обоснованный прогноз занятости и зарплаты?",
+    "uz": "Quyosh panellari buyurtmalari oshib, o‘rnatuvchilar MRP sini oshiradi. Shu payt kasb kolleji ko‘proq elektrchi tayyorlaydi. Raqobatli mehnat bozorida talab ham, taklif ham o‘ngga siljiydi. Bandlik va ish haqi haqida qanday ishonchli xulosa qilish mumkin?",
+    "options_en": [
+      "Employment falls and wage necessarily rises",
+      "Employment unchanged and wage necessarily falls",
+      "Employment rises, while the wage change is uncertain without shift magnitudes",
+      "Both employment and wages must fall"
+    ],
+    "options_ru": [
+      "Занятость падает, зарплата обязательно растёт",
+      "Занятость неизменна, зарплата обязательно падает",
+      "Занятость растёт, изменение зарплаты неоднозначно без размеров сдвигов",
+      "Занятость и зарплата обязательно падают"
+    ],
+    "options_uz": [
+      "Bandlik kamayadi, ish haqi albatta oshadi",
+      "Bandlik o‘zgarmaydi, ish haqi albatta tushadi",
+      "Bandlik oshadi, ish haqi yo‘nalishi siljish kattaligiga bog‘liq",
+      "Bandlik va ish haqi albatta kamayadi"
+    ],
+    "why": [
+      "Demand expansion and supply expansion both raise equilibrium labour quantity under usual slopes. Their opposing wage effects leave the wage direction indeterminate.",
+      "Рост спроса и предложения труда повышает равновесную занятость при обычных наклонах кривых. Влияние на зарплату направлено противоположно.",
+      "Talab va taklifning kengayishi odatdagi egri chiziqlarda bandlikni oshiradi. Ish haqiga ta’sirlari qarama-qarshi, natija noaniq."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-063",
+    "n": 63,
+    "d": "medium",
+    "sec": 150,
+    "k": "B",
+    "en": "Applicants to an occupation must now finish two years of compulsory training and obtain a licence. Existing qualified workers keep practising; employer demand and wages are initially fixed. Which short-run effect is most plausible?",
+    "ru": "Для входа в профессию теперь нужны двухлетнее обязательное обучение и лицензия. Уже квалифицированные работники продолжают работать; спрос работодателей и зарплата первоначально неизменны. Какой краткосрочный эффект наиболее вероятен?",
+    "uz": "Kasbga kirish uchun endi ikki yillik majburiy ta’lim va litsenziya kerak. Oldindan malakali ishchilar ishlashda davom etadi, ish beruvchi talabi va ish haqi dastlab o‘zgarmaydi. Qisqa muddatli eng ehtimolli ta’sir qanday?",
+    "options_en": [
+      "More newly qualified entrants can work immediately",
+      "Fewer new entrants can supply labour immediately, creating a temporary entry barrier",
+      "All existing workers lose legal jobs instantly",
+      "Product demand necessarily falls by the same percentage"
+    ],
+    "options_ru": [
+      "Больше новых специалистов сразу приступают к работе",
+      "Меньше новичков могут немедленно предложить труд; возникает временный барьер входа",
+      "Все прежние работники немедленно теряют работу",
+      "Спрос на продукт обязательно падает на тот же процент"
+    ],
+    "options_uz": [
+      "Yangi mutaxassislar darhol ko‘proq ishlaydi",
+      "Yangi kiruvchilar darhol kamroq mehnat taklif qiladi, vaqtinchalik kirish to‘sig‘i paydo bo‘ladi",
+      "Barcha amaldagi ishchilar darhol ishini yo‘qotadi",
+      "Mahsulot talabi albatta aynan shuncha foiz tushadi"
+    ],
+    "why": [
+      "The new training and licensing delay affects prospective entrants rather than automatically removing existing licensed workers, tightening short-run new supply.",
+      "Новые требования задерживают вход новичков, не увольняя автоматически уже квалифицированных работников. Краткосрочное предложение новых работников сокращается.",
+      "Yangi talablar bo‘lajak ishchilarning kirishini kechiktiradi, mavjud malakalilarni avtomatik chetlatmaydi. Qisqa muddatli yangi taklif kamayadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-066",
+    "n": 66,
+    "d": "medium",
+    "sec": 155,
+    "k": "D",
+    "en": "A country has 1,000 households, of which 200 fall below a defined poverty threshold. A fixed $200,000 transfer budget can be given equally to all households or only to those 200 households. What is the grant per household under each policy and the trade-off?",
+    "ru": "В стране 1 000 домохозяйств, из которых 200 находятся ниже установленной черты бедности. Бюджет трансфертов $200 000 можно равномерно распределить всем либо направить только этим 200 семьям. Какова выплата на домохозяйство при каждой схеме и в чём компромисс?",
+    "uz": "Mamlakatda 1000 xonadon bor, ulardan 200 tasi belgilangan kambag‘allik chegarasidan past. $200 000 transfert budjetini hammaga teng yoki faqat shu 200 xonadonga berish mumkin. Har biriga qanchadan beriladi va qanday muvozanatli tanlov mavjud?",
+    "options_en": [
+      "Universal $1,000; targeted $200; targeting is always costless",
+      "Universal $200; targeted $200; coverage is identical",
+      "Universal $200; targeted $1,000; universal transfers necessarily eliminate poverty",
+      "Universal $200; targeted $1,000; targeting concentrates help but needs eligibility decisions"
+    ],
+    "options_ru": [
+      "Всем $1 000; адресно $200; адресность всегда бесплатна",
+      "Всем $200; адресно $200; охват идентичен",
+      "Всем $200; адресно $1 000; универсальная схема обязательно устраняет бедность",
+      "Всем $200; адресно $1 000; адресная помощь концентрирует поддержку, но требует отбора"
+    ],
+    "options_uz": [
+      "Umumiy $1000; manzilli $200; tanlash har doim bepul",
+      "Umumiy $200; manzilli $200; qamrov bir xil",
+      "Umumiy $200; manzilli $1000; universal yordam kambag‘allikni albatta yo‘q qiladi",
+      "Umumiy $200; manzilli $1000; manzillilik ko‘makni jamlaydi, lekin tanlov talab qiladi"
+    ],
+    "why": [
+      "Universal payment is 200,000/1,000=$200 each; targeted is 200,000/200=$1,000 each. Targeting supports a smaller group more intensely but creates eligibility and exclusion risks.",
+      "Универсальная выплата $200 каждому, адресная — $1 000 на нуждающуюся семью. Адресность усиливает помощь, но требует отбора и несёт риск исключения.",
+      "Universal to‘lov har biriga $200, manzilli esa $1000. Manzillilik yordamni jamlaydi, ammo moslikni tekshirish va kimnidir chetda qoldirish xavfi bor."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-069",
+    "n": 69,
+    "d": "medium",
+    "sec": 155,
+    "k": "A",
+    "en": "A national absolute poverty line is $700 per month; the relative poverty threshold is 60% of a $1,500 median disposable income. A household earns $800 per month. Under these definitions, how is its poverty status classified?",
+    "ru": "Абсолютная черта бедности равна $700 в месяц; относительный порог установлен на уровне 60% медианного располагаемого дохода $1 500. Доход семьи $800 в месяц. Как классифицируется её положение по обоим определениям?",
+    "uz": "Mutlaq kambag‘allik chegarasi oyiga $700, nisbiy kambag‘allik chegarasi esa median ixtiyordagi daromad $1500 ning 60% i. Bir xonadon oyiga $800 topadi. Ushbu ikki ta’rif bo‘yicha uning holati qanday?",
+    "options_en": [
+      "Above the absolute line but below the $900 relative threshold",
+      "Below the absolute line but above the relative threshold",
+      "Below both lines because $800 is less than $1,500",
+      "Above both lines because relative poverty cannot exceed absolute poverty"
+    ],
+    "options_ru": [
+      "Выше абсолютной черты, но ниже относительного порога $900",
+      "Ниже абсолютной черты, но выше относительного порога",
+      "Ниже обеих, поскольку $800 меньше $1 500",
+      "Выше обеих, потому что относительный порог не может быть выше абсолютного"
+    ],
+    "options_uz": [
+      "Mutlaq chegaradan yuqori, ammo $900 nisbiy chegaradan past",
+      "Mutlaq chegaradan past, nisbiy chegaradan yuqori",
+      "Ikkalasidan past, chunki $800 $1500 dan kam",
+      "Ikkalasidan yuqori, chunki nisbiy chegara mutlaqdan katta bo‘lmaydi"
+    ],
+    "why": [
+      "Relative threshold =0.60×$1,500=$900. Income $800 is above the absolute $700 line but below the relative $900 line.",
+      "Относительный порог 0,60×$1 500=$900. Доход $800 выше абсолютной черты $700, но ниже относительной $900.",
+      "Nisbiy chegara 0,60×$1500=$900. $800 daromad mutlaq $700 dan yuqori, nisbiy $900 dan past."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-070",
+    "n": 70,
+    "d": "medium",
+    "sec": 160,
+    "k": "C",
+    "en": "A retirement app tests automatic enrolment with easy opt-out. Savings participation rises from 40% to 70%, but it provides no information on contribution amounts or whether users later remain enrolled. Which evaluation is best supported?",
+    "ru": "Приложение накоплений на пенсию проверяет автоматическое подключение с простым отказом. Доля участников выросла с 40% до 70%, но данных о суммах взносов и дальнейшей устойчивости участия нет. Какой вывод наиболее обоснован?",
+    "uz": "Pensiya jamg‘armasi ilovasi oson rad etish bilan avtomatik qo‘shilishni sinaydi. Ishtirok 40% dan 70% ga oshdi, ammo badal miqdori va keyingi davomiylik haqida ma’lumot yo‘q. Qaysi xulosa asosli?",
+    "options_en": [
+      "Retirement wealth certainly increased by 75% for every user",
+      "The change proves every user prefers to save more",
+      "A default can affect initial participation, but long-run savings outcomes require more evidence",
+      "Automatic enrolment has removed every financial constraint on saving"
+    ],
+    "options_ru": [
+      "Пенсионное богатство каждого пользователя обязательно выросло на 75%",
+      "Изменение доказывает желание каждого больше сберегать",
+      "Настройка по умолчанию влияет на первоначальное участие, но долгосрочные сбережения требуют дополнительных данных",
+      "Автоматическое подключение устранило все финансовые ограничения"
+    ],
+    "options_uz": [
+      "Har foydalanuvchining pensiya boyligi albatta 75% oshdi",
+      "Har bir foydalanuvchi ko‘proq jamg‘arishni xohlagani isbotlandi",
+      "Standart tanlov boshlang‘ich ishtirokka ta’sir qiladi, ammo uzoq muddatli natija uchun qo‘shimcha dalil kerak",
+      "Avtomatik qo‘shilish barcha moliyaviy cheklovni yo‘q qildi"
+    ],
+    "why": [
+      "Initial participation rose by 30 percentage points, consistent with a default effect. Contribution levels, persistence and actual retirement outcomes were not measured.",
+      "Первоначальное участие выросло на 30 процентных пунктов, что согласуется с влиянием варианта по умолчанию. Размеры взносов и долгосрочные результаты неизвестны.",
+      "Dastlabki ishtirok 30 foiz punktga oshdi, bu standart tanlov ta’siriga mos. Badal miqdori va uzoq muddatli natija noma’lum."
+    ]
+  }
+]

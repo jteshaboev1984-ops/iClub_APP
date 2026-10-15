@@ -18162,8 +18162,8 @@ try {
     // Economics Gen2 content has no authored difficulty ratings: never label all items "medium".
     // Retain established difficulty labels for other subjects without changing assessment logic.
     const ecoRef = String(q.book_ref || q.bookReference || "");
-    // T1–T4 Practice have individually reviewed difficulty levels; other Economics Gen2 remain unrated until editorial release.
-    const isUnratedEconomicsGen2 = ecoRef.startsWith("EC9708:G2:") && !/^EC9708:G2:EC9708-G2-T[1-4]-P-[0-9]{3}(?:-V2)?$/.test(ecoRef);
+    // T1–T5 Practice have individually reviewed difficulty levels; other Economics Gen2 remain unrated until editorial release.
+    const isUnratedEconomicsGen2 = ecoRef.startsWith("EC9708:G2:") && !/^EC9708:G2:EC9708-G2-T[1-5]-P-[0-9]{3}(?:-V2)?$/.test(ecoRef);
     if (!isUnratedEconomicsGen2) {
       const diff = document.createElement("div");
       diff.className = "muted small";
