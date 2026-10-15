@@ -68,36 +68,95 @@
     return q;
   }
   function answer(body) {
-    const lang=["ru","uz","en"].includes(body?.locale)?body.locale:"ru";
-    const key=String(body?.prompt_key||"");
-    const subject=String(body?.subject_key||"general");
-    const academic=subject!=="general";
-    const copies={
-      ru:{
-        subject:"Я вижу раздел выбранного предмета. Здесь можно открыть доступные уроки, Practice и Tours. Объяснение конкретной темы появится после подтверждения учебного материала и языка. В этом Preview данные и результаты не сохраняются.",
-        practice:"Practice предназначена для закрепления изученного материала. Во время выполнения заданий AI полностью скрывается. После завершённой проверки можно разобрать подтверждённые ошибки.",
-        tours:"Tours — соревновательный формат iClub. Во время тура AI недоступен. Обсуждение заданий возможно только после официального открытия архива.",
-        results:"Результаты находятся в соответствующих разделах Practice, Tours и профиле. В этом Preview нет настоящих оценок ученика.",
-        default:"Я могу помочь с навигацией по iClub: найти предмет, открыть доступный урок, объяснить правила Practice и Tours. Подтверждённых учебных результатов в этом тестовом просмотре нет."
+    const lang = ["ru","uz","en"].includes(body?.locale) ? body.locale : "ru";
+    const screen = String(body?.screen_code||"");
+    const key = String(body?.prompt_key||"").toLowerCase();
+    const typed = String(body?.user_text||"").trim();
+    const subject = String(body?.subject_key||"general");
+    const copy = {
+      ru: {
+        rules:"Practice помогает закреплять материал. Перед началом выберите доступную практику. Во время решения вопросов AI будет полностью скрыт, чтобы не подсказывать ответы.",
+        after:"Разбор ошибок возможен только после завершения всей практики и подтверждения результата сервером. Во время ответов AI не помогает.",
+        result:"В этом тестовом Preview нет подтверждённого результата завершённой Practice. Я не могу назвать ваш балл, ошибки или причины. Для настоящего разбора потребуется проверенная завершённая сессия.",
+        error:"В этом Preview нет подтверждённого завершённого вопроса Practice. Чтобы объяснить конкретную ошибку, нужен проверенный идентификатор вопроса, ответ ученика и итог завершённой сессии.",
+        next:"После реальной Practice откройте результат, затем разбор ошибок и повторите сложную тему. Здесь это только демонстрация интерфейса: личный следующий шаг недоступен.",
+        tours:"Во время активного тура AI недоступен. Он может объяснить правила, но разбор заданий разрешён лишь после официального открытия архива.",
+        archive:"В Preview нет подтверждения открытия архива конкретного тура. AI не раскрывает вопросы или правильные ответы до разрешённой даты.",
+        subject:"В выбранном предмете доступны разделы обучения, Practice и Tours в зависимости от доступа. Этот тестовый AI не подтверждает освоение темы и не меняет ваш прогресс.",
+        catalog:"Откройте Study, выберите доступный предмет и зайдите в его уроки или Practice. Это тестовый профиль без реальных учебных результатов.",
+        study:"Откройте доступный урок, изучите объяснение, затем закрепите знания в Practice. AI сможет разбирать конкретную тему только с подтверждённым учебным источником.",
+        home:"Я не вижу подтверждённый прогресс настоящего ученика в этом Preview, поэтому не буду выдумывать персональную рекомендацию. Для знакомства с приложением откройте Study и выберите предмет.",
+        profile:"В этом Preview показатели учебного прогресса не подтверждены сервером. Я могу объяснить назначение раздела, но не могу оценить вашу готовность или изменить результат.",
+        topic:"В Preview у AI нет проверенного материала текущего урока. Откройте сам урок; объяснение точной темы станет доступно после подключения утверждённого источника.",
+        general:"Это безопасный Preview интерфейса iClub AI. Я могу объяснять навигацию, правила Practice и Tours, но здесь нет генерации по учебным материалам и доступа к реальным оценкам.",
+        custom:"Это тестовый AI с ограниченными готовыми ответами, а не полноценный Tutor. На произвольный учебный вопрос я не буду выдумывать объяснение без подтверждённой темы и источника."
       },
-      uz:{
-        subject:"Men tanlangan fan bo‘limini ko‘ryapman. Bu yerdan mavjud darslar, Practice va Tours bo‘limlariga o‘tish mumkin. Muayyan mavzuni tushuntirish o‘quv manbasi va til tasdiqlangandan keyin mavjud bo‘ladi. Bu Preview natijalarni saqlamaydi.",
-        practice:"Practice o‘rganilgan mavzularni mustahkamlash uchun. Savollarni yechish paytida AI butunlay yashiriladi. Mashg‘ulot tugagach, tasdiqlangan xatolarni tahlil qilish mumkin.",
-        tours:"Tours — iClub musobaqalari. Tur davomida AI mavjud emas. Savollarni faqat arxiv rasmiy ochilgach muhokama qilish mumkin.",
-        results:"Natijalar Practice, Tours va profil bo‘limlarida ko‘rsatiladi. Bu Previewda haqiqiy o‘quvchi baholari yo‘q.",
-        default:"Men iClub bo‘limlari bo‘yicha yordam bera olaman: fan tanlash, darsga o‘tish, Practice va Tours qoidalarini tushuntirish. Bu sinovda tasdiqlangan shaxsiy natijalar yo‘q."
+      uz: {
+        rules:"Practice mavzularni mustahkamlashga yordam beradi. Savollarni yechish paytida AI butunlay yashiriladi va javobga yordam bermaydi.",
+        after:"Xatolarni faqat Practice to‘liq yakunlanib, natija serverda tasdiqlangandan keyin ko‘rib chiqish mumkin.",
+        result:"Bu sinov Previewda Practice bo‘yicha tasdiqlangan yakuniy natija yo‘q. Men baho yoki xatolarni to‘qib chiqarmayman.",
+        error:"Bu Previewda tasdiqlangan yakuniy savol va javob yo‘q. Aniq xatoni tushuntirish uchun tekshirilgan savol va yakunlangan natija kerak.",
+        next:"Haqiqiy Practice'dan keyin natija va xatolar tahlilini oching. Bu Preview shaxsiy o‘quv tavsiyasini bermaydi.",
+        tours:"Tur davomida AI mavjud emas. Savollar faqat arxiv rasmiy ochilgandan keyin tahlil qilinadi.",
+        archive:"Bu Previewda aniq tur arxivi ochilgani tasdiqlanmagan. AI yopiq savollarni ko‘rsatmaydi.",
+        subject:"Tanlangan fan ichida darslar, Practice va Tours mavjud bo‘lishi mumkin. Bu test AI o‘zlashtirish darajasini o‘zgartirmaydi.",
+        catalog:"Study bo‘limini oching, mavjud fanni tanlang va darslarga o‘ting. Bu test profilda haqiqiy natijalar yo‘q.",
+        study:"Mavjud darsni o‘rganing, keyin Practice bilan mustahkamlang. AI aniq mavzuni faqat tasdiqlangan manbadan tushuntiradi.",
+        home:"Bu Previewda haqiqiy o‘quvchi natijalari tasdiqlanmagan. Shaxsiy tavsiya to‘qib chiqarmayman. Study bo‘limini ochishingiz mumkin.",
+        profile:"Bu Previewda shaxsiy natijalar server tomonidan tasdiqlanmagan. Ularni baholay olmayman va o‘zgartirmayman.",
+        topic:"Bu Previewda joriy dars uchun tasdiqlangan manba yo‘q. Aniq tushuntirish keyinroq mavjud bo‘ladi.",
+        general:"Bu iClub AI interfeysining xavfsiz sinov Previewidir. Men navigatsiya va qoidalarni tushuntiraman, haqiqiy natijalarni o‘qimayman.",
+        custom:"Bu cheklangan tayyor javobli sinov AI. Tasdiqlangan manbasiz o‘quv savoliga javob to‘qib chiqarmayman."
       },
-      en:{
-        subject:"I can see the selected subject area. You can explore available lessons, Practice and Tours. Explanation of a specific topic requires an approved source and language. This Preview never saves academic results.",
-        practice:"Practice helps reinforce learning. AI is completely hidden while questions are active. Verified errors can be discussed after the full practice is finalized.",
-        tours:"Tours are iClub competitions. AI is unavailable during a Tour. Questions may only be discussed after the archive is officially released.",
-        results:"Results appear in the relevant Practice, Tours and profile sections. This Preview contains no genuine student scores.",
-        default:"I can help you navigate iClub, find subjects, open lessons and understand Practice and Tours. No verified personal academic results exist in this test Preview."
+      en: {
+        rules:"Practice reinforces learning. While questions are active, AI is fully hidden and cannot supply answers.",
+        after:"Mistakes can be discussed only after the full Practice is finished and the result is confirmed by the server.",
+        result:"This Preview has no server-confirmed completed Practice result. I cannot claim a score, mistake or reason without proof.",
+        error:"This Preview has no confirmed completed Practice question and answer. Explaining a specific mistake requires verified question and finalized attempt identifiers.",
+        next:"After actual Practice, open the result, review verified mistakes and revisit the relevant lesson. This Preview cannot choose a personal next step.",
+        tours:"AI is unavailable during an active Tour. Question reviews are allowed only after the archive is officially opened.",
+        archive:"This Preview cannot verify that a specific Tour archive is open, so it cannot disclose questions or answer keys.",
+        subject:"The selected subject offers Lessons, Practice and Tours where permitted. This preview AI does not change mastery or progress.",
+        catalog:"Open Study, select an available subject and navigate to lessons or Practice. This synthetic profile contains no genuine academic results.",
+        study:"Study an available lesson and then reinforce it in Practice. A specific-topic explanation requires an approved source.",
+        home:"I have no verified learner progress in this Preview, so I cannot invent a personal recommendation. Explore a subject under Study.",
+        profile:"No personal progress indicators in this Preview are verified by the server. I cannot assess readiness or modify results.",
+        topic:"There is no verified source for the current lesson in this Preview. Topic-specific explanations require approved material.",
+        general:"This is a safe iClub AI interface Preview. I can describe navigation and rules, but not generate real academic explanations or access scores.",
+        custom:"This test AI has a small set of prepared replies, not a full Tutor. I will not invent answers to arbitrary academic questions."
       }
+    }[lang];
+    if (["practice-quiz","tour-quiz"].includes(screen)) return {
+      ok:false, reason:"active_assessment",academic_state_changed:false
     };
-    const c=copies[lang];
-    const message=academic?c.subject:/practice/i.test(key)?c.practice:/tour/i.test(key)?c.tours:/result/i.test(key)?c.results:c.default;
-    return {ok:true,message,academic_state_changed:false,usage_exhausted:false,mode:"qa_prepared"};
+    const response=(message,ok=true,reason="")=>({
+      ok,reason,message,academic_state_changed:false,
+      usage_exhausted:false,mode:"qa_prepared"
+    });
+    if (key==="practice_rules" || key==="app_help_practice") return response(copy.rules);
+    if (key==="practice_after") return response(copy.after);
+    if (key==="practice_result") return response(copy.result,false,"qa_no_verified_result");
+    if (key==="practice_error") return response(copy.error,false,"qa_no_verified_question");
+    if (key==="practice_next") return response(copy.next);
+    if (key==="tour_rules" || key==="app_help_tours") return response(copy.tours);
+    if (key==="tour_archive") return response(copy.archive);
+    if (key==="subject_study") return response(copy.subject);
+    if (key==="catalog_help") return response(copy.catalog);
+    if (key==="topic_study" || key.startsWith("topic_")) return response(copy.topic,false,"qa_no_approved_topic");
+    if (key==="home_next") return response(copy.home);
+    if (key==="profile_meaning") return response(copy.profile);
+    if (key==="app_help_results") return response(copy.profile);
+    if (typed) return response(copy.custom);
+    if (["practice-result","practice-review"].includes(screen))
+      return response(screen==="practice-result"?copy.result:copy.error,false,"qa_no_verified_evidence");
+    if (["practice-start","practice-recs"].includes(screen)) return response(copy.rules);
+    if (["tours","tour-rules","tour-result","tour-review"].includes(screen)) return response(copy.tours);
+    if (["lessons","video"].includes(screen)) return response(copy.topic,false,"qa_no_approved_topic");
+    if (screen==="subject-hub") return response(copy.subject);
+    if (screen==="home") return response(copy.home);
+    if (screen==="profile") return response(copy.profile);
+    if (screen==="all-subjects") return response(copy.catalog);
+    return response(subject==="general"?copy.general:copy.subject);
   }
   const client={
     auth:{
