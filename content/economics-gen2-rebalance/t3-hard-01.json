@@ -20,16 +20,16 @@
       "90 units; $900"
     ],
     "options_ru": [
-      "80 units; $800",
-      "60 units; $600",
-      "40 units; $400",
-      "90 units; $900"
+      "80 единиц; $800",
+      "60 единиц; $600",
+      "40 единиц; $400",
+      "90 единиц; $900"
     ],
     "options_uz": [
-      "80 units; $800",
-      "60 units; $600",
-      "40 units; $400",
-      "90 units; $900"
+      "80 birlik; $800",
+      "60 birlik; $600",
+      "40 birlik; $400",
+      "90 birlik; $900"
     ]
   },
   {
@@ -53,16 +53,16 @@
       "From 80 to 83.8; improvement"
     ],
     "options_ru": [
-      "From 80 to 76.2; deterioration",
-      "From 125 to 130.9; improvement",
-      "From 80 to 88.0; improvement",
-      "From 80 to 83.8; improvement"
+      "С 80 до 76,2; ухудшение",
+      "Со 125 до 130,9; улучшение",
+      "С 80 до 88,0; улучшение",
+      "С 80 до 83,8; улучшение"
     ],
     "options_uz": [
-      "From 80 to 76.2; deterioration",
-      "From 125 to 130.9; improvement",
-      "From 80 to 88.0; improvement",
-      "From 80 to 83.8; improvement"
+      "80 dan 76,2 ga; yomonlashish",
+      "125 dan 130,9 ga; yaxshilanish",
+      "80 dan 88,0 ga; yaxshilanish",
+      "80 dan 83,8 ga; yaxshilanish"
     ]
   },
   {
@@ -86,16 +86,16 @@
       "Price +20%; receipts −4%"
     ],
     "options_ru": [
-      "Price −20%; receipts +20%",
-      "Price −20%; receipts −20%",
-      "Price −20%; receipts −4%",
-      "Price +20%; receipts −4%"
+      "Цена −20%; выручка +20%",
+      "Цена −20%; выручка −20%",
+      "Цена −20%; выручка −4%",
+      "Цена +20%; выручка −4%"
     ],
     "options_uz": [
-      "Price −20%; receipts +20%",
-      "Price −20%; receipts −20%",
-      "Price −20%; receipts −4%",
-      "Price +20%; receipts −4%"
+      "Narx −20%; tushum +20%",
+      "Narx −20%; tushum −20%",
+      "Narx −20%; tushum −4%",
+      "Narx +20%; tushum −4%"
     ]
   },
   {
@@ -152,16 +152,16 @@
       "Increased by 24 million; appreciation"
     ],
     "options_ru": [
-      "Увеличился by 12 миллионов; ослабление",
-      "Снизился by 12 миллионов; укрепление",
-      "Снизился by 500,000; ослабление",
-      "Увеличился by 24 миллионов; укрепление"
+      "Платёж вырос на 12 млн; обесценение",
+      "Платёж снизился на 12 млн; укрепление",
+      "Платёж снизился на 500 000; обесценение",
+      "Платёж вырос на 24 млн; укрепление"
     ],
     "options_uz": [
-      "Oshdi by 12 million; qadrsizlanish",
-      "Kamaydi by 12 million; qadrlanish",
-      "Kamaydi by 500,000; qadrsizlanish",
-      "Oshdi by 24 million; qadrlanish"
+      "To‘lov 12 mln ga oshdi; qadrsizlanish",
+      "To‘lov 12 mln ga kamaydi; qadrlanish",
+      "To‘lov 500 000 ga kamaydi; qadrsizlanish",
+      "To‘lov 24 mln ga oshdi; qadrlanish"
     ]
   },
   {
@@ -185,16 +185,16 @@
       "Debt rises to $960m; ratio falls from 50% to about 48.5%"
     ],
     "options_ru": [
-      "Долг увеличивается до $960m; доля растёт to 53.3%",
-      "Долг остаётся $900m; доля падает to 45.5%",
-      "Долг снижается до $840m; доля падает to 42.4%",
-      "Долг увеличивается до $960m; доля падает from 50% to about 48.5%"
+      "Долг $960 млн; доля выросла до 53,3%",
+      "Долг $900 млн; доля снизилась до 45,5%",
+      "Долг $840 млн; доля снизилась до 42,4%",
+      "Долг $960 млн; доля снизилась с 50% примерно до 48,5%"
     ],
     "options_uz": [
-      "Qarz oshib $960m; ulush oshadi to 53.3%",
-      "Qarz o‘zgarmay $900m; ulush pasayadi to 45.5%",
-      "Qarz kamayib $840m; ulush pasayadi to 42.4%",
-      "Qarz oshib $960m; ulush pasayadi from 50% to about 48.5%"
+      "Qarz $960 mln; ulush 53,3% gacha oshdi",
+      "Qarz $900 mln; ulush 45,5% ga tushdi",
+      "Qarz $840 mln; ulush 42,4% ga tushdi",
+      "Qarz $960 mln; ulush 50% dan taxminan 48,5% ga tushdi"
     ]
   },
   {
@@ -218,16 +218,16 @@
       "+$110; the project cannot be publicly funded"
     ],
     "options_ru": [
-      "−$30; excess private supply",
+      "−$30; избыточное частное предложение",
       "+$30; безбилетники могут сорвать добровольное финансирование",
-      "+$140; voluntary provision is guaranteed",
-      "+$110; the project cannot be publicly funded"
+      "+$140; добровольное обеспечение гарантировано",
+      "+$110; бюджетное финансирование невозможно"
     ],
     "options_uz": [
-      "−$30; excess private supply",
-      "+$30; tekin foydalanish ixtiyoriy moliyalashtirishni to‘xtatishi mumkin",
-      "+$140; voluntary provision is guaranteed",
-      "+$110; the project cannot be publicly funded"
+      "−$30; ortiqcha xususiy taklif",
+      "+$30; tekin foydalanish ixtiyoriy moliyalashtirishga to‘sqinlik qilishi mumkin",
+      "+$140; ixtiyoriy ta’minot kafolatlangan",
+      "+$110; davlat moliyalashtirishi mumkin emas"
     ]
   },
   {
@@ -251,16 +251,16 @@
       "Rises by 60%; higher unit costs restrict supply"
     ],
     "options_ru": [
-      "Растёт by 10%; предложение снижается",
-      "Снижается by 12.5%; потенциал обязательно падает",
-      "Снижается by 31.25%; greater может повыситься ценовая конкурентоспособность",
-      "Растёт by 60%; затраты ограничивают предложение"
+      "Растут на 10%; предложение сокращается",
+      "Падают на 12,5%; потенциал обязательно снижается",
+      "Падают на 31,25%; конкурентоспособность может повыситься",
+      "Растут на 60%; рост издержек ограничивает предложение"
     ],
     "options_uz": [
-      "Oshadi by 10%; taklif kamayadi",
-      "Kamayadi by 12.5%; quvvat albatta kamayadi",
-      "Kamayadi by 31.25%; greater xarajat raqobatbardoshligi yaxshilanishi mumkin",
-      "Oshadi by 60%; birlik xarajatlar taklifni cheklaydi"
+      "10% ga oshadi; taklif kamayadi",
+      "12,5% ga kamayadi; salohiyat albatta pasayadi",
+      "31,25% ga kamayadi; raqobatbardoshlik oshishi mumkin",
+      "60% ga oshadi; xarajat taklifni cheklaydi"
     ]
   },
   {
@@ -286,14 +286,14 @@
     "options_ru": [
       "A — ткань, B — зерно; 3 мешка за метр",
       "A — зерно, B — ткань; 3 мешка за метр",
-      "A — зерно, B — ткань; 1.5 мешка за метр",
-      "A — ткань, B — зерно; 1 bag per metre"
+      "A — зерно, B — ткань; 1,5 мешка за метр",
+      "A — ткань, B — зерно; 1 мешок за метр"
     ],
     "options_uz": [
       "A — mato, B — don; 3 qop/metr",
       "A — don, B — mato; 3 qop/metr",
-      "A — don, B — mato; 1.5 qop/metr",
-      "A — mato, B — don; 1 bag per metre"
+      "A — don, B — mato; 1,5 qop/metr",
+      "A — mato, B — don; 1 qop/metr"
     ]
   },
   {
@@ -317,16 +317,16 @@
       "Price unchanged, output +40"
     ],
     "options_ru": [
-      "Уровень цен +10, выпуск +20",
-      "Уровень цен −10, выпуск +20",
-      "Уровень цен +20, выпуск +10",
-      "Уровень цен unchanged, выпуск +40"
+      "Уровень цен +10; выпуск +20",
+      "Уровень цен −10; выпуск +20",
+      "Уровень цен +20; выпуск +10",
+      "Уровень цен не меняется; выпуск +40"
     ],
     "options_uz": [
-      "Narx darajasi +10, ishlab chiqarish +20",
-      "Narx darajasi −10, ishlab chiqarish +20",
-      "Narx darajasi +20, ishlab chiqarish +10",
-      "Narx darajasi unchanged, ishlab chiqarish +40"
+      "Narx darajasi +10; ishlab chiqarish +20",
+      "Narx darajasi −10; ishlab chiqarish +20",
+      "Narx darajasi +20; ishlab chiqarish +10",
+      "Narx darajasi o‘zgarmaydi; ishlab chiqarish +40"
     ]
   }
 ]
