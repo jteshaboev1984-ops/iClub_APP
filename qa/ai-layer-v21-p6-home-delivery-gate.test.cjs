@@ -10,11 +10,16 @@ const USER="11111111-1111-4111-8111-111111111111";
 const HANDLE="33333333-3333-4333-8333-333333333333";
 const E="a".repeat(64),S="b".repeat(64);
 const clone=x=>structuredClone(x);
-function setup(){
+function setup(withTie=false){
  const state={
   clock:100000,entitled:true,rights:true,academic:true,screenRev:12,
   scanRev:12,source:S,hash:E,complete:true,
-  subject:"economics",locale:"ru"
+  subject:"economics",locale:"ru",candidates:[
+   {actionCode:"review_finalized_practice",subjectKey:"economics",
+    evidenceId:901,evidenceRevision:12},
+   ...(withTie?[{actionCode:"review_finalized_practice",subjectKey:"biology",
+    evidenceId:902,evidenceRevision:12}]:[])
+  ]
  };
  const s={
   signingKey:Buffer.alloc(32,42),nowMs:()=>state.clock,
@@ -24,8 +29,8 @@ function setup(){
    source_publication:false,rights_approved:false,owner_id:USER,
    context_handle:HANDLE,screen_revision:state.scanRev,
    policy_version:"home_next_actions_20261014_v1",complete_scan:state.complete,
-   candidates:[{actionCode:"review_finalized_practice",subjectKey:state.subject,
-    evidenceId:901,evidenceRevision:12}]}),
+   candidates:clone(state.candidates).map(v=>v.evidenceId===901?
+    {...v,subjectKey:state.subject}:v)}),
   verifySubjectAccess:async(user,subject,intent)=>({
    allowed:state.entitled,verified:state.entitled,userId:user,subjectKey:subject,intent,
    revision:4,source:"server_enforced_subject_access_v1",mode:"commercial",
@@ -40,8 +45,8 @@ function setup(){
  };
  return{state,s};
 }
-async function signedFixture(){
- const f=setup(),{s}=f;
+async function signedFixture(withTie=false){
+ const f=setup(withTie),{s}=f;
  const built=await buildHomePlan(s,{userId:USER,contextHandle:HANDLE,locale:"ru"});
  assert.equal(built.ready,true);
  const checkServices={
@@ -70,6 +75,23 @@ test("§104 delivery checks fresh complete scan + current commercial and rights 
  assert.equal(d.expiresAtMs,f.plan.expiresAtMs);
  assert.equal(JSON.stringify(d).includes("authorityHash"),false);
  assert.equal(JSON.stringify(d).includes("evidenceHash"),false);
+});
+test("§105 same-priority tie must not expose database evidence or action IDs",async()=>{
+ const f=await signedFixture(true);
+ assert.equal(f.choice.status,"selection_required");
+ const r=await validateBeforeHomeDelivery(f.s,params(f));
+ assert.equal(r.ready,true);
+ assert.equal(r.status,"selection_required");
+ assert.deepEqual(r.choices,[
+  {actionCode:"review_finalized_practice",subjectKey:"biology"},
+  {actionCode:"review_finalized_practice",subjectKey:"economics"}
+ ]);
+ assert.equal(Object.hasOwn(r,"candidateActionIds"),false);
+ assert.equal(JSON.stringify(r).includes("901"),false);
+ assert.equal(JSON.stringify(r).includes("902"),false);
+ const poisoned=clone(f.choice);
+ poisoned.candidateActionIds=[poisoned.candidateActionIds[0]];
+ assert.equal((await validateBeforeHomeDelivery(f.s,params(f,{choice:poisoned}))).ready,false);
 });
 test("§104 a revoked commercial, source, academic, screen or candidate never leaves server",async()=>{
  const changes=[
