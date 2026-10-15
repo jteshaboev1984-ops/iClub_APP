@@ -196,9 +196,9 @@
     "d": "medium",
     "sec": 160,
     "k": "B",
-    "en": "A bakery can use labour-intensive production with fixed costs of $100 and variable costs of $4 per loaf, or automation with fixed costs of $320 and variable costs of $2 per loaf. At planned output of 200 loaves, which method has lower total cost and by how much?",
-    "ru": "Пекарня может использовать трудоёмкий способ с постоянными затратами $100 и переменными $4 на буханку либо автоматизацию с постоянными затратами $320 и переменными $2 на буханку. При выпуске 200 буханок какой способ дешевле и на сколько?",
-    "uz": "Nonvoyxona ko‘p mehnat talab qiladigan usulda doimiy xarajat $100, har non uchun o‘zgaruvchi xarajat $4 yoki avtomatlashtirishda doimiy xarajat $320, har non uchun $2 xarajat qiladi. 200 ta non ishlab chiqarishda qaysi usul arzonroq va qancha?",
+    "en": "A bakery can make the same 200 loaves using method A (16 labour-hours and 6 machine-hours) or method B (8 labour-hours and 12 machine-hours). Labour costs $20 per hour and machine use $20 per hour. Which method costs less, and by how much?",
+    "ru": "Пекарня может выпустить одинаковые 200 буханок способом A (16 человеко-часов и 6 машино-часов) либо способом B (8 человеко-часов и 12 машино-часов). Один час труда стоит $20, один машино-час — $20. Какой способ дешевле и на сколько?",
+    "uz": "Nonvoyxona bir xil 200 ta nonni A usulida (16 ishchi-soat va 6 mashina-soat) yoki B usulida (8 ishchi-soat va 12 mashina-soat) ishlab chiqarishi mumkin. Mehnatning bir soati $20, mashinaning bir soati $20. Qaysi usul arzonroq va qancha?",
     "opt_en": [
       "Labour-intensive, by $180",
       "Automation, by $180",
@@ -218,28 +218,28 @@
       "Mehnat ko‘p talab qiladigan usul, $220 ga"
     ],
     "why": [
-      "Labour-intensive cost: $100 + 200×$4 = $900. Automation: $320 + 200×$2 = $720. Automation saves $180.",
-      "Трудоёмкий способ: $100 + 200×$4 = $900. Автоматизация: $320 + 200×$2 = $720. Экономия $180.",
-      "Mehnat usuli: $100 + 200×$4 = $900. Avtomatlashtirish: $320 + 200×$2 = $720. Tejash $180."
+      "Method A costs (16 + 6) × $20 = $440; method B costs (8 + 12) × $20 = $400. Choosing how to produce saves $40 with method B.",
+      "Способ A: (16 + 6) × $20 = $440; способ B: (8 + 12) × $20 = $400. Выбор способа производства B экономит $40.",
+      "A usuli: (16 + 6) × $20 = $440; B usuli: (8 + 12) × $20 = $400. B usulini tanlash $40 tejaydi."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-038",
     "options_en": [
-      "Labour-intensive, by $180",
-      "Automation, by $180",
-      "Automation, by $220",
-      "Labour-intensive, by $220"
+      "Method A, by $40",
+      "Method B, by $40",
+      "Method B, by $80",
+      "Both cost the same"
     ],
     "options_ru": [
-      "Трудоёмкий, на $180",
-      "Автоматизация, на $180",
-      "Автоматизация, на $220",
-      "Трудоёмкий, на $220"
+      "Способ A дешевле на $40",
+      "Способ B дешевле на $40",
+      "Способ B дешевле на $80",
+      "Стоимость одинакова"
     ],
     "options_uz": [
-      "Mehnat ko‘p talab qiladigan usul, $180 ga",
-      "Avtomatlashtirish, $180 ga",
-      "Avtomatlashtirish, $220 ga",
-      "Mehnat ko‘p talab qiladigan usul, $220 ga"
+      "A usuli $40 ga arzon",
+      "B usuli $40 ga arzon",
+      "B usuli $80 ga arzon",
+      "Narx bir xil"
     ]
   },
   {
