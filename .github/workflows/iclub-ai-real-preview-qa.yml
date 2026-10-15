@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/iclub-ai-real-preview-qa.yml'
       - 'qa/ai-v21-real-preview-*'
+      - 'qa/ai-v21-real-academic-screen-bridge*'
       - 'global-ai-ui.js'
       - 'global-ai-ui.css'
       - 'app.js'
@@ -44,6 +45,8 @@ jobs:
           node --check qa/ai-v21-real-preview-ui-snapshot.js
           node --check qa/ai-v21-real-preview-fixture.js
           node --test qa/ai-v21-real-preview-regression.test.cjs
+          node --check qa/ai-v21-real-academic-screen-bridge.cjs
+          node --test qa/ai-v21-real-academic-screen-bridge.test.cjs
       - name: Browser test on loopback network only
         run: |
           set -euo pipefail
