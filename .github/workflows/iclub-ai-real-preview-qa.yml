@@ -1,0 +1,65 @@
+name: iClub AI v2.1 — real-app protected Preview QA
+
+on:
+  push:
+    branches:
+      - qa/iclub-ai-layer-v21-20261012
+    paths:
+      - '.github/workflows/iclub-ai-real-preview-qa.yml'
+      - 'qa/ai-v21-real-preview-*'
+      - 'global-ai-ui.js'
+      - 'global-ai-ui.css'
+      - 'app.js'
+      - 'index.html'
+      - 'vercel.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iclub-ai-real-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-preview-acceptance:
+    if: github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout existing QA branch, do not keep Git credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate bundle and simulated routes; refuse any prod access
+        run: |
+          set -euo pipefail
+          node --check qa/ai-v21-real-preview-build.cjs
+          node --check qa/ai-v21-real-preview-browser.cjs
+          node --check qa/ai-v21-real-preview-ui-snapshot.js
+          node --check qa/ai-v21-real-preview-fixture.js
+          node --test qa/ai-v21-real-preview-regression.test.cjs
+      - name: Browser test on loopback network only
+        run: |
+          set -euo pipefail
+          command -v google-chrome || command -v chromium
+          cd qa/ai-v21-real-preview-dist
+          python3 -m http.server 4175 --bind 127.0.0.1 > /tmp/iclub-ai-real-preview-http.log 2>&1 &
+          server=$!
+          cd ../..
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:4175/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node qa/ai-v21-real-preview-browser.cjs
+      - name: Confirm source app, Exam Prep and production SQL remain untouched
+        run: |
+          set -euo pipefail
+          git diff --exit-code c565f9a8d70ceeb791137bec36e5bf1f2e21de4c HEAD -- global-ai-ui.js global-ai-ui.css
+          test -z "$(git diff --name-only 9afc7b44aead03b2a30544e6e7d4c4eb8670efbf HEAD -- app.js index.html exam-prep/ supabase/migrations/)"
+          echo 'QA real-app preview: verified no protected source changes'
