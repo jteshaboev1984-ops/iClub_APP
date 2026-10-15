@@ -368,6 +368,118 @@
     window.iClubPracticePremiumResult = Object.freeze({render:premiumResult});
   window.iClubPracticeTopicHistoryV1 = Object.freeze({render:topicHistory,renderReview:renderTopicReview,renderLatest:topicLatest,renderHistoryPage:topicHistoryPage,openAttempt:openTopicAttempt});
 
+  // Presentation-only view for completed ordinary Practice by Tour sessions.
+  // The caller fetches authenticated history. Never join these rows to recommendations.
+  const tourRecTexts={
+    ru:{last:'ПОСЛЕДНЯЯ ПОПЫТКА',tour:'Тур ',practice:'Практика по туру',
+      emptyTitle:'Результаты практики по турам',empty:'После завершённой попытки здесь появится её результат.',
+      unavailable:'Не удалось загрузить результаты практики. Рекомендации доступны ниже.',
+      history:'История практики по турам',previous:'Предыдущие завершённые попытки',
+      more:'Показать ещё'},
+    uz:{last:'SO‘NGGI URINISH',tour:'Tur ',practice:'Tur bo‘yicha amaliyot',
+      emptyTitle:'Turlar bo‘yicha amaliyot natijalari',empty:'Yakunlangan urinishdan so‘ng natija shu yerda ko‘rinadi.',
+      unavailable:'Amaliyot natijalarini yuklab bo‘lmadi. Tavsiyalar quyida mavjud.',
+      history:'Turlar bo‘yicha amaliyot tarixi',previous:'Oldingi yakunlangan urinishlar',
+      more:'Yana ko‘rsatish'},
+    en:{last:'LATEST ATTEMPT',tour:'Tour ',practice:'Practice by tour',
+      emptyTitle:'Practice by tour results',empty:'Your result will appear here after a completed attempt.',
+      unavailable:'Could not load Practice results. Recommendations remain available below.',
+      history:'Practice by tour history',previous:'Previous completed attempts',more:'Show more'}
+  };
+  const tourRecLang=language=>['ru','uz','en'].includes(language)?language:lang();
+  function tourRecRows(data){
+    return (Array.isArray(data?.last)?data.last:[]).filter(row=>{
+      const no=Number(row?.tour_no);
+      return Number.isSafeInteger(no)&&no>0&&Number.isFinite(Date.parse(String(row?.created_at||'')));
+    });
+  }
+  function tourRecScore(row){
+    const total=Number(row?.answers_total);
+    const score=row?.score==null?NaN:Number(row.score);
+    const pct=row?.percent==null?NaN:Number(row.percent);
+    if(Number.isInteger(total)&&total>0&&Number.isInteger(score)&&score>=0&&score<=total)
+      return score+' / '+total;
+    return Number.isFinite(pct)&&pct>=0&&pct<=100?Math.round(pct)+'%':'—';
+  }
+  function tourRecDate(row,language){
+    const d=new Date(String(row?.created_at||''));
+    if(!Number.isFinite(d.getTime()))return '';
+    try{return d.toLocaleDateString(language==='en'?'en-GB':language==='uz'?'uz-UZ':'ru-RU');}
+    catch{return '';}
+  }
+  function tourRecLatest(holder,data,unavailable,language){
+    if(!holder)return false;
+    holder.replaceChildren();
+    const locale=tourRecLang(language),t=tourRecTexts[locale];
+    if(unavailable||data?.ok!==true){
+      holder.append(node('p','iclub-sx-tour-unavailable',t.unavailable));
+      return false;
+    }
+    const rows=tourRecRows(data);
+    const card=node('section','iclub-sx-tour-last');
+    if(!rows.length){
+      card.classList.add('iclub-sx-tour-last-empty');
+      card.append(node('strong','',t.emptyTitle),node('p','',t.empty));
+      holder.append(card);
+      return true;
+    }
+    const latest=rows[0];
+    const top=node('div','iclub-sx-tour-last-top');
+    top.append(node('span','iclub-sx-kicker',t.last));
+    top.append(node('small','',tourRecDate(latest,locale)));
+    const middle=node('div','iclub-sx-tour-last-body');
+    const info=node('div','iclub-sx-tour-last-info');
+    info.append(node('strong','',t.tour+String(latest.tour_no)));
+    info.append(node('span','',t.practice));
+    middle.append(info,node('strong','iclub-sx-tour-last-score',tourRecScore(latest)));
+    card.append(top,middle);
+    const pct=latest.percent==null?NaN:Number(latest.percent);
+    const seconds=latest.time_seconds==null?NaN:Number(latest.time_seconds);
+    if((Number.isFinite(pct)&&pct>=0&&pct<=100)||(Number.isFinite(seconds)&&seconds>=0)){
+      const foot=node('div','iclub-sx-tour-last-foot');
+      if(Number.isFinite(pct)&&pct>=0&&pct<=100)
+        foot.append(node('span','',Math.round(pct)+'%'));
+      if(Number.isFinite(seconds)&&seconds>=0)
+        foot.append(node('span','',Math.floor(seconds/60)+':'+String(Math.round(seconds%60)).padStart(2,'0')));
+      card.append(foot);
+    }
+    holder.append(card);
+    return true;
+  }
+  function tourRecHistory(holder,data,unavailable,language){
+    if(!holder)return false;
+    holder.replaceChildren();
+    const rows=!unavailable&&data?.ok===true?tourRecRows(data):[];
+    const past=rows.slice(1);
+    holder.hidden=!past.length;
+    if(!past.length)return false;
+    const locale=tourRecLang(language),t=tourRecTexts[locale];
+    const section=node('div','iclub-sx-tour-history');
+    section.dataset.sxTourGroup='1';
+    section.append(node('h2','',t.history),node('p','',t.previous));
+    const list=node('div','iclub-sx-tour-history-list');
+    past.forEach((item,i)=>{
+      const row=node('div','iclub-sx-tour-history-row');
+      if(i>=3){row.hidden=true;row.dataset.sxTourExtra='1';}
+      row.append(node('span','iclub-sx-tour-history-index',String(i+1).padStart(2,'0')));
+      const middle=node('span','iclub-sx-tour-history-description');
+      middle.append(node('strong','',t.tour+String(item.tour_no)));
+      middle.append(node('small','',tourRecDate(item,locale)));
+      row.append(middle,node('strong','iclub-sx-tour-history-score',tourRecScore(item)));
+      list.append(row);
+    });
+    section.append(list);
+    if(past.length>3){
+      const expand=node('button','iclub-sx-tour-expand',t.more+' '+String(past.length-3)+' ⌄');
+      expand.type='button';expand.dataset.sxTourExpand='1';
+      expand.setAttribute('aria-expanded','false');
+      section.append(expand);
+    }
+    holder.append(section);
+    return true;
+  }
+  window.iClubPracticeTourHistoryV1=Object.freeze({render:tourRecHistory,renderLatest:tourRecLatest});
+
   function install() {
     const root = document.getElementById(ROOT_ID);
     if (!root || root.dataset.practiceResultsTabsReady === 'true') return;
