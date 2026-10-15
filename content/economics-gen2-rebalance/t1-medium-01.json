@@ -1,0 +1,464 @@
+[
+  {
+    "n": 8,
+    "d": "medium",
+    "sec": 140,
+    "k": "B",
+    "en": "Tomato demand is Qd = 120 − 2P and initial supply is Qs = 30 + P. Irrigation improvements shift supply to Qs = 42 + P while demand stays unchanged. How much does equilibrium price fall?",
+    "ru": "Спрос на томаты Qd = 120 − 2P, первоначальное предложение Qs = 30 + P. Улучшение орошения изменяет предложение до Qs = 42 + P при неизменном спросе. На сколько снизится равновесная цена?",
+    "uz": "Pomidor talabi Qd = 120 − 2P, dastlabki taklif Qs = 30 + P. Sug‘orish yaxshilanib, taklif Qs = 42 + P ga o‘zgardi, talab esa o‘zgarmadi. Muvozanat narxi qanchaga pasayadi?",
+    "opts": [
+      "2",
+      "4",
+      "6",
+      "12"
+    ],
+    "why": [
+      "Initial price is 30; after the supply shift it is 26. The fall is 4.",
+      "Изначально равновесная цена 30, после сдвига — 26. Снижение равно 4.",
+      "Dastlabki muvozanat narxi 30, keyin 26 bo‘ladi. Pasayish 4 ga teng."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-008",
+    "options_en": [
+      "2",
+      "4",
+      "6",
+      "12"
+    ],
+    "options_ru": [
+      "2",
+      "4",
+      "6",
+      "12"
+    ],
+    "options_uz": [
+      "2",
+      "4",
+      "6",
+      "12"
+    ]
+  },
+  {
+    "n": 10,
+    "d": "medium",
+    "sec": 125,
+    "k": "D",
+    "en": "Only two flats can be allocated. Four households are willing and able to pay at most $120, $95, $80 and $55 for one flat each. If the price mechanism allocates the flats to those valuing them most, what is the combined willingness to pay of the successful buyers?",
+    "ru": "Можно распределить только две квартиры. Четыре домохозяйства готовы и способны заплатить максимум $120, $95, $80 и $55 за одну квартиру каждое. Если ценовой механизм распределяет квартиры среди покупателей с наибольшей оценкой, какова их суммарная готовность платить?",
+    "uz": "Faqat ikkita xonadonni taqsimlash mumkin. To‘rt uy xo‘jaligining har biri bir xonadon uchun eng ko‘pi bilan $120, $95, $80 va $55 to‘lashga tayyor hamda qodir. Narx mexanizmi xonadonlarni eng yuqori baholovchilarga ajratsa, ularning umumiy to‘lashga tayyorligi qancha?",
+    "opts": [
+      "4",
+      "1",
+      "3",
+      "2"
+    ],
+    "why": [
+      "The two highest bidders receive the flats, with valuations $120 and $95. Combined willingness to pay is $215.",
+      "Две квартиры получают покупатели с оценками $120 и $95. Совокупная готовность платить равна $215.",
+      "Eng yuqori ikkita bahoga ($120 va $95) ega xaridorlar xonadon oladi. Jami to‘lashga tayyorlik $215."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-010",
+    "options_en": [
+      "$175",
+      "$200",
+      "$255",
+      "$215"
+    ],
+    "options_ru": [
+      "$175",
+      "$200",
+      "$255",
+      "$215"
+    ],
+    "options_uz": [
+      "$175",
+      "$200",
+      "$255",
+      "$215"
+    ]
+  },
+  {
+    "n": 12,
+    "d": "medium",
+    "sec": 140,
+    "k": "A",
+    "en": "A shirt factory raises production from 1,000 to 1,200 shirts, but a new process reduces cotton use from 2 kg to 1.5 kg per shirt. If all cotton is sourced domestically, how does the factory's quantity demanded of cotton change?",
+    "ru": "Фабрика увеличивает выпуск рубашек с 1 000 до 1 200, но новая технология снижает расход хлопка с 2 до 1,5 кг на рубашку. Если весь хлопок закупается внутри страны, как изменится объём спроса фабрики на хлопок?",
+    "uz": "Ko‘ylak fabrikasi ishlab chiqarishni 1000 tadan 1200 taga oshiradi, ammo yangi usul har ko‘ylakka paxta sarfini 2 kg dan 1,5 kg ga tushiradi. Paxtaning barchasi mahalliy xarid qilinsa, fabrikaning paxtaga talabi qanday o‘zgaradi?",
+    "opt_en": [
+      "Falls by 10%",
+      "Rises by 20%",
+      "Rises by 8%",
+      "Remains unchanged"
+    ],
+    "opt_ru": [
+      "Снизится на 10%",
+      "Вырастет на 20%",
+      "Вырастет на 8%",
+      "Не изменится"
+    ],
+    "opt_uz": [
+      "10% ga kamayadi",
+      "20% ga oshadi",
+      "8% ga oshadi",
+      "O‘zgarmaydi"
+    ],
+    "why": [
+      "Originally 1,000 × 2 = 2,000 kg; afterwards 1,200 × 1.5 = 1,800 kg, 10% less despite greater shirt output.",
+      "Первоначально требуется 1 000 × 2 = 2 000 кг, после изменения — 1 200 × 1,5 = 1 800 кг. Спрос на хлопок падает на 10%.",
+      "Dastlab 1000 × 2 = 2000 kg, keyin 1200 × 1,5 = 1800 kg. Paxtaga talab 10% ga kamayadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-012",
+    "options_en": [
+      "Falls by 10%",
+      "Rises by 20%",
+      "Rises by 8%",
+      "Remains unchanged"
+    ],
+    "options_ru": [
+      "Снизится на 10%",
+      "Вырастет на 20%",
+      "Вырастет на 8%",
+      "Не изменится"
+    ],
+    "options_uz": [
+      "10% ga kamayadi",
+      "20% ga oshadi",
+      "8% ga oshadi",
+      "O‘zgarmaydi"
+    ]
+  },
+  {
+    "n": 17,
+    "d": "medium",
+    "sec": 140,
+    "k": "C",
+    "en": "Tea prices rise, shifting demand for substitute coffee from Qd = 100 − 2P to Qd = 120 − 2P. Coffee supply remains Qs = 20 + 2P. By how much does coffee's equilibrium quantity increase?",
+    "ru": "Цены на чай растут, поэтому спрос на кофе как заменитель изменяется с Qd = 100 − 2P до Qd = 120 − 2P. Предложение кофе остаётся Qs = 20 + 2P. На сколько увеличится равновесный объём кофе?",
+    "uz": "Choy narxi oshgani uchun uning o‘rinbosari qahvaga talab Qd = 100 − 2P dan Qd = 120 − 2P ga siljiydi. Qahva taklifi Qs = 20 + 2P bo‘lib qoladi. Qahvaning muvozanat miqdori qanchaga oshadi?",
+    "opts": [
+      "5",
+      "20",
+      "10",
+      "40"
+    ],
+    "why": [
+      "Initial equilibrium P = 20, Q = 60; after demand shifts P = 25, Q = 70. Quantity rises by 10.",
+      "Сначала P = 20, Q = 60; после сдвига P = 25, Q = 70. Прирост объёма равен 10.",
+      "Avval P = 20, Q = 60; talab siljigach P = 25, Q = 70. Miqdor 10 ga oshadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-017",
+    "options_en": [
+      "5",
+      "20",
+      "10",
+      "40"
+    ],
+    "options_ru": [
+      "5",
+      "20",
+      "10",
+      "40"
+    ],
+    "options_uz": [
+      "5",
+      "20",
+      "10",
+      "40"
+    ]
+  },
+  {
+    "n": 18,
+    "d": "medium",
+    "sec": 120,
+    "k": "A",
+    "en": "A school has 30 computers. Up to 25 can be used for programming, where each occupied computer produces 4 educational benefit points. Up to 20 can be used for statistics, where each produces 3 points. Each computer can serve one learner only. How should the school allocate computers to maximise the stated total benefit?",
+    "ru": "У школы 30 компьютеров. На занятиях по программированию можно использовать до 25 компьютеров, каждый приносит 4 условных балла учебной пользы. На статистике можно использовать до 20, каждый приносит 3 балла. Один компьютер обслуживает одного ученика. Как распределить компьютеры для максимальной указанной пользы?",
+    "uz": "Maktabda 30 ta kompyuter bor. Dasturlash darsida ko‘pi bilan 25 tasi ishlatilishi mumkin, har biri 4 foyda balli beradi. Statistika darsida ko‘pi bilan 20 tasi ishlatiladi, har biri 3 ball beradi. Har kompyuter bitta o‘quvchiga xizmat qiladi. Jami foydani maksimallashtirish uchun qanday taqsimlash kerak?",
+    "opts": [
+      "20",
+      "10",
+      "30",
+      "50"
+    ],
+    "why": [
+      "Programming yields 4 points per computer versus 3 in statistics; allocate the first 25 to programming, then the remaining 5 to statistics (115 points).",
+      "Компьютер в программировании даёт 4 балла против 3 в статистике. Первые 25 следует выделить программированию, ещё 5 — статистике; всего 115 баллов.",
+      "Dasturlashda har kompyuter 4 ball, statistikada 3 ball beradi. Dasturlashga 25 ta, qolgan 5 tasini statistikaga ajratish jami 115 ball beradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-018",
+    "options_en": [
+      "25 programming; 5 statistics",
+      "15 programming; 15 statistics",
+      "10 programming; 20 statistics",
+      "20 programming; 10 statistics"
+    ],
+    "options_ru": [
+      "25 — программированию; 5 — статистике",
+      "15 — программированию; 15 — статистике",
+      "10 — программированию; 20 — статистике",
+      "20 — программированию; 10 — статистике"
+    ],
+    "options_uz": [
+      "25 tasi dasturlashga; 5 tasi statistikaga",
+      "15 tasi dasturlashga; 15 tasi statistikaga",
+      "10 tasi dasturlashga; 20 tasi statistikaga",
+      "20 tasi dasturlashga; 10 tasi statistikaga"
+    ]
+  },
+  {
+    "n": 23,
+    "d": "medium",
+    "sec": 130,
+    "k": "B",
+    "en": "A café owner commits her savings, organises staff and suppliers and accepts any residual profit or loss. A salaried manager follows her business plan. Which factor-of-production distinction is best?",
+    "ru": "Владелица кафе вкладывает сбережения, организует персонал и поставщиков и несёт риск остаточной прибыли или убытка. Наёмный управляющий исполняет её бизнес-план. Какое различие факторов производства наиболее корректно?",
+    "uz": "Kafe egasi jamg‘armasini tikadi, xodimlar va yetkazib beruvchilarni boshqaradi hamda qolgan foyda yoki zararni o‘z zimmasiga oladi. Yollangan menejer uning rejasini bajaradi. Ishlab chiqarish omillarini qanday ajratish to‘g‘ri?",
+    "opt_en": [
+      "Both provide only physical capital.",
+      "The owner supplies enterprise/risk-bearing, while the manager supplies labour.",
+      "The manager automatically owns the entrepreneurial profit.",
+      "Ownership of savings means the owner supplies land, not enterprise."
+    ],
+    "opt_ru": [
+      "Оба предоставляют только физический капитал.",
+      "Владелица предоставляет предпринимательскую функцию и принимает риск, а управляющий — труд.",
+      "Наёмный управляющий автоматически получает предпринимательскую прибыль.",
+      "Наличие сбережений означает предоставление земли, а не предпринимательства."
+    ],
+    "opt_uz": [
+      "Ikkalasi faqat jismoniy kapital beradi.",
+      "Egasi tadbirkorlik va tavakkalchilikni, menejer esa mehnatni taqdim etadi.",
+      "Yollangan menejer avtomatik tarzda tadbirkorlik foydasiga ega bo‘ladi.",
+      "Jamg‘arma egasi bo‘lish yer omilini, tadbirkorlikni emas, anglatadi."
+    ],
+    "why": [
+      "Enterprise involves coordination and residual risk; routine paid management is labour even when it includes decisions.",
+      "Предприниматель принимает остаточный риск и координирует ресурсы; оплачиваемое управление относится к труду.",
+      "Tadbirkorlik koordinatsiya va qolgan tavakkalchilikni o‘z ichiga oladi; maoshli boshqaruv esa mehnat hisoblanadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-023",
+    "options_en": [
+      "Both provide only physical capital.",
+      "The owner supplies enterprise/risk-bearing, while the manager supplies labour.",
+      "The manager automatically owns the entrepreneurial profit.",
+      "Ownership of savings means the owner supplies land, not enterprise."
+    ],
+    "options_ru": [
+      "Оба предоставляют только физический капитал.",
+      "Владелица предоставляет предпринимательскую функцию и принимает риск, а управляющий — труд.",
+      "Наёмный управляющий автоматически получает предпринимательскую прибыль.",
+      "Наличие сбережений означает предоставление земли, а не предпринимательства."
+    ],
+    "options_uz": [
+      "Ikkalasi faqat jismoniy kapital beradi.",
+      "Egasi tadbirkorlik va tavakkalchilikni, menejer esa mehnatni taqdim etadi.",
+      "Yollangan menejer avtomatik tarzda tadbirkorlik foydasiga ega bo‘ladi.",
+      "Jamg‘arma egasi bo‘lish yer omilini, tadbirkorlikni emas, anglatadi."
+    ]
+  },
+  {
+    "n": 26,
+    "d": "medium",
+    "sec": 120,
+    "k": "C",
+    "en": "Demand for copper rises unexpectedly and its price increases. Which response best illustrates the price mechanism's incentive rather than its signalling function?",
+    "ru": "Спрос на медь неожиданно вырос, вслед за ним повысилась цена. Какое действие лучше показывает стимулирующую, а не информационную функцию ценового механизма?",
+    "uz": "Misga talab kutilmaganda oshib, narx ko‘tarildi. Qaysi javob narx mexanizmining axborot berish emas, balki rag‘batlantirish vazifasini yaxshiroq ko‘rsatadi?",
+    "opt_en": [
+      "Producers infer copper is scarcer relative to demand.",
+      "Consumers learn that copper is more expensive.",
+      "Mining firms invest in output expansion because potential revenues are higher.",
+      "Retailers observe the new market price."
+    ],
+    "opt_ru": [
+      "Производители узнают о выросшей относительной редкости меди.",
+      "Покупатели узнают о подорожании меди.",
+      "Добывающие фирмы инвестируют в расширение выпуска в расчёте на более высокую выручку.",
+      "Торговцы наблюдают новую рыночную цену."
+    ],
+    "opt_uz": [
+      "Ishlab chiqaruvchilar misning talabga nisbatan kamyoblashganini bilib oladilar.",
+      "Iste’molchilar mis qimmatlashganini biladilar.",
+      "Kon korxonalari daromad ehtimoli oshgani uchun ishlab chiqarishni kengaytirishga sarmoya kiritadi.",
+      "Sotuvchilar yangi bozor narxini ko‘radilar."
+    ],
+    "why": [
+      "A signal communicates scarcity; an incentive changes producers' decisions. Expansion motivated by higher expected returns is the incentive.",
+      "Сигнал сообщает о редкости ресурса, стимул меняет поведение. Инвестиция ради ожидаемого дохода — стимулирующая функция.",
+      "Signal tanqislik haqida xabar beradi, rag‘bat esa qarorni o‘zgartiradi. Yuqori daromad umididagi investitsiya — rag‘bat vazifasi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-026",
+    "options_en": [
+      "Producers infer copper is scarcer relative to demand.",
+      "Consumers learn that copper is more expensive.",
+      "Mining firms invest in output expansion because potential revenues are higher.",
+      "Retailers observe the new market price."
+    ],
+    "options_ru": [
+      "Производители узнают о выросшей относительной редкости меди.",
+      "Покупатели узнают о подорожании меди.",
+      "Добывающие фирмы инвестируют в расширение выпуска в расчёте на более высокую выручку.",
+      "Торговцы наблюдают новую рыночную цену."
+    ],
+    "options_uz": [
+      "Ishlab chiqaruvchilar misning talabga nisbatan kamyoblashganini bilib oladilar.",
+      "Iste’molchilar mis qimmatlashganini biladilar.",
+      "Kon korxonalari daromad ehtimoli oshgani uchun ishlab chiqarishni kengaytirishga sarmoya kiritadi.",
+      "Sotuvchilar yangi bozor narxini ko‘radilar."
+    ]
+  },
+  {
+    "n": 27,
+    "d": "medium",
+    "sec": 140,
+    "k": "A",
+    "en": "A bakery pays $1,000 rent for its premises, $2,000 wages and $150 interest on a business loan. Which list matches all three payments to factors of production?",
+    "ru": "Пекарня платит $1 000 аренды помещения, $2 000 зарплаты и $150 процентов по кредиту на бизнес. Какая комбинация верно соотносит все три платежа с факторами производства?",
+    "uz": "Nonvoyxona binoga $1000 ijara, xodimlarga $2000 ish haqi va biznes kreditiga $150 foiz to‘laydi. Uchala to‘lov ishlab chiqarish omillariga qanday mos keladi?",
+    "opt_en": [
+      "Rent—land; wages—labour; interest—capital",
+      "Rent—labour; wages—land; interest—enterprise",
+      "Rent—capital; wages—enterprise; interest—land",
+      "Rent—land; wages—capital; interest—labour"
+    ],
+    "opt_ru": [
+      "Аренда — земля; зарплата — труд; процент — капитал",
+      "Аренда — труд; зарплата — земля; процент — предпринимательство",
+      "Аренда — капитал; зарплата — предпринимательство; процент — земля",
+      "Аренда — земля; зарплата — капитал; процент — труд"
+    ],
+    "opt_uz": [
+      "Ijara — yer; ish haqi — mehnat; foiz — kapital",
+      "Ijara — mehnat; ish haqi — yer; foiz — tadbirkorlik",
+      "Ijara — kapital; ish haqi — tadbirkorlik; foiz — yer",
+      "Ijara — yer; ish haqi — kapital; foiz — mehnat"
+    ],
+    "why": [
+      "In conventional factor rewards, rent rewards land, wages reward labour, and interest rewards capital.",
+      "В стандартной классификации аренда — доход земли, зарплата — труда, процент — капитала.",
+      "Odatdagi tasnifda ijara yer, ish haqi mehnat, foiz esa kapital daromadidir."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-027",
+    "options_en": [
+      "Rent—land; wages—labour; interest—capital",
+      "Rent—labour; wages—land; interest—enterprise",
+      "Rent—capital; wages—enterprise; interest—land",
+      "Rent—land; wages—capital; interest—labour"
+    ],
+    "options_ru": [
+      "Аренда — земля; зарплата — труд; процент — капитал",
+      "Аренда — труд; зарплата — земля; процент — предпринимательство",
+      "Аренда — капитал; зарплата — предпринимательство; процент — земля",
+      "Аренда — земля; зарплата — капитал; процент — труд"
+    ],
+    "options_uz": [
+      "Ijara — yer; ish haqi — mehnat; foiz — kapital",
+      "Ijara — mehnat; ish haqi — yer; foiz — tadbirkorlik",
+      "Ijara — kapital; ish haqi — tadbirkorlik; foiz — yer",
+      "Ijara — yer; ish haqi — kapital; foiz — mehnat"
+    ]
+  },
+  {
+    "n": 28,
+    "d": "medium",
+    "sec": 125,
+    "k": "C",
+    "en": "A hospital makes two separate choices. First, it decides to fund more preventive screenings rather than emergency operations. Second, it switches from manual record-keeping to an electronic workflow for the chosen services. Which pair classifies these decisions in order?",
+    "ru": "Больница принимает два отдельных решения. Сначала она выделяет больше средств профилактическим обследованиям, чем экстренным операциям. Затем меняет бумажный учёт на электронный способ оказания выбранных услуг. Как по порядку классифицировать оба решения?",
+    "uz": "Shifoxona ikkita alohida qaror qiladi. Avval favqulodda operatsiyalarga nisbatan profilaktik tekshiruvlarni ko‘proq moliyalashtirishni tanlaydi. So‘ng tanlangan xizmatlarda qog‘ozli qaydlarni elektron jarayon bilan almashtiradi. Bu ikki qaror ketma-ket qaysi savollarga tegishli?",
+    "opt_en": [
+      "How to produce, because it is selecting its technology.",
+      "For whom to produce, because every budget decision allocates patients.",
+      "Whether scarcity exists, because the budget is fixed.",
+      "What to produce, because it is selecting the mix of services."
+    ],
+    "opt_ru": [
+      "Как производить, поскольку выбирается технология.",
+      "Для кого производить, поскольку каждое бюджетное решение распределяет пациентов.",
+      "Существует ли ограниченность, поскольку бюджет фиксирован.",
+      "Что производить, поскольку выбирается сочетание услуг."
+    ],
+    "opt_uz": [
+      "Qanday ishlab chiqarish, chunki texnologiya tanlanmoqda.",
+      "Kim uchun ishlab chiqarish, chunki har qanday budjet qarori bemorlarni taqsimlaydi.",
+      "Tanqislik bormi, chunki budjet cheklangan.",
+      "Nima ishlab chiqarish, chunki xizmatlar tarkibi tanlanmoqda."
+    ],
+    "why": [
+      "The first choice sets the mix of outputs ('what'); the second changes the technique for producing them ('how').",
+      "Первое решение определяет состав услуг («что»), второе — способ оказания («как»).",
+      "Birinchi qaror xizmatlar tarkibini («nima»), ikkinchisi esa ularni bajarish usulini («qanday») belgilaydi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-028",
+    "options_en": [
+      "How to produce; for whom to produce",
+      "For whom to produce; what to produce",
+      "What to produce; how to produce",
+      "What to produce; for whom to produce"
+    ],
+    "options_ru": [
+      "Как производить; для кого производить",
+      "Для кого производить; что производить",
+      "Что производить; как производить",
+      "Что производить; для кого производить"
+    ],
+    "options_uz": [
+      "Qanday ishlab chiqarish; kim uchun ishlab chiqarish",
+      "Kim uchun ishlab chiqarish; nima ishlab chiqarish",
+      "Nima ishlab chiqarish; qanday ishlab chiqarish",
+      "Nima ishlab chiqarish; kim uchun ishlab chiqarish"
+    ]
+  },
+  {
+    "n": 30,
+    "d": "medium",
+    "sec": 150,
+    "k": "B",
+    "en": "Ticket demand is Qd = 100 − 2P and supply is Qs = 20 + 2P. Tickets are initially offered at price P = 10. How large is the shortage at that price, and in which direction would price tend to move in a flexible market?",
+    "ru": "Спрос на билеты Qd = 100 − 2P, предложение Qs = 20 + 2P. Первоначальная цена P = 10. Каков дефицит билетов при этой цене и в какую сторону обычно движется цена на гибком рынке?",
+    "uz": "Chipta talabi Qd = 100 − 2P, taklifi Qs = 20 + 2P. Dastlabki narx P = 10. Shu narxda taqchillik qancha va erkin bozorda narx qaysi tomonga intiladi?",
+    "opt_en": [
+      "Shortage 20; price tends to fall",
+      "Shortage 40; price tends to rise",
+      "Surplus 40; price tends to fall",
+      "Shortage 60; price tends to rise"
+    ],
+    "opt_ru": [
+      "Дефицит 20; цена стремится вниз",
+      "Дефицит 40; цена стремится вверх",
+      "Излишек 40; цена стремится вниз",
+      "Дефицит 60; цена стремится вверх"
+    ],
+    "opt_uz": [
+      "Taqchillik 20; narx pasayishga intiladi",
+      "Taqchillik 40; narx oshishga intiladi",
+      "Ortiqcha taklif 40; narx pasayishga intiladi",
+      "Taqchillik 60; narx oshishga intiladi"
+    ],
+    "why": [
+      "At P = 10, demand is 80 and supply 40, yielding a shortage of 40. Excess demand creates upward pressure on price.",
+      "При P = 10 спрос 80, предложение 40; дефицит 40. Избыточный спрос создаёт давление на повышение цены.",
+      "P = 10 da talab 80, taklif 40; taqchillik 40. Ortiqcha talab narxni oshirishga undaydi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-030",
+    "options_en": [
+      "Shortage 20; price tends to fall",
+      "Shortage 40; price tends to rise",
+      "Surplus 40; price tends to fall",
+      "Shortage 60; price tends to rise"
+    ],
+    "options_ru": [
+      "Дефицит 20; цена стремится вниз",
+      "Дефицит 40; цена стремится вверх",
+      "Излишек 40; цена стремится вниз",
+      "Дефицит 60; цена стремится вверх"
+    ],
+    "options_uz": [
+      "Taqchillik 20; narx pasayishga intiladi",
+      "Taqchillik 40; narx oshishga intiladi",
+      "Ortiqcha taklif 40; narx pasayishga intiladi",
+      "Taqchillik 60; narx oshishga intiladi"
+    ]
+  }
+]

@@ -1,0 +1,413 @@
+[
+  {
+    "n": 31,
+    "d": "medium",
+    "sec": 140,
+    "k": "C",
+    "en": "An economy observes that income rises by 8% and demand for product A rises by 12%, while demand for product B falls by 4%. Other factors do not change. Which pair gives the income elasticities for A and B?",
+    "ru": "Доходы растут на 8%; спрос на товар A увеличивается на 12%, а спрос на товар B падает на 4%. Прочие условия неизменны. Какие значения эластичности спроса по доходу у товаров A и B?",
+    "uz": "Daromad 8% ga oshadi; A mahsulotga talab 12% ga oshadi, B mahsulotga talab 4% ga kamayadi. Boshqa omillar o‘zgarmaydi. A va B ning daromad elastikliklari qanday?",
+    "opts": [
+      "A = +0.67; B = −2.0",
+      "A = +1.5; B = +0.5",
+      "A = +1.5; B = −0.5",
+      "A = −1.5; B = +0.5"
+    ],
+    "why": [
+      "YED(A) = +12%/+8% = +1.5; YED(B) = −4%/+8% = −0.5.",
+      "YED(A) = +12%/+8% = +1,5; YED(B) = −4%/+8% = −0,5.",
+      "YED(A) = +12%/+8% = +1,5; YED(B) = −4%/+8% = −0,5."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-031",
+    "options_en": [
+      "A = +0.67; B = −2.0",
+      "A = +1.5; B = +0.5",
+      "A = +1.5; B = −0.5",
+      "A = −1.5; B = +0.5"
+    ],
+    "options_ru": [
+      "A = +0.67; B = −2.0",
+      "A = +1.5; B = +0.5",
+      "A = +1.5; B = −0.5",
+      "A = −1.5; B = +0.5"
+    ],
+    "options_uz": [
+      "A = +0.67; B = −2.0",
+      "A = +1.5; B = +0.5",
+      "A = +1.5; B = −0.5",
+      "A = −1.5; B = +0.5"
+    ]
+  },
+  {
+    "n": 32,
+    "d": "medium",
+    "sec": 135,
+    "k": "D",
+    "en": "A bakery buys an automated kneading machine and trains workers to use it. Which classification AND likely long-run production effect are consistent with the two investments?",
+    "ru": "Пекарня покупает автоматическую тестомесильную машину и обучает работников её использовать. Какая классификация вместе с возможным долгосрочным эффектом соответствует обоим вложениям?",
+    "uz": "Nonvoyxona avtomatik xamir qorish mashinasini oladi va ishchilarni undan foydalanishga o‘qitadi. Ikkala investitsiyaning tasnifi va uzoq muddatli ehtimoliy ta’siri qaysi javobda mos?",
+    "opt_en": [
+      "Machine: physical capital; training: human capital",
+      "Machine: natural capital; training: physical capital",
+      "Machine: enterprise; training: land",
+      "Machine: labour; training: natural resource"
+    ],
+    "opt_ru": [
+      "Машина — физический капитал; обучение — человеческий капитал",
+      "Машина — природный капитал; обучение — физический капитал",
+      "Машина — предпринимательство; обучение — земля",
+      "Машина — труд; обучение — природный ресурс"
+    ],
+    "opt_uz": [
+      "Mashina — jismoniy kapital; o‘qitish — inson kapitali",
+      "Mashina — tabiiy kapital; o‘qitish — jismoniy kapital",
+      "Mashina — tadbirkorlik; o‘qitish — yer",
+      "Mashina — mehnat; o‘qitish — tabiiy resurs"
+    ],
+    "why": [
+      "Equipment is physical capital and acquired skills are human capital; both can raise productive potential.",
+      "Оборудование — физический капитал, приобретённые навыки — человеческий; оба вложения способны увеличить потенциальный выпуск.",
+      "Uskuna jismoniy kapital, malaka oshishi esa inson kapitali; har ikkisi potensial ishlab chiqarishni ko‘paytirishi mumkin."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-032",
+    "options_en": [
+      "Both are land; productive capacity must fall.",
+      "The machine is human capital, training is physical capital; capacity is unchanged.",
+      "Both are labour; only current demand can rise.",
+      "The machine adds physical capital and training adds human capital; productive capacity may rise."
+    ],
+    "options_ru": [
+      "Оба вложения — земля; производственный потенциал обязательно снизится.",
+      "Машина — человеческий капитал, обучение — физический; потенциал неизменен.",
+      "Оба — труд; может увеличиться только текущий спрос.",
+      "Машина добавляет физический капитал, обучение — человеческий; производственный потенциал может вырасти."
+    ],
+    "options_uz": [
+      "Ikkalasi yer omili; ishlab chiqarish quvvati albatta kamayadi.",
+      "Mashina inson kapitali, o‘qitish jismoniy kapital; quvvat o‘zgarmaydi.",
+      "Ikkalasi mehnat; faqat joriy talab oshishi mumkin.",
+      "Mashina jismoniy kapitalni, o‘qitish inson kapitalini oshiradi; ishlab chiqarish quvvati ortishi mumkin."
+    ]
+  },
+  {
+    "n": 34,
+    "d": "medium",
+    "sec": 135,
+    "k": "D",
+    "en": "A city can finance only one project: a flood barrier worth $11m to residents, a library worth $9m or two playgrounds worth $8m in total. All cost the same limited budget and values are comparable. If the barrier is chosen, what is the opportunity cost in forgone benefit?",
+    "ru": "Город может оплатить лишь один проект: дамбу с выгодой $11 млн, библиотеку с выгодой $9 млн либо две площадки с суммарной выгодой $8 млн. Бюджет каждого одинаков, оценки сопоставимы. Если выбирается дамба, какова альтернативная стоимость в единицах отвергнутой выгоды?",
+    "uz": "Shahar faqat bitta loyihani moliyalashtira oladi: $11 mln foydali toshqin to‘sig‘i, $9 mln foydali kutubxona yoki jami $8 mln foydali ikki maydoncha. Xarajatlari bir xil, foydalar taqqoslanadi. To‘siq tanlansa, voz kechilgan foyda bo‘yicha muqobil qiymat qancha?",
+    "opt_en": [
+      "The money spent on the barrier, counted twice",
+      "One playground, because any public choice has only one unit of opportunity cost",
+      "No opportunity cost, because the city owns the budget",
+      "Two playgrounds, assuming that is the best alternative use"
+    ],
+    "opt_ru": [
+      "Деньги на дамбу, учтённые дважды",
+      "Одна площадка, поскольку альтернативная стоимость любого выбора равна одному объекту",
+      "Нулевая стоимость, поскольку бюджет уже принадлежит городу",
+      "Две площадки, если это лучшее альтернативное использование бюджета"
+    ],
+    "opt_uz": [
+      "To‘siqqa ketgan pulni ikki marta hisoblash",
+      "Bitta maydoncha, chunki har qanday qarorning muqobil qiymati bitta obyekt",
+      "Muqobil qiymat yo‘q, chunki budjet shaharga tegishli",
+      "Ikki maydoncha, agar bu eng yaxshi muqobil foydalanish bo‘lsa"
+    ],
+    "why": [
+      "The next-best feasible project is the $9m library, so the opportunity cost is $9m of forgone benefit.",
+      "Лучший отвергнутый проект — библиотека с выгодой $9 млн, поэтому альтернативная стоимость — $9 млн.",
+      "Eng yaxshi voz kechilgan muqobil $9 mln foydali kutubxona; muqobil qiymat $9 mln."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-034",
+    "options_en": [
+      "$11 million",
+      "$8 million",
+      "$2 million",
+      "$9 million"
+    ],
+    "options_ru": [
+      "$11 млн",
+      "$8 млн",
+      "$2 млн",
+      "$9 млн"
+    ],
+    "options_uz": [
+      "$11 mln",
+      "$8 mln",
+      "$2 mln",
+      "$9 mln"
+    ]
+  },
+  {
+    "n": 35,
+    "d": "medium",
+    "sec": 135,
+    "k": "C",
+    "en": "A village has abundant untreated spring water available without a scarcity cost at the source, but a nearby city needs scarce labour, filters and vehicles to make and deliver safe drinking water. Which statement correctly interprets the status of water in these two settings?",
+    "ru": "В деревне необработанная родниковая вода доступна у источника без альтернативной стоимости, но соседнему городу нужны ограниченные труд, фильтры и транспорт, чтобы очищать и доставлять безопасную воду. Какое утверждение правильно описывает экономический статус воды в двух условиях?",
+    "uz": "Qishloqda buloqning tozalanmagan suvi manbada tanqislik xarajatisiz mavjud, ammo yaqin shaharga xavfsiz suvni tozalash va yetkazish uchun cheklangan mehnat, filtr hamda transport kerak. Ikki sharoitda suvning iqtisodiy maqomi qanday?",
+    "opt_en": [
+      "Both are free goods because neither is manufactured by consumers.",
+      "Bottled water is a free good because water is a natural substance.",
+      "Sunlight is free in this setting; delivered bottled water is an economic good.",
+      "Sunlight is an economic good only if the temperature rises."
+    ],
+    "opt_ru": [
+      "Оба являются свободными благами, потому что потребители их не производят.",
+      "Бутилированная вода — свободное благо, поскольку вода природного происхождения.",
+      "Солнечный свет здесь — свободное благо, доставленная вода — экономическое благо.",
+      "Солнечный свет становится экономическим благом только при повышении температуры."
+    ],
+    "opt_uz": [
+      "Ikkalasi erkin ne’mat, chunki iste’molchilar ularni yaratmagan.",
+      "Shisha suv erkin ne’mat, chunki suv tabiiy modda.",
+      "Quyosh nuri bu sharoitda erkin, yetkazilgan ichimlik suvi esa iqtisodiy ne’mat.",
+      "Quyosh nuri faqat harorat oshganda iqtisodiy ne’mat bo‘ladi."
+    ],
+    "why": [
+      "Scarcity and opportunity cost depend on the setting and production process: treating and delivering safe water uses scarce inputs, even when raw water at its source is abundant.",
+      "Ограниченность зависит от условий: очистка и доставка безопасной воды расходуют редкие ресурсы, даже если исходная вода у источника изобильна.",
+      "Tanqislik sharoitga bog‘liq: suvni tozalash va yetkazish cheklangan resurslarni ishlatadi, manbadagi xom suv mo‘l bo‘lsa ham."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-035",
+    "options_en": [
+      "Water is always a free good regardless of treatment or delivery.",
+      "Only the city’s water is a free good because it is sold.",
+      "Water at the village source may be free, while delivered safe water in the city is an economic good.",
+      "Water at the village source becomes an economic good solely because the city exists."
+    ],
+    "options_ru": [
+      "Вода всегда свободное благо, независимо от очистки и доставки.",
+      "Только городская вода свободна, поскольку продаётся.",
+      "Вода у деревенского источника может быть свободным благом, а доставленная безопасная вода в городе — экономическим.",
+      "Вода у деревенского источника становится экономическим благом лишь потому, что существует город."
+    ],
+    "options_uz": [
+      "Suv tozalash yoki yetkazishdan qat’i nazar har doim erkin ne’mat.",
+      "Faqat shahardagi suv erkin ne’mat, chunki u sotiladi.",
+      "Qishloq manbasidagi suv erkin bo‘lishi mumkin, shaharga yetkazilgan xavfsiz suv esa iqtisodiy ne’mat.",
+      "Shahar mavjudligi sababli qishloq manbasidagi suv ham avtomatik iqtisodiy ne’mat bo‘ladi."
+    ]
+  },
+  {
+    "n": 38,
+    "d": "medium",
+    "sec": 160,
+    "k": "B",
+    "en": "A bakery can make the same 200 loaves using method A (16 labour-hours and 6 machine-hours) or method B (8 labour-hours and 12 machine-hours). Labour costs $20 per hour and machine use $20 per hour. Which method costs less, and by how much?",
+    "ru": "Пекарня может выпустить одинаковые 200 буханок способом A (16 человеко-часов и 6 машино-часов) либо способом B (8 человеко-часов и 12 машино-часов). Один час труда стоит $20, один машино-час — $20. Какой способ дешевле и на сколько?",
+    "uz": "Nonvoyxona bir xil 200 ta nonni A usulida (16 ishchi-soat va 6 mashina-soat) yoki B usulida (8 ishchi-soat va 12 mashina-soat) ishlab chiqarishi mumkin. Mehnatning bir soati $20, mashinaning bir soati $20. Qaysi usul arzonroq va qancha?",
+    "opt_en": [
+      "Labour-intensive, by $180",
+      "Automation, by $180",
+      "Automation, by $220",
+      "Labour-intensive, by $220"
+    ],
+    "opt_ru": [
+      "Трудоёмкий, на $180",
+      "Автоматизация, на $180",
+      "Автоматизация, на $220",
+      "Трудоёмкий, на $220"
+    ],
+    "opt_uz": [
+      "Mehnat ko‘p talab qiladigan usul, $180 ga",
+      "Avtomatlashtirish, $180 ga",
+      "Avtomatlashtirish, $220 ga",
+      "Mehnat ko‘p talab qiladigan usul, $220 ga"
+    ],
+    "why": [
+      "Method A costs (16 + 6) × $20 = $440; method B costs (8 + 12) × $20 = $400. Choosing how to produce saves $40 with method B.",
+      "Способ A: (16 + 6) × $20 = $440; способ B: (8 + 12) × $20 = $400. Выбор способа производства B экономит $40.",
+      "A usuli: (16 + 6) × $20 = $440; B usuli: (8 + 12) × $20 = $400. B usulini tanlash $40 tejaydi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-038",
+    "options_en": [
+      "Method A, by $40",
+      "Method B, by $40",
+      "Method B, by $80",
+      "Both cost the same"
+    ],
+    "options_ru": [
+      "Способ A дешевле на $40",
+      "Способ B дешевле на $40",
+      "Способ B дешевле на $80",
+      "Стоимость одинакова"
+    ],
+    "options_uz": [
+      "A usuli $40 ga arzon",
+      "B usuli $40 ga arzon",
+      "B usuli $80 ga arzon",
+      "Narx bir xil"
+    ]
+  },
+  {
+    "n": 41,
+    "d": "medium",
+    "sec": 135,
+    "k": "A",
+    "en": "Before specialisation, three workers each make 12 units per day. After dividing tasks, total daily output rises to 42 units with the same staff and working hours. Approximately how much has output per worker increased in percentage terms?",
+    "ru": "До специализации три работника выпускают по 12 изделий в день. После разделения труда суммарный дневной выпуск при том же штате и времени вырос до 42 изделий. На сколько примерно процентов вырос выпуск на работника?",
+    "uz": "Ixtisoslashuvdan oldin uch ishchining har biri kuniga 12 tadan mahsulot tayyorlaydi. Vazifalar bo‘lingach, shu ishchilar va ish vaqtida jami ishlab chiqarish 42 taga yetdi. Bir ishchiga to‘g‘ri keladigan ishlab chiqarish taxminan necha foiz oshdi?",
+    "opts": [
+      "16.7%",
+      "14.0%",
+      "42.0%",
+      "6.0%"
+    ],
+    "why": [
+      "Output per worker rises from 12 to 42/3 = 14, an increase of 2/12 ≈ 16.7%.",
+      "Выпуск на работника вырос с 12 до 42/3 = 14: прирост 2/12 ≈ 16,7%.",
+      "Bir ishchiga ishlab chiqarish 12 tadan 42/3 = 14 taga oshdi: 2/12 ≈ 16,7%."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-041",
+    "options_en": [
+      "16.7%",
+      "14.0%",
+      "42.0%",
+      "6.0%"
+    ],
+    "options_ru": [
+      "16.7%",
+      "14.0%",
+      "42.0%",
+      "6.0%"
+    ],
+    "options_uz": [
+      "16.7%",
+      "14.0%",
+      "42.0%",
+      "6.0%"
+    ]
+  },
+  {
+    "n": 43,
+    "d": "medium",
+    "sec": 130,
+    "k": "D",
+    "en": "A tidal power station uses natural currents, manufactured turbines and hired engineers. How should these three inputs be classified as factors of production in that order?",
+    "ru": "Приливная электростанция использует природные течения, изготовленные турбины и наёмных инженеров. Как классифицируются эти три фактора производства по порядку?",
+    "uz": "Suv ko‘tarilishidan elektr oluvchi stansiya tabiiy oqimlar, ishlab chiqarilgan turbinalar va yollangan muhandislardan foydalanadi. Ushbu uch omil ketma-ket qanday tasniflanadi?",
+    "opt_en": [
+      "Currents—capital; turbines—land",
+      "Currents—labour; engineers—land",
+      "Turbines—enterprise; engineers—land",
+      "Currents—land; turbines—physical capital"
+    ],
+    "opt_ru": [
+      "Течения — капитал; турбины — земля",
+      "Течения — труд; инженеры — земля",
+      "Турбины — предпринимательство; инженеры — земля",
+      "Течения — земля; турбины — физический капитал"
+    ],
+    "opt_uz": [
+      "Oqimlar — kapital; turbinalar — yer",
+      "Oqimlar — mehnat; muhandislar — yer",
+      "Turbinalar — tadbirkorlik; muhandislar — yer",
+      "Oqimlar — yer; turbinalar — jismoniy kapital"
+    ],
+    "why": [
+      "Natural currents are land, turbines are physical capital, and engineers provide labour.",
+      "Природные течения — земля, турбины — физический капитал, инженеры — труд.",
+      "Tabiiy oqimlar yer, turbinalar jismoniy kapital, muhandislar mehnat omilidir."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-043",
+    "options_en": [
+      "Capital; land; enterprise",
+      "Labour; capital; land",
+      "Land; labour; capital",
+      "Land; capital; labour"
+    ],
+    "options_ru": [
+      "Капитал; земля; предпринимательство",
+      "Труд; капитал; земля",
+      "Земля; труд; капитал",
+      "Земля; капитал; труд"
+    ],
+    "options_uz": [
+      "Kapital; yer; tadbirkorlik",
+      "Mehnat; kapital; yer",
+      "Yer; mehnat; kapital",
+      "Yer; kapital; mehnat"
+    ]
+  },
+  {
+    "n": 45,
+    "d": "medium",
+    "sec": 150,
+    "k": "C",
+    "en": "An economy has a straight-line PPC between 80 tonnes of rice and zero cloth, and zero rice and 40 rolls of cloth. If it raises cloth production from 20 to 30 rolls while staying on the PPC, how many tonnes of rice must it give up?",
+    "ru": "Линейная КПВ проходит через 80 тонн риса и 0 рулонов ткани, а также через 0 риса и 40 рулонов ткани. Если производство ткани вырастет с 20 до 30 рулонов при движении по КПВ, от скольких тонн риса придётся отказаться?",
+    "uz": "Iqtisodiyotning chiziqli IIECsida 80 tonna guruch va 0 o‘ram mato hamda 0 guruch va 40 o‘ram mato nuqtalari bor. IIEC bo‘ylab mato ishlab chiqarish 20 dan 30 o‘ramga oshsa, necha tonna guruchdan voz kechiladi?",
+    "opts": [
+      "10",
+      "40",
+      "20",
+      "5"
+    ],
+    "why": [
+      "Each extra cloth roll costs 80/40 = 2 tonnes of rice; 10 extra rolls cost 20 tonnes.",
+      "Каждый дополнительный рулон ткани стоит 80/40 = 2 тонны риса; 10 рулонов требуют отказаться от 20 тонн.",
+      "Har qo‘shimcha mato o‘rami 80/40 = 2 tonna guruch turadi; 10 o‘ram uchun 20 tonna guruchdan voz kechiladi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-045",
+    "options_en": [
+      "10",
+      "40",
+      "20",
+      "5"
+    ],
+    "options_ru": [
+      "10",
+      "40",
+      "20",
+      "5"
+    ],
+    "options_uz": [
+      "10",
+      "40",
+      "20",
+      "5"
+    ]
+  },
+  {
+    "n": 50,
+    "d": "medium",
+    "sec": 120,
+    "k": "B",
+    "en": "A car park has five available spaces. Six drivers each want at most one and are willing to pay $100, $90, $80, $70, $60 and $50 respectively. What is quantity demanded at the price of $70 and then at the lower price of $60?",
+    "ru": "На стоянке пять доступных мест. Шесть водителей хотят не более одного места и готовы заплатить $100, $90, $80, $70, $60 и $50 соответственно. Каков спрос при цене $70, а затем при снижении до $60?",
+    "uz": "Avtoturargohda beshta joy bor. Olti haydovchi bittadan ortiq joy xohlamaydi va $100, $90, $80, $70, $60 hamda $50 to‘lashga tayyor. $70 narxda va narx $60 ga tushirilganda talab nechta?",
+    "opts": [
+      "5",
+      "4",
+      "6",
+      "3"
+    ],
+    "why": [
+      "Four valuations are at least $70 and five are at least $60, so quantity demanded rises from four to five.",
+      "При цене $70 готовы купить четверо, при $60 — пятеро. Объём спроса растёт с четырёх до пяти.",
+      "$70 narxda to‘rtta, $60 narxda beshta xaridor bor. Talab 4 tadan 5 taga oshadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-050",
+    "options_en": [
+      "5 then 4",
+      "4 then 5",
+      "4 then 6",
+      "5 then 6"
+    ],
+    "options_ru": [
+      "5, затем 4",
+      "4, затем 5",
+      "4, затем 6",
+      "5, затем 6"
+    ],
+    "options_uz": [
+      "5, so‘ng 4",
+      "4, so‘ng 5",
+      "4, so‘ng 6",
+      "5, so‘ng 6"
+    ]
+  }
+]

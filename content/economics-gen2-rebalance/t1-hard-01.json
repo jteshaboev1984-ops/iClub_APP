@@ -1,0 +1,428 @@
+[
+  {
+    "n": 1,
+    "d": "hard",
+    "sec": 180,
+    "k": "B",
+    "en": "An economy can move from A (60 units of food, 20 machines) to B (45 food, 30 machines), then to C (20 food, 40 machines). How much greater is the opportunity cost in food per extra machine on B→C than on A→B?",
+    "ru": "Экономика может перейти от A (60 единиц продовольствия, 20 машин) к B (45 единиц продовольствия, 30 машин), затем к C (20 единиц продовольствия, 40 машин). На сколько единиц продовольствия альтернативная стоимость одной дополнительной машины на участке B→C больше, чем на A→B?",
+    "uz": "Iqtisodiyot A (60 birlik oziq-ovqat, 20 ta mashina) nuqtadan B (45 birlik oziq-ovqat, 30 ta mashina) ga, keyin C (20 birlik oziq-ovqat, 40 ta mashina) ga o‘tadi. B→C oralig‘ida bitta qo‘shimcha mashinaning oziq-ovqatdagi muqobil qiymati A→B ga nisbatan qancha yuqori?",
+    "opts": [
+      "0.5",
+      "1.0",
+      "1.5",
+      "2.5"
+    ],
+    "why": [
+      "The first trade-off is 15/10 = 1.5 food per machine; the second is 25/10 = 2.5. The difference is 1.0.",
+      "На первом участке потери составляют 15/10 = 1,5 единицы продовольствия на машину; на втором — 25/10 = 2,5. Разница равна 1,0.",
+      "Birinchi oraliqda yo‘qotish 15/10 = 1,5 birlik oziq-ovqat, ikkinchisida 25/10 = 2,5. Farq 1,0 ga teng."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-001",
+    "options_en": [
+      "0.5",
+      "1.0",
+      "1.5",
+      "2.5"
+    ],
+    "options_ru": [
+      "0.5",
+      "1.0",
+      "1.5",
+      "2.5"
+    ],
+    "options_uz": [
+      "0.5",
+      "1.0",
+      "1.5",
+      "2.5"
+    ]
+  },
+  {
+    "n": 2,
+    "d": "hard",
+    "sec": 180,
+    "k": "D",
+    "en": "Demand for a product is initially 400 units. Real income rises by 10% (YED = +1.2), while the price of a substitute rises by 5% (XED = +0.8). Assume the two estimated percentage effects are additive and other factors are fixed. What is the new quantity demanded?",
+    "ru": "Первоначальный спрос на товар составляет 400 единиц. Реальный доход растёт на 10% (YED = +1,2), а цена заменителя — на 5% (XED = +0,8). Считайте, что два процентных эффекта складываются, прочие факторы неизменны. Каким станет объём спроса?",
+    "uz": "Mahsulotga dastlabki talab 400 birlik. Real daromad 10% ga oshadi (YED = +1,2), o‘rinbosar mahsulot narxi esa 5% ga oshadi (XED = +0,8). Ikki foizli ta’sir qo‘shiladi, boshqa omillar o‘zgarmaydi deb oling. Yangi talab miqdori qancha?",
+    "opts": [
+      "416",
+      "448",
+      "460",
+      "464"
+    ],
+    "why": [
+      "Income adds 12% and the substitute's price adds 4% to demand, making a 16% increase: 400 × 1.16 = 464.",
+      "Рост дохода добавляет к спросу 12%, повышение цены заменителя — ещё 4%. Всего +16%: 400 × 1,16 = 464.",
+      "Daromad ta’siri talabni 12% ga, o‘rinbosar narxi esa yana 4% ga oshiradi. Jami +16%: 400 × 1,16 = 464."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-002",
+    "options_en": [
+      "416",
+      "448",
+      "460",
+      "464"
+    ],
+    "options_ru": [
+      "416",
+      "448",
+      "460",
+      "464"
+    ],
+    "options_uz": [
+      "416",
+      "448",
+      "460",
+      "464"
+    ]
+  },
+  {
+    "n": 3,
+    "d": "hard",
+    "sec": 180,
+    "k": "B",
+    "en": "Three households value a shared flood-warning system at $45, $40 and $35 respectively. The system costs $100 and everyone benefits whether or not they pay. Which economic conclusion follows from these figures?",
+    "ru": "Три домохозяйства оценивают общую систему предупреждения о наводнении соответственно в $45, $40 и $35. Система стоит $100; её преимуществами пользуются все независимо от оплаты. Какой экономический вывод следует из этих данных?",
+    "uz": "Uchta xonadon umumiy toshqin haqida ogohlantirish tizimini mos ravishda $45, $40 va $35 ga baholaydi. Tizim $100 turadi, uning foydasidan to‘lagan-to‘lamaganidan qat’i nazar hamma foydalanadi. Qaysi iqtisodiy xulosa kelib chiqadi?",
+    "opt_en": [
+      "Total benefit is $80, so provision destroys $20 of value.",
+      "Total benefit exceeds cost by $20, although voluntary funding may fail due to free riding.",
+      "The system is a private good because each household values it differently.",
+      "Only the household valuing it at $45 should pay the entire cost."
+    ],
+    "opt_ru": [
+      "Общая выгода равна $80, поэтому система уничтожает $20 ценности.",
+      "Общая выгода превышает затраты на $20, хотя добровольное финансирование может не сработать из-за безбилетников.",
+      "Это частное благо, поскольку домохозяйства оценивают его по-разному.",
+      "Всю стоимость должно оплатить только домохозяйство, оценивающее систему в $45."
+    ],
+    "opt_uz": [
+      "Umumiy foyda $80; demak, tizim $20 qiymatni yo‘qotadi.",
+      "Umumiy foyda xarajatdan $20 yuqori, biroq tekin foydalanish muammosi tufayli ixtiyoriy moliyalashtirish yetishmasligi mumkin.",
+      "Har bir xonadon turlicha baholagani uchun bu xususiy ne’mat.",
+      "Butun xarajatni tizimni $45 ga baholagan xonadon to‘lashi kerak."
+    ],
+    "why": [
+      "Combined benefit is $120 against a $100 cost, so net social benefit is $20. Non-excludability creates incentives to free ride, which can impede voluntary funding.",
+      "Суммарная выгода $120 при затратах $100: общественная чистая выгода $20. Неисключаемость создаёт стимул пользоваться благом без оплаты.",
+      "Umumiy foyda $120, xarajat $100; sof ijtimoiy foyda $20. Istisno qilib bo‘lmaslik tekin foydalanishni rag‘batlantiradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-003",
+    "options_en": [
+      "Total benefit is $80, so provision destroys $20 of value.",
+      "Total benefit exceeds cost by $20, although voluntary funding may fail due to free riding.",
+      "The system is a private good because each household values it differently.",
+      "Only the household valuing it at $45 should pay the entire cost."
+    ],
+    "options_ru": [
+      "Общая выгода равна $80, поэтому система уничтожает $20 ценности.",
+      "Общая выгода превышает затраты на $20, хотя добровольное финансирование может не сработать из-за безбилетников.",
+      "Это частное благо, поскольку домохозяйства оценивают его по-разному.",
+      "Всю стоимость должно оплатить только домохозяйство, оценивающее систему в $45."
+    ],
+    "options_uz": [
+      "Umumiy foyda $80; demak, tizim $20 qiymatni yo‘qotadi.",
+      "Umumiy foyda xarajatdan $20 yuqori, biroq tekin foydalanish muammosi tufayli ixtiyoriy moliyalashtirish yetishmasligi mumkin.",
+      "Har bir xonadon turlicha baholagani uchun bu xususiy ne’mat.",
+      "Butun xarajatni tizimni $45 ga baholagan xonadon to‘lashi kerak."
+    ]
+  },
+  {
+    "n": 5,
+    "d": "hard",
+    "sec": 165,
+    "k": "C",
+    "en": "A sugary drink is heavily consumed because buyers underestimate its future personal health costs. A study finds no measurable costs imposed on third parties. Which assessment is most defensible?",
+    "ru": "Сладкий напиток потребляют в избытке, потому что покупатели недооценивают будущий вред собственному здоровью. Исследование не выявило измеримых затрат для третьих лиц. Какая оценка наиболее обоснованна?",
+    "uz": "Shirin ichimlik haddan tashqari ko‘p iste’mol qilinadi, chunki xaridorlar o‘z sog‘lig‘iga kelajakdagi zararini yetarli baholamaydilar. Tadqiqot uchinchi shaxslarga o‘lchanadigan zarar topmadi. Qaysi xulosa eng asosli?",
+    "opt_en": [
+      "The case proves a negative externality equal to private health costs.",
+      "The drink is a pure public good because health information matters.",
+      "Imperfect information can cause overconsumption of a demerit good without proving an external cost.",
+      "Every informed buyer would necessarily stop consuming the drink."
+    ],
+    "opt_ru": [
+      "Случай доказывает отрицательный внешний эффект, равный личному вреду здоровью.",
+      "Напиток является чистым общественным благом, поскольку информация о здоровье важна.",
+      "Недостаток информации может вызывать избыточное потребление нежелательного блага и без доказанного внешнего ущерба.",
+      "Каждый информированный покупатель обязательно полностью откажется от напитка."
+    ],
+    "opt_uz": [
+      "Bu holat shaxsiy salomatlik xarajatlariga teng salbiy tashqi ta’sirni isbotlaydi.",
+      "Salomatlik haqidagi axborot muhim bo‘lgani uchun ichimlik sof jamoat ne’matidir.",
+      "Axborot yetishmasligi salbiy ne’matning ortiqcha iste’moliga, tashqi zarar isbotlanmasa ham, olib kelishi mumkin.",
+      "To‘liq ma’lumot olgan har bir xaridor ichimlikdan albatta butunlay voz kechadi."
+    ],
+    "why": [
+      "Private costs borne by the consumer are not automatically external costs. Underestimated private harm supports an information-based explanation of demerit-good overconsumption.",
+      "Личный вред потребителя сам по себе не является внешним ущербом. Недооценка этого вреда объясняет избыточное потребление при несовершенной информации.",
+      "Iste’molchining shaxsiy zarari avtomatik ravishda tashqi zarar emas. Uni kam baholash axborot yetishmasligi orqali ortiqcha iste’molni tushuntiradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-005",
+    "options_en": [
+      "The case proves a negative externality equal to private health costs.",
+      "The drink is a pure public good because health information matters.",
+      "Imperfect information can cause overconsumption of a demerit good without proving an external cost.",
+      "Every informed buyer would necessarily stop consuming the drink."
+    ],
+    "options_ru": [
+      "Случай доказывает отрицательный внешний эффект, равный личному вреду здоровью.",
+      "Напиток является чистым общественным благом, поскольку информация о здоровье важна.",
+      "Недостаток информации может вызывать избыточное потребление нежелательного блага и без доказанного внешнего ущерба.",
+      "Каждый информированный покупатель обязательно полностью откажется от напитка."
+    ],
+    "options_uz": [
+      "Bu holat shaxsiy salomatlik xarajatlariga teng salbiy tashqi ta’sirni isbotlaydi.",
+      "Salomatlik haqidagi axborot muhim bo‘lgani uchun ichimlik sof jamoat ne’matidir.",
+      "Axborot yetishmasligi salbiy ne’matning ortiqcha iste’moliga, tashqi zarar isbotlanmasa ham, olib kelishi mumkin.",
+      "To‘liq ma’lumot olgan har bir xaridor ichimlikdan albatta butunlay voz kechadi."
+    ]
+  },
+  {
+    "n": 7,
+    "d": "hard",
+    "sec": 165,
+    "k": "A",
+    "en": "An economy starts inside its PPC because labour is unemployed. It then employs its idle workers; separately, a farming innovation increases the maximum possible food output but leaves machinery technology unchanged. Which pair correctly describes the two changes?",
+    "ru": "Экономика первоначально находится внутри КПВ из-за безработицы. Затем она вовлекает свободных работников; отдельно новая сельскохозяйственная технология увеличивает максимально возможный выпуск продовольствия, не меняя технологию производства машин. Какая пара правильно описывает эти изменения?",
+    "uz": "Iqtisodiyot ishsizlik tufayli ishlab chiqarish imkoniyatlari egri chizig‘ining (IIEC) ichida joylashgan. Keyin bo‘sh ishchilar ishga jalb etiladi; alohida agrar yangilik oziq-ovqatning maksimal ishlab chiqarilishini oshiradi, mashina texnologiyasi o‘zgarmaydi. Qaysi juftlik to‘g‘ri?",
+    "opt_en": [
+      "Movement towards the existing PPC; outward pivot at the food intercept.",
+      "Outward parallel shift of the PPC; movement along the old curve.",
+      "Movement outside the old PPC; inward shift at both intercepts.",
+      "No change in actual production; a leftward shift of the machinery intercept."
+    ],
+    "opt_ru": [
+      "Движение к существующей КПВ; поворот КПВ наружу у оси продовольствия.",
+      "Параллельный сдвиг КПВ наружу; движение вдоль старой кривой.",
+      "Выход за прежнюю КПВ без роста возможностей; сдвиг обоих пересечений внутрь.",
+      "Отсутствие изменения выпуска; сдвиг пересечения с осью машин влево."
+    ],
+    "opt_uz": [
+      "Mavjud IIEC chegarasiga yaqinlashish; oziq-ovqat o‘qidagi kesishish nuqtasining tashqariga siljishi.",
+      "IIECning parallel tashqariga siljishi; eski egri chiziq bo‘ylab harakat.",
+      "Imkoniyat oshmasdan eski IIECdan tashqariga chiqish; ikkala kesishishning ichkariga siljishi.",
+      "Haqiqiy ishlab chiqarish o‘zgarmaydi; mashina o‘qidagi kesishish chapga siljiydi."
+    ],
+    "why": [
+      "Using idle resources raises actual output without changing capacity. A sector-specific technological improvement expands the frontier only on the food side.",
+      "Использование простаивающих ресурсов повышает фактический выпуск без изменения потенциала. Отраслевой технологический прогресс расширяет границу со стороны продовольствия.",
+      "Bo‘sh resurslarni ishga solish imkoniyat chegarasini o‘zgartirmasdan ishlab chiqarishni oshiradi; tarmoq innovatsiyasi chegarani oziq-ovqat tomon kengaytiradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-007",
+    "options_en": [
+      "Movement towards the existing PPC; outward pivot at the food intercept.",
+      "Outward parallel shift of the PPC; movement along the old curve.",
+      "Movement outside the old PPC; inward shift at both intercepts.",
+      "No change in actual production; a leftward shift of the machinery intercept."
+    ],
+    "options_ru": [
+      "Движение к существующей КПВ; поворот КПВ наружу у оси продовольствия.",
+      "Параллельный сдвиг КПВ наружу; движение вдоль старой кривой.",
+      "Выход за прежнюю КПВ без роста возможностей; сдвиг обоих пересечений внутрь.",
+      "Отсутствие изменения выпуска; сдвиг пересечения с осью машин влево."
+    ],
+    "options_uz": [
+      "Mavjud IIEC chegarasiga yaqinlashish; oziq-ovqat o‘qidagi kesishish nuqtasining tashqariga siljishi.",
+      "IIECning parallel tashqariga siljishi; eski egri chiziq bo‘ylab harakat.",
+      "Imkoniyat oshmasdan eski IIECdan tashqariga chiqish; ikkala kesishishning ichkariga siljishi.",
+      "Haqiqiy ishlab chiqarish o‘zgarmaydi; mashina o‘qidagi kesishish chapga siljiydi."
+    ]
+  },
+  {
+    "n": 11,
+    "d": "hard",
+    "sec": 195,
+    "k": "A",
+    "en": "At an initial common price, producer X supplies 100 units with PES 2.0, and producer Y supplies 300 units with PES 0.5. Price rises by 10%. Using the given percentage-change approximations, what is the market PES based on the combined supply?",
+    "ru": "При первоначальной общей цене производитель X поставляет 100 единиц с PES 2,0, а производитель Y — 300 единиц с PES 0,5. Цена растёт на 10%. Используя приближение процентных изменений, найдите PES общего предложения рынка.",
+    "uz": "Boshlang‘ich umumiy narxda X ishlab chiqaruvchi 100 birlikni PES 2,0 bilan, Y esa 300 birlikni PES 0,5 bilan taklif qiladi. Narx 10% ga oshadi. Berilgan foizli o‘zgarishlar yaqinlashuvida jami bozor taklifining PES qiymati qancha?",
+    "opts": [
+      "0.875",
+      "1.25",
+      "1.50",
+      "2.50"
+    ],
+    "why": [
+      "X adds 20 units and Y adds 15, so market supply rises 35/400 = 8.75%. PES = 8.75%/10% = 0.875, not the simple average of individual elasticities.",
+      "X добавляет 20 единиц, Y — 15. Рыночное предложение растёт на 35/400 = 8,75%; PES = 8,75%/10% = 0,875, а не среднему индивидуальных эластичностей.",
+      "X 20 birlik, Y 15 birlik qo‘shadi; bozor taklifi 35/400 = 8,75% ga oshadi. PES = 8,75%/10% = 0,875; oddiy o‘rtacha olinmaydi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-011",
+    "options_en": [
+      "0.875",
+      "1.25",
+      "1.50",
+      "2.50"
+    ],
+    "options_ru": [
+      "0.875",
+      "1.25",
+      "1.50",
+      "2.50"
+    ],
+    "options_uz": [
+      "0.875",
+      "1.25",
+      "1.50",
+      "2.50"
+    ]
+  },
+  {
+    "n": 13,
+    "d": "hard",
+    "sec": 170,
+    "k": "D",
+    "en": "An economy's linear PPC initially runs from 100 units of food (zero machines) to 50 machines (zero food). Better machinery technology raises only the machine intercept to 80. At food output of 50 units, how many additional machines can now be produced efficiently compared with the original PPC?",
+    "ru": "Первоначально линейная КПВ идёт от 100 единиц продовольствия (0 машин) до 50 машин (0 продовольствия). Улучшение технологии производства машин увеличивает только максимум машин до 80. На сколько больше машин теперь можно эффективно произвести при выпуске 50 единиц продовольствия?",
+    "uz": "Iqtisodiyotning chiziqli IIECsi dastlab 100 birlik oziq-ovqat (0 mashina) va 50 mashina (0 oziq-ovqat) nuqtalaridan o‘tadi. Mashina texnologiyasi faqat mashina maksimumini 80 taga oshiradi. 50 birlik oziq-ovqat ishlab chiqarilganda avvalgidan nechta ko‘p mashina ishlab chiqarish mumkin?",
+    "opts": [
+      "5",
+      "10",
+      "25",
+      "15"
+    ],
+    "why": [
+      "At 50 food, the original linear PPC permits 25 machines, while the new one permits 40. The increase is 15 machines.",
+      "При 50 единицах продовольствия прежняя линейная КПВ допускает 25 машин, новая — 40. Прирост равен 15.",
+      "50 birlik oziq-ovqatda eski chiziqli IIEC 25 ta, yangisi 40 ta mashinaga imkon beradi. Farq 15 ta."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-013",
+    "options_en": [
+      "5",
+      "10",
+      "25",
+      "15"
+    ],
+    "options_ru": [
+      "5",
+      "10",
+      "25",
+      "15"
+    ],
+    "options_uz": [
+      "5",
+      "10",
+      "25",
+      "15"
+    ]
+  },
+  {
+    "n": 14,
+    "d": "hard",
+    "sec": 190,
+    "k": "C",
+    "en": "At any non-negative price P in the relevant range, two buyers demand Q1 = 60 − 2P and Q2 = 40 − P. Market supply is Qs = 10 + P. What are the equilibrium price and total quantity?",
+    "ru": "При неотрицательной цене P в рассматриваемом диапазоне спрос двух покупателей: Q1 = 60 − 2P и Q2 = 40 − P. Рыночное предложение: Qs = 10 + P. Найдите равновесную цену и общий объём.",
+    "uz": "Tegishli diapazondagi manfiy bo‘lmagan P narxda ikki xaridor talabi Q1 = 60 − 2P va Q2 = 40 − P. Bozor taklifi Qs = 10 + P. Muvozanat narxi va umumiy miqdori qanday?",
+    "opts": [
+      "P = 30; Q = 40",
+      "P = 20; Q = 30",
+      "P = 22.5; Q = 32.5",
+      "P = 25; Q = 35"
+    ],
+    "why": [
+      "Horizontal addition gives Qd = 100 − 3P. Equate with Qs = 10 + P: 90 = 4P, so P = 22.5 and Q = 32.5.",
+      "Горизонтальное сложение даёт Qd = 100 − 3P. Приравниваем к Qs = 10 + P: 90 = 4P, поэтому P = 22,5, Q = 32,5.",
+      "Gorizontal qo‘shish bilan Qd = 100 − 3P. Qs = 10 + P ga tenglashtiramiz: 90 = 4P; P = 22,5 va Q = 32,5."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-014",
+    "options_en": [
+      "P = 30; Q = 40",
+      "P = 20; Q = 30",
+      "P = 22.5; Q = 32.5",
+      "P = 25; Q = 35"
+    ],
+    "options_ru": [
+      "P = 30; Q = 40",
+      "P = 20; Q = 30",
+      "P = 22.5; Q = 32.5",
+      "P = 25; Q = 35"
+    ],
+    "options_uz": [
+      "P = 30; Q = 40",
+      "P = 20; Q = 30",
+      "P = 22.5; Q = 32.5",
+      "P = 25; Q = 35"
+    ]
+  },
+  {
+    "n": 16,
+    "d": "hard",
+    "sec": 195,
+    "k": "B",
+    "en": "Market demand is initially Qd = 150 − 2P and supply is Qs = 30 + P. After a demand increase, Qd becomes 180 − 2P; improved production also shifts supply to Qs = 45 + P. What are the changes in equilibrium price and quantity?",
+    "ru": "Первоначально рыночный спрос Qd = 150 − 2P, предложение Qs = 30 + P. После роста спроса Qd = 180 − 2P; улучшение производства одновременно меняет предложение на Qs = 45 + P. Как изменятся равновесные цена и объём?",
+    "uz": "Dastlab bozor talabi Qd = 150 − 2P, taklif Qs = 30 + P. Talab oshgach Qd = 180 − 2P bo‘ladi; ishlab chiqarish yaxshilangani uchun taklif ham Qs = 45 + P ga o‘zgaradi. Muvozanat narxi va miqdori qanday o‘zgaradi?",
+    "opts": [
+      "Price +10, quantity +10",
+      "Price +5, quantity +20",
+      "Price −5, quantity +20",
+      "Price +5, quantity +5"
+    ],
+    "why": [
+      "Originally 150 − 2P = 30 + P gives P = 40 and Q = 70. Afterwards 180 − 2P = 45 + P gives P = 45 and Q = 90: +5 and +20.",
+      "Сначала P = 40, Q = 70. После двух изменений P = 45, Q = 90. Значит, цена растёт на 5, объём — на 20.",
+      "Avval P = 40, Q = 70. Ikkala o‘zgarishdan so‘ng P = 45, Q = 90. Narx +5, miqdor +20."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-016",
+    "options_en": [
+      "Price +10, quantity +10",
+      "Price +5, quantity +20",
+      "Price −5, quantity +20",
+      "Price +5, quantity +5"
+    ],
+    "options_ru": [
+      "Цена +10, объём +10",
+      "Цена +5, объём +20",
+      "Цена −5, объём +20",
+      "Цена +5, объём +5"
+    ],
+    "options_uz": [
+      "Narx +10, miqdor +10",
+      "Narx +5, miqdor +20",
+      "Narx −5, miqdor +20",
+      "Narx +5, miqdor +5"
+    ]
+  },
+  {
+    "n": 20,
+    "d": "hard",
+    "sec": 180,
+    "k": "C",
+    "en": "Tea demand is initially 500 packs. A 10% rise in coffee's price raises tea demand (XED = +0.8), while a simultaneous 5% increase in tea's own price reduces tea quantity demanded (PED = −1.2). Assume the first-order percentage effects add. What is the new quantity of tea demanded?",
+    "ru": "Первоначальный спрос на чай — 500 упаковок. Подорожание кофе на 10% повышает спрос на чай (XED = +0,8), а одновременное повышение цены самого чая на 5% снижает его объём спроса (PED = −1,2). Считайте, что процентные эффекты первого порядка складываются. Найдите новый объём спроса на чай.",
+    "uz": "Choyga dastlabki talab 500 qadoq. Qahva narxining 10% ga oshishi choy talabini ko‘paytiradi (XED = +0,8), choyning o‘z narxi 5% ga oshishi esa talab miqdorini kamaytiradi (PED = −1,2). Birinchi tartibli foizli ta’sirlar qo‘shiladi deb oling. Choyga yangi talab qancha?",
+    "opts": [
+      "430",
+      "500",
+      "510",
+      "540"
+    ],
+    "why": [
+      "The substitute-price effect is +8% and the own-price effect is −6%. Net +2% gives 500 × 1.02 = 510.",
+      "Повышение цены заменителя даёт +8%, изменение собственной цены — −6%. Итог +2%: 500 × 1,02 = 510.",
+      "O‘rinbosar narxi ta’siri +8%, o‘z narxi ta’siri −6%. Sof +2%: 500 × 1,02 = 510."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-020",
+    "options_en": [
+      "430",
+      "500",
+      "510",
+      "540"
+    ],
+    "options_ru": [
+      "430",
+      "500",
+      "510",
+      "540"
+    ],
+    "options_uz": [
+      "430",
+      "500",
+      "510",
+      "540"
+    ]
+  }
+]
