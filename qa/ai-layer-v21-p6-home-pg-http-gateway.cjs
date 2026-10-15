@@ -116,6 +116,38 @@ function makeServices(){
    return{allowed,evidenceId:id,evidenceRevision:rev,evidenceHash,
     subjectKey:subject,actionCode:v.actionCode};
   },
+  async verifyAtomicDeliverySnapshot({userId,contextHandle,locale,plan}={}){
+   // Only private disposable PG; never query live Supabase. Exact signed
+   // action values become a JSONB literal after strict type/character check.
+   if(!UUID.test(userId||"")||!UUID.test(contextHandle||"")||
+    !["ru","uz","en"].includes(locale)||
+    !Number.isSafeInteger(plan?.screenRevision)||plan.screenRevision<1||
+    !Number.isSafeInteger(plan?.expiresAtMs)||plan.expiresAtMs<1||
+    !Array.isArray(plan.actions)||plan.actions.length<1||plan.actions.length>3)
+    return false;
+   for(const a of plan.actions){
+    if(!a||!["continue_enrolled_subject","review_finalized_practice",
+       "review_open_tour_archive"].includes(a.actionCode)||
+      !WORD.test(a.subjectKey)||!/^[a-z][a-z0-9_]{2,110}$/.test(a.actionId)||
+      !Number.isSafeInteger(a.evidenceRevision)||a.evidenceRevision<1||
+      !/^[0-9a-f]{64}$/.test(a.sourceHash)||
+      !/^[0-9a-f]{64}$/.test(a.evidenceHash)||
+      !/^[a-z0-9_.-]{1,80}$/.test(a.sourceVersion))return false;
+   }
+   const path=join(__dirname,"sql_drafts",
+    "iclub_ai_v21_home_atomic_delivery_READ_ONLY.sql");
+   const template=readFileSync(path,"utf8");
+   const values={
+    "{{USER}}":userId,"{{HANDLE}}":contextHandle,"{{LOCALE}}":locale,
+    "{{REVISION}}":String(plan.screenRevision),
+    "{{EXPIRES_MS}}":String(plan.expiresAtMs),
+    "{{ACTIONS_JSON}}":JSON.stringify(plan.actions).replace(/'/g,"''")
+   };
+   let query=template;
+   for(const [tag,value] of Object.entries(values))query=query.replaceAll(tag,value);
+   if(query.includes("{{")||!/^\s*--/.test(query))return false;
+   return sql(query)==="true";
+  },
   async readEditorialRelease(locale,code,subject){
    if(!["ru","uz","en"].includes(locale)||!CODE_INTENT[code]||
     !WORD.test(subject||""))return{ready:false};
