@@ -27,7 +27,7 @@ test("§106 every visible tied subject matches the existing iClub RU UZ EN i18n.
  }
 });
 test("§106 Home QA never inserts untrusted response as HTML or gives tie fake action",()=>{
- a.match(html,/item\.textContent=SUBJECT_NAMES\[locale\]\[subject\]/);
+ a.match(html,/item\.textContent=SUBJECT_NAMES\[locale\]\[option\.subjectKey\]/);
  a.match(html,/Array\.isArray\(data\.choices\)/);
  a.match(html,/new Set\(data\.choices\.map/);
  a.doesNotMatch(html,/innerHTML\s*=\s*data\./);
