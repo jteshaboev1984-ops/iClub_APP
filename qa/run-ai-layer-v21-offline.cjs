@@ -34,6 +34,7 @@ const cases = [
  "qa/ai-layer-v21-owner-product-gate.test.cjs",
  "qa/ai-layer-v21-p6-home-approved-priority.test.cjs",
  "qa/ai-layer-v21-p6-home-signed-server-bridge.test.cjs",
+ "qa/ai-layer-v21-p6-commercial-contract-adapter.test.cjs",
  "qa/ai-layer-v21-p6-nav-approved-locale.test.cjs",
  "qa/ai-layer-v21-p6-approved-copy-bundle.test.cjs",
  "qa/ai-layer-v21-p6-home-source-drift.test.cjs",
