@@ -1,0 +1,27 @@
+
+body[data-qa-ai-review] .qa-ai-banner{position:fixed;top:calc(4px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:120;pointer-events:none;background:#173960;color:#fff;border-radius:999px;padding:6px 13px;font-size:10px;font-weight:800;box-shadow:0 4px 12px #172d462c;white-space:nowrap}
+body[data-qa-ai-review] #qa-ai-root{position:fixed;inset:0;z-index:110;pointer-events:none;font-family:inherit}
+body[data-qa-ai-review] .qa-ai-mark{position:fixed;right:14px;bottom:calc(80px + env(safe-area-inset-bottom,0px));height:50px;width:50px;border:1px solid #d9e5f8;background:white;border-radius:16px;box-shadow:0 12px 29px #1b376139;display:grid;place-items:center;pointer-events:auto;cursor:pointer}
+body[data-qa-ai-review] .qa-ai-mark img{width:31px;height:31px;object-fit:contain}
+body[data-qa-ai-review] .qa-ai-mark::after{content:"AI";position:absolute;right:-5px;bottom:-5px;border:2px solid white;border-radius:6px;background:#2F6FD6;color:white;font-weight:900;font-size:9px;padding:2px 4px}
+body[data-qa-ai-review] .qa-ai-sheet{position:fixed;right:12px;bottom:calc(75px + env(safe-area-inset-bottom,0px));width:min(390px,calc(100vw - 24px));height:min(620px,calc(100dvh - 115px));border-radius:24px;border:1px solid #e1e7f2;background:white;box-shadow:0 24px 62px #0f234d38;pointer-events:auto;display:flex;flex-direction:column;overflow:hidden}
+body[data-qa-ai-review] .qa-ai-sheet[hidden],body[data-qa-ai-review] .qa-ai-mark[hidden]{display:none!important}
+body[data-qa-ai-review] .qa-ai-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 15px;background:#f5f8ff;border-bottom:1px solid #e3eaf5}
+body[data-qa-ai-review] .qa-ai-head strong{display:block;color:#0f172a;font-size:15px;font-weight:850}
+body[data-qa-ai-review] .qa-ai-head small{display:block;color:#73849a;font-size:11px;margin-top:4px;max-width:240px}
+body[data-qa-ai-review] .qa-ai-action{width:34px;height:34px;border:0;border-radius:99px;background:#e5ebf5;color:#344763;font-size:19px;cursor:pointer}
+body[data-qa-ai-review] .qa-ai-scroll{padding:17px 14px;min-height:0;flex:1;overflow-y:auto}
+body[data-qa-ai-review] .qa-ai-scroll h2{font-size:17px;font-weight:850;letter-spacing:-.015em;margin:0 0 8px}
+body[data-qa-ai-review] .qa-ai-scroll p{font-size:13px;line-height:1.52;color:#64748b;margin:0 0 15px}
+body[data-qa-ai-review] .qa-ai-thread{display:flex;flex-direction:column;gap:9px}
+body[data-qa-ai-review] .qa-ai-bubble{align-self:flex-start;background:#f1f5f9;border-radius:15px 15px 15px 4px;color:#0f172a;font-size:13px;line-height:1.5;padding:10px 12px;max-width:93%;overflow-wrap:anywhere}
+body[data-qa-ai-review] .qa-ai-bubble.user{align-self:flex-end;background:#2f6fd6;color:white;border-radius:15px 15px 4px 15px}
+body[data-qa-ai-review] .qa-ai-suggestions{display:flex;gap:7px;flex-wrap:wrap;padding:10px 12px;border-top:1px solid #e8eef7}
+body[data-qa-ai-review] .qa-ai-chip{background:#f3f7ff;border:1px solid #dbe7fa;border-radius:99px;color:#245eaf;font-size:12px;font-weight:750;padding:9px 12px;cursor:pointer}
+body[data-qa-ai-review] .qa-ai-compose{display:grid;grid-template-columns:minmax(0,1fr)42px;gap:8px;padding:9px 11px;border-top:1px solid #e9eef6}
+body[data-qa-ai-review] .qa-ai-compose textarea{font:inherit;font-size:13px;border:1px solid #dce5f2;border-radius:13px;padding:11px 12px;min-height:42px;resize:none;outline:none;min-width:0}
+body[data-qa-ai-review] .qa-ai-send{border:0;border-radius:13px;background:#2f6fd6;color:white;font-weight:850;font-size:17px;cursor:pointer}
+body[data-qa-ai-review] .qa-ai-foot{text-align:center;background:#f6f8fc;border-top:1px solid #edf0f6;color:#75849a;font-size:10.5px;padding:7px 10px}
+body[data-qa-ai-review] .qa-ai-sheet.expanded{height:calc(100dvh - 20px);bottom:10px;width:min(850px,calc(100vw - 20px))}
+body[data-qa-ai-review] #iclub-global-ai-root{display:none!important}
+@media(max-width:600px){body[data-qa-ai-review] .qa-ai-sheet{bottom:0;left:0;right:0;width:100%;height:min(78dvh,720px);border-radius:22px 22px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}body[data-qa-ai-review] .qa-ai-sheet.expanded{height:100dvh;width:100%;border-radius:0;bottom:0}body[data-qa-ai-review] .qa-ai-banner{font-size:9px}}

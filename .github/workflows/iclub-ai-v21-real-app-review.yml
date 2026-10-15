@@ -1,0 +1,23 @@
+name: iClub AI real-app visual QA
+on:
+  push:
+    branches: ['qa/iclub-ai-v21-real-app-review-20261015']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/qa/iclub-ai-v21-real-app-review-20261015'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          node --check qa/ai-v21-native-review.js
+          node --test qa/ai-v21-preview-safety.test.cjs
+      - name: Production features preserved byte-for-byte
+        run: |
+          set -euo pipefail
+          x="$(git diff --name-only ab96c88b3ed7ad355af227c3e420e19cc2e5d158 HEAD -- app.js style.css i18n.js global-ai-ui.js global-ai-ui.css exam-prep/ supabase/ commercial-access-ui.js plans-ui.js)"
+          test -z "$x"
