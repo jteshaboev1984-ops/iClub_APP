@@ -93,8 +93,11 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   scratchSql("UPDATE private.iclub_subject_slot_selections "+
    "SET competitive_selected=false WHERE subject_key='economics'");
   const notChosen=await send();
-  a.equal(notChosen.status,403,
-   "A competitive slot without actual competitive selection must NOT grant Tour");
+  a.equal(notChosen.status,200,
+   "Without Tour selection another confirmed study subject remains eligible");
+  a.equal(notChosen.body.actionCode,"continue_enrolled_subject");
+  a.equal(notChosen.body.subjectKey,"biology");
+  a.notEqual(notChosen.body.actionCode,"review_open_tour_archive");
   scratchSql("UPDATE private.iclub_subject_slot_selections "+
    "SET competitive_selected=true WHERE subject_key='economics'");
   a.equal((await send()).body.actionCode,"review_open_tour_archive");
