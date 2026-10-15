@@ -165,6 +165,42 @@ async function run(){
      "A used handoff cannot stay selectable");
     console.log("HOME_ACTION_CHROME_CONFIRM_GREEN: "+language+" one-use synthetic confirmation only");
 
+    // New independent Study context: Home -> server route -> fresh
+    // authorised read -> mobile/desktop UI -> Back -> Home.
+    const study=await cdp.send("Runtime.evaluate",{
+     expression:'(async()=>{document.querySelector("#open-study").click();'+
+      'for(let i=0;i<180;i++){const s=window.__qaHomeState();'+
+      'if(s.page==="study"||s.state==="denied")return {...s,'+
+      'headline:document.querySelector("#study-heading").textContent,'+
+      'body:document.querySelector("#study-result").textContent,'+
+      'overflow:document.documentElement.scrollWidth>innerWidth+1};'+
+      'await new Promise(resolve=>setTimeout(resolve,40));}'+
+      'return window.__qaHomeState()})()',
+     awaitPromise:true,returnByValue:true
+    });
+    if(study.exceptionDetails)throw Error("Study screen Chrome exception "+language);
+    const shown=study.result?.value;
+    assert.equal(shown?.page,"study",language+" "+JSON.stringify(shown));
+    assert.equal(shown.studyTarget,"subject-hub");
+    assert.equal(shown.studySubject,"biology");
+    assert.equal(shown.overflow,false);
+    assert(shown.headline.length>6&&shown.body.length>12);
+    const back=await cdp.send("Runtime.evaluate",{
+     expression:'(async()=>{document.querySelector("#study-back").click();'+
+      'for(let i=0;i<180;i++){const s=window.__qaHomeState();'+
+      'if(s.page==="home"&&s.state==="idle")return s;'+
+      'await new Promise(resolve=>setTimeout(resolve,40));}'+
+      'return window.__qaHomeState()})()',
+     awaitPromise:true,returnByValue:true
+    });
+    if(back.exceptionDetails)throw Error("Study Back Chrome exception "+language);
+    assert.equal(back.result?.value?.page,"home");
+    assert.equal(back.result?.value?.state,"idle");
+    assert.equal(back.result?.value?.studyTarget,null);
+    console.log("HOME_STUDY_BACK_CHROME_GREEN: "+language+
+     " separate scoped subject read, accessible back, no progress writes");
+
+
    }
   }finally{
    scratchSql("UPDATE public.practice_session_answers_v4 "+
