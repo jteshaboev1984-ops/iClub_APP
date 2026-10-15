@@ -822,3 +822,19 @@
 .iclub-visual-v3 #courses-my-recs .iclub-sx-history-preview:has(.iclub-topic-history-header):not(:has(.iclub-topic-history-recent)) {
   margin-bottom:2px;
 }
+
+
+/* STITCH SECONDARY TABS UNDERLAY FIX
+   Premium's generic .list > * rule made this NAV a stretched white card.
+   Stitch's second-level tabs are two standalone pills with no long track. */
+.iclub-visual-v3 #courses-my-recs #my-recs-list > nav.iclub-sx-subtabs {
+  align-self: flex-start;
+  width: max-content;
+  max-width: 100%;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
