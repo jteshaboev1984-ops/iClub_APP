@@ -3,6 +3,7 @@ const {test}=require("node:test");
 const assert=require("node:assert/strict");
 const fs=require("node:fs");
 const {QaV21RealAcademicScreenBridge}=require("./ai-v21-real-academic-screen-bridge.cjs");
+const {QaV21ScreenClient}=require("./ai-layer-v21-ui-transport.cjs");
 const app=fs.readFileSync("app.js","utf8");
 const shell=fs.readFileSync("qa/ai-v21-real-academic-screen-bridge.cjs","utf8");
 function deferred(){
@@ -67,7 +68,7 @@ function fixture(){
  };
  const bridge=new QaV21RealAcademicScreenBridge({
   document,client:transport,serverResolver:resolver});
- return {flags,row,wrong,transport,resolver,bridge,calls,root};
+ return {flags,row,wrong,transport,resolver,bridge,calls,root,document};
 }
 test("actual APP exposes attempt marker and question marker but no canonical v4 session attribute",()=>{
  assert.match(app,/dataset\.practiceAiAttemptId/);
@@ -248,4 +249,61 @@ test("unsupported locale is denied before any server resolver or mint",async()=>
   assert.equal(result.ok,false,String(locale));
   assert.equal(x.calls.filter(y=>["resolve","mint","status"].includes(y[0])).length,0);
  }
+});
+
+test("real QA bridge composes authorized HTTP resolver, canonical mint, source gate and answer",async()=>{
+ const x=fixture(),requests=[],U="11111111-1111-4111-8111-111111111111";
+ const handle="33333333-3333-4333-8333-333333333333";
+ const client=new QaV21ScreenClient({
+  readJwt:async()=>"qa-signed-token-substitute",
+  newRequestId:()=>"44444444-4444-4444-8444-444444444444",
+  post:async request=>{
+   requests.push(request);
+   if(request.path==="/context"&&request.body.action==="resolvePracticeV4")
+    return {ok:true,kind:"server_resolved_practice_v4",
+     attemptReference:request.body.attemptReference,
+     questionId:request.body.questionId,sessionId:900};
+   if(request.path==="/context"&&request.body.action==="mint")
+    return {ok:true,contextHandle:handle,expiresInSeconds:90};
+   if(request.path==="/context"&&request.body.action==="revoke")
+    return {ok:true};
+   if(request.path==="/answer"&&request.body.intent==="status")
+    return {ok:true,state:"available",route:"practice_result"};
+   if(request.path==="/answer"&&request.body.intent==="answer")
+    return {ok:true,reply:"Prepared, synthetic, verified for review"};
+   return {ok:false,reason:"unavailable"};
+  }
+ });
+ const bridge=new QaV21RealAcademicScreenBridge({
+  document:x.document,client,serverResolver:client
+ });
+ assert.equal((await bridge.chooseReviewQuestion(x.row,"uz")).ok,true);
+ const response=await bridge.explainSelectedError("uz");
+ assert.equal(response.ok,true);
+ assert.equal(requests.length,4);
+ assert.deepEqual(requests.map(c=>[
+  c.path,c.body.action||c.body.intent
+ ]),[
+  ["/context","resolvePracticeV4"],
+  ["/context","mint"],
+  ["/answer","status"],
+  ["/answer","answer"]
+ ]);
+ assert.deepEqual(requests[0].body,{
+  action:"resolvePracticeV4",attemptReference:701,questionId:202
+ });
+ assert.deepEqual(requests[1].body,{
+  action:"mint",sessionId:900,questionId:202
+ });
+ assert.equal(requests[2].body.appLocale,"uz");
+ assert.equal(requests[3].body.appLocale,"uz");
+ assert.equal(requests[3].body.promptKey,"practice_error");
+ for(const req of requests){
+  assert.equal(req.authorization,"Bearer qa-signed-token-substitute");
+  for(const forbidden of ["userId","ownerId","subject","score","correctAnswer","topic","sourceHash"])
+   assert.equal(Object.hasOwn(req.body,forbidden),false,forbidden);
+ }
+ await bridge.onNavigation();
+ assert.equal(requests.at(-1).body.action,"revoke");
+ assert.equal((await bridge.explainSelectedError("uz")).ok,false);
 });
