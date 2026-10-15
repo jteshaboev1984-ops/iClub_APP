@@ -1595,6 +1595,14 @@ html, body {
   hyphens: auto;
 }
 
+/* Practice-only typography: long questions without altering competitive Tours. */
+#courses-practice-quiz #practice-question {
+  font-weight: 600;
+  line-height: 1.58;
+  hyphens: none;
+  word-break: normal;
+}
+
 .options { display: flex; flex-direction: column; gap: 10px; }
 
 .option {

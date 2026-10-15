@@ -18159,15 +18159,19 @@ try {
 
     wrap.innerHTML = "";
 
-    // Difficulty hint (small)
-    const diff = document.createElement("div");
-    diff.className = "muted small";
-    diff.style.marginBottom = "8px";
-    const diffLabel = t("practice_difficulty") || "Сложность";
-    const diffKey = `difficulty_${String(q.difficulty || "").toLowerCase()}`;
-    const diffText = t(diffKey) || q.difficulty || "";
-    diff.textContent = `${diffLabel}: ${diffText}`;
-    wrap.appendChild(diff);
+    // Economics Gen2 content has no authored difficulty ratings: never label all items "medium".
+    // Retain established difficulty labels for other subjects without changing assessment logic.
+    const isEconomicsGen2 = String(q.book_ref || q.bookReference || "").startsWith("EC9708:G2:");
+    if (!isEconomicsGen2) {
+      const diff = document.createElement("div");
+      diff.className = "muted small";
+      diff.style.marginBottom = "8px";
+      const diffLabel = t("practice_difficulty") || "Сложность";
+      const diffKey = `difficulty_${String(q.difficulty || "").toLowerCase()}`;
+      const diffText = t(diffKey) || q.difficulty || "";
+      diff.textContent = `${diffLabel}: ${diffText}`;
+      wrap.appendChild(diff);
+    }
 
     if (q.type === "mcq") {
       const selectedIndex = quiz.answers[quiz.index];
