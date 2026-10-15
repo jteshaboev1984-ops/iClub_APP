@@ -97,16 +97,39 @@ async function buildHomePlan(s,{userId,contextHandle,locale}={}){
   const end=s.nowMs();
   if(!matching(scan,finalScan)||!matching(screen,finalScreen)||
    !cleanTime(end)||end<now||end>=screen.expiresAtMs)return denied();
-  for(const v of scan.candidates){
+  for(const [index,v] of scan.candidates.entries()){
    const intent=CODE_INTENT[v.actionCode];
    const lastAccess=await s.verifySubjectAccess(userId,v.subjectKey,intent);
    if(!accessApproved(lastAccess,userId,v.subjectKey,intent))
     return denied();
+   // An independently approved source or academic proof can be revoked while
+   // commercial rights and current-screen reads are awaited. Revalidate both
+   // hashes/versions immediately before signing; do not trust old booleans.
+   const latestEvidence=await s.verifyAcademicEvidence(userId,v);
+   const earlier=actions[index];
+   if(latestEvidence?.allowed!==true||
+    latestEvidence.evidenceId!==v.evidenceId||
+    latestEvidence.evidenceRevision!==earlier.evidenceRevision||
+    latestEvidence.evidenceHash!==earlier.evidenceHash||
+    latestEvidence.subjectKey!==v.subjectKey||
+    latestEvidence.actionCode!==v.actionCode)return denied();
+   const latestRelease=await s.readEditorialRelease(locale,v.actionCode,v.subjectKey);
+   if(latestRelease?.ready!==true||latestRelease.rightsApproved!==true||
+    latestRelease.contentApproved!==true||latestRelease.sourceConflict!==false||
+    latestRelease.sourceHash!==earlier.sourceHash||
+    latestRelease.sourceVersion!==earlier.sourceVersion)return denied();
   }
-  const expiresAtMs=Math.min(screen.expiresAtMs,end+30000);
+  // Final screen/scan read after every await in the revalidation cycle.
+  const stableScreen=await s.readCurrentScreen(userId,contextHandle);
+  const stableScan=await s.readServerScan(userId,contextHandle);
+  const signedAt=s.nowMs();
+  if(!matching(screen,stableScreen)||!matching(scan,stableScan)||
+    !cleanTime(signedAt)||signedAt<end||signedAt>=screen.expiresAtMs)
+   return denied();
+  const expiresAtMs=Math.min(screen.expiresAtMs,signedAt+30000);
   if(!Number.isSafeInteger(expiresAtMs)||expiresAtMs<=end)return denied();
   const signed=signPlan({ownerId:userId,screenRevision:screen.revision,
-   planRevision:screen.revision,issuedAtMs:end,expiresAtMs,
+   planRevision:screen.revision,issuedAtMs:signedAt,expiresAtMs,
    policyVersion,priorityCoverage:{
     activeEnrollments:true,finalizedPractice:true,
     openTourArchives:true,ownerScope:true
