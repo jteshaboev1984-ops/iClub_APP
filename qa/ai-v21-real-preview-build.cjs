@@ -64,10 +64,18 @@ for(const [productFile,fixtureFile] of [
   const dest=path.join(out,productFile);
   assert.ok(fs.existsSync(src),"Missing QA visual overlay: "+fixtureFile);
   const contents=fs.readFileSync(src,"utf8");
-  assert.ok(contents.includes("iclub-global-ai-mark-symbol"),
-    "QA brand symbol marker absent: "+fixtureFile);
+  assert.ok(contents.includes("iclub-global-ai-mark-logo"),
+    "Architect-approved AI logo marker absent: "+fixtureFile);
   fs.writeFileSync(dest,contents);
 }
+// Dedicated QA-only approved Option A asset. Product logo.png is untouched.
+const aiLogo=path.join(__dirname,"iclub-ai-tutor-a-96.webp");
+assert.ok(fs.existsSync(aiLogo),"Approved AI Tutor variant A icon missing");
+const asset=fs.readFileSync(aiLogo);
+assert.equal(asset.length,3394,"Approved logo asset changed without design approval");
+assert.equal(asset.subarray(0,4).toString("ascii"),"RIFF","AI logo must be WebP");
+assert.equal(asset.subarray(8,12).toString("ascii"),"WEBP","AI logo content invalid");
+fs.writeFileSync(path.join(out,"iclub-ai-tutor-a.webp"),asset);
 const indexFile=path.join(out,"index.html");
 let html=fs.readFileSync(indexFile,"utf8");
 const sdk='<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>';
