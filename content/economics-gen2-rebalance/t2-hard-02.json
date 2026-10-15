@@ -296,16 +296,16 @@
       "Buy 170; release 110 tonnes"
     ],
     "options_ru": [
-      "Buy 35; release 70 tonnes",
-      "Buy 70; release 35 tonnes",
-      "Buy 70; release 70 tonnes",
-      "Buy 170; release 110 tonnes"
+      "Купить 35; выпустить 70 тонн",
+      "Купить 70; выпустить 35 тонн",
+      "Купить 70; выпустить 70 тонн",
+      "Купить 170; выпустить 110 тонн"
     ],
     "options_uz": [
-      "Buy 35; release 70 tonnes",
-      "Buy 70; release 35 tonnes",
-      "Buy 70; release 70 tonnes",
-      "Buy 170; release 110 tonnes"
+      "35 tonna sotib olish; 70 tonna chiqarish",
+      "70 tonna sotib olish; 35 tonna chiqarish",
+      "70 tonna sotib olish; 70 tonna chiqarish",
+      "170 tonna sotib olish; 110 tonna chiqarish"
     ]
   },
   {
@@ -335,16 +335,16 @@
       "45 units; $540"
     ],
     "options_ru": [
-      "60 units; $540",
-      "15 units; $180",
-      "15 units; $540",
-      "45 units; $540"
+      "60 единиц; $540",
+      "15 единиц; $180",
+      "15 единиц; $540",
+      "45 единиц; $540"
     ],
     "options_uz": [
-      "60 units; $540",
-      "15 units; $180",
-      "15 units; $540",
-      "45 units; $540"
+      "60 birlik; $540",
+      "15 birlik; $180",
+      "15 birlik; $540",
+      "45 birlik; $540"
     ]
   },
   {
@@ -425,16 +425,16 @@
       "Falls from 11.1% to approximately 7.7%"
     ],
     "options_ru": [
-      "Stays at 11.1%",
-      "Rises from 11.1% to 12.5%",
-      "Falls from 9.4% to 6.3%",
-      "Falls from 11.1% to approximately 7.7%"
+      "Останется 11,1%",
+      "Вырастет с 11,1% до 12,5%",
+      "Снизится с 9,4% до 6,3%",
+      "Снизится с 11,1% примерно до 7,7%"
     ],
     "options_uz": [
-      "Stays at 11.1%",
-      "Rises from 11.1% to 12.5%",
-      "Falls from 9.4% to 6.3%",
-      "Falls from 11.1% to approximately 7.7%"
+      "11,1% bo‘lib qoladi",
+      "11,1% dan 12,5% ga oshadi",
+      "9,4% dan 6,3% ga tushadi",
+      "11,1% dan taxminan 7,7% ga tushadi"
     ]
   }
 ]
