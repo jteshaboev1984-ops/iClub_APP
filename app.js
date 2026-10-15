@@ -19560,9 +19560,12 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
         const entries=items.map(({rec,index},k)=>{
           const sub=String(rec.subtopic||"").trim();
           const book=String(rec.book_reference||"").trim();
+          const label=items.length===1 && (sub||topic).toLocaleLowerCase()===topic.toLocaleLowerCase()
+            ?tr3("Открыть рекомендацию","Tavsiyani ochish","Open recommendation")
+            :(sub||topic);
           return '<button type="button" class="iclub-sx-topic-entry" data-open-rec="practice" data-rec-index="'+index+'" '+(k>=3?'hidden data-sx-extra="1"':'')+'>'+
             '<span class="iclub-sx-topic-number">'+String(k+1).padStart(2,"0")+'</span>'+
-            '<span class="iclub-sx-topic-entry-text"><strong>'+escapeHTML(sub||topic)+'</strong>'+
+            '<span class="iclub-sx-topic-entry-text"><strong>'+escapeHTML(label)+'</strong>'+
             (book?'<small>'+escapeHTML(book)+'</small>':'')+
             '</span><span class="iclub-sx-arrow" aria-hidden="true">›</span></button>';
         }).join("");
@@ -19575,9 +19578,13 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
           '<span class="iclub-sx-kicker">'+escapeHTML(tr3("ПРАКТИКА ПО ТЕМАМ","MAVZULAR BO‘YICHA AMALIYOT","PRACTICE BY TOPIC"))+'</span>'+
           '<span class="iclub-sx-tag">'+count+' '+escapeHTML(countText)+'</span></div>'+
           '<h3>'+escapeHTML(topic)+'</h3>'+
-          '<p>'+escapeHTML(tr3("Рекомендации сгруппированы по подтемам. Каждую можно открыть отдельно.",
-          "Tavsiyalar kichik mavzular bo‘yicha guruhlangan. Har birini alohida ochish mumkin.",
-          "Recommendations are grouped by subtopic. Open each separately."))+'</p>'+correctAction+'</div>'+
+          '<p>'+escapeHTML(count===1
+          ?tr3("Откройте рекомендацию, чтобы изучить ошибки и материалы.",
+            "Xatolar va materiallarni ko‘rish uchun tavsiyani oching.",
+            "Open the recommendation to review mistakes and materials.")
+          :tr3("Рекомендации сгруппированы по подтемам. Каждую можно открыть отдельно.",
+            "Tavsiyalar kichik mavzular bo‘yicha guruhlangan. Har birini alohida ochish mumkin.",
+            "Recommendations are grouped by subtopic. Open each separately."))+'</p>'+correctAction+'</div>'+
           '<div class="iclub-sx-topic-entries">'+entries+'</div>'+
           (count>3?'<button type="button" class="iclub-sx-more" data-sx-expand="1" aria-expanded="false">'+
           escapeHTML(tr3("Показать ещё","Yana ko‘rsatish","Show more"))+' '+(count-3)+' <span aria-hidden="true">⌄</span></button>':'')+
