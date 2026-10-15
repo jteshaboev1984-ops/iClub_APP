@@ -2,10 +2,33 @@
 // Real application bundle for the EXISTING QA branch only. NO prod network/DB.
 // Reuses the exact root index.html/app.js/styles and asset paths.
 const fs=require("node:fs");
+const crypto=require("node:crypto");
 const path=require("node:path");
 const assert=require("node:assert/strict");
 const root=path.resolve(__dirname,"..");
 const out=path.join(__dirname,"ai-v21-real-preview-dist");
+if (process.env.VERCEL && process.env.VERCEL_ENV !== "preview") {
+  throw Error("QA real-app Preview must never deploy to production/staging");
+}
+if (process.env.VERCEL_GIT_COMMIT_REF &&
+    process.env.VERCEL_GIT_COMMIT_REF !== "qa/iclub-ai-layer-v21-20261012") {
+  throw Error("QA Preview build attempted from an unauthorized Git branch");
+}
+function blobSha(file){
+  const bytes=fs.readFileSync(file);
+  return crypto.createHash("sha1")
+    .update(Buffer.from("blob "+bytes.length+"\0"))
+    .update(bytes).digest("hex");
+}
+const frozen={
+  "global-ai-ui.js":"023516d2127a838f8b12b398215745304fe11d9e",
+  "global-ai-ui.css":"27150c82d8204d423f178b56b01715a04cdbc1bc"
+};
+for(const [file,hash] of Object.entries(frozen)) {
+  assert.equal(blobSha(path.join(root,file)),hash,
+    "QA Preview shell changed; review source before allowing overlay: "+file);
+}
+
 const banned=new Set([".git",".github","supabase","docs","qa","node_modules",".vercel",".next","dist"]);
 const skipFile=(name)=>name.startsWith(".")||
   /(?:\.md$|\.sql$|\.cjs$|\.map$|\.env|\.yml$|\.yaml$|\.log$|\.zip$|\.pdf$|\.docx$|\.xlsx$)/i.test(name);
@@ -30,6 +53,20 @@ fs.mkdirSync(out,{recursive:true});
 for(const name of fs.readdirSync(root)){
   if(banned.has(name)||name.startsWith("."))continue;
   copySafe(path.join(root,name),path.join(out,name));
+}
+// The product files remain frozen. Only the emitted disposable Preview
+// receives a visually approved QA-only overlay, never imported in main.
+for(const [productFile,fixtureFile] of [
+  ["global-ai-ui.js","ai-v21-real-preview-ui-snapshot.js"],
+  ["global-ai-ui.css","ai-v21-real-preview-ui-snapshot.css"]
+]) {
+  const src=path.join(__dirname,fixtureFile);
+  const dest=path.join(out,productFile);
+  assert.ok(fs.existsSync(src),"Missing QA visual overlay: "+fixtureFile);
+  const contents=fs.readFileSync(src,"utf8");
+  assert.ok(contents.includes("iclub-global-ai-mark-symbol"),
+    "QA brand symbol marker absent: "+fixtureFile);
+  fs.writeFileSync(dest,contents);
 }
 const indexFile=path.join(out,"index.html");
 let html=fs.readFileSync(indexFile,"utf8");
