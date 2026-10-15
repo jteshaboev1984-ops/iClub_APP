@@ -15,7 +15,7 @@ function exe(){
   throw Error("Headless Chrome required");
 }
 async function chromePort(dir,child){
-  for(let i=0;i<140;i++){
+  for(let i=0;i<320;i++){
     if(child.exitCode!==null)throw Error("Chrome exited "+child.exitCode);
     const p=join(dir,"DevToolsActivePort");
     if(existsSync(p)){
@@ -73,10 +73,15 @@ async function main(){
     "--disable-background-networking","--disable-extensions",
     "--no-first-run","--no-default-browser-check",
     "--remote-debugging-port=0","--user-data-dir="+dir,"about:blank"
-  ],{stdio:"ignore"});
+  ],{stdio:["ignore","ignore","pipe"]});
+  let chromeStderr="";
+  child.stderr?.on("data",data=>{chromeStderr=(chromeStderr+String(data)).slice(-5000);});
   let client;
   try{
-    const port=await chromePort(dir,child);
+    let port;
+    try{port=await chromePort(dir,child);}catch(error){
+      throw Error(String(error.message)+"; Chrome output: "+chromeStderr);
+    }
     client=await connect(port);
     await client.send("Page.enable");
     await client.send("Runtime.enable");
@@ -168,7 +173,9 @@ async function main(){
   }finally{
     try{client?.close();}catch{}
     child.kill("SIGTERM");
-    rmSync(dir,{recursive:true,force:true,maxRetries:3,retryDelay:100});
+    await delay(300);
+    try{rmSync(dir,{recursive:true,force:true,maxRetries:3,retryDelay:250});}
+    catch(cleanupError){console.warn("Chrome cleanup deferred:",cleanupError.code);}
   }
 }
 main().catch(e=>{console.error("ICLUB_REAL_APP_PREVIEW_BROWSER_FAIL",e);process.exitCode=1});
