@@ -1,0 +1,1633 @@
+<!doctype html>
+<html lang="ru" class="">
+<head>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#2F6FD6" />
+  <title>iClub</title>
+
+  <!-- Telegram WebApp (optional but standard) -->
+  
+
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link rel="stylesheet" href="style.css?v=support1-econpractice1" />
+  <link rel="stylesheet" href="visual/iclub-visual-v3.css?v=v3foundation2" />
+  <link rel="stylesheet" href="visual/iclub-premium-v3.css?v=premium1-loadingpolish5-trio1" />
+  <link rel="stylesheet" href="practice-topic-choice.css?v=ptopic2" />
+  <link rel="stylesheet" href="exam-prep/exam-prep-host.css?v=p305followup1" />
+  <link rel="stylesheet" href="global-ai-ui.css?v=globalaichat1" />
+  <link rel="stylesheet" href="qa/ai-v21-native-review.css?v=1" />
+  <link rel="stylesheet" href="plans-ui.css?v=plans1" />
+  <link rel="stylesheet" href="subject-access-ui.css?v=subjectshadow1" />
+  <link rel="stylesheet" href="practice-results-tabs.css?v=stage03tabs1-premium2-stitch-qa-polish-20261015" />
+</head>
+
+<body class="iclub-visual-v3">
+  <div id="offline-banner" class="offline-banner" role="status" aria-live="polite" style="display:none">
+  <span data-i18n="offline_banner">Нет подключения к интернету. Данные могут не сохраниться.</span>
+</div>
+  <!-- ===== App Shell ===== -->
+  <div id="app" class="app">
+
+    <!-- ===== Top Bar (contextual) ===== -->
+    <header id="topbar" class="topbar is-no-left" aria-label="Top bar" style="display:grid">
+  <button id="topbar-back" class="icon-btn" type="button" aria-label="Back" data-action="back">
+    <svg class="v3-shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+
+  <div class="topbar-brand">
+    <img id="topbar-logo" class="topbar-logo" src="logo.png" alt="iClub" />
+    <div class="topbar-title">
+      <div id="topbar-title" class="title">iClub</div>
+      <div id="topbar-subtitle" class="subtitle"></div>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <button id="topbar-notifications" class="icon-btn" type="button" aria-label="Notifications" data-action="open-notifications" style="visibility:hidden">
+  <svg class="v3-shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+  <span id="topbar-notifications-badge" class="notif-badge" hidden>0</span>
+</button>
+
+    <button id="topbar-action" class="icon-btn" type="button" aria-label="Action" data-action="topbar-action" style="visibility:hidden">
+      <svg class="v3-shell-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+    </button>
+  </div>
+</header>
+
+    <!-- ===== Main Views ===== -->
+    <main id="main" class="main" role="main">
+
+      <!-- ============ Splash / Boot ============ -->
+      <section id="view-splash" class="view" data-view="splash" aria-label="Splash">
+        <div class="center">
+          <div class="logo-wrap">
+            <!-- IMPORTANT: file name exactly as you uploaded -->
+            <img class="logo" src="logo.png" alt="iClub logo" />
+          </div>
+          <div class="splash-title">iClub</div>
+          <div id="splash-status" class="muted" data-i18n="loading">Загрузка…</div>
+        </div>
+      </section>
+
+      <!-- ============ Registration ============ -->
+      <section id="view-registration" class="view" data-view="registration" aria-label="Registration">
+        <div class="content reg">
+          <h1 class="h1" data-i18n="reg_create_title">Create your account</h1>
+
+          <p class="muted" data-i18n="reg_create_subtitle">Enter your details to join the Cambridge curriculum study in Uzbekistan.</p>
+
+          <form id="reg-form" class="form reg-form">
+           <label class="field">
+            <span class="label" data-i18n="reg_language_label">Язык</span>
+              <select id="reg-language" class="input">
+                <option value="ru" data-i18n="lang_ru">Русский</option>
+                <option value="uz" data-i18n="lang_uz">O‘zbek</option>
+                <option value="en" data-i18n="lang_en">English</option>
+              </select>
+
+            <div class="field-hint" data-i18n="reg_language_hint">
+            Далее этот язык используется для практики, туров и сертификатов.
+            </div>
+
+            <div class="field-note" data-i18n="reg_language_reset_note">
+            Язык заданий можно изменить позже — результаты и ответы сохранятся.
+           </div>
+          </label>
+
+            <label class="field">
+              <span class="label" data-i18n="reg_full_name_label">Full Name</span>
+              <input id="reg-fullname" class="input" type="text" autocomplete="name" data-i18n-placeholder="reg_full_name_placeholder" placeholder="e.g. Alisher Navoiy" required />
+            </label>
+
+                         <label class="field">
+              <span class="label" data-i18n="reg_region_label">Region</span>
+              <select id="reg-region" class="input" required>
+                <option value="" selected disabled data-i18n="reg_select_region">Выберите регион…</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span class="label" data-i18n="reg_district_label">District</span>
+              <select id="reg-district" class="input" required disabled>
+                <option value="" selected disabled data-i18n="reg_select_region_first">Сначала выберите регион…</option>
+              </select>
+            </label>
+
+            <div class="reg-toggle">
+              <div>
+                <div class="label" data-i18n="reg_school_toggle_label">Are you a school student?</div>
+                <div class="muted small" data-i18n="reg_school_toggle_hint">Enable to provide school details</div>
+              </div>
+              <label class="switch">
+                <input id="reg-is-school-toggle" type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+               <select id="reg-is-school" class="input visually-hidden">
+                <option value="yes" selected data-i18n="yes">Да</option>
+                <option value="no" data-i18n="no">Нет</option>
+              </select>
+            </div>
+
+            <!-- School fields: shown/hidden by app.js depending on reg-is-school -->
+            <div id="reg-school-block" class="grid-2">
+              <label class="field">
+                <span class="label" data-i18n="reg_school_no_label">School No.</span>
+                <input id="reg-school" class="input" type="text" data-i18n-placeholder="reg_school_no_placeholder" placeholder="e.g. 154" />
+              </label>
+
+              <label class="field">
+                 <span class="label" data-i18n="reg_grade_label">Grade</span>
+                <select id="reg-class" class="input">
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                </select>
+              </label>
+            </div>
+
+             <div id="reg-subject-section" class="card reg-subject-card">
+              <div class="card-title" data-i18n="reg_competitive_subject_label">Main subjects for rankings</div>
+                <p class="muted small" data-i18n="reg_competitive_subject_hint">Choose your primary focus for the leaderboard</p>
+
+                 <div id="reg-subject-chips" class="chip-group">
+                  <button class="chip-btn" type="button" data-subject-key="informatics" data-i18n="subj_informatics">Информатика</button>
+                  <button class="chip-btn" type="button" data-subject-key="economics" data-i18n="subj_economics">Экономика</button>
+                  <button class="chip-btn" type="button" data-subject-key="biology" data-i18n="subj_biology">Биология</button>
+                  <button class="chip-btn" type="button" data-subject-key="chemistry" data-i18n="subj_chemistry">Химия</button>
+                  <button class="chip-btn" type="button" data-subject-key="mathematics" data-i18n="subj_mathematics">Математика</button>
+                </div>
+
+                <div id="reg-subject-summary" class="reg-subject-summary" aria-live="polite"></div>
+                <div id="reg-subject-change-note" class="muted small reg-subject-change-note"></div>
+
+              <label class="field visually-hidden">
+                <span class="label" data-i18n="reg_main_subject_required_label">Основной предмет (обязательно)</span>
+                <select id="reg-main-subject-1" class="input">
+                  <option value="" selected disabled data-i18n="reg_choose_placeholder">Выберите…</option>
+                  <option value="informatics">Информатика</option>
+                  <option value="economics">Экономика</option>
+                  <option value="biology">Биология</option>
+                  <option value="chemistry">Химия</option>
+                  <option value="mathematics">Математика</option>
+                </select>
+              </label>
+
+              <label class="field visually-hidden">
+  <span class="label" data-i18n="reg_main_subject_optional_label">Основной предмет №2 (опционально)</span>
+  <select id="reg-main-subject-2" class="input">
+    <option value="" selected data-i18n="reg_choose_none">Не выбирать</option>
+    <option value="informatics">Информатика</option>
+    <option value="economics">Экономика</option>
+    <option value="biology">Биология</option>
+    <option value="chemistry">Химия</option>
+    <option value="mathematics">Математика</option>
+  </select>
+</label>
+
+               <label class="field visually-hidden">
+                <span class="label" data-i18n="reg_add_subject_optional_label">Дополнительный предмет (опционально)</span>
+                <select id="reg-additional-subject" class="input">
+                  <option value="" selected data-i18n="reg_choose_none">Не выбирать</option>
+                  <option value="english_a1">English (A1)</option>
+                  <option value="english_a2">English (A2)</option>
+                  <option value="english_b1">English (B1)</option>
+                  <option value="sat">SAT</option>
+                  <option value="ielts">IELTS</option>
+                </select>
+              </label>
+            </div>
+
+             <div id="reg-nonstudent-subjects" class="card reg-nonstudent-card hidden">
+               <div class="card-title" data-i18n="reg_nonstudent_title">Обучение без школьного режима</div>
+                <div class="muted small" data-i18n="reg_nonstudent_text">
+                Если вы не ученик школы, вы можете изучать и практиковаться по всем предметам без туров.
+                Подключать и удалять предметы можно позже в профиле.
+              </div>
+            </div>
+
+            <label class="checkbox reg-consent">
+              <input id="reg-consent" type="checkbox" required />
+              <span data-i18n="reg_terms_text">I agree to the Terms of Service and consent to processing of my education data.</span>
+            </label>
+
+            <button id="reg-submit" class="btn primary" type="submit" data-i18n="reg_submit_btn">Завершить регистрацию</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ Home (Tab) ============ -->
+      <section id="view-home" class="view is-active" data-view="home" aria-label="Home">
+        <div class="content">
+          <div class="home-block">
+            <div class="home-block-head">
+              <div class="home-block-title" data-i18n="home_competitive_mode">Competitive Mode</div>
+              <div class="home-block-sub" data-i18n="home_competitive_mode_subtitle">Track your Cambridge curriculum progress</div>
+            </div>
+            <div id="home-competitive-list" class="home-competitive-list">
+              <div class="empty muted">—</div>
+            </div>
+          </div>
+
+          <div class="home-block">
+            <div class="home-block-head">
+              <div class="home-block-title" data-i18n="home_pinned_subjects">Pinned Subjects</div>
+            </div>
+            <div id="home-study-list" class="home-pinned-grid">
+              <div class="empty muted">—</div>
+            </div>
+          </div>
+
+            <!-- ✅ Qo‘shimcha (Home) — collapsible, with “About” always visible -->
+<div class="home-block" id="home-extra-block">
+  <div class="card home-extra-card" id="home-extra-card">
+    <button class="home-extra-head" type="button" data-action="home-extra-toggle">
+      <div class="home-extra-title" data-i18n="home_extra_title">Qo‘shimcha</div>
+      <div class="home-extra-arrow" id="home-extra-arrow">›</div>
+    </button>
+
+    <!-- Always visible item: About -->
+    <div class="home-extra-always">
+      <button class="settings-nav" type="button" data-action="open-about">
+        <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6"/><path d="M12 7h.01"/></svg></span>
+        <span class="settings-nav-text">
+          <span class="settings-nav-title" data-i18n="profile_settings_about">О проекте</span>
+          <span class="settings-nav-sub muted small" data-i18n="profile_settings_about_sub">Правила и организаторы</span>
+        </span>
+        <span class="settings-nav-arrow">›</span>
+      </button>
+    </div>
+
+    <!-- Collapsible items -->
+    <div class="home-extra-body" id="home-extra-body">
+      <div class="settings-list">
+        <button class="settings-nav" type="button" data-action="open-news">
+  <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg></span>
+  <span class="settings-nav-text">
+    <span class="settings-nav-title" data-i18n="profile_settings_news_title">Новости</span>
+    <span class="settings-nav-sub muted small" data-i18n="profile_settings_news_sub">Telegram kanal</span>
+  </span>
+  <span class="settings-nav-arrow">›</span>
+</button>
+
+        <button class="settings-nav" type="button" data-action="open-community">
+  <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg></span>
+  <span class="settings-nav-text">
+    <span class="settings-nav-title" data-i18n="profile_settings_community_title">Комьюнити</span>
+    <span class="settings-nav-sub muted small" data-i18n="profile_settings_community_sub">Telegram chat</span>
+  </span>
+  <span class="settings-nav-arrow">›</span>
+</button>
+      </div>
+    </div>
+  </div>
+</div>
+           <div class="home-legacy">
+            <div class="section">
+              <div class="section-title">Быстрые действия</div>
+
+              <div class="quick-tiles">
+                <button class="tile" type="button" data-action="open-resources">
+                  <div class="tile-top">
+                    <div class="tile-ico">📚</div>
+                    <div class="tile-title">Ресурсы</div>
+                  </div>
+                  <div class="tile-sub muted">Книги, материалы</div>
+                </button>
+
+                <button class="tile" type="button" data-action="open-news">
+                  <div class="tile-top">
+                    <div class="tile-ico">📰</div>
+                    <div class="tile-title">Новости</div>
+                  </div>
+                  <div class="tile-sub muted">Анонсы и обновления</div>
+                </button>
+
+                <button class="tile" type="button" data-action="open-community">
+                  <div class="tile-top">
+                    <div class="tile-ico">💬</div>
+                    <div class="tile-title">Комьюнити</div>
+                  </div>
+                  <div class="tile-sub muted">@iClubuzofficial</div>
+                </button>
+
+                <button class="tile" type="button" data-action="open-all-subjects">
+                  <div class="tile-top">
+                    <div class="tile-ico">🧭</div>
+                    <div class="tile-title">Все предметы</div>
+                  </div>
+                  <div class="tile-sub muted">Закрепить / открыть</div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Courses (Tab) ============ -->
+<section id="view-courses" class="view" data-view="courses" aria-label="Courses">
+  <div class="content">
+    <div id="courses-stack">
+
+      <section id="courses-all-subjects" class="stack-screen is-active" data-stack="courses" data-screen="all-subjects">
+  <div class="section">
+    <div class="section-title" data-i18n="courses_title">Study</div>
+
+    <!-- ✅ chips go here (rendered by app.js) -->
+    <div id="courses-filter-row" class="courses-filter-row"></div>
+  </div>
+
+  <div id="subjects-grid" class="cards-grid">
+    <!-- filled by app.js -->
+  </div>
+</section>
+
+              <!-- Subject Hub -->
+            <section id="courses-subject-hub" class="stack-screen" data-stack="courses" data-screen="subject-hub">
+    <div class="subject-hub-head">
+  <div class="subject-hub-head-left">
+    <div id="subject-hub-title" class="subject-hub-title" data-i18n="subject_hub_title">Предмет</div>
+    <div id="subject-hub-meta" class="subject-hub-meta muted" data-i18n="subject_hub_meta">Study / Competitive</div>
+  </div>
+</div>
+
+<div class="subject-hub-panels">
+  <button id="subject-hub-mentor-btn" class="panel-card subject-hub-panel subject-hub-mentor-btn" type="button" data-action="open-subject-mentor">
+    <div class="panel-row">
+      <div id="subject-hub-mentor-avatar" class="mentor-avatar" aria-hidden="true"></div>
+      <div class="panel-col">
+        <div class="panel-kicker" data-i18n="mentor_kicker">SUBJECT MENTOR</div>
+        <div id="subject-hub-mentor-title" class="panel-title" data-i18n="mentor_assigning">Ментор назначается</div>
+        <div id="subject-hub-mentor-sub" class="muted small" data-i18n="mentor_profile_soon">Скоро появится профиль</div>
+      </div>
+    </div>
+  </button>
+</div>
+
+<div class="subject-hub-primary-modes" aria-label="Preparation">
+  <div class="subject-hub-primary-label" data-i18n="hub_preparation_section">Подготовка</div>
+
+  <div id="subject-hub-exam-prep-placeholder" class="subject-mode-card subject-mode-card-exam subject-mode-card-placeholder" role="status" aria-live="polite" data-peer-status="checking">
+    <div class="subject-mode-card-button">
+      <span class="subject-mode-topline">
+        <span class="subject-mode-icon subject-mode-icon-exam" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 11c-4-3-8-3.5-14-2v20c6-1.5 10-.6 14 2 4-2.6 8-3.5 14-2V9c-6-1.5-10-1-14 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M20 11v20M11 15h5M24 15h5M11 19h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="28" cy="25" r="5.4" fill="white" stroke="currentColor" stroke-width="1.6"/><path d="m25.8 25 1.5 1.5 3-3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span id="subject-hub-exam-prep-placeholder-badge" class="subject-mode-status subject-mode-status-exam">Проверяем доступ</span>
+        <span class="subject-mode-arrow subject-mode-arrow-locked" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="3"/></svg></span>
+      </span>
+      <span class="subject-mode-title">Exam Prep</span>
+      <span id="subject-hub-exam-prep-placeholder-sub" class="subject-mode-description">Подготовка к экзаменам Cambridge AS</span>
+    </div>
+  </div>
+
+  <div id="subject-hub-exam-prep-entry" class="subject-hub-list exam-prep-host-entry exam-prep-feature-card subject-mode-card subject-mode-card-exam" hidden aria-hidden="true">
+    <button class="exam-prep-feature-button subject-mode-card-button" type="button" data-action="open-exam-prep" aria-describedby="subject-hub-exam-prep-sub">
+      <span class="exam-prep-feature-topline subject-mode-topline">
+        <span class="subject-mode-icon subject-mode-icon-exam" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 11c-4-3-8-3.5-14-2v20c6-1.5 10-.6 14 2 4-2.6 8-3.5 14-2V9c-6-1.5-10-1-14 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M20 11v20M11 15h5M24 15h5M11 19h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="28" cy="25" r="5.4" fill="white" stroke="currentColor" stroke-width="1.6"/><path d="m25.8 25 1.5 1.5 3-3.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span id="subject-hub-exam-prep-badge" class="exam-prep-feature-badge subject-mode-status subject-mode-status-exam">Cambridge AS · Mathematics</span>
+        <span class="exam-prep-feature-arrow subject-mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 6l6 6-6 6"/></svg></span>
+      </span>
+      <span id="subject-hub-exam-prep-title" class="exam-prep-feature-title subject-mode-title">Exam Prep</span>
+      <span id="subject-hub-exam-prep-sub" class="exam-prep-feature-description subject-mode-description">Paper 1 and Paper 5 preparation</span>
+      <span class="exam-prep-feature-components" aria-label="Exam components">
+        <span class="exam-prep-feature-component"><strong>P1</strong><span id="subject-hub-exam-prep-p1">Pure Mathematics 1 · 45 skills</span></span>
+        <span class="exam-prep-feature-component"><strong>P5</strong><span id="subject-hub-exam-prep-p5">Probability &amp; Statistics 1 · 36 skills</span></span>
+      </span>
+      <span class="exam-prep-feature-footer">
+        <span id="subject-hub-exam-prep-note" class="exam-prep-feature-note">Tours history stays unchanged. Mathematics Practice starts fresh.</span>
+        <span id="subject-hub-exam-prep-cta" class="exam-prep-feature-cta">Open Exam Prep</span>
+      </span>
+    </button>
+  </div>
+
+  <button class="subject-mode-card subject-mode-card-button subject-mode-card-practice" type="button" data-action="open-practice">
+    <span class="subject-mode-topline">
+      <span class="subject-mode-icon subject-mode-icon-practice" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="9" y="5" width="22" height="30" rx="5" stroke="currentColor" stroke-width="1.8"/><path d="M15 12h10M15 17h7M15 22h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="24.5" cy="26.5" r="6" fill="white" stroke="currentColor" stroke-width="1.7"/><path d="m21.8 26.5 1.8 1.8 3.5-3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="subject-mode-status subject-mode-status-practice" data-i18n="hub_practice_status">Всегда доступна</span>
+      <span class="subject-mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>
+    </span>
+    <span class="subject-mode-title" data-i18n="practice">Практика</span>
+    <span class="subject-mode-description" data-i18n="hub_practice_sub">Отрабатывайте темы в своём темпе и возвращайтесь к ошибкам.</span>
+  </button>
+
+  <button class="subject-mode-card subject-mode-card-button subject-mode-card-tours" type="button" data-action="open-tours">
+    <span class="subject-mode-topline">
+      <span class="subject-mode-icon subject-mode-icon-tours" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M13 7h14v8c0 5-3 8-7 8s-7-3-7-8V7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M13 10H8v4c0 3 2 5 5.5 5.5M27 10h5v4c0 3-2 5-5.5 5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M20 23v6M15 29h10l2 4H13l2-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m20 10.5 1.3 2.8 3.1.4-2.3 2.1.6 3.1-2.7-1.5-2.7 1.5.6-3.1-2.3-2.1 3.1-.4 1.3-2.8Z" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="subject-mode-status subject-mode-status-tours" data-i18n="hub_tours_status">По расписанию</span>
+      <span class="subject-mode-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>
+    </span>
+    <span class="subject-mode-title" data-i18n="tours_title">Туры</span>
+    <span class="subject-mode-description" data-i18n="hub_tours_sub">Проверяйте знания в соревновательном формате, когда тур открыт.</span>
+    <span class="subject-mode-state muted small" data-i18n="tours_active_and_completed">Активные и прошедшие</span>
+  </button>
+</div>
+
+<div id="exam-prep-host-root" class="exam-prep-host-root" hidden aria-hidden="true"></div>
+
+<div class="section subject-hub-materials-section">
+  <div class="h2" data-i18n="hub_materials_section">Материалы</div>
+</div>
+
+<div class="subject-hub-list subject-hub-actions">
+  <button class="settings-nav" type="button" data-action="open-lessons">
+    <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="6" width="16" height="13" rx="2"/><path d="M4 10h16"/><path d="M8 6l2 4"/><path d="M13 6l2 4"/></svg></span>
+    <span class="settings-nav-text">
+      <span class="settings-nav-title" data-i18n="hub_video_lessons_title">Видео-уроки</span>
+      <span class="settings-nav-sub muted small" data-i18n="hub_video_lessons_sub">Видео-уроки доступны в Telegram</span>
+    </span>
+    <span class="settings-nav-arrow">›</span>
+  </button>
+
+
+<button class="settings-nav" type="button" data-action="open-books">
+  <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5A2.5 2.5 0 0 1 20 21z"/></svg></span>
+  <span class="settings-nav-text">
+    <span class="settings-nav-title" data-i18n="resources_title">Ресурсы</span>
+    <span class="settings-nav-sub muted small" data-i18n="hub_resources_sub">Книги и материалы по предмету</span>
+  </span>
+  <span class="settings-nav-arrow">›</span>
+</button>
+
+  <button class="settings-nav" type="button" data-action="open-my-recommendations">
+    <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h6v16H5z"/><path d="M13 4h6v16h-6z"/><path d="M7.5 8h1"/><path d="M15.5 8h1"/></svg></span>
+    <span class="settings-nav-text">
+      <span class="settings-nav-title" data-i18n="practice_my_recs_title">Мои рекомендации</span>
+      <span class="settings-nav-sub muted small" data-i18n="hub_my_recs_sub">Повторный доступ к чтению</span>
+    </span>
+    <span class="settings-nav-arrow">›</span>
+  </button>
+</div>
+
+  <div class="section subject-hub-system-section" style="margin-top:14px">
+    <div class="h2" data-i18n="hub_system_section">Системные</div>
+  </div>
+
+  <div class="subject-hub-list">
+  <button class="settings-nav" type="button" data-action="open-certificates">
+    <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5z"/><path d="M7 12v4c2 2 8 2 10 0v-4"/></svg></span>
+    <span class="settings-nav-text">
+      <span class="settings-nav-title" data-i18n="profile_certificates_title">Сертификаты</span>
+      <span class="settings-nav-sub muted small" data-i18n="profile_certificates_row_sub">Tours & final results</span>
+    </span>
+    <span class="settings-nav-arrow">›</span>
+  </button>
+
+  <button class="settings-nav" type="button" data-action="open-archive">
+    <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2"/></svg></span>
+    <span class="settings-nav-text">
+      <span class="settings-nav-title" data-i18n="tours_archive_btn">Архив туров</span>
+      <span class="settings-nav-sub muted small" data-i18n="hub_archive_sub">Самопроверка • вне рейтинга</span>
+    </span>
+    <span class="settings-nav-arrow">›</span>
+  </button>
+</div>
+
+<div class="subject-hub-list subject-hub-bottom">
+  <button class="settings-nav" type="button" data-action="open-all-subjects">
+    <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-5 2 2-5z"/></svg></span>
+    <span class="settings-nav-text">
+      <span class="settings-nav-title" data-i18n="hub_all_subjects_title">Все предметы</span>
+      <span class="settings-nav-sub muted small" data-i18n="hub_all_subjects_sub">Каталог предметов</span>
+    </span>
+    <span class="settings-nav-arrow">›</span>
+  </button>
+</div>
+</section>
+
+            <!-- Lessons List -->
+            <section id="courses-lessons" class="stack-screen" data-stack="courses" data-screen="lessons" hidden aria-hidden="true">
+  <div class="section">
+    <div class="h1" data-i18n="home_lessons_label">Уроки</div>
+    <div class="muted" data-i18n="lessons_list_subtitle">Список видео-уроков</div>
+  </div>
+  <div id="lessons-list" class="list">
+    <!-- legacy screen kept hidden intentionally -->
+  </div>
+</section>
+
+            <!-- Video Player -->
+            <section id="courses-video" class="stack-screen" data-stack="courses" data-screen="video">
+  <div class="section">
+    <div id="video-title" class="h1" data-i18n="hub_video_lessons_title">Видео-уроки</div>
+    <div id="video-meta" class="muted" data-i18n="video_hub_subtitle">
+      Уроки по предмету доступны в Telegram
+    </div>
+  </div>
+
+  <div class="card video-hub-card">
+    <div id="video-hub-subject" class="video-hub-subject">—</div>
+
+    <div id="video-empty" class="muted small" data-i18n="video_empty" style="display:none;">
+      Видео недоступно.
+    </div>
+
+    <div id="video-player-wrap" style="display:none; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: #000; width: 100%;">
+      <iframe
+        id="video-player"
+        title="Lesson video"
+        style="width:100%; height:100%; border:0; display:block;"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+    </div>
+
+    <div id="video-external-box">
+      <div class="video-hub-note">
+        <div class="video-hub-note-title" data-i18n="video_language_note_title">Muhim</div>
+        <div id="video-external-hint" class="muted small" data-i18n="video_uz_language_note">
+          Hozircha barcha video darslar o‘zbek tilida mavjud.
+        </div>
+      </div>
+
+      <button id="video-open-external" class="btn primary video-hub-open-btn" type="button" data-i18n="video_open_telegram_btn">
+        Telegram’da darslarni ochish
+      </button>
+    </div>
+  </div>
+</section>
+
+            <!-- Practice Start -->
+            <section id="courses-practice-start" class="stack-screen" data-stack="courses" data-screen="practice-start">
+              <div class="section">
+  <div class="h1" data-i18n="practice">Практика</div>
+  <div class="muted" data-i18n="practice_subtitle">10 вопросов • от простого к сложному</div>
+</div>
+
+<div id="practice-tour-picker" class="practice-tour-picker" aria-label="Practice tour selector"></div>
+
+<div class="practice-hero">
+                <div class="practice-hero-top">
+  <div class="practice-hero-left">
+    <div class="practice-hero-kicker" data-i18n="practice_subject_label">Предмет</div>
+    <div id="practice-subject-title" class="practice-hero-title">—</div>
+    <div id="practice-stage-meta" class="practice-hero-stage">—</div>
+  </div>
+</div>
+
+                <div class="practice-hero-metrics">
+                  <div class="practice-metric">
+                    <div class="practice-metric-label" data-i18n="practice_best_result">Лучший результат</div>
+                    <div class="practice-metric-value">
+                      <span id="practice-best-score">Нет результата</span>
+                      <span id="practice-best-percent" class="practice-metric-sub"></span>
+                    </div>
+                  </div>
+
+                  <div class="practice-metric">
+                    <div class="practice-metric-label" data-i18n="practice_best_time">Лучшее время</div>
+                    <div class="practice-metric-value">
+                      <span id="practice-best-time">После первой попытки</span>
+                    </div>
+                  </div>
+                </div>
+
+                                <!-- Trend progress (show only if >=2 attempts) -->
+                <div class="practice-micro" id="practice-trend">
+                  <div class="practice-micro-head">
+                    <div class="practice-micro-label" data-i18n="progress_trend">Тренд прогресса</div>
+                    <div id="practice-micro-delta" class="practice-micro-delta"></div>
+                  </div>
+                  <div id="practice-micro-bars" class="practice-micro-bars" aria-label="Progress trend bars"></div>
+                </div>
+              </div>
+
+              <section id="practice-topic-choice" class="practice-topic-choice" aria-label="Practice topics"></section>
+
+              <div class="practice-last card">
+                <div class="practice-last-head">
+                  <div class="card-title" data-i18n="practice_last_attempts">Последние попытки</div>
+                  <button id="practice-history-link" class="btn-link" type="button" data-action="practice-history" style="display:none" data-i18n="practice_all">Все</button>
+                </div>
+
+                <div id="practice-last-empty" class="muted small" style="display:none" data-i18n="practice_no_attempts">Пока нет попыток</div>
+
+                <div class="practice-table-wrap">
+                  <table class="practice-table" aria-label="Practice attempts">
+                    <thead>
+                      <tr>
+                        <th data-i18n="practice_col_date">Дата</th>
+                        <th data-i18n="practice_col_score">Счёт</th>
+                        <th data-i18n="practice_col_time">Время</th>
+                      </tr>
+                    </thead>
+                    <tbody id="practice-last-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="practice-start-actions">
+  <button id="practice-resume-btn" class="btn" type="button" data-action="practice-resume" style="display:none" data-i18n="practice_resume">Продолжить</button>
+
+  <button id="practice-restart-btn" class="btn primary" type="button" data-action="practice-start">
+    <span id="practice-restart-label" data-i18n="practice_start">Начать практику</span>
+  </button>
+</div>
+            </section>
+
+            <!-- Practice Quiz -->
+            <section id="courses-practice-quiz" class="stack-screen" data-stack="courses" data-screen="practice-quiz">
+              <div class="quiz-top">
+                <div class="quiz-progress">
+                  <span id="practice-qno">1/10</span>
+                  <span id="practice-timer" class="pill">00:30</span>
+                </div>
+                <button id="practice-pause-btn" class="btn ghost" type="button" data-action="practice-pause" data-i18n="practice_stop">Остановить</button>
+              </div>
+
+              <div class="card">
+                <div id="practice-question" class="question-text" data-i18n="practice_question_placeholder">Вопрос практики…</div>
+                <div id="practice-options" class="options">
+                  <!-- filled by app.js -->
+                </div>
+              </div>
+
+              <div class="actions-row">
+                <button id="practice-submit-btn" class="btn" type="button" data-action="practice-submit" data-i18n="practice_submit" disabled>Ответить</button>
+              </div>
+            </section>
+
+            <!-- Practice Result -->
+                       <section id="courses-practice-result" class="stack-screen" data-stack="courses" data-screen="practice-result">
+              <div class="section">
+                <div class="h1" data-i18n="practice_result_title">Результат практики</div>
+                <div id="practice-result-meta" class="muted">—</div>
+              </div>
+
+              <div class="cards-grid">
+                <button class="card-btn" type="button" data-action="practice-review">
+                  <div class="card-title">
+                    <span data-i18n="practice_review_title">Разбор ошибок</span>
+                    <span id="practice-review-count" class="badge badge-pin" style="margin-left:6px">0</span>
+                  </div>
+                  <div class="muted small" data-i18n="practice_review_sub">Правильные ответы и объяснения</div>
+                </button>
+
+                <button class="card-btn" type="button" data-action="practice-recommendations">
+                  <div class="card-title">
+                    <span data-i18n="practice_recs_title">Рекомендации</span>
+                    <span id="practice-recs-count" class="badge badge-pin" style="margin-left:6px">0</span>
+                  </div>
+                  <div class="muted small" data-i18n="practice_recs_sub">Что прочитать по вашим ошибкам</div>
+                </button>
+              </div>
+
+              <div class="actions-row">
+                <button id="practice-again-btn" class="btn" type="button" data-action="practice-again" data-i18n="practice_again">Пройти снова</button>
+                <button id="practice-to-subject-btn" class="btn primary" type="button" data-action="practice-exit" data-i18n="practice_to_subject">К предмету</button>
+              </div>
+            </section>
+
+            <!-- Practice Review -->
+            <section id="courses-practice-review" class="stack-screen" data-stack="courses" data-screen="practice-review">
+              <div class="section">
+                <div class="h1" data-i18n="practice_review_title">Разбор ошибок</div>
+                <div class="muted" data-i18n="practice_review_sub">Правильные ответы и объяснения</div>
+              </div>
+
+              <div id="practice-review-list" class="list">
+                <div class="empty muted" data-i18n="practice_review_empty">Нет данных для разбора. Сначала пройдите практику.</div>
+              </div>
+
+              <div class="actions-row">
+                <button id="practice-review-back-btn" class="btn" type="button" data-action="practice-back-to-result" data-i18n="practice_back_to_result">Назад к результату</button>
+                <button id="practice-review-to-subject-btn" class="btn primary" type="button" data-action="practice-exit" data-i18n="practice_to_subject">К предмету</button>
+              </div>
+            </section>
+
+            <!-- Practice Recommendations -->
+            <section id="courses-practice-recs" class="stack-screen" data-stack="courses" data-screen="practice-recs">
+              <div class="section">
+  <div class="h1" data-i18n="practice_recs_title">Рекомендации</div>
+  <div class="muted" data-i18n="practice_recs_sub">Что прочитать по вашим ошибкам</div>
+</div>
+
+<div id="practice-recs-list" class="list">
+  <div class="empty muted" data-i18n="practice_recs_empty">Нет данных для рекомендаций. Сначала пройдите практику.</div>
+</div>
+
+<div class="actions-row">
+  <button class="btn" type="button" data-action="practice-back-to-result" data-i18n="practice_back_to_result">Назад к результату</button>
+  <button id="practice-recs-to-subject-btn" class="btn primary" type="button" data-action="practice-exit" data-i18n="practice_to_subject">К предмету</button>
+</div>
+            </section>
+
+            <!-- Tours List -->
+            <section id="courses-tours" class="stack-screen" data-stack="courses" data-screen="tours">
+  <div class="section">
+    <div class="h1" data-i18n="tours_title">Туры</div>
+    <div class="muted" data-i18n="tours_subtitle">Официальные туры по предмету</div>
+  </div>
+
+    <!-- Subject hero (stats like practice) -->
+  <div class="tours-hero">
+    <div class="tours-hero-top">
+      <div>
+        <div class="tours-hero-kicker" data-i18n="tours_subject_label">Предмет</div>
+        <div id="tours-subject-title" class="tours-hero-title">—</div>
+        <div id="tours-tour-label" class="tours-hero-sub" data-i18n="tours_tour_label">Тур</div>
+      </div>
+    </div>
+
+    <div class="tours-hero-metrics">
+      <div class="tours-metric">
+        <div class="tours-metric-label" data-i18n="tours_best_result">Лучший результат</div>
+        <div class="tours-metric-value">
+          <span id="tours-best-score">Нет результата</span>
+          <span id="tours-best-percent" class="tours-metric-sub"></span>
+        </div>
+      </div>
+
+      <div class="tours-metric">
+  <div class="tours-metric-label" data-i18n="tours_best_time_of_best_result">Время лучшего результата</div>
+  <div class="tours-metric-value">
+    <span id="tours-best-time">После первого тура</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trend progress (show only if >=2 attempts) -->
+    <div class="tours-micro" id="tours-trend">
+      <div class="tours-micro-head">
+        <div class="tours-micro-label" data-i18n="progress_trend">Тренд прогресса</div>
+        <div id="tours-micro-delta" class="tours-micro-delta"></div>
+      </div>
+      <div id="tours-micro-bars" class="tours-micro-bars" aria-label="Tour progress trend bars"></div>
+    </div>
+  </div>
+
+                <!-- Completed tours (DB summary) -->
+  <div class="card tours-history" id="tours-history-card">
+    <div class="tours-history-head">
+      <div class="tours-history-title" data-i18n="tours_completed_title">Пройденные туры</div>
+      <div class="tours-history-sub muted" id="tours-history-sub"></div>
+    </div>
+
+    <div class="tours-history-empty muted" id="tours-history-empty" style="display:none" data-i18n="tours_completed_empty">
+      Вы ещё не проходили туры по этому предмету.
+    </div>
+
+    <div class="tours-history-list" id="tours-history-list"></div>
+  </div>
+
+  <!-- Status message (not clickable) -->
+  <div class="card tours-status" id="tours-status">
+    <div class="tours-status-title" id="tours-status-title" data-i18n="tours_status_title">Туры пока недоступны</div>
+    <div class="tours-status-desc muted" id="tours-status-desc" data-i18n="tours_status_desc">
+      Даты и список туров появятся здесь после публикации.
+    </div>
+  </div>
+
+  <!-- Open tour (only when active tour exists) -->
+  <div class="tours-open-wrap">
+    <button id="tours-open-btn" class="btn primary" type="button" data-action="open-tour" style="display:none" data-i18n="open_tour_btn">Открыть тур</button>
+  </div>
+
+  <div class="actions-row">
+  <button class="btn primary" type="button" data-action="tour-to-subject" data-i18n="tours_to_practice_btn">К практике</button>
+</div>
+      <!-- Tours loading overlay -->
+<div class="tours-loading-overlay hidden" id="tours-loading">
+  <div class="tours-loading-card" aria-hidden="true">
+    <div class="iclub-skeleton-shape"></div>
+    <div class="iclub-skeleton-shape"></div>
+    <div class="iclub-skeleton-shape"></div>
+  </div>
+</div>
+</section>
+
+            <!-- Tour Rules -->
+            <section id="courses-tour-rules" class="stack-screen" data-stack="courses" data-screen="tour-rules">
+              <div class="section">
+                <div class="h1" data-i18n="tour_rules_title">Правила тура</div>
+                <div class="muted" data-i18n="tour_rules_subtitle">Перед стартом необходимо согласие</div>
+              </div>
+
+              <div class="card">
+                <div class="card-title" data-i18n="tour_rules_important">Важное</div>
+                <ul class="muted small">
+                  <li data-i18n="tour_rules_li1">Одна попытка, без пауз</li>
+                  <li data-i18n="tour_rules_li2">Назад-вперёд запрещено</li>
+                  <li data-i18n="tour_rules_li3">Античит: 2 нарушения → завершение</li>
+                  <li data-i18n="tour_rules_li4">Автосохранение при таймауте</li>
+                </ul>
+              </div>
+
+              <label class="checkbox">
+                <input id="tour-rules-accept" type="checkbox" />
+                <span data-i18n="tour_rules_accept">Я ознакомился и согласен с правилами</span>
+              </label>
+
+              <div class="actions-row">
+                <button class="btn primary" type="button" data-action="tour-start" data-i18n="tour_start_btn">Начать тур</button>
+              </div>
+            </section>
+
+            <!-- Tour Quiz -->
+            <section id="courses-tour-quiz" class="stack-screen" data-stack="courses" data-screen="tour-quiz">
+
+  <!-- Top line: Question X of 20 + Warning -->
+  <div class="tour-head">
+    <div class="tour-head-left">
+      <div id="tour-qof" class="tour-qof">—</div>
+      <div class="tour-progress-row">
+        <div class="tour-progress-label" data-i18n="tour_progress_label">Tour Progress</div>
+        <div id="tour-progress-pct" class="tour-progress-pct">0%</div>
+      </div>
+
+      <div class="tour-progress-bar">
+        <div id="tour-progress-fill" class="tour-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <button id="tour-warn-btn" class="tour-warn" type="button" aria-label="Warning" style="display:none">
+      <svg class="v3-tour-warning-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 9v5"/><path d="M12 17h.01"/></svg>
+    </button>
+  </div>
+
+  <!-- Badge -->
+  <div class="tour-badges">
+    <span id="tour-badge" class="tour-badge">CAMBRIDGE • TOUR #1</span>
+  </div>
+
+  <!-- Timers cards -->
+  <div class="tour-timers">
+    <div class="tour-timer-card">
+      <div class="tour-timer-cap" data-i18n="tour_overall_tour">OVERALL TOUR</div>
+      <div id="tour-overall-time" class="tour-timer-val">0:00</div>
+      <div id="tour-overall-delta" class="tour-timer-delta"></div>
+    </div>
+
+    <div class="tour-timer-card danger">
+      <div class="tour-timer-cap" data-i18n="tour_question_time">QUESTION TIME</div>
+      <div id="tour-question-time" class="tour-timer-val">0:00</div>
+      <div id="tour-question-delta" class="tour-timer-delta"></div>
+    </div>
+  </div>
+
+  <!-- Question -->
+  <div class="card">
+    <div id="tour-question" class="question-text">Вопрос тура…</div>
+
+    <figure id="tour-question-figure" class="tour-question-figure" hidden>
+      <div id="tour-question-image-status" class="tour-question-image-status muted small" role="status" aria-live="polite"></div>
+      <button id="tour-question-image-open" class="tour-question-image-open" type="button" hidden aria-label="Open question image">
+        <img id="tour-question-image" class="tour-question-image" alt="" hidden decoding="async">
+      </button>
+      <button id="tour-question-image-retry" class="btn tour-question-image-retry" type="button" hidden>
+        Повторить загрузку
+      </button>
+    </figure>
+
+    <div id="tour-options" class="options"></div>
+  </div>
+
+  <!-- Footer hint -->
+  <div id="tour-monitor" class="tour-monitor muted small" data-i18n="tour_monitoring_active">
+    SESSION MONITORING ACTIVE
+</div>
+
+  <!-- Actions -->
+  <div class="actions-row">
+   <button id="tour-next-btn" class="btn primary" type="button" data-action="tour-next" disabled data-i18n="tour_next_question">
+  Next Question →
+</button>
+  </div>
+
+</section>
+
+            <!-- Tour Result -->
+            <section id="courses-tour-result" class="stack-screen" data-stack="courses" data-screen="tour-result">
+              <div class="section">
+                <div class="h1" data-i18n="tour_result_title">Результат тура</div>
+                <div id="tour-result-meta" class="muted">—</div>
+              </div>
+
+              <div class="cards-grid">
+                <button class="card-btn" type="button" data-action="tour-review">
+                  <div class="card-title" data-i18n="tour_review_title">Разбор тура</div>
+                  <div id="tour-review-status" class="muted small" data-i18n="tour_review_sub">Ответы, объяснения, ошибки</div>
+                </button>
+
+                <button class="card-btn" type="button" data-action="tour-certificate">
+                  <div class="card-title" data-i18n="tour_certificate_title">Сертификат</div>
+                  <div id="tour-certificate-status" class="muted small" data-i18n="tour_certificate_sub">Если доступен по правилам</div>
+                </button>
+              </div>
+
+              <div id="tour-result-summary-note" class="card tour-result-summary-note" hidden>
+  <div class="card-title">Краткая сводка</div>
+  <div id="tour-result-summary-text" class="muted small">—</div>
+</div>
+              <div class="actions-row">
+  <button class="btn" type="button" data-action="open-ratings" data-i18n="open_ratings">Рейтинг</button>
+  <button class="btn primary" type="button" data-action="tour-to-subject" data-i18n="to_subject">К предмету</button>
+</div>
+            </section>
+
+            <!-- Tour Review (active) -->
+            <section id="courses-tour-review" class="stack-screen" data-stack="courses" data-screen="tour-review">
+              <div class="section">
+               <div class="h1" data-i18n="tour_review_screen_title">Разбор тура</div>
+                <div class="muted" data-i18n="tour_review_screen_sub">Ответы, объяснения и работа над ошибками</div>
+
+                <div id="tour-review-list" class="list">
+                <div class="empty muted" data-i18n="tour_review_empty">Нет данных для разбора тура.</div>
+              </div>
+
+                <div class="actions-row">
+  <button class="btn" type="button" data-action="tour-back-to-result" data-i18n="back_to_result">Назад к результату</button>
+  <button class="btn primary" type="button" data-action="tour-to-subject" data-i18n="to_subject">К предмету</button>
+</div>
+            </section>
+
+            <!-- Books -->
+<section id="courses-books" class="stack-screen" data-stack="courses" data-screen="books">
+  <div class="section">
+    <div class="h1" data-i18n="books_title">Книги</div>
+    <div class="muted" data-i18n="books_subtitle">Ресурсы по предмету</div>
+  </div>
+  <div id="books-list" class="list">
+    <div class="empty muted" data-i18n="books_empty_static">Пока книги не добавлены.</div>
+  </div>
+</section>
+
+            <!-- My Recommendations -->
+<section id="courses-my-recs" class="stack-screen" data-stack="courses" data-screen="my-recs">
+  <div class="section">
+    <div class="h1" data-i18n="my_recs_screen_title">Мои рекомендации</div>
+    <div class="muted" id="my-recs-subtitle">Темы для повторения и разбор ошибок</div>
+  </div>
+  <div id="my-recs-list" class="list">
+    <div class="empty muted" data-i18n="my_recs_empty_static">Пока пусто.</div>
+  </div>
+</section>
+
+<!-- Recent verified topic attempts, read-only existing server history. -->
+<section id="courses-my-rec-topic-history" class="stack-screen" data-stack="courses" data-screen="my-rec-topic-history">
+  <div class="section">
+    <div class="h1" id="my-rec-topic-history-title">История практики</div>
+    <div class="muted" id="my-rec-topic-history-subtitle">Последние завершённые попытки</div>
+  </div>
+  <div id="my-rec-topic-history-body" class="iclub-sx-history-page"></div>
+</section>
+
+<!-- Focused Practice attempt review, part of existing Courses navigation. -->
+<section id="courses-my-rec-topic-review" class="stack-screen" data-stack="courses" data-screen="my-rec-topic-review">
+  <div class="section">
+    <div class="h1" id="my-rec-topic-review-title">Разбор попытки</div>
+    <div class="muted" id="my-rec-topic-review-subtitle"></div>
+  </div>
+  <div id="my-rec-topic-review-body" class="list"></div>
+</section>
+
+<!-- My Recommendation Detail (AI tutor) -->
+<section id="courses-my-rec-detail" class="stack-screen" data-stack="courses" data-screen="my-rec-detail">
+  <div class="section">
+    <div class="h1" id="my-rec-title">Тема</div>
+    <div class="muted" id="my-rec-subtitle">Персональный разбор и план</div>
+  </div>
+
+  <div id="my-rec-body" class="list">
+    <div class="empty muted" data-i18n="my_rec_loading">Загрузка…</div>
+  </div>
+
+  <div class="actions-row">
+  <button class="btn" type="button" data-action="my-rec-to-subject" data-i18n="to_subject">К предмету</button>
+
+  <button class="btn" type="button" data-action="my-rec-open-books" data-i18n="rec_btn_books">Книги</button>
+
+  <button class="btn" type="button" data-action="my-rec-retry" data-i18n="rec_btn_retry">Повторить ошибки</button>
+
+  <button class="btn primary" type="button" data-action="my-rec-train" data-i18n="rec_btn_train">Тренировка по теме</button>
+
+  <button class="btn danger" type="button" data-action="my-rec-delete" data-i18n="rec_btn_done">Освоено</button>
+</div>
+</section>
+          </div><!-- /courses-stack -->
+        </div>
+      </section>
+
+      <!-- ============ Ratings (Tab) ============ -->
+<section id="view-ratings" class="view" data-view="ratings" aria-label="Ratings">
+  <div class="content leaderboard">
+
+    <!-- Header inside Ratings (как в примере) -->
+    <div class="lb-header">
+  <button class="lb-back" type="button" data-action="back" aria-label="Back"><svg class="v3-ratings-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div class="lb-title" data-i18n="ratings_title">Leaderboard</div>
+
+  <div class="lb-header-actions">
+    <button class="lb-search-btn" type="button" data-action="ratings-search" aria-label="Search"><svg class="v3-ratings-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></button>
+    <button class="lb-info" type="button" data-action="ratings-info" aria-label="Info">i</button>
+  </div>
+</div>
+
+<!-- Segmented: District / Region / Republic -->
+<div class="lb-segment" role="tablist" aria-label="Leaderboard scope">
+  <button class="seg-btn is-active" type="button" data-scope="district" role="tab" aria-selected="true" data-i18n="ratings_scope_district">District</button>
+  <button class="seg-btn" type="button" data-scope="region" role="tab" aria-selected="false" data-i18n="ratings_scope_region">Region</button>
+  <button class="seg-btn" type="button" data-scope="country" role="tab" aria-selected="false" data-i18n="ratings_scope_republic">Republic</button>
+</div>
+        <!-- Filters: Subject / Tour -->
+    <div class="lb-filters" aria-label="Leaderboard filters">
+      <label
+        id="ratings-season-filter"
+        class="lb-filter"
+        style="display:none; grid-column:1 / -1;"
+      >
+        <div
+          class="lb-filter-label"
+          data-i18n="ratings_season"
+        >
+          Season
+        </div>
+        <select
+          id="ratings-season"
+          class="lb-select"
+        ></select>
+      </label>
+
+      <label class="lb-filter">
+        <div class="lb-filter-label" data-i18n="ratings_subject">Subject</div>
+        <select id="ratings-subject" class="lb-select" aria-label="Subject"></select>
+      </label>
+
+      <label class="lb-filter">
+        <div class="lb-filter-label" data-i18n="ratings_tour">Tour</div>
+        <select id="ratings-tour" class="lb-select" aria-label="Tour"></select>
+      </label>
+    </div>
+
+    <div id="ratings-viewer-hint" class="lb-hint muted small" style="display:none" data-i18n="ratings_viewer_hint">
+      Рейтинг доступен для просмотра. “Мой ранг” показывается только участникам (Competitive).
+    </div>
+
+        <!-- Search (panel) -->
+    <button id="ratings-search-backdrop" class="lb-search-backdrop" type="button" aria-label="Close search" style="display:none"></button>
+
+    <div id="ratings-search-panel" class="lb-search-panel" style="display:none">
+      <div class="lb-search">
+        <span class="lb-search-ico" aria-hidden="true"><svg class="v3-ratings-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></span>
+        <input id="ratings-search" class="lb-search-input" type="search" placeholder="Search..." autocomplete="off" />
+        <button id="ratings-search-clear" class="lb-search-clear" type="button" aria-label="Clear">✕</button>
+      </div>
+
+      <div class="lb-search-hint" data-i18n="ratings_search_hint_inline">
+        Search by name, school, class, region or district
+      </div>
+    </div>
+
+      <!-- Table header -->
+    <div class="lb-head">
+  <div data-i18n="ratings_col_rank">RANK</div>
+  <div data-i18n="ratings_col_student">STUDENT</div>
+  <div class="lb-head-right" data-i18n="ratings_col_score">SCORE</div>
+  <div class="lb-head-right" data-i18n="ratings_col_time">TIME</div>
+</div>
+
+  <!-- List -->
+    <div class="lb-list-wrap">
+          <div id="ratings-list" class="lb-list" aria-label="Leaderboard list">
+        <div class="empty muted">Подключим базу — здесь появятся реальные участники.</div>
+      </div>
+    </div>
+
+    <!-- Bottom “My rank” bar -->
+    <div id="ratings-mybar" class="lb-mybar" aria-label="My rank" style="display:none">
+      <div class="lb-mybar-left">
+        <div class="lb-mybar-label" data-i18n="ratings_my_rank">MY RANK</div>
+        <div id="ratings-mybar-rank" class="lb-mybar-rank">—</div>
+      </div>
+
+      <div class="lb-mybar-mid">
+        <div id="ratings-mybar-total" class="lb-mybar-meta">—</div>
+      </div>
+
+      <div class="lb-mybar-right">
+        <div id="ratings-mybar-score" class="lb-mybar-score">—</div>
+        <div id="ratings-mybar-time" class="lb-mybar-time">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+      <!-- ============ Profile (Tab) ============ -->
+      <section id="view-profile" class="view" data-view="profile" aria-label="Profile">
+        <div class="content">
+
+    <!-- Profile MAIN -->
+  <div id="profile-main" class="profile-screen is-active">
+
+    <div class="card profile-hero">
+
+    <div class="profile-hero-row">
+      <div class="profile-avatar" id="profile-avatar">
+        <span id="profile-avatar-initials">IC</span>
+      </div>
+      <div class="profile-hero-info">
+        <div class="profile-name" id="profile-dash-name">—</div>
+        <div class="profile-badge" data-i18n="profile_status_badge">ADVANCED STATUS</div>
+        <div class="muted small" id="profile-dash-meta">—</div>
+      </div>
+     </div>
+
+       <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-metric-competitive">0</div>
+          <div class="muted small" data-i18n="profile_metric_competitive">Competitive</div>
+        </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-metric-study">0</div>
+          <div class="muted small" data-i18n="profile_metric_study">Study</div>
+        </div>
+            <div class="profile-stat">
+        <div class="profile-stat-value" id="profile-metric-tours">Загружаем…</div>
+        <div class="muted small" data-i18n="profile_metric_tours">Tours</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="profile-plan-entry" class="profile-section iclub-plan-entry" hidden>
+    <div class="profile-row-list">
+      <button class="profile-row" type="button" data-action="profile-plan">
+        <div class="profile-row-left">
+          <div class="profile-row-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7.5h16v11H4z"/><path d="M7 5h10v2.5H7z"/><path d="M8 12h8"/><path d="M8 15h5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="profile-row-mid">
+          <div class="profile-row-title" data-plan-row-title>Тариф</div>
+          <div class="muted small" data-plan-row-sub>Free · Базовый доступ</div>
+        </div>
+        <div class="profile-row-right">›</div>
+      </button>
+    </div>
+  </div>
+
+       <div class="profile-section">
+    <div class="profile-section-title" data-i18n="profile_performance_overview">Performance Overview</div>
+    <div class="profile-overview-grid">
+      <div class="overview-card">
+        <div class="overview-label" data-i18n="profile_stability_score">Stability Score</div>
+        <div class="overview-value" id="profile-metric-stability">Нет данных</div>
+        <div class="overview-sub" id="profile-metric-trend">Недостаточно данных</div>
+      </div>
+      <div class="overview-card">
+        <div class="overview-label" data-i18n="profile_current_level">Current Level</div>
+        <div class="overview-value" id="profile-current-level">Не определён</div>
+        <div class="overview-sub" id="profile-metric-best">Нет результатов</div>
+      </div>
+    </div>
+  </div>
+
+<div class="profile-section">
+  <div class="profile-section-head">
+    <div class="profile-section-title" data-i18n="profile_competitive_slots">Competitive Slots</div>
+    <div class="profile-section-meta">
+      <span id="profile-competitive-slots-count">0/2</span>
+      <span data-i18n="profile_active_slots_label">Active</span>
+    </div>
+  </div>
+  <div id="profile-competitive-slots-list" class="slot-list"></div>
+</div>
+
+<div class="profile-section">
+  <div class="profile-section-title" data-i18n="profile_earned_credentials">Earned Credentials</div>
+
+  <!-- Filled by app.js (CORE 7 credentials). -->
+  <div id="profile-credentials-hints" class="muted small"></div>
+
+  <div id="profile-credentials-grid" class="profile-credentials-grid">
+    <!-- filled by app.js -->
+  </div>
+
+  <div id="profile-credentials-empty" class="empty muted" style="display:none">
+    <!-- filled by app.js (optional) -->
+  </div>
+</div>
+
+<div class="profile-section">
+  <div class="profile-row-list">
+    <button class="profile-row" type="button" data-action="profile-certificates">
+      <div class="profile-row-left">
+        <div class="profile-row-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-5 9 5-9 5z"/><path d="M7 12v4c2 2 8 2 10 0v-4"/></svg></div>
+      </div>
+      <div class="profile-row-mid">
+        <div class="profile-row-title" data-i18n="profile_certificates_row_title">My certificates</div>
+        <div class="muted small" data-i18n="profile_certificates_row_sub">Tours & final results</div>
+      </div>
+      <div class="profile-row-right">›</div>
+    </button>
+  </div>
+</div>
+
+<div class="profile-section">
+  <div class="profile-row-list">
+    <button class="profile-row" type="button" data-action="profile-open-my-recs">
+      <div class="profile-row-left">
+        <div class="profile-row-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/><path d="M9 12h6"/><path d="M9 16h6"/></svg></div>
+      </div>
+      <div class="profile-row-mid">
+        <div class="profile-row-title" data-i18n="profile_my_recs_row_title">Мои рекомендации</div>
+        <div class="muted small" data-i18n="profile_my_recs_row_sub">Архив рекомендаций</div>
+      </div>
+      <div class="profile-row-right">›</div>
+    </button>
+  </div>
+</div>
+
+<div class="profile-section">
+  <div class="profile-row-list">
+    <button class="profile-row" type="button" data-action="open-support">
+      <div class="profile-row-left">
+        <div class="profile-row-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M5.6 5.6l3.6 3.6"/><path d="M14.8 14.8l3.6 3.6"/><path d="M18.4 5.6l-3.6 3.6"/><path d="M9.2 14.8l-3.6 3.6"/></svg></div>
+      </div>
+      <div class="profile-row-mid">
+        <div class="profile-row-title" data-i18n="profile_support_title">Поддержка</div>
+        <div class="muted small" data-i18n="profile_support_sub">FAQ и обращение в службу поддержки</div>
+      </div>
+      <div class="profile-row-right">›</div>
+    </button>
+  </div>
+</div>
+
+<!-- /Profile MAIN -->
+</div> <!-- ✅ FIX: закрыли #profile-main -->
+
+<!-- Profile PLAN -->
+<div id="profile-plan" class="profile-screen" hidden>
+  <div class="iclub-plan-screen">
+    <div class="iclub-plan-intro">
+      <div class="h1" data-plan-title>Тариф iClub</div>
+      <div class="muted" data-plan-subtitle></div>
+    </div>
+
+    <div class="iclub-plan-unavailable" data-plan-unavailable hidden></div>
+
+    <div data-plan-body hidden>
+      <div class="iclub-plan-cards" data-plan-cards></div>
+
+      <div id="profile-subject-access-entry" class="profile-section iclub-subject-access-entry" hidden>
+        <div class="profile-row-list">
+          <button class="profile-row" type="button" data-action="profile-subject-access">
+            <div class="profile-row-left">
+              <div class="profile-row-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 5.5h6v6H4z"/><path d="M14 5.5h6v6h-6z"/><path d="M4 15.5h6v3H4z"/><path d="M14 15.5h6v3h-6z"/>
+                </svg>
+              </div>
+            </div>
+            <div class="profile-row-mid">
+              <div class="profile-row-title" data-subject-access-entry-title>Предметы тарифа</div>
+              <div class="muted small" data-subject-access-entry-sub></div>
+            </div>
+            <div class="profile-row-right">›</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="iclub-plan-compare-wrap" data-plan-compare></div>
+      <div class="iclub-plan-info" data-plan-info></div>
+    </div>
+  </div>
+</div>
+<!-- /Profile PLAN -->
+
+<!-- Profile SUBJECT ACCESS -->
+<div id="profile-subject-access" class="profile-screen" hidden>
+  <div class="iclub-subject-access-screen">
+    <div class="iclub-subject-access-intro">
+      <div class="h1" data-subject-access-title>Предметы тарифа</div>
+      <div class="muted" data-subject-access-subtitle></div>
+    </div>
+
+    <div class="iclub-subject-access-beta">
+      <strong data-subject-access-beta-title></strong>
+      <span data-subject-access-beta-text></span>
+    </div>
+
+    <div class="iclub-subject-access-plan" data-subject-access-plan></div>
+
+    <div class="iclub-subject-access-unavailable" data-subject-access-unavailable hidden></div>
+
+    <div data-subject-access-body hidden>
+      <section class="iclub-subject-access-section" data-subject-access-study></section>
+      <section class="iclub-subject-access-section" data-subject-access-competitive></section>
+    </div>
+  </div>
+</div>
+<!-- /Profile SUBJECT ACCESS -->
+
+<!-- Profile SETTINGS -->
+<div id="profile-settings" class="profile-screen">
+
+  <!-- Language (move to top) -->
+ <div class="card">
+  <div class="card-title" data-i18n="profile_ui_language_title">Язык интерфейса</div>
+  <p class="muted small" data-i18n="profile_ui_language_desc">
+    Меняется только интерфейс приложения и не влияет на туры/практику.
+  </p>
+
+  <div class="settings-list">
+    <div class="settings-row">
+      <div id="profile-settings-language" class="lang-seg" role="tablist" aria-label="Language">
+        <button type="button" class="lang-btn" data-lang="ru">Рус</button>
+        <button type="button" class="lang-btn" data-lang="uz">Uzb</button>
+        <button type="button" class="lang-btn" data-lang="en">Eng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Content language (Tours/Practice) -->
+<div class="card">
+  <div class="card-title" data-i18n="profile_content_language_title">Язык туров и практики</div>
+  <p class="muted small" data-i18n="profile_content_language_desc">
+    Смена этого языка удалит весь прогресс (туры, практика, ответы). Используйте только если действительно нужно.
+  </p>
+
+  <div class="settings-list">
+    <div class="settings-row">
+      <div id="profile-settings-content-language" class="lang-seg" role="tablist" aria-label="Content language">
+        <button type="button" class="lang-btn" data-lang="ru">Рус</button>
+        <button type="button" class="lang-btn" data-lang="uz">Uzb</button>
+        <button type="button" class="lang-btn" data-lang="en">Eng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+     <!-- Competitive mode -->
+  <div class="card">
+  <div class="card-title" data-i18n="profile_settings_competitive_title">Соревновательный режим</div>
+  <p class="muted small" id="settings-competitive-note"></p>
+
+    <div id="profile-competitive-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+
+  <!-- Study mode / Pinned (after Competitive) -->
+  <div class="card">
+    <div class="settings-card-head">
+  <div class="card-title" data-i18n="profile_settings_study_title">Учебный режим</div>
+    <button id="profile-settings-pinned-toggle" class="btn mini ghost" type="button" data-i18n="settings_show_all">
+    Показать все
+  </button>
+</div>
+
+<p class="muted small" data-i18n="profile_settings_study_desc">
+  Закреплённые — для быстрого доступа в учебном режиме. Competitive настраивается выше.
+</p>
+
+    <div id="profile-settings-pinned-list" class="settings-list">
+      <!-- filled by app.js -->
+    </div>
+  </div>
+ </div>
+<!-- /Profile SETTINGS -->
+      </section>
+           <!-- ============ Notifications (Global) ============ -->
+      <section id="view-notifications" class="view" data-view="notifications" aria-label="Notifications">
+  <div class="content">
+    <div class="notifications-head">
+      <div>
+        <h1 class="h1" data-i18n="notifications_title">Уведомления</h1>
+        <p class="muted" data-i18n="notifications_sub">Системные сообщения и важные события.</p>
+      </div>
+
+      <button
+        id="notifications-clear-all"
+        class="btn mini ghost notifications-clear-all"
+        type="button"
+        data-action="notifications-delete-all"
+        data-i18n="notifications_delete_all"
+        hidden
+      >
+        Очистить все
+      </button>
+    </div>
+
+    <div id="notifications-list" class="list">
+      <div class="empty muted" data-i18n="notifications_empty">Пока уведомлений нет.</div>
+    </div>
+  </div>
+</section>
+      <!-- ============ Community (Global) ============ -->
+      <section id="view-community" class="view" data-view="community" aria-label="Community">
+        <div class="content">
+          <h1 class="h1" data-i18n="community_title">Комьюнити</h1>
+          <p class="muted" data-i18n="community_sub">Официальный канал и чат обсуждений.</p>
+
+          <div class="cards-grid">
+            <button class="card-btn" type="button" data-action="open-channel">
+              <div class="card-title" data-i18n="community_channel_title">Канал</div>
+              <div class="muted small">@iClubuzofficial</div>
+            </button>
+
+            <button class="card-btn" type="button" data-action="open-chat">
+              <div class="card-title" data-i18n="community_chat_title">Чат обсуждений</div>
+              <div class="muted small" data-i18n="community_join">Присоединиться</div>
+            </button>
+          </div>
+        </div>
+      </section>
+            <!-- ============ About (Global) ============ -->
+      <section id="view-about" class="view" data-view="about" aria-label="About">
+  <div class="content">
+    <h1 class="h1" data-i18n="about_title">О проекте</h1>
+    <p class="muted" data-i18n="about_sub">Коротко о платформе, правилах и команде.</p>
+
+    <!-- Tabs (rendered by JS) -->
+    <div id="about-tabs"></div>
+
+    <!-- Content (rendered by JS) -->
+    <div id="about-content" class="list"></div>
+  </div>
+</section>
+
+            <!-- ============ Support (Global) ============ -->
+      <section id="view-support" class="view" data-view="support" aria-label="Support">
+        <div class="content">
+          <h1 class="h1" data-i18n="support_title">Поддержка</h1>
+          <p class="muted" data-i18n="support_sub">Выберите тему обращения.</p>
+
+          <div id="support-topics" class="cards-grid"></div>
+
+          <div class="empty muted" style="margin-top:12px" data-i18n="support_topics_note">
+            Выберите тему. Подсказки и форма обращения откроются на отдельном экране.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Support Topic (Global) ============ -->
+      <section id="view-support-topic" class="view" data-view="support-topic" aria-label="Support Topic">
+        <div class="content">
+          <h1 id="support-topic-title" class="h1">Поддержка</h1>
+          <p id="support-topic-sub" class="muted"></p>
+
+          <div id="support-topic-faq" class="list" style="margin-top:12px"></div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="card-title" data-i18n="support_contact_title">Связаться с поддержкой</div>
+            <p class="muted small" data-i18n="support_contact_sub_v2">
+              Если подсказки не помогли, отправьте обращение. Ответ придёт вам в Telegram от службы поддержки.
+            </p>
+
+            <div class="form">
+              <label class="field">
+                <span class="label" data-i18n="support_message_label">Опишите проблему</span>
+                <textarea
+                  id="support-message"
+                  class="input support-textarea"
+                  rows="5"
+                  data-i18n-placeholder="support_message_placeholder"
+                  placeholder="Кратко опишите, что произошло"
+                ></textarea>
+              </label>
+
+              <div id="support-meta-note" class="muted small support-ticket-note" data-i18n="support_meta_note">
+                К обращению автоматически прикладываются экран, предмет, язык и технический контекст.
+              </div>
+
+              <div id="support-submit-status" class="muted small support-submit-status"></div>
+
+              <div class="actions-row">
+                <button id="support-submit" class="btn primary" type="button" data-action="support-submit" data-i18n="support_submit">
+                  Отправить обращение
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Certificates (Global) ============ -->
+      <section id="view-certificates" class="view" data-view="certificates" aria-label="Certificates">
+  <div class="content">
+    <h1 class="h1" data-i18n="certificates_title">Сертификаты</h1>
+    <p class="muted" data-i18n="certificates_sub">По турам и итоговые — в зависимости от правил доступа.</p>
+
+    <div id="certificates-list" class="list">
+      <div class="empty muted" data-i18n="certificates_empty">Пока сертификатов нет.</div>
+    </div>
+  </div>
+</section>
+
+            <!-- ============ Certificate Verify (Public) ============ -->
+      <section id="view-certificate-verify" class="view" data-view="certificate-verify" aria-label="Certificate verification">
+        <div class="content">
+          <h1 class="h1" data-i18n="certificate_verify_title">Проверка сертификата</h1>
+          <p class="muted" data-i18n="certificate_verify_sub">Публичная проверка подлинности</p>
+
+          <div id="certificate-verify-result" class="list">
+            <div class="empty muted" data-i18n="certificate_verify_loading">Проверяем сертификат…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Archive (Global) ============ -->
+      <section id="view-archive" class="view" data-view="archive" aria-label="Archive">
+        <div class="content">
+          <h1 class="h1" data-i18n="archive_title">Архив</h1>
+          <p class="muted" data-i18n="archive_sub">Прошедшие туры для самопроверки. Раздел откроется после закрытия текущего официального тура.</p>
+
+          <div id="archive-list" class="list">
+            <div class="empty muted" data-i18n="archive_empty">Доступных архивных туров пока нет.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===== Bottom Tab Bar ===== -->
+    <nav id="tabbar" class="tabbar" aria-label="Bottom navigation">
+      <button class="tab is-active" type="button" data-tab="home" aria-label="Home">
+        <span class="tab-ico" aria-hidden="true"><svg class="v3-shell-nav-icon" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg></span>
+        <span class="tab-txt" data-i18n="tab_home">Home</span>
+      </button>
+
+      <button class="tab" type="button" data-tab="courses" aria-label="Courses">
+        <span class="tab-ico" aria-hidden="true"><svg class="v3-shell-nav-icon" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/></svg></span>
+        <span class="tab-txt" data-i18n="tab_study">Study</span>
+      </button>
+
+      <button class="tab" type="button" data-tab="ratings" aria-label="Ratings">
+        <span class="tab-ico" aria-hidden="true"><svg class="v3-shell-nav-icon" viewBox="0 0 24 24"><path d="M5 20v-8"/><path d="M12 20V4"/><path d="M19 20v-12"/><path d="M3 20h18"/></svg></span>
+        <span class="tab-txt" data-i18n="tab_ratings">Ratings</span>
+      </button>
+
+      <button class="tab" type="button" data-tab="profile" aria-label="Profile">
+  <span class="tab-ico" aria-hidden="true"><svg class="v3-shell-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span>
+  <span class="tab-txt" data-i18n="tab_profile">Profile</span>
+</button>
+    </nav>
+
+  </div>
+
+  <!-- ===== Toast (snackbar) ===== -->
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+          <div class="view-transition-overlay hidden" id="view-transition-overlay" aria-hidden="true">
+  <div class="view-transition-card">
+    <div class="view-transition-spinner"></div>
+    <div class="view-transition-text" data-i18n="loading">Загрузка…</div>
+  </div>
+</div>
+
+        <!-- Ratings fullscreen loading overlay -->
+  <div id="ratings-loading" class="lb-loading" aria-hidden="true" style="display:none">
+    <div class="lb-loading-card">
+      <img class="lb-loading-logo" src="logo.png" alt="iClub" />
+      <div class="lb-loading-text" data-i18n="loading">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ===== Modal Root ===== -->
+  <div id="modal-root" class="modal-root" aria-hidden="true"></div>
+
+     <!-- i18n first, then app -->
+  <!-- BUILD: confirm2-p206finalops1 -->
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+  <div id="question-image-modal" class="question-image-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Question image" hidden>
+    <button id="question-image-modal-close" class="question-image-modal-close" type="button" aria-label="Close">×</button>
+    <div class="question-image-modal-content">
+      <img id="question-image-modal-img" class="question-image-modal-img" alt="">
+    </div>
+  </div>
+
+  
+  
+<script src="qa/ai-v21-demo-boot.js"></script>
+<script src="qa/ai-v21-native-review.js"></script>
+</body>
+</html>

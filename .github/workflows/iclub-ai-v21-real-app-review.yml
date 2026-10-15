@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {persist-credentials: false}
+        with: {persist-credentials: false, fetch-depth: 0}
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - run: |
           node --check qa/ai-v21-native-review.js
-          node --test qa/ai-v21-preview-safety.test.cjs
+          node --test qa/ai-v21-preview-safety.test.cjs qa/ai-v21-demo-boot.test.cjs
       - name: Production features preserved byte-for-byte
         run: |
           set -euo pipefail
