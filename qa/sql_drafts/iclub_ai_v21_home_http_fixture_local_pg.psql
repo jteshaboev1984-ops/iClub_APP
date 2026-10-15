@@ -2,8 +2,6 @@
 -- Every statement rolled back; no live Supabase connection or data.
 \set ON_ERROR_STOP on
 BEGIN;
--- Isolated HTTP end-to-end fixture, durable only until scratch DB is dropped.
-
 DO $guard$
 BEGIN
  IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
@@ -93,8 +91,7 @@ INSERT INTO public.tour_session_runtime_v4 VALUES
  (101,'11111111-1111-4111-8111-111111111111',31,now()),
  (102,'22222222-2222-4222-8222-222222222222',32,now()),
  (103,'11111111-1111-4111-8111-111111111111',30,now());
--- Scratch only: synthetic editorial releases for end-to-end verification.
--- These rows are NOT a real product/legal rights approval or publication.
+-- Local CI ONLY: synthetic editorial evidence for source-release revocation.
 CREATE TABLE private.iclub_ai_v21_home_source_test_releases(
  locale text NOT NULL CHECK(locale IN ('ru','uz','en')),
  action_code text NOT NULL CHECK(action_code IN
@@ -102,18 +99,7 @@ CREATE TABLE private.iclub_ai_v21_home_source_test_releases(
  subject_key text NOT NULL,
  rights_approved boolean NOT NULL DEFAULT false,
  content_approved boolean NOT NULL DEFAULT false,
- source_hash text NOT NULL CHECK(source_hash ~ '^[a-f0-9]{64}
-BEGIN
- IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$' THEN
-  RAISE EXCEPTION 'SCRATCH REQUIRED';
- END IF;
- IF (SELECT count(*) FROM public.practice_sessions_v4)<>3 THEN
-  RAISE EXCEPTION 'Synthetic seed mismatch';
- END IF;
-END $verify$;
-COMMIT;
-\echo 'Synthetic Home HTTP fixture committed only in disposable local PostgreSQL'
-),
+ source_hash text NOT NULL CHECK(source_hash ~ '^[a-f0-9]{64}$'),
  source_version text NOT NULL,
  revoked_at timestamptz,
  PRIMARY KEY(locale,action_code,subject_key)
@@ -134,13 +120,13 @@ CROSS JOIN (VALUES
  ('continue_enrolled_subject','economics'),
  ('continue_enrolled_subject','biology')
 ) AS p(action_code,subject_key);
-
 DO $verify$
 BEGIN
  IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$' THEN
   RAISE EXCEPTION 'SCRATCH REQUIRED';
  END IF;
- IF (SELECT count(*) FROM public.practice_sessions_v4)<>3 THEN
+ IF (SELECT count(*) FROM public.practice_sessions_v4)<>3
+  OR (SELECT count(*) FROM private.iclub_ai_v21_home_source_test_releases)<>12 THEN
   RAISE EXCEPTION 'Synthetic seed mismatch';
  END IF;
 END $verify$;
