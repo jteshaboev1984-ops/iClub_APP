@@ -45,16 +45,22 @@
   outline-offset: 2px;
 }
 
-.iclub-global-ai-mark-symbol {
+.iclub-global-ai-mark-logo {
+  display: block;
+  width: 40px;
+  height: 40px;
+  max-width: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+.iclub-global-ai-head-logo {
+  display: block;
+  flex: 0 0 32px;
   width: 32px;
   height: 32px;
-  border-radius: 11px;
-  background: #2F6FD6;
-  color: #fff;
-  font: 800 14px/32px system-ui, -apple-system, sans-serif;
-  letter-spacing: -0.025em;
-  text-align: center;
-  display: block;
+  object-fit: contain;
+  pointer-events: none;
   user-select: none;
 }
 
