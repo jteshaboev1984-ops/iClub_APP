@@ -9,6 +9,7 @@ const {join}=require("node:path");
 const {createHash}=require("node:crypto");
 const {buildHomePlan,verifySignedPlan}=require("./ai-layer-v21-p6-home-signed-server-bridge.cjs");
 const {QAHomeApprovedPriority}=require("./ai-layer-v21-p6-home-approved-priority.cjs");
+const {makeCommercialProofAdapter}=require("./ai-layer-v21-p6-commercial-contract-adapter.cjs");
 const OWNER="11111111-1111-4111-8111-111111111111";
 const FOREIGN="22222222-2222-4222-8222-222222222222";
 const HANDLE="33333333-3333-4333-8333-333333333333";
@@ -41,7 +42,7 @@ function sql(query){
 }
 function makeServices(){
  const signingKey=Buffer.alloc(32,0x4f); // only ephemeral QA fixture
- return{
+ const services={
   signingKey,nowMs:()=>Date.now(),
   async readCurrentScreen(user,handle){
    if(!UUID.test(user)||!UUID.test(handle))return null;
@@ -63,21 +64,16 @@ function makeServices(){
    return JSON.parse(sql("SELECT public.get_iclub_ai_v21_home_scan_scratch_service("+
     "'"+user+"'::uuid,'"+handle+"'::uuid)::text"));
   },
-  async verifySubjectAccess(user,subject,intent){
+  async readCommercialSnapshot(user,subject,intent){
+   // The code and intent arrive from a trusted server step and are syntactically
+   // allowlisted. This query calls the real-shaped scratch guard with intent
+   // "open" and separately reads selected mode and entitlement facts.
    if(!UUID.test(user)||!WORD.test(subject||"")||
     !["study","competitive"].includes(intent))return null;
-   const q="SELECT EXISTS(SELECT 1 FROM public.user_subjects us"+
-    " JOIN public.subjects sj ON sj.id=us.subject_id AND sj.is_active"+
-    " JOIN private.iclub_ai_v21_home_synthetic_access grant_row"+
-    " ON grant_row.user_id=us.user_id AND grant_row.subject_key=sj.subject_key"+
-    " AND grant_row.intent=us.mode AND grant_row.allowed"+
-    " WHERE us.user_id='"+user+"' AND sj.subject_key='"+subject+"'"+
-    " AND us.mode='"+intent+"')::text";
-   const allowed=sql(q)==="true";
-   // Emulates a separately verified server entitlement; is NOT a live grant.
-   return{allowed,verified:allowed,userId:user,subjectKey:subject,intent,
-    revision:1,source:"server_enforced_subject_access_v1",
-    mode:"commercial",competitiveSelectionVerified:allowed&&intent==="competitive"};
+   const value=sql(
+    "SELECT public.get_iclub_ai_v21_commercial_snapshot_scratch_service("+
+    "'"+user+"'::uuid,'"+subject+"','"+intent+"')::text");
+   return value?JSON.parse(value):null;
   },
   async verifyAcademicEvidence(user,v){
    if(!UUID.test(user)||!v||!CODE_INTENT[v.actionCode]||
@@ -138,6 +134,11 @@ function makeServices(){
    return raw?JSON.parse(raw):{ready:false};
   }
  };
+ const access=makeCommercialProofAdapter({
+  readCommercialSnapshot:services.readCommercialSnapshot
+ });
+ services.verifySubjectAccess=access.verifySubjectAccess;
+ return services;
 }
 async function evaluateOwnerAction(services,user,handle,locale){
  const proposed=await buildHomePlan(services,{userId:user,contextHandle:handle,locale});
