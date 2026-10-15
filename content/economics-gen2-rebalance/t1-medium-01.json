@@ -43,9 +43,9 @@
     "d": "medium",
     "sec": 125,
     "k": "D",
-    "en": "Only two completed flats are available. Four households can each buy at most one and are willing and able to pay $120, $95, $80 and $55 respectively. At a uniform market price of $90, how many of these flats are demanded?",
-    "ru": "В наличии только две готовые квартиры. Четыре домохозяйства готовы и способны заплатить за одну квартиру соответственно $120, $95, $80 и $55; каждое покупает не более одной. Сколько квартир будет востребовано при единой рыночной цене $90?",
-    "uz": "Faqat ikkita tayyor xonadon bor. To‘rt uy xo‘jaligi bittadan xonadon uchun mos ravishda $120, $95, $80 va $55 to‘lashga tayyor hamda qodir; har biri ko‘pi bilan bittadan oladi. Yagona bozor narxi $90 bo‘lsa, nechta xonadonga talab bo‘ladi?",
+    "en": "Only two flats can be allocated. Four households are willing and able to pay at most $120, $95, $80 and $55 for one flat each. If the price mechanism allocates the flats to those valuing them most, what is the combined willingness to pay of the successful buyers?",
+    "ru": "Можно распределить только две квартиры. Четыре домохозяйства готовы и способны заплатить максимум $120, $95, $80 и $55 за одну квартиру каждое. Если ценовой механизм распределяет квартиры среди покупателей с наибольшей оценкой, какова их суммарная готовность платить?",
+    "uz": "Faqat ikkita xonadonni taqsimlash mumkin. To‘rt uy xo‘jaligining har biri bir xonadon uchun eng ko‘pi bilan $120, $95, $80 va $55 to‘lashga tayyor hamda qodir. Narx mexanizmi xonadonlarni eng yuqori baholovchilarga ajratsa, ularning umumiy to‘lashga tayyorligi qancha?",
     "opts": [
       "4",
       "1",
@@ -53,28 +53,28 @@
       "2"
     ],
     "why": [
-      "Only willingness to pay of $120 and $95 meets or exceeds the $90 price, so there are two effective buyers.",
-      "Лишь два покупателя с готовностью платить $120 и $95 могут купить по цене $90. Платёжеспособный спрос равен двум квартирам.",
-      "Faqat $120 va $95 to‘lashga tayyor xaridorlar $90 narxga mos keladi. Samarali talab ikkita xonadon."
+      "The two highest bidders receive the flats, with valuations $120 and $95. Combined willingness to pay is $215.",
+      "Две квартиры получают покупатели с оценками $120 и $95. Совокупная готовность платить равна $215.",
+      "Eng yuqori ikkita bahoga ($120 va $95) ega xaridorlar xonadon oladi. Jami to‘lashga tayyorlik $215."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-010",
     "options_en": [
-      "4",
-      "1",
-      "3",
-      "2"
+      "$175",
+      "$200",
+      "$255",
+      "$215"
     ],
     "options_ru": [
-      "4",
-      "1",
-      "3",
-      "2"
+      "$175",
+      "$200",
+      "$255",
+      "$215"
     ],
     "options_uz": [
-      "4",
-      "1",
-      "3",
-      "2"
+      "$175",
+      "$200",
+      "$255",
+      "$215"
     ]
   },
   {
@@ -172,9 +172,9 @@
     "d": "medium",
     "sec": 120,
     "k": "A",
-    "en": "A school has 30 computers but two classes each require 25 at the same hour. Suppose each receives 15 computers. How many computers of unmet demand remain across both classes?",
-    "ru": "У школы 30 компьютеров, но двум классам одновременно требуется по 25. Предположим, каждому выделили по 15 компьютеров. Сколько компьютеров в сумме остаются неудовлетворённым спросом двух классов?",
-    "uz": "Maktabda 30 ta kompyuter bor, biroq ikki sinfga bir vaqtda 25 tadan kerak. Har bir sinfga 15 tadan ajratildi. Ikkala sinfning jami qondirilmagan talabi nechta kompyuter?",
+    "en": "A school has 30 computers. Up to 25 can be used for programming, where each occupied computer produces 4 educational benefit points. Up to 20 can be used for statistics, where each produces 3 points. Each computer can serve one learner only. How should the school allocate computers to maximise the stated total benefit?",
+    "ru": "У школы 30 компьютеров. На занятиях по программированию можно использовать до 25 компьютеров, каждый приносит 4 условных балла учебной пользы. На статистике можно использовать до 20, каждый приносит 3 балла. Один компьютер обслуживает одного ученика. Как распределить компьютеры для максимальной указанной пользы?",
+    "uz": "Maktabda 30 ta kompyuter bor. Dasturlash darsida ko‘pi bilan 25 tasi ishlatilishi mumkin, har biri 4 foyda balli beradi. Statistika darsida ko‘pi bilan 20 tasi ishlatiladi, har biri 3 ball beradi. Har kompyuter bitta o‘quvchiga xizmat qiladi. Jami foydani maksimallashtirish uchun qanday taqsimlash kerak?",
     "opts": [
       "20",
       "10",
@@ -182,28 +182,28 @@
       "50"
     ],
     "why": [
-      "Each class needs 25 − 15 = 10 more, so combined unmet demand is 20 computers.",
-      "Каждому классу не хватает 25 − 15 = 10 компьютеров, вместе — 20.",
-      "Har sinfga 25 − 15 = 10 ta yetishmaydi; jami 20 ta kompyuter."
+      "Programming yields 4 points per computer versus 3 in statistics; allocate the first 25 to programming, then the remaining 5 to statistics (115 points).",
+      "Компьютер в программировании даёт 4 балла против 3 в статистике. Первые 25 следует выделить программированию, ещё 5 — статистике; всего 115 баллов.",
+      "Dasturlashda har kompyuter 4 ball, statistikada 3 ball beradi. Dasturlashga 25 ta, qolgan 5 tasini statistikaga ajratish jami 115 ball beradi."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-018",
     "options_en": [
-      "20",
-      "10",
-      "30",
-      "50"
+      "25 programming; 5 statistics",
+      "15 programming; 15 statistics",
+      "10 programming; 20 statistics",
+      "20 programming; 10 statistics"
     ],
     "options_ru": [
-      "20",
-      "10",
-      "30",
-      "50"
+      "25 — программированию; 5 — статистике",
+      "15 — программированию; 15 — статистике",
+      "10 — программированию; 20 — статистике",
+      "20 — программированию; 10 — статистике"
     ],
     "options_uz": [
-      "20",
-      "10",
-      "30",
-      "50"
+      "25 tasi dasturlashga; 5 tasi statistikaga",
+      "15 tasi dasturlashga; 15 tasi statistikaga",
+      "10 tasi dasturlashga; 20 tasi statistikaga",
+      "20 tasi dasturlashga; 10 tasi statistikaga"
     ]
   },
   {
@@ -363,10 +363,10 @@
     "n": 28,
     "d": "medium",
     "sec": 125,
-    "k": "D",
-    "en": "A hospital has a fixed budget and must choose how many screening appointments and emergency operations to fund. It has already selected its equipment and staffing methods. Which basic economic question remains its immediate decision?",
-    "ru": "У больницы фиксированный бюджет. Ей нужно определить, сколько оплатить профилактических обследований и экстренных операций. Оборудование и способы использования персонала уже выбраны. Какой основной экономический вопрос она сейчас решает?",
-    "uz": "Shifoxonaning budjeti cheklangan. Nechta profilaktik tekshiruv va shoshilinch operatsiyani moliyalashtirishni belgilashi kerak. Uskunalar va xodimlar ish usullari allaqachon tanlangan. Endi qaysi asosiy iqtisodiy savol hal qilinmoqda?",
+    "k": "C",
+    "en": "A hospital makes two separate choices. First, it decides to fund more preventive screenings rather than emergency operations. Second, it switches from manual record-keeping to an electronic workflow for the chosen services. Which pair classifies these decisions in order?",
+    "ru": "Больница принимает два отдельных решения. Сначала она выделяет больше средств профилактическим обследованиям, чем экстренным операциям. Затем меняет бумажный учёт на электронный способ оказания выбранных услуг. Как по порядку классифицировать оба решения?",
+    "uz": "Shifoxona ikkita alohida qaror qiladi. Avval favqulodda operatsiyalarga nisbatan profilaktik tekshiruvlarni ko‘proq moliyalashtirishni tanlaydi. So‘ng tanlangan xizmatlarda qog‘ozli qaydlarni elektron jarayon bilan almashtiradi. Bu ikki qaror ketma-ket qaysi savollarga tegishli?",
     "opt_en": [
       "How to produce, because it is selecting its technology.",
       "For whom to produce, because every budget decision allocates patients.",
@@ -386,28 +386,28 @@
       "Nima ishlab chiqarish, chunki xizmatlar tarkibi tanlanmoqda."
     ],
     "why": [
-      "Choosing between types and quantities of services is 'what to produce'; the production method was already settled.",
-      "Выбор видов и количества услуг относится к «что производить»; способ производства уже определён.",
-      "Xizmat turlari va miqdorini tanlash «nima ishlab chiqarish» savolidir; usul oldindan tanlangan."
+      "The first choice sets the mix of outputs ('what'); the second changes the technique for producing them ('how').",
+      "Первое решение определяет состав услуг («что»), второе — способ оказания («как»).",
+      "Birinchi qaror xizmatlar tarkibini («nima»), ikkinchisi esa ularni bajarish usulini («qanday») belgilaydi."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-028",
     "options_en": [
-      "How to produce, because it is selecting its technology.",
-      "For whom to produce, because every budget decision allocates patients.",
-      "Whether scarcity exists, because the budget is fixed.",
-      "What to produce, because it is selecting the mix of services."
+      "How to produce; for whom to produce",
+      "For whom to produce; what to produce",
+      "What to produce; how to produce",
+      "What to produce; for whom to produce"
     ],
     "options_ru": [
-      "Как производить, поскольку выбирается технология.",
-      "Для кого производить, поскольку каждое бюджетное решение распределяет пациентов.",
-      "Существует ли ограниченность, поскольку бюджет фиксирован.",
-      "Что производить, поскольку выбирается сочетание услуг."
+      "Как производить; для кого производить",
+      "Для кого производить; что производить",
+      "Что производить; как производить",
+      "Что производить; для кого производить"
     ],
     "options_uz": [
-      "Qanday ishlab chiqarish, chunki texnologiya tanlanmoqda.",
-      "Kim uchun ishlab chiqarish, chunki har qanday budjet qarori bemorlarni taqsimlaydi.",
-      "Tanqislik bormi, chunki budjet cheklangan.",
-      "Nima ishlab chiqarish, chunki xizmatlar tarkibi tanlanmoqda."
+      "Qanday ishlab chiqarish; kim uchun ishlab chiqarish",
+      "Kim uchun ishlab chiqarish; nima ishlab chiqarish",
+      "Nima ishlab chiqarish; qanday ishlab chiqarish",
+      "Nima ishlab chiqarish; kim uchun ishlab chiqarish"
     ]
   },
   {
