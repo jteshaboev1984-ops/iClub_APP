@@ -1,0 +1,33 @@
+/* Visual candidate: only synthetic content styles. App chrome reuses REAL main CSS. */
+.review-only-strip{position:relative;z-index:20;display:flex;align-items:center;gap:8px;justify-content:center;min-height:34px;background:#ecf3ff;color:#315eaa;font-size:11px;font-weight:700;letter-spacing:.01em;padding:5px 12px}
+.review-only-dot{width:7px;height:7px;border-radius:50%;background:#2f6fd6;flex:none}
+.review-language{display:flex;align-items:center;gap:7px;margin-left:auto}.review-language select{appearance:auto;border:1px solid #cfdbf3;border-radius:8px;background:#fff;padding:4px 6px;color:#174a95;font-size:11px;font-weight:800}
+#topbar{display:grid!important}#topbar-back{visibility:hidden!important}
+#view-home .home-block{margin-bottom:21px}
+.review-subject-card{width:100%;min-height:74px;display:flex;align-items:center;gap:13px;text-align:left;padding:12px 14px;cursor:pointer;border-radius:17px;background:#fff}
+.review-subject-icon{width:43px;height:43px;flex:0 0 43px;border-radius:13px;display:grid;place-items:center;background:#fff5e6;color:#ad681a;font-size:23px;font-weight:850}
+.review-subject-icon.is-blue{background:#eaf0ff;color:#2f6fd6}.review-subject-icon.is-green{background:#e7f7f2;color:#147b60}
+.review-card-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}.review-card-copy strong{font-size:14px;font-weight:780;color:#122342;line-height:1.3}.review-card-copy small{font-size:12px;line-height:1.4;color:#64748b;font-weight:500}
+.review-chevron{color:#94a3b8;font-size:25px;font-weight:400}.review-next-card{padding:14px;display:flex;gap:12px;align-items:center;border:1px solid #dce6fb;background:linear-gradient(115deg,#fff,#f6f9ff)}
+.review-next-icon,.review-activity-icon{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center;background:#eaf0ff;color:#2f6fd6;font-weight:800}.review-activity-icon.alt{background:#f2f7fe}
+.review-small-button{flex:none;min-height:35px;font-size:11px;padding:8px 11px}.review-note{font-size:11px;line-height:1.5;color:#78869c;margin:8px 2px}
+#home-extra-card .home-extra-head{pointer-events:none}
+.review-breadcrumb{font-size:12px;color:#71829a;font-weight:650;margin:0 0 12px}
+.review-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;border:1px solid #dde4f0;border-radius:13px;padding:4px;background:#f0f3f8;margin:12px 0}
+.review-tabs button{min-height:36px;border:0;border-radius:9px;background:transparent;color:#708098;font-size:12px;font-weight:750;cursor:pointer}.review-tabs button.is-current{background:#fff;color:#2f6fd6;box-shadow:0 2px 8px #13294d0e}
+.review-activity{display:flex;align-items:center;gap:12px;padding:14px;margin:10px 0;min-height:82px}.review-activity .btn{flex:none;font-size:12px;padding:10px 14px}
+.review-secondary{border:1px solid #d8e3f7;background:#fff;color:#306bce;font-weight:760;border-radius:12px}
+.review-quiz-progress,.review-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.review-quiz-progress{font-size:12px;font-weight:730;color:#60748b}.review-progress{width:100%;height:7px;border-radius:99px;background:#e5ecf7;overflow:hidden;margin-bottom:14px}.review-progress span{display:block;height:100%;width:50%;background:#2f6fd6;border-radius:99px}
+.review-question{padding:23px 18px}.review-question h1{font-size:21px;line-height:1.4;letter-spacing:-.015em;margin:10px 0 20px}
+.review-eyebrow{font-size:11px;font-weight:800;color:#3e78c5;letter-spacing:.045em}.review-answers{display:grid;gap:10px}.review-answer{display:flex;align-items:center;gap:10px;padding:14px 12px;border:1px solid #dfe8f3;border-radius:13px;background:#fff;cursor:pointer;font-size:13px;line-height:1.45;text-align:left;color:#2b3d52}.review-answer[aria-checked="true"]{border-color:#6393db;background:#eff5ff}
+.review-choice{display:inline-flex;width:20px;height:20px;border:1.5px solid #9bacbe;border-radius:50%;flex:none;align-items:center;justify-content:center}.review-answer[aria-checked="true"] .review-choice{border-color:#2f6fd6;background:#2f6fd6}.review-answer[aria-checked="true"] .review-choice:after{content:"";width:7px;height:7px;background:white;border-radius:50%}
+.review-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:22px}.review-controls .btn{min-width:116px}
+.review-result-card{text-align:center;padding:30px 16px}.review-score{width:130px;height:130px;margin:18px auto;border:10px solid #e2eefe;border-top-color:#2f6fd6;border-right-color:#2f6fd6;border-radius:50%;display:flex;flex-direction:column;justify-content:center}.review-score strong{font-size:27px;line-height:1.1}.review-score small{font-size:11px;color:#75849a}.review-result-card p{font-size:13px;color:#60748b;line-height:1.55;max-width:430px;margin:12px auto 20px}
+.review-section-head h1{font-size:22px;margin:6px 0}.review-answer-list{display:grid;gap:11px}.review-answer-card{padding:16px}.review-answer-card strong{display:block;font-size:14px;line-height:1.45;margin:8px 0}.review-answer-card p{font-size:12px;color:#64748b;margin:6px 0}.review-answer-card .btn{margin-top:10px}.review-status{display:inline-block;background:#fff0e8;color:#a26936;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:800}.review-status.is-correct{background:#e9f7ed;color:#27845b}
+.review-placeholder{text-align:center;margin:16px auto;padding:34px 18px}.review-placeholder h2{font-size:20px}.review-placeholder p{font-size:13px;color:#71819a}.review-avatar,.review-icon{margin:0 auto 12px;display:grid;place-items:center;width:58px;height:58px;border-radius:18px;background:#e8f0ff;color:#2f6fd6;font-size:23px;font-weight:900}
+.review-toast{position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:50;pointer-events:none;background:#213b64;color:#fff;padding:9px 15px;border-radius:10px;display:none;font-size:12px;max-width:92%;text-align:center}
+.iclub-global-ai-mark{background:#fff;right:14px}.iclub-global-ai-mark[hidden]{display:none!important}
+.iclub-global-ai-composer textarea{outline:none}.iclub-global-ai-close{font-size:23px}
+.review-study-section[hidden],.review-answer-list[hidden]{display:none!important}
+@media(max-width:420px){.review-only-strip{font-size:10px;padding-left:8px}.review-language>span{display:none}.review-subject-card{padding:11px 12px}.review-next-card{flex-wrap:wrap}.review-next-card .review-small-button{margin-left:51px}.review-activity{flex-wrap:wrap}.review-activity .review-card-copy{min-width:calc(100% - 58px)}.review-activity .btn{margin-left:51px}.review-question{padding:18px 14px}.review-answer{padding:12px 10px}.review-activity .btn{min-height:36px}}
