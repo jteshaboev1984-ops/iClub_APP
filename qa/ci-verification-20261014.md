@@ -53,3 +53,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §108 full CI: two independent postgres claim workers must set PGAPPNAME=iclub_ai_v21_local_scratch for Docker-local scratch SQL guard; no real database/production. No merge.
 
 2026-10-15 §108 Chromium end-to-end: RU/UZ/EN Home tied subject choice buttons call one-shot local /qa/home/confirm; no route/progress modifications; restore deadline test. Run complete CI including independent two-worker PostgreSQL token race; NO MERGE.
+
+2026-10-15 §108 final regression: compare new consumed handoffs relative to pre-existing three Chromium QA confirmations; no cross-test state assumptions. Independent race remains a separate disposable DB; NEVER MERGE.
