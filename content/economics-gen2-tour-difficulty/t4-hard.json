@@ -1,0 +1,134 @@
+[
+  {
+    "n": 1,
+    "d": "hard",
+    "k": "C",
+    "sec": 135,
+    "en": "A price-taking workshop sells 100 units at $9 each. At this output its average variable cost is $7 and average total cost is $12. Assume all fixed costs must still be paid if it closes temporarily, and the 100 units are the best feasible positive output. What is its operating loss, its shutdown loss, and its better short-run decision?",
+    "ru": "Мастерская-ценополучатель продаёт 100 изделий по $9. При этом средние переменные затраты $7, средние общие затраты $12. Все постоянные затраты придётся платить и при временном закрытии, а 100 изделий — лучший возможный положительный выпуск. Каковы убыток при работе, убыток при закрытии и лучшее краткосрочное решение?",
+    "uz": "Narx qabul qiluvchi ustaxona 100 mahsulotni har birini $9 dan sotadi. Shu hajmda o‘rtacha o‘zgaruvchi xarajat $7, o‘rtacha jami xarajat $12. Vaqtincha yopilganda ham barcha doimiy xarajatlar to‘lanadi, 100 dona eng yaxshi musbat ishlab chiqarish. Ishlashdagi zarar, yopilishdagi zarar va qisqa muddatdagi eng yaxshi qaror qanday?",
+    "options_en": [
+      "Operating loss $300; shutdown loss $200; close",
+      "Operating loss $500; shutdown loss $300; close",
+      "Operating loss $300; shutdown loss $500; keep producing",
+      "Operating profit $200; shutdown loss $500; keep producing"
+    ],
+    "options_ru": [
+      "Убыток при работе $300, при закрытии $200; закрыть",
+      "Убыток при работе $500, при закрытии $300; закрыть",
+      "Убыток при работе $300, при закрытии $500; продолжать выпуск",
+      "Прибыль $200, убыток при закрытии $500; продолжать выпуск"
+    ],
+    "options_uz": [
+      "Ishlash zarari $300, yopilish zarari $200; yopish",
+      "Ishlash zarari $500, yopilish zarari $300; yopish",
+      "Ishlash zarari $300, yopilish zarari $500; ishlab chiqarishni davom ettirish",
+      "Ishlash foydasi $200, yopilish zarari $500; davom ettirish"
+    ],
+    "why": [
+      "Revenue=100×$9=$900. Total cost=100×$12=$1,200, operating loss=$300. Variable cost=$700; fixed cost=$500, so shutdown loses $500. Continue: revenue covers variable cost plus $200 of fixed cost.",
+      "Выручка $900, общие затраты $1 200, убыток при работе $300. Переменные затраты $700, постоянные $500 — столько теряется при закрытии. Работать выгоднее, поскольку выручка покрывает переменные затраты и $200 постоянных.",
+      "Tushum $900, jami xarajat $1200, ishlash zarari $300. O‘zgaruvchi xarajat $700, doimiy xarajat $500, yopilsa $500 zarar. Ishlab chiqarish davom etsa doimiy xarajatning $200 qismi qoplanadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-001"
+  },
+  {
+    "n": 5,
+    "d": "hard",
+    "k": "B",
+    "sec": 135,
+    "en": "A consumer has $9 to spend on two goods, bought in whole units. X costs $3; its first three units yield marginal utilities 12, 9 and 5. Y costs $2; its first four units yield marginal utilities 9, 6, 4 and 1. More units are unavailable. Which affordable bundle maximises total utility if marginal utilities are additive?",
+    "ru": "Потребитель располагает $9 на два товара, покупаемых целыми единицами. X стоит $3; предельные полезности первых трёх единиц 12, 9, 5. Y стоит $2; предельные полезности первых четырёх единиц 9, 6, 4, 1. Других единиц нет. Какой доступный набор максимизирует суммарную полезность при аддитивности предельных полезностей?",
+    "uz": "Iste’molchida ikkita tovar uchun $9 bor, faqat butun birlik olinadi. X $3, dastlabki uch birligining chegaraviy foydaliligi 12, 9, 5. Y $2, dastlabki to‘rt birligining foydaliligi 9, 6, 4, 1. Boshqa birlik mavjud emas. Chegaraviy foydaliliklar qo‘shilsa qaysi arzon to‘plam jami foydalilikni eng yuqori qiladi?",
+    "options_en": [
+      "2 X and 1 Y: utility 30",
+      "1 X and 3 Y: utility 31",
+      "3 X and 0 Y: utility 26",
+      "0 X and 4 Y: utility 20"
+    ],
+    "options_ru": [
+      "2 X и 1 Y: полезность 30",
+      "1 X и 3 Y: полезность 31",
+      "3 X и 0 Y: полезность 26",
+      "0 X и 4 Y: полезность 20"
+    ],
+    "options_uz": [
+      "2 X va 1 Y: foydalilik 30",
+      "1 X va 3 Y: foydalilik 31",
+      "3 X va 0 Y: foydalilik 26",
+      "0 X va 4 Y: foydalilik 20"
+    ],
+    "why": [
+      "1 X plus 3 Y costs $3+$6=$9 and gives 12+9+6+4=31 utility, above the alternatives. The best bundle balances marginal utility gains against indivisible prices and the budget constraint.",
+      "1 X и 3 Y стоят $3+$6=$9, полезность 12+9+6+4=31, выше других наборов. Нужно сопоставлять предельные выгоды с ценой и ограничением бюджета.",
+      "1 X va 3 Y $3+$6=$9 turadi, foydalilik 12+9+6+4=31, boshqa variantlardan yuqori. Narx, chegara va qo‘shimcha foydalilik hisobga olinadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-005"
+  },
+  {
+    "n": 14,
+    "d": "hard",
+    "k": "A",
+    "sec": 135,
+    "en": "Without preventive checks, a delivery fleet has a 10% chance of a $1,000 repair claim per year. Safety checks cost $40 annually and cut the chance to 2%. A full insurance contract pays every repair bill without a deductible; the premium is fixed during the year regardless of checks. What is the net expected resource saving from doing checks, and what incentive problem may insurance create?",
+    "ru": "Без проверок безопасности у автопарка вероятность ежегодного ремонта стоимостью $1 000 равна 10%. Проверки обходятся в $40 в год и снижают вероятность до 2%. Полная страховка покрывает все ремонты без франшизы; страховой взнос за год не зависит от проверок. Какова чистая ожидаемая экономия ресурсов от проверок и какую проблему стимулов может создать страхование?",
+    "uz": "Xavfsizlik tekshiruvisiz avtoparkda yiliga $1000 ta’mir ehtimoli 10%. Tekshiruv yiliga $40 turadi va ehtimolni 2% ga tushiradi. To‘liq sug‘urta barcha ta’mirni chegirmasiz qoplaydi; yil davomida badal tekshiruvga bog‘liq emas. Tekshiruvning kutilgan sof resurs tejamkorligi qancha va sug‘urta qanday rag‘bat muammosini yaratadi?",
+    "options_en": [
+      "$40 net saving; full coverage may create moral hazard by weakening the fleet's incentive to check safety",
+      "$80 net saving; insurance eliminates every accident risk",
+      "$20 net loss; checking is socially inefficient",
+      "$60 net saving; checks must always increase expected repair costs"
+    ],
+    "options_ru": [
+      "Чистая экономия $40; полное покрытие может вызвать моральный риск, ослабив стимул к проверкам",
+      "Экономия $80; страховка полностью исключает риск аварий",
+      "Чистый убыток $20; проверки неэффективны для общества",
+      "Экономия $60; проверки обязательно повышают ожидаемый ущерб"
+    ],
+    "options_uz": [
+      "Sof tejam $40; to‘liq sug‘urta tekshiruv rag‘batini susaytirib axloqiy tavakkal yaratishi mumkin",
+      "Tejam $80; sug‘urta baxtsiz hodisani butunlay yo‘q qiladi",
+      "Sof zarar $20; tekshiruv ijtimoiy samarasiz",
+      "Tejam $60; tekshiruv kutilgan ta’mir xarajatini albatta oshiradi"
+    ],
+    "why": [
+      "Expected repairs fall from 0.10×$1,000=$100 to 0.02×$1,000=$20, saving $80 before safety-check costs. Net social resource saving=$80−$40=$40. With full fixed-premium coverage, the firm may underinvest in prevention: moral hazard.",
+      "Ожидаемый ремонт без проверок $100, с проверками $20 — экономия $80. После затрат на проверку $40 чистый выигрыш $40. Полное страхование ослабляет частный стимул избегать ущерба: моральный риск.",
+      "Tekshiruvsiz kutilgan ta’mir $100, tekshiruv bilan $20; tejam $80. $40 tekshiruvdan keyin sof $40. To‘liq sug‘urta oldini olish rag‘batini kamaytiradi: axloqiy tavakkal."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-014"
+  },
+  {
+    "n": 19,
+    "d": "hard",
+    "k": "D",
+    "sec": 135,
+    "en": "A consumer's successive pastries have money-valued marginal utilities of $18, $14, $10, $6 and $2. Initially each costs $9; later price falls to $5. With no binding income constraint, by how much does the maximum total consumer surplus increase after the price cut?",
+    "ru": "Денежная оценка предельных полезностей последовательных пирожных равна $18, $14, $10, $6 и $2. Первоначальная цена $9, затем снижается до $5. Доход не ограничивает выбор. На сколько увеличится максимальный общий излишек потребителя после снижения цены?",
+    "uz": "Ketma-ket pishiriqlarning puldagi chegaraviy foydaliligi $18, $14, $10, $6 va $2. Dastlab narx $9, keyin $5 ga tushadi. Daromad cheklovi yo‘q. Narx kamaygach maksimal jami iste’molchi ortiqchaligi qanchaga oshadi?",
+    "options_en": [
+      "$5",
+      "$9",
+      "$28",
+      "$13"
+    ],
+    "options_ru": [
+      "$5",
+      "$9",
+      "$28",
+      "$13"
+    ],
+    "options_uz": [
+      "$5",
+      "$9",
+      "$28",
+      "$13"
+    ],
+    "why": [
+      "At $9 the first three units are purchased: (18−9)+(14−9)+(10−9)=$15 surplus. At $5 the first four: (18−5)+(14−5)+(10−5)+(6−5)=$28. Increase=$28−$15=$13.",
+      "При цене $9 покупаются три единицы, излишек (18−9)+(14−9)+(10−9)=$15. При $5 — четыре, излишек $28. Прирост $28−$15=$13.",
+      "$9 narxda uch dona olinadi, ortiqchalik (18−9)+(14−9)+(10−9)=$15. $5 narxda to‘rt dona, ortiqchalik $28. Oshish $13."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-019"
+  }
+]
