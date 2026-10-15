@@ -150,4 +150,4 @@ function claimSyntheticHandoff({sql,signingKey,userId,contextHandle,locale,
   reviewOnly:true,releaseAllowed:false,navigationExecuted:false,
   progressChanged:false});
 }
-module.exports={issueSyntheticHandoff,claimSyntheticHandoff,possibleChoices};
+module.exports={issueSyntheticHandoff,claimSyntheticHandoff,possibleChoices,authoritySql};
