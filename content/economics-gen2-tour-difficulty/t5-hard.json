@@ -70,9 +70,9 @@
     "d": "hard",
     "k": "C",
     "sec": 135,
-    "en": "A regulated fish market has inverse demand P=100−0.5Q and competitive marginal supply cost MC=20+0.25Q. The authority sets a binding catch quota of 80 fish, and a single licence holder captures the whole gap between the market sale price and fishers' marginal supply price on each of the 80 units. What is the resulting sale price and total licence scarcity rent?",
-    "ru": "На регулируемом рыбном рынке обратный спрос P=100−0,5Q, конкурентные предельные затраты предложения MC=20+0,25Q. Власти вводят обязательную квоту вылова 80 рыб. Один владелец лицензии получает всю разницу между рыночной ценой продажи и предельной ценой поставки рыбаков по каждой из 80 рыб. Каковы цена продажи и общий дефицитный доход владельца лицензии?",
-    "uz": "Tartibga solingan baliq bozorida teskari talab P=100−0,5Q, raqobatli chegaraviy taklif xarajati MC=20+0,25Q. Hukumat 80 dona baliq uchun majburiy ov kvotasini belgilaydi. Bitta litsenziya egasi 80 donaning har biri uchun bozor sotuv narxi va baliqchilarning chegaraviy taklif narxi orasidagi farqni to‘liq oladi. Sotuv narxi va jami litsenziya tanqislik rentasi qancha?",
+    "en": "A regulated fish market has inverse demand P=100−0.5Q and competitive marginal supply cost MC=20+0.25Q. A binding quota limits catches to 80 fish. A single licence holder buys all 80 fish at one uniform price equal to MC at Q=80 and resells them at the market demand price. What are the resale price and total gross scarcity rent for that holder, ignoring all other costs?",
+    "ru": "На рыбном рынке обратный спрос P=100−0,5Q, конкурентные предельные затраты предложения MC=20+0,25Q. Обязательная квота ограничивает вылов 80 рыбами. Один владелец лицензии покупает все 80 рыб по единой цене, равной MC при Q=80, и перепродаёт по рыночной цене спроса. Какова цена перепродажи и общая валовая дефицитная рента владельца лицензии без учёта иных затрат?",
+    "uz": "Baliq bozorida teskari talab P=100−0,5Q, raqobatli chegaraviy taklif xarajati MC=20+0,25Q. Majburiy kvota ovni 80 dona bilan cheklaydi. Bitta litsenziya egasi 80 baliqning barchasini Q=80 dagi MC ga teng yagona narxda olib, bozor talab narxida qayta sotadi. Boshqa xarajatsiz qayta sotish narxi va egasining jami yalpi tanqislik rentasi qancha?",
     "options_en": [
       "Price $40; rent $1,600",
       "Price $60; rent $800",
@@ -92,9 +92,9 @@
       "Narx $80; litsenziya rentasi $3200"
     ],
     "why": [
-      "At the quota Q=80, consumers pay P=100−0.5×80=$60; fishers' marginal supply price is MC=20+0.25×80=$40. Under the stated uniform per-unit gap assumption, licence rent is ($60−$40)×80=$1,600.",
-      "При Q=80 цена спроса 100−0,5×80=$60, предельная цена предложения 20+0,25×80=$40. При заданном одинаковом разрыве на каждую единицу доход лицензии ($60−$40)×80=$1 600.",
-      "Q=80 da xaridor narxi 100−0,5×80=$60, chegaraviy taklif narxi 20+0,25×80=$40. Har birlik uchun farq bir xil degan shartda litsenziya rentasi ($60−$40)×80=$1600."
+      "At Q=80 the uniform purchase price is MC=20+0.25×80=$40, while the market selling price is P=100−0.5×80=$60. The licence holder's gross rent is (60−40)×80=$1,600, given the explicitly uniform purchase price.",
+      "При Q=80 единая цена покупки MC=20+0,25×80=$40, цена продажи по спросу P=100−0,5×80=$60. Валовая рента владельца лицензии ($60−$40)×80=$1 600 при условии единой закупочной цены.",
+      "Q=80 da yagona xarid narxi MC=20+0,25×80=$40, talab bo‘yicha sotuv narxi P=100−0,5×80=$60. Bir xil xarid narxi shartida litsenziya egasining yalpi rentasi ($60−$40)×80=$1600."
     ],
     "ref": "EC9708:G2:EC9708-G2-T5-T-014"
   },
