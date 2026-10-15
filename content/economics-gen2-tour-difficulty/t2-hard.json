@@ -1,0 +1,134 @@
+[
+  {
+    "n": 7,
+    "d": "hard",
+    "k": "C",
+    "sec": 135,
+    "en": "Two households earn $18,000 and $82,000 before redistribution. The first receives a means-tested $7,000 transfer; the second pays an additional $13,000 tax. The poverty threshold is $28,000. By how much does the gap between their disposable incomes narrow, and does the poorer household cross the threshold?",
+    "ru": "До перераспределения два домохозяйства получают $18 000 и $82 000. Первое получает адресную выплату $7 000; второе платит дополнительный налог $13 000. Черта бедности — $28 000. На сколько сократится разрыв располагаемых доходов и выйдет ли беднейшая семья за черту бедности?",
+    "uz": "Qayta taqsimlashdan oldin ikki xonadon $18 000 va $82 000 oladi. Birinchisi $7 000 manzilli yordam oladi; ikkinchisi $13 000 qo‘shimcha soliq to‘laydi. Kambag‘allik chegarasi $28 000. Ixtiyordagi daromadlar farqi qanchaga qisqaradi va kam daromadli xonadon chegaradan chiqadimi?",
+    "options_en": [
+      "Gap narrows $13,000; yes, lower income becomes $31,000",
+      "Gap narrows $20,000; yes, lower income becomes $28,000",
+      "Gap narrows $20,000; no, lower income becomes $25,000",
+      "Gap widens $20,000; no, lower income remains $18,000"
+    ],
+    "options_ru": [
+      "Разрыв сокращается на $13 000; да, доход становится $31 000",
+      "Разрыв сокращается на $20 000; да, доход достигает $28 000",
+      "Разрыв сокращается на $20 000; нет, доход становится $25 000",
+      "Разрыв растёт на $20 000; нет, доход остаётся $18 000"
+    ],
+    "options_uz": [
+      "Farq $13 000 ga qisqaradi; ha, past daromad $31 000 bo‘ladi",
+      "Farq $20 000 ga qisqaradi; ha, daromad $28 000 bo‘ladi",
+      "Farq $20 000 ga qisqaradi; yo‘q, past daromad $25 000 bo‘ladi",
+      "Farq $20 000 ga oshadi; yo‘q, daromad $18 000 qoladi"
+    ],
+    "why": [
+      "Before, the gap is $82,000−$18,000=$64,000. Afterwards incomes are $69,000 and $25,000, gap $44,000, a $20,000 narrowing. The poorer household is still below $28,000.",
+      "До мер разрыв $64 000. После мер доходы $69 000 и $25 000, разрыв $44 000. Он сокращается на $20 000, но $25 000 всё ещё ниже черты бедности $28 000.",
+      "Avval farq $64 000. Keyin daromadlar $69 000 va $25 000, farq $44 000. $20 000 ga qisqaradi, lekin $25 000 kambag‘allik chegarasidan past."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-007"
+  },
+  {
+    "n": 11,
+    "d": "hard",
+    "k": "B",
+    "sec": 135,
+    "en": "A government pays producers a $6 subsidy per unit. The market price paid by consumers falls from $20 to $17, while the equilibrium quantity rises from 1,000 to 1,200 units. What are the subsidy benefit per unit to producers and the total government expenditure at the new equilibrium?",
+    "ru": "Государство выдаёт производителям субсидию $6 на единицу товара. Цена для покупателей снижается с $20 до $17, равновесные продажи растут с 1 000 до 1 200 единиц. Сколько дополнительного дохода на единицу получают продавцы относительно прежней цены и каковы общие расходы бюджета на субсидию при новом равновесии?",
+    "uz": "Davlat ishlab chiqaruvchilarga har birlik uchun $6 subsidiya beradi. Xaridor narxi $20 dan $17 ga tushadi, muvozanat hajmi 1000 dan 1200 birlikka oshadi. Sotuvchi avvalgi narxga nisbatan har birlikda qancha qo‘shimcha oladi va yangi muvozanatda subsidiya bo‘yicha jami budjet xarajati qancha?",
+    "options_en": [
+      "Producer gain $6; expenditure $6,000",
+      "Producer gain $3; expenditure $7,200",
+      "Producer gain $3; expenditure $6,000",
+      "Producer gain $9; expenditure $7,200"
+    ],
+    "options_ru": [
+      "Прирост у продавца $6; бюджет $6 000",
+      "Прирост у продавца $3; бюджет $7 200",
+      "Прирост у продавца $3; бюджет $6 000",
+      "Прирост у продавца $9; бюджет $7 200"
+    ],
+    "options_uz": [
+      "Sotuvchi foydasi $6; budjet $6 000",
+      "Sotuvchi foydasi $3; budjet $7 200",
+      "Sotuvchi foydasi $3; budjet $6 000",
+      "Sotuvchi foydasi $9; budjet $7 200"
+    ],
+    "why": [
+      "New producer receipt is consumer price $17 plus subsidy $6=$23; before it was $20, so producer gain is $3 per unit. Subsidy costs taxpayers $6×1,200=$7,200.",
+      "Новая выручка продавца за единицу $17+$6=$23 против прежних $20, прирост $3. Бюджет расходует $6×1 200=$7 200.",
+      "Sotuvchi yangi tushumi $17+$6=$23, avval $20 edi; foyda $3. Davlat xarajati $6×1200=$7200."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-011"
+  },
+  {
+    "n": 19,
+    "d": "hard",
+    "k": "D",
+    "sec": 135,
+    "en": "In a circular-flow model with households, government and foreign trade, planned saving is $45m, taxes $30m and imports $25m. Planned investment is $35m, government purchases $40m and exports $25m. Afterwards, government purchases rise by $9m while imports independently rise by $4m. What is the initial injection-leakage balance, and what is the direction of pressure on national income after the changes?",
+    "ru": "В модели кругооборота с государством и внешней торговлей планируемые сбережения $45 млн, налоги $30 млн, импорт $25 млн. Планируемые инвестиции $35 млн, госзакупки $40 млн, экспорт $25 млн. Затем госзакупки увеличиваются на $9 млн, а импорт независимо растёт на $4 млн. Каково исходное равенство инъекций и изъятий и каким будет давление на национальный доход после изменений?",
+    "uz": "Davlat va tashqi savdoli doiraviy oqim modelida rejalangan jamg‘arma $45 mln, soliq $30 mln, import $25 mln. Rejalangan investitsiya $35 mln, davlat xaridi $40 mln, eksport $25 mln. Keyin davlat xaridi $9 mln, import alohida $4 mln oshadi. Dastlab kirim va chiqimlar muvozanati qanday va o‘zgarishdan so‘ng milliy daromadga qanday bosim bo‘ladi?",
+    "options_en": [
+      "Initially leakages exceed injections by $25m; later income is under downward pressure",
+      "Initially injections exceed leakages by $5m; later income is under downward pressure",
+      "Initially injections equal leakages; later leakages exceed injections by $5m, pushing income down",
+      "Initially injections equal leakages at $100m; afterwards injections exceed leakages by $5m, pushing income up"
+    ],
+    "options_ru": [
+      "Изначально изъятия превышают инъекции на $25 млн; затем доход снижается",
+      "Изначально инъекции превышают изъятия на $5 млн; затем доход снижается",
+      "Изначально равновесие; затем изъятия превышают инъекции на $5 млн, доход снижается",
+      "Изначально инъекции и изъятия равны $100 млн; затем инъекции выше изъятий на $5 млн, доход растёт"
+    ],
+    "options_uz": [
+      "Dastlab chiqimlar kirimdan $25 mln ko‘p; keyin daromad pasayish bosimida",
+      "Dastlab kirimlar chiqimdan $5 mln ko‘p; keyin daromad pasayadi",
+      "Dastlab teng; keyin chiqim $5 mln ko‘proq bo‘lib daromad tushadi",
+      "Dastlab kirim va chiqim $100 mln ga teng; keyin kirim $5 mln yuqori bo‘lib daromad oshish bosimida"
+    ],
+    "why": [
+      "Initially injections I+G+X=35+40+25=$100m, and leakages S+T+M=45+30+25=$100m. Later injections=$109m and leakages=$104m; the $5m planned injection surplus puts upward pressure on output and income.",
+      "Сначала инъекции 35+40+25=$100 млн и изъятия 45+30+25=$100 млн. Затем инъекции $109 млн, изъятия $104 млн: превышение инъекций на $5 млн создаёт повышательное давление на выпуск и доход.",
+      "Avval kirimlar 35+40+25=$100 mln, chiqimlar 45+30+25=$100 mln. Keyin kirim $109 mln, chiqim $104 mln: $5 mln ortiqcha kirim ishlab chiqarish va daromadni oshirishga bosim beradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-019"
+  },
+  {
+    "n": 20,
+    "d": "hard",
+    "k": "A",
+    "sec": 135,
+    "en": "An economy's planned aggregate expenditure is C+I+G+(X−M). Initially C=$460bn, I=$90bn, G=$110bn, X=$70bn and M=$100bn. Later the government adds $15bn of purchases while household consumption falls by $8bn and imports rise by $5bn. Other items stay fixed. What are aggregate expenditure before and after these changes?",
+    "ru": "Планируемые совокупные расходы экономики рассчитываются как C+I+G+(X−M). Сначала C=$460 млрд, I=$90 млрд, G=$110 млрд, X=$70 млрд, M=$100 млрд. Затем госзакупки растут на $15 млрд, потребление сокращается на $8 млрд, импорт растёт на $5 млрд; остальные показатели неизменны. Каковы расходы до и после?",
+    "uz": "Yalpi rejalashtirilgan xarajat C+I+G+(X−M) shaklida. Dastlab C=$460 mlrd, I=$90 mlrd, G=$110 mlrd, X=$70 mlrd, M=$100 mlrd. Keyin davlat xaridi $15 mlrd oshadi, iste’mol $8 mlrd kamayadi, import $5 mlrd oshadi; boshqasi o‘zgarmaydi. O‘zgarishdan oldingi va keyingi jami xarajat qancha?",
+    "options_en": [
+      "$630bn before; $632bn after",
+      "$730bn before; $732bn after",
+      "$630bn before; $642bn after",
+      "$630bn before; $602bn after"
+    ],
+    "options_ru": [
+      "До $630 млрд; после $632 млрд",
+      "До $730 млрд; после $732 млрд",
+      "До $630 млрд; после $642 млрд",
+      "До $630 млрд; после $602 млрд"
+    ],
+    "options_uz": [
+      "Oldin $630 mlrd; keyin $632 mlrd",
+      "Oldin $730 mlrd; keyin $732 mlrd",
+      "Oldin $630 mlrd; keyin $642 mlrd",
+      "Oldin $630 mlrd; keyin $602 mlrd"
+    ],
+    "why": [
+      "Initially AD=460+90+110+70−100=$630bn. Net change is −8+15−5=+$2bn; afterwards AD=$632bn. Imports are subtracted to avoid counting foreign production in domestic output expenditure.",
+      "Сначала совокупные расходы 460+90+110+70−100=$630 млрд. Изменение −8+15−5=+$2 млрд; новый показатель $632 млрд. Импорт вычитается.",
+      "Dastlab jami xarajat 460+90+110+70−100=$630 mlrd. Sof o‘zgarish −8+15−5=+$2 mlrd; keyin $632 mlrd. Import ayiriladi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-020"
+  }
+]

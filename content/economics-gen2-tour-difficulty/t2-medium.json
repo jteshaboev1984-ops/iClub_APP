@@ -1,0 +1,167 @@
+[
+  {
+    "n": 13,
+    "d": "medium",
+    "k": "B",
+    "sec": 115,
+    "en": "An economy's gross domestic product is $720bn in Year A and $770bn in Year B. Depreciation of fixed capital is $40bn in A and $65bn in B. What are the two net domestic product figures, and by how much did net output rise?",
+    "ru": "Валовой внутренний продукт экономики равен $720 млрд в году A и $770 млрд в году B. Амортизация основного капитала составляет $40 млрд и $65 млрд соответственно. Найдите чистый внутренний продукт в обоих годах и прирост чистого выпуска.",
+    "uz": "Mamlakat yalpi ichki mahsuloti A yilida $720 mlrd va B yilida $770 mlrd. Asosiy kapital eskirishi mos ravishda $40 mlrd va $65 mlrd. Ikkala yildagi sof ichki mahsulot va sof mahsulot o‘sishi qancha?",
+    "options_en": [
+      "NDP $680bn and $705bn; net output rises $50bn",
+      "NDP $680bn and $705bn; net output rises $25bn",
+      "NDP $760bn and $835bn; net output rises $75bn",
+      "NDP $720bn and $770bn; net output rises $50bn"
+    ],
+    "options_ru": [
+      "ЧВП $680 и $705 млрд; рост $50 млрд",
+      "ЧВП $680 и $705 млрд; рост $25 млрд",
+      "ЧВП $760 и $835 млрд; рост $75 млрд",
+      "ЧВП $720 и $770 млрд; рост $50 млрд"
+    ],
+    "options_uz": [
+      "SIM $680 va $705 mlrd; o‘sish $50 mlrd",
+      "SIM $680 va $705 mlrd; o‘sish $25 mlrd",
+      "SIM $760 va $835 mlrd; o‘sish $75 mlrd",
+      "SIM $720 va $770 mlrd; o‘sish $50 mlrd"
+    ],
+    "why": [
+      "NDP=GDP−capital depreciation. A=$720−$40=$680bn; B=$770−$65=$705bn. The net-output increase is $25bn, not the $50bn increase in GDP.",
+      "ЧВП=ВВП−амортизация. В году A $720−$40=$680 млрд, в B $770−$65=$705 млрд; прирост $25 млрд, меньше прироста ВВП $50 млрд.",
+      "SIM=YaIM−kapital eskirishi. A=$720−$40=$680 mlrd, B=$770−$65=$705 mlrd. Sof o‘sish $25 mlrd, YaIMdagi $50 mlrd emas."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-013"
+  },
+  {
+    "n": 14,
+    "d": "medium",
+    "k": "C",
+    "sec": 120,
+    "en": "At a competitive monthly rental rate of $600, 100 flats are demanded and supplied. A binding rent ceiling of $450 raises quantity demanded to 140 flats and reduces quantity supplied to 80. What is the shortage and how many of the original 100 flats are no longer supplied?",
+    "ru": "При равновесной месячной аренде $600 спрос и предложение составляют по 100 квартир. Обязательный потолок платы $450 увеличивает спрос до 140 квартир и уменьшает предложение до 80. Каков дефицит жилья и сколько квартир из первоначальных 100 теперь не предлагаются?",
+    "uz": "Muvozanatli oylik ijara $600 bo‘lganda talab ham, taklif ham 100 ta uy. Majburiy $450 narx chegarasi talabni 140 taga oshiradi, taklifni 80 taga kamaytiradi. Uy tanqisligi va avvalgi 100 ta taklifdan yo‘qolgan uy soni qancha?",
+    "options_en": [
+      "Shortage 40 flats; 60 initially supplied units disappear",
+      "Shortage 60 flats; 60 initially supplied units disappear",
+      "Shortage 60 flats; 20 initially supplied units disappear",
+      "Surplus 60 flats; 20 initially supplied units disappear"
+    ],
+    "options_ru": [
+      "Дефицит 40 квартир; исчезает 60 прежних предложений",
+      "Дефицит 60 квартир; исчезает 60 прежних предложений",
+      "Дефицит 60 квартир; из прежнего предложения исчезает 20 квартир",
+      "Избыток 60 квартир; из предложения исчезает 20 квартир"
+    ],
+    "options_uz": [
+      "Tanqislik 40 uy; avvalgi taklifdan 60 yo‘qoladi",
+      "Tanqislik 60 uy; avvalgi taklifdan 60 yo‘qoladi",
+      "Tanqislik 60 uy; avvalgi taklifdan 20 yo‘qoladi",
+      "Ortiqcha taklif 60 uy; avvalgi taklifdan 20 yo‘qoladi"
+    ],
+    "why": [
+      "The shortage is Qd−Qs=140−80=60 flats. Supply falls from 100 to 80, a reduction of 20 flats; the two measurements are not the same.",
+      "Дефицит равен 140−80=60 квартир. Предложение уменьшается со 100 до 80, то есть на 20 квартир. Это разные показатели.",
+      "Tanqislik 140−80=60 uy. Taklif 100 dan 80 ga tushib 20 uy kamayadi. Ikkala ko‘rsatkich bir xil emas."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-014"
+  },
+  {
+    "n": 15,
+    "d": "medium",
+    "k": "D",
+    "sec": 120,
+    "en": "A city has a single water distributor. Its average cost is $3 per unit at output 1,000, and a regulator sets a price ceiling of $3.50. Before regulation, the firm charged $5 per unit and sold 1,000 units. Assuming costs and sales stay at those levels, how do revenue and accounting profit change?",
+    "ru": "В городе один поставщик воды. Его средние затраты составляют $3 за единицу при объёме 1 000. Регулятор вводит максимальную цену $3,50. Ранее фирма продавала 1 000 единиц по $5. Если объём и издержки остаются прежними, как меняются выручка и бухгалтерская прибыль?",
+    "uz": "Shaharda suvni bitta korxona yetkazadi. 1000 birlik hajmda o‘rtacha xarajat $3. Tartibga soluvchi eng yuqori narxni $3,50 deb belgilaydi. Ilgari firma 1000 birlikni $5 dan sotgan. Hajm va xarajat o‘zgarmasa, tushum va buxgalteriya foydasi qanday o‘zgaradi?",
+    "options_en": [
+      "Revenue falls $1,000; profit falls $500",
+      "Revenue falls $1,500; profit stays unchanged",
+      "Revenue stays $5,000; profit falls $1,500",
+      "Revenue falls $1,500; profit falls $1,500, remaining positive at $500"
+    ],
+    "options_ru": [
+      "Выручка падает на $1 000; прибыль на $500",
+      "Выручка падает на $1 500; прибыль неизменна",
+      "Выручка остаётся $5 000; прибыль падает на $1 500",
+      "Выручка и прибыль падают на $1 500; прибыль остаётся положительной: $500"
+    ],
+    "options_uz": [
+      "Tushum $1000, foyda $500 kamayadi",
+      "Tushum $1500 kamayadi, foyda o‘zgarmaydi",
+      "Tushum $5000 qoladi, foyda $1500 kamayadi",
+      "Tushum va foyda $1500 kamayadi; foyda $500 musbat qoladi"
+    ],
+    "why": [
+      "Revenue falls from $5×1,000=$5,000 to $3.50×1,000=$3,500, down $1,500. Total cost stays $3,000, so profit moves from $2,000 to $500, also down $1,500.",
+      "Выручка снижается с $5 000 до $3 500, на $1 500. Затраты $3 000 неизменны; прибыль падает с $2 000 до $500, тоже на $1 500.",
+      "Tushum $5000 dan $3500 ga $1500 kamayadi. Jami xarajat $3000 qoladi; foyda $2000 dan $500 ga, $1500 kamayadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-015"
+  },
+  {
+    "n": 16,
+    "d": "medium",
+    "k": "A",
+    "sec": 115,
+    "en": "An economy reports gross value added at basic prices of $480bn. Taxes on products are $35bn and subsidies on products $12bn. In the next period subsidies increase by $8bn, while value added and taxes on products are unchanged. What is GDP at market prices before and after the subsidy rise?",
+    "ru": "Валовая добавленная стоимость экономики в основных ценах — $480 млрд. Налоги на продукты $35 млрд, субсидии на продукты $12 млрд. В следующем периоде субсидии увеличиваются на $8 млрд, добавленная стоимость и налоги неизменны. Чему равен ВВП в рыночных ценах до и после?",
+    "uz": "Asosiy narxlardagi yalpi qo‘shilgan qiymat $480 mlrd. Mahsulot soliqlari $35 mlrd, subsidiyalar $12 mlrd. Keyingi davrda subsidiya $8 mlrd oshadi, qo‘shilgan qiymat va soliq o‘zgarmaydi. Bozor narxidagi YaIM avval va keyin qancha?",
+    "options_en": [
+      "$503bn before; $495bn after",
+      "$527bn before; $535bn after",
+      "$480bn before; $472bn after",
+      "$503bn before; $511bn after"
+    ],
+    "options_ru": [
+      "Сначала $503 млрд; затем $495 млрд",
+      "Сначала $527 млрд; затем $535 млрд",
+      "Сначала $480 млрд; затем $472 млрд",
+      "Сначала $503 млрд; затем $511 млрд"
+    ],
+    "options_uz": [
+      "Avval $503 mlrd; keyin $495 mlrd",
+      "Avval $527 mlrd; keyin $535 mlrd",
+      "Avval $480 mlrd; keyin $472 mlrd",
+      "Avval $503 mlrd; keyin $511 mlrd"
+    ],
+    "why": [
+      "GDP at market prices=GVA at basic prices+product taxes−product subsidies. Initially 480+35−12=$503bn; subsidies rise to 20, so GDP becomes 480+35−20=$495bn.",
+      "ВВП в рыночных ценах = добавленная стоимость в основных ценах + налоги на продукты − субсидии. Сначала 480+35−12=$503 млрд; затем 480+35−20=$495 млрд.",
+      "Bozor narxida YaIM=asosiy qo‘shilgan qiymat+mahsulot soliqlari−subsidiyalar. Avval 480+35−12=$503 mlrd; keyin 480+35−20=$495 mlrd."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-016"
+  },
+  {
+    "n": 18,
+    "d": "medium",
+    "k": "B",
+    "sec": 120,
+    "en": "Country A's nominal GDP increases 15% while its GDP deflator increases 10%. Country B's nominal GDP increases 8% while its deflator is unchanged. With no change in population, which country has faster growth of real GDP, using exact index ratios?",
+    "ru": "В стране A номинальный ВВП растёт на 15%, дефлятор ВВП — на 10%. В стране B номинальный ВВП растёт на 8%, дефлятор не меняется. Численность населения постоянна. В какой стране реальный ВВП растёт быстрее по точным отношениям индексов?",
+    "uz": "A mamlakatda nominal YaIM 15%, deflyator 10% oshadi. B mamlakatda nominal YaIM 8% oshadi, deflyator o‘zgarmaydi. Aholi soni o‘zgarmas. Indekslarning aniq nisbatiga ko‘ra qaysi mamlakatda real YaIM tezroq o‘sadi?",
+    "options_en": [
+      "A, because nominal GDP rises 15%",
+      "B: real growth is 8% versus about 4.55% in A",
+      "A: real growth is 25% versus 8% in B",
+      "Real growth is equal because prices and output cannot be separated"
+    ],
+    "options_ru": [
+      "A, потому что номинальный ВВП растёт на 15%",
+      "B: реальный рост 8% против примерно 4,55% в A",
+      "A: реальный рост 25% против 8% в B",
+      "Реальный рост одинаков, поскольку цены невозможно отделить от выпуска"
+    ],
+    "options_uz": [
+      "A, chunki nominal YaIM 15% oshadi",
+      "B: real o‘sish 8%, A da esa taxminan 4,55%",
+      "A: real o‘sish 25%, B da 8%",
+      "Real o‘sish teng, chunki narxni mahsulotdan ajratib bo‘lmaydi"
+    ],
+    "why": [
+      "A real-growth factor is 1.15/1.10≈1.04545, a 4.55% gain. B has 1.08/1.00=1.08, or 8% real growth, despite lower nominal growth.",
+      "Для A индекс реального роста 1,15/1,10≈1,04545, то есть 4,55%. Для B — 1,08/1,00=1,08, или 8%. Реальный рост быстрее в B.",
+      "A ning real o‘sish koeffitsienti 1,15/1,10≈1,04545, 4,55%. B da 1,08/1,00=1,08, 8%. B tezroq o‘sadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-T-018"
+  }
+]

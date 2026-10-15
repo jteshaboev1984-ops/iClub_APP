@@ -18162,7 +18162,7 @@ try {
     // Economics Gen2 unreviewed Tour content has no authored difficulty: never display its fabricated 'medium' labels.
     // Retain established difficulty labels for other subjects without changing assessment logic.
     const ecoRef = String(q.book_ref || q.bookReference || "");
-    // T1–T7 Practice have individually reviewed difficulty levels. Gen2 Tours have separate governed 20-question banks and must not inherit Practice badge rules.
+    // T1–T7 Practice and Season 2 Economics Gen2 Tours 1–2 are individually reviewed. Tour difficulty belongs to governed 20-question season banks, never Practice badge gating.
     const isUnratedEconomicsGen2 = ecoRef.startsWith("EC9708:G2:") && !/^EC9708:G2:EC9708-G2-T[1-7]-P-[0-9]{3}(?:-V2)?$/.test(ecoRef);
     if (!isUnratedEconomicsGen2) {
       const diff = document.createElement("div");
