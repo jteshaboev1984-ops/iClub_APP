@@ -1,0 +1,410 @@
+[
+  {
+    "n": 6,
+    "d": "medium",
+    "sec": 140,
+    "k": "C",
+    "en": "A factory replaces routine jobs with software, leaving some former staff unable to meet new vacancy requirements even though spending on its products has recovered. Which pairing correctly identifies the unemployment and the most targeted response?",
+    "ru": "Завод автоматизировал рутинные рабочие места. Часть бывших работников не соответствует требованиям новых вакансий, хотя спрос на продукцию уже восстановился. Какая пара верно определяет безработицу и адресную меру?",
+    "uz": "Zavod oddiy ishlarni dasturiy ta’minotga almashtirdi. Mahsulotga talab tiklangan bo‘lsa ham, sobiq ishchilar yangi vakansiyalar malakasiga mos kelmayapti. Qaysi juftlik ishsizlik turini va mos chorasini to‘g‘ri ko‘rsatadi?",
+    "opt_en": [
+      "Cyclical unemployment; only general demand stimulus",
+      "Seasonal unemployment; extend tourism seasons",
+      "Structural unemployment; skills retraining for new roles",
+      "Frictional unemployment; ban all job switching"
+    ],
+    "opt_ru": [
+      "Циклическая; только общее стимулирование спроса",
+      "Сезонная; продление туристического сезона",
+      "Структурная; переподготовка под новые профессии",
+      "Фрикционная; запрет переходов между работами"
+    ],
+    "opt_uz": [
+      "Davriy ishsizlik; faqat umumiy talabni rag‘batlantirish",
+      "Mavsumiy ishsizlik; sayyohlik mavsumini uzaytirish",
+      "Tarkibiy ishsizlik; yangi kasblarga qayta o‘qitish",
+      "Friksion ishsizlik; ish almashtirishni taqiqlash"
+    ],
+    "why": [
+      "The skills mismatch persists after demand recovery, indicating structural rather than cyclical unemployment. Retraining addresses the mechanism.",
+      "Несоответствие навыков сохраняется после восстановления спроса: это структурная безработица, требующая переподготовки.",
+      "Talab tiklangandan keyin ham malaka mos kelmasligi tarkibiy ishsizlikdir; qayta tayyorlash muammoni nishonga oladi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-006",
+    "options_en": [
+      "Cyclical unemployment; only general demand stimulus",
+      "Seasonal unemployment; extend tourism seasons",
+      "Structural unemployment; skills retraining for new roles",
+      "Frictional unemployment; ban all job switching"
+    ],
+    "options_ru": [
+      "Циклическая; только общее стимулирование спроса",
+      "Сезонная; продление туристического сезона",
+      "Структурная; переподготовка под новые профессии",
+      "Фрикционная; запрет переходов между работами"
+    ],
+    "options_uz": [
+      "Davriy ishsizlik; faqat umumiy talabni rag‘batlantirish",
+      "Mavsumiy ishsizlik; sayyohlik mavsumini uzaytirish",
+      "Tarkibiy ishsizlik; yangi kasblarga qayta o‘qitish",
+      "Friksion ishsizlik; ish almashtirishni taqiqlash"
+    ]
+  },
+  {
+    "n": 20,
+    "d": "medium",
+    "sec": 135,
+    "k": "C",
+    "en": "A shipyard has two types of unemployed workers: group A lost jobs because welding was automated and their skills do not match new programming vacancies; group B has the necessary skills but was laid off temporarily when overall orders fell. Which pair identifies the MAIN causes for A and B?",
+    "ru": "На верфи без работы остались две группы. Группа A потеряла места из-за автоматизации сварки и не соответствует новым вакансиям программистов. Группа B обладает нужными навыками, но временно уволена из-за общего падения заказов. Какие причины безработицы у A и B?",
+    "uz": "Kemasozlik zavodida ikki guruh ishsiz. A guruhi payvandlash avtomatlashtirilgani va yangi dasturlash vakansiyalariga malakasi mos emasligi sabab ishsiz qoldi. B guruhi malakali, lekin umumiy buyurtmalar kamaygani uchun vaqtincha bo‘shatildi. A va B sabablarini belgilang.",
+    "opt_en": [
+      "Lower exports in a separate industry",
+      "A temporary fall in household tourism spending",
+      "A short interruption while changing employers with matching skills",
+      "Persisting vacancies whose skill requirements the displaced workers cannot meet"
+    ],
+    "opt_ru": [
+      "Снижение экспорта в другой отрасли",
+      "Временное сокращение расходов домохозяйств на туризм",
+      "Краткий перерыв при смене работы с подходящей квалификацией",
+      "Сохраняющиеся вакансии, требованиям которых уволенные работники не соответствуют"
+    ],
+    "opt_uz": [
+      "Boshqa tarmoq eksportining kamayishi",
+      "Oilalarning sayohat xarajatlari vaqtincha kamayishi",
+      "Mos malaka bilan ish almashtirishdagi qisqa tanaffus",
+      "Bo‘sh ish joylari bor, ammo ishdan bo‘shatilganlar talab qilingan malakaga ega emas"
+    ],
+    "why": [
+      "A's lasting skill mismatch is structural unemployment; B's job loss from temporarily weak aggregate demand is cyclical.",
+      "У A устойчивое несоответствие квалификации — структурная безработица; у B временный недостаток спроса — циклическая.",
+      "A ning malaka mos kelmasligi tarkibiy ishsizlik; B dagi vaqtinchalik talab pasayishi davriy ishsizlik."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-020",
+    "options_en": [
+      "A cyclical; B structural",
+      "A frictional; B seasonal",
+      "A structural; B cyclical",
+      "A seasonal; B frictional"
+    ],
+    "options_ru": [
+      "A — циклическая; B — структурная",
+      "A — фрикционная; B — сезонная",
+      "A — структурная; B — циклическая",
+      "A — сезонная; B — фрикционная"
+    ],
+    "options_uz": [
+      "A — davriy; B — tarkibiy",
+      "A — friksion; B — mavsumiy",
+      "A — tarkibiy; B — davriy",
+      "A — mavsumiy; B — friksion"
+    ]
+  },
+  {
+    "n": 26,
+    "d": "medium",
+    "sec": 135,
+    "k": "B",
+    "en": "Hotel staff are laid off during a broad recession, although their skills still fit their previous jobs and the hotel remains open. Tourism spending is expected to recover. Which classification and likely recovery mechanism fit best?",
+    "ru": "Во время общей рецессии гостиница увольняет сотрудников, хотя их квалификация подходит прежним обязанностям и гостиница продолжает работать. Ожидается восстановление туристических расходов. Какая пара «тип безработицы — механизм восстановления» лучше подходит?",
+    "uz": "Umumiy tanazzulda mehmonxona xodimlarni bo‘shatadi, ularning malakasi avvalgi ishga mos, mehmonxona ochiq. Turizm xarajatlari tiklanishi kutiladi. Qaysi «ishsizlik turi — tiklanish sababi» juftligi mos?",
+    "opt_en": [
+      "Structural; permanent skill replacement",
+      "Cyclical; recovery of aggregate spending",
+      "Seasonal; fixed annual holiday closure",
+      "Frictional; workers voluntarily switch jobs"
+    ],
+    "opt_ru": [
+      "Структурная; необратимая замена навыков",
+      "Циклическая; восстановление совокупных расходов",
+      "Сезонная; регулярное закрытие на каникулы",
+      "Фрикционная; добровольная смена работодателя"
+    ],
+    "opt_uz": [
+      "Tarkibiy; malakani doimiy almashtirish",
+      "Davriy; jami xarajatlar tiklanishi",
+      "Mavsumiy; har yili ta’til sabab yopilish",
+      "Friksion; ixtiyoriy ish almashish"
+    ],
+    "why": [
+      "Workers' skills remain suitable; unemployment stems from reduced demand during recession and can ease as spending recovers.",
+      "Навыки работников сохраняют актуальность; причина — падение спроса в рецессию, которое может устраниться при восстановлении расходов.",
+      "Xodimlar malakasi mos, muammo tanazzuldagi talab pasayishidir; xarajat tiklansa bandlik ham tiklanishi mumkin."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-026",
+    "options_en": [
+      "Structural; permanent skill replacement",
+      "Cyclical; recovery of aggregate spending",
+      "Seasonal; fixed annual holiday closure",
+      "Frictional; workers voluntarily switch jobs"
+    ],
+    "options_ru": [
+      "Структурная; необратимая замена навыков",
+      "Циклическая; восстановление совокупных расходов",
+      "Сезонная; регулярное закрытие на каникулы",
+      "Фрикционная; добровольная смена работодателя"
+    ],
+    "options_uz": [
+      "Tarkibiy; malakani doimiy almashtirish",
+      "Davriy; jami xarajatlar tiklanishi",
+      "Mavsumiy; har yili ta’til sabab yopilish",
+      "Friksion; ixtiyoriy ish almashish"
+    ]
+  },
+  {
+    "n": 35,
+    "d": "medium",
+    "sec": 130,
+    "k": "C",
+    "en": "A region has two villages with identical medical needs. The richer village has a private clinic; the poorer village cannot afford travel to it. Government opens a local clinic in the poorer village. Which two objectives are most directly linked to this policy?",
+    "ru": "У двух деревень одинаковые медицинские потребности. В более богатой есть частная клиника, жители бедной не могут оплатить дорогу к ней. Государство открывает клинику в бедной деревне. Какие две цели наиболее непосредственно связаны с этой политикой?",
+    "uz": "Ikki qishloqning tibbiy ehtiyoji bir xil. Boyroq qishloqda xususiy klinika bor, kambag‘al qishloq aholisi u yerga yo‘l xarajatini qoplay olmaydi. Davlat kambag‘al qishloqda klinika ochdi. Qaysi ikki maqsad bevosita ko‘zlanadi?",
+    "opt_en": [
+      "Maximise export earnings and raise tax revenue",
+      "Reduce money supply and raise interest rates",
+      "Improve geographical access and reduce inequality in service use",
+      "Protect a domestic monopoly and restrict supply"
+    ],
+    "opt_ru": [
+      "Максимизация экспорта и увеличение налогов",
+      "Сокращение денежной массы и рост ставок",
+      "Улучшение территориальной доступности и сокращение неравенства в получении услуг",
+      "Защита монополии и ограничение предложения"
+    ],
+    "opt_uz": [
+      "Eksport tushumini va soliqlarni oshirish",
+      "Pul massasini kamaytirib, foizni oshirish",
+      "Hududiy kirishni yaxshilash va xizmatlardan foydalanish tengsizligini kamaytirish",
+      "Mahalliy monopoliyani himoya qilish va taklifni cheklash"
+    ],
+    "why": [
+      "Public provision directly reduces a geographic and affordability barrier to care, serving an equity objective.",
+      "Государственное предоставление услуги устраняет территориальный и финансовый барьер, поддерживая справедливость доступа.",
+      "Davlat taqdimoti tibbiy xizmatdagi geografik hamda moliyaviy to‘siqlarni kamaytirib, tenglikka xizmat qiladi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-035",
+    "options_en": [
+      "Maximise export earnings and raise tax revenue",
+      "Reduce money supply and raise interest rates",
+      "Improve geographical access and reduce inequality in service use",
+      "Protect a domestic monopoly and restrict supply"
+    ],
+    "options_ru": [
+      "Максимизация экспорта и увеличение налогов",
+      "Сокращение денежной массы и рост ставок",
+      "Улучшение территориальной доступности и сокращение неравенства в получении услуг",
+      "Защита монополии и ограничение предложения"
+    ],
+    "options_uz": [
+      "Eksport tushumini va soliqlarni oshirish",
+      "Pul massasini kamaytirib, foizni oshirish",
+      "Hududiy kirishni yaxshilash va xizmatlardan foydalanish tengsizligini kamaytirish",
+      "Mahalliy monopoliyani himoya qilish va taklifni cheklash"
+    ]
+  },
+  {
+    "n": 40,
+    "d": "medium",
+    "sec": 145,
+    "k": "D",
+    "en": "Global fuel prices fall, reducing a widespread input cost for domestic firms. With aggregate demand and productive technology unchanged, which pair of short-run AD–AS effects is most plausible?",
+    "ru": "Мировые цены на топливо падают, уменьшая распространённые производственные издержки внутренних фирм. При неизменных AD и технологиях какая пара краткосрочных эффектов AD–AS наиболее вероятна?",
+    "uz": "Jahon yoqilg‘i narxi pasayib, mahalliy firmalarning keng tarqalgan ishlab chiqarish xarajatini kamaytiradi. Yalpi talab va texnologiya o‘zgarmasa, qisqa muddatli AD–AS da qaysi juftlik eng ehtimolli?",
+    "opt_en": [
+      "SRAS shifts left; prices rise and output falls",
+      "AD shifts right; prices and output necessarily rise",
+      "LRAS shifts left immediately; output falls",
+      "SRAS shifts right; price level falls and real output rises"
+    ],
+    "opt_ru": [
+      "SRAS влево; цены растут, выпуск падает",
+      "AD вправо; цены и выпуск обязательно растут",
+      "LRAS немедленно влево; выпуск падает",
+      "SRAS вправо; уровень цен падает, реальный выпуск растёт"
+    ],
+    "opt_uz": [
+      "SRAS chapga; narx oshadi, ishlab chiqarish kamayadi",
+      "AD o‘ngga; narx va ishlab chiqarish albatta oshadi",
+      "LRAS darhol chapga; ishlab chiqarish kamayadi",
+      "SRAS o‘ngga; narx pasayadi, real ishlab chiqarish oshadi"
+    ],
+    "why": [
+      "Lower input costs shift SRAS right, allowing greater real output at a lower price level, all else equal.",
+      "Падение издержек сдвигает SRAS вправо, позволяя больший выпуск при более низком уровне цен.",
+      "Xarajatlar pasayishi SRAS ni o‘ngga suradi, real ishlab chiqarish oshib, narx darajasi pasayadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-040",
+    "options_en": [
+      "SRAS shifts left; prices rise and output falls",
+      "AD shifts right; prices and output necessarily rise",
+      "LRAS shifts left immediately; output falls",
+      "SRAS shifts right; price level falls and real output rises"
+    ],
+    "options_ru": [
+      "SRAS влево; цены растут, выпуск падает",
+      "AD вправо; цены и выпуск обязательно растут",
+      "LRAS немедленно влево; выпуск падает",
+      "SRAS вправо; уровень цен падает, реальный выпуск растёт"
+    ],
+    "options_uz": [
+      "SRAS chapga; narx oshadi, ishlab chiqarish kamayadi",
+      "AD o‘ngga; narx va ishlab chiqarish albatta oshadi",
+      "LRAS darhol chapga; ishlab chiqarish kamayadi",
+      "SRAS o‘ngga; narx pasayadi, real ishlab chiqarish oshadi"
+    ]
+  },
+  {
+    "n": 43,
+    "d": "medium",
+    "sec": 145,
+    "k": "A",
+    "en": "A pension is fixed at $1,000 a month while prices rise so the CPI moves from 100 to 125. Other workers have wages indexed exactly to inflation. What is the pension's new purchasing power in base-period dollars, and what happens to indexed real wages?",
+    "ru": "Пенсия фиксирована на $1 000 в месяц, а индекс цен вырос со 100 до 125. Зарплаты остальных работников точно индексируются по инфляции. Чему равна покупательная способность пенсии в долларах базового периода и что происходит с реальной индексированной зарплатой?",
+    "uz": "Pensiya oyiga $1000 qat’iy, narx indeksi 100 dan 125 ga oshdi. Boshqa ishchilarning maoshi inflyatsiyaga to‘liq indeksatsiya qilingan. Pensiyaning bazis davr dollaridagi xarid quvvati qancha va indekslangan real ish haqi qanday o‘zgaradi?",
+    "opt_en": [
+      "$800; indexed real wages are unchanged",
+      "$1,250; indexed real wages rise 25%",
+      "$750; indexed real wages fall 25%",
+      "$1,000; indexed real wages are unchanged"
+    ],
+    "opt_ru": [
+      "$800; реальная индексированная зарплата неизменна",
+      "$1 250; реальная индексированная зарплата растёт на 25%",
+      "$750; реальная индексированная зарплата падает на 25%",
+      "$1 000; реальная индексированная зарплата неизменна"
+    ],
+    "opt_uz": [
+      "$800; indekslangan real ish haqi o‘zgarmaydi",
+      "$1250; indekslangan real ish haqi 25% oshadi",
+      "$750; indekslangan real ish haqi 25% kamayadi",
+      "$1000; indekslangan real ish haqi o‘zgarmaydi"
+    ],
+    "why": [
+      "The fixed pension's real value is $1,000 × 100/125 = $800. Full wage indexation preserves real purchasing power.",
+      "Фиксированная пенсия в реальном выражении $1 000 × 100/125 = $800. Полная индексация зарплат сохраняет их реальную ценность.",
+      "Qat’iy pensiyaning real qiymati $1000 × 100/125 = $800. To‘liq indeksatsiya real ish haqini saqlaydi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-043",
+    "options_en": [
+      "$800; indexed real wages are unchanged",
+      "$1,250; indexed real wages rise 25%",
+      "$750; indexed real wages fall 25%",
+      "$1,000; indexed real wages are unchanged"
+    ],
+    "options_ru": [
+      "$800; реальная индексированная зарплата неизменна",
+      "$1 250; реальная индексированная зарплата растёт на 25%",
+      "$750; реальная индексированная зарплата падает на 25%",
+      "$1 000; реальная индексированная зарплата неизменна"
+    ],
+    "options_uz": [
+      "$800; indekslangan real ish haqi o‘zgarmaydi",
+      "$1250; indekslangan real ish haqi 25% oshadi",
+      "$750; indekslangan real ish haqi 25% kamayadi",
+      "$1000; indekslangan real ish haqi o‘zgarmaydi"
+    ]
+  },
+  {
+    "n": 50,
+    "d": "medium",
+    "sec": 140,
+    "k": "A",
+    "en": "An economy's CPI basket assigns 60% of expenditure weight to food and 40% to clothing. Food prices rise 10% while clothing prices fall 5%; assume fixed quantities and no other items. Approximately how much does this basket-based CPI rise?",
+    "ru": "В корзине CPI на продовольствие приходится 60% расходов, на одежду — 40%. Продовольствие подорожало на 10%, одежда подешевела на 5%; объёмы и прочие товары неизменны. На сколько примерно вырос индекс цен такой корзины?",
+    "uz": "CPI savatida oziq-ovqat xarajatlari 60%, kiyim esa 40%. Oziq-ovqat narxi 10% oshdi, kiyim narxi 5% tushdi; miqdorlar o‘zgarmaydi va boshqa mahsulot yo‘q. Ushbu savat CPI taxminan nechaga oshadi?",
+    "opt_en": [
+      "104.0; prices are falling",
+      "113.36; prices are still rising but more slowly",
+      "109.0; prices have stopped rising",
+      "113.36; general deflation has begun"
+    ],
+    "opt_ru": [
+      "104,0; цены снижаются",
+      "113,36; цены продолжают расти, но медленнее",
+      "109,0; цены перестали расти",
+      "113,36; началась общая дефляция"
+    ],
+    "opt_uz": [
+      "104,0; narxlar pasaymoqda",
+      "113,36; narxlar hali ham oshadi, ammo sekinroq",
+      "109,0; narxlar o‘sishi to‘xtadi",
+      "113,36; umumiy deflyatsiya boshlandi"
+    ],
+    "why": [
+      "With fixed basket weights, the combined price change is 0.6×10% + 0.4×(−5%) = 6% − 2% = +4%.",
+      "При фиксированных весах изменение CPI: 0,6×10% + 0,4×(−5%) = 6% − 2% = +4%.",
+      "O‘zgarmas vaznda CPI o‘zgarishi 0,6×10% + 0,4×(−5%) = 6% − 2% = +4%."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-050",
+    "options_en": [
+      "+4%",
+      "+6%",
+      "+5%",
+      "−4%"
+    ],
+    "options_ru": [
+      "+4%",
+      "+6%",
+      "+5%",
+      "−4%"
+    ],
+    "options_uz": [
+      "+4%",
+      "+6%",
+      "+5%",
+      "−4%"
+    ]
+  },
+  {
+    "n": 67,
+    "d": "medium",
+    "sec": 150,
+    "k": "C",
+    "en": "An employee's nominal salary rises by 4% over a year, while the consumer price index rises by 7%. Using the exact ratio of salary and price indices, approximately how much does the employee's real purchasing power change?",
+    "ru": "Номинальная зарплата за год выросла на 4%, индекс потребительских цен — на 7%. Используя точное отношение индексов зарплаты и цен, оцените изменение реальной покупательной способности работника.",
+    "uz": "Xodimning nominal ish haqi yiliga 4%, iste’mol narxlari indeksi esa 7% oshdi. Ish haqi va narx indekslarining aniq nisbatidan foydalanib, real xarid quvvati taxminan qanday o‘zgargan?",
+    "opt_en": [
+      "+3.0%",
+      "−3.0%",
+      "−2.8%",
+      "+2.8%"
+    ],
+    "opt_ru": [
+      "+3,0%",
+      "−3,0%",
+      "−2,8%",
+      "+2,8%"
+    ],
+    "opt_uz": [
+      "+3,0%",
+      "−3,0%",
+      "−2,8%",
+      "+2,8%"
+    ],
+    "why": [
+      "Real income factor = 1.04/1.07 ≈ 0.97196, so purchasing power falls by about 2.8%.",
+      "Коэффициент реального дохода 1,04/1,07 ≈ 0,97196, поэтому покупательная способность падает примерно на 2,8%.",
+      "Real daromad koeffitsienti 1,04/1,07 ≈ 0,97196, xarid quvvati taxminan 2,8% kamayadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-067",
+    "options_en": [
+      "+3.0%",
+      "−3.0%",
+      "−2.8%",
+      "+2.8%"
+    ],
+    "options_ru": [
+      "+3,0%",
+      "−3,0%",
+      "−2,8%",
+      "+2,8%"
+    ],
+    "options_uz": [
+      "+3,0%",
+      "−3,0%",
+      "−2,8%",
+      "+2,8%"
+    ]
+  }
+]
