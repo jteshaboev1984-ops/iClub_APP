@@ -134,7 +134,9 @@ async function validateBeforeHomeDelivery(s,{userId,contextHandle,locale,plan,ch
   const result={ready:true,reviewOnly:true,releaseAllowed:false,
     expiresAtMs:plan.expiresAtMs,status:choice.status};
   if(only){result.actionCode=choice.actionCode;result.subjectKey=choice.subjectKey;}
-  else result.candidateActionIds=[...choice.candidateActionIds].sort();
+  else result.choices=plan.actions.map(a=>Object.freeze({
+   actionCode:a.actionCode,subjectKey:a.subjectKey
+  })).sort((a,b)=>a.subjectKey.localeCompare(b.subjectKey));
   return Object.freeze(result);
  }catch{return blocked();}
 }
