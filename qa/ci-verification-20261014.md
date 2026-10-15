@@ -33,3 +33,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §104: final signed Home HTTP delivery authority rechecks commercial/source/academic/screen, transactional race negative tests, UI expires by server TTL in Chromium. QA-only NO MERGE.
 
 2026-10-15 §104 rerun: double-check commercial, academic and editorial rights across last async boundary, then re-read exact owner screen/scan; not an atomic live transaction. NO MERGE.
+
+2026-10-15 §105 final signed Home delivery now presents safe locale-independent subject/action choices only; never exposes internal evidenceId/actionId over HTTP on same-priority ties. Full CI validation, QA ONLY, NO MERGE.
