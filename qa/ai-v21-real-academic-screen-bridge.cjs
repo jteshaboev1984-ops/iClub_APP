@@ -122,7 +122,11 @@ class QaV21RealAcademicScreenBridge {
    try{await this.client.leave();}catch{}
    return fail("screen_changed");
   }
-  if(status?.ok!==true||status?.state!=="available"||status?.route!=="practice_result"){
+  // /answer status deliberately omits route in its public response.
+  // The distinct server-verified action:"mint" already fixes Practice scope.
+  // If a route is explicitly returned, require the exact Practice route.
+  if(status?.ok!==true||status?.state!=="available"||
+     (status.route!==undefined&&status.route!=="practice_result")){
    await this.leave();
    return fail("source_in_development");
   }
