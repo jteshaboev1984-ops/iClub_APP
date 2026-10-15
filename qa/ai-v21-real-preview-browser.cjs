@@ -98,7 +98,7 @@ async function main(){
       "qa:window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites===true,"+
       "screen:document.querySelector('.view.is-active')?.dataset.view,"+
       "engine:!!document.querySelector('#courses-practice-start'),"+
-      "symbol:document.querySelector('#iclub-global-ai-mark')?.textContent?.trim(),"+
+      "iconSrc:document.querySelector('#iclub-global-ai-mark img')?.getAttribute('src'),"+
       "profile:JSON.parse(localStorage.getItem('iclub_profile_v1')||'{}')?.full_name"+
       "})");
     assert.equal(await client.evaluate(
@@ -107,11 +107,18 @@ async function main(){
     assert.equal(identity.qa,true,JSON.stringify(identity));
     assert.equal(identity.screen,"home");
     assert.equal(identity.engine,true);
-    assert.equal(identity.symbol,"AI");
+    assert.equal(identity.iconSrc,"iclub-ai-tutor-a.webp");
+    await client.until("document.querySelector('#iclub-global-ai-mark img')?.naturalWidth===96",
+      "approved Option A AI icon loads");
+    const aiImage=await client.evaluate("(()=>{const i=document.querySelector('#iclub-global-ai-mark img');return {ok:i.complete&&i.naturalWidth===96,width:i.getBoundingClientRect().width,height:i.getBoundingClientRect().height}})()");
+    assert.ok(aiImage.ok&&aiImage.width===40&&aiImage.height===40,
+      "approved AI icon fit incorrect "+JSON.stringify(aiImage));
     assert.equal(identity.profile,"Демонстрационный профиль");
     await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
     await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
       "Home AI open");
+    await client.until("document.querySelector('.iclub-global-ai-head-logo')?.naturalWidth===96",
+      "approved Option A appears in Tutor sheet");
     assert.equal(await client.evaluate(
       "document.querySelector('[data-global-ai-quick]')?.textContent.includes('Что делать дальше?')"),
       true,"Home needs specific prompts");
