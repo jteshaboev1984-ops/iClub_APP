@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="global-ai-ui.css?v=globalaichat1" />
   <link rel="stylesheet" href="plans-ui.css?v=plans1" />
   <link rel="stylesheet" href="subject-access-ui.css?v=subjectshadow1" />
-  <link rel="stylesheet" href="practice-results-tabs.css?v=stage03tabs1-premium2" />
+  <link rel="stylesheet" href="practice-results-tabs.css?v=stage03tabs1-premium2-stitch-qa-polish-20261015" />
 </head>
 
 <body class="iclub-visual-v3">
@@ -962,11 +962,29 @@
 <section id="courses-my-recs" class="stack-screen" data-stack="courses" data-screen="my-recs">
   <div class="section">
     <div class="h1" data-i18n="my_recs_screen_title">Мои рекомендации</div>
-    <div class="muted" data-i18n="my_recs_screen_subtitle">Сохранённые рекомендации по чтению</div>
+    <div class="muted" id="my-recs-subtitle">Темы для повторения и разбор ошибок</div>
   </div>
   <div id="my-recs-list" class="list">
     <div class="empty muted" data-i18n="my_recs_empty_static">Пока пусто.</div>
   </div>
+</section>
+
+<!-- Recent verified topic attempts, read-only existing server history. -->
+<section id="courses-my-rec-topic-history" class="stack-screen" data-stack="courses" data-screen="my-rec-topic-history">
+  <div class="section">
+    <div class="h1" id="my-rec-topic-history-title">История практики</div>
+    <div class="muted" id="my-rec-topic-history-subtitle">Последние завершённые попытки</div>
+  </div>
+  <div id="my-rec-topic-history-body" class="iclub-sx-history-page"></div>
+</section>
+
+<!-- Focused Practice attempt review, part of existing Courses navigation. -->
+<section id="courses-my-rec-topic-review" class="stack-screen" data-stack="courses" data-screen="my-rec-topic-review">
+  <div class="section">
+    <div class="h1" id="my-rec-topic-review-title">Разбор попытки</div>
+    <div class="muted" id="my-rec-topic-review-subtitle"></div>
+  </div>
+  <div id="my-rec-topic-review-body" class="list"></div>
 </section>
 
 <!-- My Recommendation Detail (AI tutor) -->
@@ -1580,7 +1598,7 @@
   <!-- BUILD: confirm2-p206finalops1 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="i18n.js?v=practicepreserve1-mentorlabel1-regcopy1"></script>
-  <script src="exam-prep/exam-prep-api.js?v=p331progress1-subjectfix1"></script>
+  <script src="exam-prep/exam-prep-api.js?v=p331progress1-subjectfix1-stitchux1"></script>
   <script src="exam-prep/exam-prep-host.js?v=p304premium2-mathv2reset1-allsubjects1-subjectguard2-trio1"></script>
   <script src="security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2feedback1-ptopic1"></script>
   <script src="security/practice-v2-input-normalization.js?v=mathv2minus1"></script>
@@ -1590,7 +1608,7 @@
 <script src="practice-draft-identity-v1.js?v=owner1"></script>
 <script src="practice-active-owner-v1.js?v=owner1"></script>
 <script src="practice-topic-choice.js?v=ptopic3-release1-loadingpolish1"></script>
-<script src="app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1-mathv2reset3-ptopic1-reviewback1-postpublish1-owner2-cleanrelease1-premium2-loadingpolish7-trio1-subjectfix1"></script>
+<script src="app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1-mathv2reset3-ptopic1-reviewback1-postpublish1-owner2-cleanrelease1-premium2-loadingpolish7-trio1-subjectfix1-stitchdedup1-stitch-qa-polish-20261015"></script>
 <script src="practice-ai-ui.js?v=ai2review1"></script>
 <script src="global-ai-ui.js?v=globalaichat1-v3stage07"></script>
 <script src="plans-ui.js?v=plans1"></script>
@@ -1604,6 +1622,6 @@
     </div>
   </div>
 
-  <script src="practice-results-tabs.js?v=stage03tabs2-premium2"></script>
+  <script src="practice-results-tabs.js?v=stage03tabs2-premium2-stitch-qa-polish-20261015"></script>
 </body>
 </html>

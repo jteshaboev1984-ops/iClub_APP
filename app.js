@@ -12438,7 +12438,9 @@ function bindRatingsUI() {
     "tour-review",
     "books",
     "my-recs",
-    "my-rec-detail"
+    "my-rec-detail",
+    "my-rec-topic-history",
+    "my-rec-topic-review"
   ];
 
   function getCoursesTopScreen() {
@@ -12581,6 +12583,10 @@ function bindRatingsUI() {
     renderMyRecs();
   } else if (next === "my-rec-detail") {
     renderMyRecDetail();
+  } else if (next === "my-rec-topic-review") {
+    window.iClubPracticeTopicHistoryV1?.renderReview?.(currentLang());
+  } else if (next === "my-rec-topic-history") {
+    loadTopicHistoryScreen().catch(e=>logClientError("topic_history_back_load",e));
   }
 
   return;
@@ -13103,6 +13109,8 @@ if (state.tab === "courses") {
   else if (top === "tours") { if (typeof renderToursStart === "function") renderToursStart(); }
   else if (top === "books") { if (typeof renderBooks === "function") renderBooks(); }
   else if (top === "my-recs") { if (typeof renderMyRecs === "function") renderMyRecs(); }
+  else if (top === "my-rec-topic-review") { window.iClubPracticeTopicHistoryV1?.renderReview?.(currentLang()); }
+  else if (top === "my-rec-topic-history") { loadTopicHistoryScreen().catch(e=>logClientError("topic_history_language_load",e)); }
   else if (top === "practice-start") { if (typeof renderPracticeStart === "function") renderPracticeStart(); }
   else if (top === "practice-review") { if (typeof renderPracticeReview === "function") renderPracticeReview(); }
   else if (top === "practice-recs") { if (typeof renderPracticeRecs === "function") renderPracticeRecs(); }
@@ -18425,7 +18433,9 @@ try {
   total,
   percent,
   durationSec,
-  details
+  details,
+  sourceSessionId: Number(quiz.safeDrillSessionId||0)||null,
+  practiceOrigin: quiz.topicChoiceOrigin===true?"topic":(quiz.drillType?"drill":"tour")
 };
 
     // ✅ Save "My recommendations" + sync to DB right here (always, no UI dependency)
@@ -18597,24 +18607,30 @@ if (reviewCountEl) reviewCountEl.textContent = String(wrong.length);
 
 const recsCountEl = $("#practice-recs-count");
 if (recsCountEl) recsCountEl.textContent = String(recKeys.length);
-// A self-chosen topic is an independent short drill. Do not offer unrelated
-// "My recommendations" actions or claim it changed the main Practice result.
-const recsAction = document.querySelector('#courses-practice-result [data-action="practice-recommendations"]');
-if (recsAction) {
-  recsAction.hidden = false;
-  recsAction.style.display = "";
-  const recsTitle = recsAction.querySelector('[data-i18n="practice_recs_title"]');
-  const recsSubtitle = recsAction.querySelector('[data-i18n="practice_recs_sub"]');
-  const recsCountBadge = recsAction.querySelector("#practice-recs-count");
-  if (recsTitle) recsTitle.textContent = tr3(
-    "Мои рекомендации", "Mening tavsiyalarim", "My recommendations"
-  );
-  if (recsSubtitle) recsSubtitle.textContent = tr3(
-    "Подробнее о результатах — в «Моих рекомендациях»",
-    "Natijalar haqida batafsil — «Mening tavsiyalarim» bo‘limida",
-    "More about your results in My recommendations"
-  );
-  if (recsCountBadge) recsCountBadge.hidden = true;
+// Topic practice keeps its own follow-up actions and scores.
+const recsAction=document.querySelector('#courses-practice-result [data-action="practice-recommendations"],#courses-practice-result [data-action="practice-fix-mistakes"]');
+if(recsAction){
+  const topicMode=quiz?.topicChoiceOrigin===true;
+  // The existing Review card is the required first step for topic errors.
+  // Hide the unrelated Recommendations card for topic and error-retry drills.
+  recsAction.dataset.action='practice-recommendations';
+  recsAction.hidden=topicMode || quiz?.drillType==='rec_mistakes';
+  recsAction.disabled=topicMode || quiz?.drillType==='rec_mistakes';
+  recsAction.style.display=recsAction.hidden?'none':'';
+  const reviewAction=document.querySelector('#courses-practice-result [data-action="practice-review"]');
+  if(reviewAction) reviewAction.style.gridColumn=recsAction.hidden?'1 / -1':'';
+  const title=recsAction.querySelector('[data-i18n="practice_recs_title"]');
+  const subtitle=recsAction.querySelector('[data-i18n="practice_recs_sub"]');
+  const count=recsAction.querySelector('#practice-recs-count');
+  if(title) title.textContent=tr3("Мои рекомендации","Mening tavsiyalarim","My recommendations");
+  if(subtitle) subtitle.textContent=topicMode
+    ?tr3("Отдельная тренировка по ошибкам этой попытки",
+      "Ushbu urinishdagi xatolar bo‘yicha alohida mashq",
+      "Separate practice on this attempt's mistakes")
+    :tr3("Подробнее о результатах — в «Моих рекомендациях»",
+      "Natijalar haqida batafs — «Mening tavsiyalarim» bo‘limida",
+      "More about your results in My recommendations");
+  if(count){count.hidden=true;count.textContent='';}
 }
 
 // ✅ set “exit” button label based on context (main vs drill)
@@ -18719,6 +18735,17 @@ const attempt =
   // Helper: render from "details" array in one place
   const renderFromDetails = (details) => {
     if (pending && !pending.active()) return;
+    const actions=document.querySelector('#courses-practice-review .actions-row');
+    if(actions){
+      let retry=actions.querySelector('[data-action="practice-fix-mistakes"]');
+      if(!retry){
+        retry=document.createElement('button');retry.type='button';
+        retry.className='btn primary';retry.dataset.action='practice-fix-mistakes';
+        actions.insertBefore(retry,actions.firstChild);
+      }
+      retry.textContent=tr3('Исправить ошибки','Xatolarni tuzatish','Correct mistakes');
+      retry.hidden=!(Array.isArray(details)&&details.some(x=>!x.isCorrect));
+    }
     if (!Array.isArray(details) || !details.length) {
   wrap.innerHTML = `<div class="empty muted">${escapeHTML(t("practice_review_empty"))}</div>`;
   return;
@@ -19071,7 +19098,7 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
       return await window.sb
       .from("recommendations")
       .select(
-        "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at"
+        "id, source_type, tour_no, season_id, topic, subtopic, book_id, book_reference, created_at, practice_session_id, practice_drill_session_id"
       )
       .eq("user_id", uid)
       .eq("subject_id", subjectId)
@@ -19146,6 +19173,12 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
 async function renderMyRecs() {
   const wrap = $("#my-recs-list");
   if (!wrap) return;
+  const subtitle = $("#my-recs-subtitle");
+  if (subtitle) subtitle.textContent = tr3(
+    "Темы для повторения и разбор ошибок",
+    "Takrorlash uchun mavzular va xatolar tahlili",
+    "Topics to review and mistake explanations"
+  );
   const pending = beginUiLoading(wrap, "iclub-recs-pending");
   const subjectKey = String(state?.courses?.subjectKey || "").trim();
   const isCurrent = () => pending.active() && String(state?.courses?.subjectKey || "").trim() === subjectKey;
@@ -19282,7 +19315,12 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
     }));
   }
 
-    if (activeTab === "practice" && practiceRows.length) {
+  if(activeTab==="practice") {
+    practiceRows=practiceRows.filter(rec=>practiceMode==="topics"
+      ?Number(rec.practice_drill_session_id||0)>0
+      :Number(rec.practice_drill_session_id||0)===0);
+  }
+    if (activeTab === "practice" && practiceMode!=="topics" && practiceRows.length) {
     const checks = await Promise.all(
       practiceRows.map(async (rec) => {
         try {
@@ -19393,7 +19431,7 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
   // old Practice recommendations, which lack that metadata.
   let topicHistory = null;
   let topicHistoryUnavailable = false;
-  if (activeTab === "practice") {
+  if (activeTab === "practice" && practiceMode==="topics") {
     try {
       if (!window.sb?.rpc) throw new Error("not_connected");
       const { data, error } = await window.sb.rpc("get_practice_topic_history_safe_v1",
@@ -19407,20 +19445,16 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
     }
   }
   if (!isCurrent()) return;
-  // Practice has one coherent history; no nested tour/topic mode switch.
-  const modeTabs = "";
-  const tabBtn = (key, label, isActive) => `
-    <button
-      type="button"
-      class="btn ${isActive ? "primary" : ""}"
-      data-myrecs-tab="${escapeHTML(key)}"
-      style="flex:1 1 0"
-    >
-      ${escapeHTML(label)}
-    </button>
+  // Independent Practice lanes: past normal Practice vs voluntary topic Practice.
+  const modeTabs=activeTab==="practice" ? `
+    <nav class="iclub-sx-subtabs" role="group" aria-label="${escapeHTML(tr3("Режим практики","Amaliyot turi","Practice mode"))}">
+      <button type="button" aria-pressed="${practiceMode==="topics"}" class="${practiceMode==="topics"?"selected":""}" data-myrecs-mode="topics">${escapeHTML(tr3("По темам","Mavzular bo‘yicha","By topic"))}</button>
+      <button type="button" aria-pressed="${practiceMode==="tours"}" class="${practiceMode==="tours"?"selected":""}" data-myrecs-mode="tours">${escapeHTML(tr3("По турам","Turlar bo‘yicha","By tour"))}</button>
+    </nav>` : "";
+  const tabBtn = (key,label,isActive) => `
+    <button type="button" class="iclub-sx-main-tab ${isActive?"selected":""}" aria-selected="${isActive}" role="tab" data-myrecs-tab="${escapeHTML(key)}">${escapeHTML(label)}</button>
   `;
-
-  const renderSeasonControl = () => {
+    const renderSeasonControl = () => {
     if (
       activeTab !== "tour" ||
       seasonRows.length <= 1
@@ -19493,26 +19527,77 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
     `;
   };
 
+  const practiceRecCount=practiceRows.length;
+  const practiceRecCountNoun=tr3(
+    practiceRecCount%10===1&&practiceRecCount%100!==11?"рекомендация":
+    practiceRecCount%10>=2&&practiceRecCount%10<=4&&!(practiceRecCount%100>=12&&practiceRecCount%100<=14)?"рекомендации":"рекомендаций",
+    "tavsiya",practiceRecCount===1?"recommendation":"recommendations");
+
   const renderPracticeList = () => {
     // The recent topic-session summary is presented below current recommendations.
     if (!practiceRows.length) {
-      return `<div class="empty muted">${escapeHTML(t("my_recs_practice_empty") || "Рекомендаций по практике пока нет.")}</div><div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>`;
+      return `<div class="empty muted" style="margin-top:8px">${escapeHTML(practiceMode==="topics"
+        ?tr3("Пока нет активных рекомендаций по темам.","Mavzular bo‘yicha faol tavsiyalar yo‘q.","No active topic recommendations yet.")
+        :(t("my_recs_practice_empty")||"Рекомендаций по практике пока нет."))}</div>`;
     }
 
-    return practiceRows.map(rec => {
-      const dt = rec.created_at ? formatDateTime(rec.created_at) : "";
-      const sub = rec.subtopic ? String(rec.subtopic) : "";
-      const bookRef = String(rec.book_reference || "").trim();
-
-      return `
-        <div class="list-item" data-open-rec="practice">
-          <div style="font-weight:900">${escapeHTML(rec.topic || "General")}</div>
-          ${sub ? `<div class="muted small" style="margin-top:4px">${escapeHTML(sub)}</div>` : ""}
-          ${bookRef ? `<div class="muted small" style="margin-top:4px">📘 ${escapeHTML(bookRef)}</div>` : ""}
-          <div class="muted small" style="margin-top:4px">${escapeHTML(t("saved_at_label") || "Сохранено")}: ${escapeHTML(dt)}</div>
-        </div>
-      `;
-    }).join("") + '<div id="my-recs-topic-history" class="iclub-myrec-topic-holder"></div>';
+    if(practiceMode==="topics"){
+      const groups=new Map();
+      practiceRows.forEach((rec,index)=>{
+        const topic=String(rec.topic||"General").trim()||"General";
+        if(!groups.has(topic))groups.set(topic,[]);
+        groups.get(topic).push({rec,index});
+      });
+      const historyItems=Array.isArray(topicHistory?.recent)?topicHistory.recent:[];
+      return Array.from(groups.entries()).map(([topic,items])=>{
+        const sourceIds=new Set(items.map(({rec})=>Number(rec?.practice_drill_session_id||0))
+          .filter(id=>Number.isSafeInteger(id)&&id>0));
+        const matching=historyItems.find(a=>sourceIds.has(Number(a?.session_id||0)) &&
+          String(a?.topic||"").trim()===topic &&
+          Number(a?.total)>Number(a?.correct));
+        const eligibleIds=Array.from(new Set((Array.isArray(matching?.review)?matching.review:[])
+          .map(q=>Number(q?.question_id||0)).filter(id=>Number.isSafeInteger(id)&&id>0))).slice(0,10);
+        const attemptIndex=matching?historyItems.indexOf(matching):-1;
+        const count=items.length;
+        const countText=tr3("к повторению","takrorlash","to review");
+        const entries=count>1?items.map(({rec,index},k)=>{
+          const sub=String(rec.subtopic||"").trim();
+          const book=String(rec.book_reference||"").trim();
+          return '<button type="button" class="iclub-sx-topic-entry" data-open-rec="practice" data-rec-index="'+index+'" '+(k>=3?'hidden data-sx-extra="1"':'')+'>'+
+            '<span class="iclub-sx-topic-number">'+String(k+1).padStart(2,"0")+'</span>'+
+            '<span class="iclub-sx-topic-entry-text"><strong>'+escapeHTML(sub||topic)+'</strong>'+
+            (book?'<small>'+escapeHTML(book)+'</small>':'')+
+            '</span><span class="iclub-sx-arrow" aria-hidden="true">›</span></button>';
+        }).join(""):"";
+        const correctAction=matching&&eligibleIds.length
+          ?'<button type="button" class="iclub-sx-primary" data-sx-correct-attempt="'+attemptIndex+'">'+
+            escapeHTML(tr3("Исправить ошибки","Xatolarni tuzatish","Correct mistakes"))+'</button>':"";
+        const singleLink=count===1?
+          '<button type="button" class="iclub-sx-single-link" data-open-rec="practice" data-rec-index="'+items[0].index+'">'+
+            escapeHTML(tr3("Открыть рекомендацию","Tavsiyani ochish","Open recommendation"))+' <span aria-hidden="true">→</span></button>':"";
+        return '<section class="iclub-sx-topic-group" data-sx-topic-group="1">'+
+          '<div class="iclub-sx-topic-head">'+
+          (count>1?'<div class="iclub-sx-topic-headline"><span class="iclub-sx-tag">'+count+
+             ' '+escapeHTML(countText)+'</span></div>':'')+
+          '<h3>'+escapeHTML(topic)+'</h3>'+
+          (count>1?'<p>'+escapeHTML(tr3("Выберите подтему для повторения.",
+            "Takrorlash uchun kichik mavzuni tanlang.",
+            "Choose a subtopic to review."))+'</p>':"")+
+          correctAction+singleLink+'</div>'+
+          (count>1?'<div class="iclub-sx-topic-entries">'+entries+'</div>':"")+
+          (count>3?'<button type="button" class="iclub-sx-more" data-sx-expand="1" aria-expanded="false">'+
+          escapeHTML(tr3("Показать ещё","Yana ko‘rsatish","Show more"))+' '+(count-3)+' <span aria-hidden="true">⌄</span></button>':'')+
+          '</section>';
+      }).join("");
+    }
+        return practiceRows.map(rec => {
+      const dt=rec.created_at?formatDateTime(rec.created_at):"";
+      const sub=rec.subtopic?String(rec.subtopic):"",book=String(rec.book_reference||"").trim();
+      return '<div class="list-item" data-open-rec="practice"><div style="font-weight:900">'+escapeHTML(rec.topic||"General")+'</div>'+
+        (sub?'<div class="muted small" style="margin-top:4px">'+escapeHTML(sub)+'</div>':'')+
+        (book?'<div class="muted small" style="margin-top:4px">📘 '+escapeHTML(book)+'</div>':'')+
+        '<div class="muted small" style="margin-top:4px">'+escapeHTML(t("saved_at_label")||"Сохранено")+': '+escapeHTML(dt)+'</div></div>';
+    }).join("");
   };
 
   const renderTourList = () => {
@@ -19568,30 +19653,24 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
   };
 
   wrap.innerHTML = `
-    <div style="display:flex;gap:10px;margin-bottom:12px">
-      ${tabBtn(
-        "practice",
-        t("my_recs_tab_practice") ||
-        "Практика",
-        activeTab === "practice"
-      )}
-
-      ${tabBtn(
-        "tour",
-        t("my_recs_tab_tour") ||
-        "Туры",
-        activeTab === "tour"
-      )}
+    <div class="iclub-sx-main-tabs" role="tablist" aria-label="${escapeHTML(tr3("Раздел рекомендаций","Tavsiyalar bo‘limi","Recommendations section"))}">
+      ${tabBtn("practice",t("my_recs_tab_practice")||"Практика",activeTab==="practice")}
+      ${tabBtn("tour",t("my_recs_tab_tour")||"Туры",activeTab==="tour")}
     </div>
-
     ${modeTabs}
     ${renderSeasonControl()}
-
-    ${
-      activeTab === "tour"
-        ? renderTourList()
-        : renderPracticeList()
-    }
+    ${activeTab==="practice"&&practiceMode==="topics"
+      ? `<div id="my-recs-topic-latest"></div>`
+      :""}
+    ${activeTab==="practice"&&practiceMode==="topics"
+      ? `<div class="iclub-sx-heading"><h2>${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</h2><span class="iclub-sx-total">${practiceRecCount} ${escapeHTML(practiceRecCountNoun)}</span></div>`
+      :""}
+    <div class="${activeTab==="practice"&&practiceMode==="topics"?"iclub-sx-groups":""}">
+      ${activeTab==="tour" ? renderTourList() : renderPracticeList()}
+    </div>
+    ${activeTab==="practice"&&practiceMode==="topics"
+      ? `<section id="my-recs-topic-history" class="iclub-sx-history-preview"></section>`
+      :""}
   `;
 
   wrap.querySelectorAll("[data-myrecs-tab]").forEach(btn => {
@@ -19604,11 +19683,52 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
   });
 
 
-  if (activeTab === "practice") {
-    window.iClubPracticeTopicHistoryV1?.render?.(
-      wrap.querySelector("#my-recs-topic-history"),
-      topicHistory, topicHistoryUnavailable, currentLang()
+  wrap.querySelectorAll("[data-myrecs-mode]").forEach(btn=>{
+    btn.addEventListener("click",async()=>{
+      const next=btn.getAttribute("data-myrecs-mode")==="topics"?"topics":"tours";
+      if(next===practiceMode)return;
+      state.courses=state.courses||{};
+      state.courses.myRecsPracticeMode=next;
+      state.courses.myRecCurrent=null;
+      saveState();
+      await renderMyRecs();
+    });
+  });
+  if(activeTab==="practice"&&practiceMode==="topics"){
+    window.iClubPracticeTopicHistoryV1?.renderLatest?.(
+      wrap.querySelector("#my-recs-topic-latest"),topicHistory,topicHistoryUnavailable,currentLang()
     );
+    window.iClubPracticeTopicHistoryV1?.render?.(
+      wrap.querySelector("#my-recs-topic-history"),topicHistory,topicHistoryUnavailable,currentLang(),true
+    );
+    wrap.querySelectorAll("[data-sx-expand]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const group=button.closest("[data-sx-topic-group]");
+        if(!group)return;
+        const open=button.getAttribute("aria-expanded")!=="true";
+        group.querySelectorAll("[data-sx-extra]").forEach(row=>{row.hidden=!open;});
+        button.setAttribute("aria-expanded",String(open));
+        button.innerHTML=open
+          ?escapeHTML(tr3("Свернуть","Yig‘ish","Show less"))+" ⌃"
+          :escapeHTML(tr3("Показать ещё","Yana ko‘rsatish","Show more"))+
+            " "+group.querySelectorAll("[data-sx-extra]").length+" ⌄";
+      });
+    });
+    wrap.querySelectorAll("[data-sx-correct-attempt]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const index=Number(button.dataset.sxCorrectAttempt);
+        const attempt=Array.isArray(topicHistory?.recent)?topicHistory.recent[index]:null;
+        const sourceSessionId=Number(attempt?.session_id||0);
+        const questionIds=Array.from(new Set((Array.isArray(attempt?.review)?attempt.review:[])
+          .map(q=>Number(q?.question_id||0))
+          .filter(id=>Number.isSafeInteger(id)&&id>0))).slice(0,10);
+        if(!Number.isSafeInteger(sourceSessionId)||sourceSessionId<=0||
+          !questionIds.length||!String(attempt?.topic||"").trim())return;
+        window.dispatchEvent(new CustomEvent("iclub-practice-correct-history",{
+          detail:{subjectKey,sourceSessionId,questionIds,topic:String(attempt.topic)}
+        }));
+      });
+    });
   }
   const seasonSelect =
     wrap.querySelector(
@@ -19658,7 +19778,8 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
   if (activeTab === "practice") {
     const cards = Array.from(wrap.querySelectorAll('[data-open-rec="practice"]'));
     cards.forEach((el, idx) => {
-      const rec = practiceRows[idx];
+      const rec = practiceRows[Number(el.getAttribute("data-rec-index") ?? idx)];
+      if(!rec)return;
       el.addEventListener("click", async () => {
         state.courses.myRecCurrent = rec;
         saveState();
@@ -19718,6 +19839,25 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
    async function fetchRecentMistakesByRec(subjectKey, rec) {
   try {
     const api = getPracticeSafeApi();
+    const sourceSessionId=Number(rec?.practice_drill_session_id||0);
+    if(sourceSessionId>0) {
+      const rows=await api?.drill?.questions?.(sourceSessionId);
+      return (Array.isArray(rows)?rows:[])
+        .filter(row=>row.was_answered===true && row.saved_is_correct===false)
+        .filter(row=>String(row.topic||"").trim()===String(rec?.topic||"").trim())
+        .filter(row=>!String(rec?.subtopic||"").trim() ||
+          String(row.subtopic||"").trim()===String(rec.subtopic).trim())
+        .slice(0,10).map(row=>({
+          attempt_id:-sourceSessionId,
+          question_id:Number(row.id||0),
+          user_answer:String(row.saved_user_answer||""),
+          is_correct:false,time_spent:Number(row.saved_time_spent||0),
+          created_at:null,
+          q:{...row,id:Number(row.id||0),topic:row.topic||null,
+            subtopic:row.subtopic||null,qtype:row.qtype||"mcq",
+            correct_answer:row.correct_answer||null}
+        }));
+    }
     if (!api?.recentMistakes) return [];
     const rows = await api.recentMistakes({ subjectKey, topic: rec?.topic || null, subtopic: rec?.subtopic || null, limit: 10 });
     return (Array.isArray(rows) ? rows : []).map(row => ({
@@ -19846,6 +19986,7 @@ async function renderMyRecDetail() {
   if (!body || !rec || !subjectKey) return;
 
   const isTourRec = String(rec?.source_type || "practice") === "tour";
+  const isTopicRec = !isTourRec && Number(rec?.practice_drill_session_id||0)>0;
   const topic = rec.topic || "General";
   const subtopic = rec.subtopic ? String(rec.subtopic) : "";
 
@@ -19891,9 +20032,9 @@ async function renderMyRecDetail() {
       "Your answer"
     ),
     correctAnswer: tc3(
-      "Правильный",
+      "Правильный ответ",
       "To‘g‘ri javob",
-      "Correct"
+      "Correct answer"
     ),
     explanation: tc3(
       "Пояснение",
@@ -19917,12 +20058,16 @@ async function renderMyRecDetail() {
     )
   };
 
-   if (titleEl) titleEl.textContent = topic;
+   if (titleEl) titleEl.textContent = isTopicRec ? (subtopic || topic) : topic;
 if (subEl) {
-  subEl.textContent = isTourRec
-    ? (subtopic || recText.subtitleTour)
-    : (subtopic ? subtopic : recText.subtitlePractice);
+  const sameTopic = subtopic.trim().toLocaleLowerCase() === String(topic).trim().toLocaleLowerCase();
+  subEl.textContent = isTopicRec
+    ? (sameTopic ? tr3("Практика по темам","Mavzular bo‘yicha amaliyot","Practice by topic") : topic)
+    : isTourRec
+      ? (subtopic || recText.subtitleTour)
+      : (subtopic ? subtopic : recText.subtitlePractice);
 }
+body.classList.toggle("iclub-sx-detail",isTopicRec);
 
    // ✅ mini result (only for current rec/topic)
 let drillMiniHtml = "";
@@ -19946,9 +20091,9 @@ try {
         <div style="font-weight:900">${escapeHTML(recText.resultTitle)}</div>
         <div class="muted small" style="margin-top:6px">${escapeHTML(line)}</div>
         <div style="margin-top:10px">
-          <button class="btn" type="button" data-action="my-rec-repeat-drill">
+          ${isTopicRec ? "" : `<button class="btn" type="button" data-action="my-rec-repeat-drill">
             ${escapeHTML(recText.resultRepeat)}
-          </button>
+          </button>`}
         </div>
       </div>
     `;
@@ -19981,9 +20126,9 @@ const mistakesHeaderHtml = `
       <div style="font-weight:900">${escapeHTML(recText.mistakesTitle)}</div>
       <span class="pill">${escapeHTML(String(totalMistakes))}</span>
     </div>
-    <div class="muted small" style="margin-top:6px">
+    ${isTopicRec ? "" : `<div class="muted small" style="margin-top:6px">
       ${escapeHTML(recText.mistakesSubtitle)}
-    </div>
+    </div>`}
   </div>
 `;
      
@@ -19997,6 +20142,17 @@ const mistakesHtml = totalMistakes
       const caDisp = formatAnswerForDisplay(q, q.correct_answer);
 
       const num = `${idx + 1}/${totalMistakes}`;
+      if(isTopicRec){
+        return `<details class="iclub-sx-detail-question">
+          <summary><span class="iclub-sx-detail-number">${escapeHTML(tr3("Ошибка","Xato","Mistake"))} ${idx+1}</span>
+            <span class="iclub-sx-detail-stem">${escapeHTML(qText||"")}</span></summary>
+          <div class="iclub-sx-detail-answer">
+            <div><strong>${escapeHTML(recText.yourAnswer)}:</strong> ${escapeHTML(uaDisp)}</div>
+            <div><strong>${escapeHTML(recText.correctAnswer)}:</strong> ${escapeHTML(caDisp)}</div>
+            ${expl?`<div class="iclub-sx-detail-explanation"><strong>${escapeHTML(recText.explanation)}:</strong> ${escapeHTML(expl)}</div>`:""}
+          </div>
+        </details>`;
+      }
 
       return `
         <div class="list-item">
@@ -20056,9 +20212,9 @@ const mistakesHtml = totalMistakes
     <div style="font-weight:900">
       ${escapeHTML(t("rec_read_title") || "Что прочитать")}
     </div>
-    <div class="muted small" style="margin-top:6px">
+    ${isTopicRec ? "" : `<div class="muted small" style="margin-top:6px">
       ${escapeHTML((t("rec_read_line") || 'Тема в книге — "{topic}".').replace("{topic}", String(rec.topic || "").trim()))}
-    </div>
+    </div>`}
   </div>
 
   ${refsHtml}
@@ -20103,46 +20259,74 @@ body.innerHTML = isTourRec ? `
 
 async function deleteMyRecCurrent() {
   try {
-    const rec = state?.courses?.myRecCurrent;
-    const subjectKey = state?.courses?.subjectKey;
-    if (!rec || !subjectKey) return;
-
-    const ok = await uiConfirm({
-      title: t("rec_delete_title") || "Отметить как освоено?",
-      message: t("rec_delete_text") || "Рекомендация будет удалена из списка.",
-      okText: t("rec_delete_ok") || "Удалить",
-      cancelText: t("rec_delete_cancel") || (t("cancel") || "Отмена")
+    const rec=state?.courses?.myRecCurrent;
+    const subjectKey=state?.courses?.subjectKey;
+    if(!rec||!subjectKey||deleteMyRecCurrent._pending) return;
+    // In Practice by Topic, "Освоено" is user-managed recommendation status.
+    // Clarify that it never modifies attempts or academic scoring.
+    // Existing Tour / legacy Practice confirmation text remains unchanged.
+    const isTopicRecommendation=String(rec.source_type||"practice")==="practice" &&
+      Number(rec.practice_drill_session_id||0)>0;
+    const ok=await uiConfirm(isTopicRecommendation?{
+      title:tr3("Отметить как освоено?","O‘zlashtirildi deb belgilaysizmi?","Mark as mastered?"),
+      message:tr3(
+        "Из активного списка исчезнет только эта рекомендация. Результаты и история попыток сохранятся.",
+        "Faqat ushbu tavsiya faol ro‘yxatdan olib tashlanadi. Urinishlar natijalari va tarixi saqlanadi.",
+        "Only this recommendation will leave the active list. Attempt results and history will stay unchanged."
+      ),
+      okText:tr3("Освоено","O‘zlashtirildi","Mastered"),
+      cancelText:t("rec_delete_cancel")||(t("cancel")||"Отмена")
+    }:{
+      title:t("rec_delete_title")||"Отметить как освоено?",
+      message:t("rec_delete_text")||"Рекомендация будет убрана из списка. Результаты сохранятся.",
+      okText:t("rec_delete_ok")||"Удалить",
+      cancelText:t("rec_delete_cancel")||(t("cancel")||"Отмена")
     });
-
-    if (!ok) return;
-
-    // DB delete (only this record)
+    if(!ok) return;
+    deleteMyRecCurrent._pending=true;
     try {
-      const uid = await getAuthUid().catch(() => null);
-      if (window.sb && uid && rec?.id) {
-        const { error } = await window.sb
-          .from("recommendations")
-          .delete()
-          .eq("id", rec.id)
-          .eq("user_id", uid);
-
-        if (error) logClientError("myrec_delete_db_error", error);
+      const uid=await getAuthUid().catch(()=>null);
+      if(!uid) throw new Error("not_authenticated");
+      if(Number(rec.id)>0) {
+        if(!window.sb) throw new Error("offline");
+        const {data,error}=await window.sb.from("recommendations")
+          .delete().eq("id",Number(rec.id)).eq("user_id",uid)
+          .select("id");
+        if(error||!Array.isArray(data)||data.length!==1)
+          throw error||new Error("recommendation_delete_not_confirmed");
+      } else {
+        // Old locally stored recommendations have no server record; remove
+        // only the selected local display item, never Practice or Tour history.
+        const store=String(rec.source_type||"practice")==="tour"
+          ?loadMyTourRecs():loadMyRecs();
+        const list=store?.bySubject?.[subjectKey];
+        if(!Array.isArray(list)) throw new Error("local_recommendation_not_found");
+        const next=list.filter(x=>!(String(x.topic||"")===String(rec.topic||"") &&
+          String(x.subtopic||"")===String(rec.subtopic||"") &&
+          (String(rec.source_type||"practice")!=="tour" ||
+            (Number(x.tourNo||x.tour_no||0)===Number(rec.tourNo||rec.tour_no||0) &&
+             Number(x.seasonId||x.season_id||0)===Number(rec.seasonId||rec.season_id||0)))));
+        if(next.length===list.length) throw new Error("local_recommendation_not_found");
+        store.bySubject[subjectKey]=next;
+        if(String(rec.source_type||"practice")==="tour") saveMyTourRecs(store);
+        else saveMyRecs(store);
       }
-    } catch (e) {
-      logClientError("myrec_delete_db_exception", e);
-    }
-
-    showToast(t("rec_deleted_toast") || "Рекомендация удалена.");
-
-    // go back to list + refresh
-    state.courses.myRecCurrent = null;
-    saveState();
-
-    replaceCourses("my-recs");
-    renderMyRecs();
-  } catch (e) {
-    logClientError("myrec_delete_exception", e);
-  }
+      showToast(isTopicRecommendation
+        ?tr3("Отмечено как освоено. История сохранена.",
+          "O‘zlashtirildi deb belgilandi. Tarix saqlandi.",
+          "Marked as mastered. History preserved.")
+        :(t("rec_deleted_toast")||"Рекомендация удалена."));
+      state.courses.myRecCurrent=null;
+      saveState();
+      replaceCourses("my-recs");
+      await renderMyRecs();
+    } catch(error) {
+      logClientError("myrec_delete_unconfirmed",error);
+      showToast(tr3("Не удалось убрать рекомендацию. Попробуйте ещё раз.",
+        "Tavsiyani olib tashlab bo‘lmadi. Qayta urinib ko‘ring.",
+        "Could not remove the recommendation. Please retry."));
+    } finally {deleteMyRecCurrent._pending=false;}
+  } catch(error) {logClientError("myrec_delete_exception",error);}
 }
 
 // helper: content language pick
@@ -20413,24 +20597,86 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
 
-   async function startPracticeRetryMistakes() {
-  const rec = state?.courses?.myRecCurrent;
+   async function startPracticeRetryMistakes(options={}) {
+  const fromAttempt=options?.fromAttempt===true;
+  const fromHistory=options?.fromHistory===true;
+  const ctx=state?.courses?.practiceContext||"main";
+  const attempt=ctx==="topic"||ctx==="drill" ? state.practiceLastDrillAttempt:state.practiceLastAttempt;
+  const firstWrong=Array.isArray(attempt?.details)?attempt.details.find(x=>!x.isCorrect):null;
+  const rec=fromHistory
+    ?{topic:String(options?.topic||""),subtopic:null}
+    :fromAttempt
+      ?{topic:firstWrong?.topic||null,subtopic:ctx==="topic"?null:(firstWrong?.subtopic||null)}
+      :state?.courses?.myRecCurrent;
   const subjectKey = state?.courses?.subjectKey;
   const owner = await window.iClubPracticeDraftIdentityV1?.bind();
   if (!owner) { showToast(t("not_available")); return; }
   if (loadPracticeDraft()) { showToast(t("practice_resume_prompt")); return; }
-  const qids = Array.isArray(state?.courses?.myRecMistakeQids) ? state.courses.myRecMistakeQids.slice(0, 10) : [];
-  if (!rec || !subjectKey) return;
-  if (!qids.length) { showToast(t("rec_retry_empty") || "Нет ошибок для повтора."); return; }
-  const api = getPracticeSafeApi()?.drill;
+  let qids=fromHistory
+    ?Array.from(new Set((Array.isArray(options?.questionIds)?options.questionIds:[])
+        .map(x=>Number(x)).filter(x=>Number.isSafeInteger(x)&&x>0))).slice(0,10)
+    :fromAttempt
+      ?Array.from(new Set((Array.isArray(attempt?.details)?attempt.details:[])
+          .filter(x=>!x.isCorrect).map(x=>Number(x.id||0)).filter(x=>x>0))).slice(0,10)
+      :(Array.isArray(state?.courses?.myRecMistakeQids)?state.courses.myRecMistakeQids.slice(0,10):[]);
+  const api=getPracticeSafeApi()?.drill;
+  // The authenticated server session is authoritative for a topic retry.
+  // Never infer 'no errors' from a stale local screen or from a cached review.
+  if(fromAttempt && ctx==="topic"){
+    const sourceId=Number(attempt?.sourceSessionId||state?.quiz?.safeDrillSessionId||0);
+    if(Number.isSafeInteger(sourceId)&&sourceId>0&&api?.questions){
+      try{
+        const originalRows=await api.questions(sourceId);
+        const verifiedWrong=(Array.isArray(originalRows)?originalRows:[])
+          .filter(x=>x.was_answered===true&&x.saved_is_correct===false)
+          .map(x=>Number(x.id||x.question_id||0)).filter(Number.isSafeInteger);
+        qids=Array.from(new Set(verifiedWrong)).slice(0,10);
+      }catch(e){
+        logClientError("practice_topic_wrong_answers_read_failed",e);
+        showToast(tr3("Не удалось загрузить ошибки. Ответы сохранены. Попробуйте ещё раз.",
+          "Xatolarni yuklab bo‘lmadi. Javoblar saqlangan. Qayta urinib ko‘ring.",
+          "Could not load mistakes. Your answers are saved. Please retry."));
+        return;
+      }
+    }
+  }
+  if(!rec||!subjectKey) return;
+  if (!qids.length) {
+    showToast(fromAttempt
+      ?tr3("Не удалось подтвердить ошибки этой попытки. Откройте разбор из истории.",
+        "Urinishdagi xatolarni tekshirib bo‘lmadi. Tarixdan tahlilni oching.",
+        "Could not verify this attempt's mistakes. Open its review from history.")
+      :(t("rec_retry_empty")||"Нет ошибок для повтора."));
+    return;
+  }
   if (!api || !window.iclubSafeAssessment) { showToast(t("not_available") || "Practice is temporarily unavailable."); return; }
   const clientSessionId = window.iclubSafeAssessment.makeClientSessionId("practice_mistakes");
   let started = null, rows = [];
   showAsyncOverlay(tr3("Загружаем ошибки для повтора…", "Xatolarni takrorlash yuklanmoqda…", "Loading mistakes to retry…"));
   try {
+    if(fromHistory){
+      const sessionId=Number(options?.sourceSessionId||0);
+      if(!Number.isSafeInteger(sessionId)||sessionId<=0||!rec.topic)throw new Error("invalid_history_source");
+      const sourceRows=await api.questions(sessionId);
+      const verified=new Set((Array.isArray(sourceRows)?sourceRows:[])
+        .filter(x=>x.was_answered===true && x.saved_is_correct===false)
+        .map(x=>Number(x.id||0)));
+      if(qids.length===0||qids.some(id=>!verified.has(id)))
+        throw new Error("history_wrong_answers_unverified");
+      const currentSubjectId=await getSubjectIdByKey(subjectKey);
+      if((Array.isArray(sourceRows)?sourceRows:[])
+        .some(x=>Number(x.subject_id||0)!==Number(currentSubjectId||0)))
+        throw new Error("history_subject_scope_mismatch");
+    }
     started = await dbWriteWithRetry(() => api.startMistakes({ subjectKey, questionIds: qids, clientSessionId }), { tries: 3, baseDelayMs: 350 });
     rows = await dbWriteWithRetry(() => api.questions(Number(started?.session_id)), { tries: 3, baseDelayMs: 350 });
-  } catch { showToast(t("rec_retry_empty") || "Нет доступных ошибок для повтора."); return; }
+  } catch(error) {
+    logClientError("practice_retest_start_failed",error);
+    showToast(tr3("Не удалось запустить исправление ошибок. Ответы сохранены. Попробуйте ещё раз.",
+      "Xatolarni tuzatish boshlanmadi. Javoblar saqlangan. Qayta urinib ko‘ring.",
+      "Could not start correction. Your answers are saved. Please retry."));
+    return;
+  }
   finally { hideAsyncOverlay(); }
   if (!started?.session_id || !Array.isArray(rows) || !rows.length) return;
   const quiz = buildPracticeSafeQuizFromRows({
@@ -20443,13 +20689,66 @@ async function startPracticeByRec(selectedRec = null, origin = "recommendation")
   }, rows);
   if (!quiz) return;
   if (!state.courses) state.courses = {};
-  state.courses.myRecReturnTarget = "my-rec-detail";
+  state.courses.myRecReturnTarget=fromHistory?"topic-history":fromAttempt?"practice-result":"my-rec-detail";
+  if(fromAttempt||fromHistory){
+    state.courses.myRecMistakeQids=qids;
+    state.courses.practiceErrorRetryOrigin=fromHistory?"topic":ctx;
+    if(fromHistory)state.courses.practiceTopicSelection={topic:rec.topic,subtopic:null};
+  }
   if ((await window.iClubPracticeDraftIdentityV1?.bind()) !== owner) return;
   quiz.practiceOwnerUid = owner;
   state.quizLock = "practice"; state.quiz = quiz; saveState();
   pushCourses("practice-quiz"); renderPracticeQuiz(); startPracticeQuestionTimer();
 }
    
+async function loadTopicHistoryScreen(){
+  const key=String(state?.courses?.subjectKey||"");
+  const holder=document.getElementById("my-rec-topic-history-body");
+  if(!holder||!key||getCoursesTopScreen()!=="my-rec-topic-history")return;
+  holder.textContent=tr3("Загружаем историю…","Tarix yuklanmoqda…","Loading history…");
+  let data=null,unavailable=false;
+  try{
+    const uid=await getAuthUid();
+    if(!uid||!window.sb?.rpc)throw new Error("not_authenticated");
+    const result=await window.sb.rpc("get_practice_topic_history_safe_v1",{p_subject_key:key});
+    if(result.error||result.data?.ok!==true||String(result.data.subject_key)!==key)throw result.error||new Error("history_invalid");
+    data=result.data;
+  }catch(error){
+    unavailable=true;
+    logClientError("topic_history_load_failed",error);
+  }
+  if(key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-rec-topic-history")return;
+  window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),key,data,unavailable);
+}
+window.addEventListener("iclub-practice-open-history-list",event=>{
+  const key=String(event?.detail?.subjectKey||"");
+  if(!key||key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-recs")return;
+  pushCourses("my-rec-topic-history");
+  loadTopicHistoryScreen().catch(e=>logClientError("topic_history_navigation_load",e));
+});
+window.addEventListener("iclub-practice-open-history-review",event=>{
+  const key=String(event?.detail?.subjectKey||"");
+  if(!key||key!==String(state?.courses?.subjectKey||""))return;
+  if(!["my-recs","my-rec-topic-history"].includes(getCoursesTopScreen()))return;
+  pushCourses("my-rec-topic-review");
+  window.iClubPracticeTopicHistoryV1?.renderReview?.(currentLang());
+});
+let practiceHistoryRetryBusy=false;
+// Topic-history correction uses the same protected Practice retry flow.
+window.addEventListener("iclub-practice-correct-history",event=>{
+  const d=event?.detail;
+  if(!d||practiceHistoryRetryBusy||String(d.subjectKey||"")!==String(state?.courses?.subjectKey||""))return;
+  const screen=getCoursesTopScreen();
+  if(screen!=="my-rec-topic-review"&&
+    !(screen==="my-recs"&&state?.courses?.myRecsActiveTab==="practice"&&
+      state?.courses?.myRecsPracticeMode==="topics"))return;
+  practiceHistoryRetryBusy=true;
+  Promise.resolve(startPracticeRetryMistakes({fromHistory:true,
+    sourceSessionId:d.sourceSessionId||d.sessionId,questionIds:d.questionIds,topic:d.topic}))
+    .catch(error=>logClientError("practice_history_retry_exception",error))
+    .finally(()=>{practiceHistoryRetryBusy=false;});
+});
+
 async function renderBooks() {
   const wrap = $("#books-list");
   if (!wrap) return;
@@ -23638,6 +23937,11 @@ if (draft?.quiz?.topicChoiceOrigin !== true) {
   return;
 }
 
+if (action === "practice-fix-mistakes") {
+  await startPracticeRetryMistakes({fromAttempt:true});
+  return;
+}
+
 if (action === "practice-recommendations") {
   state.courses = state.courses || {};
   state.courses.myRecsActiveTab = "practice";
@@ -23657,6 +23961,16 @@ if (action === "practice-exit") {
     return;
   }
 
+  if(ctx==="drill" && state?.courses?.myRecReturnTarget==="topic-history"){
+    state.courses.myRecsActiveTab="practice";
+    state.courses.myRecsPracticeMode="topics";
+    state.courses.myRecReturnTarget=null;
+    state.courses.stack=["subject-hub","my-recs"];
+    saveState();
+    showCoursesScreen("my-recs");
+    await renderMyRecs();
+    return;
+  }
   // ✅ DRILL: go back to recommendation detail (topic screen)
   if (ctx === "drill" && state?.courses?.myRecCurrent) {
   // ✅ restore stack so header back arrow appears:
@@ -23695,8 +24009,15 @@ if (action === "practice-exit") {
     startPracticeByRec(state.courses.practiceTopicSelection, "practice");
     return;
   }
+  // After correcting errors, run a new check in the same Practice mode.
+  const d=state?.courses?.myRecDrillLast;
+  if(["practice-result","topic-history"].includes(state?.courses?.myRecReturnTarget) && d?.drillType==="rec_mistakes") {
+    if(state?.courses?.practiceErrorRetryOrigin==="topic" && state?.courses?.practiceTopicSelection?.topic)
+      startPracticeByRec(state.courses.practiceTopicSelection,"practice");
+    else startPracticeNew();
+    return;
+  }
   // ✅ if last finished was a drill — repeat that drill
-  const d = state?.courses?.myRecDrillLast;
   if (d?.drillType === "rec_mistakes") {
     startPracticeRetryMistakes();
     return;
