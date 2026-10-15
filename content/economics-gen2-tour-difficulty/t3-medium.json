@@ -1,0 +1,101 @@
+[
+  {
+    "n": 9,
+    "d": "medium",
+    "k": "B",
+    "sec": 120,
+    "en": "Following a cut in the central-bank policy rate, a household's variable-rate $200,000 loan falls from 8% to 5% interest, and a firm's variable-rate $500,000 loan falls from 9% to 7%, with both principals constant. Ignoring fees and compounding, by how much do their combined annual interest expenses decrease, and how might this affect aggregate demand?",
+    "ru": "После снижения ключевой ставки процент по кредиту семьи с плавающей ставкой и долгом $200 000 падает с 8% до 5%, а по кредиту фирмы на $500 000 — с 9% до 7%. Основные долги неизменны; комиссии и капитализацию игнорируйте. На сколько суммарно снизятся годовые процентные расходы и как это может повлиять на AD?",
+    "uz": "Markaziy bank stavkasi pasaygach oilaning $200 000 o‘zgaruvchan stavkali qarzi foizi 8% dan 5% ga, firmaning $500 000 qarzi foizi 9% dan 7% ga tushadi. Asosiy qarz o‘zgarmaydi, komissiya va murakkab foiz yo‘q. Jami yillik foiz xarajati qanchaga kamayadi va AD ga qanday ta’sir qilishi mumkin?",
+    "options_en": [
+      "Expenses fall $16,000; AD necessarily falls",
+      "Expenses fall $16,000; higher disposable cash flow may support C and I",
+      "Expenses fall $6,000; only consumption can change",
+      "Expenses fall $21,000; higher debt costs necessarily reduce AD"
+    ],
+    "options_ru": [
+      "Расходы снижаются на $16 000; AD обязательно падает",
+      "Расходы снижаются на $16 000; свободные средства могут поддержать C и I",
+      "Расходы снижаются на $6 000; изменится только потребление",
+      "Расходы снижаются на $21 000; подорожание долга обязательно уменьшает AD"
+    ],
+    "options_uz": [
+      "Xarajat $16 000 kamayadi; AD albatta pasayadi",
+      "Xarajat $16 000 kamayadi; bo‘sh mablag‘ C va I ni qo‘llashi mumkin",
+      "Xarajat $6000 kamayadi; faqat iste’mol o‘zgaradi",
+      "Xarajat $21 000 kamayadi; qarz xarajati oshib AD kamayadi"
+    ],
+    "why": [
+      "Household interest savings=$200,000×3%=$6,000. Firm savings=$500,000×2%=$10,000. Total=$16,000; lower borrowing costs can encourage household spending and private investment.",
+      "Семья экономит $200 000×3%=$6 000, фирма $500 000×2%=$10 000. Вместе $16 000; снижение расходов может поддерживать потребление и инвестиции.",
+      "Oila $200 000×3%=$6000, firma $500 000×2%=$10 000 tejaydi. Jami $16 000; past foiz xarajati iste’mol va investitsiyani qo‘llashi mumkin."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T3-T-009"
+  },
+  {
+    "n": 10,
+    "d": "medium",
+    "k": "D",
+    "sec": 120,
+    "en": "A worker's nominal salary rises by 3% over a year, but the consumer price index increases from 100 to 108. Using an exact price-adjusted ratio, approximately how much does the worker's real salary change and why does predictable inflation matter for wage bargaining?",
+    "ru": "За год номинальная зарплата работника растёт на 3%, а индекс потребительских цен увеличивается со 100 до 108. По точному отношению индексов как примерно меняется реальная зарплата и почему предсказуемая инфляция важна при обсуждении оплаты?",
+    "uz": "Bir yilda ishchining nominal oyligi 3% oshadi, iste’mol narxlari indeksi esa 100 dan 108 ga chiqadi. Aniq narxga tuzatilgan nisbat bo‘yicha real ish haqi qanchaga o‘zgaradi va nega barqaror inflyatsiya ish haqi kelishuvi uchun muhim?",
+    "options_en": [
+      "Real salary rises 11%, because nominal wages and prices are added",
+      "Real salary rises 3%, because prices cannot change purchasing power",
+      "Real salary falls exactly 8%, because nominal wages are irrelevant",
+      "Real salary falls about 4.63%; unexpected inflation can erode agreed purchasing power"
+    ],
+    "options_ru": [
+      "Реальная зарплата растёт на 11%, поскольку темпы нужно сложить",
+      "Реальная зарплата растёт на 3%, поскольку цены не влияют на покупательную способность",
+      "Реальная зарплата падает ровно на 8%, поскольку номинальная зарплата не важна",
+      "Реальная зарплата падает примерно на 4,63%; неожиданная инфляция снижает покупательную способность"
+    ],
+    "options_uz": [
+      "Real ish haqi 11% oshadi, chunki narx va ish haqi qo‘shiladi",
+      "Real ish haqi 3% oshadi, chunki narx xarid quvvatiga ta’sir qilmaydi",
+      "Real ish haqi aynan 8% tushadi, chunki nominal ish haqi ahamiyatsiz",
+      "Real ish haqi taxminan 4,63% tushadi; kutilmagan inflyatsiya kelishilgan xarid quvvatini pasaytiradi"
+    ],
+    "why": [
+      "Real-wage factor is 1.03/1.08≈0.95370, a fall of 4.63%. Unpredictable inflation makes it harder for workers and firms to agree on the intended real value of nominal pay.",
+      "Коэффициент реальной зарплаты 1,03/1,08≈0,95370, снижение на 4,63%. Непредсказуемая инфляция усложняет согласование реальной ценности номинальной оплаты.",
+      "Real ish haqi koeffitsienti 1,03/1,08≈0,95370, 4,63% kamayish. Kutilmagan inflyatsiya nominal ish haqining real qiymatini kelishishni qiyinlashtiradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T3-T-010"
+  },
+  {
+    "n": 18,
+    "d": "medium",
+    "k": "C",
+    "sec": 130,
+    "en": "A training programme raises productivity per worker by 10%, while an independent improvement in labour participation increases the potential workforce by 5%. If capital and working hours are sufficient and both changes apply multiplicatively, by approximately how much could long-run potential output rise, with no immediate AD change?",
+    "ru": "Программа обучения повышает производительность на работника на 10%, а независимый рост участия в рынке труда увеличивает потенциальную рабочую силу на 5%. Капитала и рабочего времени достаточно, эффекты перемножаются; немедленных изменений AD нет. На сколько примерно может увеличиться потенциальный долгосрочный выпуск?",
+    "uz": "O‘qitish dasturi har ishchi unumdorligini 10% oshiradi, mehnat bozorida qatnashishning mustaqil ortishi potensial ishchi kuchini 5% ko‘paytiradi. Kapital va soatlar yetarli, ta’sirlar ko‘paytiriladi; AD hozir o‘zgarmaydi. Uzoq muddatli potensial mahsulot taxminan qancha o‘sishi mumkin?",
+    "options_en": [
+      "5%; AD shifts right immediately",
+      "10%; labour participation never matters",
+      "15.5%; long-run aggregate supply can shift right",
+      "50%; potential output rises by the product of percentage changes"
+    ],
+    "options_ru": [
+      "5%; AD немедленно сдвигается вправо",
+      "10%; участие работников не имеет значения",
+      "15,5%; долгосрочное совокупное предложение может сдвинуться вправо",
+      "50%; потенциальный выпуск равен произведению процентов"
+    ],
+    "options_uz": [
+      "5%; AD darhol o‘ngga siljiydi",
+      "10%; mehnat qatnashuvi ahamiyatsiz",
+      "15,5%; uzoq muddatli yalpi taklif o‘ngga siljishi mumkin",
+      "50%; potensial mahsulot foizlar ko‘paytmasiga teng"
+    ],
+    "why": [
+      "With proportional worker productivity and workforce increases, potential output is multiplied by 1.10×1.05=1.155, up 15.5%. This raises productive capacity (LRAS), not necessarily current spending.",
+      "Производительность и число работников перемножаются: 1,10×1,05=1,155, потенциальный выпуск +15,5%. Это увеличение долгосрочного предложения, не обязательно текущего спроса.",
+      "Unumdorlik va ishchi soni ko‘paytiriladi: 1,10×1,05=1,155, potensial ishlab chiqarish +15,5%. Bu LRAS o‘sishi, joriy AD o‘sishi shart emas."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T3-T-018"
+  }
+]
