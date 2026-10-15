@@ -20262,7 +20262,21 @@ async function deleteMyRecCurrent() {
     const rec=state?.courses?.myRecCurrent;
     const subjectKey=state?.courses?.subjectKey;
     if(!rec||!subjectKey||deleteMyRecCurrent._pending) return;
-    const ok=await uiConfirm({
+    // In Practice by Topic, "Освоено" is user-managed recommendation status.
+    // Clarify that it never modifies attempts or academic scoring.
+    // Existing Tour / legacy Practice confirmation text remains unchanged.
+    const isTopicRecommendation=String(rec.source_type||"practice")==="practice" &&
+      Number(rec.practice_drill_session_id||0)>0;
+    const ok=await uiConfirm(isTopicRecommendation?{
+      title:tr3("Отметить как освоено?","O‘zlashtirildi deb belgilaysizmi?","Mark as mastered?"),
+      message:tr3(
+        "Из активного списка исчезнет только эта рекомендация. Результаты и история попыток сохранятся.",
+        "Faqat ushbu tavsiya faol ro‘yxatdan olib tashlanadi. Urinishlar natijalari va tarixi saqlanadi.",
+        "Only this recommendation will leave the active list. Attempt results and history will stay unchanged."
+      ),
+      okText:tr3("Освоено","O‘zlashtirildi","Mastered"),
+      cancelText:t("rec_delete_cancel")||(t("cancel")||"Отмена")
+    }:{
       title:t("rec_delete_title")||"Отметить как освоено?",
       message:t("rec_delete_text")||"Рекомендация будет убрана из списка. Результаты сохранятся.",
       okText:t("rec_delete_ok")||"Удалить",
@@ -20297,7 +20311,11 @@ async function deleteMyRecCurrent() {
         if(String(rec.source_type||"practice")==="tour") saveMyTourRecs(store);
         else saveMyRecs(store);
       }
-      showToast(t("rec_deleted_toast")||"Рекомендация удалена.");
+      showToast(isTopicRecommendation
+        ?tr3("Отмечено как освоено. История сохранена.",
+          "O‘zlashtirildi deb belgilandi. Tarix saqlandi.",
+          "Marked as mastered. History preserved.")
+        :(t("rec_deleted_toast")||"Рекомендация удалена."));
       state.courses.myRecCurrent=null;
       saveState();
       replaceCourses("my-recs");
