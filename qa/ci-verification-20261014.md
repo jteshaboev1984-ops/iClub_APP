@@ -15,3 +15,5 @@ QA CI rerun 2026-10-15: verify Home source priority by real enrolment mode, subj
 QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.js and plans-ui.js against trusted QA baseline without altering original production surfaces. NO MERGE.
 
 2026-10-15 §96: verify localhost HTTP->scratch PostgreSQL->signed Home policy, no live Supabase and no product release; never merge.
+
+2026-10-15 §96–§97: actual HTTP + scratch PG + server HMAC + native Chromium across 3 locales; QA-to-QA only, NO MERGE.
