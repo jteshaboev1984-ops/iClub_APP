@@ -35,3 +35,12 @@ A real CI discovery: using PostgreSQL `EXISTS(...)::text` returns `true`, not th
 - Actual full integrated iClub + live Edge remains separate and requires explicit owner rollout GO and a safe authorized backend environment. The architect rejected paying for another Supabase branch.
 
 **Verdict:** local authentic HTTP/PostgreSQL/Chromium integration **GREEN**, Global AI **NO-GO**.
+
+
+## §98 follow-up: real scratch source release/revocation, CI #245
+
+The previously synthetic hard-coded `ready:true` gateway publication double has been replaced by a *real query* of `private.iclub_ai_v21_home_source_test_releases` inside the same disposable PostgreSQL. Twelve independently fingerprinted local-only records (RU/UZ/EN × action/subject) are created by `qa/sql_drafts/iclub_ai_v21_home_http_fixture_local_pg.psql`. A released rights/source change is reread by the signer before the result is issued; denied or revoked source prevents rendering. HTTP regression now actually mutates PostgreSQL `revoked_at` and `rights_approved`, confirms denial and then restores only test permissions.
+
+One local fixture-generation bug (literal SQL `$` mishandled during code replacement) was caught by the first full CI and fixed by regenerating the file with a structural assertion; no protected code was changed.
+
+[Complete GitHub Actions #245](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38681529131) is **GREEN**: 628/628 main Node, 14/14 independent PostgreSQL suites, additional browser + HTTP signed Home suite (all three locales), Deno and two race checks. This validates a **synthetic approval workflow**, NOT real rights, real provider publication or a backend connected to a real user's Supabase records. The source test entries are discarded with the CI database. Global AI remains NO-GO for the live product.
