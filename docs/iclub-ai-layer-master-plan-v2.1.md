@@ -873,3 +873,20 @@ Run #209 успешно прошёл обновлённые Node-тесты, н�
 ## 91. Текущая граница выпуска после real CI
 
 Доказательство: `docs/iclub-ai-layer-p6-signed-home-ci-proof-20261014.md`. Архитектура и QA тесты продвинулись, но настоящее коммерческое разрешение на новый AI, rights/source publication, production-grade atomic Home planner, реальная интеграция Vercel Preview + независимая Supabase и разрешение beta/provider/live migration отсутствуют. Общий **Global AI NO-GO**, даже если очередной offline CI GREEN. `main`, действующая Supabase, пользовательский прогресс, Mathematics Tutor и production домены не затронуты.
+
+
+## 92. Offline QA без новой платной Supabase-ветки (2026-10-15)
+
+Архитектор прямо отказался от создания отдельной Supabase development branch. Запрет зафиксирован в `docs/iclub-ai-layer-zero-new-supabase-branch-v2.1-20261015.md`. Дальнейшая работа использует **только уже существующие** QA GitHub, изолированный синтетический PostgreSQL внутри CI, Node/Deno, Chromium и ранее созданный статический защищённый Vercel Preview. Production Supabase допускает только разрешённый метаданный аудит схемы, **не** чтение записей пользователей, не временные таблицы, не миграции и не транзакционные тестовые записи. Новые проекты/ветки Supabase и billing не создавались.
+
+## 93. Реальный режим предмета и повторная проверка оснований Home (2026-10-15)
+
+Сканер `qa/sql_drafts/iclub_ai_v21_home_scan_scratch_UNAPPLIED.sql` теперь учитывает поле `user_subjects.mode`: `study` для завершённой Practice и продолжения предмета, `competitive` для официально открытого архива Tour. Внутри **исключительно синтетического scratch** доступ к предмету привязан к тройке `owner/subject/intent`, а не ко всем предметам пользователя сразу. Тесты PostgreSQL `qa/sql_drafts/iclub_ai_v21_home_scan_local_pg.psql` проверяют смену режима, отзыв одного разрешения, сохранение другого разрешённого предмета и полный fail-closed при отсутствии прав. Это **не реальная коммерческая authorization service**; действующая Supabase не менялась.
+
+В `qa/ai-layer-v21-p6-home-signed-server-bridge.cjs` перед подписью плана повторно запрашиваются **академические доказательства**, **rights/content/source hash/version** для каждой записи и **полный server-owned screen + scan** после всех асинхронных операций. Изменение источника, отмена академического подтверждения, смена владельца или экрана приводит к отказу. Добавлены адресные отрицательные тесты.
+
+## 94. Подтверждённый полный CI для §92–§93 (2026-10-15)
+
+В изолированном QA→QA запуске [GitHub Actions #221](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38679111813) подтверждено **GREEN**: **628/628 Node**, **14/14 disposable PostgreSQL**, Chromium/мобильная навигация RU/UZ/EN, Deno + Edge contract, конкурентные транзакции, проверка неизменности `app.js/index.html/i18n.js/style.css` и существующего Exam Prep. По сравнению с исходным production baseline ни один защищённый файл не изменён. CI GREEN относится только к offline QA candidate, а не к реальному Supabase+Edge+AI rollout.
+
+**Global AI по-прежнему NO-GO.** Без нового Supabase branch продолжаются offline проверки и подготовка независимого QA release candidate; никакие утверждённые продуктовые тексты не объявляются редакционно опубликованными, AI не тратит средства, реальная beta не открывается. Реальный интегрированный Preview нельзя объявить доказанным на основании статического Vercel Preview или синтетического PostgreSQL.
