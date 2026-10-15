@@ -202,32 +202,32 @@
     "n": 64,
     "d": "hard",
     "sec": 180,
-    "k": "D",
-    "en": "An illustrative expectations-augmented Phillips relationship is π=πe−0.5(u−5), where inflation and unemployment are percentages. With unemployment fixed at 4%, expected inflation rises from 3% to 5%. What are the old and new implied inflation rates?",
-    "ru": "Иллюстративная кривая Филлипса с ожиданиями задана π=πe−0,5(u−5), где инфляция и безработица выражены в процентах. При неизменной безработице 4% ожидаемая инфляция растёт с 3% до 5%. Каковы прежняя и новая расчётные инфляции?",
-    "uz": "Kutishlarni hisobga olgan misoliy Fillips tenglamasi π=πe−0,5(u−5); inflyatsiya va ishsizlik foizda. Ishsizlik 4% bo‘lib qoladi, kutilgan inflyatsiya 3% dan 5% ga oshadi. Hisoblangan eski va yangi inflyatsiya nechaga teng?",
+    "k": "B",
+    "en": "In year one, a firm's wage per worker rises by 6% and output per worker rises by 2%. In year two, after inflation expectations become higher, wages rise by 9% and output per worker rises by 3%. Assume wages and productivity are measured from each previous year's levels. What are the approximate changes in unit labour cost in years one and two?",
+    "ru": "В первом году зарплата на работника растёт на 6%, а выпуск на работника — на 2%. Во втором году, после повышения инфляционных ожиданий, зарплата растёт на 9%, производительность на 3%. Считайте каждый год относительно предыдущего. Каковы приблизительные темпы изменения затрат на труд на единицу выпуска в первом и втором годах?",
+    "uz": "Birinchi yili bir ishchining ish haqi 6%, ishchi boshiga mahsulot 2% oshadi. Ikkinchi yili inflyatsiya kutilmalari yuqorilagach ish haqi 9%, unumdorlik 3% oshadi. Har yillik o‘sish oldingi yilga nisbatan olinadi. Birlik mehnat xarajati birinchi va ikkinchi yilda taxminan necha foiz o‘zgaradi?",
     "options_en": [
-      "3% then 5%",
-      "2.5% then 4.5%",
-      "4% then 6%",
-      "3.5% then 5.5%"
+      "Year 1 +8%; year 2 +12%",
+      "Year 1 +3.92%; year 2 +5.83%",
+      "Year 1 +4%; year 2 +6% exactly",
+      "Year 1 −3.92%; year 2 −5.83%"
     ],
     "options_ru": [
-      "3%, затем 5%",
-      "2,5%, затем 4,5%",
-      "4%, затем 6%",
-      "3,5%, затем 5,5%"
+      "1-й год +8%; 2-й +12%",
+      "1-й год +3,92%; 2-й +5,83%",
+      "1-й год ровно +4%; 2-й ровно +6%",
+      "1-й год −3,92%; 2-й −5,83%"
     ],
     "options_uz": [
-      "3%, keyin 5%",
-      "2,5%, keyin 4,5%",
-      "4%, keyin 6%",
-      "3,5%, keyin 5,5%"
+      "1-yil +8%; 2-yil +12%",
+      "1-yil +3,92%; 2-yil +5,83%",
+      "1-yil aynan +4%; 2-yil aynan +6%",
+      "1-yil −3,92%; 2-yil −5,83%"
     ],
     "why": [
-      "At u=4 the unemployment term contributes +0.5 percentage points. Inflation therefore changes from 3+0.5=3.5% to 5+0.5=5.5%.",
-      "При u=4 поправка на безработицу +0,5 процентного пункта. Инфляция растёт с 3,5% до 5,5%.",
-      "u=4 bo‘lsa ishsizlik tuzatmasi +0,5 foiz punkt. Inflyatsiya 3,5% dan 5,5% ga oshadi."
+      "Unit labour cost equals wage per worker divided by output per worker. The exact factors are 1.06/1.02≈1.0392 and 1.09/1.03≈1.0583, indicating stronger cost pressure in year two.",
+      "Единичные затраты на труд — зарплата на работника, делённая на его выпуск. Коэффициенты 1,06/1,02≈1,0392 и 1,09/1,03≈1,0583, то есть давление издержек усиливается.",
+      "Birlik mehnat xarajati ishchi ish haqining ishchi mahsulotiga nisbati. Koeffitsientlar 1,06/1,02≈1,0392 va 1,09/1,03≈1,0583; ikkinchi yilda xarajat bosimi kuchliroq."
     ]
   },
   {
