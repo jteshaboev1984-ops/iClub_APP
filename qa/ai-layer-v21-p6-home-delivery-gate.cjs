@@ -20,7 +20,8 @@ const blocked=()=>Object.freeze({ready:false,reason:"in_development"});
 function validServices(s){
  return s&&Buffer.isBuffer(s.signingKey)&&s.signingKey.length>=32&&
   ["nowMs","readCurrentScreen","readServerScan","verifySubjectAccess",
-   "verifyAcademicEvidence","readEditorialRelease"].every(k=>typeof s[k]==="function");
+   "verifyAcademicEvidence","readEditorialRelease","verifyAtomicDeliverySnapshot"]
+   .every(k=>typeof s[k]==="function");
 }
 async function validateBeforeHomeDelivery(s,{userId,contextHandle,locale,plan,choice}={}){
  if(!validServices(s)||!uuid(userId)||!uuid(contextHandle)||
@@ -131,6 +132,13 @@ async function validateBeforeHomeDelivery(s,{userId,contextHandle,locale,plan,ch
      !integer(closingTime)||closingTime<finish||
      closingTime>=plan.expiresAtMs||closingTime>=screen.expiresAtMs)
    return blocked();
+  // Single SQL SELECT on one scratch PostgreSQL MVCC statement snapshot:
+  // current screen, full priority, commercial selected slots, academic
+  // completion, and locale rights must all hold simultaneously.
+  if(await s.verifyAtomicDeliverySnapshot({
+    userId,contextHandle,locale,plan,choice
+   })!==true)return blocked();
+  if(s.nowMs()>=plan.expiresAtMs)return blocked();
   const result={ready:true,reviewOnly:true,releaseAllowed:false,
     expiresAtMs:plan.expiresAtMs,status:choice.status};
   if(only){result.actionCode=choice.actionCode;result.subjectKey=choice.subjectKey;}
