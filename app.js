@@ -12438,7 +12438,9 @@ function bindRatingsUI() {
     "tour-review",
     "books",
     "my-recs",
-    "my-rec-detail"
+    "my-rec-detail",
+    "my-rec-topic-history",
+    "my-rec-topic-review"
   ];
 
   function getCoursesTopScreen() {
