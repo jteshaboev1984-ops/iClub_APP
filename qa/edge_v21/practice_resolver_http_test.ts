@@ -165,3 +165,19 @@ Deno.test("Unrecognized metadata or failed PostgREST never authorizes",async()=>
    "Invalid RPC proof accepted "+JSON.stringify(result));
  }
 });
+
+Deno.test("Resolver-specific ID cannot piggyback on any older mint/revoke action",async()=>{
+ const x=fixture();x.allow();
+ for(const fields of [
+  {action:"mint",sessionId:900,questionId:901,attemptReference:99},
+  {action:"mintLesson",lessonId:72,attemptReference:99},
+  {action:"mintTourArchive",tourAttemptId:41,attemptReference:99},
+  {action:"mintAppView",view:"home",attemptReference:99},
+  {action:"revoke",contextHandle:"33333333-3333-4333-8333-333333333333",
+   attemptReference:99}
+ ]){
+  const r=await x.send(fields);
+  assert(r.status===400,"Legacy action admitted new selector "+fields.action);
+ }
+ assert(x.calls.length===0,"No resolver call authorized");
+});
