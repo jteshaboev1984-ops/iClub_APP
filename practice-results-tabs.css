@@ -843,3 +843,209 @@
   background: transparent;
   box-shadow: none;
 }
+
+
+/* Practice recommendations / By Tour — Academic Rigor.
+   Presentation-only. No change to Topic Practice or competitive Tours. */
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last {
+  margin:3px 0 18px;padding:17px 16px;
+  background:#fff;border:1px solid var(--sx-line);border-radius:17px;
+  box-shadow:0 2px 6px rgba(22,39,79,.035);min-width:0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-top,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-body,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-foot {
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-top small {
+  color:var(--sx-muted);font-size:11px;white-space:nowrap;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-body {
+  margin-top:12px;align-items:center;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-info{
+  display:grid;gap:5px;flex:1;min-width:0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-info strong {
+  font-size:18px;font-weight:830;letter-spacing:-.025em;line-height:1.3;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-info span,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-foot {
+  font-size:12px;color:var(--sx-muted);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-score {
+  color:var(--sx-blue);font-size:clamp(24px,7vw,29px);
+  font-weight:850;letter-spacing:-.04em;font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-foot {
+  margin-top:12px;padding-top:10px;border-top:1px solid var(--sx-line);
+  justify-content:flex-start;gap:18px;font-variant-numeric:tabular-nums;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-empty {
+  padding:14px 16px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-empty strong {
+  font-size:14px;font-weight:770;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last-empty p,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-unavailable {
+  margin:7px 0 0;font-size:12px;line-height:1.55;color:var(--sx-muted);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-unavailable {
+  margin:0 0 15px;padding:11px 13px;border-radius:11px;
+  background:#f3f6fa;border:1px solid var(--sx-line);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-card {
+  min-width:0;overflow:hidden;background:#fff;
+  border:1px solid var(--sx-line);border-radius:17px;
+  box-shadow:0 2px 6px rgba(22,39,79,.035);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-head {
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:15px 15px 0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-head h3 {
+  margin:0;min-width:0;font-size:17px;font-weight:800;
+  line-height:1.33;letter-spacing:-.02em;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-count {
+  flex:none;max-width:48%;padding:5px 8px;border-radius:8px;
+  background:#ecf1f7;color:#51617a;font-size:10px;
+  font-weight:750;text-align:center;line-height:1.4;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-hint {
+  margin:7px 15px 12px;color:var(--sx-muted);
+  font-size:12px;line-height:1.5;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entries {min-width:0;}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry {
+  width:100%;min-width:0;display:flex;align-items:center;gap:12px;
+  min-height:52px;padding:11px 15px;border:0;
+  border-top:1px solid var(--sx-line);
+  background:#fff;text-align:left;font:inherit;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry[hidden],
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-row[hidden] {
+  display:none!important;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry-info {
+  display:grid;gap:4px;min-width:0;flex:1;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry-info strong {
+  font-size:12.5px;line-height:1.4;font-weight:740;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry-info small,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-number {
+  font-size:11px;color:var(--sx-muted);overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-number {
+  color:var(--sx-blue);font-weight:800;font-variant-numeric:tabular-nums;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-arrow {
+  margin-left:auto;flex:none;font-size:23px;line-height:1;color:#8b99af;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-single {
+  display:grid;gap:5px;padding:10px 15px 15px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-single p {
+  margin:0;font-size:12.5px;line-height:1.45;font-weight:670;overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-single small {
+  font-size:11px;line-height:1.4;color:var(--sx-muted);overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-open {
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  min-height:40px;margin-top:7px;padding:7px 0;border:0;background:transparent;
+  color:var(--sx-blue);font:inherit;font-size:12.5px;font-weight:790;
+  text-align:left;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-open span {font-size:19px;}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-expand {
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;min-height:42px;border:0;border-top:1px solid var(--sx-line);
+  padding:10px;background:#fff;color:var(--sx-blue);
+  font:inherit;font-size:12px;font-weight:770;cursor:pointer;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-slot {
+  min-width:0;margin:24px 0 0;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-slot[hidden] {display:none!important;}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history h2 {
+  margin:0;font-size:17px;font-weight:830;line-height:1.35;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history>p {
+  margin:4px 0 13px;color:var(--sx-muted);font-size:12px;line-height:1.5;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-list {
+  background:#fff;border:1px solid var(--sx-line);
+  border-radius:15px;overflow:hidden;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-row {
+  display:flex;align-items:center;gap:12px;min-height:56px;padding:11px 14px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-row+.iclub-sx-tour-history-row {
+  border-top:1px solid var(--sx-line);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-index {
+  display:grid;place-items:center;flex:none;width:31px;height:31px;
+  border-radius:8px;background:var(--sx-soft);font-size:11px;
+  color:var(--sx-blue);font-weight:780;font-variant-numeric:tabular-nums;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-description {
+  min-width:0;flex:1;display:grid;gap:3px;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-description strong {
+  font-size:12.5px;font-weight:750;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-description small {
+  font-size:11px;color:var(--sx-muted);
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-score {
+  flex:none;white-space:nowrap;font-size:14px;font-weight:820;
+  color:var(--sx-blue);font-variant-numeric:tabular-nums;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry:hover,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-open:hover {
+  background:#f8faff;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry:focus-visible,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-open:focus-visible,
+.iclub-visual-v3 #courses-my-recs .iclub-sx-tour-expand:focus-visible {
+  outline:2px solid var(--sx-blue);outline-offset:-2px;
+}
+@media(max-width:380px){
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last,
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-head {padding-inline:12px;}
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry,
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-row {padding-inline:11px;}
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-count {font-size:9px;}
+}
+
+
+/* Same readable mistake accordion as By Topic, tour-specific action hierarchy. */
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [hidden] {
+  display:none!important;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-retry"] {
+  order:1;grid-column:1/-1;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail.iclub-sx-tour-has-errors) .actions-row [data-action="my-rec-retry"] {
+  background:#1a43bf;color:#fff;border:1px solid #1a43bf;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-train"] {
+  order:2;grid-column:1/-1;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail.iclub-sx-tour-has-errors) .actions-row [data-action="my-rec-train"] {
+  background:#eff4ff;color:#1a43bf;border:1px solid #cddcfb;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-open-books"] {
+  order:3;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-to-subject"] {
+  order:4;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-delete"] {
+  order:5;grid-column:1/-1;background:transparent;
+  color:#526277;border:1px solid #e5eaf2;
+}
