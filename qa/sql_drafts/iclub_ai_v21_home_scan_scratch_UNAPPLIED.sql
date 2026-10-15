@@ -12,10 +12,15 @@ BEGIN
  END IF;
 END $scratch$;
 
+-- The allowlist is per owner, subject and current mode in disposable scratch.
+-- Its rows are synthetic and are NEVER accepted as real commercial proof.
 -- This allowlist exists in SCRATCH tests, not in production. A future real
 -- integration MUST replace it with approved owner-bound commercial entitlements.
 CREATE TABLE IF NOT EXISTS private.iclub_ai_v21_home_synthetic_access(
- user_id uuid PRIMARY KEY, allowed boolean NOT NULL DEFAULT false
+ user_id uuid NOT NULL, subject_key text NOT NULL,
+ intent text NOT NULL CHECK(intent IN ('study','competitive')),
+ allowed boolean NOT NULL DEFAULT false,
+ PRIMARY KEY(user_id,subject_key,intent)
 );
 REVOKE ALL ON private.iclub_ai_v21_home_synthetic_access FROM public,anon,authenticated;
 
@@ -61,10 +66,13 @@ BEGIN
  -- Every enrolled active subject is enumerated. A returned candidate is
  -- evidence of an eligible action, NOT mastery and NOT an AI release.
  WITH eligible AS (
-  SELECT DISTINCT subj.id,subj.subject_key
+  SELECT DISTINCT subj.id,subj.subject_key,us.mode
   FROM public.user_subjects us
   JOIN public.subjects subj ON subj.id=us.subject_id AND subj.is_active=true
-  WHERE us.user_id=p_user_id
+  JOIN private.iclub_ai_v21_home_synthetic_access a
+   ON a.user_id=us.user_id AND a.subject_key=subj.subject_key
+    AND a.intent=us.mode AND a.allowed=true
+  WHERE us.user_id=p_user_id AND us.mode IN ('study','competitive')
  ),
  practice_candidates AS (
   SELECT DISTINCT ON (e.id) 1 AS priority,'review_finalized_practice'::text AS action_code,
@@ -74,6 +82,7 @@ BEGIN
     AND s.user_id=p_user_id AND s.status='finalized' AND s.finalized_at IS NOT NULL
   JOIN public.practice_session_answers_v4 a ON a.session_id=s.id
     AND a.question_id=ANY(s.question_ids) AND a.is_correct=false AND a.answered_at IS NOT NULL
+  WHERE e.mode='study'
   ORDER BY e.id,s.finalized_at DESC,s.id DESC
  ),
  archive_candidates AS (
@@ -87,12 +96,13 @@ BEGIN
    AND ta.user_id=p_user_id AND ta.status IN ('submitted','time_expired')
   JOIN public.tour_session_runtime_v4 rt ON rt.attempt_id=ta.id
    AND rt.user_id=ta.user_id AND rt.tour_id=ta.tour_id AND rt.finalized_at IS NOT NULL
+  WHERE e.mode='competitive'
   ORDER BY e.id,rt.finalized_at DESC,ta.id DESC
  ),
  continue_candidates AS (
   SELECT 3 AS priority,'continue_enrolled_subject'::text AS action_code,
    e.subject_key,e.id::bigint AS evidence_id,v_revision::bigint AS evidence_revision
-  FROM eligible e
+  FROM eligible e WHERE e.mode='study'
  ),
  all_found AS (
   SELECT * FROM practice_candidates
