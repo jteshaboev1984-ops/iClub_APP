@@ -1,0 +1,332 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-006",
+    "n": 6,
+    "d": "hard",
+    "k": "C",
+    "sec": 185,
+    "en": "A trade-weighted currency index uses partner weights 50%, 30%, and 20%. Partner B's exchange-rate index is 90 and C's is 110. What must partner A's index be for the overall index to equal 105? If A's index then rises by five points with other indices unchanged, what is the new overall index?",
+    "ru": "Торгово-взвешенный валютный индекс использует веса партнёров A, B и C: 50%, 30% и 20%. Индекс курса B равен 90, C — 110. Каким должен быть индекс A, чтобы общий индекс составил 105? Если затем индекс A повысится на пять пунктов при неизменных остальных, чему станет равен общий индекс?",
+    "uz": "Savdo vaznli valuta indeksida A, B, C hamkorlar vazni 50%, 30%, 20%. B kurs indeksi 90, C indeksi 110. Umumiy indeks 105 bo‘lishi uchun A indeksi nechaga teng bo‘lishi kerak? Keyin A indeksi besh punkt oshib, boshqalari o‘zgarmasa yangi umumiy indeks qancha?",
+    "options_en": [
+      "A=110; new index 107.5",
+      "A=112; new index 110",
+      "A=112; new index 107.5",
+      "A=116; new index 105"
+    ],
+    "options_ru": [
+      "A=110; новый индекс 107,5",
+      "A=112; новый индекс 110",
+      "A=112; новый индекс 107,5",
+      "A=116; новый индекс 105"
+    ],
+    "options_uz": [
+      "A=110; yangi indeks 107,5",
+      "A=112; yangi indeks 110",
+      "A=112; yangi indeks 107,5",
+      "A=116; yangi indeks 105"
+    ],
+    "why": [
+      "105=0.5A+0.3×90+0.2×110 gives 0.5A=56, so A=112. Adding five points to A adds 0.5×5=2.5 points to the aggregate, giving 107.5.",
+      "Из 105=0,5A+0,3×90+0,2×110 следует A=112. Рост A на пять пунктов увеличивает общий индекс на 0,5×5=2,5, до 107,5.",
+      "105=0,5A+0,3×90+0,2×110 dan A=112. A besh punkt oshsa jami indeks 0,5×5=2,5 punkt oshib 107,5 bo‘ladi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-008",
+    "n": 8,
+    "d": "hard",
+    "k": "D",
+    "sec": 195,
+    "en": "A country starts with a current-account deficit of $60m. A cut in domestic expenditure reduces imports by $7m. An import-switching tariff separately reduces imports by $9m, but imported-input costs cause exports to decline by $4m. Assuming these changes do not overlap and other flows stay constant, what is the new current-account balance?",
+    "ru": "Страна имеет дефицит текущего счёта $60 млн. Сокращение внутренних расходов уменьшает импорт на $7 млн. Пошлина, переключающая спрос на отечественные товары, отдельно снижает импорт на $9 млн, но рост затрат на импортные ресурсы сокращает экспорт на $4 млн. Эффекты не пересекаются, прочие потоки неизменны. Каково новое сальдо текущего счёта?",
+    "uz": "Mamlakat joriy hisobida $60 mln taqchillik bor. Ichki xarajatlarni qisqartirish importni $7 mln kamaytiradi. Import o‘rnini bosuvchi boj alohida importni $9 mln qisqartiradi, ammo import xomashyo xarajati eksportni $4 mln kamaytiradi. Ta’sirlar takrorlanmaydi, boshqa oqimlar o‘zgarmaydi. Yangi joriy hisob balansi qancha?",
+    "options_en": [
+      "−$40m",
+      "−$52m",
+      "−$56m",
+      "−$48m"
+    ],
+    "options_ru": [
+      "−$40 млн",
+      "−$52 млн",
+      "−$56 млн",
+      "−$48 млн"
+    ],
+    "options_uz": [
+      "−$40 mln",
+      "−$52 mln",
+      "−$56 mln",
+      "−$48 mln"
+    ],
+    "why": [
+      "The balance improves by $7m+$9m−$4m=$12m. Starting at −$60m, the new balance is −$48m. Input-cost effects can partly offset a tariff's import-reduction benefit.",
+      "Сальдо улучшается на $7+$9−$4=$12 млн, с −$60 до −$48 млн. Рост импортных издержек для экспортёров частично нивелирует эффект пошлины.",
+      "Balans $7+$9−$4=$12 mln yaxshilanadi; −$60 mln dan −$48 mln ga o‘tadi. Eksport xarajatlari bojning foydasini qisman kamaytiradi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-012",
+    "n": 12,
+    "d": "hard",
+    "k": "B",
+    "sec": 180,
+    "en": "In a country, nominal GDP rises by 12% over one year, the GDP deflator rises by 8%, and population rises by 4%. Using exact index ratios, approximately how does real GDP per person change?",
+    "ru": "За год номинальный ВВП страны вырос на 12%, дефлятор ВВП — на 8%, а население — на 4%. Используя точные отношения индексов, как примерно изменился реальный ВВП на человека?",
+    "uz": "Bir yilda mamlakat nominal YaIMi 12%, YaIM deflyatori 8%, aholisi esa 4% oshdi. Indekslarning aniq nisbatiga asoslanib, jon boshiga real YaIM taxminan qanday o‘zgardi?",
+    "options_en": [
+      "Rises about 0.3%",
+      "Falls about 0.3%",
+      "Rises exactly 4%",
+      "Falls exactly 4%"
+    ],
+    "options_ru": [
+      "Растёт примерно на 0,3%",
+      "Снижается примерно на 0,3%",
+      "Растёт ровно на 4%",
+      "Снижается ровно на 4%"
+    ],
+    "options_uz": [
+      "Taxminan 0,3% oshadi",
+      "Taxminan 0,3% tushadi",
+      "Aynan 4% oshadi",
+      "Aynan 4% kamayadi"
+    ],
+    "why": [
+      "The real GDP-per-person factor is 1.12/(1.08×1.04)=1.12/1.1232≈0.99715, or a fall of about 0.285%. Nominal growth alone is misleading.",
+      "Индекс реального ВВП на человека равен 1,12/(1,08×1,04)≈0,99715; снижение около 0,285%. Номинальный рост не означает рост на человека.",
+      "Jon boshiga real YaIM koeffitsienti 1,12/(1,08×1,04)≈0,99715, ya’ni taxminan 0,285% kamayish. Nominal o‘sishning o‘zi yetarli emas."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-014",
+    "n": 14,
+    "d": "hard",
+    "k": "A",
+    "sec": 175,
+    "en": "Under a fixed exchange-rate regime, the government officially changes the peg from 8 domestic currency units per US dollar to 6.4 domestic units per dollar. An export sells for 160 domestic units with its domestic price unchanged. What happens to its dollar price, and how is the official currency move described?",
+    "ru": "При фиксированном курсе власти официально меняют привязку с 8 до 6,4 единицы национальной валюты за доллар. Экспортный товар стоит 160 национальных единиц, внутренняя цена неизменна. Как меняется цена товара в долларах и как называется официальное изменение курса?",
+    "uz": "Qat’iy kursda hukumat bir dollar uchun kursni 8 mahalliy birlikdan 6,4 birlikka rasmiy o‘zgartiradi. Eksport mahsuloti 160 mahalliy birlik turadi, ichki narxi o‘zgarmaydi. Uning dollar narxi qanday o‘zgaradi va rasmiy kurs harakati nima deyiladi?",
+    "options_en": [
+      "$20 to $25; revaluation",
+      "$20 to $16; devaluation",
+      "$25 to $20; devaluation",
+      "$20 to $25; depreciation under a floating rate"
+    ],
+    "options_ru": [
+      "С $20 до $25; ревальвация",
+      "С $20 до $16; девальвация",
+      "С $25 до $20; девальвация",
+      "С $20 до $25; обесценение при плавающем курсе"
+    ],
+    "options_uz": [
+      "$20 dan $25 ga; revalvatsiya",
+      "$20 dan $16 ga; devalvatsiya",
+      "$25 dan $20 ga; devalvatsiya",
+      "$20 dan $25 ga; suzuvchi kursda qadrsizlanish"
+    ],
+    "why": [
+      "Dollar price rises from 160/8=$20 to 160/6.4=$25. Fewer domestic units per dollar represent an official strengthening (revaluation) under a fixed peg.",
+      "Цена в долларах растёт с 160/8=$20 до 160/6,4=$25. Укрепление национальной валюты по решению властей при фиксированном курсе — ревальвация.",
+      "Dollar narxi 160/8=$20 dan 160/6,4=$25 ga oshadi. Qat’iy kursni rasmiy kuchaytirish revalvatsiya deyiladi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-017",
+    "n": 17,
+    "d": "hard",
+    "k": "C",
+    "sec": 190,
+    "en": "To resist depreciation, a central bank sells $80m of foreign reserves and buys domestic currency, withdrawing the equivalent amount of domestic base money. It then buys $60m of government bonds using newly created domestic reserves. Assume dollar-equivalent values are comparable and no other flows occur. What is the net monetary-base effect, and by how much do foreign reserves change?",
+    "ru": "Для сдерживания обесценения центральный банк продаёт $80 млн валютных резервов и покупает национальную валюту, изымая эквивалентную сумму денежной базы. Затем покупает гособлигации на $60 млн за вновь созданные резервы. Долларовые эквиваленты сопоставимы, других операций нет. Каково чистое изменение денежной базы и валютных резервов?",
+    "uz": "Qadrsizlanishni to‘xtatish uchun markaziy bank $80 mln valuta zaxirasini sotib, mahalliy valutani sotib oladi va teng pul bazasini kamaytiradi. Keyin yangi mahalliy zaxira yaratib $60 mln davlat obligatsiyasini xarid qiladi. Dollar ekvivalentlari taqqoslanadi, boshqa oqim yo‘q. Pul bazasi va valuta zaxirasi qanday o‘zgaradi?",
+    "options_en": [
+      "Base +$140m; reserves +$80m",
+      "Base −$80m; reserves unchanged",
+      "Base −$20m; foreign reserves −$80m",
+      "Base +$20m; foreign reserves +$60m"
+    ],
+    "options_ru": [
+      "База +$140 млн; резервы +$80 млн",
+      "База −$80 млн; резервы неизменны",
+      "База −$20 млн; валютные резервы −$80 млн",
+      "База +$20 млн; валютные резервы +$60 млн"
+    ],
+    "options_uz": [
+      "Baza +$140 mln; zaxira +$80 mln",
+      "Baza −$80 mln; zaxira o‘zgarmaydi",
+      "Baza −$20 mln; valuta zaxirasi −$80 mln",
+      "Baza +$20 mln; valuta zaxirasi +$60 mln"
+    ],
+    "why": [
+      "FX support withdraws $80m of base money and reduces reserves by $80m. Bond purchases re-inject $60m base money, leaving a net −$20m monetary-base change while foreign reserves stay $80m lower.",
+      "Поддержка курса изымает $80 млн базы и уменьшает валютные резервы на $80 млн. Покупка облигаций возвращает $60 млн в базу: чистое изменение −$20 млн.",
+      "Kursni qo‘llash bazani $80 mln va valuta zaxirasini $80 mln kamaytiradi. Obligatsiya xaridi bazaga $60 mln qaytaradi; sof baza −$20 mln."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-019",
+    "n": 19,
+    "d": "hard",
+    "k": "B",
+    "sec": 195,
+    "en": "A country's initial annual exports are $500m and imports $600m. Just after depreciation, existing import contracts raise the domestic-currency import bill to $690m while export receipts stay $500m. Later, after volumes adjust, export receipts reach $650m and the import bill falls to $580m. What are the short-run and later trade balances?",
+    "ru": "Изначально годовой экспорт страны $500 млн, импорт $600 млн. Сразу после обесценения действующие импортные контракты повышают счёт за импорт в местной валюте до $690 млн, экспортная выручка остаётся $500 млн. Позже, после изменения объёмов, экспортная выручка достигает $650 млн, импортный счёт снижается до $580 млн. Каковы краткосрочное и последующее торговые сальдо?",
+    "uz": "Mamlakatning dastlabki yillik eksporti $500 mln, importi $600 mln. Qadrsizlanishdan darhol keyin eski import shartnomalari mahalliy valutadagi import to‘lovini $690 mln qiladi, eksport tushumi $500 mln qoladi. Keyin hajmlar moslashib, eksport $650 mln, import $580 mln bo‘ladi. Qisqa va keyingi davr savdo balansi qanday?",
+    "options_en": [
+      "Short-run +$190m; later −$70m",
+      "Short-run −$190m; later +$70m",
+      "Short-run −$100m; later −$100m",
+      "Short-run −$90m; later +$70m"
+    ],
+    "options_ru": [
+      "Сначала +$190 млн; затем −$70 млн",
+      "Сначала −$190 млн; затем +$70 млн",
+      "Сначала −$100 млн; затем −$100 млн",
+      "Сначала −$90 млн; затем +$70 млн"
+    ],
+    "options_uz": [
+      "Dastlab +$190 mln; keyin −$70 mln",
+      "Dastlab −$190 mln; keyin +$70 mln",
+      "Dastlab −$100 mln; keyin −$100 mln",
+      "Dastlab −$90 mln; keyin +$70 mln"
+    ],
+    "why": [
+      "Immediately exports−imports=500−690=−$190m, compared with −$100m before. Later balance=650−580=+$70m, illustrating the J-curve adjustment path.",
+      "Сразу после изменения сальдо 500−690=−$190 млн вместо прежних −$100 млн; затем 650−580=+$70 млн. Это соответствует J-образной динамике.",
+      "Darhol balans 500−690=−$190 mln, avval −$100 mln edi. Keyin 650−580=+$70 mln; bu J-egri chizig‘i mexanizmiga mos."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-020",
+    "n": 20,
+    "d": "hard",
+    "k": "D",
+    "sec": 185,
+    "en": "A monetary authority starts with $900m of usable foreign reserves and average monthly imports of $150m. It sells $225m of reserves to defend a fixed exchange-rate peg, with monthly imports unchanged. What happens to its import-cover ratio, and what constraint does this highlight?",
+    "ru": "Монетарные власти имеют $900 млн доступных валютных резервов, среднемесячный импорт $150 млн. Для защиты фиксированного курса они продают $225 млн резервов; импорт не меняется. Как изменится покрытие импорта резервами и какое ограничение это показывает?",
+    "uz": "Monetar organ $900 mln ishlatiladigan valuta zaxirasiga ega, oylik o‘rtacha import $150 mln. Qat’iy kursni himoyalash uchun $225 mln zaxira sotadi, import o‘zgarmaydi. Importni qoplash muddati qanday o‘zgaradi va bu nimani ko‘rsatadi?",
+    "options_en": [
+      "From 6 months to 7.5 months; the peg is costless",
+      "From 6 months to 3 months; reserves are unlimited",
+      "From 6 months to 6 months; reserves are irrelevant",
+      "From 6 months to 4.5 months; repeated intervention faces a finite-reserve limit"
+    ],
+    "options_ru": [
+      "С 6 до 7,5 месяца; защита курса бесплатна",
+      "С 6 до 3 месяцев; резервы неограниченны",
+      "С 6 до 6 месяцев; резервы не имеют значения",
+      "С 6 до 4,5 месяца; повторные интервенции ограничены запасом резервов"
+    ],
+    "options_uz": [
+      "6 oydan 7,5 oyga; kursni ushlash bepul",
+      "6 oydan 3 oyga; zaxira cheksiz",
+      "6 oy bo‘lib qoladi; zaxira ahamiyatsiz",
+      "6 oydan 4,5 oyga; takror intervensiya zaxira bilan cheklangan"
+    ],
+    "why": [
+      "Reserves decline from $900m to $675m. Import cover changes from 900/150=6 months to 675/150=4.5 months. Fixed pegs may consume finite reserves.",
+      "Резервы снижаются до $675 млн. Покрытие импорта уменьшается с 900/150=6 до 675/150=4,5 месяца. Поддержка фиксированного курса ограничена.",
+      "Zaxira $675 mln ga tushadi. Import qoplash 900/150=6 oydan 675/150=4,5 oyga kamayadi. Qat’iy kursni himoyalash chegaralangan."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-023",
+    "n": 23,
+    "d": "hard",
+    "k": "C",
+    "sec": 175,
+    "en": "A foreign parent builds and controls a new $80m factory in a host country. The factory purchases $45m of imported machinery during construction, while no other transactions occur in the simplified example. Which pair of balance-of-payments entries is directly associated with these transactions in the host country's accounts?",
+    "ru": "Иностранная материнская компания строит и контролирует новый завод стоимостью $80 млн в принимающей стране. При строительстве завод покупает импортное оборудование на $45 млн; других операций в упрощённом примере нет. Какие две записи платёжного баланса непосредственно связаны с этими операциями у принимающей страны?",
+    "uz": "Xorijiy bosh kompaniya qabul qiluvchi davlatda $80 mln yangi zavod qurib nazorat qiladi. Qurilishda zavod $45 mln import uskuna xarid qiladi; soddalashtirilgan misolda boshqa operatsiya yo‘q. Qabul qiluvchi mamlakat to‘lov balansida shu operatsiyalarning ikki asosiy yozuvi qaysi?",
+    "options_en": [
+      "Direct-investment outflow $80m; goods exports $45m",
+      "Portfolio-investment inflow $80m; services exports $45m",
+      "Direct-investment inflow $80m in the financial account; goods imports $45m in the current account",
+      "Official aid inflow $80m; secondary-income inflow $45m"
+    ],
+    "options_ru": [
+      "Отток прямых инвестиций $80 млн; экспорт товаров $45 млн",
+      "Приток портфельных инвестиций $80 млн; экспорт услуг $45 млн",
+      "Приток ПИИ $80 млн в финансовом счёте; импорт товаров $45 млн в текущем счёте",
+      "Приток помощи $80 млн; вторичные доходы $45 млн"
+    ],
+    "options_uz": [
+      "$80 mln to‘g‘ridan-to‘g‘ri investitsiya chiqimi; $45 mln tovar eksporti",
+      "$80 mln portfel investitsiya kirimi; $45 mln xizmat eksporti",
+      "Moliyaviy hisobda $80 mln PII kirimi; joriy hisobda $45 mln tovar importi",
+      "$80 mln yordam kirimi; $45 mln ikkilamchi daromad"
+    ],
+    "why": [
+      "Control and lasting participation identify FDI, recorded as a financial-account inflow (under the stated host-country presentation). Imported machinery is a goods import in the current account, not itself an aid transfer.",
+      "Контроль нового предприятия означает приток ПИИ по финансовому счёту. Купленное за границей оборудование отражается как импорт товаров по текущему счёту, не как помощь.",
+      "Nazorat qilinadigan yangi zavod PII kirimi, moliyaviy hisobga tegishli. Import uskunalar joriy hisobning tovar importi, yordam emas."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-027",
+    "n": 27,
+    "d": "hard",
+    "k": "A",
+    "sec": 175,
+    "en": "In a Lorenz-curve diagram, the total area below the line of perfect equality is 0.50. The area between that line and the Lorenz curve falls from 0.20 to 0.14 after a policy. What happens to the Gini coefficient, and what cannot be concluded from this information alone?",
+    "ru": "На диаграмме Лоренца площадь под линией абсолютного равенства равна 0,50. После реформы площадь между этой линией и кривой Лоренца снизилась с 0,20 до 0,14. Как изменился коэффициент Джини и чего нельзя заключить только по этим данным?",
+    "uz": "Lorens diagramida mutlaq tenglik chizig‘i ostidagi maydon 0,50. Islohotdan keyin shu chiziq bilan Lorens egri chizig‘i orasidagi maydon 0,20 dan 0,14 ga tushdi. Jini koeffitsienti qanday o‘zgardi va faqat shu ma’lumotdan nimani aniqlab bo‘lmaydi?",
+    "options_en": [
+      "From 0.40 to 0.28; absolute poverty change is not established",
+      "From 0.20 to 0.14; poverty necessarily disappears",
+      "From 0.40 to 0.56; inequality worsens",
+      "From 0.50 to 0.14; average income must double"
+    ],
+    "options_ru": [
+      "С 0,40 до 0,28; изменение абсолютной бедности не установлено",
+      "С 0,20 до 0,14; бедность обязательно исчезает",
+      "С 0,40 до 0,56; неравенство увеличивается",
+      "С 0,50 до 0,14; средний доход обязан удвоиться"
+    ],
+    "options_uz": [
+      "0,40 dan 0,28 ga; mutlaq kambag‘allik o‘zgarishi noma’lum",
+      "0,20 dan 0,14 ga; kambag‘allik albatta yo‘qoladi",
+      "0,40 dan 0,56 ga; tengsizlik kuchayadi",
+      "0,50 dan 0,14 ga; o‘rtacha daromad ikki baravar oshadi"
+    ],
+    "why": [
+      "Gini = area between equality line and Lorenz curve /0.50. It falls from 0.20/0.50=0.40 to 0.14/0.50=0.28. Distributional equality alone does not reveal absolute poverty.",
+      "Коэффициент Джини равен отношению площади к 0,50: 0,20/0,50=0,40, затем 0,14/0,50=0,28. Более равное распределение само по себе не показывает уровень абсолютной бедности.",
+      "Jini indeksi maydon/0,50; avval 0,20/0,50=0,40, keyin 0,14/0,50=0,28. Tenglik oshishi mutlaq kambag‘allik darajasini o‘zi ko‘rsatmaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T7-P-031",
+    "n": 31,
+    "d": "hard",
+    "k": "B",
+    "sec": 195,
+    "en": "Define the real exchange rate q=E×Pforeign/Pdomestic, where E is domestic currency per foreign currency and a higher q means real depreciation. Over one year E rises 10%, foreign prices rise 5%, and domestic prices rise 15%. Approximately what happens to q using exact index ratios?",
+    "ru": "Определим реальный курс q=E×Pвнеш/Pвнутр, где E — количество национальных единиц за иностранную, а рост q означает реальное обесценение. За год E растёт на 10%, внешние цены на 5%, внутренние на 15%. Как примерно меняется q по точным отношениям индексов?",
+    "uz": "Real kurs q=E×Pxorij/Pichki deb belgilansin, E — bir xorijiy birlik uchun mahalliy birliklar, q oshishi real qadrsizlanish. Bir yilda E 10%, xorijiy narxlar 5%, ichki narxlar 15% oshdi. Aniq indekslar bo‘yicha q taxminan qancha o‘zgaradi?",
+    "options_en": [
+      "Falls about 10%; real appreciation",
+      "Rises about 0.43%; slight real depreciation",
+      "Rises 30%; strong real depreciation",
+      "Unchanged; nominal and domestic inflation always cancel"
+    ],
+    "options_ru": [
+      "Падает примерно на 10%; реальное укрепление",
+      "Растёт примерно на 0,43%; небольшое реальное обесценение",
+      "Растёт на 30%; сильное реальное обесценение",
+      "Не меняется; номинальный курс и инфляция всегда взаимно компенсируются"
+    ],
+    "options_uz": [
+      "Taxminan 10% kamayadi; real qadrlanish",
+      "Taxminan 0,43% oshadi; kichik real qadrsizlanish",
+      "30% oshadi; kuchli real qadrsizlanish",
+      "O‘zgarmaydi; nominal kurs va ichki inflyatsiya doim qoplanadi"
+    ],
+    "why": [
+      "The real exchange-rate factor is 1.10×1.05/1.15≈1.00435, giving ≈0.43% real depreciation despite a 10% nominal depreciation.",
+      "Реальный курс меняется в 1,10×1,05/1,15≈1,00435 раза, то есть обесценивается лишь примерно на 0,43% при 10% номинального изменения.",
+      "Real kurs koeffitsienti 1,10×1,05/1,15≈1,00435. Nominal 10% qadrsizlanishga qaramay, real qadrsizlanish taxminan 0,43%."
+    ]
+  }
+]
