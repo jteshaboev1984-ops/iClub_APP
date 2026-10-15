@@ -193,7 +193,9 @@ function makeGateway(){
    return reject(404,"not_found");
   const origin="http://127.0.0.1:"+server.address().port;
   if(req.headers.origin!==origin)return reject(403,"origin_not_authorized");
-  const token=(req.headers.authorization||"").replace(/^Bearer /,"");
+  const header=req.headers.authorization||"";
+  const token=/^Bearer [A-Za-z0-9._-]{8,128}$/.test(header)?
+   header.slice(7):null;
   const user=token===OWNER_TOKEN?OWNER:token===OTHER_TOKEN?FOREIGN:null;
   if(!user)return reject(401,"authentication_required");
   if(req.headers["content-type"]!=="application/json")
