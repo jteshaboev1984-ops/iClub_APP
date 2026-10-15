@@ -37,4 +37,12 @@
 
 Реальная независимая публикация и юридические права на учебные источники не утверждены. В QA source releases остаются **синтетическими**. Реальной авторизации и выдачи Home пользователю в Supabase/Edge нет, продовая функция не изменена. Учитывая запрет на новую Supabase ветку, возможно доказать локальный PostgreSQL/HTTP/Chromium контракт, но не полную реальную интеграцию с Supabase. Статический защищённый Vercel Preview не заменяет настоящий integrated Preview. `main`, данные учеников, localStorage, Mathematics Tutor и платные вызовы не трогать.
 
-Проверка CI нового §100–§102: **результат фиксируется только после фактического полного workflow**; никаких авансовых PASS.
+[GitHub Actions #258](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38683473859) завершился **GREEN**: 635/635 Node, 14/14 PG, localhost Chromium+HTTP signed Home RU/UZ/EN, Deno, two-worker races, legacy protected-file drift. Это подтверждение **QA**, не реальной базы.
+
+## Source-integrity checkpoint
+
+Read-only `md5(pg_get_functiondef(...))` по действующим определениям:
+- `public.get_iclub_subject_access_guard_service_v1(uuid,text,text)` — `bb0c27de3665e5c6e16810044b1316a5`
+- `public.get_iclub_subscription_capabilities_service_v1(uuid)` — `58bfe7eaf0c54a8e74d50bbf79416684`
+
+При любом будущем реальном подключении оба определения нужно сверить повторно: несовпадение любого отпечатка означает STOP для новой Home/AI-функции до нового code review. Это только контроль изменения определения, **не цифровая подпись доверия к содержимому и не проверка данных клиентов**.
