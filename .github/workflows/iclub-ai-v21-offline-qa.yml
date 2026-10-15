@@ -56,6 +56,7 @@ on:
       - 'qa/ai-layer-v21-p6-home-atomic-sql.test.cjs'
       - 'qa/ai-layer-v21-p6-home-action-handoff.cjs'
       - 'qa/ai-layer-v21-p6-home-action-handoff.test.cjs'
+      - 'qa/ai-layer-v21-p6-home-action-race.cjs'
       - 'qa/sql_drafts/iclub_ai_v21_home_action_handoff_scratch_UNAPPLIED.sql'
       - 'qa/sql_drafts/iclub_ai_v21_home_atomic_delivery_READ_ONLY.sql'
       - 'qa/ai-layer-v21-p6-home-subject-labels.test.cjs'
@@ -210,6 +211,21 @@ jobs:
             -f qa/sql_drafts/iclub_ai_v21_home_http_fixture_local_pg.psql
           node qa/ai-layer-v21-p6-home-pg-chromium.cjs
           node --test qa/ai-layer-v21-p6-home-pg-http.test.cjs
+      - name: Independent one-use Home action claim race in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          db=iclub_ai_v21_scratch_ci_home_action_race
+          createdb -h 127.0.0.1 -p 5432 -U postgres "$db"
+          cleanup() { dropdb -h 127.0.0.1 -p 5432 -U postgres "$db"; }
+          trap cleanup EXIT
+          export ICLUB_PGTEST_DB="$db"
+          export ICLUB_PGTEST_HOST=127.0.0.1
+          export ICLUB_PGTEST_PORT=5432
+          psql -X -w -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 \
+            -U postgres -d "$db" \
+            -f qa/sql_drafts/iclub_ai_v21_home_http_fixture_local_pg.psql
+          node qa/ai-layer-v21-p6-home-action-race.cjs
       - name: Real two-worker durable delivery race in another empty scratch DB
         shell: bash
         run: |
