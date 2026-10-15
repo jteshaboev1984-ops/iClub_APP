@@ -69,33 +69,33 @@
     "ref": "EC9708:G2:EC9708-G2-T5-P-053",
     "n": 53,
     "d": "hard",
-    "k": "A",
+    "k": "C",
     "sec": 190,
-    "en": "A city labels 100 factories 'green' and gives each a $1,000 subsidy without measuring emissions. An independent audit estimates that only 15 recipients reduced emissions because of the programme; 55 had already complied and 30 made no improvement. What subsidy spending is incurred per additional improving factory, excluding administration?",
-    "ru": "Город присвоил 100 заводам статус «экологичный» и выплатил каждому субсидию $1 000, не измеряя выбросы. Независимый аудит обнаружил, что лишь 15 получателей сократили выбросы благодаря программе; 55 соответствовали требованиям ранее, 30 ничего не улучшили. Каковы субсидийные расходы на один дополнительно улучшивший завод без учёта администрирования?",
-    "uz": "Shahar chiqindini o‘lchamasdan 100 zavodga «yashil» belgisini berib, har biriga $1000 subsidiya to‘ladi. Mustaqil audit faqat 15 ta zavod dastur sabab chiqindini kamaytirganini, 55 tasi oldindan mos bo‘lganini, 30 tasi yaxshilanmaganini ko‘rsatdi. Boshqaruvdan tashqari har bir qo‘shimcha yaxshilangan zavodga subsidiya xarajati qancha?",
+    "en": "A green-subsidy scheme pays each factory $500 on receiving a compliance certificate. A factory can genuinely comply at a cost of $600 or submit a false certificate without that cost. False claims are detected independently with probability 30% and incur a fine F, with no other consequences. Since both strategies receive the same $500 grant, what is the minimum fine that makes genuine compliance at least as profitable as a false claim?",
+    "ru": "Экологическая программа выдаёт заводу субсидию $500 после получения сертификата. Завод может реально выполнить требования за $600 или подать ложный сертификат без этих затрат. Обман независимо обнаруживается с вероятностью 30% и влечёт штраф F; других последствий нет. Поскольку оба варианта дают одинаковую субсидию $500, какой минимальный штраф сделает соблюдение не менее выгодным, чем обман?",
+    "uz": "Ekologik dastur sertifikat olgan zavodga $500 subsidiya beradi. Zavod talablarni haqiqatan bajarish uchun $600 sarflashi yoki bu xarajatsiz soxta sertifikat berishi mumkin. Soxtalik 30% ehtimol bilan aniqlanib F jarima solinadi, boshqa oqibat yo‘q. Ikkala yo‘l ham bir xil $500 subsidiya olsa, haqiqiy rioya qilishni soxtalikdan kam bo‘lmagan foydali qilish uchun eng kam jarima qancha?",
     "options_en": [
-      "Approximately $6,667",
-      "$1,000",
-      "$1,818",
-      "$100,000"
+      "$600",
+      "$1,500",
+      "$2,000",
+      "$3,000"
     ],
     "options_ru": [
-      "Примерно $6 667",
-      "$1 000",
-      "$1 818",
-      "$100 000"
+      "$600",
+      "$1 500",
+      "$2 000",
+      "$3 000"
     ],
     "options_uz": [
-      "Taxminan $6667",
-      "$1000",
-      "$1818",
-      "$100 000"
+      "$600",
+      "$1500",
+      "$2000",
+      "$3000"
     ],
     "why": [
-      "Total subsidy spending is 100×$1,000=$100,000 and there are 15 additional improvements. $100,000/15≈$6,667 per improvement, showing weak targeting and verification.",
-      "Расходы 100×$1 000=$100 000, дополнительных улучшений лишь 15. $100 000/15≈$6 667 на улучшение — признак слабой адресности и контроля.",
-      "Jami subsidiya 100×$1000=$100 000, qo‘shimcha yaxshilanish 15 ta. $100 000/15≈$6667, manzilli tanlov va tekshiruv zaif."
+      "Compliance has additional private cost $600. False claiming has expected penalty 0.30×F. For compliance to be no worse, 0.30F≥600, so F≥$2,000. The $500 grant cancels because both strategies receive it.",
+      "Соблюдение дополнительно стоит $600, ложная заявка несёт ожидаемый штраф 0,30×F. Для сопоставимости 0,30F≥600, следовательно F≥$2 000. Субсидия $500 одинакова для двух вариантов и сокращается.",
+      "Haqiqiy rioya qilishning qo‘shimcha xarajati $600, soxta arizaning kutilgan jarimasi 0,30×F. 0,30F≥600 bo‘lsa, F≥$2000. $500 grant ikkala yo‘lda bir xil bo‘lgani uchun qisqaradi."
     ]
   },
   {
