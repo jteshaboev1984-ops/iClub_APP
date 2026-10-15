@@ -104,6 +104,33 @@ async function validateBeforeHomeDelivery(s,{userId,contextHandle,locale,plan,ch
   if(!equal(scan,finalScan)||!equal(screen,finalScreen)||
    !integer(finish)||finish<now||finish>=plan.expiresAtMs||
    finish>=screen.expiresAtMs)return blocked();
+  // A source can be revoked while an earlier await resolves a valid value.
+  // Repeat ALL three independently trusted checks after the screen/scan
+  // barrier, then inspect the complete owner screen+scan one final time.
+  // This is a bounded QA recheck, NOT a serializable live DB transaction.
+  for(const a of plan.actions){
+   const v=rows.get(a.actionId),intent=INTENT[a.actionCode];
+   const access=await s.verifySubjectAccess(userId,a.subjectKey,intent);
+   if(!accessApproved(access,userId,a.subjectKey,intent))return blocked();
+   const evidence=await s.verifyAcademicEvidence(userId,v);
+   if(evidence?.allowed!==true||evidence.evidenceId!==v.evidenceId||
+      evidence.evidenceRevision!==a.evidenceRevision||
+      evidence.evidenceHash!==a.evidenceHash||
+      evidence.subjectKey!==a.subjectKey||
+      evidence.actionCode!==a.actionCode)return blocked();
+   const release=await s.readEditorialRelease(locale,a.actionCode,a.subjectKey);
+   if(release?.ready!==true||release.rightsApproved!==true||
+      release.contentApproved!==true||release.sourceConflict!==false||
+      release.sourceHash!==a.sourceHash||
+      release.sourceVersion!==a.sourceVersion)return blocked();
+  }
+  const closingScan=await s.readServerScan(userId,contextHandle);
+  const closingScreen=await s.readCurrentScreen(userId,contextHandle);
+  const closingTime=s.nowMs();
+  if(!equal(scan,closingScan)||!equal(screen,closingScreen)||
+     !integer(closingTime)||closingTime<finish||
+     closingTime>=plan.expiresAtMs||closingTime>=screen.expiresAtMs)
+   return blocked();
   const result={ready:true,reviewOnly:true,releaseAllowed:false,
     expiresAtMs:plan.expiresAtMs,status:choice.status};
   if(only){result.actionCode=choice.actionCode;result.subjectKey=choice.subjectKey;}
