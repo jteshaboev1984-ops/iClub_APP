@@ -90,6 +90,9 @@ on:
       - 'qa/ai-layer-v21-p9-auth-constraints-readonly.json'
       - 'qa/ai-layer-v21-p9-live-constraints-metadata.test.cjs'
       - 'qa/ai-layer-v21-p9-schema-compat.test.cjs'
+      - 'qa/ai-layer-v21-app-look-preview/**'
+      - 'qa/ai-layer-v21-app-look-preview.test.cjs'
+      - 'qa/ai-layer-v21-app-look-browser.cjs'
       - 'qa/sql_drafts/iclub_ai_v21_commercial_pg_proc_READ_ONLY.sql'
       - 'qa/sql_drafts/iclub_ai_v21_commercial_contract_fixture_local_pg.psql'
       - 'qa/ai-layer-v21-p6-nav-approved-locale.cjs'
@@ -186,6 +189,18 @@ jobs:
         run: node qa/ai-layer-v21-p6-nav-a11y-browser.cjs
       - name: Synthetic Preview real Chromium practice to iClub AI journey
         run: node qa/ai-layer-v21-protected-preview-browser.cjs
+      - name: Exact APP look visual acceptance in Chromium at 320 390 and 1366
+        env:
+          ICLUB_VISUAL_ARTIFACT_DIR: /tmp/iclub-ai-v21-app-look-screenshots
+        run: node qa/ai-layer-v21-app-look-browser.cjs
+      - name: Upload iClub visual approval screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iclub-ai-v21-app-look-review-screenshots
+          path: /tmp/iclub-ai-v21-app-look-screenshots/*.png
+          if-no-files-found: warn
+          retention-days: 5
       - name: Install Deno runtime for Edge candidate verification
         uses: denoland/setup-deno@v2
         with:
