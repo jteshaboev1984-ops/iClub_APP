@@ -52,6 +52,8 @@ ALTER TABLE public.users ADD COLUMN login text;
 ALTER TABLE public.users ADD COLUMN auth_email text;
 ALTER TABLE public.users ADD COLUMN must_change_password boolean NOT NULL;
 ALTER TABLE public.users ADD COLUMN auth_migrated_at timestamptz;
+-- Existing minimal fixture is nullable; production metadata requires NOT NULL.
+ALTER TABLE public.tours ALTER COLUMN is_active SET NOT NULL;
 DO $check_89$
 DECLARE c record; kind text; required boolean; found_count int:=0;
 BEGIN
