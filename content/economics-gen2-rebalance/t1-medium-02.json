@@ -1,0 +1,413 @@
+[
+  {
+    "n": 31,
+    "d": "medium",
+    "sec": 140,
+    "k": "C",
+    "en": "An economy observes that income rises by 8% and demand for product A rises by 12%, while demand for product B falls by 4%. Other factors do not change. Which pair gives the income elasticities for A and B?",
+    "ru": "Доходы растут на 8%; спрос на товар A увеличивается на 12%, а спрос на товар B падает на 4%. Прочие условия неизменны. Какие значения эластичности спроса по доходу у товаров A и B?",
+    "uz": "Daromad 8% ga oshadi; A mahsulotga talab 12% ga oshadi, B mahsulotga talab 4% ga kamayadi. Boshqa omillar o‘zgarmaydi. A va B ning daromad elastikliklari qanday?",
+    "opts": [
+      "A = +0.67; B = −2.0",
+      "A = +1.5; B = +0.5",
+      "A = +1.5; B = −0.5",
+      "A = −1.5; B = +0.5"
+    ],
+    "why": [
+      "YED(A) = +12%/+8% = +1.5; YED(B) = −4%/+8% = −0.5.",
+      "YED(A) = +12%/+8% = +1,5; YED(B) = −4%/+8% = −0,5.",
+      "YED(A) = +12%/+8% = +1,5; YED(B) = −4%/+8% = −0,5."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-031",
+    "options_en": [
+      "A = +0.67; B = −2.0",
+      "A = +1.5; B = +0.5",
+      "A = +1.5; B = −0.5",
+      "A = −1.5; B = +0.5"
+    ],
+    "options_ru": [
+      "A = +0.67; B = −2.0",
+      "A = +1.5; B = +0.5",
+      "A = +1.5; B = −0.5",
+      "A = −1.5; B = +0.5"
+    ],
+    "options_uz": [
+      "A = +0.67; B = −2.0",
+      "A = +1.5; B = +0.5",
+      "A = +1.5; B = −0.5",
+      "A = −1.5; B = +0.5"
+    ]
+  },
+  {
+    "n": 32,
+    "d": "medium",
+    "sec": 135,
+    "k": "A",
+    "en": "A bakery buys an automated kneading machine and trains its workers to maintain the machine. Which pair classifies the immediate investments?",
+    "ru": "Пекарня покупает автоматическую тестомесильную машину и обучает работников её обслуживать. Какая пара правильно классифицирует эти вложения?",
+    "uz": "Nonvoyxona avtomatik xamir qorish mashinasini sotib oladi va xodimlarini uni boshqarishga o‘rgatadi. Ikkala investitsiya qanday tasniflanadi?",
+    "opt_en": [
+      "Machine: physical capital; training: human capital",
+      "Machine: natural capital; training: physical capital",
+      "Machine: enterprise; training: land",
+      "Machine: labour; training: natural resource"
+    ],
+    "opt_ru": [
+      "Машина — физический капитал; обучение — человеческий капитал",
+      "Машина — природный капитал; обучение — физический капитал",
+      "Машина — предпринимательство; обучение — земля",
+      "Машина — труд; обучение — природный ресурс"
+    ],
+    "opt_uz": [
+      "Mashina — jismoniy kapital; o‘qitish — inson kapitali",
+      "Mashina — tabiiy kapital; o‘qitish — jismoniy kapital",
+      "Mashina — tadbirkorlik; o‘qitish — yer",
+      "Mashina — mehnat; o‘qitish — tabiiy resurs"
+    ],
+    "why": [
+      "Equipment is physical capital; acquiring worker skills creates human capital.",
+      "Оборудование — физический капитал, повышение навыков работников — человеческий капитал.",
+      "Uskuna jismoniy kapital, xodimlar malakasining oshishi esa inson kapitalidir."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-032",
+    "options_en": [
+      "Machine: physical capital; training: human capital",
+      "Machine: natural capital; training: physical capital",
+      "Machine: enterprise; training: land",
+      "Machine: labour; training: natural resource"
+    ],
+    "options_ru": [
+      "Машина — физический капитал; обучение — человеческий капитал",
+      "Машина — природный капитал; обучение — физический капитал",
+      "Машина — предпринимательство; обучение — земля",
+      "Машина — труд; обучение — природный ресурс"
+    ],
+    "options_uz": [
+      "Mashina — jismoniy kapital; o‘qitish — inson kapitali",
+      "Mashina — tabiiy kapital; o‘qitish — jismoniy kapital",
+      "Mashina — tadbirkorlik; o‘qitish — yer",
+      "Mashina — mehnat; o‘qitish — tabiiy resurs"
+    ]
+  },
+  {
+    "n": 34,
+    "d": "medium",
+    "sec": 135,
+    "k": "D",
+    "en": "A city has $6 million to spend. It can finance a flood barrier costing $6 million or two playgrounds costing $3 million each. If it chooses the barrier, what is the opportunity cost expressed as the best forgone feasible alternative?",
+    "ru": "У города есть $6 млн. Он может построить защитную дамбу за $6 млн либо две игровые площадки по $3 млн. Если город выбирает дамбу, какова альтернативная стоимость в терминах лучшего отвергнутого доступного варианта?",
+    "uz": "Shaharda $6 mln bor. U $6 mln lik toshqin to‘sig‘ini yoki har biri $3 mln dan ikkita o‘yin maydonchasini moliyalashtira oladi. To‘siq tanlansa, eng yaxshi voz kechilgan amalga oshirilishi mumkin bo‘lgan muqobil nima?",
+    "opt_en": [
+      "The money spent on the barrier, counted twice",
+      "One playground, because any public choice has only one unit of opportunity cost",
+      "No opportunity cost, because the city owns the budget",
+      "Two playgrounds, assuming that is the best alternative use"
+    ],
+    "opt_ru": [
+      "Деньги на дамбу, учтённые дважды",
+      "Одна площадка, поскольку альтернативная стоимость любого выбора равна одному объекту",
+      "Нулевая стоимость, поскольку бюджет уже принадлежит городу",
+      "Две площадки, если это лучшее альтернативное использование бюджета"
+    ],
+    "opt_uz": [
+      "To‘siqqa ketgan pulni ikki marta hisoblash",
+      "Bitta maydoncha, chunki har qanday qarorning muqobil qiymati bitta obyekt",
+      "Muqobil qiymat yo‘q, chunki budjet shaharga tegishli",
+      "Ikki maydoncha, agar bu eng yaxshi muqobil foydalanish bo‘lsa"
+    ],
+    "why": [
+      "Opportunity cost is the highest-valued forgone feasible alternative, here the two playgrounds financed with the same budget.",
+      "Альтернативная стоимость — лучший отвергнутый допустимый вариант; здесь две площадки за те же $6 млн.",
+      "Muqobil qiymat — voz kechilgan eng yaxshi amalga oshiriladigan variant; bu yerda bir xil budjetga ikkita maydoncha."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-034",
+    "options_en": [
+      "The money spent on the barrier, counted twice",
+      "One playground, because any public choice has only one unit of opportunity cost",
+      "No opportunity cost, because the city owns the budget",
+      "Two playgrounds, assuming that is the best alternative use"
+    ],
+    "options_ru": [
+      "Деньги на дамбу, учтённые дважды",
+      "Одна площадка, поскольку альтернативная стоимость любого выбора равна одному объекту",
+      "Нулевая стоимость, поскольку бюджет уже принадлежит городу",
+      "Две площадки, если это лучшее альтернативное использование бюджета"
+    ],
+    "options_uz": [
+      "To‘siqqa ketgan pulni ikki marta hisoblash",
+      "Bitta maydoncha, chunki har qanday qarorning muqobil qiymati bitta obyekt",
+      "Muqobil qiymat yo‘q, chunki budjet shaharga tegishli",
+      "Ikki maydoncha, agar bu eng yaxshi muqobil foydalanish bo‘lsa"
+    ]
+  },
+  {
+    "n": 35,
+    "d": "medium",
+    "sec": 135,
+    "k": "C",
+    "en": "Natural sunlight is freely available in a village, but purified bottled water must be produced, packaged and delivered using scarce resources. What is the most accurate classification in this setting?",
+    "ru": "Солнечный свет в деревне доступен без ограничений, а очищенную питьевую воду нужно производить, разливать и доставлять с использованием ограниченных ресурсов. Какова наиболее точная классификация в этой ситуации?",
+    "uz": "Qishloqda quyosh nuri erkin mavjud, ammo tozalangan ichimlik suvini ishlab chiqarish, qadoqlash va yetkazish uchun tanqis resurslar kerak. Ushbu sharoitda eng to‘g‘ri tasnif qaysi?",
+    "opt_en": [
+      "Both are free goods because neither is manufactured by consumers.",
+      "Bottled water is a free good because water is a natural substance.",
+      "Sunlight is free in this setting; delivered bottled water is an economic good.",
+      "Sunlight is an economic good only if the temperature rises."
+    ],
+    "opt_ru": [
+      "Оба являются свободными благами, потому что потребители их не производят.",
+      "Бутилированная вода — свободное благо, поскольку вода природного происхождения.",
+      "Солнечный свет здесь — свободное благо, доставленная вода — экономическое благо.",
+      "Солнечный свет становится экономическим благом только при повышении температуры."
+    ],
+    "opt_uz": [
+      "Ikkalasi erkin ne’mat, chunki iste’molchilar ularni yaratmagan.",
+      "Shisha suv erkin ne’mat, chunki suv tabiiy modda.",
+      "Quyosh nuri bu sharoitda erkin, yetkazilgan ichimlik suvi esa iqtisodiy ne’mat.",
+      "Quyosh nuri faqat harorat oshganda iqtisodiy ne’mat bo‘ladi."
+    ],
+    "why": [
+      "The relevant difference is scarcity and opportunity cost of resources used, not whether the substance exists naturally.",
+      "Ключевой критерий — ограниченность и альтернативная стоимость используемых ресурсов, а не природное происхождение вещества.",
+      "Asosiy mezon resurs tanqisligi va muqobil qiymati; moddaning tabiiy kelib chiqishi emas."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-035",
+    "options_en": [
+      "Both are free goods because neither is manufactured by consumers.",
+      "Bottled water is a free good because water is a natural substance.",
+      "Sunlight is free in this setting; delivered bottled water is an economic good.",
+      "Sunlight is an economic good only if the temperature rises."
+    ],
+    "options_ru": [
+      "Оба являются свободными благами, потому что потребители их не производят.",
+      "Бутилированная вода — свободное благо, поскольку вода природного происхождения.",
+      "Солнечный свет здесь — свободное благо, доставленная вода — экономическое благо.",
+      "Солнечный свет становится экономическим благом только при повышении температуры."
+    ],
+    "options_uz": [
+      "Ikkalasi erkin ne’mat, chunki iste’molchilar ularni yaratmagan.",
+      "Shisha suv erkin ne’mat, chunki suv tabiiy modda.",
+      "Quyosh nuri bu sharoitda erkin, yetkazilgan ichimlik suvi esa iqtisodiy ne’mat.",
+      "Quyosh nuri faqat harorat oshganda iqtisodiy ne’mat bo‘ladi."
+    ]
+  },
+  {
+    "n": 38,
+    "d": "medium",
+    "sec": 160,
+    "k": "B",
+    "en": "A bakery can use labour-intensive production with fixed costs of $100 and variable costs of $4 per loaf, or automation with fixed costs of $320 and variable costs of $2 per loaf. At planned output of 200 loaves, which method has lower total cost and by how much?",
+    "ru": "Пекарня может использовать трудоёмкий способ с постоянными затратами $100 и переменными $4 на буханку либо автоматизацию с постоянными затратами $320 и переменными $2 на буханку. При выпуске 200 буханок какой способ дешевле и на сколько?",
+    "uz": "Nonvoyxona ko‘p mehnat talab qiladigan usulda doimiy xarajat $100, har non uchun o‘zgaruvchi xarajat $4 yoki avtomatlashtirishda doimiy xarajat $320, har non uchun $2 xarajat qiladi. 200 ta non ishlab chiqarishda qaysi usul arzonroq va qancha?",
+    "opt_en": [
+      "Labour-intensive, by $180",
+      "Automation, by $180",
+      "Automation, by $220",
+      "Labour-intensive, by $220"
+    ],
+    "opt_ru": [
+      "Трудоёмкий, на $180",
+      "Автоматизация, на $180",
+      "Автоматизация, на $220",
+      "Трудоёмкий, на $220"
+    ],
+    "opt_uz": [
+      "Mehnat ko‘p talab qiladigan usul, $180 ga",
+      "Avtomatlashtirish, $180 ga",
+      "Avtomatlashtirish, $220 ga",
+      "Mehnat ko‘p talab qiladigan usul, $220 ga"
+    ],
+    "why": [
+      "Labour-intensive cost: $100 + 200×$4 = $900. Automation: $320 + 200×$2 = $720. Automation saves $180.",
+      "Трудоёмкий способ: $100 + 200×$4 = $900. Автоматизация: $320 + 200×$2 = $720. Экономия $180.",
+      "Mehnat usuli: $100 + 200×$4 = $900. Avtomatlashtirish: $320 + 200×$2 = $720. Tejash $180."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-038",
+    "options_en": [
+      "Labour-intensive, by $180",
+      "Automation, by $180",
+      "Automation, by $220",
+      "Labour-intensive, by $220"
+    ],
+    "options_ru": [
+      "Трудоёмкий, на $180",
+      "Автоматизация, на $180",
+      "Автоматизация, на $220",
+      "Трудоёмкий, на $220"
+    ],
+    "options_uz": [
+      "Mehnat ko‘p talab qiladigan usul, $180 ga",
+      "Avtomatlashtirish, $180 ga",
+      "Avtomatlashtirish, $220 ga",
+      "Mehnat ko‘p talab qiladigan usul, $220 ga"
+    ]
+  },
+  {
+    "n": 41,
+    "d": "medium",
+    "sec": 135,
+    "k": "A",
+    "en": "Before specialisation, three workers each make 12 units per day. After dividing tasks, total daily output rises to 42 units with the same staff and working hours. Approximately how much has output per worker increased in percentage terms?",
+    "ru": "До специализации три работника выпускают по 12 изделий в день. После разделения труда суммарный дневной выпуск при том же штате и времени вырос до 42 изделий. На сколько примерно процентов вырос выпуск на работника?",
+    "uz": "Ixtisoslashuvdan oldin uch ishchining har biri kuniga 12 tadan mahsulot tayyorlaydi. Vazifalar bo‘lingach, shu ishchilar va ish vaqtida jami ishlab chiqarish 42 taga yetdi. Bir ishchiga to‘g‘ri keladigan ishlab chiqarish taxminan necha foiz oshdi?",
+    "opts": [
+      "16.7%",
+      "14.0%",
+      "42.0%",
+      "6.0%"
+    ],
+    "why": [
+      "Output per worker rises from 12 to 42/3 = 14, an increase of 2/12 ≈ 16.7%.",
+      "Выпуск на работника вырос с 12 до 42/3 = 14: прирост 2/12 ≈ 16,7%.",
+      "Bir ishchiga ishlab chiqarish 12 tadan 42/3 = 14 taga oshdi: 2/12 ≈ 16,7%."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-041",
+    "options_en": [
+      "16.7%",
+      "14.0%",
+      "42.0%",
+      "6.0%"
+    ],
+    "options_ru": [
+      "16.7%",
+      "14.0%",
+      "42.0%",
+      "6.0%"
+    ],
+    "options_uz": [
+      "16.7%",
+      "14.0%",
+      "42.0%",
+      "6.0%"
+    ]
+  },
+  {
+    "n": 43,
+    "d": "medium",
+    "sec": 130,
+    "k": "D",
+    "en": "A tidal power station uses coastal currents, purchased turbines and trained engineers. Which classification correctly identifies two distinct inputs?",
+    "ru": "Приливная электростанция использует морские течения, купленные турбины и подготовленных инженеров. Какая классификация верно определяет два разных ресурса?",
+    "uz": "Suv ko‘tarilishidan elektr oluvchi stansiya dengiz oqimlari, sotib olingan turbinalar va malakali muhandislardan foydalanadi. Qaysi tasnif ikkita turli resursni to‘g‘ri aniqlaydi?",
+    "opt_en": [
+      "Currents—capital; turbines—land",
+      "Currents—labour; engineers—land",
+      "Turbines—enterprise; engineers—land",
+      "Currents—land; turbines—physical capital"
+    ],
+    "opt_ru": [
+      "Течения — капитал; турбины — земля",
+      "Течения — труд; инженеры — земля",
+      "Турбины — предпринимательство; инженеры — земля",
+      "Течения — земля; турбины — физический капитал"
+    ],
+    "opt_uz": [
+      "Oqimlar — kapital; turbinalar — yer",
+      "Oqimlar — mehnat; muhandislar — yer",
+      "Turbinalar — tadbirkorlik; muhandislar — yer",
+      "Oqimlar — yer; turbinalar — jismoniy kapital"
+    ],
+    "why": [
+      "Natural currents are land/natural resources; man-made turbines are physical capital.",
+      "Природные течения — фактор «земля», созданные человеком турбины — физический капитал.",
+      "Tabiiy oqimlar yer/tabiiy resurslar, inson yaratgan turbinalar jismoniy kapital."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-043",
+    "options_en": [
+      "Currents—capital; turbines—land",
+      "Currents—labour; engineers—land",
+      "Turbines—enterprise; engineers—land",
+      "Currents—land; turbines—physical capital"
+    ],
+    "options_ru": [
+      "Течения — капитал; турбины — земля",
+      "Течения — труд; инженеры — земля",
+      "Турбины — предпринимательство; инженеры — земля",
+      "Течения — земля; турбины — физический капитал"
+    ],
+    "options_uz": [
+      "Oqimlar — kapital; turbinalar — yer",
+      "Oqimlar — mehnat; muhandislar — yer",
+      "Turbinalar — tadbirkorlik; muhandislar — yer",
+      "Oqimlar — yer; turbinalar — jismoniy kapital"
+    ]
+  },
+  {
+    "n": 45,
+    "d": "medium",
+    "sec": 150,
+    "k": "C",
+    "en": "An economy has a straight-line PPC between 80 tonnes of rice and zero cloth, and zero rice and 40 rolls of cloth. If it raises cloth production from 20 to 30 rolls while staying on the PPC, how many tonnes of rice must it give up?",
+    "ru": "Линейная КПВ проходит через 80 тонн риса и 0 рулонов ткани, а также через 0 риса и 40 рулонов ткани. Если производство ткани вырастет с 20 до 30 рулонов при движении по КПВ, от скольких тонн риса придётся отказаться?",
+    "uz": "Iqtisodiyotning chiziqli IIECsida 80 tonna guruch va 0 o‘ram mato hamda 0 guruch va 40 o‘ram mato nuqtalari bor. IIEC bo‘ylab mato ishlab chiqarish 20 dan 30 o‘ramga oshsa, necha tonna guruchdan voz kechiladi?",
+    "opts": [
+      "10",
+      "40",
+      "20",
+      "5"
+    ],
+    "why": [
+      "Each extra cloth roll costs 80/40 = 2 tonnes of rice; 10 extra rolls cost 20 tonnes.",
+      "Каждый дополнительный рулон ткани стоит 80/40 = 2 тонны риса; 10 рулонов требуют отказаться от 20 тонн.",
+      "Har qo‘shimcha mato o‘rami 80/40 = 2 tonna guruch turadi; 10 o‘ram uchun 20 tonna guruchdan voz kechiladi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-045",
+    "options_en": [
+      "10",
+      "40",
+      "20",
+      "5"
+    ],
+    "options_ru": [
+      "10",
+      "40",
+      "20",
+      "5"
+    ],
+    "options_uz": [
+      "10",
+      "40",
+      "20",
+      "5"
+    ]
+  },
+  {
+    "n": 50,
+    "d": "medium",
+    "sec": 120,
+    "k": "B",
+    "en": "Five scarce parking spaces are auctioned at one uniform price of $70 per space. Six drivers each want no more than one and are willing to pay $100, $90, $80, $70, $60 and $50 respectively. What is quantity demanded at this price?",
+    "ru": "Пять парковочных мест продаются по единой цене $70 за место. Шесть водителей хотят не более одного места и готовы заплатить $100, $90, $80, $70, $60 и $50 соответственно. Каков объём спроса при этой цене?",
+    "uz": "Beshta avtoturargoh joyi bitta joy uchun $70 yagona narxda sotiladi. Olti haydovchi ko‘pi bilan bittadan joy xohlaydi va mos ravishda $100, $90, $80, $70, $60, $50 to‘lashga tayyor. Shu narxda talab miqdori nechta?",
+    "opts": [
+      "5",
+      "4",
+      "6",
+      "3"
+    ],
+    "why": [
+      "The first four valuations meet or exceed $70. Thus four spaces are demanded at this price, even though five are available.",
+      "Первые четыре оценки не ниже $70. Значит, при этой цене спрос равен четырём местам, хотя доступно пять.",
+      "Dastlabki to‘rtta baho $70 dan kam emas. Shuning uchun 5 ta joy bo‘lsa ham, talab 4 ta joyga teng."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-050",
+    "options_en": [
+      "5",
+      "4",
+      "6",
+      "3"
+    ],
+    "options_ru": [
+      "5",
+      "4",
+      "6",
+      "3"
+    ],
+    "options_uz": [
+      "5",
+      "4",
+      "6",
+      "3"
+    ]
+  }
+]
