@@ -53,6 +53,8 @@ on:
       - 'qa/ai-layer-v21-p6-home-signed-server-bridge.test.cjs'
       - 'qa/ai-layer-v21-p6-home-delivery-gate.cjs'
       - 'qa/ai-layer-v21-p6-home-delivery-gate.test.cjs'
+      - 'qa/ai-layer-v21-p6-home-atomic-sql.test.cjs'
+      - 'qa/sql_drafts/iclub_ai_v21_home_atomic_delivery_READ_ONLY.sql'
       - 'qa/ai-layer-v21-p6-home-subject-labels.test.cjs'
       - 'qa/ai-layer-v21-p6-commercial-contract-adapter.cjs'
       - 'qa/ai-layer-v21-p6-commercial-contract-adapter.test.cjs'
