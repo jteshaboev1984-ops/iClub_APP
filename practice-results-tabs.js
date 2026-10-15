@@ -98,28 +98,30 @@
     const locale=['ru','uz','en'].includes(language)?language:lang();
     const c=HISTORY_COPY[locale];
     holder.replaceChildren();
-    const heading=node('div','iclub-topic-history-header');
-    heading.append(node('strong','',compact
-      ? (locale==='uz'?'Amaliyot tarixi':locale==='en'?'Practice history':'История практики')
-      : (locale==='uz'?'So‘nggi urinishlar':locale==='en'?'Recent attempts':'Последние попытки')));
-    if(compact && data?.ok===true){
-      const link=node('button','iclub-sx-history-link',locale==='uz'?'Oxirgi urinishlar':locale==='en'?'Recent attempts':'Последние попытки');
-      link.type='button';
-      link.addEventListener('click',()=>window.dispatchEvent(new CustomEvent('iclub-practice-open-history-list',{
-        detail:{subjectKey:String(data.subject_key||'')}
-      })));
-      heading.append(link);
+    // The standalone History screen already has its own title and subtitle.
+    // Do not repeat them inside the list. The compact preview gets one heading.
+    if(compact){
+      const heading=node('div','iclub-topic-history-header');
+      heading.append(node('strong','',locale==='uz'?'Amaliyot tarixi':
+        locale==='en'?'Practice history':'История практики'));
+      const count=Math.max(0,Math.trunc(Number(data?.completed_sessions)||0));
+      if(data?.ok===true&&count>2){
+        const link=node('button','iclub-sx-history-link',
+          locale==='uz'?'Yana ko‘rish':locale==='en'?'Show more':'Показать ещё');
+        link.type='button';
+        link.addEventListener('click',()=>window.dispatchEvent(
+          new CustomEvent('iclub-practice-open-history-list',{
+            detail:{subjectKey:String(data.subject_key||'')}
+          })));
+        heading.append(link);
+      }
+      holder.append(heading);
     }
-    holder.append(heading);
     if(unavailable||!data||data.ok!==true){
       holder.append(node('div','iclub-topic-history-empty',c.error));
       return false;
     }
     const count=Math.max(0,Math.trunc(Number(data.completed_sessions)||0));
-    const attemptNoun=locale==='ru'?
-      (count%10===1&&count%100!==11?'попытка':count%10>=2&&count%10<=4&&!(count%100>=12&&count%100<=14)?'попытки':'попыток'):
-      locale==='uz'?'ta urinish':count===1?'attempt':'attempts';
-    heading.append(node('span','iclub-topic-history-count',count+' '+attemptNoun));
     if(!count){
       holder.append(node('div','iclub-topic-history-empty',c.empty));
       return true;
@@ -209,7 +211,6 @@
     metrics.append(left,emblem);panel.append(metrics);
     const chips=node('div','iclub-sx-attempt-chips');
     chips.append(node('span','iclub-sx-attempt-chip'+(mistakes?' bad':' good'),mistakes+' '+errorsNoun(mistakes)));
-    chips.append(node('span','iclub-sx-attempt-chip',tr('Исходный результат','Dastlabki natija','Original result')));
     panel.append(chips);
 
     const saved=Array.isArray(attempt.review)?attempt.review:[];
@@ -245,8 +246,6 @@
     heading.append(node('h3','',mistakes
       ?tr('Разбор ошибок','Xatolar tahlili','Mistake review')
       :tr('Разбор попытки','Urinish tahlili','Attempt review')));
-    heading.append(node('span','iclub-sx-attempt-count',
-      mistakes+' '+tr('из','tadan','of')+' '+total));
     body.append(heading);
     if(!mistakes){
       body.append(node('div','iclub-sx-attempt-empty',
@@ -288,7 +287,9 @@
       summary.append(chevron);
       card.append(summary);
       const detail=node('div','iclub-sx-attempt-question-body');
-      detail.append(node('p','iclub-sx-attempt-question-full',stem||tr('Вопрос','Savol','Question')));
+      // The collapsed summary already contains the question. Repeat the full
+      // version only when it is long enough to be truncated there.
+      if(stem.length>90)detail.append(node('p','iclub-sx-attempt-question-full',stem));
       const wrong=node('div','iclub-sx-attempt-answer bad');
       wrong.append(node('strong','',tr('ВАШ ОТВЕТ','SIZNING JAVOBINGIZ','YOUR ANSWER')));
       wrong.append(node('div','',answer(d.user_answer)));
