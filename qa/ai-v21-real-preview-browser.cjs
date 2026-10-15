@@ -101,6 +101,9 @@ async function main(){
       "symbol:document.querySelector('#iclub-global-ai-mark')?.textContent?.trim(),"+
       "profile:JSON.parse(localStorage.getItem('iclub_profile_v1')||'{}')?.full_name"+
       "})");
+    assert.equal(await client.evaluate(
+      "document.querySelector('meta[http-equiv=\"Content-Security-Policy\"]')?.getAttribute('content')?.includes(\"connect-src 'none'\")"),
+      true,"No-network CSP must be active even on local static servers");
     assert.equal(identity.qa,true,JSON.stringify(identity));
     assert.equal(identity.screen,"home");
     assert.equal(identity.engine,true);
@@ -166,7 +169,8 @@ async function main(){
       await client.evaluate("document.querySelector('[data-global-ai-close]')?.click();true");
     }
     const outside=client.network.filter(r=>/^https?:\/\//.test(r.url)&&!r.url.startsWith(base));
-    assert.equal(outside.length,0,"No external network responses in Preview");
+    assert.deepEqual(outside,[],"No external network responses in Preview: "+
+      JSON.stringify(outside));
     process.stdout.write("ICLUB_REAL_APP_PREVIEW_BROWSER_GREEN "+
       JSON.stringify({viewports:3,realTab:true,blackouts:2,
         externalResponses:outside.length,exceptionsObserved:client.exceptions.length})+"\n");
