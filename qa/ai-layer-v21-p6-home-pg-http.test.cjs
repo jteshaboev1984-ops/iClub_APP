@@ -124,6 +124,50 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
    "SET rights_approved=true WHERE locale='ru' "+
    "AND action_code='continue_enrolled_subject' AND subject_key='biology'");
   a.equal((await send()).status,200,"Synthetic source restored in scratch only");
+  // Deterministic TOCTOU: revoke AFTER the signed planner and approved
+  // category have already completed, but BEFORE HTTP response. Only the
+  // fresh pre-delivery gate can catch these updates in disposable PG.
+  async function revokeBetweenChoiceAndDelivery(updateSql,restoreSql,reason){
+   const injected=makeGateway({beforeDelivery:async()=>{scratchSql(updateSql);}});
+   await new Promise(done=>injected.server.listen(0,"127.0.0.1",done));
+   const temporaryOrigin="http://127.0.0.1:"+injected.server.address().port;
+   try{
+    const response=await fetch(temporaryOrigin+"/qa/home/next",{
+     method:"POST",headers:{"origin":temporaryOrigin,
+      "content-type":"application/json",
+      "authorization":"Bearer "+injected.ownerToken},
+     body:JSON.stringify({contextHandle:HANDLE,locale:"ru"})});
+    const body=await response.json();
+    a.equal(response.status,403,reason+" "+JSON.stringify(body));
+    a.equal(body.ok,false);
+    a.equal(body.reason,"in_development");
+   }finally{
+    scratchSql(restoreSql);
+    await new Promise(done=>injected.server.close(done));
+   }
+  }
+  await revokeBetweenChoiceAndDelivery(
+   "UPDATE private.iclub_ai_v21_home_source_test_releases "+
+    "SET rights_approved=false WHERE locale='ru' "+
+    "AND action_code='continue_enrolled_subject' AND subject_key='biology'",
+   "UPDATE private.iclub_ai_v21_home_source_test_releases "+
+    "SET rights_approved=true WHERE locale='ru' "+
+    "AND action_code='continue_enrolled_subject' AND subject_key='biology'",
+   "source revoked before HTTP delivery");
+  await revokeBetweenChoiceAndDelivery(
+   "UPDATE private.iclub_ai_qa_capabilities_fixture "+
+    "SET ai_generation_entitled=false",
+   "UPDATE private.iclub_ai_qa_capabilities_fixture "+
+    "SET ai_generation_entitled=true",
+   "AI tariff permission revoked before HTTP delivery");
+  await revokeBetweenChoiceAndDelivery(
+   "UPDATE private.iclub_ai_v21_current_screen SET revision=13 "+
+    "WHERE user_id='11111111-1111-4111-8111-111111111111'",
+   "UPDATE private.iclub_ai_v21_current_screen SET revision=12 "+
+    "WHERE user_id='11111111-1111-4111-8111-111111111111'",
+   "screen revision changed before HTTP delivery");
+  a.equal((await send()).status,200,
+   "After synthetic test restores, authorized Home still works");
   // Server revocation makes even a previously valid token/handle unusable.
   scratchSql("UPDATE private.iclub_ai_v21_scoped_contexts SET revoked_at=now() "+
    "WHERE context_handle='33333333-3333-4333-8333-333333333333'");
