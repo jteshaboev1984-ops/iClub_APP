@@ -15,6 +15,18 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   return{status:response.status,body:await response.json(),
    headers:response.headers};
  };
+ const confirm=async(token,actionCode,subjectKey,{
+  locale="ru",auth=g.ownerToken,contextHandle=HANDLE,extra={}
+ }={})=>{
+  const response=await fetch(origin+"/qa/home/confirm",{
+   method:"POST",
+   headers:{"origin":origin,"content-type":"application/json",
+    "authorization":"Bearer "+auth},
+   body:JSON.stringify({contextHandle,locale,handoffToken:token,
+    actionCode,subjectKey,...extra})});
+  return {status:response.status,body:await response.json(),
+   cache:response.headers.get("cache-control")};
+ };
  try{
   a.equal(Number(scratchSql(
    "SELECT count(DISTINCT source_hash) FROM "+
@@ -36,6 +48,45 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
     "userId","score","correctAnswer","sourceHash","jwt","authorityHash"])
     a.equal(Object.hasOwn(result.body,prohibited),false,prohibited);
   }
+  // §108 one-use action confirmation deliberately changes NO user progress.
+  // The opaque token does not reveal owner/evidence/academic identifiers.
+  const issued=await send();
+  const token=issued.body.handoffToken;
+  a.match(token,/^[A-Za-z0-9_-]{32}$/);
+  a.equal(token.includes("901"),false);
+  a.equal(token.includes("11111111"),false);
+  a.equal(issued.body.releaseAllowed,false);
+  a.equal((await confirm(token,"review_finalized_practice","economics",
+   {auth:g.otherToken})).status,403,"Foreign user cannot consume token");
+  a.equal((await confirm(token,"review_finalized_practice","biology")).status,403,
+   "Correct action with wrong subject is rejected");
+  a.equal((await confirm(token,"review_open_tour_archive","economics")).status,403,
+   "Cannot change action under an issued Home token");
+  a.equal((await confirm(token,"review_finalized_practice","economics",
+   {locale:"en"})).status,403,"Cross-locale one-use token denied");
+  a.equal((await confirm(token,"review_finalized_practice","economics",
+   {contextHandle:"44444444-4444-4444-8444-444444444444"})).status,403);
+  a.equal((await confirm(token,"review_finalized_practice","economics",
+   {extra:{userId:"22222222-2222-4222-8222-222222222222"}})).status,400);
+  const accepted=await confirm(token,"review_finalized_practice","economics");
+  a.equal(accepted.status,200,JSON.stringify(accepted));
+  a.equal(accepted.body.status,"qa_handoff_confirmed");
+  a.equal(accepted.body.progressChanged,false);
+  a.equal(accepted.body.navigationExecuted,false);
+  a.equal(accepted.body.releaseAllowed,false);
+  a.equal(accepted.cache,"no-store");
+  a.equal((await confirm(token,"review_finalized_practice","economics")).status,403,
+   "Token must be one-use even with same authorization");
+  const raced=(await send()).body.handoffToken;
+  const race=await Promise.all([
+   confirm(raced,"review_finalized_practice","economics"),
+   confirm(raced,"review_finalized_practice","economics")
+  ]);
+  a.deepEqual(race.map(v=>v.status).sort(),[200,403],
+   "Only one claimant may consume a durable scratch token");
+  a.equal(scratchSql("SELECT count(*) FROM "+
+   "private.iclub_ai_v21_home_action_handoffs_scratch "+
+   "WHERE consumed_at IS NOT NULL"),2);
   // Real-shaped scratch PG commercial guard + subscription capabilities:
   // shadow/passthrough and a disabled AI entitlement NEVER authorize Home.
   scratchSql("UPDATE private.iclub_commercial_access_config "+
@@ -87,6 +138,14 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   a.deepEqual(tie.body.choices.map(x=>x.subjectKey),["biology","economics"]);
   a.equal(JSON.stringify(tie.body).includes("next_continue_"),false);
   a.equal(Object.hasOwn(tie.body,"candidateActionIds"),false);
+  const tiedToken=tie.body.handoffToken;
+  a.equal((await confirm(tiedToken,"continue_enrolled_subject","chemistry")).status,403,
+   "Unlisted subject cannot be used with a valid tie token");
+  const chosen=await confirm(tiedToken,"continue_enrolled_subject","biology");
+  a.equal(chosen.status,200,JSON.stringify(chosen));
+  a.equal(chosen.body.navigationExecuted,false);
+  a.equal((await confirm(tiedToken,"continue_enrolled_subject","economics")).status,403,
+   "Different tied subject cannot reuse consumed token");
   a.equal(Object.hasOwn(tie.body,"subjectKey"),false);
   // Same owner chooses competitive study mode. Only then is the ended Tour eligible.
   scratchSql("UPDATE public.user_subjects SET mode='competitive' "+
@@ -114,6 +173,16 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   a.equal(fallback.status,200,JSON.stringify(fallback.body));
   a.equal(fallback.body.actionCode,"continue_enrolled_subject");
   a.equal(fallback.body.subjectKey,"biology");
+  const tokenBeforeRightsRevoke=fallback.body.handoffToken;
+  scratchSql("UPDATE private.iclub_ai_v21_home_source_test_releases "+
+   "SET rights_approved=false WHERE locale='ru' "+
+   "AND action_code='continue_enrolled_subject' AND subject_key='biology'");
+  a.equal((await confirm(tokenBeforeRightsRevoke,
+   "continue_enrolled_subject","biology")).status,403,
+   "Revoked rights block previously offered token at action time");
+  scratchSql("UPDATE private.iclub_ai_v21_home_source_test_releases "+
+   "SET rights_approved=true WHERE locale='ru' "+
+   "AND action_code='continue_enrolled_subject' AND subject_key='biology'");
   // Unlike the old hardcoded publication mock, this verifies real scratch
   // PostgreSQL release rows. A revoked RU source MUST block the signed plan.
   scratchSql("UPDATE private.iclub_ai_v21_home_source_test_releases "+
