@@ -19590,13 +19590,44 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
           '</section>';
       }).join("");
     }
-        return practiceRows.map(rec => {
-      const dt=rec.created_at?formatDateTime(rec.created_at):"";
-      const sub=rec.subtopic?String(rec.subtopic):"",book=String(rec.book_reference||"").trim();
-      return '<div class="list-item" data-open-rec="practice"><div style="font-weight:900">'+escapeHTML(rec.topic||"General")+'</div>'+
-        (sub?'<div class="muted small" style="margin-top:4px">'+escapeHTML(sub)+'</div>':'')+
-        (book?'<div class="muted small" style="margin-top:4px">📘 '+escapeHTML(book)+'</div>':'')+
-        '<div class="muted small" style="margin-top:4px">'+escapeHTML(t("saved_at_label")||"Сохранено")+': '+escapeHTML(dt)+'</div></div>';
+    // By Tour: compact recommendations grouped by topic, without inventing tour attribution.
+    const groups=new Map();
+    practiceRows.forEach((rec,index)=>{
+      const topic=String(rec.topic||"General").trim()||"General";
+      if(!groups.has(topic))groups.set(topic,[]);
+      groups.get(topic).push({rec,index});
+    });
+    return Array.from(groups.entries()).map(([topic,items])=>{
+      const many=items.length>1;
+      const header='<div class="iclub-sx-tour-rec-head"><h3>'+escapeHTML(topic)+'</h3>'+
+        (many?'<span class="iclub-sx-tour-rec-count">'+items.length+' '+
+          escapeHTML(tr3("к повторению","takrorlash","to review"))+'</span>':'')+'</div>';
+      const entries=items.map(({rec,index},k)=>{
+        const sub=String(rec.subtopic||"").trim();
+        const book=String(rec.book_reference||"").trim();
+        const date=rec.created_at?formatDateTime(rec.created_at):"";
+        if(!many)return '<div class="iclub-sx-tour-rec-single">'+
+          (sub&&sub.toLowerCase()!==topic.toLowerCase()?'<p>'+escapeHTML(sub)+'</p>':'')+
+          (book?'<small>'+escapeHTML(book)+'</small>':'')+
+          (date?'<small>'+escapeHTML(tr3("Добавлено: ","Qo‘shilgan: ","Added: "))+escapeHTML(date)+'</small>':'')+
+          '<button type="button" class="iclub-sx-tour-rec-open" data-open-rec="practice" data-rec-index="'+index+'">'+
+          escapeHTML(tr3("Открыть рекомендацию","Tavsiyani ochish","Open recommendation"))+
+          ' <span aria-hidden="true">→</span></button></div>';
+        return '<button type="button" class="iclub-sx-tour-rec-entry" data-open-rec="practice" data-rec-index="'+index+'" '+
+          (k>=3?'hidden data-sx-tour-extra="1"':'')+'>'+
+          '<span class="iclub-sx-tour-rec-number">'+String(k+1).padStart(2,"0")+'</span>'+
+          '<span class="iclub-sx-tour-rec-entry-info"><strong>'+escapeHTML(sub||topic)+'</strong>'+
+          (book?'<small>'+escapeHTML(book)+'</small>':date?'<small>'+escapeHTML(date)+'</small>':'')+
+          '</span><span class="iclub-sx-tour-rec-arrow" aria-hidden="true">›</span></button>';
+      }).join("");
+      return '<section class="iclub-sx-tour-rec-card" data-sx-tour-group="1">'+header+
+        (many?'<p class="iclub-sx-tour-rec-hint">'+
+          escapeHTML(tr3("Выберите, что повторить","Nimani takrorlashni tanlang","Choose what to review"))+'</p>':'')+
+        '<div class="iclub-sx-tour-rec-entries">'+entries+'</div>'+
+        (items.length>3?'<button type="button" class="iclub-sx-tour-expand" data-sx-tour-expand="1" aria-expanded="false">'+
+          escapeHTML(tr3("Показать ещё","Yana ko‘rsatish","Show more"))+' '+(items.length-3)+
+          ' <span aria-hidden="true">⌄</span></button>':'')+
+        '</section>';
     }).join("");
   };
 
