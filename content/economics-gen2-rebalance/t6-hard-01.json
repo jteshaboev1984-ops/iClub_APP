@@ -1,0 +1,332 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-011",
+    "n": 11,
+    "d": "hard",
+    "sec": 190,
+    "k": "C",
+    "en": "An economy follows the simplified expectations-augmented Phillips curve π=πe−(u−5), where π is inflation (%), πe expected inflation (%) and u unemployment (%). Actual unemployment remains at 3%. Expected inflation is 4% in year one and adjusts to 6% in year two. What is actual inflation in the two years, assuming the equation otherwise stays unchanged?",
+    "ru": "В экономике используется упрощённая кривая Филлипса с ожиданиями: π=πe−(u−5), где π — инфляция (%), πe — ожидаемая инфляция (%), u — безработица (%). Фактическая безработица остаётся 3%. Ожидания инфляции равны 4% в первом году и повышаются до 6% во втором. Какова фактическая инфляция в оба года?",
+    "uz": "Iqtisodiyotda kutishlarni hisobga olgan soddalashtirilgan Fillips egri chizig‘i π=πe−(u−5), bunda π inflyatsiya (%), πe kutilgan inflyatsiya (%), u ishsizlik (%). Ishsizlik 3% bo‘lib qoladi. Kutilgan inflyatsiya birinchi yili 4%, ikkinchi yili 6%. Boshqa shart o‘zgarmasa, haqiqiy inflyatsiya nechaga teng?",
+    "options_en": [
+      "Year 1: 4%; year 2: 6%",
+      "Year 1: 2%; year 2: 4%",
+      "Year 1: 6%; year 2: 8%",
+      "Year 1: 6%; year 2: 6%"
+    ],
+    "options_ru": [
+      "1-й год: 4%; 2-й: 6%",
+      "1-й год: 2%; 2-й: 4%",
+      "1-й год: 6%; 2-й: 8%",
+      "1-й год: 6%; 2-й: 6%"
+    ],
+    "options_uz": [
+      "1-yil: 4%; 2-yil: 6%",
+      "1-yil: 2%; 2-yil: 4%",
+      "1-yil: 6%; 2-yil: 8%",
+      "1-yil: 6%; 2-yil: 6%"
+    ],
+    "why": [
+      "When u=3, −(u−5)=+2. Thus inflation is 4+2=6% initially and 6+2=8% after expectations rise. Sustaining unemployment below the natural rate can raise inflation.",
+      "При u=3 добавка к инфляции равна +2. Поэтому сначала 4+2=6%, затем 6+2=8%. Сохранение безработицы ниже естественной может ускорять инфляцию.",
+      "u=3 bo‘lsa, inflyatsiyaga qo‘shimcha +2. Avval 4+2=6%, keyin 6+2=8%. Ishsizlik tabiiy darajadan past bo‘lsa, inflyatsiya tezlashishi mumkin."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-030",
+    "n": 30,
+    "d": "hard",
+    "sec": 195,
+    "k": "B",
+    "en": "An economy has spare capacity and a fixed price level. The sum of marginal leakages from saving, tax and imports is 0.40 per extra dollar of income. Government purchases rise by $40m, but private investment simultaneously falls by $12m. Treat both as autonomous spending changes. What is the predicted total change in equilibrium income?",
+    "ru": "В экономике есть свободные мощности и фиксированный уровень цен. Сумма предельных изъятий на сбережения, налоги и импорт равна 0,40 на дополнительный доллар дохода. Госзакупки растут на $40 млн, но частные инвестиции одновременно падают на $12 млн. Оба изменения автономны. Как изменится равновесный доход?",
+    "uz": "Iqtisodiyotda bo‘sh quvvat va o‘zgarmas narx bor. Qo‘shimcha daromaddan jamg‘arma, soliq va importga chegaraviy chiqimlar yig‘indisi 0,40. Davlat xaridi $40 mln oshadi, xususiy investitsiya esa $12 mln kamayadi. Ikkisi ham avtonom o‘zgarish. Muvozanat daromadi qancha o‘zgaradi?",
+    "options_en": [
+      "+ $100m",
+      "+ $70m",
+      "+ $28m",
+      "− $70m"
+    ],
+    "options_ru": [
+      "+ $100 млн",
+      "+ $70 млн",
+      "+ $28 млн",
+      "− $70 млн"
+    ],
+    "options_uz": [
+      "+ $100 mln",
+      "+ $70 mln",
+      "+ $28 mln",
+      "− $70 mln"
+    ],
+    "why": [
+      "Multiplier=1/0.40=2.5. Net autonomous injection=40−12=$28m. Therefore ΔY=2.5×28=$70m, not $100m.",
+      "Мультипликатор 1/0,40=2,5. Чистый автономный импульс 40−12=$28 млн; прирост дохода 2,5×28=$70 млн.",
+      "Multiplikator 1/0,40=2,5. Sof avtonom qo‘shimcha 40−12=$28 mln; daromad o‘sishi 2,5×28=$70 mln."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-034",
+    "n": 34,
+    "d": "hard",
+    "sec": 195,
+    "k": "D",
+    "en": "Five equally sized income groups receive $10m, $15m, $20m, $25m and $30m before growth. After growth, their incomes are $9m, $16m, $22m, $28m and $37m. What happens to total real income and the poorest group's share of the total?",
+    "ru": "Пять одинаковых по численности групп первоначально получают $10, $15, $20, $25 и $30 млн дохода. После роста экономики — $9, $16, $22, $28 и $37 млн. Что происходит с общим реальным доходом и долей беднейшей группы?",
+    "uz": "Aholisi teng besh daromad guruhining dastlabki daromadlari $10, $15, $20, $25 va $30 mln. O‘sishdan keyin $9, $16, $22, $28 va $37 mln. Jami real daromad va eng kambag‘al guruh ulushi qanday o‘zgaradi?",
+    "options_en": [
+      "Total rises 10%; poorest share stays 10%",
+      "Total rises 12%; poorest income increases 12%",
+      "Total falls 12%; poorest share rises to 12%",
+      "Total rises 12%; poorest share falls from 10% to about 8.0%"
+    ],
+    "options_ru": [
+      "Общий доход +10%; доля беднейших остаётся 10%",
+      "Общий доход +12%; доход беднейших также +12%",
+      "Общий доход −12%; доля беднейших растёт до 12%",
+      "Общий доход +12%; доля беднейших падает с 10% примерно до 8,0%"
+    ],
+    "options_uz": [
+      "Jami daromad +10%; kambag‘allar ulushi 10% qoladi",
+      "Jami daromad +12%; kambag‘allar daromadi ham +12%",
+      "Jami daromad −12%; kambag‘allar ulushi 12% ga oshadi",
+      "Jami daromad +12%; eng kambag‘al ulushi 10% dan taxminan 8,0% ga tushadi"
+    ],
+    "why": [
+      "Total increases from $100m to $112m (+12%). The poorest group falls from $10m to $9m and its share from 10/100=10% to 9/112≈8.0%; growth is not evenly shared.",
+      "Общий доход растёт со $100 до $112 млн (+12%). Доход беднейших падает с $10 до $9 млн, доля с 10% до 9/112≈8,0%.",
+      "Jami daromad $100 mln dan $112 mln ga (+12%) oshadi. Eng kambag‘al guruh $10 mln dan $9 mln ga tushadi, ulushi 10% dan 9/112≈8,0% ga kamayadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-038",
+    "n": 38,
+    "d": "hard",
+    "sec": 180,
+    "k": "C",
+    "en": "An economy initially runs a current-account deficit of $30m. Following a boom, national income increases by $80m and the marginal propensity to import is 0.20. At the same time, exports rise independently by $5m. Assume other current-account entries remain fixed. What is the new current-account balance?",
+    "ru": "Изначально дефицит текущего счёта экономики $30 млн. Во время подъёма национальный доход увеличивается на $80 млн при MPM=0,20. Одновременно экспорт независимо растёт на $5 млн. Остальные статьи текущего счёта неизменны. Каково новое сальдо?",
+    "uz": "Iqtisodiyotning dastlabki joriy hisob taqchilligi $30 mln. O‘sish davrida milliy daromad $80 mln oshadi, importga chegaraviy moyillik MPM=0,20. Shu paytda eksport mustaqil $5 mln ko‘payadi. Boshqa joriy hisob bandlari o‘zgarmaydi. Yangi balans qancha?",
+    "options_en": [
+      "−$9m",
+      "−$16m",
+      "−$41m",
+      "−$51m"
+    ],
+    "options_ru": [
+      "−$9 млн",
+      "−$16 млн",
+      "−$41 млн",
+      "−$51 млн"
+    ],
+    "options_uz": [
+      "−$9 mln",
+      "−$16 mln",
+      "−$41 mln",
+      "−$51 mln"
+    ],
+    "why": [
+      "Imports increase by 0.20×$80m=$16m while exports increase $5m; the balance worsens $11m from −$30m to −$41m.",
+      "Импорт растёт на 0,20×$80 млн=$16 млн, экспорт на $5 млн. Сальдо ухудшается на $11 млн: с −$30 млн до −$41 млн.",
+      "Import 0,20×$80 mln=$16 mln, eksport $5 mln oshadi. Balans $11 mln yomonlashib −$30 mln dan −$41 mln ga o‘tadi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-039",
+    "n": 39,
+    "d": "hard",
+    "sec": 180,
+    "k": "A",
+    "en": "Fifty unemployed workers have matching skills for jobs in another region. Each relocation creates $8,000 of additional real output in the first year but uses $3,000 in real moving and housing resources. The government pays each worker a $2,000 grant, financed by lump-sum tax, without administrative or tax-distortion costs. What is the first-year NET social resource gain from all 50 moves?",
+    "ru": "Пятьдесят безработных имеют навыки для вакансий в другом регионе. Каждый переезд создаёт в первый год дополнительно $8 000 реального выпуска, но требует $3 000 реальных ресурсов на переезд и жильё. Государство выдаёт каждому грант $2 000, финансируемый паушальным налогом, без затрат администрирования и налоговых искажений. Каков чистый ресурсный выигрыш общества за первый год от всех переездов?",
+    "uz": "50 ishsizning malakasi boshqa hududdagi ishga mos. Har bir ko‘chish birinchi yilda $8000 qo‘shimcha real mahsulot yaratadi, lekin ko‘chish va uy-joyga $3000 real resurs ketadi. Davlat har biriga $2000 grant beradi, u bir martalik soliq bilan moliyalanadi, boshqaruv va soliq buzilishi yo‘q. Barcha 50 ko‘chishning birinchi yildagi sof ijtimoiy resurs foydasi qancha?",
+    "options_en": [
+      "$250,000",
+      "$150,000",
+      "$400,000",
+      "$100,000"
+    ],
+    "options_ru": [
+      "$250 000",
+      "$150 000",
+      "$400 000",
+      "$100 000"
+    ],
+    "options_uz": [
+      "$250 000",
+      "$150 000",
+      "$400 000",
+      "$100 000"
+    ],
+    "why": [
+      "Net additional output after real resource costs is ($8,000−$3,000)×50=$250,000. The $2,000 grants are transfers between taxpayers and workers, not additional real resource consumption under the assumptions.",
+      "Чистая выгода ($8 000−$3 000)×50=$250 000. Гранты — перераспределение между налогоплательщиками и работниками, не дополнительный расход реальных ресурсов при данных допущениях.",
+      "Sof foyda ($8000−$3000)×50=$250 000. Grantlar soliq to‘lovchi va ishchi o‘rtasidagi transfert bo‘lib, berilgan shartlarda qo‘shimcha real resurs sarfi emas."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-042",
+    "n": 42,
+    "d": "hard",
+    "sec": 195,
+    "k": "B",
+    "en": "In a loanable-funds market, saving supply is S=20+3r and private investment demand is I=100−5r, where r is the interest rate in percentage points. Government borrowing of 20 units adds to demand for funds without directly changing private investment demand. What are the new equilibrium interest rate and reduction in private investment?",
+    "ru": "На рынке заёмных средств предложение сбережений S=20+3r, частный инвестиционный спрос I=100−5r, где r — ставка в процентных пунктах. Госзаимствования на 20 единиц увеличивают общий спрос на средства, не сдвигая функцию частных инвестиций. Найдите новую равновесную ставку и сокращение частных инвестиций.",
+    "uz": "Qarz mablag‘lari bozorida jamg‘arma taklifi S=20+3r, xususiy investitsiya talabi I=100−5r, r foiz punktdagi stavka. Davlatning 20 birlik qarzi mablag‘ga umumiy talabni oshiradi, xususiy investitsiya funksiyasini siljitmaydi. Yangi muvozanat stavkasi va xususiy investitsiyaning kamayishi qancha?",
+    "options_en": [
+      "r=10%; private investment falls by 20",
+      "r=12.5%; private investment falls by 12.5",
+      "r=15%; private investment rises by 20",
+      "r=12.5%; private investment is unchanged"
+    ],
+    "options_ru": [
+      "r=10%; частные инвестиции падают на 20",
+      "r=12,5%; частные инвестиции сокращаются на 12,5",
+      "r=15%; частные инвестиции растут на 20",
+      "r=12,5%; частные инвестиции неизменны"
+    ],
+    "options_uz": [
+      "r=10%; xususiy investitsiya 20 ga kamayadi",
+      "r=12,5%; xususiy investitsiya 12,5 ga kamayadi",
+      "r=15%; xususiy investitsiya 20 ga oshadi",
+      "r=12,5%; xususiy investitsiya o‘zgarmaydi"
+    ],
+    "why": [
+      "Initially 20+3r=100−5r, giving r=10 and private I=50. New demand I+20 gives 20+3r=120−5r, r=12.5, private I=37.5. Crowding out=12.5.",
+      "Сначала r=10 и частные инвестиции 50. После госзаимствований r=12,5, частные инвестиции 37,5. Вытеснение 50−37,5=12,5.",
+      "Dastlab r=10, xususiy I=50. Davlat qarzidan keyin r=12,5, xususiy I=37,5. Siqib chiqarish 12,5."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-044",
+    "n": 44,
+    "d": "hard",
+    "sec": 185,
+    "k": "D",
+    "en": "A central bank buys $200m of foreign currency from domestic banks and pays by creating domestic reserves. It then sells $150m of domestic government securities to those banks, which pay from their reserves. There are no other transactions. What is the net immediate effect on the domestic monetary base?",
+    "ru": "Центральный банк покупает у местных банков иностранную валюту на $200 млн, создавая резервы в национальной валюте. Затем продаёт тем же банкам государственные бумаги на $150 млн, которые те оплачивают из резервов. Других операций нет. Каково чистое немедленное изменение денежной базы?",
+    "uz": "Markaziy bank mahalliy banklardan $200 mln xorijiy valuta sotib olib, milliy valutada zaxira yaratadi. So‘ng ularga $150 mln mahalliy davlat obligatsiyasini sotadi, banklar zaxiradan to‘laydi. Boshqa operatsiya yo‘q. Pul bazasi darhol sof qancha o‘zgaradi?",
+    "options_en": [
+      "Decreases $350m",
+      "Increases $350m",
+      "Decreases $50m",
+      "Increases $50m"
+    ],
+    "options_ru": [
+      "Снижается на $350 млн",
+      "Увеличивается на $350 млн",
+      "Снижается на $50 млн",
+      "Увеличивается на $50 млн"
+    ],
+    "options_uz": [
+      "$350 mln kamayadi",
+      "$350 mln oshadi",
+      "$50 mln kamayadi",
+      "$50 mln oshadi"
+    ],
+    "why": [
+      "The FX purchase adds $200m bank reserves; security sales withdraw $150m, leaving a $50m monetary-base increase. The second operation partially sterilises the first.",
+      "Покупка валюты добавляет $200 млн резервов, продажа бумаг изымает $150 млн. Чистый рост базы $50 млн: частичная стерилизация.",
+      "Valuta xaridi zaxirani $200 mln oshiradi, obligatsiya sotuvi $150 mln kamaytiradi. Sof pul bazasi +$50 mln: qisman sterilizatsiya."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-046",
+    "n": 46,
+    "d": "hard",
+    "sec": 175,
+    "k": "A",
+    "en": "Transactions and speculative money demand in an economy follow the illustrative linear rule Md=0.3Y−20r, with Y measured in million dollars and r in percentage-point units. Income rises from 1,000 to 1,100 while the interest rate falls from 5 to 4. What is the combined change in money demanded?",
+    "ru": "Спрос на деньги задаётся иллюстративной функцией Md=0,3Y−20r, где Y — доход в млн долларов, r — процентная ставка в процентных пунктах. Доход растёт с 1 000 до 1 100, а ставка снижается с 5 до 4. На сколько в совокупности меняется спрос на деньги?",
+    "uz": "Pulga talabning misoliy funksiyasi Md=0,3Y−20r, bunda Y mln dollardagi daromad, r foiz punktlardagi stavka. Daromad 1000 dan 1100 ga oshadi, stavka 5 dan 4 ga tushadi. Pulga umumiy talab qancha o‘zgaradi?",
+    "options_en": [
+      "Increases by 50 million",
+      "Increases by 30 million",
+      "Decreases by 20 million",
+      "Remains unchanged"
+    ],
+    "options_ru": [
+      "Увеличивается на 50 млн",
+      "Увеличивается на 30 млн",
+      "Уменьшается на 20 млн",
+      "Не изменяется"
+    ],
+    "options_uz": [
+      "50 mln ga oshadi",
+      "30 mln ga oshadi",
+      "20 mln ga kamayadi",
+      "O‘zgarmaydi"
+    ],
+    "why": [
+      "Initially Md=0.3×1000−20×5=200. Afterwards Md=0.3×1100−20×4=250, a rise of 50, reflecting both income and interest-rate effects.",
+      "Изначально Md=0,3×1000−20×5=200. Затем Md=0,3×1100−20×4=250. Рост на 50 вызван обеими переменными.",
+      "Dastlab Md=0,3×1000−20×5=200. Keyin Md=0,3×1100−20×4=250. Ikkala omil tufayli o‘sish 50."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-047",
+    "n": 47,
+    "d": "hard",
+    "sec": 195,
+    "k": "B",
+    "en": "An economy's labour force is 5 million. At the recession trough, 100,000 are frictionally unemployed, 150,000 structurally unemployed and 250,000 cyclically unemployed. Assuming none of these categories overlap and the labour force stays constant, what are its actual unemployment rate and its approximate natural unemployment rate after cyclical unemployment disappears?",
+    "ru": "Рабочая сила страны — 5 млн человек. В нижней точке рецессии 100 000 фрикционных, 150 000 структурных и 250 000 циклических безработных. Категории не пересекаются, численность рабочей силы постоянна. Каковы фактический уровень безработицы и примерный естественный уровень после исчезновения циклической безработицы?",
+    "uz": "Mamlakat ishchi kuchi 5 mln. Tanazzul tubida 100 000 friksion, 150 000 tarkibiy va 250 000 davriy ishsiz bor. Guruhlar kesishmaydi, ishchi kuchi o‘zgarmaydi. Haqiqiy ishsizlik darajasi va davriy ishsizlik yo‘qolgandan keyingi taxminiy tabiiy daraja qancha?",
+    "options_en": [
+      "Actual 5%; natural 10%",
+      "Actual 10%; natural 5%",
+      "Actual 10%; natural 0%",
+      "Actual 15%; natural 5%"
+    ],
+    "options_ru": [
+      "Фактический 5%; естественный 10%",
+      "Фактический 10%; естественный 5%",
+      "Фактический 10%; естественный 0%",
+      "Фактический 15%; естественный 5%"
+    ],
+    "options_uz": [
+      "Haqiqiy 5%; tabiiy 10%",
+      "Haqiqiy 10%; tabiiy 5%",
+      "Haqiqiy 10%; tabiiy 0%",
+      "Haqiqiy 15%; tabiiy 5%"
+    ],
+    "why": [
+      "Actual unemployment=(100k+150k+250k)/5m=10%. Frictional plus structural unemployment=(100k+150k)/5m=5% natural-rate approximation.",
+      "Фактическая безработица (100+150+250) тыс./5 млн=10%; фрикционная и структурная (100+150) тыс./5 млн=5% естественного уровня.",
+      "Haqiqiy ishsizlik (100+150+250) ming/5 mln=10%; friksion va tarkibiy (100+150) ming/5 mln=5% tabiiy daraja."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T6-P-048",
+    "n": 48,
+    "d": "hard",
+    "sec": 185,
+    "k": "C",
+    "en": "An accredited programme retrains 100 structurally unemployed workers for currently vacant technical roles. Each placed worker is expected to generate an extra $80,000 of real output in the first year, with no displaced output elsewhere. The one-time real resource cost of training is $1m. Ignore other effects. What is the first-year net resource gain and unemployment mechanism addressed?",
+    "ru": "Аккредитованная программа переучивает 100 структурно безработных для существующих технических вакансий. Каждый трудоустроенный создаст в первый год дополнительно $80 000 реального выпуска без вытеснения выпуска в других местах. Реальные разовые ресурсы на обучение стоят $1 млн. Прочие эффекты игнорируются. Каковы чистый ресурсный выигрыш за год и устраняемый механизм безработицы?",
+    "uz": "Akkreditatsiyalangan dastur 100 nafar tarkibiy ishsizni mavjud texnik vakansiyalar uchun qayta o‘qitadi. Ishga kirgan har biri birinchi yilda boshqa ishlab chiqarishni siqib chiqarmasdan $80 000 qo‘shimcha real mahsulot yaratadi. Bir martalik real o‘qitish xarajati $1 mln. Boshqa ta’sir yo‘q. Birinchi yil sof resurs foydasi va bartaraf etiladigan ishsizlik sababi qanday?",
+    "options_en": [
+      "$8m; purely cyclical unemployment",
+      "$1m; seasonal unemployment",
+      "$7m; skills mismatch causing structural unemployment",
+      "$7m; frictional unemployment caused solely by job-search delays"
+    ],
+    "options_ru": [
+      "$8 млн; исключительно циклическая безработица",
+      "$1 млн; сезонная безработица",
+      "$7 млн; несоответствие квалификации и структурная безработица",
+      "$7 млн; только фрикционные задержки поиска работы"
+    ],
+    "options_uz": [
+      "$8 mln; faqat davriy ishsizlik",
+      "$1 mln; mavsumiy ishsizlik",
+      "$7 mln; malaka mos kelmasligi sabab tarkibiy ishsizlik",
+      "$7 mln; faqat ish izlashning friksion kechikishi"
+    ],
+    "why": [
+      "Extra output=100×$80,000=$8m, minus real training resources $1m gives $7m net first-year gain. Retraining tackles a mismatch of skills to vacancies.",
+      "Дополнительный выпуск 100×$80 000=$8 млн, минус ресурсы обучения $1 млн = $7 млн. Переобучение исправляет структурный разрыв навыков.",
+      "Qo‘shimcha mahsulot 100×$80 000=$8 mln, o‘qitish resursi $1 mln; sof $7 mln. Qayta o‘qitish vakansiya bilan malaka nomuvofiqligini kamaytiradi."
+    ]
+  }
+]
