@@ -12,6 +12,7 @@ const {QAHomeApprovedPriority}=require("./ai-layer-v21-p6-home-approved-priority
 const {makeCommercialProofAdapter}=require("./ai-layer-v21-p6-commercial-contract-adapter.cjs");
 const {validateBeforeHomeDelivery}=require("./ai-layer-v21-p6-home-delivery-gate.cjs");
 const {issueSyntheticHandoff,claimSyntheticHandoff}=require("./ai-layer-v21-p6-home-action-handoff.cjs");
+const {resolveSyntheticDestination}=require("./ai-layer-v21-p6-home-destination-proof.cjs");
 const OWNER="11111111-1111-4111-8111-111111111111";
 const FOREIGN="22222222-2222-4222-8222-222222222222";
 const HANDLE="33333333-3333-4333-8333-333333333333";
@@ -256,7 +257,8 @@ function makeGateway({beforeDelivery,beforeAtomicRead}={}){
   };
   const isNext=req.url==="/qa/home/next";
   const isConfirm=req.url==="/qa/home/confirm";
-  if((!isNext&&!isConfirm)||req.method!=="POST")
+  const isDestination=req.url==="/qa/home/destination";
+  if((!isNext&&!isConfirm&&!isDestination)||req.method!=="POST")
    return reject(404,"not_found");
   const origin="http://127.0.0.1:"+server.address().port;
   if(req.headers.origin!==origin)return reject(403,"origin_not_authorized");
@@ -274,12 +276,13 @@ function makeGateway({beforeDelivery,beforeAtomicRead}={}){
     if(Buffer.byteLength(raw)>256)return reject(413,"body_too_large");
    }
    const body=JSON.parse(raw),keys=Object.keys(body||{}).sort().join(",");
-   if(isConfirm){
+   if(isConfirm||isDestination){
     if(keys!=="actionCode,contextHandle,handoffToken,locale,subjectKey"||
      !UUID.test(body.contextHandle||"")||
      !["ru","uz","en"].includes(body.locale))
      return reject(400,"invalid_request");
-    const claimed=claimSyntheticHandoff({sql,signingKey:services.signingKey,
+    const claimed=(isConfirm?claimSyntheticHandoff:resolveSyntheticDestination)({
+     sql,signingKey:services.signingKey,
      userId:user,contextHandle:body.contextHandle,locale:body.locale,
      handoffToken:body.handoffToken,actionCode:body.actionCode,
      subjectKey:body.subjectKey});
