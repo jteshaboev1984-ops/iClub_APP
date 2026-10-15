@@ -1,0 +1,165 @@
+-- §117: 89-column exact type/nullability replica, no learner records. Scratch ONLY.
+DO $q$ BEGIN
+ IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
+ THEN RAISE EXCEPTION 'STOP disposable PostgreSQL ONLY'; END IF;
+END $q$;
+ALTER TABLE private.iclub_global_ai_runtime_config ADD COLUMN plans_ui_enabled boolean DEFAULT false NOT NULL;
+ALTER TABLE private.iclub_global_ai_runtime_config ADD COLUMN checkout_enabled boolean DEFAULT false NOT NULL;
+ALTER TABLE private.iclub_global_ai_runtime_config ADD COLUMN plans_rollout_mode text DEFAULT 'off' NOT NULL;
+ALTER TABLE public.lessons ADD COLUMN title text NOT NULL;
+ALTER TABLE public.lessons ADD COLUMN topic text;
+ALTER TABLE public.lessons ADD COLUMN order_no integer NOT NULL;
+ALTER TABLE public.practice_session_answers_v4 ADD COLUMN user_answer text;
+ALTER TABLE public.practice_session_answers_v4 ADD COLUMN picked_index integer;
+ALTER TABLE public.practice_session_answers_v4 ADD COLUMN is_correct boolean NOT NULL;
+ALTER TABLE public.practice_session_answers_v4 ADD COLUMN time_spent integer NOT NULL;
+ALTER TABLE public.practice_session_answers_v4 ADD COLUMN answered_at timestamptz NOT NULL;
+ALTER TABLE public.practice_sessions_v4 ADD COLUMN pool_id bigint NOT NULL;
+ALTER TABLE public.practice_sessions_v4 ADD COLUMN client_session_id text NOT NULL;
+ALTER TABLE public.practice_sessions_v4 ADD COLUMN legacy_attempt_id bigint;
+ALTER TABLE public.practice_sessions_v4 ADD COLUMN created_at timestamptz NOT NULL;
+ALTER TABLE public.practice_sessions_v4 ADD COLUMN bank_generation integer;
+ALTER TABLE public.subjects ADD COLUMN title text NOT NULL;
+ALTER TABLE public.subjects ADD COLUMN type text NOT NULL;
+ALTER TABLE public.tour_attempts ADD COLUMN score integer NOT NULL;
+ALTER TABLE public.tour_attempts ADD COLUMN percent numeric NOT NULL;
+ALTER TABLE public.tour_attempts ADD COLUMN total_time integer NOT NULL;
+ALTER TABLE public.tour_attempts ADD COLUMN created_at timestamptz NOT NULL;
+ALTER TABLE public.tour_session_runtime_v4 ADD COLUMN client_session_id text NOT NULL;
+ALTER TABLE public.tour_session_runtime_v4 ADD COLUMN question_ids bigint[] NOT NULL;
+ALTER TABLE public.tour_session_runtime_v4 ADD COLUMN created_at timestamptz NOT NULL;
+ALTER TABLE public.tours ADD COLUMN tour_no smallint NOT NULL;
+ALTER TABLE public.tours ADD COLUMN start_date date;
+ALTER TABLE public.tours ADD COLUMN created_at timestamptz NOT NULL;
+ALTER TABLE public.tours ADD COLUMN season_id bigint NOT NULL;
+ALTER TABLE public.user_subjects ADD COLUMN id bigint NOT NULL;
+ALTER TABLE public.user_subjects ADD COLUMN created_at timestamptz NOT NULL;
+ALTER TABLE public.users ADD COLUMN telegram_user_id text;
+ALTER TABLE public.users ADD COLUMN last_name text;
+ALTER TABLE public.users ADD COLUMN avatar_url text;
+ALTER TABLE public.users ADD COLUMN language_code text;
+ALTER TABLE public.users ADD COLUMN is_school_student boolean;
+ALTER TABLE public.users ADD COLUMN region text;
+ALTER TABLE public.users ADD COLUMN district text;
+ALTER TABLE public.users ADD COLUMN school text;
+ALTER TABLE public.users ADD COLUMN class text;
+ALTER TABLE public.users ADD COLUMN created_at timestamptz NOT NULL;
+ALTER TABLE public.users ADD COLUMN region_id bigint;
+ALTER TABLE public.users ADD COLUMN district_id bigint;
+ALTER TABLE public.users ADD COLUMN country_code text;
+ALTER TABLE public.users ADD COLUMN country text;
+ALTER TABLE public.users ADD COLUMN login text;
+ALTER TABLE public.users ADD COLUMN auth_email text;
+ALTER TABLE public.users ADD COLUMN must_change_password boolean NOT NULL;
+ALTER TABLE public.users ADD COLUMN auth_migrated_at timestamptz;
+DO $check_89$
+DECLARE c record; kind text; required boolean; found_count int:=0;
+BEGIN
+ FOR c IN SELECT * FROM (VALUES
+('private','iclub_global_ai_runtime_config','id','int2',false),
+('private','iclub_global_ai_runtime_config','config_version','text',false),
+('private','iclub_global_ai_runtime_config','ui_enabled','bool',false),
+('private','iclub_global_ai_runtime_config','gateway_enabled','bool',false),
+('private','iclub_global_ai_runtime_config','generation_enabled','bool',false),
+('private','iclub_global_ai_runtime_config','kill_switch','bool',false),
+('private','iclub_global_ai_runtime_config','updated_at','timestamptz',false),
+('private','iclub_global_ai_runtime_config','updated_by','uuid',true),
+('private','iclub_global_ai_runtime_config','plans_ui_enabled','bool',false),
+('private','iclub_global_ai_runtime_config','checkout_enabled','bool',false),
+('private','iclub_global_ai_runtime_config','global_ai_rollout_mode','text',false),
+('private','iclub_global_ai_runtime_config','plans_rollout_mode','text',false),
+('public','lessons','id','int8',false),
+('public','lessons','subject_id','int8',false),
+('public','lessons','title','text',false),
+('public','lessons','topic','text',true),
+('public','lessons','order_no','int4',false),
+('public','practice_session_answers_v4','session_id','int8',false),
+('public','practice_session_answers_v4','question_id','int8',false),
+('public','practice_session_answers_v4','user_answer','text',true),
+('public','practice_session_answers_v4','picked_index','int4',true),
+('public','practice_session_answers_v4','is_correct','bool',false),
+('public','practice_session_answers_v4','time_spent','int4',false),
+('public','practice_session_answers_v4','answered_at','timestamptz',false),
+('public','practice_sessions_v4','id','int8',false),
+('public','practice_sessions_v4','user_id','uuid',false),
+('public','practice_sessions_v4','subject_id','int8',false),
+('public','practice_sessions_v4','pool_id','int8',false),
+('public','practice_sessions_v4','client_session_id','text',false),
+('public','practice_sessions_v4','question_ids','_int8',false),
+('public','practice_sessions_v4','legacy_attempt_id','int8',true),
+('public','practice_sessions_v4','status','text',false),
+('public','practice_sessions_v4','created_at','timestamptz',false),
+('public','practice_sessions_v4','finalized_at','timestamptz',true),
+('public','practice_sessions_v4','bank_generation','int4',true),
+('public','subjects','id','int8',false),
+('public','subjects','subject_key','text',false),
+('public','subjects','title','text',false),
+('public','subjects','type','text',false),
+('public','subjects','is_active','bool',false),
+('public','tour_attempts','id','int8',false),
+('public','tour_attempts','user_id','uuid',false),
+('public','tour_attempts','tour_id','int8',false),
+('public','tour_attempts','score','int4',false),
+('public','tour_attempts','percent','numeric',false),
+('public','tour_attempts','total_time','int4',false),
+('public','tour_attempts','status','text',false),
+('public','tour_attempts','created_at','timestamptz',false),
+('public','tour_session_runtime_v4','attempt_id','int8',false),
+('public','tour_session_runtime_v4','user_id','uuid',false),
+('public','tour_session_runtime_v4','tour_id','int8',false),
+('public','tour_session_runtime_v4','client_session_id','text',false),
+('public','tour_session_runtime_v4','question_ids','_int8',false),
+('public','tour_session_runtime_v4','finalized_at','timestamptz',true),
+('public','tour_session_runtime_v4','created_at','timestamptz',false),
+('public','tours','id','int8',false),
+('public','tours','subject_id','int8',false),
+('public','tours','tour_no','int2',false),
+('public','tours','start_date','date',true),
+('public','tours','end_date','date',true),
+('public','tours','is_active','bool',false),
+('public','tours','created_at','timestamptz',false),
+('public','tours','season_id','int8',false),
+('public','user_subjects','id','int8',false),
+('public','user_subjects','user_id','uuid',false),
+('public','user_subjects','subject_id','int8',false),
+('public','user_subjects','mode','text',false),
+('public','user_subjects','is_pinned','bool',false),
+('public','user_subjects','created_at','timestamptz',false),
+('public','users','id','uuid',false),
+('public','users','telegram_user_id','text',true),
+('public','users','first_name','text',true),
+('public','users','last_name','text',true),
+('public','users','avatar_url','text',true),
+('public','users','language_code','text',true),
+('public','users','is_school_student','bool',true),
+('public','users','region','text',true),
+('public','users','district','text',true),
+('public','users','school','text',true),
+('public','users','class','text',true),
+('public','users','created_at','timestamptz',false),
+('public','users','region_id','int8',true),
+('public','users','district_id','int8',true),
+('public','users','country_code','text',true),
+('public','users','country','text',true),
+('public','users','login','text',true),
+('public','users','auth_email','text',true),
+('public','users','must_change_password','bool',false),
+('public','users','auth_migrated_at','timestamptz',true)
+ ) AS src(schema_name,table_name,column_name,pg_type,nullable) LOOP
+ SELECT typ.typname,att.attnotnull INTO kind,required
+ FROM pg_catalog.pg_attribute att
+ JOIN pg_catalog.pg_class tbl ON tbl.oid=att.attrelid
+ JOIN pg_catalog.pg_namespace ns ON ns.oid=tbl.relnamespace
+ JOIN pg_catalog.pg_type typ ON typ.oid=att.atttypid
+ WHERE ns.nspname=c.schema_name AND tbl.relname=c.table_name
+ AND att.attname=c.column_name AND att.attnum>0 AND NOT att.attisdropped;
+ IF NOT FOUND OR kind IS DISTINCT FROM c.pg_type OR
+ required IS DISTINCT FROM NOT c.nullable THEN
+  RAISE EXCEPTION '89-column drift %.%.% type % nullability %',
+   c.schema_name,c.table_name,c.column_name,kind,required;
+ END IF;
+ found_count:=found_count+1;
+ END LOOP;
+ IF found_count<>89 THEN RAISE EXCEPTION 'not all 89 compared';END IF;
+ RAISE NOTICE 'FULL_SHAPE_89_GREEN: production metadata types/nullability 89/89';
+END $check_89$;

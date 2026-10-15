@@ -42,6 +42,7 @@ const cases = [
  "qa/ai-layer-v21-p6-commercial-catalog-drift.test.cjs",
  "qa/ai-layer-v21-p9-live-integration-preflight.test.cjs",
  "qa/ai-layer-v21-p9-draft-contract-gate.test.cjs",
+ "qa/ai-layer-v21-p9-schema-compat.test.cjs",
  "qa/ai-layer-v21-p6-nav-approved-locale.test.cjs",
  "qa/ai-layer-v21-p6-approved-copy-bundle.test.cjs",
  "qa/ai-layer-v21-p6-home-source-drift.test.cjs",

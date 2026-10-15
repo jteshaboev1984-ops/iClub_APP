@@ -70,6 +70,7 @@ CREATE OR REPLACE FUNCTION public.get_iclub_subscription_capabilities_service_v1
  AS $f$ SELECT '{"resolved":false}'::jsonb $f$;
 -- All 9 SQL DRAFTS must coexist in ONE transaction against ONE database.
 BEGIN;
+\ir iclub_ai_v21_89_column_overlay_LOCAL_ONLY.psql
 \ir iclub_ai_scoped_context_v21_UNAPPLIED.sql
 \ir iclub_ai_topic_release_gate_v21_UNAPPLIED.sql
 \ir iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql
@@ -154,6 +155,7 @@ BEGIN
  RAISE NOTICE 'INTEGRATED_NINE_DRAFTS_GREEN: 23 RPC, service grants, owner/off gates';
 END $integrated$;
 
+\ir iclub_ai_v21_two_owner_proof_LOCAL_ONLY.psql
 -- All nine new versions and synthetic test state MUST be rolled back atomically.
 ROLLBACK;
 DO $verify_rollback$
