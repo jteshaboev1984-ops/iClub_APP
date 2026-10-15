@@ -86,7 +86,7 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
    "Only one claimant may consume a durable scratch token");
   a.equal(scratchSql("SELECT count(*) FROM "+
    "private.iclub_ai_v21_home_action_handoffs_scratch "+
-   "WHERE consumed_at IS NOT NULL"),2);
+   "WHERE consumed_at IS NOT NULL"),"2");
   // Real-shaped scratch PG commercial guard + subscription capabilities:
   // shadow/passthrough and a disabled AI entitlement NEVER authorize Home.
   scratchSql("UPDATE private.iclub_commercial_access_config "+
