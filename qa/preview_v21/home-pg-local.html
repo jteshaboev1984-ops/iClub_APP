@@ -27,13 +27,21 @@ nav button[aria-current=page]{color:#2159d3;background:#eaf2ff;font-weight:700}
 <header><div><h1>iClub AI · Home</h1><small id="caption"></small></div>
 <div><label id="locale-label" for="locale">Язык</label>
 <select id="locale"><option value="ru">RU</option><option value="uz">UZ</option><option value="en">EN</option></select></div></header>
-<section class="card" aria-labelledby="heading">
+<section id="home-card" class="card" aria-labelledby="heading">
 <h2 id="heading"></h2><p class="note" id="explain"></p>
 <div id="result" class="result" role="status" aria-live="polite" data-state="idle"></div>
 <div id="choices" class="choices" role="list" aria-label="Разрешённые предметы"></div>
 <button id="check" type="button" class="primary"></button>
 <button id="confirm" type="button" class="secondary" hidden></button>
+<button id="open-study" type="button" class="primary" hidden></button>
 <button id="leave" type="button" class="secondary"></button>
+</section>
+<section id="study-panel" class="card" aria-labelledby="study-heading" hidden>
+<h2 id="study-heading"></h2>
+<p id="study-subject" class="note"></p>
+<div id="study-result" class="result" role="status" aria-live="polite"></div>
+<p id="study-disclaimer" class="note"></p>
+<button id="study-back" type="button" class="secondary"></button>
 </section>
 </main>
 <nav id="tabs" aria-label="Нижнее меню">
@@ -49,6 +57,10 @@ ru:{caption:"Без реальных учеников и внешнего AI",he
  explain:"Демонстрация проверенного сервером выбора. Учебные результаты не меняются.",
  check:"Проверить следующий шаг",leave:"Выйти из демонстрации",
  confirm:"Проверить выбранное действие",confirming:"Проверяем выбранное действие",
+ openStudy:"Открыть учебный раздел",opening:"Открываем учебный раздел",
+ studyBack:"Вернуться на главную",studyReadOnly:"Проверочный просмотр. Учебные результаты не изменяются.",
+ studyPracticeSummary:"Ошибок для разбора: ",studyTourSummary:"Архив завершённого тура доступен для просмотра.",
+ studySubjectSummary:"Можно продолжить изучение выбранного предмета.",
  confirmed:"Действие подтверждено. Учебный прогресс не изменён",
  idle:"Нажмите, чтобы проверить разрешённое действие",pending:"Проверяем доступ",expired:"Срок рекомендации истёк. Проверьте снова",
  denied:"Рекомендация сейчас недоступна",left:"Сеанс завершён",
@@ -60,6 +72,10 @@ uz:{caption:"Haqiqiy o‘quvchilar va tashqi AI ishlatilmaydi",heading:"Keyingi 
  explain:"Server tasdiqlagan tanlov namoyishi. O‘quvchining natijalari o‘zgarmaydi.",
  check:"Keyingi qadamni tekshirish",leave:"Namoyishdan chiqish",
  confirm:"Tanlangan qadamni tekshirish",confirming:"Tanlov tekshirilmoqda",
+ openStudy:"O‘quv bo‘limini ochish",opening:"O‘quv bo‘limi ochilmoqda",
+ studyBack:"Bosh sahifaga qaytish",studyReadOnly:"Sinov ko‘rish. O‘qish natijalari o‘zgarmaydi.",
+ studyPracticeSummary:"Ko‘rib chiqiladigan xatolar: ",studyTourSummary:"Yakunlangan tur arxivi ko‘rish uchun ochiq.",
+ studySubjectSummary:"Tanlangan fanni o‘rganishni davom ettirish mumkin.",
  confirmed:"Tanlov tasdiqlandi. O‘qish natijalari o‘zgarmadi",
  idle:"Mumkin bo‘lgan qadamni tekshirish uchun bosing",pending:"Ruxsat tekshirilmoqda",expired:"Tavsiya muddati tugadi. Qayta tekshiring",
  denied:"Tavsiya hozircha mavjud emas",left:"Seans yakunlandi",
@@ -71,6 +87,10 @@ en:{caption:"No real students or external AI",heading:"Next step",
  explain:"Demonstration of a server-verified choice. Student progress is unchanged.",
  check:"Check next step",leave:"Leave demonstration",
  confirm:"Verify selected action",confirming:"Verifying selected action",
+ openStudy:"Open study section",opening:"Opening study section",
+ studyBack:"Return to Home",studyReadOnly:"Test-only view. Learning progress is unchanged.",
+ studyPracticeSummary:"Mistakes to review: ",studyTourSummary:"The completed Tour archive is available to view.",
+ studySubjectSummary:"You can continue learning this subject.",
  confirmed:"Action verified. Study progress was not changed",
  idle:"Select to verify an eligible action",pending:"Checking access",expired:"Recommendation expired. Check again",
  denied:"A recommendation is not currently available",left:"Session ended",
@@ -85,6 +105,8 @@ const h="33333333-3333-4333-8333-333333333333";
 const syntheticToken="synthetic-owner-no-real-jwt-AAAAAAAA";
 let locale="ru",page="home",epoch=0,active=true,state="idle",action=null;
 let expiresAtMs=0,expiryTimer=null,choices=[],handoffToken=null,singleSubject=null;
+let confirmedToken=null,confirmedAction=null,confirmedSubject=null;
+let routeToken=null,routeSubject=null,routeTarget=null,routeCount=0;
 function clearExpiry(){if(expiryTimer!==null)clearTimeout(expiryTimer);
  expiryTimer=null;expiresAtMs=0;choices=[];handoffToken=null;singleSubject=null;}
 function expireIfStale(){if(active&&state==="ready"&&expiresAtMs>0&&Date.now()>=expiresAtMs){
@@ -98,13 +120,30 @@ function render(){
  by("caption").textContent=c.caption;by("heading").textContent=c.heading;
  by("explain").textContent=c.explain;by("check").textContent=c.check;
  by("leave").textContent=c.leave;by("confirm").textContent=c.confirm;
+ by("open-study").textContent=c.openStudy;
+ by("study-back").textContent=c.studyBack;
+ by("study-disclaimer").textContent=c.studyReadOnly;
+ by("home-card").hidden=page==="study";
+ by("study-panel").hidden=page!=="study";
+ if(page==="study"){
+  by("study-heading").textContent=routeTarget==="practice-review"?
+   c.review_finalized_practice:routeTarget==="tour-review"?
+   c.review_open_tour_archive:c.continue_enrolled_subject;
+  by("study-subject").textContent=SUBJECT_NAMES[locale][routeSubject]||"";
+  by("study-result").textContent=routeTarget==="practice-review"?
+   c.studyPracticeSummary+routeCount:routeTarget==="tour-review"?
+   c.studyTourSummary:c.studySubjectSummary;
+ }
  by("locale-label").textContent=c.lang;
  by("tabs").setAttribute("aria-label",c.nav);
  buttons.forEach((b,i)=>{
-  b.textContent=c.tab[i];b.toggleAttribute("aria-current",b.dataset.page===page);
-  if(b.dataset.page===page)b.setAttribute("aria-current","page");
+  const shown=page==="study"?"courses":page;
+  b.textContent=c.tab[i];b.toggleAttribute("aria-current",b.dataset.page===shown);
+  if(b.dataset.page===(page==="study"?"courses":page))b.setAttribute("aria-current","page");
   else b.removeAttribute("aria-current");
  });
+ by("open-study").hidden=!(active&&page==="home"&&state==="confirmed"&&confirmedToken);
+ by("locale").disabled=page==="study";
  by("confirm").hidden=!(active&&page==="home"&&state==="ready"&&
  action!=="selection_required");
  const output=by("result");
@@ -124,7 +163,7 @@ function render(){
    wrapper.append(item);list.append(wrapper);
   }
  }
- by("check").disabled=!active||page!=="home"||state==="pending"||state==="confirming";
+ by("check").disabled=!active||page!=="home"||state==="pending"||state==="confirming"||state==="opening";
 }
 async function submitChoice(actionCode,subjectKey){
  if(!active||page!=="home"||state!=="ready"||!handoffToken||
@@ -132,6 +171,7 @@ async function submitChoice(actionCode,subjectKey){
     "continue_enrolled_subject"].includes(actionCode)||!SUBJECT_NAMES[locale][subjectKey])
   return;
  const at=++epoch,token=handoffToken;
+ confirmedToken=null;confirmedAction=null;confirmedSubject=null;
  clearExpiry();state="confirming";action=null;render();
  try{
   const res=await fetch("/qa/home/confirm",{method:"POST",
@@ -145,17 +185,82 @@ async function submitChoice(actionCode,subjectKey){
    data.reviewOnly===true&&data.releaseAllowed===false&&
    data.navigationExecuted===false&&data.progressChanged===false?
    "confirmed":"denied";
+  if(state==="confirmed"){
+   confirmedToken=token;confirmedAction=actionCode;confirmedSubject=subjectKey;
+  }
  }catch{if(at===epoch)state="denied";}
  if(at===epoch)render();
 }
+
+// Only synthetic localhost navigation is possible. The Home token is
+// consumed at /confirm; opening creates a NEW independent server scope.
+async function qaPost(path,body){
+ const res=await fetch(path,{method:"POST",credentials:"omit",cache:"no-store",
+  headers:{"Content-Type":"application/json",
+   "Authorization":"Bearer "+syntheticToken},
+  body:JSON.stringify(body)});
+ return {res,data:await res.json()};
+}
+by("open-study").addEventListener("click",async()=>{
+ if(!active||page!=="home"||state!=="confirmed"||!confirmedToken)return;
+ const at=++epoch,token=confirmedToken,code=confirmedAction,subject=confirmedSubject;
+ confirmedToken=null;state="opening";render();
+ try{
+  const open=await qaPost("/qa/study/open",{contextHandle:h,locale,
+   handoffToken:token,actionCode:code,subjectKey:subject});
+  if(at!==epoch||!active)return;
+  if(!open.res.ok||open.data.status!=="qa_study_scope_open"||
+   !/^[A-Za-z0-9_-]{32}$/.test(open.data.routeToken||"")||
+   open.data.reviewOnly!==true||open.data.releaseAllowed!==false||
+   open.data.progressChanged!==false)throw Error("Route refused");
+  routeToken=open.data.routeToken;
+  const read=await qaPost("/qa/study/read",{locale,routeToken});
+  if(at!==epoch||!active)return;
+  if(!read.res.ok||read.data.status!=="qa_study_read"||
+   read.data.reviewOnly!==true||read.data.releaseAllowed!==false||
+   read.data.progressChanged!==false||
+   read.data.subjectKey!==subject||
+   read.data.targetScreen!==open.data.targetScreen||
+   !["practice-review","tour-review","subject-hub"].includes(read.data.targetScreen)||
+   !Number.isSafeInteger(read.data.reviewCount))throw Error("Study read refused");
+  routeSubject=read.data.subjectKey;routeTarget=read.data.targetScreen;
+  routeCount=read.data.reviewCount;
+  page="study";state="study";
+ }catch{
+  if(at===epoch){
+   if(routeToken)void qaPost("/qa/study/close",{routeToken,locale}).catch(()=>{});
+   routeToken=null;state="denied";
+  }
+ }
+ if(at===epoch)render();
+});
+by("study-back").addEventListener("click",async()=>{
+ if(page!=="study"||!routeToken)return;
+ const at=++epoch,token=routeToken,oldLocale=locale;
+ state="closing";render();
+ try{
+  const closed=await qaPost("/qa/study/close",{locale:oldLocale,routeToken:token});
+  if(at!==epoch)return;
+  if(!closed.res.ok||closed.data.status!=="qa_study_closed"||
+   closed.data.progressChanged!==false)throw Error("Close refused");
+  routeToken=null;routeSubject=null;routeTarget=null;routeCount=0;
+  confirmedToken=null;page="home";resetSuggestion();state="idle";
+ }catch{if(at===epoch)state="denied";}
+ if(at===epoch)render();
+});
+
 by("confirm").addEventListener("click",()=>submitChoice(action,singleSubject));
 by("locale").addEventListener("change",e=>{
  locale=e.target.value;epoch++;resetSuggestion();render();
 });
 buttons.forEach(b=>b.addEventListener("click",()=>{
- page=b.dataset.page;epoch++;resetSuggestion();render();
+ if(page==="study"){by("study-back").click();return;}
+ page=b.dataset.page;epoch++;confirmedToken=null;resetSuggestion();render();
 }));
 by("leave").addEventListener("click",()=>{
+ const was=routeToken;
+ if(was)void qaPost("/qa/study/close",{locale,routeToken:was}).catch(()=>{});
+ routeToken=null;confirmedToken=null;
  epoch++;clearExpiry();active=false;state="left";action=null;render();
 });
 by("check").addEventListener("click",async()=>{
@@ -212,6 +317,7 @@ by("check").addEventListener("click",async()=>{
 document.addEventListener("visibilitychange",expireIfStale);
 render();
 window.__qaHomeState=()=>({state,action,active,page,locale,expiresAtMs,
+ studyTarget:routeTarget,studySubject:routeSubject,studyCount:routeCount,
  visibleChoices:[...document.querySelectorAll("#choices .choice-item")].map(x=>x.textContent)});
 })();
 </script></body></html>
