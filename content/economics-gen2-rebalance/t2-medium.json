@@ -54,10 +54,10 @@
     "n": 20,
     "d": "medium",
     "sec": 135,
-    "k": "D",
-    "en": "A shipyard automates welding, but new vacancies require programming skills. Orders are rising again, yet former welders remain unemployed. Which evidence most strongly distinguishes their situation from purely cyclical unemployment?",
-    "ru": "Верфь автоматизировала сварку; новые вакансии требуют навыков программирования. Заказы снова растут, но прежние сварщики остаются без работы. Какой факт сильнее всего отличает их положение от чисто циклической безработицы?",
-    "uz": "Kemasozlik zavodi payvandlashni avtomatlashtirdi, yangi ishlar dasturlash malakasini talab qiladi. Buyurtmalar tiklangan, ammo sobiq payvandchilar ishsiz. Qaysi dalil bu holatni oddiy davriy ishsizlikdan ajratadi?",
+    "k": "C",
+    "en": "A shipyard has two types of unemployed workers: group A lost jobs because welding was automated and their skills do not match new programming vacancies; group B has the necessary skills but was laid off temporarily when overall orders fell. Which pair identifies the MAIN causes for A and B?",
+    "ru": "На верфи без работы остались две группы. Группа A потеряла места из-за автоматизации сварки и не соответствует новым вакансиям программистов. Группа B обладает нужными навыками, но временно уволена из-за общего падения заказов. Какие причины безработицы у A и B?",
+    "uz": "Kemasozlik zavodida ikki guruh ishsiz. A guruhi payvandlash avtomatlashtirilgani va yangi dasturlash vakansiyalariga malakasi mos emasligi sabab ishsiz qoldi. B guruhi malakali, lekin umumiy buyurtmalar kamaygani uchun vaqtincha bo‘shatildi. A va B sabablarini belgilang.",
     "opt_en": [
       "Lower exports in a separate industry",
       "A temporary fall in household tourism spending",
@@ -77,28 +77,28 @@
       "Bo‘sh ish joylari bor, ammo ishdan bo‘shatilganlar talab qilingan malakaga ega emas"
     ],
     "why": [
-      "A persistent mismatch of available workers to vacancies is evidence of structural unemployment, even while aggregate demand recovers.",
-      "Сохраняющийся разрыв между навыками работников и требованиями вакансий — признак структурной безработицы даже при восстановлении спроса.",
-      "Mavjud ishchilar malakasi vakansiyalarga mos kelmasligi talab tiklanganda ham tarkibiy ishsizlikdan dalolat."
+      "A's lasting skill mismatch is structural unemployment; B's job loss from temporarily weak aggregate demand is cyclical.",
+      "У A устойчивое несоответствие квалификации — структурная безработица; у B временный недостаток спроса — циклическая.",
+      "A ning malaka mos kelmasligi tarkibiy ishsizlik; B dagi vaqtinchalik talab pasayishi davriy ishsizlik."
     ],
     "ref": "EC9708:G2:EC9708-G2-T2-P-020",
     "options_en": [
-      "Lower exports in a separate industry",
-      "A temporary fall in household tourism spending",
-      "A short interruption while changing employers with matching skills",
-      "Persisting vacancies whose skill requirements the displaced workers cannot meet"
+      "A cyclical; B structural",
+      "A frictional; B seasonal",
+      "A structural; B cyclical",
+      "A seasonal; B frictional"
     ],
     "options_ru": [
-      "Снижение экспорта в другой отрасли",
-      "Временное сокращение расходов домохозяйств на туризм",
-      "Краткий перерыв при смене работы с подходящей квалификацией",
-      "Сохраняющиеся вакансии, требованиям которых уволенные работники не соответствуют"
+      "A — циклическая; B — структурная",
+      "A — фрикционная; B — сезонная",
+      "A — структурная; B — циклическая",
+      "A — сезонная; B — фрикционная"
     ],
     "options_uz": [
-      "Boshqa tarmoq eksportining kamayishi",
-      "Oilalarning sayohat xarajatlari vaqtincha kamayishi",
-      "Mos malaka bilan ish almashtirishdagi qisqa tanaffus",
-      "Bo‘sh ish joylari bor, ammo ishdan bo‘shatilganlar talab qilingan malakaga ega emas"
+      "A — davriy; B — tarkibiy",
+      "A — friksion; B — mavsumiy",
+      "A — tarkibiy; B — davriy",
+      "A — mavsumiy; B — friksion"
     ]
   },
   {
@@ -309,10 +309,10 @@
     "n": 50,
     "d": "medium",
     "sec": 140,
-    "k": "B",
-    "en": "The CPI starts at 100, inflation is 9% in year 1 and 4% in year 2. What is the CPI after year 2 and what does the fall in the inflation rate mean?",
-    "ru": "Индекс цен первоначально равен 100, инфляция в первом году 9%, во втором 4%. Чему равен CPI после второго года и что означает замедление инфляции?",
-    "uz": "CPI boshida 100, birinchi yilda inflyatsiya 9%, ikkinchi yilda 4%. Ikkinchi yil oxirida CPI qancha va inflyatsiya pasayishi nimani anglatadi?",
+    "k": "A",
+    "en": "An economy's CPI basket assigns 60% of expenditure weight to food and 40% to clothing. Food prices rise 10% while clothing prices fall 5%; assume fixed quantities and no other items. Approximately how much does this basket-based CPI rise?",
+    "ru": "В корзине CPI на продовольствие приходится 60% расходов, на одежду — 40%. Продовольствие подорожало на 10%, одежда подешевела на 5%; объёмы и прочие товары неизменны. На сколько примерно вырос индекс цен такой корзины?",
+    "uz": "CPI savatida oziq-ovqat xarajatlari 60%, kiyim esa 40%. Oziq-ovqat narxi 10% oshdi, kiyim narxi 5% tushdi; miqdorlar o‘zgarmaydi va boshqa mahsulot yo‘q. Ushbu savat CPI taxminan nechaga oshadi?",
     "opt_en": [
       "104.0; prices are falling",
       "113.36; prices are still rising but more slowly",
@@ -332,28 +332,28 @@
       "113,36; umumiy deflyatsiya boshlandi"
     ],
     "why": [
-      "CPI = 100 × 1.09 × 1.04 = 113.36. Positive 4% inflation still raises the price level; a lower rate is disinflation.",
-      "CPI = 100 × 1,09 × 1,04 = 113,36. Положительная инфляция 4% всё ещё повышает цены, хотя её темп снизился.",
-      "CPI = 100 × 1,09 × 1,04 = 113,36. Musbat 4% inflyatsiya narxni oshiradi, faqat sur’at sekinlashadi."
+      "With fixed basket weights, the combined price change is 0.6×10% + 0.4×(−5%) = 6% − 2% = +4%.",
+      "При фиксированных весах изменение CPI: 0,6×10% + 0,4×(−5%) = 6% − 2% = +4%.",
+      "O‘zgarmas vaznda CPI o‘zgarishi 0,6×10% + 0,4×(−5%) = 6% − 2% = +4%."
     ],
     "ref": "EC9708:G2:EC9708-G2-T2-P-050",
     "options_en": [
-      "104.0; prices are falling",
-      "113.36; prices are still rising but more slowly",
-      "109.0; prices have stopped rising",
-      "113.36; general deflation has begun"
+      "+4%",
+      "+6%",
+      "+5%",
+      "−4%"
     ],
     "options_ru": [
-      "104,0; цены снижаются",
-      "113,36; цены продолжают расти, но медленнее",
-      "109,0; цены перестали расти",
-      "113,36; началась общая дефляция"
+      "+4%",
+      "+6%",
+      "+5%",
+      "−4%"
     ],
     "options_uz": [
-      "104,0; narxlar pasaymoqda",
-      "113,36; narxlar hali ham oshadi, ammo sekinroq",
-      "109,0; narxlar o‘sishi to‘xtadi",
-      "113,36; umumiy deflyatsiya boshlandi"
+      "+4%",
+      "+6%",
+      "+5%",
+      "−4%"
     ]
   },
   {
