@@ -13,6 +13,8 @@ const {makeCommercialProofAdapter}=require("./ai-layer-v21-p6-commercial-contrac
 const {validateBeforeHomeDelivery}=require("./ai-layer-v21-p6-home-delivery-gate.cjs");
 const {issueSyntheticHandoff,claimSyntheticHandoff}=require("./ai-layer-v21-p6-home-action-handoff.cjs");
 const {resolveSyntheticDestination}=require("./ai-layer-v21-p6-home-destination-proof.cjs");
+const {openSyntheticStudy,readSyntheticStudy,closeSyntheticStudy}=
+ require("./ai-layer-v21-p6-study-route.cjs");
 const OWNER="11111111-1111-4111-8111-111111111111";
 const FOREIGN="22222222-2222-4222-8222-222222222222";
 const HANDLE="33333333-3333-4333-8333-333333333333";
@@ -258,7 +260,11 @@ function makeGateway({beforeDelivery,beforeAtomicRead}={}){
   const isNext=req.url==="/qa/home/next";
   const isConfirm=req.url==="/qa/home/confirm";
   const isDestination=req.url==="/qa/home/destination";
-  if((!isNext&&!isConfirm&&!isDestination)||req.method!=="POST")
+  const isStudyOpen=req.url==="/qa/study/open";
+  const isStudyRead=req.url==="/qa/study/read";
+  const isStudyClose=req.url==="/qa/study/close";
+  if((!isNext&&!isConfirm&&!isDestination&&!isStudyOpen&&
+   !isStudyRead&&!isStudyClose)||req.method!=="POST")
    return reject(404,"not_found");
   const origin="http://127.0.0.1:"+server.address().port;
   if(req.headers.origin!==origin)return reject(403,"origin_not_authorized");
@@ -276,12 +282,14 @@ function makeGateway({beforeDelivery,beforeAtomicRead}={}){
     if(Buffer.byteLength(raw)>256)return reject(413,"body_too_large");
    }
    const body=JSON.parse(raw),keys=Object.keys(body||{}).sort().join(",");
-   if(isConfirm||isDestination){
+   if(isConfirm||isDestination||isStudyOpen){
     if(keys!=="actionCode,contextHandle,handoffToken,locale,subjectKey"||
      !UUID.test(body.contextHandle||"")||
      !["ru","uz","en"].includes(body.locale))
      return reject(400,"invalid_request");
-    const claimed=(isConfirm?claimSyntheticHandoff:resolveSyntheticDestination)({
+    const handler=isConfirm?claimSyntheticHandoff:isDestination?
+     resolveSyntheticDestination:openSyntheticStudy;
+    const claimed=handler({
      sql,signingKey:services.signingKey,
      userId:user,contextHandle:body.contextHandle,locale:body.locale,
      handoffToken:body.handoffToken,actionCode:body.actionCode,
@@ -291,6 +299,18 @@ function makeGateway({beforeDelivery,beforeAtomicRead}={}){
      "Cache-Control":"no-store","Access-Control-Allow-Origin":origin,
      "X-Content-Type-Options":"nosniff"});
     return res.end(JSON.stringify(claimed));
+   }
+   if(isStudyRead||isStudyClose){
+    if(keys!=="locale,routeToken"||!["ru","uz","en"].includes(body.locale))
+     return reject(400,"invalid_request");
+    const handler=isStudyRead?readSyntheticStudy:closeSyntheticStudy;
+    const result=handler({sql,userId:user,locale:body.locale,
+     routeToken:body.routeToken});
+    if(result.ok!==true)return reject(403,"in_development");
+    res.writeHead(200,{"Content-Type":"application/json",
+     "Cache-Control":"no-store","Access-Control-Allow-Origin":origin,
+     "X-Content-Type-Options":"nosniff"});
+    return res.end(JSON.stringify(result));
    }
    if(keys!=="contextHandle,locale"||!UUID.test(body.contextHandle||"")||
     !["ru","uz","en"].includes(body.locale))return reject(400,"invalid_request");
