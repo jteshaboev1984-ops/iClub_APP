@@ -170,6 +170,7 @@ BEGIN
  OR to_regclass('private.iclub_ai_v21_provider_spend_leases') IS NOT NULL
  OR to_regprocedure('public.get_iclub_ai_v21_runtime_service()') IS NOT NULL
  OR to_regprocedure('public.claim_iclub_ai_delivery_service_v21(uuid,uuid,text,text,text)') IS NOT NULL
+ OR to_regprocedure('public.get_iclub_ai_v21_screen_evidence_service(uuid,text,text,text,bigint,bigint,bigint,bigint)') IS NOT NULL
  THEN RAISE EXCEPTION 'Integrated rollback left draft objects';END IF;
  IF to_regclass('private.iclub_ai_usage_policies') IS NULL
  OR NOT EXISTS(SELECT 1 FROM private.iclub_global_ai_runtime_config

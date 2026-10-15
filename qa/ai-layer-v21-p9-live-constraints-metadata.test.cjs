@@ -19,7 +19,7 @@ test("§118 production constraints/indices/triggers/policy inventory grounded in
  "trg_enforce_competitive_limit","trg_sync_telegram_link_from_users"].sort());
 });
 test("§118 limited test constraints and eight negative statements are never product DDL",()=>{
- a.ok(local.includes("SCRATCH")&&local.includes("FOREIGN KEY"));
+ a.ok(local.includes("scratch only")&&local.includes("FOREIGN KEY"));
  a.equal((local.match(/ADD CONSTRAINT qa_/g)||[]).length,23);
  a.ok(flow.includes("\\ir iclub_ai_v21_critical_constraints_LOCAL_ONLY.psql"));
  a.ok(flow.includes("\\ir iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql"));
