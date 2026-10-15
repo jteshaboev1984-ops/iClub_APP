@@ -11,3 +11,5 @@ Another full CI run: bounded cleanup for short-lived Chromium profile subprocess
 Final QA-to-QA run for owner-subject-intent commercial access proof, exact source hashes and signed Home authorization. Never merge to main.
 
 QA CI rerun 2026-10-15: verify Home source priority by real enrolment mode, subject-level synthetic authorization, independent academic/editorial rechecks and final owner screen/scan stability. No paid Supabase branch or production changes. NEVER MERGE.
+
+QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.js and plans-ui.js against trusted QA baseline without altering original production surfaces. NO MERGE.
