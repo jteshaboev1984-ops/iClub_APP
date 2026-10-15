@@ -44,7 +44,7 @@ const LANG={
 ru:{caption:"Без реальных учеников и внешнего AI",heading:"Следующий шаг",
  explain:"Демонстрация проверенного сервером выбора. Учебные результаты не меняются.",
  check:"Проверить следующий шаг",leave:"Выйти из демонстрации",
- idle:"Нажмите, чтобы проверить разрешённое действие",pending:"Проверяем доступ",
+ idle:"Нажмите, чтобы проверить разрешённое действие",pending:"Проверяем доступ",expired:"Срок рекомендации истёк. Проверьте снова",
  denied:"Рекомендация сейчас недоступна",left:"Сеанс завершён",
  review_finalized_practice:"Разобрать ошибки Practice",
  review_open_tour_archive:"Посмотреть открытый архив Tour",
@@ -53,7 +53,7 @@ ru:{caption:"Без реальных учеников и внешнего AI",he
 uz:{caption:"Haqiqiy o‘quvchilar va tashqi AI ishlatilmaydi",heading:"Keyingi qadam",
  explain:"Server tasdiqlagan tanlov namoyishi. O‘quvchining natijalari o‘zgarmaydi.",
  check:"Keyingi qadamni tekshirish",leave:"Namoyishdan chiqish",
- idle:"Mumkin bo‘lgan qadamni tekshirish uchun bosing",pending:"Ruxsat tekshirilmoqda",
+ idle:"Mumkin bo‘lgan qadamni tekshirish uchun bosing",pending:"Ruxsat tekshirilmoqda",expired:"Tavsiya muddati tugadi. Qayta tekshiring",
  denied:"Tavsiya hozircha mavjud emas",left:"Seans yakunlandi",
  review_finalized_practice:"Practice xatolarini tahlil qilish",
  review_open_tour_archive:"Ochiq Tour arxivini ko‘rish",
@@ -62,7 +62,7 @@ uz:{caption:"Haqiqiy o‘quvchilar va tashqi AI ishlatilmaydi",heading:"Keyingi 
 en:{caption:"No real students or external AI",heading:"Next step",
  explain:"Demonstration of a server-verified choice. Student progress is unchanged.",
  check:"Check next step",leave:"Leave demonstration",
- idle:"Select to verify an eligible action",pending:"Checking access",
+ idle:"Select to verify an eligible action",pending:"Checking access",expired:"Recommendation expired. Check again",
  denied:"A recommendation is not currently available",left:"Session ended",
  review_finalized_practice:"Review Practice mistakes",
  review_open_tour_archive:"Review an open Tour archive",
@@ -72,6 +72,12 @@ en:{caption:"No real students or external AI",heading:"Next step",
 const h="33333333-3333-4333-8333-333333333333";
 const syntheticToken="synthetic-owner-no-real-jwt-AAAAAAAA";
 let locale="ru",page="home",epoch=0,active=true,state="idle",action=null;
+let expiresAtMs=0,expiryTimer=null;
+function clearExpiry(){if(expiryTimer!==null)clearTimeout(expiryTimer);expiryTimer=null;expiresAtMs=0;}
+function expireIfStale(){if(active&&state==="ready"&&expiresAtMs>0&&Date.now()>=expiresAtMs){
+ clearExpiry();state="expired";action=null;render();
+}}
+function resetSuggestion(){clearExpiry();state="idle";action=null;}
 const by=id=>document.getElementById(id);
 const buttons=[...document.querySelectorAll("#tabs button")];
 function render(){
@@ -93,17 +99,17 @@ function render(){
  by("check").disabled=!active||page!=="home"||state==="pending";
 }
 by("locale").addEventListener("change",e=>{
- locale=e.target.value;epoch++;state="idle";action=null;render();
+ locale=e.target.value;epoch++;resetSuggestion();render();
 });
 buttons.forEach(b=>b.addEventListener("click",()=>{
- page=b.dataset.page;epoch++;state="idle";action=null;render();
+ page=b.dataset.page;epoch++;resetSuggestion();render();
 }));
 by("leave").addEventListener("click",()=>{
- epoch++;active=false;state="left";action=null;render();
+ epoch++;clearExpiry();active=false;state="left";action=null;render();
 });
 by("check").addEventListener("click",async()=>{
  if(!active||page!=="home"||state==="pending")return;
- const at=++epoch;state="pending";render();
+ const at=++epoch;clearExpiry();state="pending";render();
  try{
   const res=await fetch("/qa/home/next",{method:"POST",
    credentials:"omit",cache:"no-store",
@@ -115,15 +121,25 @@ by("check").addEventListener("click",async()=>{
   if(res.ok&&data.ok===true&&data.reviewOnly===true&&
    data.releaseAllowed===false&&
    (data.status==="candidate_only"||data.status==="selection_required")){
-   state="ready";action=data.status==="selection_required"?
-    "selection_required":data.actionCode;
+   const deadline=data.expiresAtMs;
+   if(!Number.isSafeInteger(deadline)||deadline<=Date.now()||
+      deadline-Date.now()>30000){state="denied";action=null;}
+   else{
+    state="ready";action=data.status==="selection_required"?
+     "selection_required":data.actionCode;
+    expiresAtMs=deadline;
+    expiryTimer=setTimeout(()=>{
+     if(at===epoch)expireIfStale();
+    },Math.max(1,deadline-Date.now()+1));
+   }
   }else{state="denied";action=null;}
  }catch{
   if(at===epoch){state="denied";action=null;}
  }
  if(at===epoch)render();
 });
+document.addEventListener("visibilitychange",expireIfStale);
 render();
-window.__qaHomeState=()=>({state,action,active,page,locale});
+window.__qaHomeState=()=>({state,action,active,page,locale,expiresAtMs});
 })();
 </script></body></html>
