@@ -139,7 +139,12 @@
       const dt=new Date(String(attempt.finished_at||''));
       if(Number.isFinite(dt.getTime()))info.append(node('small','',dt.toLocaleDateString(locale)));
       const right=node('span','iclub-topic-history-row-meta');
-      right.append(node('span','iclub-topic-history-row-score',score(attempt)));
+      const ratio=Number(attempt.correct)/Number(attempt.total);
+      const state=ratio===1?'good':ratio<=.2?'bad':'neutral';
+      const icon=node('span','iclub-sx-history-icon '+state,state==='good'?'✓':state==='bad'?'!':'↺');
+      icon.setAttribute('aria-hidden','true');
+      button.prepend(icon);
+      right.append(node('span','iclub-topic-history-row-score '+state,score(attempt)));
       right.append(node('span','iclub-topic-history-arrow','›'));
       button.append(info,right);
       button.addEventListener('click',()=>openTopicAttempt(attempt,data.subject_key));
@@ -213,8 +218,11 @@
     const sessionId=Number(attempt.session_id||0);
     const canRetry=mistakes>0&&wrongIds.length>0&&Number.isSafeInteger(sessionId)&&sessionId>0;
     if(canRetry){
+      const retryNoun=locale==='ru'
+        ?(wrongIds.length%10===1&&wrongIds.length%100!==11?'ошибку':errorsNoun(wrongIds.length))
+        :errorsNoun(wrongIds.length);
       const retry=node('button','btn primary iclub-sx-attempt-retry',
-        tr('Исправить ','Tuzatish: ','Correct ')+mistakes+' '+errorsNoun(mistakes));
+        tr('Исправить ','Tuzatish: ','Correct ')+wrongIds.length+' '+retryNoun);
       retry.type='button';
       retry.addEventListener('click',()=>{
         window.dispatchEvent(new CustomEvent('iclub-practice-correct-history',{
