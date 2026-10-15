@@ -19555,37 +19555,36 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
         const matching=historyItems.find(a=>sourceIds.has(Number(a?.session_id||0)) &&
           String(a?.topic||"").trim()===topic &&
           Number(a?.total)>Number(a?.correct));
-        const errorCount=matching?Math.max(0,Number(matching.total)-Number(matching.correct)):0;
+        const eligibleIds=Array.from(new Set((Array.isArray(matching?.review)?matching.review:[])
+          .map(q=>Number(q?.question_id||0)).filter(id=>Number.isSafeInteger(id)&&id>0))).slice(0,10);
         const attemptIndex=matching?historyItems.indexOf(matching):-1;
-        const entries=items.map(({rec,index},k)=>{
-          const sub=String(rec.subtopic||"").trim();
-          const book=String(rec.book_reference||"").trim();
-          const label=items.length===1 && (sub||topic).toLocaleLowerCase()===topic.toLocaleLowerCase()
-            ?tr3("Открыть рекомендацию","Tavsiyani ochish","Open recommendation")
-            :(sub||topic);
-          return '<button type="button" class="iclub-sx-topic-entry" data-open-rec="practice" data-rec-index="'+index+'" '+(k>=3?'hidden data-sx-extra="1"':'')+'>'+
-            '<span class="iclub-sx-topic-number">'+String(k+1).padStart(2,"0")+'</span>'+
-            '<span class="iclub-sx-topic-entry-text"><strong>'+escapeHTML(label)+'</strong>'+
-            (book?'<small>'+escapeHTML(book)+'</small>':'')+
-            '</span><span class="iclub-sx-arrow" aria-hidden="true">›</span></button>';
-        }).join("");
-        const correctAction=matching?'<button type="button" class="iclub-sx-primary" data-sx-open-attempt="'+attemptIndex+'">'+
-          escapeHTML(tr3("Разобрать ошибки","Xatolarni tahlil qilish","Review mistakes"))+' ('+errorCount+')</button>':"";
         const count=items.length;
         const countText=tr3("к повторению","takrorlash","to review");
+        const entries=count>1?items.map(({rec,index},k)=>{
+          const sub=String(rec.subtopic||"").trim();
+          const book=String(rec.book_reference||"").trim();
+          return '<button type="button" class="iclub-sx-topic-entry" data-open-rec="practice" data-rec-index="'+index+'" '+(k>=3?'hidden data-sx-extra="1"':'')+'>'+
+            '<span class="iclub-sx-topic-number">'+String(k+1).padStart(2,"0")+'</span>'+
+            '<span class="iclub-sx-topic-entry-text"><strong>'+escapeHTML(sub||topic)+'</strong>'+
+            (book?'<small>'+escapeHTML(book)+'</small>':'')+
+            '</span><span class="iclub-sx-arrow" aria-hidden="true">›</span></button>';
+        }).join(""):"";
+        const correctAction=matching&&eligibleIds.length
+          ?'<button type="button" class="iclub-sx-primary" data-sx-correct-attempt="'+attemptIndex+'">'+
+            escapeHTML(tr3("Исправить ошибки","Xatolarni tuzatish","Correct mistakes"))+'</button>':"";
+        const singleLink=count===1?
+          '<button type="button" class="iclub-sx-single-link" data-open-rec="practice" data-rec-index="'+items[0].index+'">'+
+            escapeHTML(tr3("Открыть рекомендацию","Tavsiyani ochish","Open recommendation"))+' <span aria-hidden="true">→</span></button>':"";
         return '<section class="iclub-sx-topic-group" data-sx-topic-group="1">'+
-          '<div class="iclub-sx-topic-head"><div class="iclub-sx-topic-headline">'+
-          '<span class="iclub-sx-kicker">'+escapeHTML(tr3("ПРАКТИКА ПО ТЕМАМ","MAVZULAR BO‘YICHA AMALIYOT","PRACTICE BY TOPIC"))+'</span>'+
-          '<span class="iclub-sx-tag">'+count+' '+escapeHTML(countText)+'</span></div>'+
+          '<div class="iclub-sx-topic-head">'+
+          (count>1?'<div class="iclub-sx-topic-headline"><span class="iclub-sx-tag">'+count+
+             ' '+escapeHTML(countText)+'</span></div>':'')+
           '<h3>'+escapeHTML(topic)+'</h3>'+
-          '<p>'+escapeHTML(count===1
-          ?tr3("Откройте рекомендацию, чтобы изучить ошибки и материалы.",
-            "Xatolar va materiallarni ko‘rish uchun tavsiyani oching.",
-            "Open the recommendation to review mistakes and materials.")
-          :tr3("Рекомендации сгруппированы по подтемам. Каждую можно открыть отдельно.",
-            "Tavsiyalar kichik mavzular bo‘yicha guruhlangan. Har birini alohida ochish mumkin.",
-            "Recommendations are grouped by subtopic. Open each separately."))+'</p>'+correctAction+'</div>'+
-          '<div class="iclub-sx-topic-entries">'+entries+'</div>'+
+          (count>1?'<p>'+escapeHTML(tr3("Выберите подтему для повторения.",
+            "Takrorlash uchun kichik mavzuni tanlang.",
+            "Choose a subtopic to review."))+'</p>':"")+
+          correctAction+singleLink+'</div>'+
+          (count>1?'<div class="iclub-sx-topic-entries">'+entries+'</div>':"")+
           (count>3?'<button type="button" class="iclub-sx-more" data-sx-expand="1" aria-expanded="false">'+
           escapeHTML(tr3("Показать ещё","Yana ko‘rsatish","Show more"))+' '+(count-3)+' <span aria-hidden="true">⌄</span></button>':'')+
           '</section>';
@@ -19715,11 +19714,19 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
             " "+group.querySelectorAll("[data-sx-extra]").length+" ⌄";
       });
     });
-    wrap.querySelectorAll("[data-sx-open-attempt]").forEach(button=>{
+    wrap.querySelectorAll("[data-sx-correct-attempt]").forEach(button=>{
       button.addEventListener("click",()=>{
-        const index=Number(button.dataset.sxOpenAttempt);
+        const index=Number(button.dataset.sxCorrectAttempt);
         const attempt=Array.isArray(topicHistory?.recent)?topicHistory.recent[index]:null;
-        if(attempt)window.iClubPracticeTopicHistoryV1?.openAttempt?.(attempt,subjectKey);
+        const sourceSessionId=Number(attempt?.session_id||0);
+        const questionIds=Array.from(new Set((Array.isArray(attempt?.review)?attempt.review:[])
+          .map(q=>Number(q?.question_id||0))
+          .filter(id=>Number.isSafeInteger(id)&&id>0))).slice(0,10);
+        if(!Number.isSafeInteger(sourceSessionId)||sourceSessionId<=0||
+          !questionIds.length||!String(attempt?.topic||"").trim())return;
+        window.dispatchEvent(new CustomEvent("iclub-practice-correct-history",{
+          detail:{subjectKey,sourceSessionId,questionIds,topic:String(attempt.topic)}
+        }));
       });
     });
   }
@@ -20713,7 +20720,10 @@ let practiceHistoryRetryBusy=false;
 window.addEventListener("iclub-practice-correct-history",event=>{
   const d=event?.detail;
   if(!d||practiceHistoryRetryBusy||String(d.subjectKey||"")!==String(state?.courses?.subjectKey||""))return;
-  if(getCoursesTopScreen()!=="my-rec-topic-review")return;
+  const screen=getCoursesTopScreen();
+  if(screen!=="my-rec-topic-review"&&
+    !(screen==="my-recs"&&state?.courses?.myRecsActiveTab==="practice"&&
+      state?.courses?.myRecsPracticeMode==="topics"))return;
   practiceHistoryRetryBusy=true;
   Promise.resolve(startPracticeRetryMistakes({fromHistory:true,
     sourceSessionId:d.sourceSessionId||d.sessionId,questionIds:d.questionIds,topic:d.topic}))
