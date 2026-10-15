@@ -1,0 +1,24 @@
+{
+  "schema": "iclub_ai_v21_real_commercial_catalog_proof_v1",
+  "capturedOn": "2026-10-15",
+  "scope": "READ_ONLY_SOURCE_DEFINITIONS_NO_USER_DATA",
+  "source": "live_pg_proc_function_definitions",
+  "functions": [
+    {
+      "schema": "public",
+      "name": "get_iclub_subject_access_guard_service_v1",
+      "identityArgs": "p_user_id uuid, p_subject_key text, p_intent text",
+      "definitionMd5": "bb0c27de3665e5c6e16810044b1316a5"
+    },
+    {
+      "schema": "public",
+      "name": "get_iclub_subscription_capabilities_service_v1",
+      "identityArgs": "p_user_id uuid",
+      "definitionMd5": "58bfe7eaf0c54a8e74d50bbf79416684"
+    }
+  ],
+  "guardOnDrift": "NO_GO_REVIEW_REQUIRED",
+  "liveReleaseAllowed": false,
+  "allowsLiveStudentQuery": false,
+  "automaticLiveDatabaseConnection": false
+}
