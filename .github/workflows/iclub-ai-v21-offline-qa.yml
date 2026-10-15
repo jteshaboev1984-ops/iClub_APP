@@ -207,3 +207,14 @@ jobs:
             echo "FAIL: original Mathematics Exam Prep surface changed"
             exit 1
           fi
+          # QA shell had known historical differences from production BEFORE
+          # unified AI work. Freeze those files against the trusted QA base,
+          # rather than falsely claiming they equal the production blobs.
+          git diff --name-only c565f9a8d70ceeb791137bec36e5bf1f2e21de4c HEAD -- \
+            global-ai-ui.js commercial-access-ui.js plans-ui.js \
+            > /tmp/iclub-ai-qa-shell-drift.txt
+          if [ -s /tmp/iclub-ai-qa-shell-drift.txt ]; then
+            cat /tmp/iclub-ai-qa-shell-drift.txt
+            echo "FAIL: pre-existing AI shell or commercial access logic changed"
+            exit 1
+          fi
