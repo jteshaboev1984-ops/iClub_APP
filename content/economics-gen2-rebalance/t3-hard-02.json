@@ -38,31 +38,31 @@
     "d": "hard",
     "k": "B",
     "sec": 175,
-    "en": "Foreign-bond purchases increase the supply of domestic currency in a floating FX market. The quote moves from 12 to 14 domestic units per foreign unit. An importer must pay 25,000 foreign units. How does the importer's domestic-currency bill change?",
-    "ru": "Покупки иностранных облигаций увеличивают предложение национальной валюты на плавающем валютном рынке. Курс меняется с 12 до 14 единиц местной валюты за одну иностранную. Импортёр должен заплатить 25 000 иностранных единиц. Как изменится его платёж в местной валюте?",
-    "uz": "Xorijiy obligatsiyalar xaridi suzuvchi valuta bozorida mahalliy valuta taklifini oshiradi. Kurs bir xorijiy valuta birligi uchun 12 dan 14 mahalliy birlikka o‘zgaradi. Importchi 25 000 xorijiy birlik to‘lashi kerak. Mahalliy valutadagi to‘lov qanday o‘zgaradi?",
+    "en": "Foreign-bond purchases increase the supply of domestic currency in a floating FX market. The quote moves from 12 to 14 domestic units per foreign unit. An importer must pay 25,000 foreign units. Approximately what is the change in its domestic-currency payment, and what happened to the domestic currency?",
+    "ru": "Покупки иностранных облигаций увеличивают предложение национальной валюты на плавающем валютном рынке. Курс меняется с 12 до 14 единиц местной валюты за иностранную. Импортёр должен заплатить 25 000 иностранных единиц. Как примерно изменится платёж в местной валюте и что произошло с её курсом?",
+    "uz": "Xorijiy obligatsiyalar xaridi suzuvchi valuta bozorida mahalliy valuta taklifini oshiradi. Kurs bir xorijiy birlik uchun 12 dan 14 mahalliy birlikka o‘zgaradi. Importchi 25 000 xorijiy birlik to‘laydi. Mahalliy valutadagi to‘lov taxminan qanday o‘zgaradi va valuta kursiga nima bo‘ladi?",
     "options_en": [
-      "Falls by 50,000; domestic currency appreciates",
-      "Rises by 50,000; domestic currency depreciates",
-      "Rises by 25,000; domestic currency appreciates",
-      "Falls by 25,000; domestic currency depreciates"
+      "Payment falls by 50,000 (about 16.7%); currency appreciates",
+      "Payment rises by 50,000 (about 16.7%); currency depreciates",
+      "Payment rises by 25,000 (about 8.3%); currency appreciates",
+      "Payment is unchanged; currency depreciates"
     ],
     "options_ru": [
-      "Падает на 50 000; национальная валюта укрепляется",
-      "Растёт на 50 000; национальная валюта ослабевает",
-      "Растёт на 25 000; национальная валюта укрепляется",
-      "Падает на 25 000; национальная валюта ослабевает"
+      "Платёж падает на 50 000 (≈16,7%); валюта укрепляется",
+      "Платёж растёт на 50 000 (≈16,7%); валюта ослабевает",
+      "Платёж растёт на 25 000 (≈8,3%); валюта укрепляется",
+      "Платёж неизменен; валюта ослабевает"
     ],
     "options_uz": [
-      "50 000 ga kamayadi; mahalliy valuta qadrlanadi",
-      "50 000 ga oshadi; mahalliy valuta qadrsizlanadi",
-      "25 000 ga oshadi; mahalliy valuta qadrlanadi",
-      "25 000 ga kamayadi; mahalliy valuta qadrsizlanadi"
+      "To‘lov 50 000 ga (≈16,7%) kamayadi; valuta qadrlanadi",
+      "To‘lov 50 000 ga (≈16,7%) oshadi; valuta qadrsizlanadi",
+      "To‘lov 25 000 ga (≈8,3%) oshadi; valuta qadrlanadi",
+      "To‘lov o‘zgarmaydi; valuta qadrsizlanadi"
     ],
     "why": [
-      "The bill rises from 25,000×12=300,000 to 25,000×14=350,000 domestic units. More units per foreign unit means depreciation.",
-      "Первоначальный платёж 25 000×12=300 000, новый 25 000×14=350 000. Большее число местных единиц за иностранную означает обесценение.",
-      "To‘lov 25 000×12=300 000 dan 25 000×14=350 000 gacha oshadi. Bir xorijiy birlikka ko‘proq milliy valuta kerak — qadrsizlanish."
+      "The bill rises from 25,000×12=300,000 to 25,000×14=350,000 domestic units, an increase of 50,000/300,000≈16.7%. The domestic currency depreciates.",
+      "Платёж растёт с 25 000×12=300 000 до 25 000×14=350 000, прирост 50 000/300 000≈16,7%. Местная валюта ослабевает.",
+      "To‘lov 25 000×12=300 000 dan 25 000×14=350 000 ga oshadi: 50 000/300 000≈16,7%. Mahalliy valuta qadrsizlanadi."
     ]
   },
   {
@@ -104,31 +104,31 @@
     "d": "hard",
     "k": "A",
     "sec": 175,
-    "en": "Country Z bans commercial imports from Country A but permits the same products from Country B. A manufacturer switches 1,200 units previously imported from A at $35 each to B at $42 each, with identical quality and no other costs. Which outcome follows?",
-    "ru": "Страна Z запрещает коммерческий импорт из страны A, но разрешает ввоз тех же товаров из B. Производитель заменяет 1 200 единиц из A по $35 на единицу на поставки из B по $42 при равном качестве и отсутствии других затрат. Какой вывод следует?",
-    "uz": "Z mamlakati A mamlakatidan tijoriy importni taqiqlaydi, B mamlakatidan esa ayni tovarlarni olib kirishga ruxsat beradi. Firma ilgari A dan $35 ga olgan 1200 birlikni B dan $42 ga oladi, sifat bir xil va boshqa xarajat yo‘q. Qaysi natija kelib chiqadi?",
+    "en": "Country Z bans commercial imports from Country A but permits identical inputs from B. A domestic manufacturer previously bought 1,200 imported input units from A at $35 each; it must now pay B $42 each. It sells 1,200 finished units at $60 per unit, with other variable costs of $10 per finished unit. Ignoring fixed costs, which policy and profit change follow?",
+    "ru": "Страна Z запрещает коммерческий импорт из страны A, но разрешает те же комплектующие из B. Предприятие раньше покупало 1 200 единиц из A по $35, теперь вынуждено брать из B по $42. Оно продаёт 1 200 готовых изделий по $60, прочие переменные затраты — $10 на изделие. Игнорируя постоянные затраты, определите политику и изменение прибыли.",
+    "uz": "Z mamlakati A dan tijoriy importni taqiqlaydi, ammo B dan ayni xomashyoni olishga ruxsat beradi. Mahalliy firma ilgari 1200 birlikni A dan $35 ga, endi B dan $42 ga oladi. Firma 1200 tayyor mahsulotni $60 dan sotadi, boshqa o‘zgaruvchi xarajat har biriga $10. Doimiy xarajatsiz siyosat va foyda qanday o‘zgaradi?",
     "options_en": [
-      "Targeted embargo; input costs rise by $8,400",
-      "A general import tariff; input costs rise by $42,000",
-      "An export subsidy; input costs fall by $8,400",
-      "A quota auction; government automatically earns $8,400"
+      "Targeted embargo; operating profit falls from $18,000 to $9,600",
+      "General import tariff; operating profit falls from $18,000 to $9,600",
+      "Targeted embargo; operating profit rises from $18,000 to $26,400",
+      "Import quota; operating profit stays at $18,000"
     ],
     "options_ru": [
-      "Адресное эмбарго; затраты на ресурсы растут на $8 400",
-      "Общая импортная пошлина; затраты растут на $42 000",
-      "Экспортная субсидия; затраты падают на $8 400",
-      "Аукцион квот; бюджет автоматически получает $8 400"
+      "Адресное эмбарго; операционная прибыль падает с $18 000 до $9 600",
+      "Общая пошлина; операционная прибыль падает с $18 000 до $9 600",
+      "Адресное эмбарго; операционная прибыль растёт с $18 000 до $26 400",
+      "Импортная квота; операционная прибыль остаётся $18 000"
     ],
     "options_uz": [
-      "Maqsadli embargo; resurs xarajati $8400 ga oshadi",
-      "Umumiy import boji; xarajat $42 000 ga oshadi",
-      "Eksport subsidiyasi; xarajat $8400 ga kamayadi",
-      "Kvota auksioni; davlat avtomatik $8400 oladi"
+      "Maqsadli embargo; operatsion foyda $18 000 dan $9 600 ga kamayadi",
+      "Umumiy import boji; operatsion foyda $18 000 dan $9 600 ga kamayadi",
+      "Maqsadli embargo; operatsion foyda $18 000 dan $26 400 ga oshadi",
+      "Import kvotasi; operatsion foyda $18 000 bo‘lib qoladi"
     ],
     "why": [
-      "A source-specific ban is an embargo, not a general tariff. The input-cost increase is ($42−$35)×1,200=$8,400.",
-      "Запрет торговли с определённой страной — эмбарго, а не общая пошлина. Дополнительные затраты ($42−$35)×1 200=$8 400.",
-      "Alohida manbaga taqiq embargo, umumiy boj emas. Qo‘shimcha xarajat ($42−$35)×1200=$8400."
+      "A source-specific ban is an embargo. Initial profit per unit = $60−$35−$10=$15, total $18,000; new profit per unit = $60−$42−$10=$8, total $9,600.",
+      "Запрет торговли с определённой страной — эмбарго. Раньше прибыль на единицу $60−$35−$10=$15, всего $18 000; теперь $60−$42−$10=$8, всего $9 600.",
+      "Muayyan mamlakatdan import taqiqi — embargo. Dastlab birlik foyda $60−$35−$10=$15, jami $18 000; endi $60−$42−$10=$8, jami $9 600."
     ]
   },
   {
