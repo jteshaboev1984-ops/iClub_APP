@@ -45,3 +45,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §107 exact last-MVCC-moment revocation injected in isolated localhost Home; source rights, ai_generation_entitled and owner screen must fail closed in single SQL SELECT; QA-only no merge.
 
 2026-10-15 §108: local one-use opaque Home handoff; atomic scratch PG claim plus last MVCC permission snapshot, no student progress. QA-only, do NOT merge.
+
+2026-10-15 §108 correction: PostgreSQL INSERT token digest must be returned by SELECT CTE, not psql command-tag output; verify localhost issuer+claim end to end; QA only.
