@@ -1,0 +1,167 @@
+[
+  {
+    "n": 3,
+    "d": "medium",
+    "k": "B",
+    "sec": 115,
+    "en": "An established firm with variable costs of $8 per unit charges $20 per unit. A potential entrant needs at least $16 per unit to cover its own average cost. The incumbent temporarily charges $14 to make entry unattractive while remaining above its own variable cost. What strategy is this, and how does the incumbent's contribution margin per unit change?",
+    "ru": "Действующая фирма с переменными затратами $8 на единицу продаёт по $20. Потенциальному конкуренту для покрытия собственных средних затрат нужна цена минимум $16. Действующая фирма временно снижает цену до $14, оставаясь выше переменных затрат, чтобы осложнить вход. Как называется стратегия и как меняется маржинальный доход на единицу?",
+    "uz": "Bozordagi firmaning birlik o‘zgaruvchi xarajati $8, narxi $20. Yangi raqobatchi o‘z o‘rtacha xarajatini qoplash uchun kamida $16 narxga muhtoj. Mavjud firma kirishni qiyinlashtirish uchun vaqtincha narxni $14 ga tushiradi, lekin o‘z xarajatidan yuqori qoladi. Bu qanday strategiya va birlik hissa marjasi qanday o‘zgaradi?",
+    "options_en": [
+      "Predatory pricing; margin becomes negative $2",
+      "Limit pricing; contribution per unit falls from $12 to $6",
+      "Price discrimination; contribution rises from $12 to $14",
+      "Loss leadership; contribution rises from $6 to $12"
+    ],
+    "options_ru": [
+      "Хищническое ценообразование; маржа становится −$2",
+      "Сдерживающее вход ценообразование; маржа снижается с $12 до $6",
+      "Ценовая дискриминация; маржа растёт с $12 до $14",
+      "Продажи с убытком ради привлечения покупателей; маржа растёт с $6 до $12"
+    ],
+    "options_uz": [
+      "Yirtqich narx; marja −$2 bo‘ladi",
+      "Kirishni cheklovchi narx; birlik hissa $12 dan $6 ga tushadi",
+      "Narx diskriminatsiyasi; marja $12 dan $14 ga oshadi",
+      "Zararga sotish; marja $6 dan $12 ga oshadi"
+    ],
+    "why": [
+      "Limit pricing aims to deter entry while retaining a positive contribution for the incumbent. Contribution falls from $20−$8=$12 to $14−$8=$6 per unit.",
+      "Ограничивающее вход ценообразование призвано удержать конкурента за пределами рынка. Маржинальный доход на единицу снижается с $20−$8=$12 до $14−$8=$6.",
+      "Kirishni cheklovchi narx raqibni bozorga kiritmaslikka qaratilgan. Hissa marjasi $20−$8=$12 dan $14−$8=$6 ga tushadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-003"
+  },
+  {
+    "n": 6,
+    "d": "medium",
+    "k": "D",
+    "sec": 120,
+    "en": "A consumer has $120 for goods X and Y, initially priced at $10 and $20 respectively. Later only the price of X falls to $8, with income and Y price unchanged. With X on the horizontal axis and Y vertically, how do the two intercepts of the budget line change?",
+    "ru": "Потребитель располагает $120 на товары X и Y, первоначальные цены $10 и $20. Затем цена X снижается до $8 при неизменном доходе и цене Y. Если X расположен по горизонтальной оси, Y — по вертикальной, как изменяются обе точки пересечения бюджетной линии с осями?",
+    "uz": "Iste’molchida X va Y uchun $120 bor, dastlabki narxlar $10 va $20. Keyin faqat X narxi $8 ga tushadi, daromad va Y narxi o‘zgarmaydi. X gorizontal, Y vertikal o‘qda bo‘lsa, budjet chizig‘ining ikki o‘qdagi kesishishi qanday o‘zgaradi?",
+    "options_en": [
+      "X 12→12; Y 6→7.5",
+      "X 12→15; Y 6→7.5",
+      "X 10→8; Y 20→20",
+      "X 12→15; Y stays 6, so the line pivots outward"
+    ],
+    "options_ru": [
+      "X: 12→12; Y: 6→7,5",
+      "X: 12→15; Y: 6→7,5",
+      "X: 10→8; Y: 20→20",
+      "X: 12→15; Y остаётся 6, линия поворачивается наружу"
+    ],
+    "options_uz": [
+      "X 12→12; Y 6→7,5",
+      "X 12→15; Y 6→7,5",
+      "X 10→8; Y 20→20",
+      "X 12→15; Y 6 qoladi, chiziq tashqariga buriladi"
+    ],
+    "why": [
+      "Maximum X rises from $120/$10=12 to $120/$8=15. Maximum Y remains $120/$20=6. The budget line pivots outward around its fixed Y intercept.",
+      "Максимум X растёт с $120/$10=12 до $120/$8=15; максимум Y остаётся $120/$20=6. Линия поворачивается вокруг неизменного пересечения с осью Y.",
+      "X maksimumi $120/$10=12 dan $120/$8=15 ga oshadi. Y maksimumi $120/$20=6 qoladi. Chiziq Y kesishish nuqtasi atrofida tashqariga buriladi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-006"
+  },
+  {
+    "n": 8,
+    "d": "medium",
+    "k": "C",
+    "sec": 120,
+    "en": "A firm compares long-run plant sizes: at 20 units average total cost is $14; at 30 units it is $12; at 40 units it rises to $15. Which listed size has the lowest unit cost, what is total cost there, and what happens to average cost at the next listed size?",
+    "ru": "Фирма сравнивает долгосрочные размеры предприятия: при выпуске 20 единиц средние общие затраты $14, при 30 — $12, при 40 — $15. При каком указанном выпуске затраты на единицу минимальны, сколько составляют там общие затраты и что происходит со средними затратами на следующем размере?",
+    "uz": "Firma uzoq muddatli korxona hajmlarini taqqoslaydi: 20 birlikda o‘rtacha jami xarajat $14, 30 birlikda $12, 40 birlikda $15. Qaysi hajmda birlik xarajati eng past, shu yerda jami xarajat qancha va keyingi hajmda o‘rtacha xarajat qanday o‘zgaradi?",
+    "options_en": [
+      "20 units; total cost $280; average cost falls at 40",
+      "40 units; total cost $600; average cost falls at 40",
+      "30 units; total cost $360; average cost then rises from $12 to $15",
+      "30 units; total cost $180; average cost stays $12 at 40"
+    ],
+    "options_ru": [
+      "20 единиц; общие затраты $280; далее средние затраты падают",
+      "40 единиц; общие затраты $600; далее средние затраты падают",
+      "30 единиц; общие затраты $360; затем средние затраты растут с $12 до $15",
+      "30 единиц; общие затраты $180; при 40 средние затраты остаются $12"
+    ],
+    "options_uz": [
+      "20 birlik; jami xarajat $280; keyin o‘rtacha xarajat tushadi",
+      "40 birlik; jami xarajat $600; keyin o‘rtacha xarajat tushadi",
+      "30 birlik; jami xarajat $360; keyin o‘rtacha xarajat $12 dan $15 ga oshadi",
+      "30 birlik; jami xarajat $180; 40 birlikda o‘rtacha xarajat $12 qoladi"
+    ],
+    "why": [
+      "The lowest listed AC is $12 at Q=30, giving total cost $12×30=$360. At Q=40, AC rises to $15, suggesting diseconomies beyond the minimum listed scale.",
+      "Минимальные средние затраты $12 при Q=30, общие затраты $12×30=$360. При Q=40 средние затраты растут до $15, что указывает на отрицательный эффект масштаба после минимума.",
+      "Eng past AC $12 Q=30 da, jami xarajat $12×30=$360. Q=40 da AC $15 ga oshadi, bu keyingi hajmda miqyos samarasizligini ko‘rsatadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-008"
+  },
+  {
+    "n": 15,
+    "d": "medium",
+    "k": "A",
+    "sec": 115,
+    "en": "A cinema sells 200 discounted student tickets at $6 and 300 adult tickets at $11, with no resale. Assume exactly the same 500 customers would attend under a uniform $8 price. What is ticket revenue under the two-price system compared with the uniform-price alternative?",
+    "ru": "Кинотеатр продаёт 200 студенческих билетов по $6 и 300 взрослых по $11, перепродажа невозможна. Предположим, те же 500 зрителей пришли бы при единой цене $8. Какова выручка при двух ценах по сравнению с единой ценой?",
+    "uz": "Kinoteatr qayta sotishsiz 200 talabaga $6 dan, 300 kattaga $11 dan chipta sotadi. Faraz qilaylik, ayni 500 tomoshabin yagona $8 narxda ham keladi. Ikki xil narxdagi tushum yagona narxga nisbatan qanday?",
+    "options_en": [
+      "$4,500 vs $4,000; differential pricing earns $500 more under the assumptions",
+      "$4,000 vs $4,500; differential pricing earns $500 less",
+      "$5,500 vs $4,000; differential pricing earns $1,500 more",
+      "$4,500 vs $4,500; no difference"
+    ],
+    "options_ru": [
+      "$4 500 против $4 000; две цены дают на $500 больше при этих допущениях",
+      "$4 000 против $4 500; две цены дают на $500 меньше",
+      "$5 500 против $4 000; две цены дают на $1 500 больше",
+      "$4 500 против $4 500; разницы нет"
+    ],
+    "options_uz": [
+      "$4500 va $4000; ikki narx bu shartlarda $500 ko‘proq tushum beradi",
+      "$4000 va $4500; ikki narx $500 kam tushum beradi",
+      "$5500 va $4000; ikki narx $1500 ko‘proq beradi",
+      "$4500 va $4500; farq yo‘q"
+    ],
+    "why": [
+      "Two-price revenue=200×$6+300×$11=$4,500. Uniform revenue=500×$8=$4,000. The $500 difference relies on holding attendance fixed; quantities may respond differently in reality.",
+      "Выручка при двух ценах 200×$6+300×$11=$4 500, при единой 500×$8=$4 000. Разница $500 верна лишь при заданном неизменном числе зрителей.",
+      "Ikki narxda tushum 200×$6+300×$11=$4500, yagona narxda 500×$8=$4000. $500 farq tomoshabinlar soni o‘zgarmas degan shartga bog‘liq."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-015"
+  },
+  {
+    "n": 18,
+    "d": "medium",
+    "k": "B",
+    "sec": 120,
+    "en": "An owner-run repair business records annual revenue $180,000 and explicit operating costs $125,000. The owner could earn $50,000 in a salaried job; her invested funds could earn a further $10,000 in their next-best alternative use. Assuming these opportunity costs do not overlap, what are accounting profit and economic profit?",
+    "ru": "Ремонтная мастерская владельца получает $180 000 годовой выручки при явных операционных затратах $125 000. Владелец мог бы заработать $50 000 по найму; вложенные средства могли бы отдельно приносить ещё $10 000 в лучшем альтернативном использовании. Альтернативные затраты не пересекаются. Найдите бухгалтерскую и экономическую прибыль.",
+    "uz": "Egasi boshqaradigan ta’mirlash firmasi yillik $180 000 tushum va $125 000 aniq operatsion xarajatga ega. Egasi ishga kirsa $50 000 topishi, kiritilgan mablag‘ esa alohida eng yaxshi muqobilda $10 000 daromad berishi mumkin. Muqobil xarajatlar takrorlanmaydi. Buxgalteriya va iqtisodiy foyda qancha?",
+    "options_en": [
+      "Accounting +$55,000; economic +$5,000",
+      "Accounting +$55,000; economic −$5,000",
+      "Accounting −$5,000; economic +$55,000",
+      "Accounting +$180,000; economic +$125,000"
+    ],
+    "options_ru": [
+      "Бухгалтерская +$55 000; экономическая +$5 000",
+      "Бухгалтерская +$55 000; экономическая −$5 000",
+      "Бухгалтерская −$5 000; экономическая +$55 000",
+      "Бухгалтерская +$180 000; экономическая +$125 000"
+    ],
+    "options_uz": [
+      "Buxgalteriya +$55 000; iqtisodiy +$5 000",
+      "Buxgalteriya +$55 000; iqtisodiy −$5 000",
+      "Buxgalteriya −$5 000; iqtisodiy +$55 000",
+      "Buxgalteriya +$180 000; iqtisodiy +$125 000"
+    ],
+    "why": [
+      "Accounting profit=180,000−125,000=$55,000. Economic profit also subtracts the owner's salary alternative $50,000 and capital opportunity cost $10,000, giving −$5,000.",
+      "Бухгалтерская прибыль 180 000−125 000=$55 000. Экономическая вычитает зарплатную альтернативу $50 000 и доход капитала $10 000: −$5 000.",
+      "Buxgalteriya foyda 180 000−125 000=$55 000. Iqtisodiy foyda yana muqobil ish haqi $50 000 va kapital daromadi $10 000 ni ayirib, −$5 000 beradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T4-T-018"
+  }
+]
