@@ -36,6 +36,10 @@ export function makeContextCore(services:ContextServices){
    try{input=JSON.parse(bodyText);}catch{}
    if(!isObject(input)||Object.keys(input).some(k=>!KEYS.has(k)))
     return result(400,{ok:false,reason:"invalid_request"});
+   // Extending the shared action-key vocabulary must not accidentally allow
+   // a resolver reference to be smuggled into legacy mint/revoke requests.
+   if(input.action!=="resolvePracticeV4"&&hasOwn(input,"attemptReference"))
+     return result(400,{ok:false,reason:"invalid_request"});
    if(input.action==="resolvePracticeV4"){
     // Deliberately no client-supplied user, session, source, subject, status,
     // progress, correct answer, topic, rollout flag or role.
