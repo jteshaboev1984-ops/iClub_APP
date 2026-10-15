@@ -1,0 +1,134 @@
+[
+  {
+    "n": 9,
+    "d": "hard",
+    "k": "B",
+    "sec": 135,
+    "en": "In Year 1, a country has 1,250 working-age residents, 900 employed and 100 unemployed people actively seeking work. In Year 2, the working-age population grows to 1,300, while 920 are employed and 80 unemployed people actively seek work. What happens to the unemployment rate and labour-force participation rate?",
+    "ru": "В первом году в стране 1 250 жителей трудоспособного возраста, из них 900 работают и 100 безработных активно ищут работу. Во втором году трудоспособное население выросло до 1 300, занятых стало 920, безработных, ищущих работу, — 80. Как меняются уровень безработицы и доля участия в рабочей силе?",
+    "uz": "1-yilda mamlakatda mehnat yoshidagi 1250 kishi bor, 900 nafari ishlaydi va 100 ishsiz faol ish qidiradi. 2-yilda mehnat yoshidagi aholi 1300 ga oshadi, ishlovchilar 920, faol ish qidirayotgan ishsizlar 80 kishi. Ishsizlik va mehnat kuchida qatnashish darajalari qanday o‘zgaradi?",
+    "options_en": [
+      "Unemployment 10%→8%; participation 80%→80%",
+      "Unemployment 10%→8%; participation 80%→about 76.9%",
+      "Unemployment 8%→10%; participation 80%→about 76.9%",
+      "Unemployment 10%→6.15%; participation 80%→100%"
+    ],
+    "options_ru": [
+      "Безработица 10%→8%; участие 80%→80%",
+      "Безработица 10%→8%; участие 80%→примерно 76,9%",
+      "Безработица 8%→10%; участие 80%→примерно 76,9%",
+      "Безработица 10%→6,15%; участие 80%→100%"
+    ],
+    "options_uz": [
+      "Ishsizlik 10%→8%; qatnashish 80%→80%",
+      "Ishsizlik 10%→8%; qatnashish 80%→taxminan 76,9%",
+      "Ishsizlik 8%→10%; qatnashish 80%→taxminan 76,9%",
+      "Ishsizlik 10%→6,15%; qatnashish 80%→100%"
+    ],
+    "why": [
+      "The labour force is 900+100=1,000 in Year 1 and 920+80=1,000 in Year 2. Unemployment falls from 100/1,000=10% to 80/1,000=8%; participation declines from 1,000/1,250=80% to 1,000/1,300≈76.9%.",
+      "Рабочая сила в оба года 1 000 человек. Безработица уменьшается со 100/1 000=10% до 80/1 000=8%. Участие падает с 1 000/1 250=80% до 1 000/1 300≈76,9%.",
+      "Mehnat kuchi ikkala yilda 1000 kishi. Ishsizlik 100/1000=10% dan 80/1000=8% ga tushadi; qatnashish 1000/1250=80% dan 1000/1300≈76,9% ga kamayadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T6-T-009"
+  },
+  {
+    "n": 11,
+    "d": "hard",
+    "k": "D",
+    "sec": 135,
+    "en": "In a closed economy with fixed prices, no taxes and spare capacity, private saving is S=−40+0.25Y, where Y is national income in millions of dollars. Planned private investment is $60m and government purchases are $40m, with no other injections or leakages. In the simplified circular-flow equilibrium S=I+G. Government purchases then rise by $20m. What are the equilibrium incomes before and after the increase?",
+    "ru": "В закрытой экономике с фиксированными ценами, без налогов и при свободных мощностях частные сбережения S=−40+0,25Y, где Y — национальный доход в млн долларов. Планируемые частные инвестиции $60 млн, госзакупки $40 млн; других инъекций и изъятий нет. В упрощённом равновесии кругооборота S=I+G. Затем госзакупки растут на $20 млн. Каковы равновесные доходы до и после?",
+    "uz": "Yopiq iqtisodiyotda narxlar o‘zgarmas, soliq yo‘q, bo‘sh quvvat mavjud. Xususiy jamg‘arma S=−40+0,25Y, bunda Y milllion dollardagi milliy daromad. Rejalangan xususiy investitsiya $60 mln, davlat xaridi $40 mln, boshqa kirim yoki chiqim yo‘q. Soddalashtirilgan muvozanatda S=I+G. Keyin davlat xaridi $20 mln oshadi. Oldingi va keyingi muvozanat daromadlari qancha?",
+    "options_en": [
+      "$400m before; $480m after",
+      "$560m before; $580m after",
+      "$400m before; $560m after",
+      "$560m before; $640m after"
+    ],
+    "options_ru": [
+      "До $400 млн; после $480 млн",
+      "До $560 млн; после $580 млн",
+      "До $400 млн; после $560 млн",
+      "До $560 млн; после $640 млн"
+    ],
+    "options_uz": [
+      "Oldin $400 mln; keyin $480 mln",
+      "Oldin $560 mln; keyin $580 mln",
+      "Oldin $400 mln; keyin $560 mln",
+      "Oldin $560 mln; keyin $640 mln"
+    ],
+    "why": [
+      "Initially −40+0.25Y=60+40=100, giving Y=560. After spending rises, injections are 60+60=120, so −40+0.25Y=120 and Y=640. The $20m injection raises equilibrium income by $80m with multiplier 4.",
+      "Изначально −40+0,25Y=60+40=100, поэтому Y=560. Затем инъекции 60+60=120, отсюда Y=640. Дополнительные $20 млн повышают доход на $80 млн, мультипликатор 4.",
+      "Dastlab −40+0,25Y=60+40=100, bundan Y=560. Keyin kirim 60+60=120, Y=640. $20 mln qo‘shimcha davlat xaridi daromadni $80 mln oshiradi, multiplikator 4."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T6-T-011"
+  },
+  {
+    "n": 14,
+    "d": "hard",
+    "k": "C",
+    "sec": 135,
+    "en": "A central bank purchases $120m of government securities from commercial banks, crediting new bank reserves. It then sells $50m of securities back to commercial banks, which pay with reserves. In a simplified banking model the reserve requirement is 20%, all loans are redeposited and no bank holds excess reserves. What are the maximum total additional deposits and bank loans supported by the net reserve injection?",
+    "ru": "Центральный банк покупает у коммерческих банков государственные бумаги на $120 млн, создавая новые банковские резервы. Затем продаёт банкам бумаги на $50 млн, которые оплачиваются резервами. В упрощённой банковской модели норма обязательных резервов 20%, все выданные кредиты возвращаются депозитами, избыточных резервов нет. Каковы максимальные дополнительные депозиты и кредиты, поддерживаемые чистым приростом резервов?",
+    "uz": "Markaziy bank tijorat banklaridan $120 mln davlat obligatsiyasini sotib olib, yangi bank zaxiralari yaratadi. Keyin banklarga $50 mln qimmatli qog‘oz sotadi, ular zaxiradan to‘laydi. Soddalashtirilgan modelda majburiy zaxira 20%, barcha kreditlar qayta depozitga aylanadi va ortiqcha zaxira yo‘q. Sof zaxira qo‘shilishiga mos maksimal qo‘shimcha depozit va kredit qancha?",
+    "options_en": [
+      "Deposits $600m; loans $480m",
+      "Deposits $350m; loans $350m",
+      "Deposits $350m; loans $280m",
+      "Deposits $70m; loans $56m"
+    ],
+    "options_ru": [
+      "Депозиты $600 млн; кредиты $480 млн",
+      "Депозиты $350 млн; кредиты $350 млн",
+      "Депозиты $350 млн; кредиты $280 млн",
+      "Депозиты $70 млн; кредиты $56 млн"
+    ],
+    "options_uz": [
+      "Depozit $600 mln; kredit $480 mln",
+      "Depozit $350 mln; kredit $350 mln",
+      "Depozit $350 mln; kredit $280 mln",
+      "Depozit $70 mln; kredit $56 mln"
+    ],
+    "why": [
+      "Net reserves rise by $120m−$50m=$70m. With 20% reserves, maximum new deposits are $70m/0.20=$350m. Required reserves absorb $70m, leaving up to $280m additional lending in this deliberately idealised model.",
+      "Чистый прирост резервов $120−$50=$70 млн. При норме 20% максимально возможные новые депозиты $70/0,20=$350 млн. Из них $70 млн остаются резервами, до $280 млн могут быть кредитами.",
+      "Sof zaxira $120−$50=$70 mln. 20% norma bilan maksimal yangi depozit $70/0,20=$350 mln. $70 mln majburiy zaxira, qolgan maksimal $280 mln kredit bo‘lishi mumkin."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T6-T-014"
+  },
+  {
+    "n": 19,
+    "d": "hard",
+    "k": "A",
+    "sec": 135,
+    "en": "A bank holds $45m of highly liquid assets against projected 30-day stressed net cash outflows of $60m. Its regulator requires a liquidity coverage ratio of at least 100%. The bank proposes replacing $20m of loans yielding 6% per year with liquid assets yielding 0%, with all other figures unchanged. What is the new coverage ratio and direct annual interest-income sacrifice?",
+    "ru": "У банка $45 млн высоколиквидных активов при прогнозируемом чистом оттоке денежных средств за стрессовые 30 дней $60 млн. Регулятор требует коэффициент покрытия ликвидности не ниже 100%. Банк предлагает заменить $20 млн кредитов с годовой доходностью 6% ликвидными активами с доходностью 0%; прочее неизменно. Какими станут покрытие и прямое годовое сокращение процентного дохода?",
+    "uz": "Bankda 30 kunlik stressdagi prognoz sof pul chiqimi $60 mln ga qarshi $45 mln yuqori likvid aktiv bor. Regulyator likvidlik qoplash koeffitsienti kamida 100% bo‘lishini talab qiladi. Bank 6% yillik daromadli $20 mln kreditni 0% daromadli likvid aktivga almashtiradi, qolganlari o‘zgarmaydi. Yangi qoplash koeffitsienti va to‘g‘ridan-to‘g‘ri yillik foiz daromadi yo‘qotishi qancha?",
+    "options_en": [
+      "108.3%; $1.2m annual interest forgone",
+      "75.0%; $1.2m annual interest gained",
+      "108.3%; $0.12m annual interest forgone",
+      "125.0%; $2.0m annual interest forgone"
+    ],
+    "options_ru": [
+      "108,3%; отказ от годового дохода $1,2 млн",
+      "75,0%; прирост годового дохода $1,2 млн",
+      "108,3%; потери годового дохода $0,12 млн",
+      "125,0%; потери годового дохода $2,0 млн"
+    ],
+    "options_uz": [
+      "108,3%; yillik foiz daromadi $1,2 mln yo‘qotiladi",
+      "75,0%; yillik foiz daromadi $1,2 mln oshadi",
+      "108,3%; yillik foiz daromadi $0,12 mln yo‘qotiladi",
+      "125,0%; yillik foiz daromadi $2,0 mln yo‘qotiladi"
+    ],
+    "why": [
+      "Liquid assets rise from $45m to $65m. Coverage becomes 65/60≈108.3%, above the requirement. Forgone loan interest is $20m×6%=$1.2m annually, demonstrating the liquidity-versus-profitability trade-off.",
+      "Ликвидные активы растут с $45 до $65 млн. Покрытие 65/60≈108,3%, выше минимума. Потерянные проценты $20 млн×6%=$1,2 млн в год — компромисс ликвидности и доходности.",
+      "Likvid aktiv $45 mln dan $65 mln ga oshadi. Qoplash 65/60≈108,3%, talabdan yuqori. Yo‘qotilgan foiz $20 mln×6%=$1,2 mln yiliga, ya’ni likvidlik va foydalilik muvozanati."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T6-T-019"
+  }
+]
