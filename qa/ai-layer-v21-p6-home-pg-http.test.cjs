@@ -36,6 +36,36 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
     "userId","score","correctAnswer","sourceHash","jwt","authorityHash"])
     a.equal(Object.hasOwn(result.body,prohibited),false,prohibited);
   }
+  // Real-shaped scratch PG commercial guard + subscription capabilities:
+  // shadow/passthrough and a disabled AI entitlement NEVER authorize Home.
+  scratchSql("UPDATE private.iclub_commercial_access_config "+
+   "SET subject_limits_mode='shadow' WHERE id=1");
+  a.equal((await send()).status,403,"Shadow allowed=true is NOT AI rights");
+  scratchSql("UPDATE private.iclub_commercial_access_config "+
+   "SET subject_limits_mode='off' WHERE id=1");
+  a.equal((await send()).status,403,"Legacy passthrough is NOT AI rights");
+  scratchSql("UPDATE private.iclub_commercial_access_config "+
+   "SET subject_limits_mode='enforced' WHERE id=1");
+  scratchSql("UPDATE private.iclub_ai_qa_capabilities_fixture "+
+   "SET ai_generation_entitled=false");
+  a.equal((await send()).status,403,"AI product entitlement is mandatory");
+  scratchSql("UPDATE private.iclub_ai_qa_capabilities_fixture "+
+   "SET ai_generation_entitled=true");
+  scratchSql("UPDATE private.iclub_ai_qa_home_feature_gate "+
+   "SET approved=false");
+  a.equal((await send()).status,403,"Separate AI rollout gate mandatory");
+  scratchSql("UPDATE private.iclub_ai_qa_home_feature_gate "+
+   "SET approved=true");
+  scratchSql("UPDATE private.iclub_subject_slot_selections "+
+   "SET study_selected=false WHERE subject_key='economics'");
+  const unselected=await send();
+  a.equal(unselected.status,200,"Another authorized subject should remain");
+  a.equal(unselected.body.actionCode,"continue_enrolled_subject");
+  a.equal(unselected.body.subjectKey,"biology");
+  scratchSql("UPDATE private.iclub_subject_slot_selections "+
+   "SET study_selected=true WHERE subject_key='economics'");
+  a.equal((await send()).body.actionCode,"review_finalized_practice",
+   "Restored verified slot must restore original priority");
   a.equal((await send({token:g.otherToken})).status,403,
    "Foreign owner must not inherit Home context");
   a.equal((await send({token:"synthetic-forged"})).status,401);
@@ -60,6 +90,15 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   a.equal(tour.status,200,JSON.stringify(tour.body));
   a.equal(tour.body.actionCode,"review_open_tour_archive");
   a.equal(tour.body.subjectKey,"economics");
+  scratchSql("UPDATE private.iclub_subject_slot_selections "+
+   "SET competitive_selected=false WHERE subject_key='economics'");
+  const notChosen=await send();
+  a.equal(notChosen.status,403,
+   "A competitive slot without actual competitive selection must NOT grant Tour");
+  scratchSql("UPDATE private.iclub_subject_slot_selections "+
+   "SET competitive_selected=true WHERE subject_key='economics'");
+  a.equal((await send()).body.actionCode,"review_open_tour_archive");
+
   // Revoked rights for this subject must reveal another entitled study subject.
   scratchSql("UPDATE private.iclub_ai_v21_home_synthetic_access SET allowed=false "+
    "WHERE subject_key='economics' AND intent='competitive'");
@@ -88,7 +127,7 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   const revoked=await send();
   a.equal(revoked.status,403);
   a.equal(revoked.body.reason,"in_development");
-  a.equal(g.state.requests>=16,true);
+  a.equal(g.state.requests>=24,true);
   console.log("HOME_PG_HTTP_GREEN: owner auth, RU/UZ/EN, Practice, tie, Tour, fallback, revoke");
  }finally{
   await new Promise(resolve=>g.server.close(resolve));
