@@ -180,7 +180,7 @@ async function evaluateOwnerAction(services,user,handle,locale,beforeDelivery){
  if(delivered.status==="candidate_only"){
   out.actionCode=delivered.actionCode;out.subjectKey=delivered.subjectKey;
  }else if(delivered.status==="selection_required"){
-  out.candidateActionIds=delivered.candidateActionIds;
+  out.choices=delivered.choices;
  }else return null;
  return out;
 }
