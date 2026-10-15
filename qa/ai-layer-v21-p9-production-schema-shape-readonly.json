@@ -1,0 +1,843 @@
+{
+  "schema": "iclub_ai_v21_p9_production_structure_readonly_snapshot_v1",
+  "observedOn": "2026-10-15",
+  "source": "information_schema.columns (metadata only)",
+  "metadataOnly": true,
+  "releaseAllowed": false,
+  "productionColumnCount": 89,
+  "comparedFixture": "qa/sql_drafts/iclub_ai_v21_nine_drafts_integrated_local_pg.psql + v1 foundation",
+  "comparability": "MINIMAL_SYNTHETIC_NOT_PRODUCTION_CLONE",
+  "fixtureMissingOrMismatchedColumns": 49,
+  "columns": [
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "id",
+      "type": "int2",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "config_version",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "ui_enabled",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "gateway_enabled",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "generation_enabled",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "kill_switch",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "updated_at",
+      "type": "timestamptz",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "updated_by",
+      "type": "uuid",
+      "nullable": true
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "plans_ui_enabled",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "checkout_enabled",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "global_ai_rollout_mode",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "plans_rollout_mode",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.lessons",
+      "column": "id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.lessons",
+      "column": "subject_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.lessons",
+      "column": "title",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.lessons",
+      "column": "topic",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.lessons",
+      "column": "order_no",
+      "type": "int4",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "session_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "question_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "user_answer",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "picked_index",
+      "type": "int4",
+      "nullable": true
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "is_correct",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "time_spent",
+      "type": "int4",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "answered_at",
+      "type": "timestamptz",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "user_id",
+      "type": "uuid",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "subject_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "pool_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "client_session_id",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "question_ids",
+      "type": "_int8",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "legacy_attempt_id",
+      "type": "int8",
+      "nullable": true
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "status",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "created_at",
+      "type": "timestamptz",
+      "nullable": false
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "finalized_at",
+      "type": "timestamptz",
+      "nullable": true
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "bank_generation",
+      "type": "int4",
+      "nullable": true
+    },
+    {
+      "table": "public.subjects",
+      "column": "id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.subjects",
+      "column": "subject_key",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.subjects",
+      "column": "title",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.subjects",
+      "column": "type",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.subjects",
+      "column": "is_active",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "user_id",
+      "type": "uuid",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "tour_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "score",
+      "type": "int4",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "percent",
+      "type": "numeric",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "total_time",
+      "type": "int4",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "status",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "created_at",
+      "type": "timestamptz",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "attempt_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "user_id",
+      "type": "uuid",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "tour_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "client_session_id",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "question_ids",
+      "type": "_int8",
+      "nullable": false
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "finalized_at",
+      "type": "timestamptz",
+      "nullable": true
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "created_at",
+      "type": "timestamptz",
+      "nullable": false
+    },
+    {
+      "table": "public.tours",
+      "column": "id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.tours",
+      "column": "subject_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.tours",
+      "column": "tour_no",
+      "type": "int2",
+      "nullable": false
+    },
+    {
+      "table": "public.tours",
+      "column": "start_date",
+      "type": "date",
+      "nullable": true
+    },
+    {
+      "table": "public.tours",
+      "column": "end_date",
+      "type": "date",
+      "nullable": true
+    },
+    {
+      "table": "public.tours",
+      "column": "is_active",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "public.tours",
+      "column": "created_at",
+      "type": "timestamptz",
+      "nullable": false
+    },
+    {
+      "table": "public.tours",
+      "column": "season_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.user_subjects",
+      "column": "id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.user_subjects",
+      "column": "user_id",
+      "type": "uuid",
+      "nullable": false
+    },
+    {
+      "table": "public.user_subjects",
+      "column": "subject_id",
+      "type": "int8",
+      "nullable": false
+    },
+    {
+      "table": "public.user_subjects",
+      "column": "mode",
+      "type": "text",
+      "nullable": false
+    },
+    {
+      "table": "public.user_subjects",
+      "column": "is_pinned",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "public.user_subjects",
+      "column": "created_at",
+      "type": "timestamptz",
+      "nullable": false
+    },
+    {
+      "table": "public.users",
+      "column": "id",
+      "type": "uuid",
+      "nullable": false
+    },
+    {
+      "table": "public.users",
+      "column": "telegram_user_id",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "first_name",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "last_name",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "avatar_url",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "language_code",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "is_school_student",
+      "type": "bool",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "region",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "district",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "school",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "class",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "created_at",
+      "type": "timestamptz",
+      "nullable": false
+    },
+    {
+      "table": "public.users",
+      "column": "region_id",
+      "type": "int8",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "district_id",
+      "type": "int8",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "country_code",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "country",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "login",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "auth_email",
+      "type": "text",
+      "nullable": true
+    },
+    {
+      "table": "public.users",
+      "column": "must_change_password",
+      "type": "bool",
+      "nullable": false
+    },
+    {
+      "table": "public.users",
+      "column": "auth_migrated_at",
+      "type": "timestamptz",
+      "nullable": true
+    }
+  ],
+  "gaps": [
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "plans_ui_enabled",
+      "live_type": "boolean",
+      "fixture_type": null
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "checkout_enabled",
+      "live_type": "boolean",
+      "fixture_type": null
+    },
+    {
+      "table": "private.iclub_global_ai_runtime_config",
+      "column": "plans_rollout_mode",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.lessons",
+      "column": "title",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.lessons",
+      "column": "topic",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.lessons",
+      "column": "order_no",
+      "live_type": "integer",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "user_answer",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "picked_index",
+      "live_type": "integer",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "is_correct",
+      "live_type": "boolean",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "time_spent",
+      "live_type": "integer",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_session_answers_v4",
+      "column": "answered_at",
+      "live_type": "timestamptz",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "pool_id",
+      "live_type": "bigint",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "client_session_id",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "legacy_attempt_id",
+      "live_type": "bigint",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "created_at",
+      "live_type": "timestamptz",
+      "fixture_type": null
+    },
+    {
+      "table": "public.practice_sessions_v4",
+      "column": "bank_generation",
+      "live_type": "integer",
+      "fixture_type": null
+    },
+    {
+      "table": "public.subjects",
+      "column": "title",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.subjects",
+      "column": "type",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "score",
+      "live_type": "integer",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "percent",
+      "live_type": "numeric",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "total_time",
+      "live_type": "integer",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tour_attempts",
+      "column": "created_at",
+      "live_type": "timestamptz",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "client_session_id",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "question_ids",
+      "live_type": "bigint[]",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tour_session_runtime_v4",
+      "column": "created_at",
+      "live_type": "timestamptz",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tours",
+      "column": "tour_no",
+      "live_type": "smallint",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tours",
+      "column": "start_date",
+      "live_type": "date",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tours",
+      "column": "created_at",
+      "live_type": "timestamptz",
+      "fixture_type": null
+    },
+    {
+      "table": "public.tours",
+      "column": "season_id",
+      "live_type": "bigint",
+      "fixture_type": null
+    },
+    {
+      "table": "public.user_subjects",
+      "column": "id",
+      "live_type": "bigint",
+      "fixture_type": null
+    },
+    {
+      "table": "public.user_subjects",
+      "column": "created_at",
+      "live_type": "timestamptz",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "telegram_user_id",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "last_name",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "avatar_url",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "language_code",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "is_school_student",
+      "live_type": "boolean",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "region",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "district",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "school",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "class",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "created_at",
+      "live_type": "timestamptz",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "region_id",
+      "live_type": "bigint",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "district_id",
+      "live_type": "bigint",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "country_code",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "country",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "login",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "auth_email",
+      "live_type": "text",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "must_change_password",
+      "live_type": "boolean",
+      "fixture_type": null
+    },
+    {
+      "table": "public.users",
+      "column": "auth_migrated_at",
+      "live_type": "timestamptz",
+      "fixture_type": null
+    }
+  ]
+}
