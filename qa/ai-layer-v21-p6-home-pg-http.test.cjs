@@ -28,6 +28,9 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
    cache:response.headers.get("cache-control")};
  };
  try{
+  const initialConsumed=Number(scratchSql("SELECT count(*) FROM "+
+   "private.iclub_ai_v21_home_action_handoffs_scratch "+
+   "WHERE consumed_at IS NOT NULL"));
   a.equal(Number(scratchSql(
    "SELECT count(DISTINCT source_hash) FROM "+
    "private.iclub_ai_v21_home_source_test_releases")),12,
@@ -84,9 +87,10 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   ]);
   a.deepEqual(race.map(v=>v.status).sort(),[200,403],
    "Only one claimant may consume a durable scratch token");
-  a.equal(scratchSql("SELECT count(*) FROM "+
+  a.equal(Number(scratchSql("SELECT count(*) FROM "+
    "private.iclub_ai_v21_home_action_handoffs_scratch "+
-   "WHERE consumed_at IS NOT NULL"),"2");
+   "WHERE consumed_at IS NOT NULL")),initialConsumed+2,
+   "Only two new HTTP claims, independent of prior Chromium demonstrations");
   // Real-shaped scratch PG commercial guard + subscription capabilities:
   // shadow/passthrough and a disabled AI entitlement NEVER authorize Home.
   scratchSql("UPDATE private.iclub_commercial_access_config "+
