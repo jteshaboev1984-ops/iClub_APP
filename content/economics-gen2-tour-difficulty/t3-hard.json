@@ -1,0 +1,134 @@
+[
+  {
+    "n": 8,
+    "d": "hard",
+    "k": "C",
+    "sec": 135,
+    "en": "An economy originally exports $200m of goods and imports $250m. After an appreciation, lower price competitiveness reduces export receipts by $18m while cheaper foreign goods raise import expenditure by $12m. A separate gain in consumer confidence adds $8m to consumption. Assuming other AD components are fixed, what is the change in net exports and the combined change in aggregate demand?",
+    "ru": "Экономика первоначально экспортирует товаров на $200 млн и импортирует на $250 млн. После укрепления валюты экспортная выручка падает на $18 млн, а расходы на импорт увеличиваются на $12 млн. Независимый рост уверенности потребителей добавляет $8 млн к потреблению. Остальные компоненты AD неизменны. Как изменятся чистый экспорт и совокупный спрос?",
+    "uz": "Iqtisodiyot dastlab $200 mln tovar eksport qiladi va $250 mln import qiladi. Valuta qadrlangach eksport tushumi $18 mln kamayadi, import xarajati $12 mln oshadi. Iste’molchi ishonchining alohida ortishi iste’molga $8 mln qo‘shadi. AD ning boshqa qismlari o‘zgarmaydi. Sof eksport va yalpi talab qanday o‘zgaradi?",
+    "options_en": [
+      "Net exports −$6m; AD +$8m",
+      "Net exports −$30m; AD −$30m",
+      "Net exports −$30m; AD −$22m",
+      "Net exports +$30m; AD +$38m"
+    ],
+    "options_ru": [
+      "Чистый экспорт −$6 млн; AD +$8 млн",
+      "Чистый экспорт −$30 млн; AD −$30 млн",
+      "Чистый экспорт −$30 млн; AD −$22 млн",
+      "Чистый экспорт +$30 млн; AD +$38 млн"
+    ],
+    "options_uz": [
+      "Sof eksport −$6 mln; AD +$8 mln",
+      "Sof eksport −$30 mln; AD −$30 mln",
+      "Sof eksport −$30 mln; AD −$22 mln",
+      "Sof eksport +$30 mln; AD +$38 mln"
+    ],
+    "why": [
+      "Net exports change by −$18m−$12m=−$30m. Consumption rises $8m, so total AD changes −$30m+$8m=−$22m, other things equal.",
+      "Чистый экспорт уменьшается на $18+$12=$30 млн. Потребление прибавляет $8 млн, поэтому изменение AD −$30+$8=−$22 млн.",
+      "Sof eksport $18+$12=$30 mln kamayadi. Iste’mol +$8 mln bo‘lgani uchun AD o‘zgarishi −$30+$8=−$22 mln."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T3-T-008"
+  },
+  {
+    "n": 15,
+    "d": "hard",
+    "k": "D",
+    "sec": 135,
+    "en": "A country runs a current-account deficit of $12bn for one year, financed wholly by new foreign-currency debt carrying 5% annual interest. Assume the principal remains outstanding and no other changes occur. How much annual interest will this borrowing add from the following year, and why does a deficit-financing strategy of this type create vulnerability?",
+    "ru": "Страна имеет годовой дефицит текущего счёта $12 млрд и полностью покрывает его новым валютным долгом под 5% годовых. Основной долг остаётся непогашенным, других изменений нет. Сколько дополнительных годовых процентов появится со следующего года и почему такой способ финансирования создаёт риск?",
+    "uz": "Mamlakat bir yil davomida $12 mlrd joriy hisob taqchilligiga ega va uni 5% yillik foizli yangi xorijiy valuta qarzi bilan to‘liq qoplaydi. Asosiy qarz qoladi, boshqa o‘zgarish yo‘q. Keyingi yildan qancha qo‘shimcha yillik foiz kelib chiqadi va bu usul nima uchun xavfli?",
+    "options_en": [
+      "$60m; debt servicing falls automatically as imports rise",
+      "$600m; foreign borrowing always increases export competitiveness",
+      "$12bn; borrowing is itself an annual interest payment",
+      "$600m; repeated debt financing creates future external servicing obligations"
+    ],
+    "options_ru": [
+      "$60 млн; обслуживание долга автоматически дешевеет с ростом импорта",
+      "$600 млн; внешний долг всегда повышает конкурентоспособность экспорта",
+      "$12 млрд; заём равен годовому процентному платежу",
+      "$600 млн; повторное долговое финансирование создаёт обязательства по будущим выплатам"
+    ],
+    "options_uz": [
+      "$60 mln; import oshsa qarz xizmati avtomatik kamayadi",
+      "$600 mln; xorijiy qarz doim eksport raqobatini oshiradi",
+      "$12 mlrd; qarzning o‘zi yillik foiz",
+      "$600 mln; doimiy qarz moliyalashi keyingi tashqi to‘lov majburiyatini yaratadi"
+    ],
+    "why": [
+      "Annual interest =5%×$12bn=$0.6bn=$600m. The borrowed funds finance the external imbalance now but create future interest and refinancing obligations, especially if repeated.",
+      "Годовые проценты 5%×$12 млрд=$0,6 млрд=$600 млн. Долг покрывает текущий дефицит, но создаёт будущие процентные и рефинансовые обязательства.",
+      "Yillik foiz 5%×$12 mlrd=$0,6 mlrd=$600 mln. Qarz bugungi taqchillikni qoplaydi, lekin keyingi foiz va qayta moliyalash majburiyatini yaratadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T3-T-015"
+  },
+  {
+    "n": 16,
+    "d": "hard",
+    "k": "A",
+    "sec": 135,
+    "en": "To reduce demand-pull inflation, a central bank raises interest rates. In an illustrative AD accounting exercise, interest-sensitive household spending falls $16bn and private investment falls $14bn, while government purchases rise independently $10bn. Imports also fall $5bn because domestic spending weakens; exports are unchanged. What is the combined direct change in planned aggregate demand before multiplier effects?",
+    "ru": "Чтобы снизить инфляцию спроса, центральный банк повышает ставки. В условном расчёте AD потребительские расходы уменьшаются на $16 млрд, частные инвестиции на $14 млрд, но госзакупки независимо растут на $10 млрд. Импорт сокращается на $5 млрд из-за ослабления внутреннего спроса, экспорт неизменен. Каково общее прямое изменение планируемого AD без мультипликатора?",
+    "uz": "Talab inflyatsiyasini kamaytirish uchun markaziy bank stavkani oshiradi. AD hisobining soddalashtirilgan misolida iste’mol $16 mlrd, xususiy investitsiya $14 mlrd kamayadi, davlat xaridi mustaqil $10 mlrd oshadi. Ichki talab pasaygani uchun import $5 mlrd kamayadi, eksport o‘zgarmaydi. Multiplikator ta’sirisiz rejalangan AD bevosita qancha o‘zgaradi?",
+    "options_en": [
+      "Falls $15bn",
+      "Falls $25bn",
+      "Falls $45bn",
+      "Rises $15bn"
+    ],
+    "options_ru": [
+      "Падает на $15 млрд",
+      "Падает на $25 млрд",
+      "Падает на $45 млрд",
+      "Растёт на $15 млрд"
+    ],
+    "options_uz": [
+      "$15 mlrd kamayadi",
+      "$25 mlrd kamayadi",
+      "$45 mlrd kamayadi",
+      "$15 mlrd oshadi"
+    ],
+    "why": [
+      "AD=C+I+G+X−M, so ΔAD=−16−14+10−(−5)=−15bn. Lower imports partially offset the domestic spending contraction; the fiscal expansion also offsets monetary tightening.",
+      "AD=C+I+G+X−M: изменение −16−14+10−(−5)=−$15 млрд. Снижение импорта и рост G частично компенсируют сжатие потребления и инвестиций.",
+      "AD=C+I+G+X−M: −16−14+10−(−5)=−$15 mlrd. Importning kamayishi va davlat xaridi o‘sishi ichki xarajat pasayishini qisman qoplaydi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T3-T-016"
+  },
+  {
+    "n": 19,
+    "d": "hard",
+    "k": "B",
+    "sec": 135,
+    "en": "A tariff raises the price of an imported machine component from $20 to $26. A domestic exporter needs three imported components for each finished machine and produces 400 machines, with all other prices and quantities fixed. How much do component costs rise, and which trade-policy concern does this illustrate?",
+    "ru": "Пошлина повышает цену импортной детали с $20 до $26. Отечественному экспортёру нужно три такие детали на готовую машину; он выпускает 400 машин. Остальные цены и объёмы неизменны. На сколько растут затраты на детали и какой риск протекционизма это иллюстрирует?",
+    "uz": "Boj import detal narxini $20 dan $26 ga oshiradi. Mahalliy eksportchi har bir tayyor mashinaga uchta detal ishlatadi va 400 mashina ishlab chiqaradi. Boshqa narx va hajmlar o‘zgarmaydi. Detal xarajati qancha oshadi va bu himoya siyosatining qaysi xavfini ko‘rsatadi?",
+    "options_en": [
+      "Costs rise $2,400; tariffs necessarily help all domestic producers",
+      "Costs rise $7,200; protection for component producers can weaken downstream exporters",
+      "Costs rise $3,600; only final imports become more expensive",
+      "Costs rise $7,200; exporter competitiveness necessarily improves"
+    ],
+    "options_ru": [
+      "Затраты растут на $2 400; пошлины помогают всем местным фирмам",
+      "Затраты растут на $7 200; защита производителей деталей может навредить экспортёрам",
+      "Затраты растут на $3 600; дорожает только импорт конечных товаров",
+      "Затраты растут на $7 200; конкурентоспособность экспорта обязательно повышается"
+    ],
+    "options_uz": [
+      "Xarajat $2400 oshadi; boj barcha mahalliy firmaga foydali",
+      "Xarajat $7200 oshadi; detal ishlab chiqaruvchilarini himoya qilish tayyor mahsulot eksportiga zarar yetkazishi mumkin",
+      "Xarajat $3600 oshadi; faqat tayyor import qimmatlashadi",
+      "Xarajat $7200 oshadi; eksport raqobati albatta oshadi"
+    ],
+    "why": [
+      "Every machine uses three components, so 400 machines need 1,200. Each component costs $6 more: 1,200×$6=$7,200. Tariffs can increase input costs for local exporters.",
+      "Каждой машине нужны три детали, для 400 машин — 1 200 деталей. Удорожание $6 даёт $7 200 затрат; пошлины на компоненты могут ослабить экспортёров.",
+      "400 mashinaga 1200 detal kerak. Har biri $6 qimmatlashadi, jami 1200×$6=$7200. Import detaliga boj mahalliy eksportchi xarajatini oshirishi mumkin."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T3-T-019"
+  }
+]
