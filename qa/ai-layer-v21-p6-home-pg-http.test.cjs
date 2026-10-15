@@ -28,6 +28,17 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
    cache:response.headers.get("cache-control")};
  };
  try{
+  const destination=async(handoffToken,actionCode,subjectKey,{
+   locale="ru",auth=g.ownerToken,extra={}
+  }={})=>{
+   const response=await fetch(origin+"/qa/home/destination",{
+    method:"POST",headers:{"origin":origin,"content-type":"application/json",
+     "authorization":"Bearer "+auth},
+    body:JSON.stringify({contextHandle:HANDLE,locale,
+     handoffToken,actionCode,subjectKey,...extra})});
+   return {status:response.status,body:await response.json(),
+    cache:response.headers.get("cache-control")};
+  };
   const initialConsumed=Number(scratchSql("SELECT count(*) FROM "+
    "private.iclub_ai_v21_home_action_handoffs_scratch "+
    "WHERE consumed_at IS NOT NULL"));
@@ -71,6 +82,8 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
    {contextHandle:"44444444-4444-4444-8444-444444444444"})).status,403);
   a.equal((await confirm(token,"review_finalized_practice","economics",
    {extra:{userId:"22222222-2222-4222-8222-222222222222"}})).status,400);
+  a.equal((await destination(token,"review_finalized_practice","economics")).status,403,
+   "Offered but unconsumed Home token must not open any academic destination");
   const accepted=await confirm(token,"review_finalized_practice","economics");
   a.equal(accepted.status,200,JSON.stringify(accepted));
   a.equal(accepted.body.status,"qa_handoff_confirmed");
@@ -78,6 +91,29 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   a.equal(accepted.body.navigationExecuted,false);
   a.equal(accepted.body.releaseAllowed,false);
   a.equal(accepted.cache,"no-store");
+  const studyTarget=await destination(token,"review_finalized_practice","economics");
+  a.equal(studyTarget.status,200,JSON.stringify(studyTarget));
+  a.deepEqual(studyTarget.body,{ok:true,status:"qa_destination_verified",
+   targetScreen:"practice-review",subjectKey:"economics",reviewOnly:true,
+   releaseAllowed:false,navigationExecuted:false,progressChanged:false});
+  a.equal(studyTarget.cache,"no-store");
+  a.equal((await destination(token,"review_open_tour_archive","economics")).status,403);
+  a.equal((await destination(token,"review_finalized_practice","biology")).status,403);
+  a.equal((await destination(token,"review_finalized_practice","economics",
+   {auth:g.otherToken})).status,403);
+  a.equal((await destination(token,"review_finalized_practice","economics",
+   {extra:{objectId:901}})).status,400,
+   "Browser must not nominate any academic object ID");
+  scratchSql("UPDATE private.iclub_ai_v21_home_source_test_releases "+
+   "SET rights_approved=false WHERE locale='ru' "+
+   "AND action_code='review_finalized_practice' AND subject_key='economics'");
+  a.equal((await destination(token,"review_finalized_practice","economics")).status,403,
+   "Already confirmed action cannot bypass a later source-rights revocation");
+  scratchSql("UPDATE private.iclub_ai_v21_home_source_test_releases "+
+   "SET rights_approved=true WHERE locale='ru' "+
+   "AND action_code='review_finalized_practice' AND subject_key='economics'");
+  a.equal((await destination(token,"review_finalized_practice","economics")).status,200,
+   "Fresh authorized destination lookup may recover without academic writes");
   a.equal((await confirm(token,"review_finalized_practice","economics")).status,403,
    "Token must be one-use even with same authorization");
   const raced=(await send()).body.handoffToken;
@@ -148,6 +184,10 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   const chosen=await confirm(tiedToken,"continue_enrolled_subject","biology");
   a.equal(chosen.status,200,JSON.stringify(chosen));
   a.equal(chosen.body.navigationExecuted,false);
+  const subjectTarget=await destination(tiedToken,"continue_enrolled_subject","biology");
+  a.equal(subjectTarget.status,200,JSON.stringify(subjectTarget));
+  a.equal(subjectTarget.body.targetScreen,"subject-hub");
+  a.equal((await destination(tiedToken,"continue_enrolled_subject","economics")).status,403);
   a.equal((await confirm(tiedToken,"continue_enrolled_subject","economics")).status,403,
    "Different tied subject cannot reuse consumed token");
   a.equal(Object.hasOwn(tie.body,"subjectKey"),false);
@@ -158,6 +198,13 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   a.equal(tour.status,200,JSON.stringify(tour.body));
   a.equal(tour.body.actionCode,"review_open_tour_archive");
   a.equal(tour.body.subjectKey,"economics");
+  const tourConfirmed=await confirm(tour.body.handoffToken,
+   "review_open_tour_archive","economics");
+  a.equal(tourConfirmed.status,200,JSON.stringify(tourConfirmed));
+  const tourTarget=await destination(tour.body.handoffToken,
+   "review_open_tour_archive","economics");
+  a.equal(tourTarget.status,200,JSON.stringify(tourTarget));
+  a.equal(tourTarget.body.targetScreen,"tour-review");
   scratchSql("UPDATE private.iclub_subject_slot_selections "+
    "SET competitive_selected=false WHERE subject_key='economics'");
   const notChosen=await send();
