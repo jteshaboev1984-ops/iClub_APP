@@ -81,7 +81,12 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   const tie=await send();
   a.equal(tie.status,200,JSON.stringify(tie.body));
   a.equal(tie.body.status,"selection_required");
-  a.equal(tie.body.candidateActionIds.length,2);
+  a.equal(tie.body.choices.length,2);
+  a.deepEqual(tie.body.choices.map(x=>Object.keys(x).sort()),
+   [["actionCode","subjectKey"],["actionCode","subjectKey"]]);
+  a.deepEqual(tie.body.choices.map(x=>x.subjectKey),["biology","economics"]);
+  a.equal(JSON.stringify(tie.body).includes("next_continue_"),false);
+  a.equal(Object.hasOwn(tie.body,"candidateActionIds"),false);
   a.equal(Object.hasOwn(tie.body,"subjectKey"),false);
   // Same owner chooses competitive study mode. Only then is the ended Tour eligible.
   scratchSql("UPDATE public.user_subjects SET mode='competitive' "+
