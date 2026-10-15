@@ -83,8 +83,9 @@ class QaV21RealAcademicScreenBridge {
  }
  async chooseReviewQuestion(row){
   const candidate=this.readReviewCandidate(row);
+  const epoch=this.epoch+1;
   await this.leave();
-  const epoch=this.epoch;
+  if(this.epoch!==epoch)return fail("screen_changed");
   if(!candidate)return fail("verified_review_required");
   if(!this.same(candidate,row))return fail("screen_changed");
   // The browser supplies ONLY exact integer selectors, not scores, progress,
