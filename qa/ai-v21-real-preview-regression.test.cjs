@@ -118,9 +118,14 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
     .replace('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>',
       '<script src="ai-v21-real-preview-fixture.js"></script>')
     .replace('<script src="https://telegram.org/js/telegram-web-app.js"></script>',
-      "<!-- External Telegram SDK disabled in offline QA -->");
+      "<!-- External Telegram SDK disabled in offline QA -->")
+    .replace("<head>",'<head>\n<meta http-equiv="Content-Security-Policy" content="'+
+      vercel.headers[0].headers.find(h=>h.key==="Content-Security-Policy").value
+       .replaceAll("&","&amp;").replaceAll('"',"&quot;")+'">');
   assert.equal(output,expected);
   assert.doesNotMatch(output,/cdn\.jsdelivr\.net\/npm\/@supabase/);
+  assert.match(output,/<meta http-equiv="Content-Security-Policy"/);
+  assert.match(output,/connect-src 'none'/);
   assert.ok(fs.existsSync(path.join(dist,"logo.png")),"Real app logo is preserved elsewhere");
   for(const banned of ["supabase","docs","qa",".github"]){
     assert.equal(fs.existsSync(path.join(dist,banned)),false,banned);
