@@ -1,0 +1,440 @@
+[
+  {
+    "n": 22,
+    "d": "hard",
+    "sec": 180,
+    "k": "A",
+    "en": "A petrol market initially has demand Qd = 180 − 3P and supply Qs = 20 + P. A new metro system reduces petrol demand to Qd = 150 − 3P, while more efficient refining increases supply to Qs = 30 + P. Relative to the initial equilibrium, what happens?",
+    "ru": "Первоначально спрос на бензин Qd = 180 − 3P, предложение Qs = 20 + P. Новое метро снижает спрос до Qd = 150 − 3P, а более эффективная переработка увеличивает предложение до Qs = 30 + P. Что происходит относительно первоначального равновесия?",
+    "uz": "Benzin bozorida dastlab talab Qd = 180 − 3P va taklif Qs = 20 + P. Yangi metro talabni Qd = 150 − 3P ga kamaytiradi, samarali qayta ishlash esa taklifni Qs = 30 + P ga oshiradi. Dastlabki muvozanatga nisbatan nima yuz beradi?",
+    "opts": [
+      "Price falls by 10; quantity is unchanged",
+      "Price falls by 10; quantity rises by 10",
+      "Price rises by 10; quantity is unchanged",
+      "Price falls by 5; quantity falls by 10"
+    ],
+    "why": [
+      "Initially P = 40, Q = 60; after both changes P = 30, Q = 60. Two curve shifts affect price but offset each other in quantity.",
+      "Сначала P = 40, Q = 60; после двух сдвигов P = 30, Q = 60. Цена уменьшается на 10, объём не меняется.",
+      "Avval P = 40, Q = 60; ikkala siljishdan keyin P = 30, Q = 60. Narx 10 ga pasayadi, miqdor o‘zgarmaydi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-022",
+    "options_en": [
+      "Price falls by 10; quantity is unchanged",
+      "Price falls by 10; quantity rises by 10",
+      "Price rises by 10; quantity is unchanged",
+      "Price falls by 5; quantity falls by 10"
+    ],
+    "options_ru": [
+      "Price falls by 10; quantity is unchanged",
+      "Price falls by 10; quantity rises by 10",
+      "Price rises by 10; quantity is unchanged",
+      "Price falls by 5; quantity falls by 10"
+    ],
+    "options_uz": [
+      "Price falls by 10; quantity is unchanged",
+      "Price falls by 10; quantity rises by 10",
+      "Price rises by 10; quantity is unchanged",
+      "Price falls by 5; quantity falls by 10"
+    ]
+  },
+  {
+    "n": 24,
+    "d": "hard",
+    "sec": 180,
+    "k": "D",
+    "en": "Initially, rail demand is Qd = 100 − 2P and supply is Qs = 20 + 2P. Higher bus fares raise rail demand to Qd = 120 − 2P, but track maintenance reduces rail supply to Qs = 10 + 2P. What are the changes in rail equilibrium price and quantity?",
+    "ru": "Первоначально спрос на поездки поездом Qd = 100 − 2P, предложение Qs = 20 + 2P. Рост автобусных тарифов увеличивает спрос на поездки поездом до Qd = 120 − 2P, но ремонт путей уменьшает предложение до Qs = 10 + 2P. Как изменятся равновесные цена и объём?",
+    "uz": "Dastlab temiryo‘l safarlariga talab Qd = 100 − 2P, taklif Qs = 20 + 2P. Avtobus narxlari oshishi talabni Qd = 120 − 2P ga ko‘paytiradi, yo‘l ta’miri esa taklifni Qs = 10 + 2P ga kamaytiradi. Muvozanat narxi va miqdori qanday o‘zgaradi?",
+    "opts": [
+      "Price +5, quantity +10",
+      "Price +7.5, quantity −5",
+      "Price +10, quantity +5",
+      "Price +7.5, quantity +5"
+    ],
+    "why": [
+      "Originally P = 20, Q = 60. Afterwards P = 27.5 and Q = 65. Thus price rises by 7.5 and quantity by 5.",
+      "Сначала P = 20, Q = 60; после изменений P = 27,5, Q = 65. Цена выросла на 7,5, объём — на 5.",
+      "Avval P = 20, Q = 60; keyin P = 27,5, Q = 65. Narx 7,5 ga, miqdor 5 ga oshadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-024",
+    "options_en": [
+      "Price +5, quantity +10",
+      "Price +7.5, quantity −5",
+      "Price +10, quantity +5",
+      "Price +7.5, quantity +5"
+    ],
+    "options_ru": [
+      "Price +5, quantity +10",
+      "Price +7.5, quantity −5",
+      "Price +10, quantity +5",
+      "Price +7.5, quantity +5"
+    ],
+    "options_uz": [
+      "Price +5, quantity +10",
+      "Price +7.5, quantity −5",
+      "Price +10, quantity +5",
+      "Price +7.5, quantity +5"
+    ]
+  },
+  {
+    "n": 25,
+    "d": "hard",
+    "sec": 190,
+    "k": "C",
+    "en": "On a straight-line demand curve P = 100 − 2Q, the market moves from Q = 20 to Q = 30. Using the midpoint method, which pair correctly gives the magnitude of PED over this interval and the effect on total revenue?",
+    "ru": "На линейной кривой спроса P = 100 − 2Q рынок переходит от Q = 20 к Q = 30. Используя метод средней точки, выберите правильную пару: модуль PED на участке и изменение общей выручки.",
+    "uz": "Chiziqli talab egri chizig‘i P = 100 − 2Q bo‘yicha bozor Q = 20 dan Q = 30 ga o‘tadi. O‘rta nuqta usulida ushbu oraliqdagi PED moduli va umumiy tushum o‘zgarishi qanday?",
+    "opt_en": [
+      "PED = 0.5; revenue rises by $200",
+      "PED = 2; revenue falls by $200",
+      "PED = 1; total revenue is unchanged",
+      "PED = 1; revenue rises by $200"
+    ],
+    "opt_ru": [
+      "PED = 0,5; выручка выросла на $200",
+      "PED = 2; выручка упала на $200",
+      "PED = 1; общая выручка не изменилась",
+      "PED = 1; выручка выросла на $200"
+    ],
+    "opt_uz": [
+      "PED = 0,5; tushum $200 ga oshdi",
+      "PED = 2; tushum $200 ga kamaydi",
+      "PED = 1; umumiy tushum o‘zgarmadi",
+      "PED = 1; tushum $200 ga oshdi"
+    ],
+    "why": [
+      "Prices are $60 and $40; both price–quantity products equal $1,200. Midpoint PED is (10/25)/(20/50) = 1.",
+      "Цены равны $60 и $40, в обоих случаях общая выручка $1 200. PED по средней точке: (10/25)/(20/50) = 1.",
+      "Narxlar $60 va $40; har ikkala holatda tushum $1200. O‘rta nuqta usulidagi PED: (10/25)/(20/50) = 1."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-025",
+    "options_en": [
+      "PED = 0.5; revenue rises by $200",
+      "PED = 2; revenue falls by $200",
+      "PED = 1; total revenue is unchanged",
+      "PED = 1; revenue rises by $200"
+    ],
+    "options_ru": [
+      "PED = 0,5; выручка выросла на $200",
+      "PED = 2; выручка упала на $200",
+      "PED = 1; общая выручка не изменилась",
+      "PED = 1; выручка выросла на $200"
+    ],
+    "options_uz": [
+      "PED = 0,5; tushum $200 ga oshdi",
+      "PED = 2; tushum $200 ga kamaydi",
+      "PED = 1; umumiy tushum o‘zgarmadi",
+      "PED = 1; tushum $200 ga oshdi"
+    ]
+  },
+  {
+    "n": 29,
+    "d": "hard",
+    "sec": 180,
+    "k": "A",
+    "en": "Demand for a product is initially 500 units. Real household income rises 10% (YED = +1.5), while its own price simultaneously rises 5% (PED = −0.8). Assume additive first-order percentage effects with other influences fixed. What quantity is now predicted?",
+    "ru": "Первоначальный спрос на товар — 500 единиц. Реальный доход домохозяйств растёт на 10% (YED = +1,5), а цена самого товара одновременно растёт на 5% (PED = −0,8). Считайте процентные эффекты первого порядка аддитивными, прочие условия неизменными. Каков прогноз спроса?",
+    "uz": "Mahsulotga dastlabki talab 500 birlik. Uy xo‘jaliklarining real daromadi 10% ga oshadi (YED = +1,5), mahsulotning o‘z narxi esa bir vaqtda 5% ga oshadi (PED = −0,8). Birinchi tartibli foizli ta’sirlar qo‘shiladi, boshqa omillar o‘zgarmaydi deb oling. Talab qancha?",
+    "opts": [
+      "555",
+      "575",
+      "520",
+      "480"
+    ],
+    "why": [
+      "Income increases demand 15%; the own-price rise reduces quantity demanded 4%. Net +11% on 500 gives 555.",
+      "Доход повышает спрос на 15%, рост собственной цены уменьшает его объём на 4%. Итого +11% от 500 = 555.",
+      "Daromad talabni 15% oshiradi, narxning o‘zgarishi uni 4% kamaytiradi. Sof +11%: 500 × 1,11 = 555."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-029",
+    "options_en": [
+      "555",
+      "575",
+      "520",
+      "480"
+    ],
+    "options_ru": [
+      "555",
+      "575",
+      "520",
+      "480"
+    ],
+    "options_uz": [
+      "555",
+      "575",
+      "520",
+      "480"
+    ]
+  },
+  {
+    "n": 33,
+    "d": "hard",
+    "sec": 165,
+    "k": "B",
+    "en": "A preventive screening programme costs $60 per patient. Each patient privately values the benefit at $25, while additional benefits to other people are estimated at $50 per patient. Assume these values can be added. Which conclusion about provision is best supported?",
+    "ru": "Профилактическое обследование стоит $60 на пациента. Личную пользу пациент оценивает в $25, дополнительная выгода для других людей составляет примерно $50 на пациента. Считайте эти оценки суммируемыми. Какой вывод о предоставлении услуги наиболее обоснован?",
+    "uz": "Profilaktik tekshiruv har bir bemor uchun $60 turadi. Bemorning shaxsiy foydasi $25, boshqa odamlarga qo‘shimcha foyda esa har bir bemor uchun $50 deb baholanadi. Ushbu qiymatlar qo‘shiladi deb oling. Xizmatni taqdim etish haqida qaysi xulosa asosli?",
+    "opt_en": [
+      "Private willingness to pay exceeds the cost, so no underconsumption is possible.",
+      "The combined benefit exceeds cost by $15, but private demand alone may be too low.",
+      "There is a net social loss of $35 per patient.",
+      "The service must be a pure public good because outsiders benefit."
+    ],
+    "opt_ru": [
+      "Личная готовность платить превышает издержки, поэтому недопотребление исключено.",
+      "Совокупная выгода превышает затраты на $15, но одного частного спроса может быть недостаточно.",
+      "Общественный чистый убыток составляет $35 на пациента.",
+      "Это обязательно чистое общественное благо, поскольку пользу получают и посторонние."
+    ],
+    "opt_uz": [
+      "Shaxsiy to‘lashga tayyorlik xarajatdan yuqori; demak, kam iste’mol bo‘lishi mumkin emas.",
+      "Jami foyda xarajatdan $15 yuqori, biroq faqat xususiy talab yetarli bo‘lmasligi mumkin.",
+      "Har bir bemor uchun sof ijtimoiy zarar $35.",
+      "Boshqalar ham foyda ko‘rgani uchun xizmat albatta sof jamoat ne’matidir."
+    ],
+    "why": [
+      "Private benefit ($25) is below cost ($60), but total benefit ($25 + $50 = $75) exceeds it by $15. External benefits can lead to underprovision.",
+      "Личная выгода $25 ниже затрат $60, но общая выгода $25 + $50 = $75 выше их на $15. Внешние выгоды могут вести к недостаточному предложению.",
+      "Shaxsiy foyda $25 xarajat $60 dan past, lekin jami foyda $75 bo‘lib, xarajatdan $15 yuqori. Tashqi foyda xizmatning kam taqdim etilishiga sabab bo‘lishi mumkin."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-033",
+    "options_en": [
+      "Private willingness to pay exceeds the cost, so no underconsumption is possible.",
+      "The combined benefit exceeds cost by $15, but private demand alone may be too low.",
+      "There is a net social loss of $35 per patient.",
+      "The service must be a pure public good because outsiders benefit."
+    ],
+    "options_ru": [
+      "Личная готовность платить превышает издержки, поэтому недопотребление исключено.",
+      "Совокупная выгода превышает затраты на $15, но одного частного спроса может быть недостаточно.",
+      "Общественный чистый убыток составляет $35 на пациента.",
+      "Это обязательно чистое общественное благо, поскольку пользу получают и посторонние."
+    ],
+    "options_uz": [
+      "Shaxsiy to‘lashga tayyorlik xarajatdan yuqori; demak, kam iste’mol bo‘lishi mumkin emas.",
+      "Jami foyda xarajatdan $15 yuqori, biroq faqat xususiy talab yetarli bo‘lmasligi mumkin.",
+      "Har bir bemor uchun sof ijtimoiy zarar $35.",
+      "Boshqalar ham foyda ko‘rgani uchun xizmat albatta sof jamoat ne’matidir."
+    ]
+  },
+  {
+    "n": 37,
+    "d": "hard",
+    "sec": 190,
+    "k": "D",
+    "en": "Beef and hides are jointly supplied. The hide market initially has demand Qd = 300 − 5P and supply Qs = 60 + 3P. Higher beef output increases hide supply to Qs = 100 + 3P with hide demand unchanged. How do the hide equilibrium price and quantity change?",
+    "ru": "Говядина и шкуры производятся совместно. На рынке шкур первоначально Qd = 300 − 5P, Qs = 60 + 3P. Рост производства говядины увеличивает предложение шкур до Qs = 100 + 3P, спрос на шкуры неизменен. Как изменятся равновесные цена и объём шкур?",
+    "uz": "Mol go‘shti va teri birgalikda ishlab chiqariladi. Teri bozorida dastlab Qd = 300 − 5P va Qs = 60 + 3P. Mol go‘shti ishlab chiqarish oshishi bilan teri taklifi Qs = 100 + 3P ga ko‘payadi, talab o‘zgarmaydi. Teri bozoridagi muvozanat narxi va miqdori qanday o‘zgaradi?",
+    "opts": [
+      "Price −5, quantity +15",
+      "Price +5, quantity +25",
+      "Price −10, quantity +25",
+      "Price −5, quantity +25"
+    ],
+    "why": [
+      "Originally P = 30 and Q = 150. After the joint-supply increase P = 25 and Q = 175. Price falls by 5, quantity rises by 25.",
+      "Сначала P = 30, Q = 150; после роста совместного предложения P = 25, Q = 175. Цена −5, объём +25.",
+      "Dastlab P = 30, Q = 150; birgalikdagi taklif oshgach P = 25, Q = 175. Narx −5, miqdor +25."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-037",
+    "options_en": [
+      "Price −5, quantity +15",
+      "Price +5, quantity +25",
+      "Price −10, quantity +25",
+      "Price −5, quantity +25"
+    ],
+    "options_ru": [
+      "Price −5, quantity +15",
+      "Price +5, quantity +25",
+      "Price −10, quantity +25",
+      "Price −5, quantity +25"
+    ],
+    "options_uz": [
+      "Price −5, quantity +15",
+      "Price +5, quantity +25",
+      "Price −10, quantity +25",
+      "Price −5, quantity +25"
+    ]
+  },
+  {
+    "n": 40,
+    "d": "hard",
+    "sec": 195,
+    "k": "A",
+    "en": "The market price rises from $20 to $25, while quantity supplied rises from 80 to 100 units. Use initial values as the percentage-change base. What are PES and the change in sellers' total sales receipts?",
+    "ru": "Рыночная цена растёт с $20 до $25, а объём предложения — с 80 до 100 единиц. Для процентных изменений используйте первоначальные значения. Найдите PES и изменение общей выручки продавцов.",
+    "uz": "Bozor narxi $20 dan $25 ga, taklif miqdori esa 80 dan 100 birlikka oshadi. Foizli o‘zgarishlar uchun boshlang‘ich qiymatlarni asos qilib oling. PES va sotuvchilarning jami tushumi o‘zgarishi qancha?",
+    "opt_en": [
+      "PES = 1.0; receipts increase by $900",
+      "PES = 0.8; receipts increase by $400",
+      "PES = 1.25; receipts increase by $900",
+      "PES = 1.0; receipts decrease by $900"
+    ],
+    "opt_ru": [
+      "PES = 1,0; выручка увеличилась на $900",
+      "PES = 0,8; выручка увеличилась на $400",
+      "PES = 1,25; выручка увеличилась на $900",
+      "PES = 1,0; выручка уменьшилась на $900"
+    ],
+    "opt_uz": [
+      "PES = 1,0; tushum $900 ga oshdi",
+      "PES = 0,8; tushum $400 ga oshdi",
+      "PES = 1,25; tushum $900 ga oshdi",
+      "PES = 1,0; tushum $900 ga kamaydi"
+    ],
+    "why": [
+      "PES = (20/80)/(5/20) = 1. Original receipts: $1,600; new receipts: $2,500, a $900 increase.",
+      "PES = (20/80)/(5/20) = 1. Первоначальная выручка $1 600, новая $2 500; прирост $900.",
+      "PES = (20/80)/(5/20) = 1. Dastlabki tushum $1600, yangi tushum $2500; farq $900."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-040",
+    "options_en": [
+      "PES = 1.0; receipts increase by $900",
+      "PES = 0.8; receipts increase by $400",
+      "PES = 1.25; receipts increase by $900",
+      "PES = 1.0; receipts decrease by $900"
+    ],
+    "options_ru": [
+      "PES = 1,0; выручка увеличилась на $900",
+      "PES = 0,8; выручка увеличилась на $400",
+      "PES = 1,25; выручка увеличилась на $900",
+      "PES = 1,0; выручка уменьшилась на $900"
+    ],
+    "options_uz": [
+      "PES = 1,0; tushum $900 ga oshdi",
+      "PES = 0,8; tushum $400 ga oshdi",
+      "PES = 1,25; tushum $900 ga oshdi",
+      "PES = 1,0; tushum $900 ga kamaydi"
+    ]
+  },
+  {
+    "n": 47,
+    "d": "hard",
+    "sec": 180,
+    "k": "C",
+    "en": "Market demand is Qd = 180 − 3P. A seller reduces price from $30 to $25 and sells exactly the quantities implied by this demand relationship. What is the change in total sales revenue?",
+    "ru": "Рыночный спрос описан Qd = 180 − 3P. Продавец снижает цену с $30 до $25 и продаёт ровно те объёмы, которые соответствуют этому уравнению спроса. Как изменится общая выручка?",
+    "uz": "Bozor talabi Qd = 180 − 3P. Sotuvchi narxni $30 dan $25 ga tushiradi va ushbu talab tenglamasidagi miqdorlarni sotadi. Jami tushum qanday o‘zgaradi?",
+    "opts": [
+      "Increases by $75",
+      "Increases by $375",
+      "Decreases by $75",
+      "Remains unchanged"
+    ],
+    "why": [
+      "At P = 30, Q = 90 and revenue is $2,700. At P = 25, Q = 105 and revenue is $2,625. Revenue decreases by $75.",
+      "При P = 30 объём 90 и выручка $2 700. При P = 25 объём 105 и выручка $2 625. Снижение составляет $75.",
+      "P = 30 da Q = 90 va tushum $2700. P = 25 da Q = 105 va tushum $2625. Tushum $75 ga kamayadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-047",
+    "options_en": [
+      "Increases by $75",
+      "Increases by $375",
+      "Decreases by $75",
+      "Remains unchanged"
+    ],
+    "options_ru": [
+      "Increases by $75",
+      "Increases by $375",
+      "Decreases by $75",
+      "Remains unchanged"
+    ],
+    "options_uz": [
+      "Increases by $75",
+      "Increases by $375",
+      "Decreases by $75",
+      "Remains unchanged"
+    ]
+  },
+  {
+    "n": 51,
+    "d": "hard",
+    "sec": 200,
+    "k": "B",
+    "en": "Price rises from $15 to $18 as quantity demanded falls from 100 to 80 units. Using the midpoint formula, which combination best describes the absolute PED and the change in revenue?",
+    "ru": "Цена растёт с $15 до $18, объём спроса падает со 100 до 80 единиц. Используя формулу средней точки, выберите верную комбинацию модуля PED и изменения выручки.",
+    "uz": "Narx $15 dan $18 ga oshadi, talab miqdori 100 dan 80 birlikka kamayadi. O‘rta nuqta formulasi bo‘yicha PED moduli va tushumdagi o‘zgarish qaysi?",
+    "opt_en": [
+      "PED ≈ 0.82; revenue rises by $60",
+      "PED ≈ 1.22; revenue falls by $60",
+      "PED ≈ 1.22; revenue rises by $60",
+      "PED ≈ 2.00; revenue falls by $300"
+    ],
+    "opt_ru": [
+      "PED ≈ 0,82; выручка увеличилась на $60",
+      "PED ≈ 1,22; выручка уменьшилась на $60",
+      "PED ≈ 1,22; выручка увеличилась на $60",
+      "PED ≈ 2,00; выручка уменьшилась на $300"
+    ],
+    "opt_uz": [
+      "PED ≈ 0,82; tushum $60 ga oshdi",
+      "PED ≈ 1,22; tushum $60 ga kamaydi",
+      "PED ≈ 1,22; tushum $60 ga oshdi",
+      "PED ≈ 2,00; tushum $300 ga kamaydi"
+    ],
+    "why": [
+      "Absolute arc PED = (20/90)/(3/16.5) ≈ 1.22. Revenue falls from $1,500 to $1,440, or by $60.",
+      "Модуль дуговой PED = (20/90)/(3/16,5) ≈ 1,22. Выручка падает с $1 500 до $1 440, то есть на $60.",
+      "Yoy bo‘yicha PED moduli = (20/90)/(3/16,5) ≈ 1,22. Tushum $1500 dan $1440 ga, ya’ni $60 ga kamayadi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-051",
+    "options_en": [
+      "PED ≈ 0.82; revenue rises by $60",
+      "PED ≈ 1.22; revenue falls by $60",
+      "PED ≈ 1.22; revenue rises by $60",
+      "PED ≈ 2.00; revenue falls by $300"
+    ],
+    "options_ru": [
+      "PED ≈ 0,82; выручка увеличилась на $60",
+      "PED ≈ 1,22; выручка уменьшилась на $60",
+      "PED ≈ 1,22; выручка увеличилась на $60",
+      "PED ≈ 2,00; выручка уменьшилась на $300"
+    ],
+    "options_uz": [
+      "PED ≈ 0,82; tushum $60 ga oshdi",
+      "PED ≈ 1,22; tushum $60 ga kamaydi",
+      "PED ≈ 1,22; tushum $60 ga oshdi",
+      "PED ≈ 2,00; tushum $300 ga kamaydi"
+    ]
+  },
+  {
+    "n": 65,
+    "d": "hard",
+    "sec": 190,
+    "k": "C",
+    "en": "Coffee demand starts at 500 packs. A 10% rise in tea's price increases coffee demand with XED = +0.8. Subsequently coffee's own price rises by 5%, and PED is −1.2. Apply each percentage change sequentially to the quantity reached at the preceding step. What is final coffee demand?",
+    "ru": "Первоначальный спрос на кофе — 500 упаковок. Подорожание чая на 10% повышает спрос на кофе при XED = +0,8. Затем собственная цена кофе растёт на 5%, а PED = −1,2. Применяйте каждый процентный эффект последовательно к результату предыдущего шага. Каков итоговый объём спроса на кофе?",
+    "uz": "Qahvaga dastlabki talab 500 qadoq. Choy narxi 10% oshganda XED = +0,8 bo‘yicha qahva talabi ortadi. So‘ng qahvaning o‘z narxi 5% oshadi, PED = −1,2. Har bir foizli o‘zgarishni oldingi bosqich natijasiga ketma-ket qo‘llang. Yakuniy talab qancha?",
+    "opts": [
+      "470",
+      "510",
+      "507.6",
+      "540"
+    ],
+    "why": [
+      "After the substitute-price effect: 500 × 1.08 = 540. Then the own-price effect reduces this by 6%: 540 × 0.94 = 507.6.",
+      "После изменения цены заменителя: 500 × 1,08 = 540. Затем собственная цена уменьшает объём на 6%: 540 × 0,94 = 507,6.",
+      "O‘rinbosar narxi ta’siridan keyin: 500 × 1,08 = 540. So‘ng o‘z narxi sabab 6% kamayadi: 540 × 0,94 = 507,6."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T1-P-065",
+    "options_en": [
+      "470",
+      "510",
+      "507.6",
+      "540"
+    ],
+    "options_ru": [
+      "470",
+      "510",
+      "507.6",
+      "540"
+    ],
+    "options_uz": [
+      "470",
+      "510",
+      "507.6",
+      "540"
+    ]
+  }
+]
