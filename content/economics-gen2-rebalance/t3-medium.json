@@ -1,0 +1,266 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-004",
+    "n": 4,
+    "k": "B",
+    "d": "medium",
+    "sec": 150,
+    "en": "Commercial banks have a $200m consumer-loan portfolio. The central bank cuts the maximum permitted one-year portfolio growth from 10% to 4%. If the original loan base stays fixed, how much less new lending is permitted, and what is the policy stance?",
+    "ru": "У банков портфель потребительских кредитов $200 млн. Центральный банк снижает предельный годовой рост портфеля с 10% до 4%. Если исходный объём кредитов неизменен, на сколько меньше новых кредитов теперь разрешено и каков характер политики?",
+    "uz": "Tijorat banklarining iste’mol kreditlari portfeli $200 mln. Markaziy bank bir yillik ruxsat etilgan o‘sish chegarasini 10% dan 4% ga tushirdi. Boshlang‘ich portfel o‘zgarmasa, yangi kreditlar qanchaga kamayadi va siyosat yo‘nalishi qanday?",
+    "options_en": [
+      "$8m; expansionary",
+      "$12m; contractionary",
+      "$20m; expansionary",
+      "$12m; expansionary"
+    ],
+    "options_ru": [
+      "$8 млн; стимулирующая",
+      "$12 млн; сдерживающая",
+      "$20 млн; стимулирующая",
+      "$12 млн; стимулирующая"
+    ],
+    "options_uz": [
+      "$8 mln; kengaytiruvchi",
+      "$12 mln; cheklovchi",
+      "$20 mln; kengaytiruvchi",
+      "$12 mln; kengaytiruvchi"
+    ],
+    "why": [
+      "Previously up to $20m new credit was allowed; now only $8m. The reduction is $12m and restricts credit growth.",
+      "Ранее допускалось $20 млн новых кредитов, теперь $8 млн. Разница $12 млн; ограничение сдерживает рост кредитования.",
+      "Avval $20 mln yangi kreditga ruxsat, hozir $8 mln. Farq $12 mln; bu kredit o‘sishini cheklaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-013",
+    "n": 13,
+    "k": "D",
+    "d": "medium",
+    "sec": 150,
+    "en": "A government initially spends $300m and receives $250m in revenue. To reduce demand-pull inflation it cuts purchases by $30m and raises taxes by $20m, with no other changes. What is its new budget balance and likely immediate effect on aggregate demand?",
+    "ru": "Государство первоначально расходует $300 млн и получает доходы $250 млн. Для снижения инфляции спроса оно сокращает закупки на $30 млн и повышает налоги на $20 млн. Каковы новое бюджетное сальдо и ожидаемый немедленный эффект на AD?",
+    "uz": "Davlat dastlab $300 mln sarflaydi va $250 mln daromad oladi. Talab inflyatsiyasini pasaytirish uchun xaridni $30 mln kamaytirib, soliqlarni $20 mln oshiradi. Yangi budjet saldosi va yalpi talabga dastlabki ta’siri qanday?",
+    "options_en": [
+      "$50m deficit; AD increases",
+      "$20m deficit; AD unchanged",
+      "$30m surplus; AD increases",
+      "Balanced budget; AD tends to fall"
+    ],
+    "options_ru": [
+      "Дефицит $50 млн; AD растёт",
+      "Дефицит $20 млн; AD не меняется",
+      "Профицит $30 млн; AD растёт",
+      "Бюджет сбалансирован; AD имеет тенденцию к снижению"
+    ],
+    "options_uz": [
+      "$50 mln taqchillik; AD oshadi",
+      "$20 mln taqchillik; AD o‘zgarmaydi",
+      "$30 mln profitsit; AD oshadi",
+      "Budjet muvozanatli; AD kamayishga intiladi"
+    ],
+    "why": [
+      "New spending is $270m and revenue $270m, so the budget balances. Lower purchases and higher taxes tend to lower AD.",
+      "Новые расходы $270 млн и доходы $270 млн: бюджет сбалансирован. Снижение закупок и повышение налогов сдерживают AD.",
+      "Yangi xarajat va daromad $270 mln dan: budjet muvozanatda. Xaridlarni qisqartirish va soliqni oshirish AD ni pasaytiradi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-029",
+    "n": 29,
+    "k": "C",
+    "d": "medium",
+    "sec": 150,
+    "en": "A central bank is concerned about accelerating demand-pull inflation. It sells government securities to banks, which pay from their reserves, and also raises its policy interest rate. Other influences are unchanged. Which combined transmission is most plausible?",
+    "ru": "Центральный банк обеспокоен ускорением инфляции спроса. Он продаёт банкам государственные бумаги, за которые те платят резервами, и одновременно повышает ключевую ставку. Прочие условия неизменны. Какой совместный механизм наиболее вероятен?",
+    "uz": "Markaziy bank talab inflyatsiyasi tezlashishidan xavotirda. U banklarga davlat qimmatli qog‘ozlarini sotadi, banklar zaxiralari hisobidan to‘laydi; ayni paytda siyosat stavkasi oshiriladi. Boshqa omillar o‘zgarmasa, qanday umumiy uzatish mexanizmi kutiladi?",
+    "options_en": [
+      "Bank reserves rise and credit becomes cheaper.",
+      "The government automatically collects more tariff revenue.",
+      "Bank reserves fall and borrowing becomes more expensive, restraining AD.",
+      "Long-run productive capacity immediately doubles."
+    ],
+    "options_ru": [
+      "Банковские резервы растут, кредиты дешевеют.",
+      "Государство автоматически получает больше таможенных сборов.",
+      "Резервы банков падают, заимствования дорожают, сдерживая AD.",
+      "Долгосрочный производственный потенциал сразу удваивается."
+    ],
+    "options_uz": [
+      "Bank zaxiralari oshib, kredit arzonlashadi.",
+      "Davlat avtomatik ko‘proq boj daromadi oladi.",
+      "Bank zaxiralari kamayib, qarz qimmatlashadi va AD cheklanadi.",
+      "Uzoq muddatli ishlab chiqarish quvvati darhol ikki baravar oshadi."
+    ],
+    "why": [
+      "Selling securities withdraws bank reserves; higher rates discourage some borrowing and spending. Both are contractionary monetary channels.",
+      "Продажа бумаг изымает резервы; более высокая ставка сдерживает кредиты и расходы. Оба инструмента ограничивают денежные условия.",
+      "Qimmatli qog‘oz sotuvi bank zaxirasini kamaytiradi; yuqori stavka qarz va xarajatni cheklaydi. Ikkisi ham cheklovchi siyosatdir."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-032",
+    "n": 32,
+    "k": "A",
+    "d": "medium",
+    "sec": 145,
+    "en": "Foreign investors exchange overseas money for Country R's currency to buy its bonds. The exchange rate floats and other flows are initially fixed. Which pair of immediate currency-market pressure and potential export-competitiveness effect follows?",
+    "ru": "Иностранные инвесторы меняют валюту на деньги страны R для покупки её облигаций. Курс плавающий, прочие валютные потоки первоначально неизменны. Какая пара «давление на курс — возможный эффект на экспортную конкурентоспособность» следует?",
+    "uz": "Xorijiy investorlar R mamlakati obligatsiyalarini olish uchun xorijiy pulni R valutasiga almashtiradi. Kurs suzuvchi, boshqa valuta oqimlari dastlab o‘zgarmaydi. «Kursga bosim — eksport raqobatbardoshligiga ehtimoliy ta’sir» juftligi qaysi?",
+    "options_en": [
+      "Appreciation pressure; exports may become dearer to foreign buyers",
+      "Depreciation pressure; exports always become cheaper",
+      "Appreciation pressure; exports necessarily double",
+      "No exchange-rate pressure; exports are unaffected by currency values"
+    ],
+    "options_ru": [
+      "Давление к укреплению; экспорт может подорожать для иностранцев",
+      "Давление к обесценению; экспорт всегда дешевеет",
+      "Укрепление; экспорт обязательно удвоится",
+      "Нет давления на курс; валютный курс не влияет на экспорт"
+    ],
+    "options_uz": [
+      "Qadrlanish bosimi; eksport chet elliklar uchun qimmatlashishi mumkin",
+      "Qadrsizlanish bosimi; eksport har doim arzonlashadi",
+      "Qadrlanish bosimi; eksport albatta ikki baravar oshadi",
+      "Kursga bosim yo‘q; valuta eksportga ta’sir qilmaydi"
+    ],
+    "why": [
+      "Demand for domestic currency rises, creating appreciation pressure; a stronger currency can make home exports more expensive abroad.",
+      "Национальная валюта становится более востребованной и может укрепиться; это способно повысить иностранную цену экспорта.",
+      "Mahalliy valutaga talab ko‘payib, qadrlanish bosimini yaratadi; kuchli valuta eksportni chet elliklar uchun qimmatlashtirishi mumkin."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-035",
+    "n": 35,
+    "k": "B",
+    "d": "medium",
+    "sec": 165,
+    "en": "A country's linear PPC allows either 20 computers or 80 tonnes of grain. It produces 20 computers, exports five, and imports 30 tonnes of grain in exchange. Which conclusion follows about its consumption bundle?",
+    "ru": "Линейная КПВ страны допускает выпуск либо 20 компьютеров, либо 80 тонн зерна. Страна производит 20 компьютеров, экспортирует пять и получает в обмен 30 тонн зерна. Какой вывод следует о её потребительском наборе?",
+    "uz": "Mamlakatning chiziqli ishlab chiqarish imkoniyatlari egri chizig‘i 20 kompyuter yoki 80 tonna don ishlab chiqarishga imkon beradi. Mamlakat 20 kompyuter ishlab chiqarib, beshtasini eksport qiladi va 30 tonna don import qiladi. Iste’mol to‘plami haqida qanday xulosa kelib chiqadi?",
+    "options_en": [
+      "The economy produces 15 computers and 30 tonnes of grain domestically.",
+      "Its consumption of 15 computers and 30 tonnes of grain lies outside its own PPC.",
+      "The import contract shifts its physical PPC inward.",
+      "Trade prevents consumption of any grain."
+    ],
+    "options_ru": [
+      "Страна внутри себя производит 15 компьютеров и 30 тонн зерна.",
+      "Потребление 15 компьютеров и 30 тонн зерна находится за пределами её собственной КПВ.",
+      "Импортный контракт сдвигает физическую КПВ внутрь.",
+      "Торговля исключает потребление зерна."
+    ],
+    "options_uz": [
+      "Mamlakat ichida 15 kompyuter va 30 tonna don ishlab chiqaradi.",
+      "15 kompyuter va 30 tonna don iste’moli o‘zining IIECsidan tashqarida joylashgan.",
+      "Import bitimi fizik IIECni ichkariga siljitadi.",
+      "Savdo don iste’molini imkonsiz qiladi."
+    ],
+    "why": [
+      "The domestic linear PPC allows 20 tonnes of grain at 15 computers, whereas trade permits consumption of 30. Production stays on the PPC, consumption can lie beyond it.",
+      "На собственной КПВ при 15 компьютерах возможно лишь 20 тонн зерна, а благодаря обмену потребляется 30. Производство остаётся на КПВ, потребление выходит за неё.",
+      "Mahalliy IIECda 15 kompyuter bilan atigi 20 tonna don mumkin, savdo orqali 30 tonna iste’mol qilinadi. Ishlab chiqarish IIECda, iste’mol tashqarida."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-042",
+    "n": 42,
+    "k": "C",
+    "d": "medium",
+    "sec": 155,
+    "en": "A worker pays 20% personal income tax on $20,000 taxable earnings, while a retailer charges 10% VAT on an item priced at $1,000 before VAT. Which pair correctly identifies the direct and indirect taxes and their amounts?",
+    "ru": "Работник платит подоходный налог 20% с облагаемого дохода $20 000; продавец начисляет НДС 10% на товар стоимостью $1 000 без налога. Какая пара правильно определяет прямой и косвенный налоги с суммами?",
+    "uz": "Ishchi $20 000 soliqqa tortiladigan daromaddan 20% shaxsiy daromad solig‘i to‘laydi; sotuvchi QQSsiz $1000 lik mahsulotga 10% QQS qo‘shadi. Qaysi juftlik to‘g‘ridan-to‘g‘ri va egri soliqlarni hamda summalarini to‘g‘ri ko‘rsatadi?",
+    "options_en": [
+      "Direct VAT $100; indirect income tax $4,000",
+      "Direct income tax $400; indirect VAT $1,000",
+      "Direct income tax $4,000; indirect VAT $100",
+      "Direct VAT $1,000; indirect income tax $2,000"
+    ],
+    "options_ru": [
+      "Прямой НДС $100; косвенный подоходный $4 000",
+      "Прямой подоходный $400; косвенный НДС $1 000",
+      "Прямой подоходный $4 000; косвенный НДС $100",
+      "Прямой НДС $1 000; косвенный подоходный $2 000"
+    ],
+    "options_uz": [
+      "To‘g‘ri QQS $100; egri daromad solig‘i $4000",
+      "To‘g‘ri daromad solig‘i $400; egri QQS $1000",
+      "To‘g‘ri daromad solig‘i $4000; egri QQS $100",
+      "To‘g‘ri QQS $1000; egri daromad solig‘i $2000"
+    ],
+    "why": [
+      "Income tax is a direct tax: 0.20×20,000=$4,000. VAT is indirect: 0.10×1,000=$100.",
+      "Подоходный налог — прямой: 0,20×20 000=$4 000. НДС — косвенный: 0,10×1 000=$100.",
+      "Daromad solig‘i to‘g‘ri: 0,20×20 000=$4000. QQS egri: 0,10×1000=$100."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-048",
+    "n": 48,
+    "k": "D",
+    "d": "medium",
+    "sec": 160,
+    "en": "An imported bicycle has a pre-tariff landed price of $200. A 15% ad valorem import duty is imposed. Assume 100 bicycles are imported and the entire duty is reflected in the domestic price, with no other charges. What are the new price per bicycle and government revenue?",
+    "ru": "Импортный велосипед стоит $200 с доставкой, но без пошлины. Вводится адвалорная пошлина 15%. Ввозят 100 велосипедов; пошлина полностью отражается в цене, других сборов нет. Найдите новую цену велосипеда и доход бюджета.",
+    "uz": "Import velosipedining bojdan oldingi yetib kelgan narxi $200. 15% advalor boj joriy etildi. 100 velosiped import qilinadi, boj to‘liq ichki narxda aks etadi, boshqa yig‘imlar yo‘q. Velosipedning yangi narxi va davlat daromadi qancha?",
+    "options_en": [
+      "$215; revenue $1,500",
+      "$230; revenue $15,000",
+      "$200; revenue $3,000",
+      "$230; revenue $3,000"
+    ],
+    "options_ru": [
+      "$215; бюджет $1 500",
+      "$230; бюджет $15 000",
+      "$200; бюджет $3 000",
+      "$230; бюджет $3 000"
+    ],
+    "options_uz": [
+      "$215; davlat $1500",
+      "$230; davlat $15 000",
+      "$200; davlat $3000",
+      "$230; davlat $3000"
+    ],
+    "why": [
+      "Duty per bicycle =15%×$200=$30, raising price to $230. Revenue from 100 imports is $30×100=$3,000.",
+      "Пошлина с велосипеда 15%×$200=$30, цена $230. Доход бюджета $30×100=$3 000.",
+      "Har velosiped boji 15%×$200=$30, narx $230. Davlat daromadi $30×100=$3000."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-063",
+    "n": 63,
+    "k": "A",
+    "d": "medium",
+    "sec": 165,
+    "en": "An economy's real GDP index increases from 100 to 106 while its population index rises from 100 to 102 over the same period. Approximately how much has real output per person increased, and which conclusion is justified?",
+    "ru": "Индекс реального ВВП вырос со 100 до 106, а индекс населения за тот же период — со 100 до 102. На сколько примерно вырос реальный выпуск на человека и какой вывод обоснован?",
+    "uz": "Bir davrda real YaIM indeksi 100 dan 106 ga, aholi indeksi 100 dan 102 ga oshdi. Jon boshiga real ishlab chiqarish qanchaga ko‘paydi va qanday xulosa asosli?",
+    "options_en": [
+      "+3.92%; average material output per person grew, but distribution is not established",
+      "+6%; all citizens' incomes necessarily rose equally",
+      "+4%; unemployment necessarily fell to zero",
+      "+8%; environmental quality necessarily improved"
+    ],
+    "options_ru": [
+      "+3,92%; средний реальный выпуск на человека вырос, но распределение неизвестно",
+      "+6%; доходы всех граждан обязательно выросли одинаково",
+      "+4%; безработица обязательно исчезла",
+      "+8%; экологическая ситуация обязательно улучшилась"
+    ],
+    "options_uz": [
+      "+3,92%; jon boshiga o‘rtacha real ishlab chiqarish oshdi, lekin taqsimot noma’lum",
+      "+6%; barcha fuqarolar daromadi bir xil oshdi",
+      "+4%; ishsizlik albatta nolga tushdi",
+      "+8%; ekologik holat albatta yaxshilandi"
+    ],
+    "why": [
+      "Per-person real output factor =1.06/1.02≈1.0392, or +3.92%. The average rises, but the data say nothing about income distribution.",
+      "Реальный выпуск на человека: 1,06/1,02≈1,0392, или +3,92%. Рост среднего не доказывает равномерность распределения доходов.",
+      "Jon boshiga real ishlab chiqarish: 1,06/1,02≈1,0392, ya’ni +3,92%. O‘rtacha o‘sish daromadlar teng taqsimlanganini bildirmaydi."
+    ]
+  }
+]
