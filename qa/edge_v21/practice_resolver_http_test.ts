@@ -22,7 +22,7 @@ function fixture(){
   resolvePracticeV4:async(args:{userId:string;attemptReference:number;questionId:number})=>{
    calls.push(args);
    if(throwRpc)throw Error("DB private SQL exception with secret keys");
-   return record??{ok:false,reason:"server_verification_required"};
+   return args.userId===A?(record??{ok:false,reason:"server_verification_required"}):{ok:false,reason:"server_verification_required"};
   }
  };
  const http=makeHttpHandler(makeContextCore(services),[O]);
@@ -66,10 +66,8 @@ Deno.test("Wrong JWT, origin, foreign owner never reaches a successful resolutio
  assert(x.calls.length===0,"No privileged call before origin + Auth");
  x.setUser(B);
  const r=await x.send({action:"resolvePracticeV4",attemptReference:99,questionId:901});
- // Even if the service returned a wrong-owner result, SQL is required to
- // enforce owner. This HTTP test only asserts server-derived user selection.
  assert(x.calls[0].userId===B,"Browser must not override JWT owner");
- assert(r.body.ok===true,"Synthetic service returns for its own principal only");
+ assert(r.body.ok===false,"Foreign learner cannot receive another owner's mapping");
 });
 Deno.test("Extra client-provided ownership, subject, score or session blocked before RPC",async()=>{
  const x=fixture();x.allow();
