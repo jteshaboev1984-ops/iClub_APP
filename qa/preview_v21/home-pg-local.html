@@ -12,6 +12,8 @@ small{color:#6e7e99}select,button{font:inherit}
 select{border:1px solid #cad6ea;border-radius:9px;background:white;padding:8px}
 .card{background:white;border:1px solid #dfebf8;border-radius:18px;padding:22px;margin-top:22px;box-shadow:0 10px 25px #243c670b}
 .note{line-height:1.55;font-size:14px;color:#657693}.result{border-radius:12px;padding:16px;background:#eff5ff;color:#2453ac;min-height:68px;font-weight:650}
+.choices{display:grid;gap:8px;margin-top:12px}.choices:empty{display:none}
+.choice-item{border:1px solid #dce8f7;background:#fafcff;padding:12px 14px;border-radius:11px;font-size:14px;font-weight:700;color:#254a88}
 .primary{background:#245fe0;color:white;border:0;border-radius:11px;padding:12px 17px;margin-top:16px;font-weight:700}
 .secondary{background:white;color:#3159aa;border:1px solid #d4def1;border-radius:10px;padding:9px;margin-top:16px}
 nav{position:fixed;bottom:0;left:0;right:0;max-width:640px;margin:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:white;border-top:1px solid #dce6f5;padding:8px}
@@ -28,6 +30,7 @@ nav button[aria-current=page]{color:#2159d3;background:#eaf2ff;font-weight:700}
 <section class="card" aria-labelledby="heading">
 <h2 id="heading"></h2><p class="note" id="explain"></p>
 <div id="result" class="result" role="status" aria-live="polite" data-state="idle"></div>
+<div id="choices" class="choices" role="list" aria-label="Разрешённые предметы"></div>
 <button id="check" type="button" class="primary"></button>
 <button id="leave" type="button" class="secondary"></button>
 </section>
@@ -69,11 +72,13 @@ en:{caption:"No real students or external AI",heading:"Next step",
  continue_enrolled_subject:"Continue studying",selection_required:"Choose a subject",
  tab:["Home","Study","Ratings","Profile"],nav:"Bottom navigation",lang:"Language"}
 };
+// Exact subject captions copied from current i18n.js, verified by offline QA.
+const SUBJECT_NAMES={"ru":{"informatics":"Информатика","economics":"Экономика","biology":"Биология","chemistry":"Химия","mathematics":"Математика","english_a1":"Английский (A1)","english_a2":"Английский (A2)","english_b1":"Английский (B1)","sat":"SAT","ielts":"IELTS"},"uz":{"informatics":"Informatika","economics":"Iqtisodiyot","biology":"Biologiya","chemistry":"Kimyo","mathematics":"Matematika","english_a1":"Ingliz tili (A1)","english_a2":"Ingliz tili (A2)","english_b1":"Ingliz tili (B1)","sat":"SAT","ielts":"IELTS"},"en":{"informatics":"Informatics","economics":"Economics","biology":"Biology","chemistry":"Chemistry","mathematics":"Mathematics","english_a1":"English (A1)","english_a2":"English (A2)","english_b1":"English (B1)","sat":"SAT","ielts":"IELTS"}};
 const h="33333333-3333-4333-8333-333333333333";
 const syntheticToken="synthetic-owner-no-real-jwt-AAAAAAAA";
 let locale="ru",page="home",epoch=0,active=true,state="idle",action=null;
-let expiresAtMs=0,expiryTimer=null;
-function clearExpiry(){if(expiryTimer!==null)clearTimeout(expiryTimer);expiryTimer=null;expiresAtMs=0;}
+let expiresAtMs=0,expiryTimer=null,choices=[];
+function clearExpiry(){if(expiryTimer!==null)clearTimeout(expiryTimer);expiryTimer=null;expiresAtMs=0;choices=[];}
 function expireIfStale(){if(active&&state==="ready"&&expiresAtMs>0&&Date.now()>=expiresAtMs){
  clearExpiry();state="expired";action=null;render();
 }}
@@ -96,6 +101,16 @@ function render(){
  output.textContent=!active?c.left:page!=="home"?c.idle:
   state==="ready"?c[action]||c.selection_required:
   c[state]||c.idle;
+ const list=by("choices");list.replaceChildren();
+ list.setAttribute("aria-label",c.selection_required);
+ if(active&&page==="home"&&state==="ready"&&action==="selection_required"){
+  for(const subject of choices){
+   const item=document.createElement("div");item.className="choice-item";
+   item.setAttribute("role","listitem");
+   item.textContent=SUBJECT_NAMES[locale][subject];
+   list.append(item);
+  }
+ }
  by("check").disabled=!active||page!=="home"||state==="pending";
 }
 by("locale").addEventListener("change",e=>{
@@ -125,12 +140,25 @@ by("check").addEventListener("click",async()=>{
    if(!Number.isSafeInteger(deadline)||deadline<=Date.now()||
       deadline-Date.now()>30000){state="denied";action=null;}
    else{
-    state="ready";action=data.status==="selection_required"?
-     "selection_required":data.actionCode;
+    const tie=data.status==="selection_required";
+    const possible=tie&&Array.isArray(data.choices)&&
+     data.choices.length>=2&&data.choices.length<=3&&
+     data.choices.every(v=>v&&Object.keys(v).sort().join(",")==="actionCode,subjectKey"&&
+      ["review_finalized_practice","review_open_tour_archive",
+       "continue_enrolled_subject"].includes(v.actionCode)&&
+      !!SUBJECT_NAMES[locale][v.subjectKey])&&
+     new Set(data.choices.map(v=>v.subjectKey)).size===data.choices.length;
+    if(tie&&!possible){state="denied";action=null;}
+    else{
+     choices=tie?data.choices.map(v=>v.subjectKey):[];
+     state="ready";action=tie?"selection_required":data.actionCode;
+    }
+    if(state==="ready"){
     expiresAtMs=deadline;
     expiryTimer=setTimeout(()=>{
      if(at===epoch)expireIfStale();
     },Math.max(1,deadline-Date.now()+1));
+    }
    }
   }else{state="denied";action=null;}
  }catch{
@@ -140,6 +168,7 @@ by("check").addEventListener("click",async()=>{
 });
 document.addEventListener("visibilitychange",expireIfStale);
 render();
-window.__qaHomeState=()=>({state,action,active,page,locale,expiresAtMs});
+window.__qaHomeState=()=>({state,action,active,page,locale,expiresAtMs,
+ visibleChoices:[...document.querySelectorAll("#choices .choice-item")].map(x=>x.textContent)});
 })();
 </script></body></html>
