@@ -93,6 +93,8 @@ on:
       - 'qa/ai-layer-v21-app-look-preview/**'
       - 'qa/ai-layer-v21-app-look-preview.test.cjs'
       - 'qa/ai-layer-v21-app-look-browser.cjs'
+      - 'qa/ai-layer-v21-app-look-package.cjs'
+      - 'qa/ai-layer-v21-app-look-package.test.cjs'
       - 'qa/sql_drafts/iclub_ai_v21_commercial_pg_proc_READ_ONLY.sql'
       - 'qa/sql_drafts/iclub_ai_v21_commercial_contract_fixture_local_pg.psql'
       - 'qa/ai-layer-v21-p6-nav-approved-locale.cjs'
@@ -201,6 +203,16 @@ jobs:
           path: /tmp/iclub-ai-v21-app-look-screenshots/*.png
           if-no-files-found: warn
           retention-days: 5
+      - name: Build one-file offline visual Preview with exact application styles
+        run: node qa/ai-layer-v21-app-look-package.cjs /tmp/iclub-ai-v21-visual-review/iClub_AI_v21_Visual_Preview.html
+      - name: Attach clickable offline iClub visual review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iclub-ai-v21-standalone-visual-preview
+          path: /tmp/iclub-ai-v21-visual-review/iClub_AI_v21_Visual_Preview.html
+          if-no-files-found: warn
+          retention-days: 7
       - name: Install Deno runtime for Edge candidate verification
         uses: denoland/setup-deno@v2
         with:
