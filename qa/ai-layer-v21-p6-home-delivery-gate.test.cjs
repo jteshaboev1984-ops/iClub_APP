@@ -38,6 +38,8 @@ function setup(withTie=false){
   verifyAcademicEvidence:async(user,v)=>({
    allowed:state.academic,evidenceId:v.evidenceId,evidenceRevision:v.evidenceRevision,
    subjectKey:v.subjectKey,actionCode:v.actionCode,evidenceHash:state.hash}),
+  verifyAtomicDeliverySnapshot:async()=>state.entitled&&state.rights&&
+    state.academic&&state.screenRev===12&&state.scanRev===12,
   readEditorialRelease:async(locale,code,subject)=>({
    ready:state.rights&&locale===state.locale,rightsApproved:state.rights,
    contentApproved:true,sourceConflict:false,sourceHash:state.source,
@@ -105,6 +107,22 @@ test("§104 a revoked commercial, source, academic, screen or candidate never le
   const r=await validateBeforeHomeDelivery(f.s,params(f));
   assert.equal(r.ready,false,change.toString());
  }
+});
+test("§107 a last atomic SQL authority check is mandatory and fails closed",async()=>{
+ const f=await signedFixture();
+ let calls=0;
+ f.s.verifyAtomicDeliverySnapshot=async args=>{
+  calls++;
+  assert.equal(args.userId,USER);
+  assert.equal(args.contextHandle,HANDLE);
+  assert.equal(args.locale,"ru");
+  assert.equal(args.plan.ownerId,USER);
+  return false;
+ };
+ assert.equal((await validateBeforeHomeDelivery(f.s,params(f))).ready,false);
+ assert.equal(calls,1);
+ delete f.s.verifyAtomicDeliverySnapshot;
+ assert.equal((await validateBeforeHomeDelivery(f.s,params(f))).ready,false);
 });
 test("§104 exact chosen action cannot be replaced or cross-replayed",async()=>{
  const f=await signedFixture();
