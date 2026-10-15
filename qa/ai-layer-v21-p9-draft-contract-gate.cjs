@@ -64,8 +64,11 @@ function verifyDraftContracts({drafts=manifest,live=snapshot,policies=policyBase
   if(JSON.stringify(row.args)!==JSON.stringify(c.args))issue("RPC_SIGNATURE_DRIFT",c.name);
   const sql=sqlFiles.get(c.draft);
   if(!sql)continue;
-  const tail=sql.slice(row.start),start=tail.search(/\bas\s+\$[a-z0-9_]*\$/i);
-  const header=start>=0?tail.slice(0,start):"";
+  const tail=sql.slice(row.start);
+  // Never scan through a malformed function into a later function's safe
+  // search_path: the AS delimiter must occur in THIS declaration header.
+  const opening=/\bas\s+\$[a-z0-9_]*\$/i.exec(tail.slice(0,550));
+  const header=opening?tail.slice(0,opening.index):"";
   if(!/\bsecurity\s+definer\b/i.test(header)||!/\bset\s+search_path\s*=\s*''/i.test(header))
    issue("UNSAFE_DEFINER_CONTEXT",c.name);
   const rev=[...sql.matchAll(/\brevoke\s+all\s+on\s+function\s+public\.([a-z0-9_]+)\s*\(([^)]*)\)\s+from\s+([^;]+);/gi)].filter(m=>m[1]===c.name);

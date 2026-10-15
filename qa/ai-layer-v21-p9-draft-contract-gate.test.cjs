@@ -34,7 +34,7 @@ test("P9 unsafe function owner context blocks",()=>{
  const s=source(),modified=s.replace("VOLATILE SECURITY DEFINER","VOLATILE SECURITY INVOKER");
  a.notEqual(s,modified);
  a.equal(code(verifyDraftContracts({overrides:{[file]:modified}}),"UNSAFE_DEFINER_CONTEXT"),true);
- const modifiedPath=s.replace("SET search_path='' AS $$","SET search_path=public AS $$");
+ const modifiedPath=s.replace("SET search_path='' AS $",()=>"SET search_path=public AS $");
  a.notEqual(s,modifiedPath);
  a.equal(code(verifyDraftContracts({overrides:{[file]:modifiedPath}}),"UNSAFE_DEFINER_CONTEXT"),true);
 });
