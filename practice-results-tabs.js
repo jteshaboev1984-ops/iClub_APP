@@ -105,9 +105,9 @@
       heading.append(node('strong','',locale==='uz'?'Amaliyot tarixi':
         locale==='en'?'Practice history':'История практики'));
       const count=Math.max(0,Math.trunc(Number(data?.completed_sessions)||0));
-      if(data?.ok===true&&count>2){
+      if(data?.ok===true&&count>0){
         const link=node('button','iclub-sx-history-link',
-          locale==='uz'?'Yana ko‘rish':locale==='en'?'Show more':'Показать ещё');
+          locale==='uz'?'Ochish':locale==='en'?'Open':'Открыть');
         link.type='button';
         link.addEventListener('click',()=>window.dispatchEvent(
           new CustomEvent('iclub-practice-open-history-list',{
@@ -131,7 +131,11 @@
       return Number.isInteger(good)&&Number.isInteger(all)&&all>0&&good>=0&&good<=all?good+' / '+all:'—';
     };
     const list=node('div','iclub-topic-history-recent');
-    for(const attempt of (Array.isArray(data.recent)?data.recent.slice(0,compact?2:5):[])){
+    // The latest completed attempt has a dedicated summary above. Do not
+    // display that same session again in the compact history preview.
+    const recentAttempts=Array.isArray(data.recent)?data.recent:[];
+    const previewAttempts=compact?recentAttempts.slice(1,3):recentAttempts.slice(0,5);
+    for(const attempt of previewAttempts){
       if(score(attempt)==='—')continue;
       const button=node('button','iclub-topic-history-row');
       button.type='button';
@@ -152,7 +156,7 @@
       button.addEventListener('click',()=>openTopicAttempt(attempt,data.subject_key));
       list.append(button);
     }
-    holder.append(list);
+    if(!compact||list.children.length)holder.append(list);
     return true;
   }
   function renderTopicReview(language) {
