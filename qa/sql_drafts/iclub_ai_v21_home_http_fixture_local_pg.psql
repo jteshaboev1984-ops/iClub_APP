@@ -93,6 +93,46 @@ INSERT INTO public.tour_session_runtime_v4 VALUES
  (101,'11111111-1111-4111-8111-111111111111',31,now()),
  (102,'22222222-2222-4222-8222-222222222222',32,now()),
  (103,'11111111-1111-4111-8111-111111111111',30,now());
+-- Scratch only: synthetic editorial releases for end-to-end verification.
+-- These rows are NOT a real product/legal rights approval or publication.
+CREATE TABLE private.iclub_ai_v21_home_source_test_releases(
+ locale text NOT NULL CHECK(locale IN ('ru','uz','en')),
+ action_code text NOT NULL CHECK(action_code IN
+  ('review_finalized_practice','review_open_tour_archive','continue_enrolled_subject')),
+ subject_key text NOT NULL,
+ rights_approved boolean NOT NULL DEFAULT false,
+ content_approved boolean NOT NULL DEFAULT false,
+ source_hash text NOT NULL CHECK(source_hash ~ '^[a-f0-9]{64}
+BEGIN
+ IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$' THEN
+  RAISE EXCEPTION 'SCRATCH REQUIRED';
+ END IF;
+ IF (SELECT count(*) FROM public.practice_sessions_v4)<>3 THEN
+  RAISE EXCEPTION 'Synthetic seed mismatch';
+ END IF;
+END $verify$;
+COMMIT;
+\echo 'Synthetic Home HTTP fixture committed only in disposable local PostgreSQL'
+),
+ source_version text NOT NULL,
+ revoked_at timestamptz,
+ PRIMARY KEY(locale,action_code,subject_key)
+);
+REVOKE ALL ON private.iclub_ai_v21_home_source_test_releases
+ FROM PUBLIC,anon,authenticated;
+INSERT INTO private.iclub_ai_v21_home_source_test_releases
+ (locale,action_code,subject_key,rights_approved,content_approved,
+  source_hash,source_version)
+SELECT l.code,p.action_code,p.subject_key,true,true,
+ repeat('a',64),'synthetic-only-v1'
+FROM (VALUES ('ru'),('uz'),('en')) AS l(code)
+CROSS JOIN (VALUES
+ ('review_finalized_practice','economics'),
+ ('review_open_tour_archive','economics'),
+ ('continue_enrolled_subject','economics'),
+ ('continue_enrolled_subject','biology')
+) AS p(action_code,subject_key);
+
 DO $verify$
 BEGIN
  IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$' THEN
