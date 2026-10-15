@@ -20146,7 +20146,8 @@ if (subEl) {
       ? (subtopic || recText.subtitleTour)
       : (subtopic ? subtopic : recText.subtitlePractice);
 }
-body.classList.toggle("iclub-sx-detail",isTopicRec);
+body.classList.toggle("iclub-sx-detail",!isTourRec);
+body.classList.toggle("iclub-sx-tour-detail",!isTourRec&&!isTopicRec);
 
    // ✅ mini result (only for current rec/topic)
 let drillMiniHtml = "";
@@ -20221,7 +20222,7 @@ const mistakesHtml = totalMistakes
       const caDisp = formatAnswerForDisplay(q, q.correct_answer);
 
       const num = `${idx + 1}/${totalMistakes}`;
-      if(isTopicRec){
+      if(!isTourRec){
         return `<details class="iclub-sx-detail-question">
           <summary><span class="iclub-sx-detail-number">${escapeHTML(tr3("Ошибка","Xato","Mistake"))} ${idx+1}</span>
             <span class="iclub-sx-detail-stem">${escapeHTML(qText||"")}</span></summary>
@@ -20327,6 +20328,20 @@ body.innerHTML = isTourRec ? `
   ${readBlockHtml}
 `;
 
+  // For ordinary Practice by Tour, correct verified mistakes first.
+  // Do not alter the Topic Practice or competitive Tours action layout.
+  if(!isTourRec&&!isTopicRec){
+    body.classList.toggle("iclub-sx-tour-has-errors",totalMistakes>0);
+    const retryButton=document.querySelector('#courses-my-rec-detail .actions-row [data-action="my-rec-retry"]');
+    if(retryButton){
+      retryButton.hidden=totalMistakes===0;
+      retryButton.textContent=tr3("Исправить ошибки","Xatolarni tuzatish","Correct mistakes");
+    }
+  } else {
+    const retryButton=document.querySelector('#courses-my-rec-detail .actions-row [data-action="my-rec-retry"]');
+    if(retryButton)retryButton.hidden=false;
+  }
+
   body.querySelectorAll("button[data-open-book-url]").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -20341,12 +20356,11 @@ async function deleteMyRecCurrent() {
     const rec=state?.courses?.myRecCurrent;
     const subjectKey=state?.courses?.subjectKey;
     if(!rec||!subjectKey||deleteMyRecCurrent._pending) return;
-    // In Practice by Topic, "Освоено" is user-managed recommendation status.
-    // Clarify that it never modifies attempts or academic scoring.
-    // Existing Tour / legacy Practice confirmation text remains unchanged.
-    const isTopicRecommendation=String(rec.source_type||"practice")==="practice" &&
-      Number(rec.practice_drill_session_id||0)>0;
-    const ok=await uiConfirm(isTopicRecommendation?{
+    // For both Practice modes, "Освоено" removes an active recommendation only.
+    // It never changes attempt results, history or academic scoring.
+    // Competitive Tours keep their existing confirmation behavior.
+    const isPracticeRecommendation=String(rec.source_type||"practice")==="practice";
+    const ok=await uiConfirm(isPracticeRecommendation?{
       title:tr3("Отметить как освоено?","O‘zlashtirildi deb belgilaysizmi?","Mark as mastered?"),
       message:tr3(
         "Из активного списка исчезнет только эта рекомендация. Результаты и история попыток сохранятся.",
@@ -20390,7 +20404,7 @@ async function deleteMyRecCurrent() {
         if(String(rec.source_type||"practice")==="tour") saveMyTourRecs(store);
         else saveMyRecs(store);
       }
-      showToast(isTopicRecommendation
+      showToast(isPracticeRecommendation
         ?tr3("Отмечено как освоено. История сохранена.",
           "O‘zlashtirildi deb belgilandi. Tarix saqlandi.",
           "Marked as mastered. History preserved.")
