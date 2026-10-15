@@ -57,10 +57,11 @@ function issueSyntheticHandoff({sql,signingKey,userId,contextHandle,locale,plan,
   literal(JSON.stringify(choices))+"::jsonb"
  ].join(",");
  try{
-  const inserted=sql("INSERT INTO private.iclub_ai_v21_home_action_handoffs_scratch "+
+  const inserted=sql("WITH created AS (INSERT INTO "+
+   "private.iclub_ai_v21_home_action_handoffs_scratch "+
    "(token_sha256,owner_id,context_handle,locale,screen_revision,"+
    "expires_at,signed_plan,allowed_choices) VALUES ("+row+") "+
-   "RETURNING token_sha256");
+   "RETURNING token_sha256) SELECT token_sha256 FROM created");
   if(inserted!==sha256(token))return denial();
   return Object.freeze({ok:true,handoffToken:token,expiresAtMs:plan.expiresAtMs,
    reviewOnly:true,releaseAllowed:false,navigationExecuted:false});
