@@ -1,0 +1,143 @@
+{
+  "schema": "iclub_ai_v21_live_metadata_preflight_v1",
+  "observedOn": "2026-10-15",
+  "source": "SUPABASE_PRODUCTION_READ_ONLY_PG_CATALOG_AND_EDGE_INVENTORY",
+  "sourceCommit": "9750a76ae06726fffe39e3dc34ceb0c186f58e32",
+  "auditedProjectRef": "mmmduffgpvwjdpruzikw",
+  "adapter": "qa/edge_v21/supabase_services.ts",
+  "adapterBlobSha": "1e42a36e67cc428d6d46e8f8dcb4386d93d1f8e5",
+  "expectedRpcContracts": [
+    "claim_iclub_ai_delivery_service_v21",
+    "dispatch_iclub_ai_v21_provider_spend_service",
+    "finish_iclub_ai_delivery_service_v21",
+    "finish_iclub_ai_delivery_with_receipt_service_v21",
+    "finish_iclub_ai_v21_provider_spend_service",
+    "get_iclub_ai_topic_release_service_v21",
+    "get_iclub_ai_v21_encrypted_reply_service",
+    "get_iclub_ai_v21_entitlement_service",
+    "get_iclub_ai_v21_general_scope_service",
+    "get_iclub_ai_v21_protected_service",
+    "get_iclub_ai_v21_provider_budget_service",
+    "get_iclub_ai_v21_rollout_service",
+    "get_iclub_ai_v21_runtime_service",
+    "get_iclub_ai_v21_scoped_context_service",
+    "get_iclub_ai_v21_source_bundle_service",
+    "get_iclub_ai_v21_source_proof_service",
+    "mint_iclub_ai_v21_app_view_context_service",
+    "mint_iclub_ai_v21_lesson_context_service",
+    "mint_iclub_ai_v21_practice_context_service",
+    "mint_iclub_ai_v21_tour_archive_context_service",
+    "reserve_iclub_ai_usage_service_v2",
+    "reserve_iclub_ai_v21_provider_spend_service",
+    "revoke_iclub_ai_v21_scoped_context_service"
+  ],
+  "observedV21RpcContracts": [],
+  "previouslyVerifiedCommercial": [
+    {
+      "name": "get_iclub_subject_access_guard_service_v1",
+      "identityArgs": "p_user_id uuid, p_subject_key text, p_intent text",
+      "definitionMd5": "bb0c27de3665e5c6e16810044b1316a5",
+      "securityDefiner": true,
+      "anonExecute": false,
+      "authenticatedExecute": false,
+      "serviceRoleExecute": true
+    },
+    {
+      "name": "get_iclub_subscription_capabilities_service_v1",
+      "identityArgs": "p_user_id uuid",
+      "definitionMd5": "58bfe7eaf0c54a8e74d50bbf79416684",
+      "securityDefiner": true,
+      "anonExecute": false,
+      "authenticatedExecute": false,
+      "serviceRoleExecute": true
+    }
+  ],
+  "observedTables": [
+    {
+      "schema": "private",
+      "name": "iclub_subject_slot_selections",
+      "rls": true,
+      "policyCount": 0,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "private",
+      "name": "iclub_commercial_access_config",
+      "rls": true,
+      "policyCount": 0,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "public",
+      "name": "practice_sessions_v4",
+      "rls": true,
+      "policyCount": 0,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "public",
+      "name": "practice_session_answers_v4",
+      "rls": true,
+      "policyCount": 0,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "public",
+      "name": "tour_attempts",
+      "rls": true,
+      "policyCount": 1,
+      "anonSelect": false,
+      "authenticatedSelect": true
+    },
+    {
+      "schema": "public",
+      "name": "tour_session_runtime_v4",
+      "rls": true,
+      "policyCount": 0,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "public",
+      "name": "subjects",
+      "rls": true,
+      "policyCount": 1,
+      "anonSelect": true,
+      "authenticatedSelect": true
+    },
+    {
+      "schema": "public",
+      "name": "user_subjects",
+      "rls": true,
+      "policyCount": 5,
+      "anonSelect": true,
+      "authenticatedSelect": true
+    }
+  ],
+  "observedAIRelevantEdgeFunctions": [
+    {
+      "slug": "exam-prep-ai",
+      "status": "ACTIVE",
+      "version": 16,
+      "verifyJwt": true
+    },
+    {
+      "slug": "practice-ai",
+      "status": "ACTIVE",
+      "version": 4,
+      "verifyJwt": true
+    }
+  ],
+  "observedV21EdgeDeployed": false,
+  "contentSourceRightsReleased": false,
+  "fullIntegratedPreviewVerified": false,
+  "currentProductionAcademicRowsRead": false,
+  "releaseAllowed": false,
+  "freshRecheckRequired": true,
+  "independentOwnerReleaseApprovalRequired": true,
+  "notes": "Snapshot proves metadata only; no student rows, no production writes. SHA hashes are drift signals, not release authorization."
+}
