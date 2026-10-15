@@ -137,11 +137,11 @@
     "d": "hard",
     "k": "A",
     "sec": 195,
-    "en": "An additional vaccination has private benefit $35, external benefit $25 and marginal provision cost $50. Families perceive the private benefit correctly but ignore the benefit to others. Which assessment of a $15 per-vaccination subsidy is supported at this margin?",
-    "ru": "Дополнительная вакцинация даёт личную выгоду $35, внешнюю выгоду $25 и обходится в $50. Семьи правильно оценивают личную выгоду, но не учитывают пользу другим. Как оценить субсидию $15 на прививку на данном пределе?",
-    "uz": "Qo‘shimcha emlashning shaxsiy foydasi $35, tashqi foydasi $25, taqdim etish xarajati $50. Oilalar shaxsiy foydani to‘g‘ri, boshqalarga foydani esa hisobga olmaydi. Shu chegaradagi har bir emlashga $15 subsidiya haqida qanday xulosa asosli?",
+    "en": "An additional vaccination has private benefit $35, external benefit $25 and marginal provision cost $50. Families perceive the private benefit correctly but ignore the benefit to others. Which assessment of a $20 per-vaccination subsidy is supported at this margin?",
+    "ru": "Дополнительная вакцинация даёт личную выгоду $35, внешнюю выгоду $25 и обходится в $50. Семьи правильно оценивают личную выгоду, но не учитывают пользу другим. Как оценить субсидию $20 на прививку на данном пределе?",
+    "uz": "Qo‘shimcha emlashning shaxsiy foydasi $35, tashqi foydasi $25, taqdim etish xarajati $50. Oilalar shaxsiy foydani to‘g‘ri, boshqalarga foydani esa hisobga olmaydi. Shu chegaradagi har bir emlashga $20 subsidiya haqida qanday xulosa asosli?",
     "options_en": [
-      "It can make private uptake attractive and the unit has $10 net social benefit, although $15 is below the full external benefit",
+      "It can make private uptake attractive and the unit has $10 net social benefit, although $20 is below the full external benefit",
       "It eliminates the external benefit and makes net social benefit zero",
       "It is unnecessary because private benefit already exceeds full cost",
       "It creates $25 of net social loss regardless of behavioural response"
@@ -153,15 +153,15 @@
       "Она создаёт $25 общественного убытка независимо от реакции людей"
     ],
     "options_uz": [
-      "U xususiy talabni rag‘batlantirishi mumkin; sof ijtimoiy foyda $10, garchi $15 tashqi foydadan kam",
+      "U xususiy talabni rag‘batlantirishi mumkin; sof ijtimoiy foyda $10, garchi $20 tashqi foydadan kam",
       "U tashqi foydani yo‘qotib, sof ijtimoiy foydani nol qiladi",
       "Keraksiz, chunki shaxsiy foyda xarajatdan yuqori",
       "Javob qanday bo‘lishidan qat’i nazar $25 ijtimoiy zarar yaratadi"
     ],
     "why": [
-      "Total marginal social benefit =35+25=$60, cost $50, net gain $10. With subsidy $15, the private effective cost is $35, matching private benefit; this can support uptake, but the Pigouvian benchmark is $25.",
-      "Предельная общественная выгода $60 при стоимости $50, чистая выгода $10. После субсидии $15 личные затраты $35 равны личной выгоде. Эталонная коррекция внешней выгоды — $25.",
-      "Jami ijtimoiy foyda $60, xarajat $50, sof natija +$10. $15 subsidiya bilan shaxsiy narx $35 bo‘ladi, shaxsiy foydaga teng. Tashqi foyda bo‘yicha to‘liq tuzatish $25."
+      "Total marginal social benefit=$35+$25=$60, cost=$50, so net social gain is $10. A $20 subsidy reduces the private payment to $30, below the $35 private benefit; the full external-benefit benchmark would be $25.",
+      "Общественная выгода $35+$25=$60 при затратах $50, чистая выгода $10. Субсидия $20 уменьшает личный платёж до $30, ниже личной выгоды $35; полная компенсация внешней выгоды соответствовала бы $25.",
+      "Jami ijtimoiy foyda $35+$25=$60, xarajat $50, sof foyda $10. $20 subsidiya shaxsiy to‘lovni $30 ga tushiradi, bu $35 foydadan past; tashqi foydani to‘liq qoplash me’yori $25."
     ]
   },
   {
