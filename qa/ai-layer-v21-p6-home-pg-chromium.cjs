@@ -149,11 +149,32 @@ async function run(){
     assert.deepEqual(actual.visibleChoices,names[language]);
     assert.equal(JSON.stringify(actual).includes("next_continue_"),false);
     console.log("HOME_PG_CHROME_TIE_GREEN: "+language+" approved translated subjects, no IDs");
+    // A user-picked subject triggers an actual local one-shot POST,
+    // but NEVER navigates or changes academic progress.
+    const click=await cdp.send("Runtime.evaluate",{
+     expression:'(async()=>{document.querySelector("#choices .choice-item").click();'+
+      'for(let i=0;i<180;i++){const s=window.__qaHomeState();'+
+      'if(s.state==="confirmed"||s.state==="denied")return s;'+
+      'await new Promise(resolve=>setTimeout(resolve,40));}'+
+      'return window.__qaHomeState()})()',
+     awaitPromise:true,returnByValue:true});
+    if(click.exceptionDetails)throw Error("Synthetic confirmation exception "+language);
+    assert.equal(click.result?.value?.state,"confirmed",
+     "One-use Home chosen subject was not confirmed: "+language);
+    assert.deepEqual(click.result?.value?.visibleChoices,[],
+     "A used handoff cannot stay selectable");
+    console.log("HOME_ACTION_CHROME_CONFIRM_GREEN: "+language+" one-use synthetic confirmation only");
+
    }
   }finally{
    scratchSql("UPDATE public.practice_session_answers_v4 "+
     "SET is_correct=false WHERE session_id=901");
   }
+  // Recreate a fresh Home page after the prior valid tie was consumed,
+  // so the independent expiry check starts with a currently valid token.
+  await cdp.send("Page.navigate",{url:url+"/qa/home/demo"});
+  await waitForPage(cdp);
+  await checkLocale(cdp,"en");
   // Browser should stop displaying a once-valid recommendation when the
   // signed server deadline passes, even with no click, navigation or network.
   const expiry=await cdp.send("Runtime.evaluate",{expression:
