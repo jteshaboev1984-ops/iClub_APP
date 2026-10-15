@@ -19173,6 +19173,12 @@ async function fetchMyRecsDB(subjectKey, seasonIdArg = null) {
 async function renderMyRecs() {
   const wrap = $("#my-recs-list");
   if (!wrap) return;
+  const subtitle = $("#my-recs-subtitle");
+  if (subtitle) subtitle.textContent = tr3(
+    "Темы для повторения и разбор ошибок",
+    "Takrorlash uchun mavzular va xatolar tahlili",
+    "Topics to review and mistake explanations"
+  );
   const pending = beginUiLoading(wrap, "iclub-recs-pending");
   const subjectKey = String(state?.courses?.subjectKey || "").trim();
   const isCurrent = () => pending.active() && String(state?.courses?.subjectKey || "").trim() === subjectKey;
@@ -20040,9 +20046,12 @@ async function renderMyRecDetail() {
 
    if (titleEl) titleEl.textContent = isTopicRec ? (subtopic || topic) : topic;
 if (subEl) {
-  subEl.textContent = isTopicRec ? topic : isTourRec
-    ? (subtopic || recText.subtitleTour)
-    : (subtopic ? subtopic : recText.subtitlePractice);
+  const sameTopic = subtopic.trim().toLocaleLowerCase() === String(topic).trim().toLocaleLowerCase();
+  subEl.textContent = isTopicRec
+    ? (sameTopic ? tr3("Практика по темам","Mavzular bo‘yicha amaliyot","Practice by topic") : topic)
+    : isTourRec
+      ? (subtopic || recText.subtitleTour)
+      : (subtopic ? subtopic : recText.subtitlePractice);
 }
 body.classList.toggle("iclub-sx-detail",isTopicRec);
 
