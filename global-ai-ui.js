@@ -566,7 +566,16 @@
     const title = p.querySelector("[data-global-ai-empty-title]");
     const text = p.querySelector("[data-global-ai-empty-copy]");
     if (title) title.textContent = copy().emptyTitle;
-    if (text) text.textContent = copy().emptyCopy;
+    if (text) {
+      const previewGuidance = {
+        ru: "В этом защищённом Preview проверьте кнопку AI, смену экранов и его скрытие во время заданий. Реальные оценки и ответы по учебным вопросам здесь не подключены.",
+        uz: "Ushbu himoyalangan Previewda AI tugmasi, ekranlar almashinuvi va savollar vaqtida uning yashirilishini tekshiring. Haqiqiy natijalar va fan javoblari ulanmagan.",
+        en: "In this protected Preview, check the AI button, screen changes and blackout during questions. Real grades and academic answers are not connected."
+      };
+      text.textContent = window.__ICLUB_AI_QA_PREVIEW__
+        ? previewGuidance[locale()] || previewGuidance.ru
+        : copy().emptyCopy;
+    }
   }
 
   function renderPanel() {
