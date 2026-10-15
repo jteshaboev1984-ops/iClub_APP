@@ -45,25 +45,11 @@
   outline-offset: 2px;
 }
 
-.iclub-global-ai-mark-symbol {
-  width: 32px;
-  height: 32px;
-  border-radius: 11px;
-  background: #2F6FD6;
-  color: #fff;
-  font: 800 14px/32px system-ui, -apple-system, sans-serif;
-  letter-spacing: -0.025em;
-  text-align: center;
+.iclub-global-ai-mark-logo {
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
   display: block;
-  user-select: none;
-}
-
-/* Fail-closed visual guard for the active quiz's first animation frame. */
-body:has(#courses-practice-quiz.is-active) .iclub-global-ai-mark,
-body:has(#courses-practice-quiz.is-active) .iclub-global-ai-panel,
-body:has(#courses-tour-quiz.is-active) .iclub-global-ai-mark,
-body:has(#courses-tour-quiz.is-active) .iclub-global-ai-panel {
-  display: none !important;
 }
 
 /* Decision 33B: active protected assessments have NO visible AI mark. */
