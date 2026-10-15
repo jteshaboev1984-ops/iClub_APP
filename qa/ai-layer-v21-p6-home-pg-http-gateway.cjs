@@ -73,7 +73,7 @@ function makeServices(){
     " AND grant_row.intent=us.mode AND grant_row.allowed"+
     " WHERE us.user_id='"+user+"' AND sj.subject_key='"+subject+"'"+
     " AND us.mode='"+intent+"')::text";
-   const allowed=sql(q)==="t";
+   const allowed=sql(q)==="true";
    // Emulates a separately verified server entitlement; is NOT a live grant.
    return{allowed,verified:allowed,userId:user,subjectKey:subject,intent,
     revision:1,source:"server_enforced_subject_access_v1",
@@ -112,7 +112,7 @@ function makeServices(){
      " ON us.subject_id=j.id WHERE j.id="+id+" AND j.is_active"+
      " AND j.subject_key='"+subject+"' AND us.user_id='"+user+"'"+
      " AND us.mode='study' AND "+rev+">0)::text";
-   const allowed=sql(q)==="t";
+   const allowed=sql(q)==="true";
    const evidenceHash=createHash("sha256").update(
     ["SYNTHETIC-EVIDENCE",user,v.actionCode,subject,id,rev].join(":")
    ).digest("hex");
