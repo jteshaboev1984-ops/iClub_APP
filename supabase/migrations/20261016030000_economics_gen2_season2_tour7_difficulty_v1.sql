@@ -1,0 +1,78 @@
+-- Economics Gen2 Season 2 Tour 7. Versioned hard content, 6 easy/10 medium/4 hard.
+-- Does not touch legacy Season 1 and aborts if there is learner history on the target season.
+BEGIN;
+SET LOCAL lock_timeout='5s';
+SET LOCAL statement_timeout='75s';
+DO $tour7$
+DECLARE
+ d jsonb:='[{"ref":"EC9708:G2:EC9708-G2-T7-T-004","d":"hard","sec":135,"k":"C","en":"To defend a managed exchange rate, a central bank begins with $900m of usable foreign-exchange reserves and average monthly imports of $100m. It first sells $300m of reserves and later another $180m, with no replenishment or change in imports. What is the new import-cover ratio, and what does this show about repeated currency interventions?","ru":"Для поддержки управляемого валютного курса центральный банк имеет $900 млн доступных валютных резервов, а средний месячный импорт составляет $100 млн. Сначала банк продаёт $300 млн резервов, позже ещё $180 млн. Восполнения резервов и изменения импорта нет. Каким станет покрытие импорта резервами и что это показывает о повторных интервенциях?","uz":"Boshqariladigan valuta kursini himoya qilish uchun markaziy bankda $900 mln ishlatiladigan xorijiy valuta zaxirasi bor, oylik o‘rtacha import $100 mln. Bank avval $300 mln, keyin yana $180 mln zaxira sotadi, zaxira to‘ldirilmaydi, import o‘zgarmaydi. Yangi import qoplash muddati qancha va takroriy intervensiya haqida nimani bildiradi?","options_en":["Import cover rises from 9 to 13.8 months; reserve sales strengthen the reserve position","Import cover falls from 9 to 7.2 months; reserve limits disappear under a managed float","Import cover falls from 9 to 4.2 months; repeated support can exhaust finite reserves","Import cover falls from 9 to 4.2 months; the exchange rate is guaranteed to appreciate permanently"],"options_ru":["Покрытие растёт с 9 до 13,8 месяца; продажа резервов укрепляет их запас","Покрытие падает с 9 до 7,2 месяца; при управляемом курсе резервы не ограничены","Покрытие падает с 9 до 4,2 месяца; повторная защита может истощать конечные резервы","Покрытие падает с 9 до 4,2 месяца; курс гарантированно укрепится навсегда"],"options_uz":["Qoplash 9 oydan 13,8 oyga oshadi; zaxira sotish zaxirani kuchaytiradi","Qoplash 9 oydan 7,2 oyga tushadi; boshqariladigan kursda zaxira cheksiz","Qoplash 9 oydan 4,2 oyga tushadi; takroriy himoya cheklangan zaxirani tugatishi mumkin","Qoplash 9 oydan 4,2 oyga tushadi; kurs abadiy qadrlanishi kafolatlangan"],"why":["Remaining reserves are $900m−$300m−$180m=$420m. Import cover falls from 900/100=9 months to 420/100=4.2 months; finite reserves constrain repeated intervention.","Резервы после интервенций $900−$300−$180=$420 млн. Покрытие падает с 900/100=9 до 420/100=4,2 месяца. Запас резервов ограничивает дальнейшую поддержку.","Intervensiyalardan keyin zaxira $900−$300−$180=$420 mln. Import qoplash 900/100=9 oydan 420/100=4,2 oyga tushadi. Takroriy himoya zaxira bilan cheklanadi."]},{"ref":"EC9708:G2:EC9708-G2-T7-T-010","d":"hard","sec":135,"k":"D","en":"A country starts the year with 1,500,000 residents and ends with 1,510,000. During the year there are 24,000 live births, 13,000 deaths and 9,000 emigrants. Assuming no other population adjustments, how many immigrants arrived, and what was net migration?","ru":"На начало года в стране 1 500 000 жителей, на конец — 1 510 000. За год было 24 000 живорождений, 13 000 смертей и 9 000 эмигрантов. Других изменений численности нет. Сколько иммигрантов прибыло и чему равно миграционное сальдо?","uz":"Yil boshida mamlakat aholisi 1 500 000, yil oxirida 1 510 000. Yil davomida 24 000 tirik tug‘ilish, 13 000 o‘lim va 9 000 emigrant bo‘lgan. Boshqa o‘zgarish yo‘q. Nechta immigrant kelgan va sof migratsiya qancha?","options_en":["19,000 immigrants; net migration +10,000","10,000 immigrants; net migration +1,000","8,000 immigrants; net migration +8,000","8,000 immigrants; net migration −1,000"],"options_ru":["19 000 иммигрантов; миграционное сальдо +10 000","10 000 иммигрантов; миграционное сальдо +1 000","8 000 иммигрантов; миграционное сальдо +8 000","8 000 иммигрантов; миграционное сальдо −1 000"],"options_uz":["19 000 immigrant; sof migratsiya +10 000","10 000 immigrant; sof migratsiya +1 000","8 000 immigrant; sof migratsiya +8 000","8 000 immigrant; sof migratsiya −1 000"],"why":["Population grows by 10,000. Natural increase is 24,000−13,000=11,000, so net migration must be −1,000. With 9,000 emigrants, immigrants are 9,000−1,000=8,000.","Общий прирост 10 000. Естественный прирост 24 000−13 000=11 000, значит миграционное сальдо −1 000. При 9 000 эмигрантов иммигрантов было 8 000.","Aholi 10 000 oshgan. Tabiiy o‘sish 24 000−13 000=11 000, shuning uchun sof migratsiya −1 000. 9 000 emigrant bo‘lsa, immigrant 8 000."]},{"ref":"EC9708:G2:EC9708-G2-T7-T-014","d":"hard","sec":135,"k":"B","en":"Before trade restrictions, a country''s annual goods exports are $600m and goods imports $650m. An import quota cuts import expenditure by $80m. Its trading partner retaliates and reduces the country''s export earnings by $110m; higher costs for imported production inputs independently reduce exports by another $20m. Assuming no overlap and all other flows fixed, what is the new goods-trade balance and its change from the original?","ru":"До торговых ограничений годовой экспорт товаров страны $600 млн, импорт $650 млн. Импортная квота снижает расходы на импорт на $80 млн. Торговый партнёр отвечает ограничениями и сокращает экспортную выручку страны на $110 млн; подорожание импортных производственных ресурсов независимо уменьшает экспорт ещё на $20 млн. Эффекты не пересекаются, остальные потоки неизменны. Какими станут сальдо торговли товарами и его изменение?","uz":"Cheklovlardan oldin mamlakat yillik tovar eksporti $600 mln, importi $650 mln. Import kvotasi import xarajatini $80 mln kamaytiradi. Savdo hamkori javoban eksport tushumini $110 mln kamaytiradi; import ishlab chiqarish resurslari qimmatlashishi eksportni mustaqil yana $20 mln qisqartiradi. Ta’sirlar takrorlanmaydi, boshqa oqimlar o‘zgarmaydi. Yangi tovar savdo balansi va avvalgiga nisbatan o‘zgarish qancha?","options_en":["Balance +$100m, improvement by $150m","Balance −$100m, deterioration by $50m","Balance −$50m, unchanged because imports fall","Balance −$180m, deterioration by $130m"],"options_ru":["Сальдо +$100 млн, улучшение на $150 млн","Сальдо −$100 млн, ухудшение на $50 млн","Сальдо −$50 млн, без изменений из-за снижения импорта","Сальдо −$180 млн, ухудшение на $130 млн"],"options_uz":["Balans +$100 mln, $150 mln yaxshilanish","Balans −$100 mln, $50 mln yomonlashish","Balans −$50 mln, import kamaygani uchun o‘zgarishsiz","Balans −$180 mln, $130 mln yomonlashish"],"why":["Originally the goods balance is 600−650=−$50m. Afterwards exports are 600−110−20=$470m and imports 650−80=$570m; the balance is −$100m, $50m worse. Retaliation can outweigh import reductions.","Изначальное сальдо 600−650=−$50 млн. Новый экспорт 600−110−20=$470 млн, импорт 650−80=$570 млн. Сальдо −$100 млн, ухудшение на $50 млн: ответные меры могут перекрыть сокращение импорта.","Dastlab balans 600−650=−$50 mln. Yangi eksport 600−110−20=$470 mln, import 650−80=$570 mln. Balans −$100 mln, $50 mln yomonlashadi. Javob cheklovlari import tejamini ortig‘i bilan qoplashi mumkin."]},{"ref":"EC9708:G2:EC9708-G2-T7-T-020","d":"hard","sec":135,"k":"A","en":"Three countries remove tariffs among themselves but each retains its own external tariff schedule. Before the agreement, Country A bought 300 tonnes of steel from a low-cost non-member producer at a real resource cost of $40 per tonne. The non-member''s delivered price now includes a $10 external tariff, while a member''s steel is tariff-free at a real resource cost of $45 per tonne, so A switches all 300 tonnes to that member. What is the arrangement and the extra real resource cost of the trade shift?","ru":"Три страны отменяют пошлины между собой, но каждая сохраняет собственные внешние тарифы. До соглашения страна A покупала 300 тонн стали у более эффективного производителя вне объединения с реальными ресурсными затратами $40 за тонну. Теперь поставка вне объединения стоит $40 плюс внешняя пошлина $10, а сталь участника поступает беспошлинно при ресурсной себестоимости $45; A переключает все 300 тонн на участника. Как называется объединение и каковы дополнительные реальные ресурсные затраты такого переключения?","uz":"Uch mamlakat o‘zaro bojlarni bekor qiladi, lekin har biri tashqi boj jadvalini alohida saqlaydi. Kelishuvdan oldin A mamlakat 300 tonna po‘latni ittifoqdan tashqaridagi samarali ishlab chiqaruvchidan har tonnaga $40 real resurs xarajati bilan olgan. Endi tashqi yetkazib berish $40 ustiga $10 boj, a’zo po‘lati esa $45 real xarajat bilan bojsiz, shuning uchun A barcha 300 tonnani a’zodan oladi. Bu qanday kelishuv va ko‘chishning qo‘shimcha real resurs xarajati qancha?","options_en":["Free trade area; trade diversion causes $1,500 extra real resource cost","Customs union; trade creation saves $1,500","Free trade area; trade creation saves $3,000","Common market; trade diversion imposes $3,000 extra real resource cost"],"options_ru":["Зона свободной торговли; отклонение торговли создаёт $1 500 дополнительных ресурсных затрат","Таможенный союз; создание торговли экономит $1 500","Зона свободной торговли; создание торговли экономит $3 000","Общий рынок; отклонение торговли создаёт $3 000 дополнительных затрат"],"options_uz":["Erkin savdo hududi; savdoning og‘ishi $1500 qo‘shimcha real resurs xarajatini keltiradi","Bojxona ittifoqi; savdo yaratilishi $1500 tejaydi","Erkin savdo hududi; savdo yaratilishi $3000 tejaydi","Umumiy bozor; savdoning og‘ishi $3000 qo‘shimcha xarajat keltiradi"],"why":["Separate external tariffs identify a free trade area, not a customs union. Tariff preference diverts trade from a $40 resource-cost producer to one costing $45, adding ($45−$40)×300=$1,500 real resource cost; the tariff itself is a transfer.","Раздельные внешние тарифы означают зону свободной торговли, не таможенный союз. Торговля смещается от производителя с затратами $40 к производителю с $45; дополнительные реальные затраты ($45−$40)×300=$1 500. Пошлина — трансферт.","Alohida tashqi bojlar erkin savdo hududini bildiradi, bojxona ittifoqini emas. Savdo $40 xarajatli ishlab chiqaruvchidan $45 xarajatlidagi a’zoga o‘tadi: ($45−$40)×300=$1500 qo‘shimcha real xarajat. Boj transfert hisoblanadi."]}]'::jsonb;
+ x jsonb; oldq record; new_id bigint; i int; idx int; keytxt text; reftext text; cnt int;
+ enwhy text; ruwhy text; uzwhy text; ez int; med int; hard int;
+BEGIN
+ IF jsonb_array_length(d)<>4 THEN RAISE EXCEPTION 'T7_four_hard_required'; END IF;
+ IF EXISTS(SELECT 1 FROM public.tour_attempts at JOIN public.tours t ON t.id=at.tour_id WHERE t.subject_id=7 AND t.season_id=2 AND t.tour_no=7)
+ THEN RAISE EXCEPTION 'T7_season2_attempts_exist'; END IF;
+ SELECT count(*) INTO cnt FROM public.tours t JOIN public.tour_questions l ON l.tour_id=t.id AND l.is_active
+ WHERE t.subject_id=7 AND t.season_id=2 AND t.tour_no=7;
+ IF cnt<>20 THEN RAISE EXCEPTION 'T7_pool_not20_before: %',cnt; END IF;
+ FOR x IN SELECT value FROM jsonb_array_elements(d) LOOP
+   reftext:=x->>'ref';keytxt:=x->>'k';idx:=ascii(keytxt)-65;
+   IF keytxt NOT IN ('A','B','C','D') OR x->>'d'<>'hard'
+      OR jsonb_array_length(x->'options_en')<>4 OR jsonb_array_length(x->'options_ru')<>4
+      OR jsonb_array_length(x->'options_uz')<>4
+   THEN RAISE EXCEPTION 'T7_invalid_authoring: %',reftext; END IF;
+   SELECT q.id,q.subject_id,q.topic,q.subtopic,q.quality_flag,l.tour_id,l.order_no
+   INTO STRICT oldq FROM public.questions q JOIN public.tour_questions l ON l.question_id=q.id AND l.is_active
+   JOIN public.tours t ON t.id=l.tour_id
+   WHERE q.subject_id=7 AND t.subject_id=7 AND t.season_id=2 AND t.tour_no=7 AND q.book_ref=reftext;
+   IF EXISTS(SELECT 1 FROM public.tour_answers a WHERE a.question_id=oldq.id)
+      OR EXISTS(SELECT 1 FROM public.tour_session_answers_v4 a WHERE a.question_id=oldq.id)
+      OR EXISTS(SELECT 1 FROM public.questions q WHERE q.subject_id=7 AND q.book_ref=reftext||'-V2')
+   THEN RAISE EXCEPTION 'T7_history_or_duplicate: %',reftext; END IF;
+   enwhy:=x->'why'->>0;ruwhy:=x->'why'->>1;uzwhy:=x->'why'->>2;
+   INSERT INTO public.questions(subject_id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,explanation,image_url,is_active,
+   question_text_ru,question_text_uz,question_text_en,options_text_ru,options_text_uz,options_text_en,explanation_ru,explanation_uz,explanation_en,book_ref,time_limit_sec,quality_flag,quality_status)
+   VALUES(oldq.subject_id,oldq.topic,oldq.subtopic,'hard','mcq',x->>'en',(x->'options_en')::text,keytxt,
+   'Correct: '||(x->'options_en'->>idx)||E'\n'||enwhy,NULL,true,
+   x->>'ru',x->>'uz',x->>'en',(x->'options_ru')::text,(x->'options_uz')::text,(x->'options_en')::text,
+   'Правильный ответ: '||(x->'options_ru'->>idx)||E'\n'||ruwhy,
+   'To‘g‘ri javob: '||(x->'options_uz'->>idx)||E'\n'||uzwhy,
+   'Correct answer: '||(x->'options_en'->>idx)||E'\n'||enwhy,
+   reftext||'-V2',(x->>'sec')::int,oldq.quality_flag,'published')
+   RETURNING id INTO new_id;
+   UPDATE public.tour_questions SET is_active=false WHERE tour_id=oldq.tour_id AND question_id=oldq.id AND is_active;
+   GET DIAGNOSTICS cnt=ROW_COUNT;
+   IF cnt<>1 THEN RAISE EXCEPTION 'T7_old_link_count: %',reftext; END IF;
+   INSERT INTO public.tour_questions(tour_id,question_id,order_no,is_active) VALUES(oldq.tour_id,new_id,oldq.order_no,true);
+   INSERT INTO public.question_version_links(old_question_id,new_question_id,link_type,reason)
+   VALUES(oldq.id,new_id,'replacement','Economics Gen2 season2 Tour7: actual high-order difficulty replacement; old question preserved');
+   FOR i IN 0..3 LOOP
+     INSERT INTO public.question_answer_diagnostics(question_id,answer_kind,answer_key,answer_value,is_correct,
+        mistake_type,weak_skill,feedback_ru,feedback_uz,feedback_en,next_action_ru,next_action_uz,next_action_en,rule_json,quality_status)
+     VALUES(new_id,'mcq_option',chr(65+i),NULL,i=idx,
+        CASE WHEN i=idx THEN NULL ELSE 'multi_step_economic_reasoning' END,oldq.subtopic,
+        'Выбрано: '||(x->'options_ru'->>i)||E'\n'||ruwhy||E'\nОтвет: '||(x->'options_ru'->>idx),
+        'Tanlov: '||(x->'options_uz'->>i)||E'\n'||uzwhy||E'\nJavob: '||(x->'options_uz'->>idx),
+        'Selected: '||(x->'options_en'->>i)||E'\n'||enwhy||E'\nCorrect: '||(x->'options_en'->>idx),
+        CASE WHEN i=idx THEN NULL ELSE 'Перепроверьте каждый шаг.' END,
+        CASE WHEN i=idx THEN NULL ELSE 'Har bir bosqichni tekshiring.' END,
+        CASE WHEN i=idx THEN NULL ELSE 'Check each step.' END,
+        jsonb_build_object('diagnostic_code','EC9708_G2_T7T'||substring(reftext from 'T-([0-9]{3})')||'_V2_'||chr(65+i)),
+        'published');
+   END LOOP;
+ END LOOP;
+ UPDATE public.questions q SET difficulty=
+  CASE WHEN right(q.book_ref,3) IN ('003','005','006','009','017','019') THEN 'easy' ELSE 'medium' END
+ WHERE q.subject_id=7 AND q.book_ref ~ '^EC9708:G2:EC9708-G2-T7-T-[0-9]{3}$'
+   AND NOT EXISTS(SELECT 1 FROM jsonb_array_elements(d) z WHERE z->>'ref'=q.book_ref);
+ GET DIAGNOSTICS cnt=ROW_COUNT;
+ IF cnt<>16 THEN RAISE EXCEPTION 'T7_unchanged_expected16: %',cnt; END IF;
+ SELECT count(*),count(*) FILTER(WHERE q.difficulty='easy'),
+ count(*) FILTER(WHERE q.difficulty='medium'),count(*) FILTER(WHERE q.difficulty='hard')
+ INTO cnt,ez,med,hard
+ FROM public.tours t JOIN public.tour_questions l ON l.tour_id=t.id AND l.is_active
+ JOIN public.questions q ON q.id=l.question_id WHERE t.subject_id=7 AND t.season_id=2 AND t.tour_no=7;
+ IF cnt<>20 OR ez<>6 OR med<>10 OR hard<>4 THEN
+ RAISE EXCEPTION 'T7_mix_invalid: %,%,%,%',cnt,ez,med,hard; END IF;
+END $tour7$;
+COMMIT;
