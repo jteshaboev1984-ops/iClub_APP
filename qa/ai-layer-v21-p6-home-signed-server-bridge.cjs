@@ -138,4 +138,4 @@ async function buildHomePlan(s,{userId,contextHandle,locale}={}){
    betaAllowed:false,providerAllowed:false,productionAllowed:false});
  }catch{return denied();}
 }
-module.exports={buildHomePlan,verifySignedPlan};
+module.exports={buildHomePlan,verifySignedPlan,accessApproved};
