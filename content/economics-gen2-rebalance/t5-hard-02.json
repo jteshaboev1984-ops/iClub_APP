@@ -1,0 +1,332 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-050",
+    "n": 50,
+    "d": "hard",
+    "k": "D",
+    "sec": 190,
+    "en": "Market demand is Qd=180−3P and supply is Qs=30+2P. A licensing requirement restricts entry and effectively reduces supply to Qs=10+2P. What happens to equilibrium price and quantity, and what would removing that restriction restore, holding everything else fixed?",
+    "ru": "Рыночный спрос Qd=180−3P, предложение Qs=30+2P. Лицензирование ограничивает вход и уменьшает предложение до Qs=10+2P. Как изменяются равновесные цена и объём и что восстановит отмена ограничения при прочих равных?",
+    "uz": "Bozor talabi Qd=180−3P, taklif Qs=30+2P. Litsenziya talabi kirishni cheklab taklifni Qs=10+2P ga kamaytiradi. Muvozanat narx va miqdor qanday o‘zgaradi, boshqa shartlar o‘zgarmasa cheklovni bekor qilish nimani tiklaydi?",
+    "options_en": [
+      "Price falls by 4 and quantity rises by 12; repeal reverses these changes",
+      "Price rises by 10 and quantity falls by 30; repeal has no effect",
+      "Price rises by 4 and quantity stays constant; repeal lowers demand",
+      "Price rises by 4 and quantity falls by 12; repeal restores the earlier lower-price equilibrium"
+    ],
+    "options_ru": [
+      "Цена падает на 4, объём растёт на 12; отмена обращает изменения",
+      "Цена растёт на 10, объём падает на 30; отмена не влияет",
+      "Цена растёт на 4, объём неизменен; отмена уменьшает спрос",
+      "Цена растёт на 4, объём падает на 12; отмена восстанавливает прежнее равновесие с меньшей ценой"
+    ],
+    "options_uz": [
+      "Narx 4 ga kamayib, miqdor 12 ga oshadi; bekor qilish buni teskarilaydi",
+      "Narx 10 ga oshib, miqdor 30 ga kamayadi; bekor qilish ta’sirsiz",
+      "Narx 4 ga oshib, miqdor o‘zgarmaydi; bekor qilish talabni kamaytiradi",
+      "Narx 4 ga oshib, miqdor 12 ga kamayadi; bekor qilish avvalgi past narxli muvozanatni tiklaydi"
+    ],
+    "why": [
+      "Without restriction 180−3P=30+2P gives P=30, Q=90. With restriction 180−3P=10+2P gives P=34, Q=78: price +4 and quantity −12. Repeal restores P=30, Q=90.",
+      "Без ограничения P=30, Q=90. При сдвиге предложения P=34, Q=78: цена +4, объём −12. Отмена возвращает исходное равновесие.",
+      "Cheklovsiz P=30, Q=90; cheklov bilan P=34, Q=78. Narx +4, miqdor −12. Bekor qilish avvalgi holatni tiklaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-052",
+    "n": 52,
+    "d": "hard",
+    "k": "B",
+    "sec": 190,
+    "en": "A city proposes mandatory taxi-driver safety testing. The annual expected value of accidents avoided is $270,000. Drivers' compliance costs total $90,000, enforcement costs $30,000, and the programme is expected to reduce service availability with an additional $60,000 social loss. Ignoring any other effects, what is estimated annual net social benefit?",
+    "ru": "Город предлагает обязательную проверку безопасности водителей такси. Ожидаемая годовая выгода от предотвращённых аварий $270 000. Соблюдение требований обойдётся водителям в $90 000, контроль — в $30 000; снижение доступности такси принесёт дополнительный общественный ущерб $60 000. Игнорируя другие эффекты, найдите ожидаемую годовую чистую общественную выгоду.",
+    "uz": "Shahar taksi haydovchilarining majburiy xavfsizlik sinovini taklif qilmoqda. Oldi olingan baxtsiz hodisalarning yillik kutilgan foydasi $270 000. Haydovchi moslashuv xarajati $90 000, nazorat $30 000, taksi xizmatining kamayishi esa qo‘shimcha $60 000 ijtimoiy zarar beradi. Boshqa ta’sirsiz yillik sof ijtimoiy foyda qancha?",
+    "options_en": [
+      "$270,000",
+      "$90,000",
+      "$150,000",
+      "−$90,000"
+    ],
+    "options_ru": [
+      "$270 000",
+      "$90 000",
+      "$150 000",
+      "−$90 000"
+    ],
+    "options_uz": [
+      "$270 000",
+      "$90 000",
+      "$150 000",
+      "−$90 000"
+    ],
+    "why": [
+      "Net benefit =270,000−90,000−30,000−60,000=$90,000. Even when positive, the estimate depends on the reliability of all four values.",
+      "Чистая выгода 270 000−90 000−30 000−60 000=$90 000. Результат положительный, но зависит от обоснованности всех оценок.",
+      "Sof foyda 270 000−90 000−30 000−60 000=$90 000. Natija musbat, lekin to‘rt bahoning ishonchliligiga bog‘liq."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-053",
+    "n": 53,
+    "d": "hard",
+    "k": "A",
+    "sec": 190,
+    "en": "A city labels 100 factories 'green' and gives each a $1,000 subsidy without measuring emissions. An independent audit estimates that only 15 recipients reduced emissions because of the programme; 55 had already complied and 30 made no improvement. What subsidy spending is incurred per additional improving factory, excluding administration?",
+    "ru": "Город присвоил 100 заводам статус «экологичный» и выплатил каждому субсидию $1 000, не измеряя выбросы. Независимый аудит обнаружил, что лишь 15 получателей сократили выбросы благодаря программе; 55 соответствовали требованиям ранее, 30 ничего не улучшили. Каковы субсидийные расходы на один дополнительно улучшивший завод без учёта администрирования?",
+    "uz": "Shahar chiqindini o‘lchamasdan 100 zavodga «yashil» belgisini berib, har biriga $1000 subsidiya to‘ladi. Mustaqil audit faqat 15 ta zavod dastur sabab chiqindini kamaytirganini, 55 tasi oldindan mos bo‘lganini, 30 tasi yaxshilanmaganini ko‘rsatdi. Boshqaruvdan tashqari har bir qo‘shimcha yaxshilangan zavodga subsidiya xarajati qancha?",
+    "options_en": [
+      "Approximately $6,667",
+      "$1,000",
+      "$1,818",
+      "$100,000"
+    ],
+    "options_ru": [
+      "Примерно $6 667",
+      "$1 000",
+      "$1 818",
+      "$100 000"
+    ],
+    "options_uz": [
+      "Taxminan $6667",
+      "$1000",
+      "$1818",
+      "$100 000"
+    ],
+    "why": [
+      "Total subsidy spending is 100×$1,000=$100,000 and there are 15 additional improvements. $100,000/15≈$6,667 per improvement, showing weak targeting and verification.",
+      "Расходы 100×$1 000=$100 000, дополнительных улучшений лишь 15. $100 000/15≈$6 667 на улучшение — признак слабой адресности и контроля.",
+      "Jami subsidiya 100×$1000=$100 000, qo‘shimcha yaxshilanish 15 ta. $100 000/15≈$6667, manzilli tanlov va tekshiruv zaif."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-055",
+    "n": 55,
+    "d": "hard",
+    "k": "C",
+    "sec": 200,
+    "en": "To meet an emission cap, two firms must jointly cut emissions by three tonnes. Firm A's successive one-tonne abatement costs are $10, $20, $30; Firm B's are $40, $50, $60. Initially A is required to cut one tonne and B two tonnes. With perfect permit trading and no transaction costs, which allocation minimises total abatement cost, and how much is saved compared with the initial assignment?",
+    "ru": "Чтобы соблюсти общий лимит выбросов, две фирмы должны совместно сократить загрязнение на три тонны. Затраты фирмы A на последовательные тонны снижения: $10, $20, $30; фирмы B: $40, $50, $60. Первоначально A обязана сократить одну тонну, B — две. При свободной торговле разрешениями и нулевых транзакционных затратах какое распределение минимизирует затраты и сколько экономит относительно исходного?",
+    "uz": "Umumiy emissiya chegarasi uchun ikki firma jami uch tonna chiqindini kamaytirishi kerak. A firmasida ketma-ket tonna xarajatlari $10, $20, $30, B da $40, $50, $60. Dastlab A bir tonna, B ikki tonna kamaytirishi shart. Ruxsatnomalar erkin savdo qilinsa va bitim xarajati nol bo‘lsa, qaysi taqsimot xarajatni minimallashtiradi va dastlabkiga nisbatan qancha tejaydi?",
+    "options_en": [
+      "A cuts one, B cuts two; savings $40",
+      "A cuts two, B cuts one; savings $0",
+      "A cuts three, B cuts zero; savings $40",
+      "A cuts zero, B cuts three; savings $40"
+    ],
+    "options_ru": [
+      "A — одну, B — две; экономия $40",
+      "A — две, B — одну; экономия $0",
+      "A — три, B — ноль; экономия $40",
+      "A — ноль, B — три; экономия $40"
+    ],
+    "options_uz": [
+      "A bir, B ikki tonna; tejam $40",
+      "A ikki, B bir tonna; tejam $0",
+      "A uch, B nol tonna; tejam $40",
+      "A nol, B uch tonna; tejam $40"
+    ],
+    "why": [
+      "Initial abatement cost is $10+($40+$50)=$100. Cheapest three cuts are all at A: $10+$20+$30=$60, saving $40 while keeping the same total cap.",
+      "Исходные затраты $10+$40+$50=$100. Три самые дешёвые тонны сокращения — все у A: $10+$20+$30=$60. Экономия $40 при прежнем лимите.",
+      "Dastlab xarajat $10+$40+$50=$100. Eng arzon uch tonnani A kamaytiradi: $10+$20+$30=$60. Tejam $40, umumiy limit o‘zgarmaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-056",
+    "n": 56,
+    "d": "hard",
+    "k": "D",
+    "sec": 210,
+    "en": "A single large employer faces labour supply w=10+L, where L is employment and w is wage. Its marginal revenue product of labour is MRP=70−2L. Hiring an extra worker requires raising the wage for all workers. In the continuous monopsony model, what are monopsony employment and wage, compared with the competitive benchmark?",
+    "ru": "Единственный крупный работодатель сталкивается с предложением труда w=10+L, где L — занятость, w — зарплата. Предельная доходность труда MRP=70−2L. Для найма дополнительного работника нужно повысить зарплату всем. В непрерывной модели монопсонии найдите занятость и зарплату по сравнению с конкурентным ориентиром.",
+    "uz": "Yagona yirik ish beruvchi w=10+L mehnat taklifiga duch keladi, bunda L bandlik, w ish haqi. Mehnatning chegaraviy daromad mahsuloti MRP=70−2L. Yangi ishchi uchun hammaga ish haqi oshiriladi. Uzluksiz monopsoniya modelida bandlik va ish haqi raqobatli holatga nisbatan qanday?",
+    "options_en": [
+      "Monopsony L=20, w=30; competition L=15, w=25",
+      "Monopsony L=15, w=40; competition L=20, w=30",
+      "Monopsony L=15, w=30; competition L=20, w=40",
+      "Monopsony L=15, w=25; competition L=20, w=30"
+    ],
+    "options_ru": [
+      "Монопсония L=20, w=30; конкуренция L=15, w=25",
+      "Монопсония L=15, w=40; конкуренция L=20, w=30",
+      "Монопсония L=15, w=30; конкуренция L=20, w=40",
+      "Монопсония L=15, w=25; конкуренция L=20, w=30"
+    ],
+    "options_uz": [
+      "Monopsoniya L=20, w=30; raqobat L=15, w=25",
+      "Monopsoniya L=15, w=40; raqobat L=20, w=30",
+      "Monopsoniya L=15, w=30; raqobat L=20, w=40",
+      "Monopsoniya L=15, w=25; raqobat L=20, w=30"
+    ],
+    "why": [
+      "Total wage bill is L(10+L); marginal expenditure ME=10+2L. Set ME=MRP: 10+2L=70−2L, L=15, w=25. Competitive MRP=w gives L=20, w=30.",
+      "Общие затраты на труд L(10+L), предельные ME=10+2L. При ME=MRP получаем L=15, w=25. В конкуренции MRP=w даёт L=20, w=30.",
+      "Jami ish haqi L(10+L), chegaraviy xarajat ME=10+2L. ME=MRP dan L=15, w=25. Raqobatda MRP=w dan L=20, w=30."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-058",
+    "n": 58,
+    "d": "hard",
+    "k": "B",
+    "sec": 185,
+    "en": "A school has exactly 45 tutoring hours. Ten students in Group X each need three hours to reach a minimum standard; thirty in Group Y each need one hour. A student reaches the standard only after receiving all required hours. If the sole goal is to maximise the number who reach the standard, which allocation is optimal?",
+    "ru": "У школы ровно 45 часов дополнительных занятий. Каждому из десяти учеников группы X нужно по три часа для достижения минимума, а каждому из тридцати учеников группы Y — по одному. Ученик достигает минимума только после получения всей необходимой помощи. Если единственная цель — максимальное число достигших минимума, какое распределение оптимально?",
+    "uz": "Maktabda aynan 45 ta qo‘shimcha dars soati bor. X guruhidagi 10 o‘quvchining har biriga standartga yetish uchun 3 soat, Y dagi 30 o‘quvchining har biriga 1 soat kerak. O‘quvchi faqat barcha kerakli soat olgach standartga yetadi. Maqsad faqat standartga yetganlar sonini ko‘paytirish bo‘lsa, qaysi taqsimot optimal?",
+    "options_en": [
+      "Give 1.125 hours to all 40 students; 40 reach the standard",
+      "Give 30 hours to Y and 15 hours to five X students; 35 reach the standard",
+      "Give 30 hours to all X, then divide 15 hours among Y; 40 reach the standard",
+      "Give each X three hours; the remaining 15 hours cannot be used"
+    ],
+    "options_ru": [
+      "Раздать всем 40 по 1,125 часа; стандарт достигнут все 40",
+      "Выделить 30 часов группе Y и 15 часов пяти ученикам X; достигнут стандарт 35",
+      "Выделить 30 часов всем X и разделить оставшиеся 15 между Y; стандарт достигнут 40",
+      "Выделить каждому X по 3 часа; оставшиеся 15 часов бесполезны"
+    ],
+    "options_uz": [
+      "40 o‘quvchiga 1,125 soatdan; 40 tasi standartga yetadi",
+      "Y guruhiga 30 soat, X dagi 5 o‘quvchiga 15 soat; 35 tasi standartga yetadi",
+      "X ga 30 soat, qolgan 15 soat Y o‘rtasida; 40 tasi standartga yetadi",
+      "X dagilarga 3 soatdan; qolgan 15 soat ishlatilmaydi"
+    ],
+    "why": [
+      "Cover all 30 one-hour needs first (30 hours), then use 15 hours for five three-hour needs. That yields 35 complete students; evenly spreading hours would leave many short.",
+      "Сначала удовлетворяются потребности всех 30 учеников Y (30 часов), затем 15 часов — пяти ученикам X. Итого 35 достигают стандарта; равное дробление не гарантирует результата.",
+      "Avval Y dagi 30 o‘quvchiga 30 soat, qolgan 15 soat X dagi 5 o‘quvchiga beriladi. 35 tasi standartga yetadi; teng bo‘lib tarqatish ko‘pchilikni yetkaza olmaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-062",
+    "n": 62,
+    "d": "hard",
+    "k": "A",
+    "sec": 190,
+    "en": "A low-income worker earns an additional $300 per month. Income tax is 20% of extra earnings, means-tested benefits fall by $0.60 per extra $1, and commuting expenses rise by $40. What is the worker's extra disposable money after all three effects, and what does this illustrate?",
+    "ru": "Низкооплачиваемый работник зарабатывает дополнительно $300 в месяц. Подоходный налог составляет 20% дополнительного заработка, адресные пособия сокращаются на $0,60 за каждый дополнительный доллар, транспортные расходы растут на $40. Сколько дополнительных свободных средств остаётся и какую проблему это иллюстрирует?",
+    "uz": "Kam daromadli ishchi oyiga qo‘shimcha $300 ishlab topadi. Qo‘shimcha daromaddan 20% soliq olinadi, manzilli nafaqa har $1 uchun $0,60 ga kamayadi va yo‘l xarajati $40 ga oshadi. Oxirida qancha qo‘shimcha erkin mablag‘ qoladi va bu nimani ko‘rsatadi?",
+    "options_en": [
+      "$20; a strong poverty-trap disincentive",
+      "$60; no work disincentive",
+      "$120; the full marginal tax rate is only 20%",
+      "$300; transfers and travel costs are irrelevant"
+    ],
+    "options_ru": [
+      "$20; сильный стимул не увеличивать заработок из-за ловушки бедности",
+      "$60; препятствий к дополнительной работе нет",
+      "$120; предельная совокупная ставка лишь 20%",
+      "$300; пособия и транспорт несущественны"
+    ],
+    "options_uz": [
+      "$20; kambag‘allik tuzog‘i tufayli mehnatga kuchli salbiy rag‘bat",
+      "$60; ishlashga to‘sqinlik yo‘q",
+      "$120; umumiy chegaraviy soliq atigi 20%",
+      "$300; nafaqa va yo‘l xarajati ahamiyatsiz"
+    ],
+    "why": [
+      "Extra pay $300 − tax $60 − benefit withdrawal $180 − commute $40 = $20. Only $20 of $300 remains, signalling a poverty trap.",
+      "Дополнительный доход $300 минус налог $60, потеря пособия $180 и дорога $40 оставляет $20. Большая часть заработка не увеличивает располагаемые ресурсы.",
+      "Qo‘shimcha $300 dan $60 soliq, $180 nafaqa yo‘qotish va $40 yo‘l xarajati ayirilsa $20 qoladi; kambag‘allik tuzog‘i."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-065",
+    "n": 65,
+    "d": "hard",
+    "k": "C",
+    "sec": 185,
+    "en": "A city reimburses a taxi operator for 90% of its verified operating losses. The operator could spend $200 on an efficiency review that would certainly reduce operating costs by $1,000 without changing service. Assume reimbursement adjusts dollar for dollar to cost changes. What is the private net benefit to the operator from the review, and the net resource benefit to society?",
+    "ru": "Город возмещает оператору такси 90% подтверждённых операционных убытков. Оператор может потратить $200 на проверку эффективности, которая гарантированно снизит операционные затраты на $1 000 без изменения услуги. Возмещение автоматически меняется вместе с затратами. Какова частная чистая выгода оператора от проверки и чистая ресурсная выгода общества?",
+    "uz": "Shahar taksi operatorining tasdiqlangan operatsion zararining 90% ini qoplaydi. Operator $200 sarflab xizmatni o‘zgartirmasdan xarajatni albatta $1000 kamaytiradigan samaradorlik tekshiruvini o‘tkazishi mumkin. Qoplama xarajat bilan birga o‘zgaradi. Operatorning xususiy sof foydasi va jamiyat resurs foydasi qancha?",
+    "options_en": [
+      "Private +$800; social −$100",
+      "Private +$100; social +$1,000",
+      "Private −$100; social +$800",
+      "Private +$800; social +$100"
+    ],
+    "options_ru": [
+      "Частная +$800; общественная −$100",
+      "Частная +$100; общественная +$1 000",
+      "Частная −$100; общественная +$800",
+      "Частная +$800; общественная +$100"
+    ],
+    "options_uz": [
+      "Xususiy +$800; ijtimoiy −$100",
+      "Xususiy +$100; ijtimoiy +$1000",
+      "Xususiy −$100; ijtimoiy +$800",
+      "Xususiy +$800; ijtimoiy +$100"
+    ],
+    "why": [
+      "Reimbursement falls $900 when operating cost falls $1,000. The operator keeps only $100 of savings but pays $200, net −$100. Society saves $1,000 resources less review cost $200, net +$800.",
+      "При экономии $1 000 возмещение уменьшается на $900, оператор сохраняет лишь $100, но платит $200: чистая частная выгода −$100. Обществу остаётся $1 000−$200=+$800.",
+      "Xarajat $1000 kamayganda qoplama $900 kamayadi, operator $100 tejab $200 sarflaydi: sof −$100. Jamiyat $1000−$200=+$800 resurs tejaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-067",
+    "n": 67,
+    "d": "hard",
+    "k": "D",
+    "sec": 195,
+    "en": "In a competitive labour market, demand is Ld=100−2w and supply Ls=10+w, where w is hourly wage. A union enforces a wage of $35 without shifting either curve. Relative to the original equilibrium, what happens to employment, and how many willing workers are not hired at that wage?",
+    "ru": "На конкурентном рынке труда спрос Ld=100−2w, предложение Ls=10+w, где w — почасовая зарплата. Профсоюз добивается ставки $35, не сдвигая кривые. Как меняется занятость относительно прежнего равновесия и сколько готовых работать людей не находят работу при этой ставке?",
+    "uz": "Raqobatli mehnat bozorida talab Ld=100−2w, taklif Ls=10+w, bunda w soatlik ish haqi. Kasaba uyushmasi egri chiziqlarni o‘zgartirmasdan $35 stavkani belgilaydi. Avvalgi muvozanatga nisbatan bandlik qanday o‘zgaradi va shu stavkada nechta ish izlovchi yollanmaydi?",
+    "options_en": [
+      "Employment rises from 40 to 45; unemployment zero",
+      "Employment stays 40; 15 unemployed",
+      "Employment falls from 40 to 30; unemployment five",
+      "Employment falls from 40 to 30; 15 willing workers are not hired"
+    ],
+    "options_ru": [
+      "Занятость растёт с 40 до 45; безработицы нет",
+      "Занятость остаётся 40; не наняты 15",
+      "Занятость падает с 40 до 30; не наняты пятеро",
+      "Занятость падает с 40 до 30; не наняты 15 желающих"
+    ],
+    "options_uz": [
+      "Bandlik 40 dan 45 ga oshadi; ishsizlik yo‘q",
+      "Bandlik 40 bo‘lib qoladi; 15 kishi ishsiz",
+      "Bandlik 40 dan 30 ga tushadi; 5 kishi yollanmaydi",
+      "Bandlik 40 dan 30 ga tushadi; 15 ish istovchi yollanmaydi"
+    ],
+    "why": [
+      "Equilibrium 100−2w=10+w gives w=30, L=40. At wage 35, demand=30 and supply=45, so employment=30 and excess labour supply=15.",
+      "Равновесие w=30, L=40. При w=35 спрос на труд 30, предложение 45. Занятость 30, избыточное предложение труда 15.",
+      "Muvozanatda w=30, L=40. w=35 da talab 30, taklif 45. Bandlik 30, ortiqcha mehnat taklifi 15."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-068",
+    "n": 68,
+    "d": "hard",
+    "k": "B",
+    "sec": 195,
+    "en": "A river-polluting firm can avoid causing $180 of verified harm to downstream fishers by spending $110 on a filter. Monitoring and negotiating enforceable compensation would cost another $20. No other effects occur. What is the maximum net joint gain from reaching an agreement to install the filter, and which obstacle could prevent it?",
+    "ru": "Предприятие загрязняет реку, причиняя рыбакам ниже по течению подтверждённый ущерб $180. Фильтр стоимостью $110 предотвращает ущерб; контроль и переговоры о юридически защищённой компенсации стоят ещё $20. Других эффектов нет. Каков максимальный общий чистый выигрыш от соглашения установить фильтр и что может помешать?",
+    "uz": "Korxona daryoni ifloslantirib, quyi oqimdagi baliqchilarga tasdiqlangan $180 zarar yetkazadi. $110 lik filtr zararni oldini oladi, huquqiy kuchga ega kelishuvni nazorat qilish va muzokara yana $20 turadi. Boshqa ta’sir yo‘q. Filtr o‘rnatish kelishuvining maksimal jami sof foydasi qancha va unga nima to‘sqinlik qilishi mumkin?",
+    "options_en": [
+      "$70; no negotiation costs can ever arise",
+      "$50; high transaction or enforcement costs could destroy the bargaining surplus",
+      "$180; the filter cost is a pure transfer",
+      "−$50; continuing pollution is necessarily optimal"
+    ],
+    "options_ru": [
+      "$70; переговорные издержки никогда не возникают",
+      "$50; высокие издержки сделки или защиты прав могут уничтожить выгоду переговоров",
+      "$180; затраты на фильтр — лишь трансферт",
+      "−$50; продолжать загрязнение обязательно эффективно"
+    ],
+    "options_uz": [
+      "$70; muzokara xarajati hech qachon bo‘lmaydi",
+      "$50; yuqori bitim yoki huquqni ta’minlash xarajatlari kelishuv foydasini yo‘q qilishi mumkin",
+      "$180; filtr xarajati faqat transfert",
+      "−$50; ifloslantirishni davom ettirish albatta optimal"
+    ],
+    "why": [
+      "The avoided harm of $180 minus filter cost $110 and transaction cost $20 gives $50 net surplus. Larger transaction costs can impede a mutually beneficial agreement.",
+      "Предотвращённый ущерб $180 минус фильтр $110 и издержки соглашения $20 даёт $50 чистой выгоды. Более высокие издержки могут сделать переговоры невыгодными.",
+      "Oldi olingan $180 zarar minus $110 filtr va $20 bitim xarajati = $50 sof foyda. Yuqori bitim xarajatlari kelishuvga to‘sqinlik qiladi."
+    ]
+  }
+]
