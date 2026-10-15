@@ -77,6 +77,7 @@ on:
       - 'qa/ai-layer-v21-p9-draft-contract-gate.cjs'
       - 'qa/ai-layer-v21-p9-draft-contract-gate.test.cjs'
       - 'qa/sql_drafts/iclub_ai_v21_p9_catalog_READ_ONLY.sql'
+      - 'qa/sql_drafts/iclub_ai_v21_nine_drafts_integrated_local_pg.psql'
       - 'qa/sql_drafts/iclub_ai_v21_commercial_pg_proc_READ_ONLY.sql'
       - 'qa/sql_drafts/iclub_ai_v21_commercial_contract_fixture_local_pg.psql'
       - 'qa/ai-layer-v21-p6-nav-approved-locale.cjs'
@@ -187,12 +188,12 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y -qq postgresql-client
           fi
-      - name: Run fourteen independent scratch PostgreSQL suites
+      - name: Run fifteen independent scratch PostgreSQL suites
         shell: bash
         run: |
           set -euo pipefail
           failed=0
-          for suite in meter math practice release claim atomic context source publisher authority spend receipt realproof home; do
+          for suite in meter math practice release claim atomic context source publisher authority spend receipt realproof home integrated; do
             db="iclub_ai_v21_scratch_ci_${suite}"
             createdb -h 127.0.0.1 -p 5432 -U postgres "${db}"
             if ICLUB_PGTEST_DB="${db}" ICLUB_PGTEST_HOST=127.0.0.1 \

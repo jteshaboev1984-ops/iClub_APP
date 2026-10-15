@@ -1036,3 +1036,7 @@ Metadata-only `pg_catalog.pg_policy` подтвердил семь полити�
 
 
 **Итог технического CI:** [GitHub Actions #338](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38698089004) — **GREEN, 664/664 Node, 14/14 independent scratch PostgreSQL**, проверка исходного Home HTTP, полный Chromium RU/UZ/EN Home→Study→Home и два независимых PostgreSQL-исполнителя с результатом один вход / один отказ. Новый fail-closed SQL RPC coverage test проверил все 23/23 existing UNAPPLIED drafts и отрицательные сценарии. Первый промежуточный run #337 отклонил дефект самого отрицательного теста с заменой SQL delimiter; тест и валидатор исправлены, полный run #338 GREEN. Protected app/Exam Prep/tariff файлы не изменились. Этот успех **не** означает live deployment либо разрешение запускать Global AI.
+
+## 116. Совместная транзакционная проверка девяти UNAPPLIED SQL (2026-10-15; QA only)
+
+Собран единый disposable PostgreSQL fixture с подлинной v1 тарифной базой и synthetic academic schema; девять черновиков загружаются в одном `BEGIN`, проверяются 23 RPC и server-role permissions, OFF gates, невозможность платного запроса, затем один `ROLLBACK` должен вернуть исходную v1. Интеграционная схема основана на искусственных таблицах и ограниченных v1 stub-функциях, **не production clone**. Дополнительно 15-й независимый PostgreSQL набор включён в QA CI. Результат: `docs/iclub-ai-layer-p9-nine-draft-integrated-qa-20261015.md`. До подтверждения run статус проверки PENDING. Production Supabase, Vercel, main, данные и прогресс не затронуты. Global AI OFF / NO-GO.

@@ -1,0 +1,173 @@
+-- Integrated 9/9 real QA draft bootstrap, on a fresh disposable PG16 DB.
+-- NOT a production clone. No real users, passwords, providers or content.
+\set ON_ERROR_STOP on
+DO $safe$
+BEGIN
+ IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
+  OR (inet_server_addr() IS NOT NULL AND inet_server_addr()
+      NOT IN ('127.0.0.1'::inet,'::1'::inet)
+      AND NOT (inet_server_addr() << '172.16.0.0/12'::cidr
+       AND current_setting('application_name')='iclub_ai_v21_local_scratch'))
+  OR to_regclass('public.users') IS NOT NULL
+  OR to_regclass('private.iclub_ai_usage_policies') IS NOT NULL
+ THEN RAISE EXCEPTION 'STOP: integrated test needs NEW LOCAL SCRATCH DB'; END IF;
+END $safe$;
+DO $roles$
+DECLARE v text;
+BEGIN
+ FOREACH v IN ARRAY ARRAY['anon','authenticated','service_role'] LOOP
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname=v) THEN
+   EXECUTE format('CREATE ROLE %I NOLOGIN',v);
+  END IF;
+ END LOOP;
+END $roles$;
+CREATE TABLE public.users(id uuid PRIMARY KEY,first_name text);
+-- Already-deployed v1 foundation is reproduced locally, untouched.
+\ir ../../supabase/migrations/20261006102000_iclub_global_ai_tariff_foundation_v1.sql
+DO $v1_base$
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM private.iclub_global_ai_runtime_config
+  WHERE id=1 AND kill_switch=true AND ui_enabled=false
+  AND gateway_enabled=false)
+ THEN RAISE EXCEPTION 'baseline v1 AI must be OFF';END IF;
+END $v1_base$;
+-- Later real v1 rollout migration is not applied in this synthetic fixture.
+-- Stand-in missing metadata property, explicit NOT a production clone.
+ALTER TABLE private.iclub_global_ai_runtime_config
+ ADD COLUMN global_ai_rollout_mode text NOT NULL DEFAULT 'off';
+CREATE TABLE public.subjects(
+ id bigint PRIMARY KEY,subject_key text NOT NULL UNIQUE,is_active boolean NOT NULL);
+CREATE TABLE public.user_subjects(
+ user_id uuid NOT NULL,subject_id bigint NOT NULL,mode text NOT NULL DEFAULT 'study',
+ is_pinned boolean NOT NULL DEFAULT false, PRIMARY KEY(user_id,subject_id));
+CREATE TABLE public.lessons(id bigint PRIMARY KEY,subject_id bigint NOT NULL);
+CREATE TABLE public.practice_sessions_v4(
+ id bigint PRIMARY KEY,user_id uuid NOT NULL,subject_id bigint NOT NULL,
+ status text NOT NULL,finalized_at timestamptz,question_ids bigint[] NOT NULL);
+CREATE TABLE public.practice_session_answers_v4(
+ session_id bigint NOT NULL,question_id bigint NOT NULL,
+ PRIMARY KEY(session_id,question_id));
+CREATE TABLE public.tours(
+ id bigint PRIMARY KEY,subject_id bigint NOT NULL,end_date date,is_active boolean);
+CREATE TABLE public.tour_attempts(
+ id bigint PRIMARY KEY,user_id uuid NOT NULL,tour_id bigint NOT NULL,status text NOT NULL);
+CREATE TABLE public.tour_session_runtime_v4(
+ attempt_id bigint PRIMARY KEY,user_id uuid NOT NULL,tour_id bigint NOT NULL,
+ finalized_at timestamptz);
+-- A conservative v1 synthetic service authority: no subject access.
+CREATE OR REPLACE FUNCTION private.iclub_rollout_allows_user_v1(
+ p_user_id uuid,p_mode text) RETURNS boolean LANGUAGE sql STABLE
+ SET search_path='' AS $f$ SELECT false $f$;
+CREATE OR REPLACE FUNCTION private.iclub_ai_has_active_protected_assessment_v1(
+ p_user_id uuid) RETURNS boolean LANGUAGE sql STABLE SET search_path=''
+ AS $f$ SELECT true $f$;
+CREATE OR REPLACE FUNCTION public.get_iclub_subject_access_guard_service_v1(
+ p_user_id uuid,p_subject_key text,p_intent text)
+ RETURNS jsonb LANGUAGE sql STABLE SET search_path=''
+ AS $f$ SELECT '{"allowed":false}'::jsonb $f$;
+CREATE OR REPLACE FUNCTION public.get_iclub_subscription_capabilities_service_v1(
+ p_user_id uuid) RETURNS jsonb LANGUAGE sql STABLE SET search_path=''
+ AS $f$ SELECT '{"resolved":false}'::jsonb $f$;
+-- All 9 SQL DRAFTS must coexist in ONE transaction against ONE database.
+BEGIN;
+\ir iclub_ai_scoped_context_v21_UNAPPLIED.sql
+\ir iclub_ai_topic_release_gate_v21_UNAPPLIED.sql
+\ir iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql
+\ir iclub_ai_v21_live_authority_UNAPPLIED.sql
+\ir iclub_ai_v21_meter_v2_UNAPPLIED.sql
+\ir iclub_ai_delivery_claim_v21_UNAPPLIED.sql
+\ir iclub_ai_v21_provider_spend_UNAPPLIED.sql
+\ir iclub_ai_v21_encrypted_reply_UNAPPLIED.sql
+\ir iclub_ai_v21_p6_navigation_gate_UNAPPLIED.sql
+
+DO $integrated$
+DECLARE n integer;
+DECLARE v jsonb;
+BEGIN
+ -- This list is independently checked by the Node manifest/Edge contract gate.
+ SELECT count(*) INTO n
+ FROM pg_catalog.pg_proc p
+ JOIN pg_catalog.pg_namespace ns ON ns.oid=p.pronamespace
+ WHERE ns.nspname='public' AND p.proname IN (
+ 'claim_iclub_ai_delivery_service_v21',
+ 'dispatch_iclub_ai_v21_provider_spend_service',
+ 'finish_iclub_ai_delivery_service_v21',
+ 'finish_iclub_ai_delivery_with_receipt_service_v21',
+ 'finish_iclub_ai_v21_provider_spend_service',
+ 'get_iclub_ai_topic_release_service_v21',
+ 'get_iclub_ai_v21_encrypted_reply_service',
+ 'get_iclub_ai_v21_entitlement_service',
+ 'get_iclub_ai_v21_general_scope_service',
+ 'get_iclub_ai_v21_protected_service',
+ 'get_iclub_ai_v21_provider_budget_service',
+ 'get_iclub_ai_v21_rollout_service',
+ 'get_iclub_ai_v21_runtime_service',
+ 'get_iclub_ai_v21_scoped_context_service',
+ 'get_iclub_ai_v21_source_bundle_service',
+ 'get_iclub_ai_v21_source_proof_service',
+ 'mint_iclub_ai_v21_app_view_context_service',
+ 'mint_iclub_ai_v21_lesson_context_service',
+ 'mint_iclub_ai_v21_practice_context_service',
+ 'mint_iclub_ai_v21_tour_archive_context_service',
+ 'reserve_iclub_ai_usage_service_v2',
+ 'reserve_iclub_ai_v21_provider_spend_service',
+ 'revoke_iclub_ai_v21_scoped_context_service'
+ );
+ IF n<>23 THEN RAISE EXCEPTION 'Combined drafts produce %/23 expected RPC',n;END IF;
+ IF EXISTS(
+  SELECT 1 FROM pg_catalog.pg_proc p
+  JOIN pg_catalog.pg_namespace ns ON ns.oid=p.pronamespace
+  WHERE ns.nspname='public' AND (
+   p.proname LIKE '%iclub_ai%v21%' OR p.proname LIKE '%iclub_ai%_v2'
+   OR p.proname='get_iclub_ai_topic_release_service_v21')
+   AND (NOT p.prosecdef
+      OR has_function_privilege('anon',p.oid,'EXECUTE')
+      OR has_function_privilege('authenticated',p.oid,'EXECUTE')
+      OR NOT has_function_privilege('service_role',p.oid,'EXECUTE'))
+ ) THEN RAISE EXCEPTION 'Integrated SQL exposes RPC or missing trusted grant';END IF;
+ IF has_table_privilege('authenticated','private.iclub_ai_v21_release_control','SELECT')
+ OR has_table_privilege('authenticated','private.iclub_ai_v21_scoped_contexts','SELECT')
+ OR has_table_privilege('anon','private.iclub_ai_topic_release_v21','SELECT')
+ OR has_table_privilege('service_role','private.iclub_ai_v21_provider_spend_control','UPDATE')
+ THEN RAISE EXCEPTION 'Integrated private table privileges widened';END IF;
+ v:=public.get_iclub_ai_v21_runtime_service();
+ IF v->>'kill_switch' IS DISTINCT FROM 'true' OR
+ v->>'release_approved' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Integrated runtime did not fail closed %',v; END IF;
+ v:=public.get_iclub_ai_v21_rollout_service(
+ '11111111-1111-4111-8111-111111111111',
+ 'lesson','biology','topic_explanation','lesson_101');
+ IF v->>'allowed' IS DISTINCT FROM 'false'
+ THEN RAISE EXCEPTION 'No enrolment / no release should deny rollout %',v; END IF;
+ v:=public.get_iclub_ai_v21_general_scope_service();
+ IF v->>'allowed' IS DISTINCT FROM 'false'
+ THEN RAISE EXCEPTION 'Unreleased navigation must deny %',v; END IF;
+ v:=public.get_iclub_ai_v21_entitlement_service(
+ '11111111-1111-4111-8111-111111111111');
+ IF v->>'allowed' IS DISTINCT FROM 'false'
+ THEN RAISE EXCEPTION 'Missing entitlement must deny %',v; END IF;
+ v:=public.reserve_iclub_ai_v21_provider_spend_service(
+ '22222222-2222-4222-8222-222222222222',
+ '11111111-1111-4111-8111-111111111111',repeat('a',64),repeat('b',64));
+ IF v->>'allowed' IS DISTINCT FROM 'false'
+ THEN RAISE EXCEPTION 'Unapproved provider spend admitted %',v; END IF;
+ RAISE NOTICE 'INTEGRATED_NINE_DRAFTS_GREEN: 23 RPC, service grants, owner/off gates';
+END $integrated$;
+
+-- All nine new versions and synthetic test state MUST be rolled back atomically.
+ROLLBACK;
+DO $verify_rollback$
+BEGIN
+ IF to_regclass('private.iclub_ai_v21_scoped_contexts') IS NOT NULL
+ OR to_regclass('private.iclub_ai_v21_release_control') IS NOT NULL
+ OR to_regclass('private.iclub_ai_v21_encrypted_reply_receipts') IS NOT NULL
+ OR to_regclass('private.iclub_ai_v21_provider_spend_leases') IS NOT NULL
+ OR to_regprocedure('public.get_iclub_ai_v21_runtime_service()') IS NOT NULL
+ OR to_regprocedure('public.claim_iclub_ai_delivery_service_v21(uuid,uuid,text,text,text)') IS NOT NULL
+ THEN RAISE EXCEPTION 'Integrated rollback left draft objects';END IF;
+ IF to_regclass('private.iclub_ai_usage_policies') IS NULL
+ OR NOT EXISTS(SELECT 1 FROM private.iclub_global_ai_runtime_config
+              WHERE id=1 AND kill_switch=true AND ui_enabled=false)
+ THEN RAISE EXCEPTION 'Rollback damaged baseline foundation';END IF;
+ RAISE NOTICE 'INTEGRATED_NINE_ROLLBACK_GREEN: nine drafts absent, v1 baseline OFF';
+END $verify_rollback$;

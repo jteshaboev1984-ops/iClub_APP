@@ -24,7 +24,8 @@ case "$SUITE" in
   receipt) TEST_FILE="qa/sql_drafts/iclub_ai_v21_encrypted_reply_local_pg.psql" ;;
   realproof) TEST_FILE="qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_local_pg.psql" ;;
   home) TEST_FILE="qa/sql_drafts/iclub_ai_v21_home_scan_local_pg.psql" ;;
-  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter, math, practice, release, claim, atomic, context source publisher authority spend receipt or realproof" >&2; exit 2 ;;
+  integrated) TEST_FILE="qa/sql_drafts/iclub_ai_v21_nine_drafts_integrated_local_pg.psql" ;;
+  *) echo "STOP: ICLUB_PGTEST_SUITE must be meter, math, practice, release, claim, atomic, context source publisher authority spend receipt or realproof or integrated" >&2; exit 2 ;;
 esac
 
 if [[ ! "$DB" =~ ^iclub_ai_v21_scratch_[a-z0-9_]+$ ]]; then
