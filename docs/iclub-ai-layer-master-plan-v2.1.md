@@ -949,3 +949,24 @@ READ-ONLY просмотрены определения действующих `
 `qa/ai-layer-v21-p6-commercial-catalog-drift.cjs` возвращает только `matched:true, releaseAllowed:false` при точном совпадении двух сигнатур и hash. Отсутствие функции, новая версия, чужой параметр/схема, дубли и неполный результат возвращают **NO-GO**. Это проверка **предоставленного доверенным read-only источником** каталога; CI не подключается к production и не претендует на самостоятельную автоматическую проверку live Supabase. При будущей интеграции повторный метаданный аудит и независимый feature/source/owner-GO обязательны.
 
 [GitHub Actions #263](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38683948146) — **полный GREEN** нового snapshot/gate: **638/638 Node**, **14/14 PG scratch**, реальный localhost Chromium→HTTP→signed Home через disposable DB RU/UZ/EN, Deno, race и protected-file drift. Это **только QA**. Production/main/реальные данные/тарифы/Mathematics Tutor/локальный прогресс/платные запросы не менялись; отдельная Supabase ветка не создавалась. Global AI **NO-GO** до разрешения полноценного выпуска.
+
+
+## 104. Последний Home HTTP-gate после принятого приоритета (2026-10-15; QA ONLY)
+
+Отдельный `qa/ai-layer-v21-p6-home-delivery-gate.cjs` блокирует выдачу уже подписанной рекомендации, если после `buildHomePlan` и `QAHomeApprovedPriority.choose` текущие коммерческие права, академические доказательства, source rights/content/hash/version, экран, полный scan, владелец или TTL изменились. Реализована двойная перепроверка прав после асинхронных чтений и финальное сопоставление сканера/экрана непосредственно перед HTTP-ответом. `qa/ai-layer-v21-p6-home-pg-http-gateway.cjs` вызывает gate до успешного 200. В одноразовой PostgreSQL специальные negative tests отзывают коммерческий `ai_generation_entitled`, source rights или меняют screen revision **после** выбора, но **до** отправки; обязательный ответ — fail closed, без пользовательских данных. [Actions #275](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38684809721) — полный GREEN §104 после исправления обнаруженной гонки с поздним отзывом источника.
+
+**Важно:** последовательные read-only проверки НЕ заменяют одну serializable серверную транзакцию. Даже после последней проверки возможна более поздняя запись/отзыв прав. Это остаётся отдельным обязательным live-release gate; нельзя заявлять абсолютную atomic authorization.
+
+## 105. Приватность ответа: внутренние evidence/action IDs остаются внутри QA-сервера (2026-10-15)
+
+При равноприоритетных предметах `QAHomeApprovedPriority` продолжает внутреннее сравнение подписанного полного набора `candidateActionIds`, но HTTP теперь выдаёт только `choices:[{actionCode,subjectKey}]` после серверной проверки точного множества. Номера внутренних session/evidence, HMAC, grades, answers и JWT не передаются. Подмена ответа или изменение множества вариантов блокируется. [Actions #280](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38684994156) — полный GREEN серверного §105 и прежней математики, Pg/Chrome/Deno.
+
+## 106. Трёхъязычное отображение равных по приоритету предметов и TTL (2026-10-15)
+
+В **локальной синтетической** `qa/preview_v21/home-pg-local.html` добавлены ровные визуальные ряды разрешённых предметов, без кнопок с несуществующей навигацией и без внутренних идентификаторов. Названия основных/дополнительных предметов скопированы дословно из действующего `i18n.js` (RU/UZ/EN) и сверяются отдельным Node-тестом `qa/ai-layer-v21-p6-home-subject-labels.test.cjs`. Ответ выводится только через безопасный `textContent`; если пришёл неизвестный subject key или некорректная структура choices, UI fail closed.
+
+Home также не сохраняет бессрочный устаревший ответ: `expiresAtMs` от подписанного плана приводит к автоматическому закрытию рекомендации, а смена экрана/языка и выход сбрасывают её немедленно. Chromium проверяет обычную Practice, tie двух субъектов на 3 языках, desktop/mobile, screen-reader landmark и истечение TTL без дополнительного запроса.
+
+[GitHub Actions #287](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38685398048) — **полный GREEN 645/645 Node, 14/14 PostgreSQL**, обычный Chromium + HOME_PG_CHROME_TIE_GREEN RU/UZ/EN, HOME_PG_CHROME_TTL_GREEN, HTTP→signed PG, Deno, два parallel race теста, legacy protected-file guards. Отчёт: `docs/iclub-ai-layer-home-final-delivery-privacy-qa-20261015.md`.
+
+**Global AI по-прежнему NO-GO:** Vercel Preview остаётся статической SSO-демонстрацией, новый HTTP Preview существует только внутри CI; реальная независимая source-rights публикация и live Edge/Supabase authorization не делались. По прямому решению архитектора новый Supabase branch не создавался; без нового отдельного GO запрещены любые изменения `main`, production, реальных ученических данных, localStorage, Mathematics Tutor, тарифов, доменов и платных AI-вызовов.
