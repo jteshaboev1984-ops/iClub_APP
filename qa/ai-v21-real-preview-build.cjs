@@ -78,6 +78,17 @@ assert.ok(html.includes('src="app.js?'),"Must use the real app.js");
 assert.ok(html.includes('src="global-ai-ui.js?'),"Must use the real global-ai-ui.js");
 html=html.replace(sdk,'<script src="ai-v21-real-preview-fixture.js"></script>');
 html=html.replace(telegram,"<!-- External Telegram SDK disabled in offline QA -->");
+// Defense-in-depth: local static servers do not set Vercel response headers.
+// Inject the *same* CSP as an early meta element before every script or link.
+const vercel=JSON.parse(fs.readFileSync(path.join(root,"vercel.json"),"utf8"));
+const csp=vercel.headers?.[0]?.headers?.find(h=>
+  h.key.toLowerCase()==="content-security-policy")?.value;
+assert.ok(csp && csp.includes("connect-src 'none'") &&
+  csp.includes("form-action 'none'"),"Missing mandatory no-network CSP");
+assert.equal(html.split("<head>").length,2,"Unexpected HTML head structure");
+const htmlAttr=String(csp).replaceAll("&","&amp;").replaceAll('"',"&quot;");
+html=html.replace("<head>",
+  '<head>\n<meta http-equiv="Content-Security-Policy" content="'+htmlAttr+'">');
 fs.writeFileSync(indexFile,html);
 fs.copyFileSync(path.join(__dirname,"ai-v21-real-preview-fixture.js"),
   path.join(out,"ai-v21-real-preview-fixture.js"));
