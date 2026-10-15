@@ -42,10 +42,10 @@
     "n": 32,
     "d": "medium",
     "sec": 135,
-    "k": "A",
-    "en": "A bakery buys an automated kneading machine and trains its workers to maintain the machine. Which pair classifies the immediate investments?",
-    "ru": "Пекарня покупает автоматическую тестомесильную машину и обучает работников её обслуживать. Какая пара правильно классифицирует эти вложения?",
-    "uz": "Nonvoyxona avtomatik xamir qorish mashinasini sotib oladi va xodimlarini uni boshqarishga o‘rgatadi. Ikkala investitsiya qanday tasniflanadi?",
+    "k": "D",
+    "en": "A bakery buys an automated kneading machine and trains workers to use it. Which classification AND likely long-run production effect are consistent with the two investments?",
+    "ru": "Пекарня покупает автоматическую тестомесильную машину и обучает работников её использовать. Какая классификация вместе с возможным долгосрочным эффектом соответствует обоим вложениям?",
+    "uz": "Nonvoyxona avtomatik xamir qorish mashinasini oladi va ishchilarni undan foydalanishga o‘qitadi. Ikkala investitsiyaning tasnifi va uzoq muddatli ehtimoliy ta’siri qaysi javobda mos?",
     "opt_en": [
       "Machine: physical capital; training: human capital",
       "Machine: natural capital; training: physical capital",
@@ -65,28 +65,28 @@
       "Mashina — mehnat; o‘qitish — tabiiy resurs"
     ],
     "why": [
-      "Equipment is physical capital; acquiring worker skills creates human capital.",
-      "Оборудование — физический капитал, повышение навыков работников — человеческий капитал.",
-      "Uskuna jismoniy kapital, xodimlar malakasining oshishi esa inson kapitalidir."
+      "Equipment is physical capital and acquired skills are human capital; both can raise productive potential.",
+      "Оборудование — физический капитал, приобретённые навыки — человеческий; оба вложения способны увеличить потенциальный выпуск.",
+      "Uskuna jismoniy kapital, malaka oshishi esa inson kapitali; har ikkisi potensial ishlab chiqarishni ko‘paytirishi mumkin."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-032",
     "options_en": [
-      "Machine: physical capital; training: human capital",
-      "Machine: natural capital; training: physical capital",
-      "Machine: enterprise; training: land",
-      "Machine: labour; training: natural resource"
+      "Both are land; productive capacity must fall.",
+      "The machine is human capital, training is physical capital; capacity is unchanged.",
+      "Both are labour; only current demand can rise.",
+      "The machine adds physical capital and training adds human capital; productive capacity may rise."
     ],
     "options_ru": [
-      "Машина — физический капитал; обучение — человеческий капитал",
-      "Машина — природный капитал; обучение — физический капитал",
-      "Машина — предпринимательство; обучение — земля",
-      "Машина — труд; обучение — природный ресурс"
+      "Оба вложения — земля; производственный потенциал обязательно снизится.",
+      "Машина — человеческий капитал, обучение — физический; потенциал неизменен.",
+      "Оба — труд; может увеличиться только текущий спрос.",
+      "Машина добавляет физический капитал, обучение — человеческий; производственный потенциал может вырасти."
     ],
     "options_uz": [
-      "Mashina — jismoniy kapital; o‘qitish — inson kapitali",
-      "Mashina — tabiiy kapital; o‘qitish — jismoniy kapital",
-      "Mashina — tadbirkorlik; o‘qitish — yer",
-      "Mashina — mehnat; o‘qitish — tabiiy resurs"
+      "Ikkalasi yer omili; ishlab chiqarish quvvati albatta kamayadi.",
+      "Mashina inson kapitali, o‘qitish jismoniy kapital; quvvat o‘zgarmaydi.",
+      "Ikkalasi mehnat; faqat joriy talab oshishi mumkin.",
+      "Mashina jismoniy kapitalni, o‘qitish inson kapitalini oshiradi; ishlab chiqarish quvvati ortishi mumkin."
     ]
   },
   {
@@ -94,9 +94,9 @@
     "d": "medium",
     "sec": 135,
     "k": "D",
-    "en": "A city has $6 million to spend. It can finance a flood barrier costing $6 million or two playgrounds costing $3 million each. If it chooses the barrier, what is the opportunity cost expressed as the best forgone feasible alternative?",
-    "ru": "У города есть $6 млн. Он может построить защитную дамбу за $6 млн либо две игровые площадки по $3 млн. Если город выбирает дамбу, какова альтернативная стоимость в терминах лучшего отвергнутого доступного варианта?",
-    "uz": "Shaharda $6 mln bor. U $6 mln lik toshqin to‘sig‘ini yoki har biri $3 mln dan ikkita o‘yin maydonchasini moliyalashtira oladi. To‘siq tanlansa, eng yaxshi voz kechilgan amalga oshirilishi mumkin bo‘lgan muqobil nima?",
+    "en": "A city can finance only one project: a flood barrier worth $11m to residents, a library worth $9m or two playgrounds worth $8m in total. All cost the same limited budget and values are comparable. If the barrier is chosen, what is the opportunity cost in forgone benefit?",
+    "ru": "Город может оплатить лишь один проект: дамбу с выгодой $11 млн, библиотеку с выгодой $9 млн либо две площадки с суммарной выгодой $8 млн. Бюджет каждого одинаков, оценки сопоставимы. Если выбирается дамба, какова альтернативная стоимость в единицах отвергнутой выгоды?",
+    "uz": "Shahar faqat bitta loyihani moliyalashtira oladi: $11 mln foydali toshqin to‘sig‘i, $9 mln foydali kutubxona yoki jami $8 mln foydali ikki maydoncha. Xarajatlari bir xil, foydalar taqqoslanadi. To‘siq tanlansa, voz kechilgan foyda bo‘yicha muqobil qiymat qancha?",
     "opt_en": [
       "The money spent on the barrier, counted twice",
       "One playground, because any public choice has only one unit of opportunity cost",
@@ -116,28 +116,28 @@
       "Ikki maydoncha, agar bu eng yaxshi muqobil foydalanish bo‘lsa"
     ],
     "why": [
-      "Opportunity cost is the highest-valued forgone feasible alternative, here the two playgrounds financed with the same budget.",
-      "Альтернативная стоимость — лучший отвергнутый допустимый вариант; здесь две площадки за те же $6 млн.",
-      "Muqobil qiymat — voz kechilgan eng yaxshi amalga oshiriladigan variant; bu yerda bir xil budjetga ikkita maydoncha."
+      "The next-best feasible project is the $9m library, so the opportunity cost is $9m of forgone benefit.",
+      "Лучший отвергнутый проект — библиотека с выгодой $9 млн, поэтому альтернативная стоимость — $9 млн.",
+      "Eng yaxshi voz kechilgan muqobil $9 mln foydali kutubxona; muqobil qiymat $9 mln."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-034",
     "options_en": [
-      "The money spent on the barrier, counted twice",
-      "One playground, because any public choice has only one unit of opportunity cost",
-      "No opportunity cost, because the city owns the budget",
-      "Two playgrounds, assuming that is the best alternative use"
+      "$11 million",
+      "$8 million",
+      "$2 million",
+      "$9 million"
     ],
     "options_ru": [
-      "Деньги на дамбу, учтённые дважды",
-      "Одна площадка, поскольку альтернативная стоимость любого выбора равна одному объекту",
-      "Нулевая стоимость, поскольку бюджет уже принадлежит городу",
-      "Две площадки, если это лучшее альтернативное использование бюджета"
+      "$11 млн",
+      "$8 млн",
+      "$2 млн",
+      "$9 млн"
     ],
     "options_uz": [
-      "To‘siqqa ketgan pulni ikki marta hisoblash",
-      "Bitta maydoncha, chunki har qanday qarorning muqobil qiymati bitta obyekt",
-      "Muqobil qiymat yo‘q, chunki budjet shaharga tegishli",
-      "Ikki maydoncha, agar bu eng yaxshi muqobil foydalanish bo‘lsa"
+      "$11 mln",
+      "$8 mln",
+      "$2 mln",
+      "$9 mln"
     ]
   },
   {
@@ -286,9 +286,9 @@
     "d": "medium",
     "sec": 130,
     "k": "D",
-    "en": "A tidal power station uses coastal currents, purchased turbines and trained engineers. Which classification correctly identifies two distinct inputs?",
-    "ru": "Приливная электростанция использует морские течения, купленные турбины и подготовленных инженеров. Какая классификация верно определяет два разных ресурса?",
-    "uz": "Suv ko‘tarilishidan elektr oluvchi stansiya dengiz oqimlari, sotib olingan turbinalar va malakali muhandislardan foydalanadi. Qaysi tasnif ikkita turli resursni to‘g‘ri aniqlaydi?",
+    "en": "A tidal power station uses natural currents, manufactured turbines and hired engineers. How should these three inputs be classified as factors of production in that order?",
+    "ru": "Приливная электростанция использует природные течения, изготовленные турбины и наёмных инженеров. Как классифицируются эти три фактора производства по порядку?",
+    "uz": "Suv ko‘tarilishidan elektr oluvchi stansiya tabiiy oqimlar, ishlab chiqarilgan turbinalar va yollangan muhandislardan foydalanadi. Ushbu uch omil ketma-ket qanday tasniflanadi?",
     "opt_en": [
       "Currents—capital; turbines—land",
       "Currents—labour; engineers—land",
@@ -308,28 +308,28 @@
       "Oqimlar — yer; turbinalar — jismoniy kapital"
     ],
     "why": [
-      "Natural currents are land/natural resources; man-made turbines are physical capital.",
-      "Природные течения — фактор «земля», созданные человеком турбины — физический капитал.",
-      "Tabiiy oqimlar yer/tabiiy resurslar, inson yaratgan turbinalar jismoniy kapital."
+      "Natural currents are land, turbines are physical capital, and engineers provide labour.",
+      "Природные течения — земля, турбины — физический капитал, инженеры — труд.",
+      "Tabiiy oqimlar yer, turbinalar jismoniy kapital, muhandislar mehnat omilidir."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-043",
     "options_en": [
-      "Currents—capital; turbines—land",
-      "Currents—labour; engineers—land",
-      "Turbines—enterprise; engineers—land",
-      "Currents—land; turbines—physical capital"
+      "Capital; land; enterprise",
+      "Labour; capital; land",
+      "Land; labour; capital",
+      "Land; capital; labour"
     ],
     "options_ru": [
-      "Течения — капитал; турбины — земля",
-      "Течения — труд; инженеры — земля",
-      "Турбины — предпринимательство; инженеры — земля",
-      "Течения — земля; турбины — физический капитал"
+      "Капитал; земля; предпринимательство",
+      "Труд; капитал; земля",
+      "Земля; труд; капитал",
+      "Земля; капитал; труд"
     ],
     "options_uz": [
-      "Oqimlar — kapital; turbinalar — yer",
-      "Oqimlar — mehnat; muhandislar — yer",
-      "Turbinalar — tadbirkorlik; muhandislar — yer",
-      "Oqimlar — yer; turbinalar — jismoniy kapital"
+      "Kapital; yer; tadbirkorlik",
+      "Mehnat; kapital; yer",
+      "Yer; mehnat; kapital",
+      "Yer; kapital; mehnat"
     ]
   },
   {
@@ -376,9 +376,9 @@
     "d": "medium",
     "sec": 120,
     "k": "B",
-    "en": "Five scarce parking spaces are auctioned at one uniform price of $70 per space. Six drivers each want no more than one and are willing to pay $100, $90, $80, $70, $60 and $50 respectively. What is quantity demanded at this price?",
-    "ru": "Пять парковочных мест продаются по единой цене $70 за место. Шесть водителей хотят не более одного места и готовы заплатить $100, $90, $80, $70, $60 и $50 соответственно. Каков объём спроса при этой цене?",
-    "uz": "Beshta avtoturargoh joyi bitta joy uchun $70 yagona narxda sotiladi. Olti haydovchi ko‘pi bilan bittadan joy xohlaydi va mos ravishda $100, $90, $80, $70, $60, $50 to‘lashga tayyor. Shu narxda talab miqdori nechta?",
+    "en": "A car park has five available spaces. Six drivers each want at most one and are willing to pay $100, $90, $80, $70, $60 and $50 respectively. What is quantity demanded at the price of $70 and then at the lower price of $60?",
+    "ru": "На стоянке пять доступных мест. Шесть водителей хотят не более одного места и готовы заплатить $100, $90, $80, $70, $60 и $50 соответственно. Каков спрос при цене $70, а затем при снижении до $60?",
+    "uz": "Avtoturargohda beshta joy bor. Olti haydovchi bittadan ortiq joy xohlamaydi va $100, $90, $80, $70, $60 hamda $50 to‘lashga tayyor. $70 narxda va narx $60 ga tushirilganda talab nechta?",
     "opts": [
       "5",
       "4",
@@ -386,28 +386,28 @@
       "3"
     ],
     "why": [
-      "The first four valuations meet or exceed $70. Thus four spaces are demanded at this price, even though five are available.",
-      "Первые четыре оценки не ниже $70. Значит, при этой цене спрос равен четырём местам, хотя доступно пять.",
-      "Dastlabki to‘rtta baho $70 dan kam emas. Shuning uchun 5 ta joy bo‘lsa ham, talab 4 ta joyga teng."
+      "Four valuations are at least $70 and five are at least $60, so quantity demanded rises from four to five.",
+      "При цене $70 готовы купить четверо, при $60 — пятеро. Объём спроса растёт с четырёх до пяти.",
+      "$70 narxda to‘rtta, $60 narxda beshta xaridor bor. Talab 4 tadan 5 taga oshadi."
     ],
     "ref": "EC9708:G2:EC9708-G2-T1-P-050",
     "options_en": [
-      "5",
-      "4",
-      "6",
-      "3"
+      "5 then 4",
+      "4 then 5",
+      "4 then 6",
+      "5 then 6"
     ],
     "options_ru": [
-      "5",
-      "4",
-      "6",
-      "3"
+      "5, затем 4",
+      "4, затем 5",
+      "4, затем 6",
+      "5, затем 6"
     ],
     "options_uz": [
-      "5",
-      "4",
-      "6",
-      "3"
+      "5, so‘ng 4",
+      "4, so‘ng 5",
+      "4, so‘ng 6",
+      "5, so‘ng 6"
     ]
   }
 ]
