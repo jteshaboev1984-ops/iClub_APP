@@ -4,7 +4,7 @@ export type ContextServices={
  authenticate(token:string):Promise<{authenticated:boolean;userId:string}|null>;
  // Exact server-resolved legacy Practice marker -> canonical V4 selector.
  // This does NOT grant any AI answer; the subsequent mint & source check do.
- resolvePracticeV4(args:{userId:string;attemptReference:number;questionId:number}):
+ resolvePracticeV4?(args:{userId:string;attemptReference:number;questionId:number}):
   Promise<Record<string,unknown>>;
  mintScopedContext(args:{userId:string;sessionId:number;questionId:number}):
   Promise<Record<string,unknown>>;
@@ -45,6 +45,8 @@ export function makeContextCore(services:ContextServices){
        !Number.isSafeInteger(input.questionId)||
        Number(input.attemptReference)<=0||Number(input.questionId)<=0)
       return result(400,{ok:false,reason:"invalid_context_selector"});
+    if(typeof services.resolvePracticeV4!=="function")
+      return result(503,{ok:false,reason:"unavailable"});
     let record:Record<string,unknown>;
     try{
       record=await services.resolvePracticeV4({
