@@ -216,11 +216,20 @@ async function evaluateOwnerAction(services,user,handle,locale,beforeDelivery){
  }else return null;
  return out;
 }
-function makeGateway({beforeDelivery}={}){
- if(beforeDelivery!==undefined&&typeof beforeDelivery!=="function")
+function makeGateway({beforeDelivery,beforeAtomicRead}={}){
+ if([beforeDelivery,beforeAtomicRead].some(h=>h!==undefined&&typeof h!=="function"))
   throw Error("invalid scratch-only injection hook");
  pg();
  const services=makeServices(),state={requests:0,denied:0};
+ if(typeof beforeAtomicRead==="function"){
+  const actual=services.verifyAtomicDeliverySnapshot;
+  services.verifyAtomicDeliverySnapshot=async input=>{
+   // Test-only deterministic revocation immediately before the single SQL
+   // statement. No product code, no credentials and no production DB.
+   await beforeAtomicRead({userId:input.userId,locale:input.locale});
+   return actual(input);
+  };
+ }
  const server=createServer(async(req,res)=>{
   state.requests++;
   // This page is ONLY available on the locally bound QA fixture server.
