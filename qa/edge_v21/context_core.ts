@@ -2,6 +2,10 @@
 // No client-supplied subject, topic, progress, plan, rights, source or user ID.
 export type ContextServices={
  authenticate(token:string):Promise<{authenticated:boolean;userId:string}|null>;
+ // Exact server-resolved legacy Practice marker -> canonical V4 selector.
+ // This does NOT grant any AI answer; the subsequent mint & source check do.
+ resolvePracticeV4(args:{userId:string;attemptReference:number;questionId:number}):
+  Promise<Record<string,unknown>>;
  mintScopedContext(args:{userId:string;sessionId:number;questionId:number}):
   Promise<Record<string,unknown>>;
  mintLessonContext(args:{userId:string;lessonId:number}):
@@ -14,7 +18,7 @@ export type ContextServices={
   Promise<Record<string,unknown>>;
 };
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
-const KEYS=new Set(["action","sessionId","questionId","lessonId","tourAttemptId","view","contextHandle"]);
+const KEYS=new Set(["action","sessionId","questionId","lessonId","tourAttemptId","view","contextHandle","attemptReference"]);
 const hasOwn=(o:Record<string,unknown>,k:string)=>Object.prototype.hasOwnProperty.call(o,k);
 const isObject=(v:unknown):v is Record<string,unknown>=>v!==null&&
  typeof v==="object"&&!Array.isArray(v);
@@ -32,6 +36,38 @@ export function makeContextCore(services:ContextServices){
    try{input=JSON.parse(bodyText);}catch{}
    if(!isObject(input)||Object.keys(input).some(k=>!KEYS.has(k)))
     return result(400,{ok:false,reason:"invalid_request"});
+   if(input.action==="resolvePracticeV4"){
+    // Deliberately no client-supplied user, session, source, subject, status,
+    // progress, correct answer, topic, rollout flag or role.
+    if(Object.keys(input).length!==3||
+       !hasOwn(input,"attemptReference")||!hasOwn(input,"questionId")||
+       !Number.isSafeInteger(input.attemptReference)||
+       !Number.isSafeInteger(input.questionId)||
+       Number(input.attemptReference)<=0||Number(input.questionId)<=0)
+      return result(400,{ok:false,reason:"invalid_context_selector"});
+    let record:Record<string,unknown>;
+    try{
+      record=await services.resolvePracticeV4({
+        userId:principal.userId,
+        attemptReference:Number(input.attemptReference),
+        questionId:Number(input.questionId)
+      });
+    }catch{return result(503,{ok:false,reason:"unavailable"});}
+    // Construct response from trusted checked fields ONLY. A mistaken RPC
+    // must never pass user id, question text, answer keys, score or readiness.
+    if(record?.ok!==true||
+       record.kind!=="server_resolved_practice_v4"||
+       record.attemptReference!==input.attemptReference||
+       record.questionId!==input.questionId||
+       !Number.isSafeInteger(record.sessionId)||Number(record.sessionId)<=0)
+      return result(200,{ok:false,reason:"server_verification_required"});
+    return result(200,{
+      ok:true,kind:"server_resolved_practice_v4",
+      attemptReference:input.attemptReference,
+      questionId:input.questionId,
+      sessionId:record.sessionId
+    });
+   }
    if(input.action==="mint"){
     if(!hasOwn(input,"sessionId")||!hasOwn(input,"questionId")||
       hasOwn(input,"contextHandle")||hasOwn(input,"lessonId")||hasOwn(input,"tourAttemptId")||hasOwn(input,"view")||
