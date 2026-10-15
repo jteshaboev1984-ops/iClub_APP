@@ -16,6 +16,10 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
    headers:response.headers};
  };
  try{
+  a.equal(Number(scratchSql(
+   "SELECT count(DISTINCT source_hash) FROM "+
+   "private.iclub_ai_v21_home_source_test_releases")),12,
+   "Each locale and action has an independently versioned source digest");
   // Three locales go through the REAL scratch PostgreSQL function, independent
   // academic SQL checks, signed proof, and approved category priority.
   for(const locale of ["ru","uz","en"]){
