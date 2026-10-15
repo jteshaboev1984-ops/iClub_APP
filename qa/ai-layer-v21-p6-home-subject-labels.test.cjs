@@ -14,7 +14,7 @@ function names(){
 test("§106 every visible tied subject matches the existing iClub RU UZ EN i18n.js strings",()=>{
  const subjects=names(),keys=["informatics","economics","biology",
   "chemistry","mathematics","english_a1","english_a2","english_b1","sat","ielts"];
- a.deepEqual(Object.keys(subjects).sort(),["ru","uz","en"]);
+ a.deepEqual(Object.keys(subjects).sort(),["en","ru","uz"]);
  for(const [index,locale] of ["ru","uz","en"].entries()){
   a.deepEqual(Object.keys(subjects[locale]).sort(),[...keys].sort());
   for(const key of keys){
