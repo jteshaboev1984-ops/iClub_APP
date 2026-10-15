@@ -40,6 +40,7 @@ const cases = [
  "qa/ai-layer-v21-p6-home-subject-labels.test.cjs",
  "qa/ai-layer-v21-p6-commercial-contract-adapter.test.cjs",
  "qa/ai-layer-v21-p6-commercial-catalog-drift.test.cjs",
+ "qa/ai-layer-v21-p9-live-integration-preflight.test.cjs",
  "qa/ai-layer-v21-p6-nav-approved-locale.test.cjs",
  "qa/ai-layer-v21-p6-approved-copy-bundle.test.cjs",
  "qa/ai-layer-v21-p6-home-source-drift.test.cjs",
