@@ -1,6 +1,6 @@
 # iClub AI Layer v2.1 — §109: проверка учебного назначения после Home claim (QA ONLY)
 
-**Дата:** 2026-10-15. **Статус:** QA candidate, подтверждение полного CI требуется. **Релиз:** Global AI OFF / NO-GO.
+**Дата:** 2026-10-15. **Статус:** GREEN — GitHub Actions #324, run 38691379094, 649/649 Node, 14/14 PostgreSQL, Chromium RU/UZ/EN и Deno. **Релиз:** Global AI OFF / NO-GO.
 
 ## Что изменилось
 
@@ -22,4 +22,4 @@
 
 Реальная source-rights publication, production-compatible Edge/Supabase integration, публикация материалов, платный AI, protected integrated Preview и beta требуют отдельных проверок/разрешений. Запрещены новая Supabase branch, реальные миграции, реальные пользовательские записи, редактирование legacy Practice/Tour, тарифов, Mathematics Exam Prep, существующей AI-оболочки, локального прогресса и `main`.
 
-**Проверка CI:** ожидается отдельный GitHub Actions run нового HEAD. До подтверждения результат не называется GREEN.
+**Проверка CI:** [Actions #324](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38691379094) — completed/success для QA HEAD `ff9ff5a2fb23960dda33029427c65786260d5ec3`: 649/649 Node, 14/14 PostgreSQL scratch, localhost HTTP→real scratch PostgreSQL destination проверка и последующий отзыв source rights, Chromium RU/UZ/EN, Deno, две конкурентные проверки и защищённые файлы PASS. Это не реальный Supabase/production выпуск.
