@@ -5,6 +5,7 @@ import {makeHttpHandler} from "./http.ts";
 import {isolatedQaStartupAllowed} from "./qa_startup_guard.ts";
 import {createQaEdgeCandidate} from "./runtime.ts";
 import {createSupabaseServices} from "./supabase_services.ts";
+import {createQaLocalPracticeResolver} from "./practice_resolver_service.ts";
 import {makeContextCore} from "./context_core.ts";
 
 const flag=Deno.env.get("ICLUB_AI_V21_EXPLICIT_QA")||"";
@@ -18,9 +19,13 @@ let handler:((req:Request)=>Promise<Response>)|null=null;
 if(enabled){
  try{
   if(!/^https:\/\/[^/]+$/.test(origin))throw Error("qa_origin_required");
-  const services=createSupabaseServices({
-   supabaseUrl,anonKey,serviceRoleKey
-  });
+  const config={supabaseUrl,anonKey,serviceRoleKey};
+  // The extra resolver is an isolated QA contract, separate from the
+  // frozen 24-RPC production metadata gate. Localhost is mandatory.
+  const services={
+   ...createSupabaseServices(config),
+   ...createQaLocalPracticeResolver(config)
+  };
   const candidate=createQaEdgeCandidate(services as unknown as Record<string,unknown>,[origin]);
   const answerHandler=makeHttpHandler(candidate,[origin]);
   const contextHandler=makeHttpHandler(makeContextCore(services),[origin]);
