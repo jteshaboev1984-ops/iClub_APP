@@ -5,9 +5,9 @@
     "d": "hard",
     "k": "C",
     "sec": 195,
-    "en": "A government pays a $200 grant to each factory adopting a cleaner process. Of 100 applicants, 70 would have adopted without support; the grant induces 20 additional factories to adopt, while 10 recipients still fail to adopt. Every applicant receives the grant and administration costs $2,000. What is total public spending per additional adopting factory?",
-    "ru": "Государство выплачивает по $200 каждому из 100 заводов, заявивших о внедрении экологичной технологии. Из них 70 внедрили бы её и без субсидии, ещё 20 внедряют благодаря субсидии, а 10 так и не внедряют. Выплаты получают все заявители; администрирование стоит $2 000. Каковы общие бюджетные затраты на один дополнительно внедривший завод?",
-    "uz": "Davlat ekologik texnologiya uchun ariza bergan 100 zavodning har biriga $200 grant beradi. Ulardan 70 tasi grantsiz ham joriy etgan bo‘lardi, yana 20 tasi grant tufayli joriy etadi, 10 tasi esa joriy etmaydi. Barcha arizachilar grant oladi; boshqaruv xarajati $2000. Grant tufayli qo‘shimcha texnologiya joriy etgan bitta zavodga jami davlat xarajati qancha?",
+    "en": "A government pays a $200 grant to each applicant claiming it plans to adopt a cleaner process. Of 100 applicants, 70 would have adopted without support; the grant induces 20 additional factories to adopt, while 10 recipients still fail to adopt. Every applicant receives the grant and administration costs $2,000. What is total public spending per additional adopting factory?",
+    "ru": "Государство выплачивает по $200 каждому из 100 заводов, заявивших о намерении внедрить экологичную технологию. Из них 70 внедрили бы её и без субсидии, ещё 20 внедряют благодаря субсидии, а 10 так и не внедряют. Выплаты получают все заявители; администрирование стоит $2 000. Каковы общие бюджетные затраты на один дополнительно внедривший завод?",
+    "uz": "Davlat ekologik texnologiyani joriy etishni rejalaganini bildirgan 100 zavodning har biriga $200 grant beradi. Ulardan 70 tasi grantsiz ham joriy etgan bo‘lardi, yana 20 tasi grant tufayli joriy etadi, 10 tasi esa joriy etmaydi. Barcha arizachilar grant oladi; boshqaruv xarajati $2000. Grant tufayli qo‘shimcha texnologiya joriy etgan bitta zavodga jami davlat xarajati qancha?",
     "options_en": [
       "$200",
       "$220",
@@ -236,31 +236,31 @@
     "d": "hard",
     "k": "C",
     "sec": 185,
-    "en": "A city subsidises new bus routes. Each subsidised route costs taxpayers $120,000 annually. An audit finds that four of six routes would have operated anyway, while only two are truly additional. Administration costs $60,000 in total. What is the public cost per additional route, and what concern follows?",
-    "ru": "Город субсидирует автобусные маршруты: каждый из шести обходится бюджету в $120 000 в год. Аудит показал, что четыре маршрута работали бы без помощи, только два действительно появились благодаря субсидии. Административные расходы $60 000. Каковы бюджетные затраты на дополнительный маршрут и какой риск очевиден?",
-    "uz": "Shahar oltita avtobus yo‘nalishini subsidiyalaydi: har biri davlatga yiliga $120 000 turadi. Audit to‘rttasi grantsiz ham ishlagan bo‘lishini, faqat ikkitasi qo‘shimcha ekanini aniqladi. Ma’muriy xarajat $60 000. Har bir yangi yo‘nalish uchun davlat xarajati qancha va qanday muammo ko‘rinadi?",
+    "en": "A city is choosing a bus-service concession. Operator A would cost taxpayers $100,000 annually but is expected to impose $80,000 in passenger-delay costs. Operator B would cost $140,000, cause only $20,000 in delay costs, and require an additional $10,000 in monitoring. Assume all costs are comparable and service coverage is equal. Which contract has the lower total social cost, and by how much?",
+    "ru": "Город выбирает концессию автобусного обслуживания. Оператор A обходится бюджету в $100 000 в год, но ожидаемые задержки пассажиров стоят обществу ещё $80 000. Оператор B стоит $140 000, задержки — $20 000, а дополнительный контроль — $10 000. Все оценки сопоставимы, охват одинаков. Какой контракт имеет меньшие совокупные общественные затраты и на сколько?",
+    "uz": "Shahar avtobus xizmati uchun shartnoma tanlaydi. A operatori davlatga yiliga $100 000 turadi, lekin yo‘lovchilar kechikishining kutilgan ijtimoiy qiymati $80 000. B operatori $140 000, kechikish $20 000 va qo‘shimcha nazorat $10 000 turadi. Xarajatlar taqqoslanadi, qamrov bir xil. Qaysi shartnomaning jami ijtimoiy xarajati kam va qancha?",
     "options_en": [
-      "$120,000; no deadweight spending",
-      "$130,000; zero administration costs",
-      "$390,000; subsidies for existing services create deadweight spending",
-      "$780,000; all routes are additional"
+      "Operator A by $40,000, because only the public subsidy matters",
+      "Both cost exactly $180,000 when all effects are counted",
+      "Operator B by $10,000, once passenger delay and monitoring costs are included",
+      "Operator B by $80,000, because its delay costs are zero"
     ],
     "options_ru": [
-      "$120 000; бесполезных расходов нет",
-      "$130 000; администрирование ничего не стоит",
-      "$390 000; выплаты за уже существовавшие маршруты создают неэффективные расходы",
-      "$780 000; все маршруты дополнительные"
+      "Оператор A на $40 000, поскольку важны только бюджетные расходы",
+      "Оба стоят ровно $180 000 с учётом всех эффектов",
+      "Оператор B на $10 000 после учёта задержек и контроля",
+      "Оператор B на $80 000, поскольку задержек у него нет"
     ],
     "options_uz": [
-      "$120 000; ortiqcha xarajat yo‘q",
-      "$130 000; boshqaruv xarajati yo‘q",
-      "$390 000; oldindan mavjud yo‘nalishlarga to‘lov samarasiz sarf yaratadi",
-      "$780 000; barcha yo‘nalishlar qo‘shimcha"
+      "Faqat davlat to‘lovi muhim bo‘lgani uchun A $40 000 arzon",
+      "Barcha ta’sirlarni hisoblaganda ikkalasi $180 000 turadi",
+      "Kechikish va nazorat qo‘shilsa, B operatori $10 000 arzon",
+      "B operatori $80 000 arzon, chunki unda kechikish yo‘q"
     ],
     "why": [
-      "Total expenditure is 6×120,000+60,000=$780,000; only two routes are additional. Cost per new route is $390,000, highlighting deadweight subsidy expenditure.",
-      "Всего 6×120 000+60 000=$780 000. Новых маршрутов только два; на каждый приходится $390 000. Субсидии остальным могут быть неэффективны.",
-      "Jami 6×120 000+60 000=$780 000. Qo‘shimcha yo‘nalishlar 2 ta; bittasiga $390 000. Oldindan mavjud yo‘nalishlar uchun to‘lov samarasiz."
+      "Total social cost A = $100,000+$80,000=$180,000. B = $140,000+$20,000+$10,000=$170,000, or $10,000 less. Lowest public bid need not be socially cheapest.",
+      "Общественные затраты A: $100 000+$80 000=$180 000. У B: $140 000+$20 000+$10 000=$170 000, на $10 000 меньше. Самая дешёвая бюджетная заявка не всегда социально оптимальна.",
+      "A jami xarajati $100 000+$80 000=$180 000. B jami $140 000+$20 000+$10 000=$170 000, $10 000 kam. Eng arzon davlat taklifi har doim jamiyat uchun arzon emas."
     ]
   },
   {
