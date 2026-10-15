@@ -124,7 +124,9 @@ INSERT INTO private.iclub_ai_v21_home_source_test_releases
  (locale,action_code,subject_key,rights_approved,content_approved,
   source_hash,source_version)
 SELECT l.code,p.action_code,p.subject_key,true,true,
- repeat('a',64),'synthetic-only-v1'
+ md5('synthetic-source:'||l.code||':'||p.action_code||':'||p.subject_key)
+ ||md5('synthetic-content:'||p.subject_key||':'||p.action_code||':'||l.code),
+ 'synthetic-only-v1'
 FROM (VALUES ('ru'),('uz'),('en')) AS l(code)
 CROSS JOIN (VALUES
  ('review_finalized_practice','economics'),
