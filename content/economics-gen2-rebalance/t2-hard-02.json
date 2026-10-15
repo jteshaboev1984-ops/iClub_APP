@@ -1,0 +1,440 @@
+[
+  {
+    "n": 18,
+    "d": "hard",
+    "sec": 185,
+    "k": "A",
+    "en": "Nominal GDP rises by 12%, the GDP deflator rises by 8%, and population rises by 2% over the same year. Using exact index ratios, approximately what is the growth rate of real GDP per person?",
+    "ru": "За один год номинальный ВВП вырос на 12%, дефлятор ВВП — на 8%, население — на 2%. Используя точные отношения индексов, оцените темп роста реального ВВП на человека.",
+    "uz": "Bir yilda nominal YaIM 12% ga, YaIM deflyatori 8% ga, aholi 2% ga oshdi. Indekslarning aniq nisbatlaridan foydalanib, jon boshiga real YaIM o‘sishini taxminan toping.",
+    "opts": [
+      "+1.67%",
+      "+2.00%",
+      "+3.70%",
+      "+4.00%"
+    ],
+    "why": [
+      "Real GDP grows 1.12/1.08 − 1 ≈ 3.70%. Per person, growth is (1.12/1.08)/1.02 − 1 ≈ 1.67%.",
+      "Реальный ВВП растёт на 1,12/1,08 − 1 ≈ 3,70%. На человека: (1,12/1,08)/1,02 − 1 ≈ 1,67%.",
+      "Real YaIM o‘sishi 1,12/1,08 − 1 ≈ 3,70%. Jon boshiga: (1,12/1,08)/1,02 − 1 ≈ 1,67%."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-018",
+    "options_en": [
+      "+1.67%",
+      "+2.00%",
+      "+3.70%",
+      "+4.00%"
+    ],
+    "options_ru": [
+      "+1.67%",
+      "+2.00%",
+      "+3.70%",
+      "+4.00%"
+    ],
+    "options_uz": [
+      "+1.67%",
+      "+2.00%",
+      "+3.70%",
+      "+4.00%"
+    ]
+  },
+  {
+    "n": 19,
+    "d": "hard",
+    "sec": 170,
+    "k": "C",
+    "en": "In a simplified open-economy circular flow, investment is $40m, government spending $50m and exports $30m. Savings are $35m, taxes $45m and imports $50m. With spare capacity and otherwise normal adjustment, which statement follows?",
+    "ru": "В упрощённом круговом потоке открытой экономики инвестиции — $40 млн, госрасходы — $50 млн, экспорт — $30 млн. Сбережения — $35 млн, налоги — $45 млн, импорт — $50 млн. При наличии резервных мощностей какой вывод следует в модели обычной корректировки?",
+    "uz": "Ochiq iqtisodiyotning soddalashtirilgan aylanishida investitsiya $40 mln, davlat xarajati $50 mln, eksport $30 mln. Jamg‘arma $35 mln, soliqlar $45 mln, import $50 mln. Bo‘sh quvvat mavjud bo‘lsa, odatiy moslashuvda qaysi xulosa kelib chiqadi?",
+    "opt_en": [
+      "Injections exceed leakages by $10m, creating upward pressure on income.",
+      "Injections and leakages are equal, so income is stable.",
+      "Leakages exceed injections by $10m, tending to reduce income.",
+      "The current account is balanced because government spending is $50m."
+    ],
+    "opt_ru": [
+      "Инъекции превышают изъятия на $10 млн, стимулируя рост дохода.",
+      "Инъекции и изъятия равны, поэтому доход стабилен.",
+      "Изъятия превышают инъекции на $10 млн, создавая тенденцию к снижению дохода.",
+      "Текущий счёт сбалансирован, потому что госрасходы $50 млн."
+    ],
+    "opt_uz": [
+      "Inyeksiyalar chiqimlardan $10 mln ko‘p, daromad oshishga intiladi.",
+      "Inyeksiya va chiqimlar teng; daromad barqaror.",
+      "Chiqimlar inyeksiyalardan $10 mln ko‘p, daromad kamayishga intiladi.",
+      "Davlat xarajati $50 mln bo‘lgani uchun joriy hisob muvozanatli."
+    ],
+    "why": [
+      "Injections = 40 + 50 + 30 = 120; leakages = 35 + 45 + 50 = 130. A net withdrawal of $10m tends to depress income.",
+      "Инъекции 40 + 50 + 30 = 120; изъятия 35 + 45 + 50 = 130. Чистое изъятие $10 млн сокращает совокупный доход.",
+      "Inyeksiyalar 120, chiqimlar 130. $10 mln sof chiqim milliy daromadni kamaytirishga moyil."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-019",
+    "options_en": [
+      "Injections exceed leakages by $10m, creating upward pressure on income.",
+      "Injections and leakages are equal, so income is stable.",
+      "Leakages exceed injections by $10m, tending to reduce income.",
+      "The current account is balanced because government spending is $50m."
+    ],
+    "options_ru": [
+      "Инъекции превышают изъятия на $10 млн, стимулируя рост дохода.",
+      "Инъекции и изъятия равны, поэтому доход стабилен.",
+      "Изъятия превышают инъекции на $10 млн, создавая тенденцию к снижению дохода.",
+      "Текущий счёт сбалансирован, потому что госрасходы $50 млн."
+    ],
+    "options_uz": [
+      "Inyeksiyalar chiqimlardan $10 mln ko‘p, daromad oshishga intiladi.",
+      "Inyeksiya va chiqimlar teng; daromad barqaror.",
+      "Chiqimlar inyeksiyalardan $10 mln ko‘p, daromad kamayishga intiladi.",
+      "Davlat xarajati $50 mln bo‘lgani uchun joriy hisob muvozanatli."
+    ]
+  },
+  {
+    "n": 23,
+    "d": "hard",
+    "sec": 205,
+    "k": "D",
+    "en": "Demand is Qd = 200 − 2Pb and supply is Qs = 40 + 2Ps. The government pays producers a subsidy of $10 per unit, so Ps = Pb + 10, where Pb is the price paid by buyers and Ps received by sellers. Compared with no subsidy, what happens to the two prices and the equilibrium quantity?",
+    "ru": "Спрос Qd = 200 − 2Pb, предложение Qs = 40 + 2Ps. Государство выплачивает производителям субсидию $10 на единицу, поэтому Ps = Pb + 10, где Pb — цена для покупателя, Ps — доходная цена продавца. Что изменится относительно рынка без субсидии?",
+    "uz": "Talab Qd = 200 − 2Pb, taklif Qs = 40 + 2Ps. Davlat ishlab chiqaruvchilarga birlik uchun $10 subsidiya beradi, shuning uchun Ps = Pb + 10; Pb xaridor narxi, Ps sotuvchi oladigan narx. Subsidiyasiz holatga nisbatan ikki narx va miqdor qanday o‘zgaradi?",
+    "opt_en": [
+      "Buyers pay $45, sellers get $35, quantity falls.",
+      "Buyers pay $40, sellers get $50, quantity remains unchanged.",
+      "Buyers pay $30, sellers get $40, quantity rises by 20.",
+      "Buyers pay $35, sellers get $45, quantity rises by 10."
+    ],
+    "opt_ru": [
+      "Покупатели платят $45, продавцы получают $35, объём падает.",
+      "Покупатели платят $40, продавцы получают $50, объём неизменен.",
+      "Покупатели платят $30, продавцы получают $40, объём растёт на 20.",
+      "Покупатели платят $35, продавцы получают $45, объём растёт на 10."
+    ],
+    "opt_uz": [
+      "Xaridorlar $45 to‘laydi, sotuvchilar $35 oladi, miqdor kamayadi.",
+      "Xaridorlar $40 to‘laydi, sotuvchilar $50 oladi, miqdor o‘zgarmaydi.",
+      "Xaridorlar $30 to‘laydi, sotuvchilar $40 oladi, miqdor 20 ga oshadi.",
+      "Xaridorlar $35 to‘laydi, sotuvchilar $45 oladi, miqdor 10 ga oshadi."
+    ],
+    "why": [
+      "Without subsidy P = 40 and Q = 120. With subsidy 200−2Pb = 40+2(Pb+10) gives Pb = 35, Ps = 45, Q = 130.",
+      "Без субсидии P = 40, Q = 120. При субсидии 200−2Pb = 40+2(Pb+10), отсюда Pb = 35, Ps = 45, Q = 130.",
+      "Subsidiyasiz P = 40, Q = 120. Subsidiya bilan 200−2Pb = 40+2(Pb+10); Pb = 35, Ps = 45, Q = 130."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-023",
+    "options_en": [
+      "Buyers pay $45, sellers get $35, quantity falls.",
+      "Buyers pay $40, sellers get $50, quantity remains unchanged.",
+      "Buyers pay $30, sellers get $40, quantity rises by 20.",
+      "Buyers pay $35, sellers get $45, quantity rises by 10."
+    ],
+    "options_ru": [
+      "Покупатели платят $45, продавцы получают $35, объём падает.",
+      "Покупатели платят $40, продавцы получают $50, объём неизменен.",
+      "Покупатели платят $30, продавцы получают $40, объём растёт на 20.",
+      "Покупатели платят $35, продавцы получают $45, объём растёт на 10."
+    ],
+    "options_uz": [
+      "Xaridorlar $45 to‘laydi, sotuvchilar $35 oladi, miqdor kamayadi.",
+      "Xaridorlar $40 to‘laydi, sotuvchilar $50 oladi, miqdor o‘zgarmaydi.",
+      "Xaridorlar $30 to‘laydi, sotuvchilar $40 oladi, miqdor 20 ga oshadi.",
+      "Xaridorlar $35 to‘laydi, sotuvchilar $45 oladi, miqdor 10 ga oshadi."
+    ]
+  },
+  {
+    "n": 24,
+    "d": "hard",
+    "sec": 180,
+    "k": "C",
+    "en": "A country reports gross value added at basic prices of $800bn, product taxes of $55bn, product subsidies of $15bn and depreciation of $60bn. What are GDP at market prices and net domestic product at market prices?",
+    "ru": "В стране валовая добавленная стоимость в основных ценах $800 млрд, налоги на продукты $55 млрд, субсидии на продукты $15 млрд, амортизация $60 млрд. Найдите ВВП и чистый внутренний продукт в рыночных ценах.",
+    "uz": "Mamlakatda asosiy narxlarda yalpi qo‘shilgan qiymat $800 mlrd, mahsulot soliqlari $55 mlrd, subsidiyalar $15 mlrd va amortizatsiya $60 mlrd. Bozor narxlaridagi YaIM va sof ichki mahsulot qancha?",
+    "opts": [
+      "GDP $870bn; NDP $810bn",
+      "GDP $840bn; NDP $800bn",
+      "GDP $840bn; NDP $780bn",
+      "GDP $760bn; NDP $700bn"
+    ],
+    "why": [
+      "GDP = 800 + 55 − 15 = 840. NDP deducts depreciation: 840 − 60 = 780.",
+      "ВВП = 800 + 55 − 15 = 840. Чистый внутренний продукт 840 − 60 = 780.",
+      "YaIM = 800 + 55 − 15 = 840. Sof ichki mahsulot 840 − 60 = 780."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-024",
+    "options_en": [
+      "GDP $870bn; NDP $810bn",
+      "GDP $840bn; NDP $800bn",
+      "GDP $840bn; NDP $780bn",
+      "GDP $760bn; NDP $700bn"
+    ],
+    "options_ru": [
+      "GDP $870bn; NDP $810bn",
+      "GDP $840bn; NDP $800bn",
+      "GDP $840bn; NDP $780bn",
+      "GDP $760bn; NDP $700bn"
+    ],
+    "options_uz": [
+      "GDP $870bn; NDP $810bn",
+      "GDP $840bn; NDP $800bn",
+      "GDP $840bn; NDP $780bn",
+      "GDP $760bn; NDP $700bn"
+    ]
+  },
+  {
+    "n": 27,
+    "d": "hard",
+    "sec": 175,
+    "k": "A",
+    "en": "In a simplified long-run AD–AS model, aggregate demand is Qd = 400 − 2P while vertical LRAS initially fixes real capacity at Q = 200. Productivity improvement shifts LRAS to Q = 220, with aggregate demand unchanged. What is the new price level and output?",
+    "ru": "В упрощённой долгосрочной модели AD–AS совокупный спрос Qd = 400 − 2P, вертикальная LRAS первоначально фиксирует выпуск Q = 200. Рост производительности сдвигает LRAS к Q = 220 при неизменном AD. Каковы новые уровень цен и выпуск?",
+    "uz": "Soddalashtirilgan uzoq muddatli AD–AS modelida yalpi talab Qd = 400 − 2P, vertikal LRAS dastlab Q = 200 ni belgilaydi. Unumdorlik o‘sishi LRAS ni Q = 220 ga siljitadi, AD o‘zgarmaydi. Yangi narx darajasi va ishlab chiqarish qancha?",
+    "opts": [
+      "P = 90; Q = 220",
+      "P = 110; Q = 220",
+      "P = 100; Q = 220",
+      "P = 90; Q = 200"
+    ],
+    "why": [
+      "Initially 200 = 400 − 2P yields P = 100. New capacity 220 = 400 − 2P yields P = 90 and Q = 220.",
+      "Изначально P = 100. При новом потенциальном выпуске 220 = 400 − 2P, откуда P = 90, Q = 220.",
+      "Dastlab P = 100. Yangi quvvatda 220 = 400 − 2P, natija P = 90, Q = 220."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-027",
+    "options_en": [
+      "P = 90; Q = 220",
+      "P = 110; Q = 220",
+      "P = 100; Q = 220",
+      "P = 90; Q = 200"
+    ],
+    "options_ru": [
+      "P = 90; Q = 220",
+      "P = 110; Q = 220",
+      "P = 100; Q = 220",
+      "P = 90; Q = 200"
+    ],
+    "options_uz": [
+      "P = 90; Q = 220",
+      "P = 110; Q = 220",
+      "P = 100; Q = 220",
+      "P = 90; Q = 200"
+    ]
+  },
+  {
+    "n": 31,
+    "d": "hard",
+    "sec": 180,
+    "k": "D",
+    "en": "Initially, aggregate demand is Qd = 400 − 2P. The price index is 100. A rise in consumer confidence shifts demand to Qd = 440 − 2P and the price index subsequently falls to 90. By how much does quantity demanded change in total, and how much is due to movement along the NEW curve caused by the price fall?",
+    "ru": "Первоначальный AD описан Qd = 400 − 2P, индекс цен равен 100. Улучшение доверия потребителей сдвигает AD к Qd = 440 − 2P, после чего индекс цен снижается до 90. На сколько изменится объём спроса в целом и какая часть связана с движением вдоль НОВОЙ кривой при снижении цен?",
+    "uz": "Dastlab yalpi talab Qd = 400 − 2P, narx indeksi 100. Iste’molchi ishonchi oshib, talab Qd = 440 − 2P ga siljiydi, keyin narx indeksi 90 ga tushadi. Jami talab miqdori qanchaga o‘zgaradi va yangi egri chiziq bo‘ylab narx pasayishi hisobiga qancha?",
+    "opt_en": [
+      "Total +20; movement +40",
+      "Total +40; movement +40",
+      "Total +60; movement +40",
+      "Total +60; movement +20"
+    ],
+    "opt_ru": [
+      "Всего +20; движение +40",
+      "Всего +40; движение +40",
+      "Всего +60; движение +40",
+      "Всего +60; движение +20"
+    ],
+    "opt_uz": [
+      "Jami +20; egri chiziq bo‘ylab +40",
+      "Jami +40; egri chiziq bo‘ylab +40",
+      "Jami +60; egri chiziq bo‘ylab +40",
+      "Jami +60; egri chiziq bo‘ylab +20"
+    ],
+    "why": [
+      "Initially Q = 200. A shift at P = 100 adds 40, giving 240. A fall in P to 90 adds another 20 along the new curve; final Q = 260.",
+      "Сначала Q = 200. Сдвиг при P = 100 добавляет 40, затем снижение P до 90 — ещё 20 вдоль новой кривой. Всего +60.",
+      "Dastlab Q = 200. Siljish P = 100 da +40 beradi, keyingi P = 90 ga tushish yangi egri chiziq bo‘ylab +20. Jami +60."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-031",
+    "options_en": [
+      "Total +20; movement +40",
+      "Total +40; movement +40",
+      "Total +60; movement +40",
+      "Total +60; movement +20"
+    ],
+    "options_ru": [
+      "Всего +20; движение +40",
+      "Всего +40; движение +40",
+      "Всего +60; движение +40",
+      "Всего +60; движение +20"
+    ],
+    "options_uz": [
+      "Jami +20; egri chiziq bo‘ylab +40",
+      "Jami +40; egri chiziq bo‘ylab +40",
+      "Jami +60; egri chiziq bo‘ylab +40",
+      "Jami +60; egri chiziq bo‘ylab +20"
+    ]
+  },
+  {
+    "n": 38,
+    "d": "hard",
+    "sec": 190,
+    "k": "B",
+    "en": "A buffer-stock agency maintains grain prices between $8 and $12. At the floor price of $8, market supply is 170 tonnes and private demand is 100 tonnes. Months later, at the ceiling price of $12, private demand is 110 tonnes and private supply is 75 tonnes. What quantity must the agency buy first and release from stock later to support those respective prices, ignoring storage losses?",
+    "ru": "Агентство буферных запасов удерживает цену зерна между $8 и $12. При нижней цене $8 рыночное предложение 170 тонн, частный спрос 100 тонн. Через несколько месяцев при верхней цене $12 частный спрос 110 тонн, частное предложение 75 тонн. Сколько агентству нужно сначала закупить и затем выпустить из запасов, чтобы поддержать соответствующие цены, игнорируя потери хранения?",
+    "uz": "Bufer zaxira agentligi don narxini $8–$12 oralig‘ida ushlab turadi. $8 pastki narxda bozor taklifi 170 tonna, xususiy talab 100 tonna. Keyin $12 yuqori narxda xususiy talab 110, taklif 75 tonna bo‘ladi. Saqlashdagi yo‘qotishsiz agentlik avval qancha sotib olib, keyin qancha zaxiradan chiqarishi kerak?",
+    "opts": [
+      "Buy 35; release 70 tonnes",
+      "Buy 70; release 35 tonnes",
+      "Buy 70; release 70 tonnes",
+      "Buy 170; release 110 tonnes"
+    ],
+    "why": [
+      "At the floor, excess supply = 170 − 100 = 70, which the agency buys. At the ceiling, shortage = 110 − 75 = 35, which it releases.",
+      "При нижней цене излишек 170 − 100 = 70 тонн, его агентство покупает. При верхней цене дефицит 110 − 75 = 35 тонн, его покрывают запасами.",
+      "Pastki narxda ortiqcha taklif 170 − 100 = 70 tonna sotib olinadi. Yuqori narxda yetishmovchilik 110 − 75 = 35 tonna zaxiradan chiqariladi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-038",
+    "options_en": [
+      "Buy 35; release 70 tonnes",
+      "Buy 70; release 35 tonnes",
+      "Buy 70; release 70 tonnes",
+      "Buy 170; release 110 tonnes"
+    ],
+    "options_ru": [
+      "Купить 35; выпустить 70 тонн",
+      "Купить 70; выпустить 35 тонн",
+      "Купить 70; выпустить 70 тонн",
+      "Купить 170; выпустить 110 тонн"
+    ],
+    "options_uz": [
+      "35 tonna sotib olish; 70 tonna chiqarish",
+      "70 tonna sotib olish; 35 tonna chiqarish",
+      "70 tonna sotib olish; 70 tonna chiqarish",
+      "170 tonna sotib olish; 110 tonna chiqarish"
+    ]
+  },
+  {
+    "n": 41,
+    "d": "hard",
+    "sec": 170,
+    "k": "C",
+    "en": "A legal minimum milk price of $12 is above equilibrium. At that price, farmers offer 140 units while consumers want 80. The government purchases 45 unsold units at $12. How many units remain unsold by both private buyers and government, and what is the government purchase cost?",
+    "ru": "Обязательная минимальная цена молока $12 выше равновесной. По этой цене фермеры предлагают 140 единиц, покупатели хотят 80. Государство выкупает 45 непроданных единиц по $12. Сколько единиц останутся непроданными и сколько стоит госзакупка?",
+    "uz": "Sutning qonuniy eng kam narxi $12 bo‘lib, muvozanatdan yuqori. Bu narxda fermerlar 140 birlik taklif qiladi, iste’molchilar 80 birlik xohlaydi. Davlat sotilmagan 45 birlikni $12 dan xarid qiladi. Qancha birlik sotilmay qoladi va davlat xarajati qancha?",
+    "opts": [
+      "60 units; $540",
+      "15 units; $180",
+      "15 units; $540",
+      "45 units; $540"
+    ],
+    "why": [
+      "Initial surplus is 140 − 80 = 60 units; buying 45 leaves 15 unsold. Government spending is 45 × $12 = $540.",
+      "Первоначальный излишек 140 − 80 = 60, выкуп 45 оставляет 15. Госзатраты 45 × $12 = $540.",
+      "Ortiqcha taklif 140 − 80 = 60, 45 ta davlat xarididan so‘ng 15 ta qoladi. Xarajat 45 × $12 = $540."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-041",
+    "options_en": [
+      "60 units; $540",
+      "15 units; $180",
+      "15 units; $540",
+      "45 units; $540"
+    ],
+    "options_ru": [
+      "60 единиц; $540",
+      "15 единиц; $180",
+      "15 единиц; $540",
+      "45 единиц; $540"
+    ],
+    "options_uz": [
+      "60 birlik; $540",
+      "15 birlik; $180",
+      "15 birlik; $540",
+      "45 birlik; $540"
+    ]
+  },
+  {
+    "n": 49,
+    "d": "hard",
+    "sec": 185,
+    "k": "A",
+    "en": "An imported-fuel cost shock raises the consumer price index from 100 to 110 and reduces real output. A household's nominal wage rises by only 5% over the same period. What is the approximate change in its real wage, and which inflation mechanism is most consistent with the shock?",
+    "ru": "Рост стоимости импортного топлива повышает индекс потребительских цен со 100 до 110 и снижает реальный выпуск. Номинальная зарплата домохозяйства выросла за тот же период лишь на 5%. Как примерно изменилась его реальная зарплата и какой инфляционный механизм соответствует шоку?",
+    "uz": "Import yoqilg‘i xarajati oshib, iste’mol narxlari indeksi 100 dan 110 ga ko‘tariladi va real ishlab chiqarish kamayadi. Shu davrda xonadonning nominal ish haqi faqat 5% ga oshdi. Real ish haqi taxminan qanchaga o‘zgardi va bu qanday inflyatsiya mexanizmi?",
+    "opt_en": [
+      "Real wage −4.5%; cost-push inflation",
+      "Real wage +5%; demand-pull inflation",
+      "Real wage −10%; demand-pull inflation",
+      "Real wage −5%; purely monetary inflation"
+    ],
+    "opt_ru": [
+      "Реальная зарплата −4,5%; инфляция издержек",
+      "Реальная зарплата +5%; инфляция спроса",
+      "Реальная зарплата −10%; инфляция спроса",
+      "Реальная зарплата −5%; исключительно монетарная инфляция"
+    ],
+    "opt_uz": [
+      "Real ish haqi −4,5%; xarajatlar inflyatsiyasi",
+      "Real ish haqi +5%; talab inflyatsiyasi",
+      "Real ish haqi −10%; talab inflyatsiyasi",
+      "Real ish haqi −5%; faqat monetar inflyatsiya"
+    ],
+    "why": [
+      "The real wage factor is 1.05/1.10 ≈ 0.9545, a 4.5% fall. Imported input-cost pressure with lower output is cost-push inflation.",
+      "Реальная зарплата: 1,05/1,10 ≈ 0,9545, то есть снижение на 4,5%. Рост импортных затрат при сокращении выпуска — инфляция издержек.",
+      "Real ish haqi 1,05/1,10 ≈ 0,9545, ya’ni 4,5% kamayish. Import xarajatlari oshib, ishlab chiqarish tushishi — xarajatlar inflyatsiyasi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-049",
+    "options_en": [
+      "Real wage −4.5%; cost-push inflation",
+      "Real wage +5%; demand-pull inflation",
+      "Real wage −10%; demand-pull inflation",
+      "Real wage −5%; purely monetary inflation"
+    ],
+    "options_ru": [
+      "Реальная зарплата −4,5%; инфляция издержек",
+      "Реальная зарплата +5%; инфляция спроса",
+      "Реальная зарплата −10%; инфляция спроса",
+      "Реальная зарплата −5%; исключительно монетарная инфляция"
+    ],
+    "options_uz": [
+      "Real ish haqi −4,5%; xarajatlar inflyatsiyasi",
+      "Real ish haqi +5%; talab inflyatsiyasi",
+      "Real ish haqi −10%; talab inflyatsiyasi",
+      "Real ish haqi −5%; faqat monetar inflyatsiya"
+    ]
+  },
+  {
+    "n": 59,
+    "d": "hard",
+    "sec": 200,
+    "k": "D",
+    "en": "A labour force initially has 2.4 million employed and 0.3 million unemployed actively seeking work; another 0.5 million people are inactive. Then 0.1 million unemployed stop searching but no one gets a job. What happens to the measured unemployment rate?",
+    "ru": "В рабочей силе первоначально 2,4 млн занятых и 0,3 млн безработных, активно ищущих работу; ещё 0,5 млн экономически неактивны. Затем 0,1 млн безработных прекращают поиски, хотя никто не устроился на работу. Как изменится измеряемый уровень безработицы?",
+    "uz": "Dastlab ishchi kuchida 2,4 mln band, ish faol qidirayotgan 0,3 mln ishsiz; yana 0,5 mln faol bo‘lmaganlar bor. So‘ng ishsizlarning 0,1 mln qismi ish qidirishni to‘xtatadi, hech kim ishga joylashmaydi. O‘lchanadigan ishsizlik darajasi qanday o‘zgaradi?",
+    "opts": [
+      "Stays at 11.1%",
+      "Rises from 11.1% to 12.5%",
+      "Falls from 9.4% to 6.3%",
+      "Falls from 11.1% to approximately 7.7%"
+    ],
+    "why": [
+      "Initially unemployment = 0.3/(2.4+0.3) ≈ 11.1%. Afterwards active unemployed = 0.2 and labour force = 2.6; rate ≈ 0.2/2.6 = 7.7%.",
+      "Изначально 0,3/(2,4+0,3) ≈ 11,1%. После выхода 0,1 млн из рабочей силы: 0,2/2,6 ≈ 7,7%, несмотря на отсутствие новых рабочих мест.",
+      "Dastlab 0,3/(2,4+0,3) ≈ 11,1%. Keyin ishsiz 0,2, ishchi kuchi 2,6; ko‘rsatkich 0,2/2,6 ≈ 7,7%, bandlik oshmagan bo‘lsa ham."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-059",
+    "options_en": [
+      "Stays at 11.1%",
+      "Rises from 11.1% to 12.5%",
+      "Falls from 9.4% to 6.3%",
+      "Falls from 11.1% to approximately 7.7%"
+    ],
+    "options_ru": [
+      "Останется 11,1%",
+      "Вырастет с 11,1% до 12,5%",
+      "Снизится с 9,4% до 6,3%",
+      "Снизится с 11,1% примерно до 7,7%"
+    ],
+    "options_uz": [
+      "11,1% bo‘lib qoladi",
+      "11,1% dan 12,5% ga oshadi",
+      "9,4% dan 6,3% ga tushadi",
+      "11,1% dan taxminan 7,7% ga tushadi"
+    ]
+  }
+]
