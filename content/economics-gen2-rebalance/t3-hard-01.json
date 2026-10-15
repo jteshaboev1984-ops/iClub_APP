@@ -1,0 +1,332 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-001",
+    "n": 1,
+    "k": "B",
+    "sec": 210,
+    "d": "hard",
+    "en": "A small country faces a fixed world price of $30. Its domestic demand is Qd = 200 − 2P and domestic supply is Qs = 20 + P. A tariff of $10 per imported unit raises the domestic price to $40. What are imports after the tariff and government tariff revenue?",
+    "ru": "Малая страна покупает товар по неизменной мировой цене $30. Внутренний спрос Qd = 200 − 2P, предложение Qs = 20 + P. Пошлина $10 на импортную единицу повышает внутреннюю цену до $40. Каковы импорт после пошлины и доход бюджета от неё?",
+    "uz": "Kichik mamlakatda jahon narxi o‘zgarmas $30. Ichki talab Qd = 200 − 2P, taklif Qs = 20 + P. Har import birligiga $10 boj ichki narxni $40 ga oshiradi. Bojdan keyingi import hajmi va davlat boj daromadi qancha?",
+    "why": [
+      "At P = 40 demand is 120 and domestic supply 60, so imports are 60. Revenue = 60 × $10 = $600.",
+      "При P = 40 спрос составляет 120, внутреннее предложение — 60, импорт — 60. Доход бюджета 60 × $10 = $600.",
+      "P = 40 da talab 120, ichki taklif 60, import 60. Boj daromadi 60 × $10 = $600."
+    ],
+    "options_en": [
+      "80 units; $800",
+      "60 units; $600",
+      "40 units; $400",
+      "90 units; $900"
+    ],
+    "options_ru": [
+      "80 units; $800",
+      "60 units; $600",
+      "40 units; $400",
+      "90 units; $900"
+    ],
+    "options_uz": [
+      "80 units; $800",
+      "60 units; $600",
+      "40 units; $400",
+      "90 units; $900"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-002",
+    "n": 2,
+    "k": "D",
+    "sec": 195,
+    "d": "hard",
+    "en": "A country's export and import price indices are 120 and 150. Next year export prices rise by 10% and import prices by 5%, measured from those index levels. Approximately how does the terms-of-trade index change?",
+    "ru": "Индексы экспортных и импортных цен страны равны 120 и 150. На следующий год цены экспорта растут на 10%, импорта — на 5% относительно указанных уровней. Как примерно изменится индекс условий торговли?",
+    "uz": "Mamlakat eksport va import narx indekslari 120 va 150. Keyingi yil eksport narxlari shu darajadan 10%, import narxlari esa 5% oshadi. Savdo shartlari indeksi taxminan qanday o‘zgaradi?",
+    "why": [
+      "Initially ToT = 120/150 × 100 = 80. Afterwards it is 132/157.5 × 100 ≈ 83.8: an improvement.",
+      "Изначально индекс 120/150 × 100 = 80. Затем 132/157,5 × 100 ≈ 83,8: условия торговли улучшились.",
+      "Dastlab indeks 120/150 × 100 = 80. Keyin 132/157,5 × 100 ≈ 83,8; savdo shartlari yaxshilanadi."
+    ],
+    "options_en": [
+      "From 80 to 76.2; deterioration",
+      "From 125 to 130.9; improvement",
+      "From 80 to 88.0; improvement",
+      "From 80 to 83.8; improvement"
+    ],
+    "options_ru": [
+      "From 80 to 76.2; deterioration",
+      "From 125 to 130.9; improvement",
+      "From 80 to 88.0; improvement",
+      "From 80 to 83.8; improvement"
+    ],
+    "options_uz": [
+      "From 80 to 76.2; deterioration",
+      "From 125 to 130.9; improvement",
+      "From 80 to 88.0; improvement",
+      "From 80 to 83.8; improvement"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-003",
+    "n": 3,
+    "k": "C",
+    "sec": 190,
+    "d": "hard",
+    "en": "An exporter initially sells 10,000 tonnes abroad at $100 per tonne. Its export price falls to $80 but the volume exported grows to 12,000 tonnes. Import prices do not change. By what percentages do its export price and total export receipts change?",
+    "ru": "Экспортёр первоначально продаёт за рубеж 10 000 тонн по $100 за тонну. Цена падает до $80, но объём экспорта увеличивается до 12 000 тонн. Цены импорта неизменны. На сколько процентов меняются экспортная цена и общая экспортная выручка?",
+    "uz": "Eksportchi dastlab chetga 10 000 tonnani bir tonnasini $100 dan sotadi. Eksport narxi $80 ga tushadi, hajm esa 12 000 tonnaga oshadi. Import narxlari o‘zgarmaydi. Eksport narxi va jami eksport tushumi necha foizga o‘zgaradi?",
+    "why": [
+      "Price falls 20%. Receipts change from $1,000,000 to $960,000, a decline of 4%; volume growth does not fully offset the price decline.",
+      "Цена падает на 20%. Выручка уменьшается с $1 000 000 до $960 000, то есть на 4%; рост объёма не компенсирует падение цены.",
+      "Narx 20% tushadi. Tushum $1 000 000 dan $960 000 ga, ya’ni 4% ga kamayadi; hajm o‘sishi narx pasayishini to‘liq qoplamaydi."
+    ],
+    "options_en": [
+      "Price −20%; receipts +20%",
+      "Price −20%; receipts −20%",
+      "Price −20%; receipts −4%",
+      "Price +20%; receipts −4%"
+    ],
+    "options_ru": [
+      "Price −20%; receipts +20%",
+      "Price −20%; receipts −20%",
+      "Price −20%; receipts −4%",
+      "Price +20%; receipts −4%"
+    ],
+    "options_uz": [
+      "Price −20%; receipts +20%",
+      "Price −20%; receipts −20%",
+      "Price −20%; receipts −4%",
+      "Price +20%; receipts −4%"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-005",
+    "n": 5,
+    "k": "A",
+    "sec": 190,
+    "d": "hard",
+    "en": "Over one year nominal GDP rises by 12%, the GDP deflator rises by 8%, and population rises by 2%. Using exact index ratios rather than subtracting percentage points, approximately how much does real GDP per person grow?",
+    "ru": "За год номинальный ВВП вырос на 12%, дефлятор ВВП — на 8%, население — на 2%. Используя точные отношения индексов, а не вычитание процентных пунктов, найдите приблизительный рост реального ВВП на человека.",
+    "uz": "Bir yilda nominal YaIM 12% ga, YaIM deflyatori 8% ga, aholi 2% ga o‘sdi. Foiz punktlarini ayirish o‘rniga indekslarning aniq nisbatlarini qo‘llab, jon boshiga real YaIM o‘sishini toping.",
+    "why": [
+      "The real per-person factor is (1.12/1.08)/1.02 ≈ 1.0167, or growth of about 1.67%.",
+      "Индекс реального ВВП на человека (1,12/1,08)/1,02 ≈ 1,0167; прирост около 1,67%.",
+      "Jon boshiga real YaIM koeffitsienti (1,12/1,08)/1,02 ≈ 1,0167; o‘sish taxminan 1,67%."
+    ],
+    "options_en": [
+      "+1.67%",
+      "+2.00%",
+      "+3.70%",
+      "+6.00%"
+    ],
+    "options_ru": [
+      "+1.67%",
+      "+2.00%",
+      "+3.70%",
+      "+6.00%"
+    ],
+    "options_uz": [
+      "+1.67%",
+      "+2.00%",
+      "+3.70%",
+      "+6.00%"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-006",
+    "n": 6,
+    "k": "B",
+    "sec": 175,
+    "d": "hard",
+    "en": "An importer must pay a foreign supplier US$24,000. Initially US$1 costs 12,000 local currency units; later it costs 11,500. How has the importer's local-currency bill changed, and which movement of the local currency explains it?",
+    "ru": "Импортёр должен иностранному поставщику $24 000. Первоначально $1 стоил 12 000 единиц местной валюты, позднее — 11 500. Как изменилась сумма платежа в местной валюте и каким изменением курса это объясняется?",
+    "uz": "Importchi xorijiy yetkazib beruvchiga $24 000 to‘lashi kerak. Dastlab $1 = 12 000 mahalliy pul birligi, keyin $1 = 11 500. Mahalliy valyutadagi to‘lov qanchaga o‘zgardi va bunga qanday kurs o‘zgarishi sabab bo‘ldi?",
+    "why": [
+      "Initially the bill is 24,000 × 12,000 = 288m local units; later 24,000 × 11,500 = 276m. It falls by 12m because local currency appreciates.",
+      "Первоначально платёж 288 млн единиц, затем 276 млн. Снижение на 12 млн вызвано укреплением местной валюты.",
+      "Dastlab to‘lov 288 mln birlik, keyin 276 mln. 12 mln ga kamayish mahalliy valyuta qadrlanganini bildiradi."
+    ],
+    "options_en": [
+      "Increased by 12 million; depreciation",
+      "Decreased by 12 million; appreciation",
+      "Decreased by 500,000; depreciation",
+      "Increased by 24 million; appreciation"
+    ],
+    "options_ru": [
+      "Увеличился by 12 миллионов; ослабление",
+      "Снизился by 12 миллионов; укрепление",
+      "Снизился by 500,000; ослабление",
+      "Увеличился by 24 миллионов; укрепление"
+    ],
+    "options_uz": [
+      "Oshdi by 12 million; qadrsizlanish",
+      "Kamaydi by 12 million; qadrlanish",
+      "Kamaydi by 500,000; qadrsizlanish",
+      "Oshdi by 24 million; qadrlanish"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-008",
+    "n": 8,
+    "k": "D",
+    "sec": 205,
+    "d": "hard",
+    "en": "Government debt starts at $900m, and GDP is $1,800m. In each of the next two years, a $30m budget deficit is financed entirely through borrowing. At the end of year two, GDP is $1,980m. What happens to the debt level and the debt-to-GDP ratio?",
+    "ru": "Государственный долг первоначально $900 млн при ВВП $1 800 млн. В каждом из следующих двух лет дефицит бюджета $30 млн полностью финансируется заимствованиями. В конце второго года ВВП $1 980 млн. Как изменятся сумма долга и отношение долга к ВВП?",
+    "uz": "Davlat qarzi dastlab $900 mln, YaIM $1 800 mln. Keyingi ikki yilning har birida $30 mln budjet taqchilligi to‘liq qarz bilan qoplanadi. Ikkinchi yil oxirida YaIM $1 980 mln. Qarz summasi va qarz/YaIM nisbati qanday o‘zgaradi?",
+    "why": [
+      "Debt rises by $60m to $960m. Initially debt/GDP = 900/1800 = 50%; finally 960/1980 ≈ 48.5%.",
+      "Долг увеличивается на $60 млн до $960 млн. Доля к ВВП сначала 900/1800 = 50%, в конце 960/1980 ≈ 48,5%.",
+      "Qarz $60 mln ga oshib $960 mln bo‘ladi. Dastlab qarz/YaIM 50%, oxirida 960/1980 ≈ 48,5%."
+    ],
+    "options_en": [
+      "Debt rises to $960m; ratio rises to 53.3%",
+      "Debt stays $900m; ratio falls to 45.5%",
+      "Debt falls to $840m; ratio falls to 42.4%",
+      "Debt rises to $960m; ratio falls from 50% to about 48.5%"
+    ],
+    "options_ru": [
+      "Долг увеличивается до $960m; доля растёт to 53.3%",
+      "Долг остаётся $900m; доля падает to 45.5%",
+      "Долг снижается до $840m; доля падает to 42.4%",
+      "Долг увеличивается до $960m; доля падает from 50% to about 48.5%"
+    ],
+    "options_uz": [
+      "Qarz oshib $960m; ulush oshadi to 53.3%",
+      "Qarz o‘zgarmay $900m; ulush pasayadi to 45.5%",
+      "Qarz kamayib $840m; ulush pasayadi to 42.4%",
+      "Qarz oshib $960m; ulush pasayadi from 50% to about 48.5%"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-010",
+    "n": 10,
+    "k": "B",
+    "sec": 175,
+    "d": "hard",
+    "en": "Three households value a community flood barrier at $70, $40 and $30 respectively. The barrier costs $110 and provides protection to all three even if one refuses to contribute. What is its net social benefit, and what financing problem can still arise?",
+    "ru": "Три домохозяйства оценивают общую защитную дамбу в $70, $40 и $30 соответственно. Дамба стоит $110 и защищает всех троих, даже если кто-то отказывается платить. Какова чистая общественная выгода и какая проблема финансирования возможна?",
+    "uz": "Uch xonadon umumiy toshqin to‘sig‘ini $70, $40 va $30 ga baholaydi. To‘siq $110 turadi va biror xonadon to‘lashdan bosh tortsa ham, uchalasini himoya qiladi. Sof ijtimoiy foyda qancha va qanday moliyalashtirish muammosi yuz berishi mumkin?",
+    "why": [
+      "Benefits total $140 against cost $110, yielding net benefit $30. Non-excludable benefits can induce free riding and underfunding.",
+      "Суммарная выгода $140 минус стоимость $110 даёт $30. Неисключаемость защиты порождает проблему безбилетника и риск недофинансирования.",
+      "Jami foyda $140, xarajat $110, sof foyda $30. Foydadan chetlatib bo‘lmasligi tekin foydalanish va mablag‘ yetishmasligi xavfini tug‘diradi."
+    ],
+    "options_en": [
+      "−$30; excess private supply",
+      "+$30; free riding may prevent voluntary funding",
+      "+$140; voluntary provision is guaranteed",
+      "+$110; the project cannot be publicly funded"
+    ],
+    "options_ru": [
+      "−$30; excess private supply",
+      "+$30; безбилетники могут сорвать добровольное финансирование",
+      "+$140; voluntary provision is guaranteed",
+      "+$110; the project cannot be publicly funded"
+    ],
+    "options_uz": [
+      "−$30; excess private supply",
+      "+$30; tekin foydalanish ixtiyoriy moliyalashtirishni to‘xtatishi mumkin",
+      "+$140; voluntary provision is guaranteed",
+      "+$110; the project cannot be publicly funded"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-015",
+    "n": 15,
+    "k": "C",
+    "sec": 190,
+    "d": "hard",
+    "en": "A firm's hourly wage rises from $20 to $22 following training, while output per labour-hour rises from 5 units to 8 units. Ignoring other costs, by what percentage does wage cost per unit change, and what supply-side implication follows?",
+    "ru": "После обучения почасовая оплата на предприятии повышается с $20 до $22, а производительность — с 5 до 8 изделий на человеко-час. Игнорируя остальные издержки, на сколько процентов изменятся затраты на оплату труда в расчёте на изделие и каков эффект для предложения?",
+    "uz": "O‘qitishdan so‘ng korxonada soatlik ish haqi $20 dan $22 ga, har ishchi-soatdagi ishlab chiqarish 5 tadan 8 taga oshadi. Boshqa xarajatlarni hisobga olmasdan, birlik uchun ish haqi xarajati necha foizga o‘zgaradi va taklifga qanday ta’sir qiladi?",
+    "why": [
+      "Initial wage cost per unit = 20/5 = $4; new cost = 22/8 = $2.75. Reduction = 1.25/4 = 31.25%, supporting supply-side competitiveness.",
+      "Первоначально $20/5 = $4 за изделие, затем $22/8 = $2,75. Снижение $1,25/$4 = 31,25% может повысить конкурентоспособность предложения.",
+      "Dastlab birlik xarajati 20/5 = $4, keyin 22/8 = $2,75. Pasayish 1,25/4 = 31,25%; taklif raqobatbardoshligi yaxshilanishi mumkin."
+    ],
+    "options_en": [
+      "Rises by 10%; supply decreases",
+      "Falls by 12.5%; capacity necessarily falls",
+      "Falls by 31.25%; greater cost competitiveness is possible",
+      "Rises by 60%; higher unit costs restrict supply"
+    ],
+    "options_ru": [
+      "Растёт by 10%; предложение снижается",
+      "Снижается by 12.5%; потенциал обязательно падает",
+      "Снижается by 31.25%; greater может повыситься ценовая конкурентоспособность",
+      "Растёт by 60%; затраты ограничивают предложение"
+    ],
+    "options_uz": [
+      "Oshadi by 10%; taklif kamayadi",
+      "Kamayadi by 12.5%; quvvat albatta kamayadi",
+      "Kamayadi by 31.25%; greater xarajat raqobatbardoshligi yaxshilanishi mumkin",
+      "Oshadi by 60%; birlik xarajatlar taklifni cheklaydi"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-017",
+    "n": 17,
+    "k": "C",
+    "sec": 205,
+    "d": "hard",
+    "en": "In one hour, Country A can make 4 bags of grain or 2 metres of cloth; Country B can make 3 bags of grain or 3 metres of cloth. Which specialisation and trade rate of 1 metre of cloth for grain could benefit both under constant opportunity costs?",
+    "ru": "За час страна A выпускает 4 мешка зерна или 2 метра ткани; страна B — 3 мешка зерна или 3 метра ткани. Какое распределение специализации и обмен 1 метра ткани на зерно могут быть взаимовыгодными при постоянных альтернативных издержках?",
+    "uz": "Bir soatda A mamlakat 4 qop don yoki 2 metr mato, B mamlakat esa 3 qop don yoki 3 metr mato ishlab chiqaradi. Doimiy muqobil xarajatlarda qaysi ixtisoslashuv va 1 metr matoning donga ayirboshlash nisbati ikkalasiga foydali bo‘lishi mumkin?",
+    "why": [
+      "A's cost of 1 m cloth is 2 bags of grain; B's is 1 bag. B should specialise in cloth, A in grain. Trading at 1.5 bags per metre lies between their opportunity costs.",
+      "В A метр ткани стоит 2 мешка зерна, в B — 1 мешок. B специализируется на ткани, A — на зерне. Курс 1,5 мешка за метр лежит между альтернативными издержками.",
+      "A da 1 metr mato 2 qop don, B da 1 qop don turadi. B matoga, A donga ixtisoslashadi; 1,5 qop/metr ikkala muqobil xarajat orasida."
+    ],
+    "options_en": [
+      "A cloth, B grain; 3 bags per metre",
+      "A grain, B cloth; 3 bags per metre",
+      "A grain, B cloth; 1.5 bags per metre",
+      "A cloth, B grain; 1 bag per metre"
+    ],
+    "options_ru": [
+      "A — ткань, B — зерно; 3 мешка за метр",
+      "A — зерно, B — ткань; 3 мешка за метр",
+      "A — зерно, B — ткань; 1.5 мешка за метр",
+      "A — ткань, B — зерно; 1 bag per metre"
+    ],
+    "options_uz": [
+      "A — mato, B — don; 3 qop/metr",
+      "A — don, B — mato; 3 qop/metr",
+      "A — don, B — mato; 1.5 qop/metr",
+      "A — mato, B — don; 1 bag per metre"
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T3-P-020",
+    "n": 20,
+    "k": "A",
+    "sec": 180,
+    "d": "hard",
+    "en": "An economy initially has AD: Qd = 200 − 2P and SRAS: Qs = 40 + 2P. An interest-rate cut raises aggregate demand to Qd = 240 − 2P without shifting SRAS. What are the changes in equilibrium price level and real output?",
+    "ru": "Первоначально в экономике AD: Qd = 200 − 2P, SRAS: Qs = 40 + 2P. Снижение процентной ставки сдвигает AD к Qd = 240 − 2P при неизменном SRAS. Как изменятся равновесные уровень цен и реальный выпуск?",
+    "uz": "Iqtisodiyotda dastlab AD: Qd = 200 − 2P va SRAS: Qs = 40 + 2P. Foiz stavkasi pasayib, AD Qd = 240 − 2P ga siljiydi, SRAS o‘zgarmaydi. Muvozanat narx darajasi va real ishlab chiqarish qanchaga o‘zgaradi?",
+    "why": [
+      "Initially 200−2P = 40+2P gives P = 40, Q = 120. Afterwards 240−2P = 40+2P gives P = 50, Q = 140; changes +10 and +20.",
+      "Сначала P = 40, Q = 120; после сдвига P = 50, Q = 140. Уровень цен +10, выпуск +20.",
+      "Dastlab P = 40, Q = 120; keyin P = 50, Q = 140. Narx +10, ishlab chiqarish +20."
+    ],
+    "options_en": [
+      "Price +10, output +20",
+      "Price −10, output +20",
+      "Price +20, output +10",
+      "Price unchanged, output +40"
+    ],
+    "options_ru": [
+      "Уровень цен +10, выпуск +20",
+      "Уровень цен −10, выпуск +20",
+      "Уровень цен +20, выпуск +10",
+      "Уровень цен unchanged, выпуск +40"
+    ],
+    "options_uz": [
+      "Narx darajasi +10, ishlab chiqarish +20",
+      "Narx darajasi −10, ishlab chiqarish +20",
+      "Narx darajasi +20, ishlab chiqarish +10",
+      "Narx darajasi unchanged, ishlab chiqarish +40"
+    ]
+  }
+]
