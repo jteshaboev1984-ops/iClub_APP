@@ -159,9 +159,26 @@ async function main(){
       await client.send("Emulation.setDeviceMetricsOverride",{
         width,height,deviceScaleFactor:1,mobile:width<600
       });
-      await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
-      await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
-        width+" AI sheet");
+      // Reset panel consistently between breakpoint changes, including pending UI timers.
+      await client.evaluate("window.iClubGlobalAiShell.close();true");
+      await delay(160);
+      const openPanel=async()=>client.evaluate(
+        "document.getElementById('iclub-global-ai-mark').click();true");
+      await openPanel();
+      let opened=false;
+      for(let retry=0;retry<3;retry++){
+        await delay(180);
+        opened=await client.evaluate("!document.querySelector('#iclub-global-ai-panel')?.hidden");
+        if(opened)break;
+        await openPanel();
+      }
+      if(!opened){
+        const diag=await client.evaluate("({view:document.querySelector('.view.is-active')?.dataset.view,"+
+          "panelHidden:document.querySelector('#iclub-global-ai-panel')?.hidden,"+
+          "markHidden:document.querySelector('#iclub-global-ai-mark')?.hidden,"+
+          "context:window.iClubGlobalAiShell?.context?.()})");
+        throw Error(width+"px Preview panel failed: "+JSON.stringify(diag));
+      }
       const rect=await client.evaluate("(()=>{const r=document.getElementById('iclub-global-ai-panel').getBoundingClientRect();"+
         "return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}})()");
       assert.ok(rect.left>=-1&&rect.right<=width+1,"horizontal clip "+JSON.stringify(rect));
