@@ -7,7 +7,8 @@ const snapshot=require("./ai-layer-v21-p9-live-metadata-readonly-snapshot.json")
 const policyBaseline=require("./ai-layer-v21-p9-policy-fingerprint-snapshot.json");
 const load=path=>readFileSync(join(root,path),"utf8");
 function verifyDraftContracts({drafts=manifest,live=snapshot,policies=policyBaseline,
- adapter=load("qa/edge_v21/supabase_services.ts"),overrides={}}={}){
+ adapter=load("qa/edge_v21/supabase_services.ts"),
+ evidence=load("qa/edge_v21/screen_proof_services.ts"),overrides={}}={}){
  const errors=[];
  const issue=(code,name)=>errors.push({code,name});
  if(drafts?.schema!=="iclub_ai_v21_p9_draft_contract_bundle_v1"||
@@ -17,9 +18,12 @@ function verifyDraftContracts({drafts=manifest,live=snapshot,policies=policyBase
   drafts.requiresProductionCompatibilityReview!==true||
   !Array.isArray(drafts.stages)||!Array.isArray(drafts.contracts))
   return {matched:false,status:"NO_GO",releaseAllowed:false,errors:[{code:"UNTRUSTED_MANIFEST"}]};
- const rpcCalls=[...adapter.matchAll(/\brpc\("([a-z][a-z0-9_]+)"/g)].map(x=>x[1]).sort();
+ const rpcCalls=[...adapter.matchAll(/\brpc\("([a-z][a-z0-9_]+)"/g)].map(x=>x[1]);
+ const indirect=[...evidence.matchAll(/\bconst\s+KIND\s*=\s*"(get_iclub_ai_v21_[a-z0-9_]+)"/g)].map(x=>x[1]);
+ if(indirect.length!==1)issue("INDIRECT_RPC_DRIFT","screen proof");
+ rpcCalls.push(...indirect);rpcCalls.sort();
  const catalog=drafts.contracts.map(x=>x.name);
- if(rpcCalls.length!==23||new Set(rpcCalls).size!==23||
+ if(rpcCalls.length!==24||new Set(rpcCalls).size!==24||
   JSON.stringify(rpcCalls)!==JSON.stringify(catalog)||
   JSON.stringify(catalog)!==JSON.stringify(live.expectedRpcContracts))
   issue("RPC_INVENTORY_DRIFT","Edge adapter");
@@ -29,7 +33,7 @@ function verifyDraftContracts({drafts=manifest,live=snapshot,policies=policyBase
    locations.has(s.path))issue("BAD_DRAFT_LOCATION",s.path);
   locations.set(s.path,i);
  }
- if(locations.size!==9)issue("DRAFT_COUNT_DRIFT","expected nine files");
+ if(locations.size!==10)issue("DRAFT_COUNT_DRIFT","expected ten files");
  const declarations=new Map(),sqlFiles=new Map();
  for(const stage of drafts.stages){
   if(!locations.has(stage.path))continue;
@@ -81,6 +85,11 @@ function verifyDraftContracts({drafts=manifest,live=snapshot,policies=policyBase
   const grantOk=grant.length===1&&matchTypes(grant[0])&&
    grant[0][3].trim().toLowerCase()==="service_role";
   if(!revOk||!grantOk)issue("RPC_EXECUTION_GRANTS_DRIFT",c.name);
+  if(c.name==="get_iclub_ai_v21_screen_evidence_service"){
+   if(!indirect.includes(c.name)||c.args.some(arg=>!evidence.includes(arg.name+":")))
+    issue("INDIRECT_RPC_ARGUMENT_DRIFT",c.name);
+   continue;
+  }
   const needle='rpc("'+c.name+'",';
   const at=adapter.indexOf(needle);
   if(at<0){issue("RPC_EDGE_MISSING",c.name);continue;}

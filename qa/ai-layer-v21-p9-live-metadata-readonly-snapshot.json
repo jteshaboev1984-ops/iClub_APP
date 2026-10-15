@@ -21,6 +21,7 @@
     "get_iclub_ai_v21_rollout_service",
     "get_iclub_ai_v21_runtime_service",
     "get_iclub_ai_v21_scoped_context_service",
+    "get_iclub_ai_v21_screen_evidence_service",
     "get_iclub_ai_v21_source_bundle_service",
     "get_iclub_ai_v21_source_proof_service",
     "mint_iclub_ai_v21_app_view_context_service",
@@ -139,5 +140,5 @@
   "releaseAllowed": false,
   "freshRecheckRequired": true,
   "independentOwnerReleaseApprovalRequired": true,
-  "notes": "Snapshot proves metadata only; no student rows, no production writes. SHA hashes are drift signals, not release authorization."
+  "notes": "Snapshot proves metadata only; no student rows, no production writes. SHA hashes are drift signals, not release authorization. §118 correction: 24th indirect screen-evidence RPC from screen_proof_services.ts omitted in prior 23-call inventory."
 }

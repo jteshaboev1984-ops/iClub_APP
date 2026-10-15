@@ -18,9 +18,12 @@ const REQUIRED_TABLES=Object.freeze([
  "public.subjects","public.tour_attempts",
  "public.tour_session_runtime_v4","public.user_subjects"
 ]);
-function expectedRpcNames(source){
- if(typeof source!=="string")return null;
+function expectedRpcNames(source,proof=read("qa/edge_v21/screen_proof_services.ts")){
+ if(typeof source!=="string"||typeof proof!=="string")return null;
  const matches=[...source.matchAll(/\brpc\("([a-z][a-z0-9_]+)"/g)].map(x=>x[1]);
+ const indirect=[...proof.matchAll(/\bconst\s+KIND\s*=\s*"(get_iclub_ai_v21_[a-z0-9_]+)"/g)].map(x=>x[1]);
+ if(indirect.length!==1)return null;
+ matches.push(...indirect);
  if(matches.length===0||matches.length>60)return null;
  return [...new Set(matches)].sort();
 }
@@ -43,7 +46,7 @@ function checkLiveIntegrationReadiness({
   metadata.independentOwnerReleaseApprovalRequired!==true)
   return Object.freeze({status:"NO_GO",reason:"untrusted_metadata_snapshot",
    releaseAllowed:false,missingRpcCount:null,issues:[]});
- if(!expected||expected.length!==23||!sortedUnique(metadata.expectedRpcContracts)||
+ if(!expected||expected.length!==24||!sortedUnique(metadata.expectedRpcContracts)||
   JSON.stringify(expected)!==JSON.stringify(metadata.expectedRpcContracts))
   add("ADAPTER_RPC_INVENTORY_CHANGED","Re-audit exact adapter RPC list");
  const observed=metadata.observedV21RpcContracts;

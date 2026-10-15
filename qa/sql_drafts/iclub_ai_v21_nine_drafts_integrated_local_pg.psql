@@ -80,6 +80,7 @@ BEGIN;
 \ir iclub_ai_v21_provider_spend_UNAPPLIED.sql
 \ir iclub_ai_v21_encrypted_reply_UNAPPLIED.sql
 \ir iclub_ai_v21_p6_navigation_gate_UNAPPLIED.sql
+\ir iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql
 
 DO $integrated$
 DECLARE n integer;
@@ -104,6 +105,7 @@ BEGIN
  'get_iclub_ai_v21_rollout_service',
  'get_iclub_ai_v21_runtime_service',
  'get_iclub_ai_v21_scoped_context_service',
+ 'get_iclub_ai_v21_screen_evidence_service',
  'get_iclub_ai_v21_source_bundle_service',
  'get_iclub_ai_v21_source_proof_service',
  'mint_iclub_ai_v21_app_view_context_service',
@@ -114,7 +116,7 @@ BEGIN
  'reserve_iclub_ai_v21_provider_spend_service',
  'revoke_iclub_ai_v21_scoped_context_service'
  );
- IF n<>23 THEN RAISE EXCEPTION 'Combined drafts produce %/23 expected RPC',n;END IF;
+ IF n<>24 THEN RAISE EXCEPTION 'Combined drafts produce %/24 expected RPC',n;END IF;
  IF EXISTS(
   SELECT 1 FROM pg_catalog.pg_proc p
   JOIN pg_catalog.pg_namespace ns ON ns.oid=p.pronamespace

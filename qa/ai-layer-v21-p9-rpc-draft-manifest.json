@@ -55,6 +55,12 @@
       "dependsOn": [
         "qa/sql_drafts/iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql"
       ]
+    },
+    {
+      "path": "qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql",
+      "dependsOn": [
+        "qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql"
+      ]
     }
   ],
   "contracts": [
@@ -366,6 +372,45 @@
         {
           "name": "p_context_handle",
           "type": "text"
+        }
+      ],
+      "caller": "trusted_service_role_only"
+    },
+    {
+      "name": "get_iclub_ai_v21_screen_evidence_service",
+      "draft": "qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql",
+      "args": [
+        {
+          "name": "p_user_id",
+          "type": "uuid"
+        },
+        {
+          "name": "p_kind",
+          "type": "text"
+        },
+        {
+          "name": "p_view",
+          "type": "text"
+        },
+        {
+          "name": "p_subject",
+          "type": "text"
+        },
+        {
+          "name": "p_lesson_id",
+          "type": "bigint"
+        },
+        {
+          "name": "p_session_id",
+          "type": "bigint"
+        },
+        {
+          "name": "p_question_id",
+          "type": "bigint"
+        },
+        {
+          "name": "p_attempt_id",
+          "type": "bigint"
         }
       ],
       "caller": "trusted_service_role_only"

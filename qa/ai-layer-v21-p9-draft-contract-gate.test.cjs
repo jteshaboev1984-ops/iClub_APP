@@ -8,10 +8,10 @@ const file="qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql";
 const source=()=>readFileSync(file,"utf8");
 const clone=v=>JSON.parse(JSON.stringify(v));
 const code=(r,k)=>r.errors.some(x=>x.code===k);
-test("P9 all 23 SQL drafts match actual adapter signatures, service-only grants, scratch guard",()=>{
+test("P9 all 24 SQL drafts match actual adapter signatures, service-only grants, scratch guard",()=>{
  const r=verifyDraftContracts();
  a.equal(r.matched,true,JSON.stringify(r.errors));
- a.equal(r.rpcContractCount,23);a.equal(r.localDraftCount,9);
+ a.equal(r.rpcContractCount,24);a.equal(r.localDraftCount,10);
  a.equal(r.status,"NO_GO");a.equal(r.releaseAllowed,false);
 });
 test("P9 parameter type drift blocks SQL",()=>{
@@ -60,6 +60,13 @@ test("P9 fake new Edge contract, altered manifest or missing SQL blocks",()=>{
   "CREATE OR REPLACE FUNCTION public.mint_iclub_ai_v21_fake_context_service");
  a.notEqual(s,edited);
  a.equal(code(verifyDraftContracts({overrides:{[file]:edited}}),"RPC_DRAFT_MISSING"),true);
+});
+test("P9 indirect proof RPC SQL signature cannot drift",()=>{
+ const path="qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_UNAPPLIED.sql";
+ const text=readFileSync(path,"utf8");
+ const broken=text.replace("p_question_id bigint DEFAULT NULL","p_question_id text DEFAULT NULL");
+ a.notEqual(broken,text);
+ a.equal(code(verifyDraftContracts({overrides:{[path]:broken}}),"RPC_SIGNATURE_DRIFT"),true);
 });
 test("P9 dated RLS policy metadata cannot grant release",()=>{
  const b=clone(policy);b.policies[0].expressionMd5="BROKEN";

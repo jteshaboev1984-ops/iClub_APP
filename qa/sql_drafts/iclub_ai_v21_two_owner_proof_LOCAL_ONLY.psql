@@ -96,6 +96,12 @@ BEGIN
  j:=public.mint_iclub_ai_v21_practice_context_service(a,900,901);
  IF j->>'allowed'<>'true' THEN RAISE EXCEPTION 'A own Practice denied %',j;END IF;
  hA:=j->>'context_handle';
+ j:=public.get_iclub_ai_v21_screen_evidence_service(
+  a,'practice_answer_v4',NULL,NULL,NULL,900,901,NULL);
+ IF j->>'allowed'<>'true' THEN RAISE EXCEPTION 'A evidence denied: %',j;END IF;
+ j:=public.get_iclub_ai_v21_screen_evidence_service(
+  b,'practice_answer_v4',NULL,NULL,NULL,900,901,NULL);
+ IF j->>'allowed'<>'false' THEN RAISE EXCEPTION 'B read A evidence';END IF;
  IF (public.get_iclub_ai_v21_scoped_context_service(a,hA)->>'allowed')<>'true'
  THEN RAISE EXCEPTION 'A own context denied';END IF;
  IF (public.get_iclub_ai_v21_scoped_context_service(b,hA)->>'allowed')<>'false'
@@ -110,6 +116,7 @@ BEGIN
  UPDATE public.practice_sessions_v4 SET status='in_progress' WHERE id=900;
  IF (public.get_iclub_ai_v21_scoped_context_service(a,hA)->>'allowed')<>'false'
  THEN RAISE EXCEPTION 'Academic status revocation bypass';END IF;
+ IF (public.get_iclub_ai_v21_screen_evidence_service(a,'practice_answer_v4',NULL,NULL,NULL,900,901,NULL)->>'allowed')<>'false' THEN RAISE EXCEPTION 'Evidence stale finalization';END IF;
  UPDATE public.practice_sessions_v4 SET status='finalized' WHERE id=900;
  UPDATE private.qa_protected_exam SET active=true WHERE user_id=a;
  IF (public.get_iclub_ai_v21_scoped_context_service(a,hA)->>'allowed')<>'false'

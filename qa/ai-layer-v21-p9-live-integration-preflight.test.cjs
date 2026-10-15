@@ -6,12 +6,12 @@ const {checkLiveIntegrationReadiness,expectedRpcNames}=
 const metadata=require("./ai-layer-v21-p9-live-metadata-readonly-snapshot.json");
 const copy=()=>JSON.parse(JSON.stringify(metadata));
 const has=(result,code)=>result.issues.some(x=>x.code===code);
-test("P9 live read-only audit fails closed on ALL twenty-three missing contracts",()=>{
+test("P9 live read-only audit fails closed on ALL twenty-four missing contracts",()=>{
  const v=checkLiveIntegrationReadiness();
  a.equal(v.status,"NO_GO");a.equal(v.releaseAllowed,false);
- a.equal(v.expectedRpcCount,23);a.equal(v.observedRpcCount,0);
- a.equal(v.missingRpcCount,23);
- a.equal(new Set(v.missingRpcNames).size,23);
+ a.equal(v.expectedRpcCount,24);a.equal(v.observedRpcCount,0);
+ a.equal(v.missingRpcCount,24);
+ a.equal(new Set(v.missingRpcNames).size,24);
  a.equal(has(v,"LIVE_RPC_MISSING"),true);
  a.equal(has(v,"V21_SERVER_EDGE_NOT_DEPLOYED"),true);
  a.equal(has(v,"CONTENT_RIGHTS_UNPUBLISHED"),true);
@@ -23,12 +23,19 @@ test("P9 RPC inventory is exact static API source, not aspirational documentatio
  const source=readFileSync("qa/edge_v21/supabase_services.ts","utf8");
  const real=expectedRpcNames(source);
  a.deepEqual(real,metadata.expectedRpcContracts);
- a.equal(real.length,23);
+ a.equal(real.length,24);
  const injected=checkLiveIntegrationReadiness({adapterSource:
   source.replace('get_iclub_ai_v21_runtime_service"',
    'get_iclub_ai_v21_unknown_service"')});
  a.equal(injected.status,"NO_GO");
  a.equal(has(injected,"ADAPTER_RPC_INVENTORY_CHANGED"),true);
+});
+test("Indirect evidence RPC must be counted and fail closed on omission",()=>{
+ const source=readFileSync("qa/edge_v21/supabase_services.ts","utf8");
+ const proof=readFileSync("qa/edge_v21/screen_proof_services.ts","utf8");
+ a.equal(expectedRpcNames(source,proof.replace('const KIND="get_iclub_ai_v21_screen_evidence_service"',
+  'const KIND="wrong_evidence"'))?.includes("get_iclub_ai_v21_screen_evidence_service"),false);
+ a.equal(expectedRpcNames(source,proof).length,24);
 });
 test("P9 fake all-present RPC inventory can NEVER turn into rollout approval",()=>{
  const fake=copy();
