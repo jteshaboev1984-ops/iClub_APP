@@ -13,7 +13,7 @@ select{border:1px solid #cad6ea;border-radius:9px;background:white;padding:8px}
 .card{background:white;border:1px solid #dfebf8;border-radius:18px;padding:22px;margin-top:22px;box-shadow:0 10px 25px #243c670b}
 .note{line-height:1.55;font-size:14px;color:#657693}.result{border-radius:12px;padding:16px;background:#eff5ff;color:#2453ac;min-height:68px;font-weight:650}
 .choices{display:grid;gap:8px;margin-top:12px}.choices:empty{display:none}
-.choice-item{border:1px solid #dce8f7;background:#fafcff;padding:12px 14px;border-radius:11px;font-size:14px;font-weight:700;color:#254a88}
+.choice-item{width:100%;text-align:center;border:1px solid #dce8f7;background:#fafcff;padding:12px 14px;border-radius:11px;font-size:14px;font-weight:700;color:#254a88;cursor:pointer}
 .primary{background:#245fe0;color:white;border:0;border-radius:11px;padding:12px 17px;margin-top:16px;font-weight:700}
 .secondary{background:white;color:#3159aa;border:1px solid #d4def1;border-radius:10px;padding:9px;margin-top:16px}
 nav{position:fixed;bottom:0;left:0;right:0;max-width:640px;margin:auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:white;border-top:1px solid #dce6f5;padding:8px}
@@ -32,6 +32,7 @@ nav button[aria-current=page]{color:#2159d3;background:#eaf2ff;font-weight:700}
 <div id="result" class="result" role="status" aria-live="polite" data-state="idle"></div>
 <div id="choices" class="choices" role="list" aria-label="Разрешённые предметы"></div>
 <button id="check" type="button" class="primary"></button>
+<button id="confirm" type="button" class="secondary" hidden></button>
 <button id="leave" type="button" class="secondary"></button>
 </section>
 </main>
@@ -47,6 +48,8 @@ const LANG={
 ru:{caption:"Без реальных учеников и внешнего AI",heading:"Следующий шаг",
  explain:"Демонстрация проверенного сервером выбора. Учебные результаты не меняются.",
  check:"Проверить следующий шаг",leave:"Выйти из демонстрации",
+ confirm:"Проверить выбранное действие",confirming:"Проверяем выбранное действие",
+ confirmed:"Действие подтверждено. Учебный прогресс не изменён",
  idle:"Нажмите, чтобы проверить разрешённое действие",pending:"Проверяем доступ",expired:"Срок рекомендации истёк. Проверьте снова",
  denied:"Рекомендация сейчас недоступна",left:"Сеанс завершён",
  review_finalized_practice:"Разобрать ошибки Practice",
@@ -56,6 +59,8 @@ ru:{caption:"Без реальных учеников и внешнего AI",he
 uz:{caption:"Haqiqiy o‘quvchilar va tashqi AI ishlatilmaydi",heading:"Keyingi qadam",
  explain:"Server tasdiqlagan tanlov namoyishi. O‘quvchining natijalari o‘zgarmaydi.",
  check:"Keyingi qadamni tekshirish",leave:"Namoyishdan chiqish",
+ confirm:"Tanlangan qadamni tekshirish",confirming:"Tanlov tekshirilmoqda",
+ confirmed:"Tanlov tasdiqlandi. O‘qish natijalari o‘zgarmadi",
  idle:"Mumkin bo‘lgan qadamni tekshirish uchun bosing",pending:"Ruxsat tekshirilmoqda",expired:"Tavsiya muddati tugadi. Qayta tekshiring",
  denied:"Tavsiya hozircha mavjud emas",left:"Seans yakunlandi",
  review_finalized_practice:"Practice xatolarini tahlil qilish",
@@ -65,6 +70,8 @@ uz:{caption:"Haqiqiy o‘quvchilar va tashqi AI ishlatilmaydi",heading:"Keyingi 
 en:{caption:"No real students or external AI",heading:"Next step",
  explain:"Demonstration of a server-verified choice. Student progress is unchanged.",
  check:"Check next step",leave:"Leave demonstration",
+ confirm:"Verify selected action",confirming:"Verifying selected action",
+ confirmed:"Action verified. Study progress was not changed",
  idle:"Select to verify an eligible action",pending:"Checking access",expired:"Recommendation expired. Check again",
  denied:"A recommendation is not currently available",left:"Session ended",
  review_finalized_practice:"Review Practice mistakes",
@@ -77,8 +84,9 @@ const SUBJECT_NAMES={"ru":{"informatics":"Информатика","economics":"�
 const h="33333333-3333-4333-8333-333333333333";
 const syntheticToken="synthetic-owner-no-real-jwt-AAAAAAAA";
 let locale="ru",page="home",epoch=0,active=true,state="idle",action=null;
-let expiresAtMs=0,expiryTimer=null,choices=[];
-function clearExpiry(){if(expiryTimer!==null)clearTimeout(expiryTimer);expiryTimer=null;expiresAtMs=0;choices=[];}
+let expiresAtMs=0,expiryTimer=null,choices=[],handoffToken=null,singleSubject=null;
+function clearExpiry(){if(expiryTimer!==null)clearTimeout(expiryTimer);
+ expiryTimer=null;expiresAtMs=0;choices=[];handoffToken=null;singleSubject=null;}
 function expireIfStale(){if(active&&state==="ready"&&expiresAtMs>0&&Date.now()>=expiresAtMs){
  clearExpiry();state="expired";action=null;render();
 }}
@@ -89,13 +97,16 @@ function render(){
  const c=LANG[locale];document.documentElement.lang=locale;
  by("caption").textContent=c.caption;by("heading").textContent=c.heading;
  by("explain").textContent=c.explain;by("check").textContent=c.check;
- by("leave").textContent=c.leave;by("locale-label").textContent=c.lang;
+ by("leave").textContent=c.leave;by("confirm").textContent=c.confirm;
+ by("locale-label").textContent=c.lang;
  by("tabs").setAttribute("aria-label",c.nav);
  buttons.forEach((b,i)=>{
   b.textContent=c.tab[i];b.toggleAttribute("aria-current",b.dataset.page===page);
   if(b.dataset.page===page)b.setAttribute("aria-current","page");
   else b.removeAttribute("aria-current");
  });
+ by("confirm").hidden=!(active&&page==="home"&&state==="ready"&&
+ action!=="selection_required");
  const output=by("result");
  output.dataset.state=state;
  output.textContent=!active?c.left:page!=="home"?c.idle:
@@ -104,15 +115,40 @@ function render(){
  const list=by("choices");list.replaceChildren();
  list.setAttribute("aria-label",c.selection_required);
  if(active&&page==="home"&&state==="ready"&&action==="selection_required"){
-  for(const subject of choices){
-   const item=document.createElement("div");item.className="choice-item";
-   item.setAttribute("role","listitem");
-   item.textContent=SUBJECT_NAMES[locale][subject];
-   list.append(item);
+  for(const option of choices){
+   const item=document.createElement("button");item.className="choice-item";
+   item.setAttribute("type","button");
+   item.textContent=SUBJECT_NAMES[locale][option.subjectKey];
+   item.addEventListener("click",()=>submitChoice(option.actionCode,option.subjectKey));
+   const wrapper=document.createElement("div");wrapper.setAttribute("role","listitem");
+   wrapper.append(item);list.append(wrapper);
   }
  }
- by("check").disabled=!active||page!=="home"||state==="pending";
+ by("check").disabled=!active||page!=="home"||state==="pending"||state==="confirming";
 }
+async function submitChoice(actionCode,subjectKey){
+ if(!active||page!=="home"||state!=="ready"||!handoffToken||
+  !["review_finalized_practice","review_open_tour_archive",
+    "continue_enrolled_subject"].includes(actionCode)||!SUBJECT_NAMES[locale][subjectKey])
+  return;
+ const at=++epoch,token=handoffToken;
+ clearExpiry();state="confirming";action=null;render();
+ try{
+  const res=await fetch("/qa/home/confirm",{method:"POST",
+   credentials:"omit",cache:"no-store",
+   headers:{"Content-Type":"application/json",
+    "Authorization":"Bearer "+syntheticToken},
+   body:JSON.stringify({contextHandle:h,locale,handoffToken:token,actionCode,subjectKey})});
+  const data=await res.json();
+  if(at!==epoch||!active||page!=="home")return;
+  state=res.ok&&data.ok===true&&data.status==="qa_handoff_confirmed"&&
+   data.reviewOnly===true&&data.releaseAllowed===false&&
+   data.navigationExecuted===false&&data.progressChanged===false?
+   "confirmed":"denied";
+ }catch{if(at===epoch)state="denied";}
+ if(at===epoch)render();
+}
+by("confirm").addEventListener("click",()=>submitChoice(action,singleSubject));
 by("locale").addEventListener("change",e=>{
  locale=e.target.value;epoch++;resetSuggestion();render();
 });
@@ -150,8 +186,15 @@ by("check").addEventListener("click",async()=>{
      new Set(data.choices.map(v=>v.subjectKey)).size===data.choices.length;
     if(tie&&!possible){state="denied";action=null;}
     else{
-     choices=tie?data.choices.map(v=>v.subjectKey):[];
-     state="ready";action=tie?"selection_required":data.actionCode;
+     if(!/^[A-Za-z0-9_-]{32}$/.test(data.handoffToken||"")||
+        (!tie&&!SUBJECT_NAMES[locale][data.subjectKey])){
+      state="denied";action=null;
+     }else{
+      choices=tie?data.choices.map(v=>({actionCode:v.actionCode,subjectKey:v.subjectKey})):[];
+      handoffToken=data.handoffToken;
+      singleSubject=tie?null:data.subjectKey;
+      state="ready";action=tie?"selection_required":data.actionCode;
+     }
     }
     if(state==="ready"){
     expiresAtMs=deadline;
