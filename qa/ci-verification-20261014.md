@@ -39,3 +39,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §106: trilingual subject choices use exact live i18n.js captions in synthetic Home Chromium; must show all same-priority selections, never raw evidence IDs or fake clickable navigation. QA-to-QA only NO MERGE.
 
 2026-10-15 §106 rerun: strictly sorted locale-set QA assertion (en,ru,uz), no product text changed; native Chromium three-language tied subject choices + full offline CI; never merge.
+
+2026-10-15 §107: final one-statement read-only PostgreSQL MVCC commercial/source/screen/academic authority before Home delivery; disposable PG only; NO MERGE.
