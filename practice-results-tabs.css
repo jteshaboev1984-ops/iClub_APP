@@ -1021,3 +1021,31 @@
   .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-row {padding-inline:11px;}
   .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-count {font-size:9px;}
 }
+
+
+/* Same readable mistake accordion as By Topic, tour-specific action hierarchy. */
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [hidden] {
+  display:none!important;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-retry"] {
+  order:1;grid-column:1/-1;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail.iclub-sx-tour-has-errors) .actions-row [data-action="my-rec-retry"] {
+  background:#1a43bf;color:#fff;border:1px solid #1a43bf;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-train"] {
+  order:2;grid-column:1/-1;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail.iclub-sx-tour-has-errors) .actions-row [data-action="my-rec-train"] {
+  background:#eff4ff;color:#1a43bf;border:1px solid #cddcfb;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-open-books"] {
+  order:3;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-to-subject"] {
+  order:4;
+}
+.iclub-visual-v3 #courses-my-rec-detail:has(.iclub-sx-tour-detail) .actions-row [data-action="my-rec-delete"] {
+  order:5;grid-column:1/-1;background:transparent;
+  color:#526277;border:1px solid #e5eaf2;
+}
