@@ -63,13 +63,28 @@ test("§96 real PostgreSQL -> localhost HTTP -> HMAC -> Home choice, including r
   a.equal(fallback.status,200,JSON.stringify(fallback.body));
   a.equal(fallback.body.actionCode,"continue_enrolled_subject");
   a.equal(fallback.body.subjectKey,"biology");
+  // Unlike the old hardcoded publication mock, this verifies real scratch
+  // PostgreSQL release rows. A revoked RU source MUST block the signed plan.
+  scratchSql("UPDATE private.iclub_ai_v21_home_source_test_releases "+
+   "SET revoked_at=now() WHERE locale='ru' "+
+   "AND action_code='continue_enrolled_subject' AND subject_key='biology'");
+  const sourceRevoked=await send();
+  a.equal(sourceRevoked.status,403,"Revoked source must block new Home plan");
+  scratchSql("UPDATE private.iclub_ai_v21_home_source_test_releases "+
+   "SET revoked_at=NULL,rights_approved=false WHERE locale='ru' "+
+   "AND action_code='continue_enrolled_subject' AND subject_key='biology'");
+  a.equal((await send()).status,403,"Independent rights flag must still block");
+  scratchSql("UPDATE private.iclub_ai_v21_home_source_test_releases "+
+   "SET rights_approved=true WHERE locale='ru' "+
+   "AND action_code='continue_enrolled_subject' AND subject_key='biology'");
+  a.equal((await send()).status,200,"Synthetic source restored in scratch only");
   // Server revocation makes even a previously valid token/handle unusable.
   scratchSql("UPDATE private.iclub_ai_v21_scoped_contexts SET revoked_at=now() "+
    "WHERE context_handle='33333333-3333-4333-8333-333333333333'");
   const revoked=await send();
   a.equal(revoked.status,403);
   a.equal(revoked.body.reason,"in_development");
-  a.equal(g.state.requests>=13,true);
+  a.equal(g.state.requests>=16,true);
   console.log("HOME_PG_HTTP_GREEN: owner auth, RU/UZ/EN, Practice, tie, Tour, fallback, revoke");
  }finally{
   await new Promise(resolve=>g.server.close(resolve));
