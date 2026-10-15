@@ -1,0 +1,332 @@
+[
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-027",
+    "n": 27,
+    "d": "hard",
+    "k": "C",
+    "sec": 195,
+    "en": "A government pays a $200 grant to each factory adopting a cleaner process. Of 100 applicants, 70 would have adopted without support; the grant induces 20 additional factories to adopt, while 10 recipients still fail to adopt. Every applicant receives the grant and administration costs $2,000. What is total public spending per additional adopting factory?",
+    "ru": "Государство выплачивает по $200 каждому из 100 заводов, заявивших о внедрении экологичной технологии. Из них 70 внедрили бы её и без субсидии, ещё 20 внедряют благодаря субсидии, а 10 так и не внедряют. Выплаты получают все заявители; администрирование стоит $2 000. Каковы общие бюджетные затраты на один дополнительно внедривший завод?",
+    "uz": "Davlat ekologik texnologiya uchun ariza bergan 100 zavodning har biriga $200 grant beradi. Ulardan 70 tasi grantsiz ham joriy etgan bo‘lardi, yana 20 tasi grant tufayli joriy etadi, 10 tasi esa joriy etmaydi. Barcha arizachilar grant oladi; boshqaruv xarajati $2000. Grant tufayli qo‘shimcha texnologiya joriy etgan bitta zavodga jami davlat xarajati qancha?",
+    "options_en": [
+      "$200",
+      "$220",
+      "$1,100",
+      "$2,200"
+    ],
+    "options_ru": [
+      "$200",
+      "$220",
+      "$1 100",
+      "$2 200"
+    ],
+    "options_uz": [
+      "$200",
+      "$220",
+      "$1100",
+      "$2200"
+    ],
+    "why": [
+      "Grants cost 100×$200=$20,000 plus $2,000 administration. Only 20 adoptions are additional; $22,000/20=$1,100 per extra adoption. The programme has substantial deadweight spending.",
+      "Гранты обходятся в $20 000 плюс $2 000 администрирования. Дополнительных внедрений только 20; $22 000/20=$1 100 за каждое. Большая часть расходов не меняет поведение.",
+      "Grantlar 100×$200=$20 000, boshqaruv $2000. Qo‘shimcha joriy etishlar 20 ta; $22 000/20=$1100. Xarajatlarning katta qismi qarorga ta’sir qilmaydi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-029",
+    "n": 29,
+    "d": "hard",
+    "k": "B",
+    "sec": 195,
+    "en": "A factory can install a filter for $80 per week. Without it, downstream households suffer verified harm of $140 per week. Installing the filter does not alter output. With zero bargaining costs and enforceable rights, what is the maximum net social gain from installing it, and which conclusion follows?",
+    "ru": "Завод может установить фильтр за $80 в неделю. Без фильтра жители ниже по течению несут подтверждённый ущерб $140 в неделю. Фильтр не влияет на выпуск. При нулевых издержках переговоров и защищённых правах какова максимальная чистая общественная выгода установки и какой вывод следует?",
+    "uz": "Zavod haftasiga $80 ga filtr o‘rnata oladi. Filtrsiz quyi oqimdagi aholi haftasiga $140 zarar ko‘radi. Filtr ishlab chiqarishni o‘zgartirmaydi. Muzokara xarajati nol va huquqlar kafolatlangan bo‘lsa, filtrning eng katta sof ijtimoiy foydasi qancha va qanday xulosa kelib chiqadi?",
+    "options_en": [
+      "$140; production must shut down",
+      "$60; bargaining could support filtering, although compensation depends on rights",
+      "$80; residents must always pay the full filter cost",
+      "−$60; it is efficient to continue polluting"
+    ],
+    "options_ru": [
+      "$140; производство необходимо остановить",
+      "$60; переговоры могут обеспечить установку, но компенсации зависят от прав",
+      "$80; жители всегда должны полностью оплатить фильтр",
+      "−$60; выгоднее продолжать загрязнение"
+    ],
+    "options_uz": [
+      "$140; ishlab chiqarish albatta to‘xtashi kerak",
+      "$60; muzokara filtrga olib kelishi mumkin, lekin to‘lov huquqlarga bog‘liq",
+      "$80; aholi har doim filtrni to‘liq to‘lashi kerak",
+      "−$60; ifloslantirishni davom ettirish samarali"
+    ],
+    "why": [
+      "Avoiding $140 harm at a cost of $80 creates $60 net gain. Bargaining can support the efficient outcome under the stated assumptions, but rights affect who compensates whom.",
+      "Предотвращение ущерба $140 при затратах $80 даёт $60 чистой выгоды. Переговоры могут привести к эффективному решению, однако распределение платежей зависит от прав.",
+      "$140 zararni $80 xarajat bilan oldini olish $60 sof foyda beradi. Kelishuv samarali natijaga olib kelishi mumkin, ammo kim to‘lashi mulk huquqlariga bog‘liq."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-032",
+    "n": 32,
+    "d": "hard",
+    "k": "D",
+    "sec": 190,
+    "en": "A competitive employer receives marginal revenue products of $90, $75, $60 and $45 from four additional workers in sequence. Initially the daily wage is $65; later it rises to $80, with MRP unchanged. How many of these workers maximise profit before and after the wage rise?",
+    "ru": "Для конкурентного работодателя предельная доходность четырёх дополнительных работников по порядку составляет $90, $75, $60 и $45 в день. Первоначальная дневная зарплата $65, позже она растёт до $80; MRP не меняется. Сколько этих работников выгодно нанять до и после повышения зарплаты?",
+    "uz": "Raqobatli ish beruvchi ketma-ket qo‘shimcha to‘rt ishchidan kuniga $90, $75, $60 va $45 chegaraviy daromad oladi. Dastlab kunlik ish haqi $65, keyin $80 ga oshadi; MRP o‘zgarmaydi. Ish haqi o‘sishidan oldin va keyin nechtasini yollash foydani maksimallashtiradi?",
+    "options_en": [
+      "3 before; 2 after",
+      "2 before; 2 after",
+      "1 before; 2 after",
+      "2 before; 1 after"
+    ],
+    "options_ru": [
+      "До повышения — 3; после — 2",
+      "До повышения — 2; после — 2",
+      "До повышения — 1; после — 2",
+      "До повышения — 2; после — 1"
+    ],
+    "options_uz": [
+      "Oldin — 3; keyin — 2",
+      "Oldin — 2; keyin — 2",
+      "Oldin — 1; keyin — 2",
+      "Oldin — 2; keyin — 1"
+    ],
+    "why": [
+      "At wage $65, only MRPs $90 and $75 exceed cost, so hire 2. At $80, only $90 exceeds cost, so hire 1.",
+      "При зарплате $65 выгодны работники с MRP $90 и $75 — двое. При $80 выгоден лишь первый — один.",
+      "$65 ish haqida $90 va $75 MRPlar xarajatdan yuqori, 2 kishi yollanadi. $80 da faqat $90 yuqori, 1 kishi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-033",
+    "n": 33,
+    "d": "hard",
+    "k": "C",
+    "sec": 195,
+    "en": "Two households earn $12,000 and $90,000 annually before redistribution. The lower-income household receives a $5,000 means-tested transfer, while the higher-income household pays an additional $25,000 income tax. Ignore responses and other taxes. By how much does their disposable-income gap narrow, and is the lower-income household necessarily above a $20,000 poverty threshold?",
+    "ru": "До перераспределения два домохозяйства зарабатывают $12 000 и $90 000 в год. Первое получает адресный трансферт $5 000, второе платит дополнительный подоходный налог $25 000. Игнорируйте поведенческие эффекты и другие налоги. На сколько сократится разница располагаемых доходов и обязательно ли первое домохозяйство выйдет за порог бедности $20 000?",
+    "uz": "Qayta taqsimlashdan oldin ikki xonadon yillik $12 000 va $90 000 topadi. Kam daromadlisi $5000 maqsadli transfert oladi, yuqori daromadlisi qo‘shimcha $25 000 daromad solig‘i to‘laydi. Boshqa ta’sir va soliqlarni hisoblamang. Ixtiyordagi daromad farqi qanchaga qisqaradi va past daromadli xonadon $20 000 kambag‘allik chegarasidan albatta chiqadimi?",
+    "options_en": [
+      "Gap narrows by $25,000; yes, income becomes $37,000",
+      "Gap narrows by $30,000; yes, income reaches $20,000",
+      "Gap narrows by $30,000; no, lower income is still $17,000",
+      "Gap widens by $30,000; no, income stays $12,000"
+    ],
+    "options_ru": [
+      "Разрыв сокращается на $25 000; да, доход станет $37 000",
+      "Разрыв сокращается на $30 000; да, доход достигнет $20 000",
+      "Разрыв сокращается на $30 000; нет, доход первого всё ещё $17 000",
+      "Разрыв увеличивается на $30 000; нет, доход остаётся $12 000"
+    ],
+    "options_uz": [
+      "Farq $25 000 ga kamayadi; ha, daromad $37 000 bo‘ladi",
+      "Farq $30 000 ga kamayadi; ha, daromad $20 000 ga yetadi",
+      "Farq $30 000 ga kamayadi; yo‘q, past daromad $17 000 bo‘ladi",
+      "Farq $30 000 ga oshadi; yo‘q, daromad $12 000 qoladi"
+    ],
+    "why": [
+      "Original gap =90,000−12,000=$78,000. After redistribution it is 65,000−17,000=$48,000, $30,000 less. $17,000 remains below $20,000.",
+      "Изначальный разрыв $78 000; после мер доходы $65 000 и $17 000, разрыв $48 000. Сокращение $30 000, но $17 000 ниже порога бедности.",
+      "Dastlab farq $78 000; keyin daromadlar $65 000 va $17 000, farq $48 000. $30 000 ga qisqaradi, ammo $17 000 kambag‘allik chegarasidan past."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-037",
+    "n": 37,
+    "d": "hard",
+    "k": "A",
+    "sec": 195,
+    "en": "An additional vaccination has private benefit $35, external benefit $25 and marginal provision cost $50. Families perceive the private benefit correctly but ignore the benefit to others. Which assessment of a $15 per-vaccination subsidy is supported at this margin?",
+    "ru": "Дополнительная вакцинация даёт личную выгоду $35, внешнюю выгоду $25 и обходится в $50. Семьи правильно оценивают личную выгоду, но не учитывают пользу другим. Как оценить субсидию $15 на прививку на данном пределе?",
+    "uz": "Qo‘shimcha emlashning shaxsiy foydasi $35, tashqi foydasi $25, taqdim etish xarajati $50. Oilalar shaxsiy foydani to‘g‘ri, boshqalarga foydani esa hisobga olmaydi. Shu chegaradagi har bir emlashga $15 subsidiya haqida qanday xulosa asosli?",
+    "options_en": [
+      "It can make private uptake attractive and the unit has $10 net social benefit, although $15 is below the full external benefit",
+      "It eliminates the external benefit and makes net social benefit zero",
+      "It is unnecessary because private benefit already exceeds full cost",
+      "It creates $25 of net social loss regardless of behavioural response"
+    ],
+    "options_ru": [
+      "Она может стимулировать личный спрос; чистая общественная выгода единицы $10, хотя $15 меньше внешней выгоды",
+      "Она устраняет внешнюю выгоду, делая чистую общественную выгоду нулевой",
+      "Она не нужна, поскольку личная выгода уже выше полных затрат",
+      "Она создаёт $25 общественного убытка независимо от реакции людей"
+    ],
+    "options_uz": [
+      "U xususiy talabni rag‘batlantirishi mumkin; sof ijtimoiy foyda $10, garchi $15 tashqi foydadan kam",
+      "U tashqi foydani yo‘qotib, sof ijtimoiy foydani nol qiladi",
+      "Keraksiz, chunki shaxsiy foyda xarajatdan yuqori",
+      "Javob qanday bo‘lishidan qat’i nazar $25 ijtimoiy zarar yaratadi"
+    ],
+    "why": [
+      "Total marginal social benefit =35+25=$60, cost $50, net gain $10. With subsidy $15, the private effective cost is $35, matching private benefit; this can support uptake, but the Pigouvian benchmark is $25.",
+      "Предельная общественная выгода $60 при стоимости $50, чистая выгода $10. После субсидии $15 личные затраты $35 равны личной выгоде. Эталонная коррекция внешней выгоды — $25.",
+      "Jami ijtimoiy foyda $60, xarajat $50, sof natija +$10. $15 subsidiya bilan shaxsiy narx $35 bo‘ladi, shaxsiy foydaga teng. Tashqi foyda bo‘yicha to‘liq tuzatish $25."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-040",
+    "n": 40,
+    "d": "hard",
+    "k": "B",
+    "sec": 195,
+    "en": "A firm's marginal revenue from each extra unit of output is $12. The next three workers would add 6, 4 and 3 units of output respectively, with other inputs unchanged. Each worker costs $50 per day. How many of these workers should it hire, and what is the combined additional profit?",
+    "ru": "Предельный доход фирмы от каждой дополнительной единицы выпуска — $12. Следующие три работника прибавят соответственно 6, 4 и 3 единицы при неизменных остальных ресурсах. Каждый работник обходится в $50 в день. Сколько работников выгодно нанять и каков суммарный прирост прибыли?",
+    "uz": "Firma har qo‘shimcha mahsulot birligidan $12 chegaraviy daromad oladi. Keyingi uch ishchi mos ravishda 6, 4 va 3 birlik qo‘shadi, boshqa resurslar o‘zgarmaydi. Har ishchi kuniga $50 turadi. Nechtasini yollash foydali va jami qo‘shimcha foyda qancha?",
+    "options_en": [
+      "2 workers; +$20",
+      "1 worker; +$22",
+      "3 workers; +$56",
+      "1 worker; +$72"
+    ],
+    "options_ru": [
+      "2 работника; +$20",
+      "1 работник; +$22",
+      "3 работника; +$56",
+      "1 работник; +$72"
+    ],
+    "options_uz": [
+      "2 ishchi; +$20",
+      "1 ishchi; +$22",
+      "3 ishchi; +$56",
+      "1 ishchi; +$72"
+    ],
+    "why": [
+      "Workers' MRPs are 6×12=$72, 4×12=$48 and 3×12=$36. At $50 wage only the first is profitable, adding $22.",
+      "MRP работников равны $72, $48 и $36. При зарплате $50 выгоден только первый; его вклад в прибыль $72−$50=$22.",
+      "Ishchilar MRPlari $72, $48 va $36. $50 ish haqida faqat birinchi ishchi foydali; qo‘shimcha foyda $22."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-041",
+    "n": 41,
+    "d": "hard",
+    "k": "D",
+    "sec": 175,
+    "en": "Households initially underestimate the private lifetime savings from insulation as $30, when independent tests estimate $80. Installation costs $60, and neighbouring households gain no measurable external benefit. Which policy explanation best fits public information disclosure?",
+    "ru": "Домохозяйства первоначально оценивают будущую личную экономию от утепления жилья в $30, хотя независимые испытания показывают $80. Установка обходится в $60, измеримых внешних выгод соседям нет. Какое объяснение политики раскрытия информации наиболее точное?",
+    "uz": "Xonadonlar issiqlik izolyatsiyasidan keladigan kelajakdagi shaxsiy tejamni $30 deb o‘ylaydi, mustaqil sinovlar esa $80 ekanini ko‘rsatadi. O‘rnatish xarajati $60, qo‘shnilarga o‘lchanadigan tashqi foyda yo‘q. Axborotni oshkor qilish siyosatini qaysi izoh eng to‘g‘ri tushuntiradi?",
+    "options_en": [
+      "It must address a $50 negative externality imposed on neighbours",
+      "It cannot alter demand because installation cost stays $60",
+      "It turns insulation into a non-rival public good",
+      "It can correct underestimated private benefits, changing a privately unattractive purchase into a beneficial one without proving an externality"
+    ],
+    "options_ru": [
+      "Оно обязательно устраняет внешний ущерб соседям $50",
+      "Оно не влияет на спрос, поскольку цена установки остаётся $60",
+      "Оно превращает утепление в неисключаемое общественное благо",
+      "Оно исправляет недооценку личной выгоды и может сделать покупку выгодной без доказательства внешнего эффекта"
+    ],
+    "options_uz": [
+      "U qo‘shnilarga $50 tashqi zararni bartaraf etishi shart",
+      "O‘rnatish $60 bo‘lgani uchun talabga ta’sir qilmaydi",
+      "Izolyatsiyani raqobatsiz jamoat ne’matiga aylantiradi",
+      "U shaxsiy foydani past baholashni tuzatadi va tashqi ta’sirsiz ham xaridni foydali qilishi mumkin"
+    ],
+    "why": [
+      "Perceived private gain $30 is less than cost $60, whereas actual expected private gain $80 exceeds cost. This is an information problem, not proof of an externality.",
+      "Ошибочно воспринимаемая личная выгода $30 ниже затрат $60, фактическая ожидаемая выгода $80 выше затрат. Это информационная проблема, а не доказательство внешнего эффекта.",
+      "Baholangan shaxsiy foyda $30 xarajat $60 dan past, haqiqiy kutilgan foyda $80 esa yuqori. Bu tashqi ta’sir emas, axborot muammosi."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-043",
+    "n": 43,
+    "d": "hard",
+    "k": "C",
+    "sec": 185,
+    "en": "A city subsidises new bus routes. Each subsidised route costs taxpayers $120,000 annually. An audit finds that four of six routes would have operated anyway, while only two are truly additional. Administration costs $60,000 in total. What is the public cost per additional route, and what concern follows?",
+    "ru": "Город субсидирует автобусные маршруты: каждый из шести обходится бюджету в $120 000 в год. Аудит показал, что четыре маршрута работали бы без помощи, только два действительно появились благодаря субсидии. Административные расходы $60 000. Каковы бюджетные затраты на дополнительный маршрут и какой риск очевиден?",
+    "uz": "Shahar oltita avtobus yo‘nalishini subsidiyalaydi: har biri davlatga yiliga $120 000 turadi. Audit to‘rttasi grantsiz ham ishlagan bo‘lishini, faqat ikkitasi qo‘shimcha ekanini aniqladi. Ma’muriy xarajat $60 000. Har bir yangi yo‘nalish uchun davlat xarajati qancha va qanday muammo ko‘rinadi?",
+    "options_en": [
+      "$120,000; no deadweight spending",
+      "$130,000; zero administration costs",
+      "$390,000; subsidies for existing services create deadweight spending",
+      "$780,000; all routes are additional"
+    ],
+    "options_ru": [
+      "$120 000; бесполезных расходов нет",
+      "$130 000; администрирование ничего не стоит",
+      "$390 000; выплаты за уже существовавшие маршруты создают неэффективные расходы",
+      "$780 000; все маршруты дополнительные"
+    ],
+    "options_uz": [
+      "$120 000; ortiqcha xarajat yo‘q",
+      "$130 000; boshqaruv xarajati yo‘q",
+      "$390 000; oldindan mavjud yo‘nalishlarga to‘lov samarasiz sarf yaratadi",
+      "$780 000; barcha yo‘nalishlar qo‘shimcha"
+    ],
+    "why": [
+      "Total expenditure is 6×120,000+60,000=$780,000; only two routes are additional. Cost per new route is $390,000, highlighting deadweight subsidy expenditure.",
+      "Всего 6×120 000+60 000=$780 000. Новых маршрутов только два; на каждый приходится $390 000. Субсидии остальным могут быть неэффективны.",
+      "Jami 6×120 000+60 000=$780 000. Qo‘shimcha yo‘nalishlar 2 ta; bittasiga $390 000. Oldindan mavjud yo‘nalishlar uchun to‘lov samarasiz."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-045",
+    "n": 45,
+    "d": "hard",
+    "k": "A",
+    "sec": 190,
+    "en": "A consultant increases her hourly wage from $50 to $60 but chooses to work 36 rather than 40 hours weekly. Assume there is no other income or job change. What happens to weekly earnings, and what labour-supply explanation is consistent with fewer hours at the higher wage?",
+    "ru": "Почасовая оплата консультанта выросла с $50 до $60, однако она сократила рабочую неделю с 40 до 36 часов. Другие доходы и условия не изменились. Что происходит с недельным заработком и каким эффектом предложения труда объясняется сокращение часов при более высокой ставке?",
+    "uz": "Maslahatchining soatlik ish haqi $50 dan $60 ga oshdi, ammo haftalik ish vaqtini 40 dan 36 soatga kamaytirdi. Boshqa daromad va ish shartlari o‘zgarmaydi. Haftalik daromad qanday o‘zgaradi va yuqori ish haqida ish vaqtining qisqarishi nimadan kelib chiqishi mumkin?",
+    "options_en": [
+      "Earnings rise $160; income effect can outweigh substitution effect",
+      "Earnings fall $160; substitution effect must dominate",
+      "Earnings rise $400; labour supply must always slope upward",
+      "Earnings remain $2,000; preferences are unchanged"
+    ],
+    "options_ru": [
+      "Заработок растёт на $160; эффект дохода может превысить эффект замещения",
+      "Заработок падает на $160; обязательно доминирует эффект замещения",
+      "Заработок растёт на $400; предложение труда всегда возрастает",
+      "Заработок остаётся $2 000; предпочтения неизменны"
+    ],
+    "options_uz": [
+      "Daromad $160 ga oshadi; daromad ta’siri almashtirish ta’siridan kuchli bo‘lishi mumkin",
+      "Daromad $160 ga tushadi; almashtirish ta’siri ustun",
+      "Daromad $400 ga oshadi; mehnat taklifi doim o‘sadi",
+      "Daromad $2000 bo‘lib qoladi; afzalliklar o‘zgarmaydi"
+    ],
+    "why": [
+      "Weekly earnings go from 50×40=$2,000 to 60×36=$2,160, increasing $160. Fewer hours despite higher pay are consistent with a dominant income effect.",
+      "Недельный доход растёт с $2 000 до $2 160, на $160. Снижение часов при более высокой ставке согласуется с преобладанием эффекта дохода.",
+      "Haftalik daromad $2000 dan $2160 ga, ya’ni $160 oshadi. Yuqori ish haqida soatning kamayishi daromad ta’siri ustunligiga mos."
+    ]
+  },
+  {
+    "ref": "EC9708:G2:EC9708-G2-T5-P-046",
+    "n": 46,
+    "d": "hard",
+    "k": "B",
+    "sec": 180,
+    "en": "A privately owned utility reduces annual operating costs from $5m to $4m after privatisation, but annual consumer bills rise from $7m to $9m, with the same number and quality of services. Which evaluation is most defensible?",
+    "ru": "После приватизации коммунальная компания снизила годовые операционные затраты с $5 млн до $4 млн, но общая сумма счетов потребителей выросла с $7 млн до $9 млн при прежнем количестве и качестве услуг. Какая оценка наиболее обоснованна?",
+    "uz": "Kommunal korxona xususiylashtirilgach yillik ishlash xarajati $5 mln dan $4 mln ga tushdi, ammo xizmat soni va sifati o‘zgarmagan holda iste’molchi to‘lovlari $7 mln dan $9 mln ga oshdi. Qaysi baho eng asosli?",
+    "options_en": [
+      "Privatisation certainly reduced consumer welfare and raised production costs",
+      "Operating efficiency improved, but higher bills raise distribution and market-power concerns; ownership alone does not settle welfare",
+      "The increase in bills proves that the firm became less cost-efficient",
+      "Competition is guaranteed because ownership changed"
+    ],
+    "options_ru": [
+      "Приватизация обязательно ухудшила благосостояние и повысила производственные затраты",
+      "Операционная эффективность выросла, но повышение счетов вызывает вопросы распределения и рыночной власти; одна смена владельца не определяет благосостояние",
+      "Рост счетов доказывает снижение эффективности производства",
+      "Смена собственности гарантирует конкуренцию"
+    ],
+    "options_uz": [
+      "Xususiylashtirish farovonlikni albatta yomonlashtirib, ishlab chiqarish xarajatini oshirdi",
+      "Operatsion samaradorlik oshdi, ammo yuqori to‘lovlar taqsimot va bozor kuchi muammosini tug‘diradi; faqat mulk shakli yetarli emas",
+      "To‘lovning oshishi ishlab chiqarish samarasizligini isbotlaydi",
+      "Mulk o‘zgarishi raqobatni kafolatlaydi"
+    ],
+    "why": [
+      "Production costs fell $1m for the same output, consistent with efficiency gains. Bills rose $2m, raising potential consumer and market-power concerns. Net welfare requires further evidence.",
+      "При прежнем выпуске затраты упали на $1 млн — признак повышения эффективности. Счета выросли на $2 млн. Для вывода об общественном благосостоянии нужны дополнительные данные.",
+      "Bir xil xizmatda xarajat $1 mln kamaydi, bu samaradorlik belgisidir. To‘lov $2 mln oshdi; umumiy farovonlikni baholash uchun qo‘shimcha ma’lumot kerak."
+    ]
+  }
+]
