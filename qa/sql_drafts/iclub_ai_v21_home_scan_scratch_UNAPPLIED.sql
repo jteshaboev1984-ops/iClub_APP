@@ -72,6 +72,12 @@ BEGIN
   JOIN private.iclub_ai_v21_home_synthetic_access a
    ON a.user_id=us.user_id AND a.subject_key=subj.subject_key
     AND a.intent=us.mode AND a.allowed=true
+  -- Complete candidate enumeration must respect an ACTUAL stored selection,
+  -- not merely remaining quota or a synthetic allowlist flag.
+  JOIN private.iclub_subject_slot_selections slot
+   ON slot.user_id=us.user_id AND slot.subject_key=subj.subject_key
+    AND slot.study_selected=true
+    AND (us.mode='study' OR slot.competitive_selected=true)
   WHERE us.user_id=p_user_id AND us.mode IN ('study','competitive')
  ),
  practice_candidates AS (
