@@ -10,6 +10,7 @@ const {createHash}=require("node:crypto");
 const {buildHomePlan,verifySignedPlan}=require("./ai-layer-v21-p6-home-signed-server-bridge.cjs");
 const {QAHomeApprovedPriority}=require("./ai-layer-v21-p6-home-approved-priority.cjs");
 const {makeCommercialProofAdapter}=require("./ai-layer-v21-p6-commercial-contract-adapter.cjs");
+const {validateBeforeHomeDelivery}=require("./ai-layer-v21-p6-home-delivery-gate.cjs");
 const OWNER="11111111-1111-4111-8111-111111111111";
 const FOREIGN="22222222-2222-4222-8222-222222222222";
 const HANDLE="33333333-3333-4333-8333-333333333333";
@@ -140,7 +141,7 @@ function makeServices(){
  services.verifySubjectAccess=access.verifySubjectAccess;
  return services;
 }
-async function evaluateOwnerAction(services,user,handle,locale){
+async function evaluateOwnerAction(services,user,handle,locale,beforeDelivery){
  const proposed=await buildHomePlan(services,{userId:user,contextHandle:handle,locale});
  if(proposed.ready!==true)return null;
  const validated={
@@ -167,15 +168,25 @@ async function evaluateOwnerAction(services,user,handle,locale){
  const choice=await new QAHomeApprovedPriority(validated).choose({
   userId:user,contextHandle:handle,locale});
  if(choice.ready!==true)return null;
- const out={ok:true,status:choice.status,reviewOnly:true,releaseAllowed:false};
- if(choice.status==="candidate_only"){
-  out.actionCode=choice.actionCode;out.subjectKey=choice.subjectKey;
- }else if(choice.status==="selection_required")
-  out.candidateActionIds=choice.candidateActionIds;
- else return null;
+ // QA instrumentation runs only on isolated loopback and may revoke
+ // synthetic rights *after* priority selection but *before* delivery.
+ if(typeof beforeDelivery==="function")await beforeDelivery({user,handle,locale});
+ const delivered=await validateBeforeHomeDelivery(services,{
+  userId:user,contextHandle:handle,locale,plan:proposed.plan,choice
+ });
+ if(delivered.ready!==true)return null;
+ const out={ok:true,status:delivered.status,
+  reviewOnly:true,releaseAllowed:false,expiresAtMs:delivered.expiresAtMs};
+ if(delivered.status==="candidate_only"){
+  out.actionCode=delivered.actionCode;out.subjectKey=delivered.subjectKey;
+ }else if(delivered.status==="selection_required"){
+  out.candidateActionIds=delivered.candidateActionIds;
+ }else return null;
  return out;
 }
-function makeGateway(){
+function makeGateway({beforeDelivery}={}){
+ if(beforeDelivery!==undefined&&typeof beforeDelivery!=="function")
+  throw Error("invalid scratch-only injection hook");
  pg();
  const services=makeServices(),state={requests:0,denied:0};
  const server=createServer(async(req,res)=>{
@@ -218,7 +229,7 @@ function makeGateway(){
    const body=JSON.parse(raw),keys=Object.keys(body||{}).sort().join(",");
    if(keys!=="contextHandle,locale"||!UUID.test(body.contextHandle||"")||
     !["ru","uz","en"].includes(body.locale))return reject(400,"invalid_request");
-   const out=await evaluateOwnerAction(services,user,body.contextHandle,body.locale);
+   const out=await evaluateOwnerAction(services,user,body.contextHandle,body.locale,beforeDelivery);
    if(!out)return reject(403,"in_development");
    res.writeHead(200,{"Content-Type":"application/json",
     "Cache-Control":"no-store","Access-Control-Allow-Origin":origin,
