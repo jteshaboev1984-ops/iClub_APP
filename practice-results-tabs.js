@@ -282,6 +282,7 @@
         return ix>=0&&ix<options.length?key+' — '+String(options[ix]):key||'—';
       };
       const card=node('details','iclub-sx-attempt-question');
+      if(i===0)card.open=true;
       const summary=node('summary','iclub-sx-attempt-question-head');
       summary.append(node('span','iclub-sx-attempt-question-no',String(i+1)));
       summary.append(node('span','iclub-sx-attempt-question-label',
@@ -291,9 +292,6 @@
       summary.append(chevron);
       card.append(summary);
       const detail=node('div','iclub-sx-attempt-question-body');
-      // The collapsed summary already contains the question. Repeat the full
-      // version only when it is long enough to be truncated there.
-      if(stem.length>90)detail.append(node('p','iclub-sx-attempt-question-full',stem));
       const wrong=node('div','iclub-sx-attempt-answer bad');
       wrong.append(node('strong','',tr('ВАШ ОТВЕТ','SIZNING JAVOBINGIZ','YOUR ANSWER')));
       wrong.append(node('div','',answer(d.user_answer)));
