@@ -120,6 +120,24 @@ async function run(){
     locale:v.lang,viewport:v.w+"x"+v.h,action:state.action,
     navLandmark:state.landmark,overflow:false}));
   }
+  // Browser should stop displaying a once-valid recommendation when the
+  // signed server deadline passes, even with no click, navigation or network.
+  const expiry=await cdp.send("Runtime.evaluate",{expression:
+   '(()=>{const before=window.__qaHomeState();'+
+   'const deadline=before.expiresAtMs;'+
+   'if(!Number.isSafeInteger(deadline)||deadline<=Date.now()) throw Error("Missing signed TTL");'+
+   'Date.now=()=>deadline+1;'+
+   'document.dispatchEvent(new Event("visibilitychange"));'+
+   'return {before,after:window.__qaHomeState(),text:document.querySelector("#result").textContent}})()',
+   returnByValue:true});
+  if(expiry.exceptionDetails)throw Error("Browser expiry validation exception");
+  const exp=expiry.result?.value;
+  assert.equal(exp?.before.state,"ready");
+  assert.equal(exp.after.state,"expired");
+  assert.equal(exp.after.action,null);
+  assert.equal(exp.after.expiresAtMs,0);
+  assert.equal(exp.text,"Recommendation expired. Check again");
+  console.log("HOME_PG_CHROME_TTL_GREEN: expired signed Home no longer displayed");
   const leave=await cdp.send("Runtime.evaluate",{expression:
    '(()=>{document.querySelector("#leave").click();'+
    'return window.__qaHomeState()})()',returnByValue:true});
