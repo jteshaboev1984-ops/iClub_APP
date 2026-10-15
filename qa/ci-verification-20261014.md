@@ -35,3 +35,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §104 rerun: double-check commercial, academic and editorial rights across last async boundary, then re-read exact owner screen/scan; not an atomic live transaction. NO MERGE.
 
 2026-10-15 §105 final signed Home delivery now presents safe locale-independent subject/action choices only; never exposes internal evidenceId/actionId over HTTP on same-priority ties. Full CI validation, QA ONLY, NO MERGE.
+
+2026-10-15 §106: trilingual subject choices use exact live i18n.js captions in synthetic Home Chromium; must show all same-priority selections, never raw evidence IDs or fake clickable navigation. QA-to-QA only NO MERGE.
