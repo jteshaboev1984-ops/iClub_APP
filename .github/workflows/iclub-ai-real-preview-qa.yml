@@ -8,6 +8,11 @@ on:
       - '.github/workflows/iclub-ai-real-preview-qa.yml'
       - 'qa/ai-v21-real-preview-*'
       - 'qa/ai-v21-real-academic-screen-bridge*'
+      - 'qa/ai-v21-resolver-transport.test.cjs'
+      - 'qa/ai-layer-v21-ui-transport.cjs'
+      - 'qa/edge_v21/context_core.ts'
+      - 'qa/edge_v21/index.ts'
+      - 'qa/edge_v21/practice_resolver_*'
       - 'qa/sql_drafts/iclub_ai_v21_practice_attempt_resolution_*'
       - 'global-ai-ui.js'
       - 'global-ai-ui.css'
@@ -48,6 +53,15 @@ jobs:
           node --test qa/ai-v21-real-preview-regression.test.cjs
           node --check qa/ai-v21-real-academic-screen-bridge.cjs
           node --test qa/ai-v21-real-academic-screen-bridge.test.cjs
+          node --test qa/ai-v21-resolver-transport.test.cjs
+      - name: Install Deno for isolated Edge contract checks
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check existing /context and new Practice resolver HTTP contract
+        run: |
+          set -euo pipefail
+          deno test --no-check             qa/edge_v21/context_core_test.ts             qa/edge_v21/practice_resolver_http_test.ts             qa/edge_v21/supabase_services_test.ts
       - name: Browser test on loopback network only
         run: |
           set -euo pipefail
