@@ -122,12 +122,20 @@ function makeServices(){
   async readEditorialRelease(locale,code,subject){
    if(!["ru","uz","en"].includes(locale)||!CODE_INTENT[code]||
     !WORD.test(subject||""))return{ready:false};
-   // This is a TEST DOUBLE: real publishing/rights must remain NO-GO.
-   const sourceHash=createHash("sha256").update(
-    "SYNTHETIC-UNPUBLISHED-RIGHTS:"+locale+":"+code+":"+subject
-   ).digest("hex");
-   return{ready:true,rightsApproved:true,contentApproved:true,
-    sourceConflict:false,sourceHash,sourceVersion:"synthetic-only-v1"};
+   // Read a REAL PostgreSQL row, but ONLY the synthetic scratch release
+   // table. A revoked locale / source fails before any signed recommendation.
+   // This is NOT real editorial approval or production source publication.
+   const q="SELECT (SELECT json_build_object("+
+    "'ready',r.rights_approved AND r.content_approved AND r.revoked_at IS NULL,"+
+    "'rightsApproved',r.rights_approved AND r.revoked_at IS NULL,"+
+    "'contentApproved',r.content_approved AND r.revoked_at IS NULL,"+
+    "'sourceConflict',false,'sourceHash',r.source_hash,"+
+    "'sourceVersion',r.source_version)"+
+    " FROM private.iclub_ai_v21_home_source_test_releases r"+
+    " WHERE r.locale='"+locale+"' AND r.action_code='"+code+"'"+
+    " AND r.subject_key='"+subject+"')::text";
+   const raw=sql(q);
+   return raw?JSON.parse(raw):{ready:false};
   }
  };
 }
