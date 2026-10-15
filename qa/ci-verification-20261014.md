@@ -27,3 +27,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §100–101: new strict commercial source adapter + scratch mirror of existing iClub subject guard/capabilities/selection, scanner rejects unselected subjects and falls back to other eligible ones; full CI-only; never merge.
 
 2026-10-15 §101 rerun: share selected-subject PG fixture between scanner and HTTP test; commercial contract under enforced mode requires caps ai_generation_entitled and separately approved QA gate. NO MERGE.
+
+2026-10-15 §103 real commercial pg_proc function fingerprints, read-only contract drift gate, no student SQL, no production/live Supabase CI; QA-to-QA ONLY, NO MERGE.
