@@ -31,3 +31,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §103 real commercial pg_proc function fingerprints, read-only contract drift gate, no student SQL, no production/live Supabase CI; QA-to-QA ONLY, NO MERGE.
 
 2026-10-15 §104: final signed Home HTTP delivery authority rechecks commercial/source/academic/screen, transactional race negative tests, UI expires by server TTL in Chromium. QA-only NO MERGE.
+
+2026-10-15 §104 rerun: double-check commercial, academic and editorial rights across last async boundary, then re-read exact owner screen/scan; not an atomic live transaction. NO MERGE.
