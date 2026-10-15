@@ -19445,6 +19445,24 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
     }
   }
   if (!isCurrent()) return;
+  // Existing authenticated Practice history is independent of recommendation rows.
+  let tourPracticeHistory=null,tourPracticeHistoryUnavailable=false;
+  if(activeTab==="practice"&&practiceMode==="tours"){
+    try{
+      if(!window.sb?.rpc)throw new Error("history_rpc_unavailable");
+      const {data,error}=await window.sb.rpc("get_practice_progress_summary",{
+        p_subject_key:subjectKey,p_tour_no:null,p_limit:12
+      });
+      if(error||data?.ok!==true||
+          String(data?.subject_key||"").toLowerCase()!==subjectKey.toLowerCase())
+        throw error||new Error("history_invalid");
+      tourPracticeHistory=data;
+    }catch(error){
+      tourPracticeHistoryUnavailable=true;
+      logClientError("myrecs_tour_practice_history_unavailable",error);
+    }
+  }
+  if(!isCurrent())return;
   // Independent Practice lanes: past normal Practice vs voluntary topic Practice.
   const modeTabs=activeTab==="practice" ? `
     <nav class="iclub-sx-subtabs" role="group" aria-label="${escapeHTML(tr3("Режим практики","Amaliyot turi","Practice mode"))}">
@@ -19690,17 +19708,26 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
     </div>
     ${modeTabs}
     ${renderSeasonControl()}
+    ${activeTab==="practice"&&practiceMode==="tours"
+      ? `<div id="my-recs-tour-latest"></div>`
+      :""}
     ${activeTab==="practice"&&practiceMode==="topics"
       ? `<div id="my-recs-topic-latest"></div>`
       :""}
     ${activeTab==="practice"&&practiceMode==="topics"
       ? `<div class="iclub-sx-heading"><h2>${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</h2><span class="iclub-sx-total">${practiceRecCount} ${escapeHTML(practiceRecCountNoun)}</span></div>`
       :""}
-    <div class="${activeTab==="practice"&&practiceMode==="topics"?"iclub-sx-groups":""}">
+    ${activeTab==="practice"&&practiceMode==="tours"
+      ? `<div class="iclub-sx-heading"><h2>${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</h2><span class="iclub-sx-total">${practiceRecCount} ${escapeHTML(practiceRecCountNoun)}</span></div>`
+      :""}
+    <div class="${activeTab==="practice"?"iclub-sx-groups":""}">
       ${activeTab==="tour" ? renderTourList() : renderPracticeList()}
     </div>
     ${activeTab==="practice"&&practiceMode==="topics"
       ? `<section id="my-recs-topic-history" class="iclub-sx-history-preview"></section>`
+      :""}
+    ${activeTab==="practice"&&practiceMode==="tours"
+      ? `<section id="my-recs-tour-history" class="iclub-sx-tour-history-slot"></section>`
       :""}
   `;
 
@@ -19758,6 +19785,27 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
         window.dispatchEvent(new CustomEvent("iclub-practice-correct-history",{
           detail:{subjectKey,sourceSessionId,questionIds,topic:String(attempt.topic)}
         }));
+      });
+    });
+  }
+  if(activeTab==="practice"&&practiceMode==="tours"){
+    window.iClubPracticeTourHistoryV1?.renderLatest?.(
+      wrap.querySelector("#my-recs-tour-latest"),tourPracticeHistory,tourPracticeHistoryUnavailable,currentLang()
+    );
+    window.iClubPracticeTourHistoryV1?.render?.(
+      wrap.querySelector("#my-recs-tour-history"),tourPracticeHistory,tourPracticeHistoryUnavailable,currentLang()
+    );
+    wrap.querySelectorAll("[data-sx-tour-expand]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const group=button.closest("[data-sx-tour-group]");
+        if(!group)return;
+        const extras=group.querySelectorAll("[data-sx-tour-extra]");
+        const open=button.getAttribute("aria-expanded")!=="true";
+        extras.forEach(el=>{el.hidden=!open;});
+        button.setAttribute("aria-expanded",String(open));
+        button.textContent=open
+          ?tr3("Свернуть","Yig‘ish","Show less")
+          :tr3("Показать ещё","Yana ko‘rsatish","Show more")+" "+extras.length+" ⌄";
       });
     });
   }
