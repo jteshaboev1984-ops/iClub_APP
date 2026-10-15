@@ -108,4 +108,4 @@ function resolveSyntheticDestination({sql,signingKey,userId,contextHandle,
   targetScreen:TARGET[actionCode],subjectKey,reviewOnly:true,
   releaseAllowed:false,navigationExecuted:false,progressChanged:false});
 }
-module.exports={resolveSyntheticDestination};
+module.exports={resolveSyntheticDestination,destinationExistsSql};
