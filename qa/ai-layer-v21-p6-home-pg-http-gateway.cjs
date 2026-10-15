@@ -4,6 +4,8 @@
 // NEVER deploy this synthetic fixture to Vercel or a production Edge.
 const {execFileSync}=require("node:child_process");
 const {createServer}=require("node:http");
+const {readFileSync}=require("node:fs");
+const {join}=require("node:path");
 const {createHash}=require("node:crypto");
 const {buildHomePlan,verifySignedPlan}=require("./ai-layer-v21-p6-home-signed-server-bridge.cjs");
 const {QAHomeApprovedPriority}=require("./ai-layer-v21-p6-home-approved-priority.cjs");
@@ -169,6 +171,19 @@ function makeGateway(){
  const services=makeServices(),state={requests:0,denied:0};
  const server=createServer(async(req,res)=>{
   state.requests++;
+  // This page is ONLY available on the locally bound QA fixture server.
+  // Never served by Vercel or the real app. It invokes the SAME HTTP route
+  // that authenticates synthetic user and reads the disposable PostgreSQL.
+  if(req.method==="GET"&&req.url==="/qa/home/demo"){
+   const file=join(__dirname,"preview_v21","home-pg-local.html");
+   const html=readFileSync(file,"utf8");
+   res.writeHead(200,{"Content-Type":"text/html; charset=utf-8",
+    "Cache-Control":"no-store","X-Content-Type-Options":"nosniff",
+    "Content-Security-Policy":"default-src 'none'; script-src 'unsafe-inline'; "+
+    "style-src 'unsafe-inline'; connect-src 'self'; img-src 'none'; "+
+    "base-uri 'none'; form-action 'none'; frame-ancestors 'none'"});
+   return res.end(html);
+  }
   const reject=(status,reason)=>{
    state.denied++;
    res.writeHead(status,{"Content-Type":"application/json","Cache-Control":"no-store"});
