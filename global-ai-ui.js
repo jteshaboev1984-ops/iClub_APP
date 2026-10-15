@@ -48,18 +48,6 @@
       limitPending: "Доступ восстановится после текущего периода.",
       routeInsufficient: "Для этого ответа сейчас недостаточно доступного лимита. Готовые объяснения могут быть доступны.",
       inDevelopment: "В разработке. AI-помощь по этой теме пока готовится.",
-      practiceRules: "Как работает Practice?",
-      practiceAfter: "Когда можно разобрать ошибки?",
-      practiceResult: "Объяснить результат",
-      practiceError: "Объяснить ошибку",
-      practiceNext: "Что делать после Practice?",
-      tourRules: "Правила Tours",
-      tourArchive: "Когда открывается разбор тура?",
-      topicStudy: "Как изучать эту тему?",
-      homeNext: "Что делать дальше?",
-      subjectStudy: "Как изучать предмет?",
-      catalogHelp: "Как открыть предмет?",
-      profileMeaning: "Что означают показатели?",
       subjectNames: {
         mathematics: "Математика",
         biology: "Биология",
@@ -97,18 +85,6 @@
       limitPending: "Kirish joriy davrdan keyin tiklanadi.",
       routeInsufficient: "Bu javob uchun limit yetarli emas. Tayyor izohlar hali mavjud bo‘lishi mumkin.",
       inDevelopment: "Ishlab chiqilmoqda. Bu mavzu bo‘yicha AI yordami hali tayyorlanmoqda.",
-      practiceRules: "Practice qanday ishlaydi?",
-      practiceAfter: "Xatolarni qachon tahlil qilaman?",
-      practiceResult: "Natijani tushuntir",
-      practiceError: "Xatoni tushuntir",
-      practiceNext: "Practice'dan keyin nima qilaman?",
-      tourRules: "Tours qoidalari",
-      tourArchive: "Tur tahlili qachon ochiladi?",
-      topicStudy: "Bu mavzuni qanday o‘rganaman?",
-      homeNext: "Keyin nima qilaman?",
-      subjectStudy: "Fanni qanday o‘rganaman?",
-      catalogHelp: "Fanni qanday ochaman?",
-      profileMeaning: "Ko‘rsatkichlar nimani anglatadi?",
       subjectNames: {
         mathematics: "Matematika",
         biology: "Biologiya",
@@ -146,18 +122,6 @@
       limitPending: "Access will return after the current period.",
       routeInsufficient: "There is not enough allowance for this answer. Prepared explanations may still be available.",
       inDevelopment: "In development. AI help for this topic is being prepared.",
-      practiceRules: "How does Practice work?",
-      practiceAfter: "When can I review mistakes?",
-      practiceResult: "Explain the result",
-      practiceError: "Explain the mistake",
-      practiceNext: "What next after Practice?",
-      tourRules: "Tours rules",
-      tourArchive: "When does Tour review open?",
-      topicStudy: "How do I study this topic?",
-      homeNext: "What should I do next?",
-      subjectStudy: "How do I study this subject?",
-      catalogHelp: "How do I open a subject?",
-      profileMeaning: "What do the indicators mean?",
       subjectNames: {
         mathematics: "Mathematics",
         biology: "Biology",
@@ -254,37 +218,37 @@
     };
   }
 
-  function activeCoursesScreen() {
-    const active = document.querySelector("#view-courses .stack-screen.is-active");
-    return String(active?.id || "").replace(/^courses-/, "").trim();
-  }
-
   function resolveContext() {
     const view = activeViewName();
     if (view === "courses") {
-      const screenCode = activeCoursesScreen() || "all-subjects";
       const skill = examPrepSkillContext();
-      if (skill) return { ...skill, screenCode: "exam_prep_skill" };
-      // Never infer a current subject from a stale hub heading on the catalogue.
-      if (screenCode !== "all-subjects") {
-        const title = String(document.getElementById("subject-hub-title")?.textContent || "").trim();
-        const key = subjectKeyFromText(title);
-        if (key) return {
-          threadKey: key, subjectKey: key, scopeCode: "global",
-          screenCode, academic: true, componentCode: "", skillCode: "",
-          subjectLabel: subjectName(key), subtitle: subjectName(key)
+      if (skill) return skill;
+
+      const title = String(document.getElementById("subject-hub-title")?.textContent || "").trim();
+      const key = subjectKeyFromText(title);
+      if (key) {
+        return {
+          threadKey: key,
+          subjectKey: key,
+          scopeCode: "global",
+          academic: true,
+          componentCode: "",
+          skillCode: "",
+          subjectLabel: subjectName(key),
+          subtitle: subjectName(key)
         };
       }
-      return {
-        threadKey: "general", subjectKey: "general", scopeCode: "global",
-        screenCode, academic: false, componentCode: "", skillCode: "",
-        subjectLabel: "", subtitle: copy().subtitleGeneral
-      };
     }
+
     return {
-      threadKey: "general", subjectKey: "general", scopeCode: "global",
-      screenCode: view, academic: false, componentCode: "", skillCode: "",
-      subjectLabel: "", subtitle: copy().subtitleGeneral
+      threadKey: "general",
+      subjectKey: "general",
+      scopeCode: "global",
+      academic: false,
+      componentCode: "",
+      skillCode: "",
+      subjectLabel: "",
+      subtitle: copy().subtitleGeneral
     };
   }
 
@@ -416,26 +380,6 @@
       ];
     }
 
-    const screen = ctx?.screenCode || activeViewName();
-    const prompts = {
-      "practice-start": [["practice_rules",c.practiceRules],["practice_after",c.practiceAfter]],
-      "practice-result": [["practice_result",c.practiceResult],["practice_next",c.practiceNext]],
-      "practice-review": [["practice_error",c.practiceError],["practice_next",c.practiceNext]],
-      "practice-recs": [["practice_next",c.practiceNext],["practice_rules",c.practiceRules]],
-      "tours": [["tour_rules",c.tourRules],["tour_archive",c.tourArchive]],
-      "tour-rules": [["tour_rules",c.tourRules],["tour_archive",c.tourArchive]],
-      "tour-result": [["tour_rules",c.tourRules],["tour_archive",c.tourArchive]],
-      "tour-review": [["tour_archive",c.tourArchive],["tour_rules",c.tourRules]],
-      "lessons": [["topic_study",c.topicStudy]],
-      "video": [["topic_study",c.topicStudy]],
-      "subject-hub": [["subject_study",c.subjectStudy],["practice_rules",c.practiceRules]],
-      "all-subjects": [["catalog_help",c.catalogHelp],["app_help_here",c.appHere]],
-      "home": [["home_next",c.homeNext],["practice_rules",c.practiceRules]],
-      "profile": [["profile_meaning",c.profileMeaning],["app_help_results",c.appResults]]
-    };
-    if (Object.prototype.hasOwnProperty.call(prompts, screen)) {
-      return prompts[screen].map(([key,label])=>({key,label}));
-    }
     const view = activeViewName();
     if (["profile", "ratings", "certificates", "archive"].includes(view)) {
       return [
@@ -566,16 +510,7 @@
     const title = p.querySelector("[data-global-ai-empty-title]");
     const text = p.querySelector("[data-global-ai-empty-copy]");
     if (title) title.textContent = copy().emptyTitle;
-    if (text) {
-      const previewGuidance = {
-        ru: "В этом защищённом Preview проверьте кнопку AI, смену экранов и его скрытие во время заданий. Реальные оценки и ответы по учебным вопросам здесь не подключены.",
-        uz: "Ushbu himoyalangan Previewda AI tugmasi, ekranlar almashinuvi va savollar vaqtida uning yashirilishini tekshiring. Haqiqiy natijalar va fan javoblari ulanmagan.",
-        en: "In this protected Preview, check the AI button, screen changes and blackout during questions. Real grades and academic answers are not connected."
-      };
-      text.textContent = window.__ICLUB_AI_QA_PREVIEW__
-        ? previewGuidance[locale()] || previewGuidance.ru
-        : copy().emptyCopy;
-    }
+    if (text) text.textContent = copy().emptyCopy;
   }
 
   function renderPanel() {
@@ -737,8 +672,7 @@
         prompt_key: promptKey || "",
         user_text: cleanText,
         component_code: context.componentCode || "",
-        skill_code: context.skillCode || "",
-        ...(window.__ICLUB_AI_QA_PREVIEW__ ? {screen_code: context.screenCode || ""} : {})
+        skill_code: context.skillCode || ""
       });
 
       // A response from an old account, exam or screen is NEVER rendered,
@@ -833,8 +767,7 @@
     button.type = "button";
     button.setAttribute("aria-haspopup", "dialog");
     button.setAttribute("aria-expanded", "false");
-    // Interim neutral AI lettering: final proprietary AI symbol is not yet approved.
-    button.innerHTML = '<span class="iclub-global-ai-mark-symbol" aria-hidden="true">AI</span>';
+    button.innerHTML = '<img class="iclub-global-ai-mark-logo" src="logo.png" alt="" aria-hidden="true">';
     button.addEventListener("click", () => {
       if (currentBlocked()) {
         showToast(copy().assessmentTap);
@@ -853,7 +786,7 @@
   function contextIdentity(ctx) {
     if (!ctx) return "";
     return [ctx.threadKey,ctx.subjectKey,ctx.scopeCode,
-      ctx.componentCode||"",ctx.skillCode||"",ctx.screenCode||""].join("|");
+      ctx.componentCode||"",ctx.skillCode||""].join("|");
   }
 
   function invalidatePendingAnswer() {
@@ -1055,12 +988,6 @@
 
     state.contextObserver?.disconnect?.();
     state.contextObserver = new MutationObserver(scheduleContextReconcile);
-    const courseView = document.getElementById("view-courses");
-    if (courseView) {
-      state.viewObserver.observe(courseView, {
-        subtree: true, attributes: true, attributeFilter: ["class"]
-      });
-    }
     const subjectTitle = document.getElementById("subject-hub-title");
     if (subjectTitle) {
       state.contextObserver.observe(subjectTitle, { childList: true, subtree: true, characterData: true });
