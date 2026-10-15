@@ -707,6 +707,11 @@
   font-weight:740;color:var(--sx-ink);line-height:1.42;
   overflow-wrap:anywhere;
 }
+.iclub-visual-v3 #courses-my-rec-topic-review .iclub-sx-attempt-question[open] .iclub-sx-attempt-question-label {
+  display:block;
+  overflow:visible;
+  -webkit-line-clamp:unset;
+}
 .iclub-visual-v3 #courses-my-rec-topic-review .iclub-sx-attempt-question-arrow{
   color:#8796a7;font-size:18px;flex:none;line-height:1;
 }
