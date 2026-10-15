@@ -133,6 +133,57 @@ test("§88 a changing server scan across awaits cannot be signed",async()=>{
  const x=fixture();x.t.changeScan=true;
  a.equal((await x.run()).ready,false);
 });
+
+test("§92 academic evidence revoked or changed during commercial waits is never signed",async()=>{
+ for(const kind of ["revoked","hash","revision"]){
+  const x=fixture();let calls=0;
+  x.s.verifyAcademicEvidence=async(_,v)=>{
+   const isLate=++calls>1;
+   return {allowed:!(isLate&&kind==="revoked"),
+    evidenceId:v.evidenceId,
+    evidenceRevision:isLate&&kind==="revision"?v.evidenceRevision+1:v.evidenceRevision,
+    subjectKey:v.subjectKey,actionCode:v.actionCode,
+    evidenceHash:isLate&&kind==="hash"?"c".repeat(64):evHash};
+  };
+  a.equal((await x.run()).ready,false,kind);
+  a.equal(calls,2,"Fresh academic evidence required");
+ }
+});
+test("§92 source rights, publication or hash revoked while awaiting other services denies",async()=>{
+ for(const kind of ["rights","ready","sourceHash","sourceVersion"]){
+  const x=fixture();let calls=0;
+  x.s.readEditorialRelease=async()=>{
+   const late=++calls>1;
+   return {ready:!(late&&kind==="ready"),
+    rightsApproved:!(late&&kind==="rights"),contentApproved:true,
+    sourceConflict:false,
+    sourceHash:late&&kind==="sourceHash"?"c".repeat(64):sourceHash,
+    sourceVersion:late&&kind==="sourceVersion"?"new-version":"synthetic-reviewed-v1"};
+  };
+  a.equal((await x.run()).ready,false,kind);
+  a.equal(calls,2,"Fresh published source validation required");
+ }
+});
+test("§92 final screen or scan change AFTER evidence recheck cannot be signed",async()=>{
+ for(const which of ["screen","scan"]){
+  const x=fixture();let count=0;
+  if(which==="screen"){
+   x.s.readCurrentScreen=async()=>{
+    const next=clone(x.t.screen);
+    if(++count>=3)next.revision=13;
+    return next;
+   };
+  }else{
+   x.s.readServerScan=async()=>{
+    const next=clone(x.t.scan);
+    if(++count>=3)next.candidates[0].evidenceRevision+=1;
+    return next;
+   };
+  }
+  a.equal((await x.run()).ready,false,which);
+  a.equal(count,3,"Final owner-bound read must be performed");
+ }
+});
 test("§88 the signed plan integrates with existing owner-screen, evidence and Home priority checks",async()=>{
  const x=fixture([P]);
  const signed=await x.run();a.equal(signed.ready,true);
