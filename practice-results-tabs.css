@@ -763,3 +763,36 @@
   .iclub-visual-v3 #courses-my-rec-topic-review .iclub-sx-attempt-number{font-size:36px;}
   .iclub-visual-v3 #courses-my-rec-topic-review .iclub-sx-attempt-question-head{padding:10px;}
 }
+
+
+/* Distinguish completed attempt scores without inventing academic mastery. */
+.iclub-visual-v3 #courses-my-recs .iclub-topic-history-row,
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row{
+  text-align:left;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-icon,
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-sx-history-icon{
+  display:grid;place-items:center;flex:none;width:33px;height:33px;
+  border-radius:9px;background:#edf2ff;color:#1a43bf;
+  font-size:16px;font-weight:840;line-height:1;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-icon.bad,
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-sx-history-icon.bad{
+  color:#c83d40;background:#fff0ef;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-sx-history-icon.good,
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-sx-history-icon.good{
+  color:#14825d;background:#ecf9f2;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-topic-history-row-score.bad,
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row-score.bad{
+  background:#fff0ef;color:#c83d40;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-topic-history-row-score.good,
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row-score.good{
+  background:#ecf9f2;color:#14825d;
+}
+.iclub-visual-v3 #courses-my-recs .iclub-topic-history-row-score.neutral,
+.iclub-visual-v3 #courses-my-rec-topic-history .iclub-topic-history-row-score.neutral{
+  background:#eef3ff;color:#1a43bf;
+}
