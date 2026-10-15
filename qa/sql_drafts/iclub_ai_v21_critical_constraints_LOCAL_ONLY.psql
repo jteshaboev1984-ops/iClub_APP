@@ -1,0 +1,55 @@
+-- §118 reduced structural constraints from read-only production pg_catalog.
+-- Application/user-facing triggers and external FK schemas are NOT installed.
+-- The 10 draft functions are still in one disposable BEGIN/ROLLBACK.
+DO $s$ BEGIN IF current_database() !~ '^iclub_ai_v21_scratch_[a-z0-9_]+$'
+ THEN RAISE EXCEPTION 'STOP scratch only';END IF;END $s$;
+ALTER TABLE private.iclub_global_ai_runtime_config
+ ADD CONSTRAINT qa_cfg_single_id CHECK (id=1);
+ALTER TABLE private.iclub_global_ai_runtime_config
+ ADD CONSTRAINT qa_cfg_mode CHECK (global_ai_rollout_mode IN ('off','canary','all'));
+ALTER TABLE public.subjects
+ ADD CONSTRAINT qa_subject_type CHECK (type IN ('main','additional'));
+ALTER TABLE public.user_subjects
+ ADD CONSTRAINT qa_subject_mode CHECK (mode IN ('study','competitive'));
+ALTER TABLE public.practice_sessions_v4
+ ADD CONSTRAINT qa_practice_status CHECK (status IN ('in_progress','finalized','abandoned'));
+ALTER TABLE public.practice_sessions_v4
+ ADD CONSTRAINT qa_practice_ids CHECK (cardinality(question_ids) BETWEEN 1 AND 10);
+ALTER TABLE public.practice_sessions_v4
+ ADD CONSTRAINT qa_practice_client_id CHECK (length(client_session_id) BETWEEN 8 AND 128);
+ALTER TABLE public.practice_session_answers_v4
+ ADD CONSTRAINT qa_answer_time CHECK (time_spent>=0);
+ALTER TABLE public.tour_attempts
+ ADD CONSTRAINT qa_tour_attempt_status CHECK
+ (status IN ('in_progress','submitted','time_expired','anti_cheat','abandoned'));
+ALTER TABLE public.tours
+ ADD CONSTRAINT qa_tour_no CHECK (tour_no BETWEEN 1 AND 7);
+ALTER TABLE public.tour_session_runtime_v4
+ ADD CONSTRAINT qa_tour_exact_questions CHECK (cardinality(question_ids)=20);
+ALTER TABLE public.tour_session_runtime_v4
+ ADD CONSTRAINT qa_tour_client_id CHECK (length(client_session_id) BETWEEN 8 AND 128);
+ALTER TABLE public.user_subjects
+ ADD CONSTRAINT qa_subject_user_fk FOREIGN KEY(user_id) REFERENCES public.users(id);
+ALTER TABLE public.user_subjects
+ ADD CONSTRAINT qa_subject_ref_fk FOREIGN KEY(subject_id) REFERENCES public.subjects(id);
+ALTER TABLE public.lessons
+ ADD CONSTRAINT qa_lesson_subject_fk FOREIGN KEY(subject_id) REFERENCES public.subjects(id);
+ALTER TABLE public.practice_sessions_v4
+ ADD CONSTRAINT qa_practice_subject_fk FOREIGN KEY(subject_id) REFERENCES public.subjects(id);
+ALTER TABLE public.practice_session_answers_v4
+ ADD CONSTRAINT qa_answer_session_fk FOREIGN KEY(session_id) REFERENCES public.practice_sessions_v4(id);
+ALTER TABLE public.tours
+ ADD CONSTRAINT qa_tour_subject_fk FOREIGN KEY(subject_id) REFERENCES public.subjects(id);
+ALTER TABLE public.tour_attempts
+ ADD CONSTRAINT qa_attempt_tour_fk FOREIGN KEY(tour_id) REFERENCES public.tours(id);
+ALTER TABLE public.tour_attempts
+ ADD CONSTRAINT qa_attempt_user_fk FOREIGN KEY(user_id) REFERENCES public.users(id);
+ALTER TABLE public.tour_attempts
+ ADD CONSTRAINT qa_attempt_unique UNIQUE(user_id,tour_id);
+ALTER TABLE public.tour_session_runtime_v4
+ ADD CONSTRAINT qa_runtime_attempt_fk FOREIGN KEY(attempt_id) REFERENCES public.tour_attempts(id);
+ALTER TABLE public.tour_session_runtime_v4
+ ADD CONSTRAINT qa_runtime_tour_fk FOREIGN KEY(tour_id) REFERENCES public.tours(id);
+DO $done$ BEGIN
+ RAISE NOTICE 'HIGH_RISK_CONSTRAINTS_GREEN: 23 checked/foreign/unique contracts on scratch';
+END $done$;

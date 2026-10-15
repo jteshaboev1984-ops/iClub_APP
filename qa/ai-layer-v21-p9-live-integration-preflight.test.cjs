@@ -34,7 +34,7 @@ test("Indirect evidence RPC must be counted and fail closed on omission",()=>{
  const source=readFileSync("qa/edge_v21/supabase_services.ts","utf8");
  const proof=readFileSync("qa/edge_v21/screen_proof_services.ts","utf8");
  a.equal(expectedRpcNames(source,proof.replace('const KIND="get_iclub_ai_v21_screen_evidence_service"',
-  'const KIND="wrong_evidence"'))?.includes("get_iclub_ai_v21_screen_evidence_service"),false);
+  'const KIND="wrong_evidence"')),null);
  a.equal(expectedRpcNames(source,proof).length,24);
 });
 test("P9 fake all-present RPC inventory can NEVER turn into rollout approval",()=>{

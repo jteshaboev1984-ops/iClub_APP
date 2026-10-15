@@ -1,0 +1,829 @@
+{
+  "schema": "iclub_ai_v21_p9_auth_constraints_metadata_readonly_v1",
+  "observedOn": "2026-10-15",
+  "metadataOnly": true,
+  "realUserRowsRead": false,
+  "releaseAllowed": false,
+  "notAProductionClone": true,
+  "constraints": [
+    {
+      "schema": "private",
+      "table_name": "iclub_global_ai_runtime_config",
+      "name": "iclub_global_ai_runtime_config_global_ai_rollout_mode_check",
+      "kind": "c",
+      "definition": "CHECK (global_ai_rollout_mode = ANY (ARRAY['off'::text, 'canary'::text, 'all'::text]))"
+    },
+    {
+      "schema": "private",
+      "table_name": "iclub_global_ai_runtime_config",
+      "name": "iclub_global_ai_runtime_config_id_check",
+      "kind": "c",
+      "definition": "CHECK (id = 1)"
+    },
+    {
+      "schema": "private",
+      "table_name": "iclub_global_ai_runtime_config",
+      "name": "iclub_global_ai_runtime_config_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "private",
+      "table_name": "iclub_global_ai_runtime_config",
+      "name": "iclub_global_ai_runtime_config_plans_rollout_mode_check",
+      "kind": "c",
+      "definition": "CHECK (plans_rollout_mode = ANY (ARRAY['off'::text, 'canary'::text, 'all'::text]))"
+    },
+    {
+      "schema": "public",
+      "table_name": "lessons",
+      "name": "lessons_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "lessons",
+      "name": "lessons_subject_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_session_answers_v4",
+      "name": "practice_session_answers_v4_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (session_id, question_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_session_answers_v4",
+      "name": "practice_session_answers_v4_question_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (question_id) REFERENCES questions(id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_session_answers_v4",
+      "name": "practice_session_answers_v4_session_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (session_id) REFERENCES practice_sessions_v4(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_session_answers_v4",
+      "name": "practice_session_answers_v4_time_spent_check",
+      "kind": "c",
+      "definition": "CHECK (time_spent >= 0)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_client_session_id_check",
+      "kind": "c",
+      "definition": "CHECK (length(client_session_id) >= 8 AND length(client_session_id) <= 128)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_legacy_attempt_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (legacy_attempt_id) REFERENCES practice_attempts(id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_legacy_attempt_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (legacy_attempt_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_pool_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (pool_id) REFERENCES practice_pools(id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_question_ids_check",
+      "kind": "c",
+      "definition": "CHECK (cardinality(question_ids) >= 1 AND cardinality(question_ids) <= 10)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_status_check",
+      "kind": "c",
+      "definition": "CHECK (status = ANY (ARRAY['in_progress'::text, 'finalized'::text, 'abandoned'::text]))"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_subject_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (subject_id) REFERENCES subjects(id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_user_id_client_session_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (user_id, client_session_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "subjects",
+      "name": "subjects_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "subjects",
+      "name": "subjects_subject_key_key",
+      "kind": "u",
+      "definition": "UNIQUE (subject_key)"
+    },
+    {
+      "schema": "public",
+      "table_name": "subjects",
+      "name": "subjects_type_check",
+      "kind": "c",
+      "definition": "CHECK (type = ANY (ARRAY['main'::text, 'additional'::text]))"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "tour_attempts_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "tour_attempts_status_check",
+      "kind": "c",
+      "definition": "CHECK (status = ANY (ARRAY['in_progress'::text, 'submitted'::text, 'time_expired'::text, 'anti_cheat'::text, 'abandoned'::text]))"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "tour_attempts_tour_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "tour_attempts_user_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "tour_attempts_user_id_tour_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (user_id, tour_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_attempt_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (attempt_id) REFERENCES tour_attempts(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_client_session_id_check",
+      "kind": "c",
+      "definition": "CHECK (length(client_session_id) >= 8 AND length(client_session_id) <= 128)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (attempt_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_question_ids_check",
+      "kind": "c",
+      "definition": "CHECK (cardinality(question_ids) = 20)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_tour_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (tour_id) REFERENCES tours(id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_user_id_client_session_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (user_id, client_session_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_user_id_tour_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (user_id, tour_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_season_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (season_id) REFERENCES seasons(id) ON DELETE RESTRICT"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_season_subject_tour_no_key",
+      "kind": "u",
+      "definition": "UNIQUE (season_id, subject_id, tour_no)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_subject_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_tour_no_check",
+      "kind": "c",
+      "definition": "CHECK (tour_no >= 1 AND tour_no <= 7)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_mode_check",
+      "kind": "c",
+      "definition": "CHECK (mode = ANY (ARRAY['study'::text, 'competitive'::text]))"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_subject_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_unique",
+      "kind": "u",
+      "definition": "UNIQUE (user_id, subject_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_user_id_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_user_id_subject_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (user_id, subject_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_id_auth_users_fkey",
+      "kind": "f",
+      "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_pkey",
+      "kind": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_telegram_user_id_key",
+      "kind": "u",
+      "definition": "UNIQUE (telegram_user_id)"
+    }
+  ],
+  "indexes": [
+    {
+      "schema": "private",
+      "table_name": "iclub_global_ai_runtime_config",
+      "name": "iclub_global_ai_runtime_config_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX iclub_global_ai_runtime_config_pkey ON private.iclub_global_ai_runtime_config USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "lessons",
+      "name": "idx_lessons_subject_order",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_lessons_subject_order ON public.lessons USING btree (subject_id, order_no)"
+    },
+    {
+      "schema": "public",
+      "table_name": "lessons",
+      "name": "lessons_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX lessons_pkey ON public.lessons USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_session_answers_v4",
+      "name": "practice_session_answers_v4_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX practice_session_answers_v4_pkey ON public.practice_session_answers_v4 USING btree (session_id, question_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_legacy_attempt_id_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX practice_sessions_v4_legacy_attempt_id_key ON public.practice_sessions_v4 USING btree (legacy_attempt_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX practice_sessions_v4_pkey ON public.practice_sessions_v4 USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_sessions_v4_user_id_client_session_id_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX practice_sessions_v4_user_id_client_session_id_key ON public.practice_sessions_v4 USING btree (user_id, client_session_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "subjects",
+      "name": "subjects_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX subjects_pkey ON public.subjects USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "subjects",
+      "name": "subjects_subject_key_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX subjects_subject_key_key ON public.subjects USING btree (subject_key)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "idx_tour_attempts_tour_score_time",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_tour_attempts_tour_score_time ON public.tour_attempts USING btree (tour_id, score DESC, total_time)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "idx_tour_attempts_tour_status",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_tour_attempts_tour_status ON public.tour_attempts USING btree (tour_id, status)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "idx_tour_attempts_user_id",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_tour_attempts_user_id ON public.tour_attempts USING btree (user_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "idx_tour_attempts_user_time",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_tour_attempts_user_time ON public.tour_attempts USING btree (user_id, created_at DESC)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "idx_tour_attempts_user_tour_status",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_tour_attempts_user_tour_status ON public.tour_attempts USING btree (user_id, tour_id, status)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "tour_attempts_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX tour_attempts_pkey ON public.tour_attempts USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "tour_attempts_user_id_tour_id_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX tour_attempts_user_id_tour_id_key ON public.tour_attempts USING btree (user_id, tour_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "ux_tour_attempts_user_tour",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX ux_tour_attempts_user_tour ON public.tour_attempts USING btree (user_id, tour_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX tour_session_runtime_v4_pkey ON public.tour_session_runtime_v4 USING btree (attempt_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_user_id_client_session_id_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX tour_session_runtime_v4_user_id_client_session_id_key ON public.tour_session_runtime_v4 USING btree (user_id, client_session_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_session_runtime_v4",
+      "name": "tour_session_runtime_v4_user_id_tour_id_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX tour_session_runtime_v4_user_id_tour_id_key ON public.tour_session_runtime_v4 USING btree (user_id, tour_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "idx_tours_dates",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_tours_dates ON public.tours USING btree (start_date, end_date)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "idx_tours_subject_no",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_tours_subject_no ON public.tours USING btree (subject_id, tour_no)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX tours_pkey ON public.tours USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_season_subject_idx",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX tours_season_subject_idx ON public.tours USING btree (season_id, subject_id, tour_no)"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_season_subject_tour_no_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX tours_season_subject_tour_no_key ON public.tours USING btree (season_id, subject_id, tour_no)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "idx_user_subjects_subject_id",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_user_subjects_subject_id ON public.user_subjects USING btree (subject_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "idx_user_subjects_user_created_at",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_user_subjects_user_created_at ON public.user_subjects USING btree (user_id, created_at)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "idx_user_subjects_user_id",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_user_subjects_user_id ON public.user_subjects USING btree (user_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "idx_user_subjects_user_mode",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_user_subjects_user_mode ON public.user_subjects USING btree (user_id, mode)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "idx_user_subjects_user_mode_subject",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_user_subjects_user_mode_subject ON public.user_subjects USING btree (user_id, mode, subject_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX user_subjects_pkey ON public.user_subjects USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_unique",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX user_subjects_unique ON public.user_subjects USING btree (user_id, subject_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_user_id_subject_id_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX user_subjects_user_id_subject_id_key ON public.user_subjects USING btree (user_id, subject_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_user_subject_unique",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX user_subjects_user_subject_unique ON public.user_subjects USING btree (user_id, subject_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "ux_user_subjects_user_subject",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX ux_user_subjects_user_subject ON public.user_subjects USING btree (user_id, subject_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "idx_users_school_telegram",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_users_school_telegram ON public.users USING btree (is_school_student, telegram_user_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "idx_users_telegram_user_id",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX idx_users_telegram_user_id ON public.users USING btree (telegram_user_id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_auth_email_lower_uq",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX users_auth_email_lower_uq ON public.users USING btree (lower(auth_email)) WHERE (auth_email IS NOT NULL)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_auth_migrated_at_idx",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX users_auth_migrated_at_idx ON public.users USING btree (auth_migrated_at)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_login_lower_uq",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX users_login_lower_uq ON public.users USING btree (lower(login)) WHERE (login IS NOT NULL)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_must_change_password_idx",
+      "is_unique": false,
+      "is_primary": false,
+      "definition": "CREATE INDEX users_must_change_password_idx ON public.users USING btree (must_change_password)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_pkey",
+      "is_unique": true,
+      "is_primary": true,
+      "definition": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_telegram_user_id_key",
+      "is_unique": true,
+      "is_primary": false,
+      "definition": "CREATE UNIQUE INDEX users_telegram_user_id_key ON public.users USING btree (telegram_user_id)"
+    }
+  ],
+  "triggers": [
+    {
+      "schema": "public",
+      "table_name": "practice_sessions_v4",
+      "name": "practice_stamp_bank_generation_v1",
+      "enabled": "O",
+      "function_name": "practice_stamp_bank_generation_v1",
+      "function_md5": "7aeb88fb087a267b94496c34a38a262d",
+      "definition": "CREATE TRIGGER practice_stamp_bank_generation_v1 BEFORE INSERT OR UPDATE ON practice_sessions_v4 FOR EACH ROW EXECUTE FUNCTION practice_stamp_bank_generation_v1()"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "trg_enforce_competitive_limit",
+      "enabled": "O",
+      "function_name": "enforce_competitive_limit",
+      "function_md5": "db3219b0982bce875bce450151304a22",
+      "definition": "CREATE TRIGGER trg_enforce_competitive_limit BEFORE INSERT OR UPDATE OF mode ON user_subjects FOR EACH ROW EXECUTE FUNCTION enforce_competitive_limit()"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "trg_auto_notify_welcome_after_registration",
+      "enabled": "O",
+      "function_name": "auto_notify_welcome_after_registration",
+      "function_md5": "71d0bb9d9e3052268f775ad1c40beb34",
+      "definition": "CREATE TRIGGER trg_auto_notify_welcome_after_registration AFTER INSERT OR UPDATE ON users FOR EACH ROW EXECUTE FUNCTION auto_notify_welcome_after_registration()"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "trg_sync_telegram_link_from_users",
+      "enabled": "O",
+      "function_name": "sync_telegram_link_from_users",
+      "function_md5": "954966a7cd75b817e024526cdac8bc34",
+      "definition": "CREATE TRIGGER trg_sync_telegram_link_from_users AFTER INSERT OR UPDATE OF id, telegram_user_id, first_name, last_name ON users FOR EACH ROW EXECUTE FUNCTION sync_telegram_link_from_users()"
+    }
+  ],
+  "policies": [
+    {
+      "schema": "public",
+      "table_name": "lessons",
+      "name": "lessons_public_read",
+      "command": "r",
+      "expression_md5": "eb28d87532d6edd9b635727493ef89f7"
+    },
+    {
+      "schema": "public",
+      "table_name": "lessons",
+      "name": "lessons_select",
+      "command": "r",
+      "expression_md5": "eb28d87532d6edd9b635727493ef89f7"
+    },
+    {
+      "schema": "public",
+      "table_name": "subjects",
+      "name": "subjects_public_read",
+      "command": "r",
+      "expression_md5": "eb28d87532d6edd9b635727493ef89f7"
+    },
+    {
+      "schema": "public",
+      "table_name": "tour_attempts",
+      "name": "tour_attempts_select_own",
+      "command": "r",
+      "expression_md5": "5eebdfba311617743b110b29a41f23a0"
+    },
+    {
+      "schema": "public",
+      "table_name": "tours",
+      "name": "tours_public_read",
+      "command": "r",
+      "expression_md5": "eb28d87532d6edd9b635727493ef89f7"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_delete_own",
+      "command": "d",
+      "expression_md5": "5eebdfba311617743b110b29a41f23a0"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_insert_own",
+      "command": "a",
+      "expression_md5": "f2ddbc79e24daf371a14e31c92b8402a"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_rw_own",
+      "command": "*",
+      "expression_md5": "7ea2326acd7022f54ccb7566a1d93f26"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_select_own",
+      "command": "r",
+      "expression_md5": "5eebdfba311617743b110b29a41f23a0"
+    },
+    {
+      "schema": "public",
+      "table_name": "user_subjects",
+      "name": "user_subjects_update_own",
+      "command": "w",
+      "expression_md5": "7ea2326acd7022f54ccb7566a1d93f26"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_insert_own",
+      "command": "a",
+      "expression_md5": "9ef31a767fb16ce24991edbc281938b7"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_select_own",
+      "command": "r",
+      "expression_md5": "bd301ab91c482f43f9fd893c5783c3c0"
+    },
+    {
+      "schema": "public",
+      "table_name": "users",
+      "name": "users_update_own",
+      "command": "w",
+      "expression_md5": "2657526f2b2b4f74443519a2f7e3077b"
+    }
+  ],
+  "limits": [
+    "No production auth.users row or JWT token was accessed",
+    "Only selected high-risk constraints can safely run in the synthetic fixture",
+    "All four production application triggers are intentionally NOT installed in QA",
+    "External tables auth.users, questions, practice_pools, seasons are not cloned"
+  ]
+}
