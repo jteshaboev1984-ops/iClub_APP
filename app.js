@@ -19449,6 +19449,24 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
     }
   }
   if (!isCurrent()) return;
+  // Existing authenticated Practice history is independent of recommendation rows.
+  let tourPracticeHistory=null,tourPracticeHistoryUnavailable=false;
+  if(activeTab==="practice"&&practiceMode==="tours"){
+    try{
+      if(!window.sb?.rpc)throw new Error("history_rpc_unavailable");
+      const {data,error}=await window.sb.rpc("get_practice_progress_summary",{
+        p_subject_key:subjectKey,p_tour_no:null,p_limit:12
+      });
+      if(error||data?.ok!==true||
+          String(data?.subject_key||"").toLowerCase()!==subjectKey.toLowerCase())
+        throw error||new Error("history_invalid");
+      tourPracticeHistory=data;
+    }catch(error){
+      tourPracticeHistoryUnavailable=true;
+      logClientError("myrecs_tour_practice_history_unavailable",error);
+    }
+  }
+  if(!isCurrent())return;
   // Independent Practice lanes: past normal Practice vs voluntary topic Practice.
   const modeTabs=activeTab==="practice" ? `
     <nav class="iclub-sx-subtabs" role="group" aria-label="${escapeHTML(tr3("Режим практики","Amaliyot turi","Practice mode"))}">
@@ -19594,13 +19612,44 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
           '</section>';
       }).join("");
     }
-        return practiceRows.map(rec => {
-      const dt=rec.created_at?formatDateTime(rec.created_at):"";
-      const sub=rec.subtopic?String(rec.subtopic):"",book=String(rec.book_reference||"").trim();
-      return '<div class="list-item" data-open-rec="practice"><div style="font-weight:900">'+escapeHTML(rec.topic||"General")+'</div>'+
-        (sub?'<div class="muted small" style="margin-top:4px">'+escapeHTML(sub)+'</div>':'')+
-        (book?'<div class="muted small" style="margin-top:4px">📘 '+escapeHTML(book)+'</div>':'')+
-        '<div class="muted small" style="margin-top:4px">'+escapeHTML(t("saved_at_label")||"Сохранено")+': '+escapeHTML(dt)+'</div></div>';
+    // By Tour: compact recommendations grouped by topic, without inventing tour attribution.
+    const groups=new Map();
+    practiceRows.forEach((rec,index)=>{
+      const topic=String(rec.topic||"General").trim()||"General";
+      if(!groups.has(topic))groups.set(topic,[]);
+      groups.get(topic).push({rec,index});
+    });
+    return Array.from(groups.entries()).map(([topic,items])=>{
+      const many=items.length>1;
+      const header='<div class="iclub-sx-tour-rec-head"><h3>'+escapeHTML(topic)+'</h3>'+
+        (many?'<span class="iclub-sx-tour-rec-count">'+items.length+' '+
+          escapeHTML(tr3("к повторению","takrorlash","to review"))+'</span>':'')+'</div>';
+      const entries=items.map(({rec,index},k)=>{
+        const sub=String(rec.subtopic||"").trim();
+        const book=String(rec.book_reference||"").trim();
+        const date=rec.created_at?formatDateTime(rec.created_at):"";
+        if(!many)return '<div class="iclub-sx-tour-rec-single">'+
+          (sub&&sub.toLowerCase()!==topic.toLowerCase()?'<p>'+escapeHTML(sub)+'</p>':'')+
+          (book?'<small>'+escapeHTML(book)+'</small>':'')+
+          (date?'<small>'+escapeHTML(tr3("Добавлено: ","Qo‘shilgan: ","Added: "))+escapeHTML(date)+'</small>':'')+
+          '<button type="button" class="iclub-sx-tour-rec-open" data-open-rec="practice" data-rec-index="'+index+'">'+
+          escapeHTML(tr3("Открыть рекомендацию","Tavsiyani ochish","Open recommendation"))+
+          ' <span aria-hidden="true">→</span></button></div>';
+        return '<button type="button" class="iclub-sx-tour-rec-entry" data-open-rec="practice" data-rec-index="'+index+'" '+
+          (k>=3?'hidden data-sx-tour-extra="1"':'')+'>'+
+          '<span class="iclub-sx-tour-rec-number">'+String(k+1).padStart(2,"0")+'</span>'+
+          '<span class="iclub-sx-tour-rec-entry-info"><strong>'+escapeHTML(sub||topic)+'</strong>'+
+          (book?'<small>'+escapeHTML(book)+'</small>':date?'<small>'+escapeHTML(date)+'</small>':'')+
+          '</span><span class="iclub-sx-tour-rec-arrow" aria-hidden="true">›</span></button>';
+      }).join("");
+      return '<section class="iclub-sx-tour-rec-card" data-sx-tour-group="1">'+header+
+        (many?'<p class="iclub-sx-tour-rec-hint">'+
+          escapeHTML(tr3("Выберите, что повторить","Nimani takrorlashni tanlang","Choose what to review"))+'</p>':'')+
+        '<div class="iclub-sx-tour-rec-entries">'+entries+'</div>'+
+        (items.length>3?'<button type="button" class="iclub-sx-tour-expand" data-sx-tour-expand="1" aria-expanded="false">'+
+          escapeHTML(tr3("Показать ещё","Yana ko‘rsatish","Show more"))+' '+(items.length-3)+
+          ' <span aria-hidden="true">⌄</span></button>':'')+
+        '</section>';
     }).join("");
   };
 
@@ -19663,17 +19712,26 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
     </div>
     ${modeTabs}
     ${renderSeasonControl()}
+    ${activeTab==="practice"&&practiceMode==="tours"
+      ? `<div id="my-recs-tour-latest"></div>`
+      :""}
     ${activeTab==="practice"&&practiceMode==="topics"
       ? `<div id="my-recs-topic-latest"></div>`
       :""}
     ${activeTab==="practice"&&practiceMode==="topics"
       ? `<div class="iclub-sx-heading"><h2>${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</h2><span class="iclub-sx-total">${practiceRecCount} ${escapeHTML(practiceRecCountNoun)}</span></div>`
       :""}
-    <div class="${activeTab==="practice"&&practiceMode==="topics"?"iclub-sx-groups":""}">
+    ${activeTab==="practice"&&practiceMode==="tours"
+      ? `<div class="iclub-sx-heading"><h2>${escapeHTML(tr3("Что повторить","Nimani takrorlash kerak","What to review"))}</h2><span class="iclub-sx-total">${practiceRecCount} ${escapeHTML(practiceRecCountNoun)}</span></div>`
+      :""}
+    <div class="${activeTab==="practice"?"iclub-sx-groups":""}">
       ${activeTab==="tour" ? renderTourList() : renderPracticeList()}
     </div>
     ${activeTab==="practice"&&practiceMode==="topics"
       ? `<section id="my-recs-topic-history" class="iclub-sx-history-preview"></section>`
+      :""}
+    ${activeTab==="practice"&&practiceMode==="tours"
+      ? `<section id="my-recs-tour-history" class="iclub-sx-tour-history-slot"></section>`
       :""}
   `;
 
@@ -19731,6 +19789,27 @@ async function renderMyRecsRaw(isCurrent, skeleton) {
         window.dispatchEvent(new CustomEvent("iclub-practice-correct-history",{
           detail:{subjectKey,sourceSessionId,questionIds,topic:String(attempt.topic)}
         }));
+      });
+    });
+  }
+  if(activeTab==="practice"&&practiceMode==="tours"){
+    window.iClubPracticeTourHistoryV1?.renderLatest?.(
+      wrap.querySelector("#my-recs-tour-latest"),tourPracticeHistory,tourPracticeHistoryUnavailable,currentLang()
+    );
+    window.iClubPracticeTourHistoryV1?.render?.(
+      wrap.querySelector("#my-recs-tour-history"),tourPracticeHistory,tourPracticeHistoryUnavailable,currentLang()
+    );
+    wrap.querySelectorAll("[data-sx-tour-expand]").forEach(button=>{
+      button.addEventListener("click",()=>{
+        const group=button.closest("[data-sx-tour-group]");
+        if(!group)return;
+        const extras=group.querySelectorAll("[data-sx-tour-extra]");
+        const open=button.getAttribute("aria-expanded")!=="true";
+        extras.forEach(el=>{el.hidden=!open;});
+        button.setAttribute("aria-expanded",String(open));
+        button.textContent=open
+          ?tr3("Свернуть","Yig‘ish","Show less")
+          :tr3("Показать ещё","Yana ko‘rsatish","Show more")+" "+extras.length+" ⌄";
       });
     });
   }
@@ -20071,7 +20150,8 @@ if (subEl) {
       ? (subtopic || recText.subtitleTour)
       : (subtopic ? subtopic : recText.subtitlePractice);
 }
-body.classList.toggle("iclub-sx-detail",isTopicRec);
+body.classList.toggle("iclub-sx-detail",!isTourRec);
+body.classList.toggle("iclub-sx-tour-detail",!isTourRec&&!isTopicRec);
 
    // ✅ mini result (only for current rec/topic)
 let drillMiniHtml = "";
@@ -20146,7 +20226,7 @@ const mistakesHtml = totalMistakes
       const caDisp = formatAnswerForDisplay(q, q.correct_answer);
 
       const num = `${idx + 1}/${totalMistakes}`;
-      if(isTopicRec){
+      if(!isTourRec){
         return `<details class="iclub-sx-detail-question">
           <summary><span class="iclub-sx-detail-number">${escapeHTML(tr3("Ошибка","Xato","Mistake"))} ${idx+1}</span>
             <span class="iclub-sx-detail-stem">${escapeHTML(qText||"")}</span></summary>
@@ -20252,6 +20332,20 @@ body.innerHTML = isTourRec ? `
   ${readBlockHtml}
 `;
 
+  // For ordinary Practice by Tour, correct verified mistakes first.
+  // Do not alter the Topic Practice or competitive Tours action layout.
+  if(!isTourRec&&!isTopicRec){
+    body.classList.toggle("iclub-sx-tour-has-errors",totalMistakes>0);
+    const retryButton=document.querySelector('#courses-my-rec-detail .actions-row [data-action="my-rec-retry"]');
+    if(retryButton){
+      retryButton.hidden=totalMistakes===0;
+      retryButton.textContent=tr3("Исправить ошибки","Xatolarni tuzatish","Correct mistakes");
+    }
+  } else {
+    const retryButton=document.querySelector('#courses-my-rec-detail .actions-row [data-action="my-rec-retry"]');
+    if(retryButton)retryButton.hidden=false;
+  }
+
   body.querySelectorAll("button[data-open-book-url]").forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -20266,12 +20360,11 @@ async function deleteMyRecCurrent() {
     const rec=state?.courses?.myRecCurrent;
     const subjectKey=state?.courses?.subjectKey;
     if(!rec||!subjectKey||deleteMyRecCurrent._pending) return;
-    // In Practice by Topic, "Освоено" is user-managed recommendation status.
-    // Clarify that it never modifies attempts or academic scoring.
-    // Existing Tour / legacy Practice confirmation text remains unchanged.
-    const isTopicRecommendation=String(rec.source_type||"practice")==="practice" &&
-      Number(rec.practice_drill_session_id||0)>0;
-    const ok=await uiConfirm(isTopicRecommendation?{
+    // For both Practice modes, "Освоено" removes an active recommendation only.
+    // It never changes attempt results, history or academic scoring.
+    // Competitive Tours keep their existing confirmation behavior.
+    const isPracticeRecommendation=String(rec.source_type||"practice")==="practice";
+    const ok=await uiConfirm(isPracticeRecommendation?{
       title:tr3("Отметить как освоено?","O‘zlashtirildi deb belgilaysizmi?","Mark as mastered?"),
       message:tr3(
         "Из активного списка исчезнет только эта рекомендация. Результаты и история попыток сохранятся.",
@@ -20315,7 +20408,7 @@ async function deleteMyRecCurrent() {
         if(String(rec.source_type||"practice")==="tour") saveMyTourRecs(store);
         else saveMyRecs(store);
       }
-      showToast(isTopicRecommendation
+      showToast(isPracticeRecommendation
         ?tr3("Отмечено как освоено. История сохранена.",
           "O‘zlashtirildi deb belgilandi. Tarix saqlandi.",
           "Marked as mastered. History preserved.")
