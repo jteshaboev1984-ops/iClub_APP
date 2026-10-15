@@ -1,0 +1,134 @@
+[
+  {
+    "n": 8,
+    "d": "hard",
+    "k": "D",
+    "sec": 135,
+    "en": "In labour market A, demand is Ld=80−2w and supply is Ls=20+w. In market B, demand is Ld=140−4w and supply is Ls=20+2w. Here w is the hourly wage, and all quantities are worker-hours. A nationwide minimum wage of $25 is introduced, with no changes to either curve. What are employment and excess labour supply in the two markets after the law?",
+    "ru": "На рынке труда A спрос Ld=80−2w, предложение Ls=20+w. На рынке B спрос Ld=140−4w, предложение Ls=20+2w. Здесь w — почасовая оплата, количества измеряются в человеко-часах. Вводится единая минимальная зарплата $25; кривые не меняются. Каковы занятость и избыток предложения труда в каждом рынке после закона?",
+    "uz": "A mehnat bozorida talab Ld=80−2w, taklif Ls=20+w. B bozorida talab Ld=140−4w, taklif Ls=20+2w. w — soatlik ish haqi, miqdor ishchi-soatlarda. Ikki bozorga ham $25 eng kam ish haqi joriy etiladi, egri chiziqlar o‘zgarmaydi. Yangi qonundan keyin bandlik va ortiqcha mehnat taklifi qancha?",
+    "options_en": [
+      "A employs 45 with 15 excess hours; B employs 70 with 30 excess hours",
+      "A employs 30 with no excess; B employs 40 with no excess",
+      "A employs 30 with 30 excess; B employs 40 with 15 excess",
+      "A employs 30 with 15 excess; B employs 40 with 30 excess"
+    ],
+    "options_ru": [
+      "A: занято 45, избыток 15 часов; B: занято 70, избыток 30",
+      "A: занято 30 без избытка; B: занято 40 без избытка",
+      "A: занято 30, избыток 30; B: занято 40, избыток 15",
+      "A: занято 30, избыток 15; B: занято 40, избыток 30"
+    ],
+    "options_uz": [
+      "A: bandlik 45, ortiqcha 15 soat; B: bandlik 70, ortiqcha 30",
+      "A: bandlik 30, ortiqcha yo‘q; B: bandlik 40, ortiqcha yo‘q",
+      "A: bandlik 30, ortiqcha 30; B: bandlik 40, ortiqcha 15",
+      "A: bandlik 30, ortiqcha 15; B: bandlik 40, ortiqcha 30"
+    ],
+    "why": [
+      "At w=25, A labour demand is 80−50=30 and supply is 45, giving 15 excess hours. B demand is 140−100=40 and supply is 70, giving 30 excess. Each market's unconstrained equilibrium wage was $20, so the floor binds.",
+      "При w=25 спрос A равен 30, предложение 45, избыточное предложение 15. В B спрос 40, предложение 70, избыток 30. До закона в обоих рынках равновесная ставка $20, поэтому минимум обязателен.",
+      "w=25 da A talab 30, taklif 45, ortiqcha 15. B talab 40, taklif 70, ortiqcha 30. Dastlab ikkala bozorning muvozanat ish haqi $20, shuning uchun $25 cheklovchi minimum."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T5-T-008"
+  },
+  {
+    "n": 13,
+    "d": "hard",
+    "k": "B",
+    "sec": 135,
+    "en": "A school has exactly 60 extra tutoring hours. Thirty pupils in Group Y need one hour each to reach the minimum standard, while twenty pupils in Group X need two hours each. A pupil reaches the standard only after receiving their full requirement. If the sole stated objective is to maximise the number who reach the standard, which allocation succeeds, and what important limitation should be acknowledged?",
+    "ru": "У школы ровно 60 часов дополнительных занятий. Тридцати ученикам группы Y требуется по одному часу, а двадцати ученикам группы X — по два часа для достижения минимального стандарта. Результат достигается лишь после получения всей необходимой помощи. Если заявленная единственная цель — максимальное число достигших стандарта, какое распределение оптимально и какое ограничение оценки важно признать?",
+    "uz": "Maktabda aynan 60 ta qo‘shimcha dars soati bor. Y guruhidagi 30 o‘quvchining har biriga standartga yetish uchun 1 soat, X guruhidagi 20 o‘quvchining har biriga 2 soat kerak. O‘quvchi talab qilingan barcha soatni olsagina standartga yetadi. Maqsad faqat standartga yetganlar sonini oshirish bo‘lsa, qaysi taqsimot optimal va qanday cheklovni e’tirof etish zarur?",
+    "options_en": [
+      "Give 1.2 hours to every pupil; all 50 reach the standard and fairness is guaranteed",
+      "Give 30 hours to all Y pupils and 30 hours to 15 X pupils; 45 reach the standard, but that does not by itself prove the allocation is the fairest",
+      "Give 40 hours to X and the remaining 20 hours to Y; all 50 reach the standard",
+      "Give the full 60 hours to 20 X pupils; 50 reach the standard"
+    ],
+    "options_ru": [
+      "Дать каждому по 1,2 часа; все 50 достигнут стандарта, справедливость гарантирована",
+      "Дать 30 часов всем Y и 30 часов 15 ученикам X; стандарт достигнут 45, но это не доказывает максимальную справедливость",
+      "Дать 40 часов X и 20 часов Y; все 50 достигнут стандарта",
+      "Отдать все 60 часов двадцати ученикам X; стандарт достигнут 50"
+    ],
+    "options_uz": [
+      "Hammaga 1,2 soatdan berish; 50 nafarning barchasi standartga yetadi va adolat kafolatlanadi",
+      "Y dagi barchaga 30 soat, X dagi 15 kishiga 30 soat; 45 kishi standartga yetadi, ammo bu eng adolatli taqsimot ekanini isbotlamaydi",
+      "X ga 40 soat, Y ga 20 soat; 50 kishi standartga yetadi",
+      "60 soatning hammasini X dagi 20 kishiga berish; 50 kishi standartga yetadi"
+    ],
+    "why": [
+      "Complete all 30 one-hour Y requirements (30 hours), then 15 two-hour X requirements (30 hours), reaching 45 pupils. Giving X priority yields only 40 completed pupils. Maximising a count is not identical to meeting a broader equity objective.",
+      "Сначала закрываются потребности всех 30 учеников Y (30 часов), затем 15 учеников X (ещё 30 часов): всего 45. При приоритете X можно довести до стандарта только 40. Максимизация числа результатов не равнозначна общей справедливости.",
+      "Avval Y dagi 30 kishiga 30 soat, keyin X dagi 15 kishiga 30 soat beriladi; jami 45 kishi yetadi. X ni ustun qo‘yish faqat 40 natija beradi. Soni ko‘pligi har tomonlama adolatni anglatmaydi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T5-T-013"
+  },
+  {
+    "n": 14,
+    "d": "hard",
+    "k": "C",
+    "sec": 135,
+    "en": "A regulated fish market has inverse demand P=100−0.5Q and competitive marginal supply cost MC=20+0.25Q. A binding quota limits catches to 80 fish. A single licence holder buys all 80 fish at one uniform price equal to MC at Q=80 and resells them at the market demand price. What are the resale price and total gross scarcity rent for that holder, ignoring all other costs?",
+    "ru": "На рыбном рынке обратный спрос P=100−0,5Q, конкурентные предельные затраты предложения MC=20+0,25Q. Обязательная квота ограничивает вылов 80 рыбами. Один владелец лицензии покупает все 80 рыб по единой цене, равной MC при Q=80, и перепродаёт по рыночной цене спроса. Какова цена перепродажи и общая валовая дефицитная рента владельца лицензии без учёта иных затрат?",
+    "uz": "Baliq bozorida teskari talab P=100−0,5Q, raqobatli chegaraviy taklif xarajati MC=20+0,25Q. Majburiy kvota ovni 80 dona bilan cheklaydi. Bitta litsenziya egasi 80 baliqning barchasini Q=80 dagi MC ga teng yagona narxda olib, bozor talab narxida qayta sotadi. Boshqa xarajatsiz qayta sotish narxi va egasining jami yalpi tanqislik rentasi qancha?",
+    "options_en": [
+      "Price $40; rent $1,600",
+      "Price $60; rent $800",
+      "Price $60; rent $1,600",
+      "Price $80; rent $3,200"
+    ],
+    "options_ru": [
+      "Цена $40; доход лицензии $1 600",
+      "Цена $60; доход лицензии $800",
+      "Цена $60; доход лицензии $1 600",
+      "Цена $80; доход лицензии $3 200"
+    ],
+    "options_uz": [
+      "Narx $40; litsenziya rentasi $1600",
+      "Narx $60; litsenziya rentasi $800",
+      "Narx $60; litsenziya rentasi $1600",
+      "Narx $80; litsenziya rentasi $3200"
+    ],
+    "why": [
+      "At Q=80 the uniform purchase price is MC=20+0.25×80=$40, while the market selling price is P=100−0.5×80=$60. The licence holder's gross rent is (60−40)×80=$1,600, given the explicitly uniform purchase price.",
+      "При Q=80 единая цена покупки MC=20+0,25×80=$40, цена продажи по спросу P=100−0,5×80=$60. Валовая рента владельца лицензии ($60−$40)×80=$1 600 при условии единой закупочной цены.",
+      "Q=80 da yagona xarid narxi MC=20+0,25×80=$40, talab bo‘yicha sotuv narxi P=100−0,5×80=$60. Bir xil xarid narxi shartida litsenziya egasining yalpi rentasi ($60−$40)×80=$1600."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T5-T-014"
+  },
+  {
+    "n": 19,
+    "d": "hard",
+    "k": "A",
+    "sec": 135,
+    "en": "Before reform, 200 small bakeries each pay an annual permit fee of $500 to the government. Processing these permits also consumes $35,000 in real public administrative resources and $15,000 in real business preparation costs each year. The government abolishes the permit and related paperwork but retains identical food-safety inspections. Assume no change in the number of bakeries or other effects. What is the net annual social RESOURCE saving, and how should the lost fee revenue be treated?",
+    "ru": "До реформы 200 небольших пекарен ежегодно платят государству по $500 за разрешение. Оформление разрешений также потребляет $35 000 реальных государственных административных ресурсов и $15 000 реальных затрат бизнеса на подготовку документов. Разрешение и оформление отменяются, проверки пищевой безопасности остаются прежними. Число пекарен и прочие условия не меняются. Какова годовая экономия реальных ресурсов общества и как учитывать исчезнувшие поступления от сборов?",
+    "uz": "Islohotdan oldin 200 ta kichik nonvoyxona davlatga har yili $500 litsenziya to‘lovi qiladi. Ruxsatnomani ko‘rib chiqish uchun $35 000 real davlat boshqaruv resursi va $15 000 biznes hujjat xarajati ketadi. Ruxsatnoma va qog‘ozbozlik bekor qilinadi, oziq-ovqat xavfsizligi tekshiruvlari o‘zgarmaydi. Nonvoyxonalar soni va boshqa sharoit o‘zgarmaydi. Jamiyatning yillik real resurs tejami qancha va yo‘qolgan yig‘im tushumiga qanday qaraladi?",
+    "options_en": [
+      "$50,000; lost $100,000 fees are transfers, not resource costs",
+      "$150,000; fee revenue and administration are both real resource costs",
+      "−$50,000; losing fees always makes deregulation socially harmful",
+      "$100,000; the administrative and paperwork resources have no value"
+    ],
+    "options_ru": [
+      "$50 000; исчезнувшие $100 000 сборов — трансферт, а не реальные затраты ресурсов",
+      "$150 000; сборы и администрирование одинаково являются расходами ресурсов",
+      "−$50 000; потеря сборов всегда делает реформу общественно вредной",
+      "$100 000; ресурсы на администрирование и документы ничего не стоят"
+    ],
+    "options_uz": [
+      "$50 000; yo‘qolgan $100 000 yig‘im transfert, real resurs xarajati emas",
+      "$150 000; yig‘im va boshqaruv ikkalasi ham real resurs sarfi",
+      "−$50 000; yig‘im yo‘qolishi tartibni bekor qilishni doim zararli qiladi",
+      "$100 000; boshqaruv va hujjat resurslari qiymatsiz"
+    ],
+    "why": [
+      "Real resources saved are $35,000 public administration plus $15,000 business paperwork=$50,000. The $500×200=$100,000 fees move money from firms to government; eliminating them reverses a transfer, not a social resource cost under these assumptions.",
+      "Реальная экономия — $35 000 на госадминистрировании плюс $15 000 на документах бизнеса, всего $50 000. Сборы $500×200=$100 000 были перечислением денег от фирм государству, не потреблением ресурсов.",
+      "Real tejam $35 000 davlat boshqaruvi va $15 000 biznes hujjati, jami $50 000. $500×200=$100 000 yig‘im firma va davlat o‘rtasidagi transfert bo‘lib, real resurs sarfi emas."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T5-T-019"
+  }
+]
