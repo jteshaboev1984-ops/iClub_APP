@@ -29,4 +29,4 @@
 - Нельзя переносить эту SQL-схему на действующую Supabase или объявлять продукт beta-ready.
 - Vercel SSO Preview остаётся отдельной статической демонстрацией; локальный HTTP endpoint не развёрнут вне GitHub Actions.
 
-**Global AI remains OFF / NO-GO.** Результат завершающего CI с last-moment revocation фиксируется отдельно после фактического прогона.
+**Global AI remains OFF / NO-GO.** [GitHub Actions #298](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/38686134805) — полный **GREEN**: 647/647 Node, 14/14 PG, Native Chromium RU/UZ/EN, local HTTP→MVCC PostgreSQL Home, отзыв source/tariff/screen **прямо перед** single-SELECT snapshot, Deno, concurrency и protected legacy surface checks. Никакая production-база при тестах не участвовала.
