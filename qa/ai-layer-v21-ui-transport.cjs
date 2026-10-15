@@ -80,6 +80,22 @@ class QaV21ScreenClient{
    return fail("invalid_screen");
   return this.open({action:"mint",sessionId,questionId});
  }
+ // A browser's Practice attempt marker is NOT a canonical V4 ID.
+ // This is one extra QA-only JWT-bound read-only /context action.
+ async resolvePracticeV4({attemptReference,questionId}={}){
+  if(!validIndex(attemptReference)||!validIndex(questionId))
+   return fail("invalid_screen");
+  const seq=this.epoch;
+  const r=await this.authenticatedPost("/context",{
+   action:"resolvePracticeV4",attemptReference,questionId
+  },()=>seq===this.epoch);
+  if(seq!==this.epoch)return fail("context_changed");
+  if(r?.ok!==true||r.kind!=="server_resolved_practice_v4"||
+     r.attemptReference!==attemptReference||r.questionId!==questionId||
+     !validIndex(r.sessionId))return fail("server_verification_required");
+  return {ok:true,kind:"server_resolved_practice_v4",
+   attemptReference,questionId,sessionId:r.sessionId};
+ }
  async openTourArchive(tourAttemptId){
   if(!validIndex(tourAttemptId))return fail("invalid_screen");
   return this.open({action:"mintTourArchive",tourAttemptId});
