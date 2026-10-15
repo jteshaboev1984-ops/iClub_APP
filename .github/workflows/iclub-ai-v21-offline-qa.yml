@@ -51,6 +51,8 @@ on:
       - 'qa/ai-layer-v21-p6-home-approved-priority.test.cjs'
       - 'qa/ai-layer-v21-p6-home-signed-server-bridge.cjs'
       - 'qa/ai-layer-v21-p6-home-signed-server-bridge.test.cjs'
+      - 'qa/ai-layer-v21-p6-home-delivery-gate.cjs'
+      - 'qa/ai-layer-v21-p6-home-delivery-gate.test.cjs'
       - 'qa/ai-layer-v21-p6-commercial-contract-adapter.cjs'
       - 'qa/ai-layer-v21-p6-commercial-contract-adapter.test.cjs'
       - 'qa/ai-layer-v21-p6-live-commercial-catalog-snapshot.json'
