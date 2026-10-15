@@ -608,6 +608,7 @@
     p.hidden = true;
     p.innerHTML = `
       <header class="iclub-global-ai-head">
+        <img class="iclub-global-ai-head-logo" src="iclub-ai-tutor-a.webp" alt="" aria-hidden="true" width="32" height="32" decoding="async">
         <div class="iclub-global-ai-head-copy">
           <div class="iclub-global-ai-title" data-global-ai-title></div>
           <div class="iclub-global-ai-subtitle" data-global-ai-subtitle></div>
@@ -833,8 +834,8 @@
     button.type = "button";
     button.setAttribute("aria-haspopup", "dialog");
     button.setAttribute("aria-expanded", "false");
-    // Interim neutral AI lettering: final proprietary AI symbol is not yet approved.
-    button.innerHTML = '<span class="iclub-global-ai-mark-symbol" aria-hidden="true">AI</span>';
+    // Architect-approved iClub AI Tutor mark A; local, QA-only, no external resources.
+    button.innerHTML = '<img class="iclub-global-ai-mark-logo" src="iclub-ai-tutor-a.webp" alt="" aria-hidden="true" width="40" height="40" decoding="async">';
     button.addEventListener("click", () => {
       if (currentBlocked()) {
         showToast(copy().assessmentTap);
