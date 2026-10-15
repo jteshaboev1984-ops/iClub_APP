@@ -1,0 +1,398 @@
+[
+  {
+    "n": 2,
+    "d": "hard",
+    "sec": 180,
+    "k": "C",
+    "en": "A bakery buys flour for $30, electricity for $10 and packaging for $5, then sells finished bread to a retailer for $100. The retailer sells that bread to households for $150 without other intermediate purchases. What is the combined value added at the bakery and retail stages?",
+    "ru": "Пекарня покупает муку за $30, электроэнергию за $10 и упаковку за $5, затем продаёт хлеб магазину за $100. Магазин продаёт хлеб покупателям за $150 без других промежуточных закупок. Какова общая добавленная стоимость пекарни и магазина?",
+    "uz": "Nonvoyxona unni $30, elektrni $10 va qadoqni $5 ga olib, tayyor nonni do‘konga $100 ga sotadi. Do‘kon boshqa oraliq xaridlarsiz nonni aholiga $150 ga sotadi. Nonvoyxona va do‘kon bosqichlaridagi jami qo‘shilgan qiymat qancha?",
+    "opts": [
+      "$55",
+      "$150",
+      "$105",
+      "$95"
+    ],
+    "why": [
+      "Bakery value added is $100 − ($30 + $10 + $5) = $55; retail value added is $150 − $100 = $50. Combined = $105.",
+      "Добавленная стоимость пекарни $100 − ($30 + $10 + $5) = $55, магазина $150 − $100 = $50. Всего $105.",
+      "Nonvoyxona qo‘shilgan qiymati $100 − ($30 + $10 + $5) = $55, do‘kon esa $150 − $100 = $50. Jami $105."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-002",
+    "options_en": [
+      "$55",
+      "$150",
+      "$105",
+      "$95"
+    ],
+    "options_ru": [
+      "$55",
+      "$150",
+      "$105",
+      "$95"
+    ],
+    "options_uz": [
+      "$55",
+      "$150",
+      "$105",
+      "$95"
+    ]
+  },
+  {
+    "n": 3,
+    "d": "hard",
+    "sec": 195,
+    "k": "B",
+    "en": "In a short-run model, aggregate demand is Qd = 300 − P and aggregate supply is initially Qs = 100 + P. A permanent improvement in productivity raises short-run supply to Qs = 140 + P, with aggregate demand unchanged. How do equilibrium price and real output change?",
+    "ru": "В краткосрочной модели совокупный спрос Qd = 300 − P, первоначальное совокупное предложение Qs = 100 + P. Постоянный рост производительности изменяет краткосрочное предложение до Qs = 140 + P при неизменном спросе. Как меняются равновесный уровень цен и реальный выпуск?",
+    "uz": "Qisqa muddatli modelda yalpi talab Qd = 300 − P, dastlabki yalpi taklif Qs = 100 + P. Unumdorlikning doimiy oshishi qisqa muddatli taklifni Qs = 140 + P ga o‘zgartiradi, talab o‘zgarmaydi. Muvozanat narx darajasi va real ishlab chiqarish qanday o‘zgaradi?",
+    "options_en": [
+      "Price +20; output −20",
+      "Price −20; output +20",
+      "Price −40; output +40",
+      "Price unchanged; output +40"
+    ],
+    "options_ru": [
+      "Уровень цен +20; выпуск −20",
+      "Уровень цен −20; выпуск +20",
+      "Уровень цен −40; выпуск +40",
+      "Уровень цен неизменен; выпуск +40"
+    ],
+    "options_uz": [
+      "Narx darajasi +20; ishlab chiqarish −20",
+      "Narx darajasi −20; ishlab chiqarish +20",
+      "Narx darajasi −40; ishlab chiqarish +40",
+      "Narx darajasi o‘zgarmaydi; ishlab chiqarish +40"
+    ],
+    "why": [
+      "Initially P = 100 and Q = 200. Afterwards P = 80 and Q = 220. The supply expansion lowers price by 20 and raises output by 20.",
+      "Изначально P = 100, Q = 200. Затем P = 80, Q = 220: цены −20, выпуск +20.",
+      "Dastlab P = 100, Q = 200. Keyin P = 80, Q = 220: narx −20, ishlab chiqarish +20."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-003"
+  },
+  {
+    "n": 4,
+    "d": "hard",
+    "sec": 170,
+    "k": "D",
+    "en": "A consumer price index starts at 100. Inflation is 8% in year 1 and 3% in year 2. Assuming the index uses the previous year's level as the base each year, what is the price index at the end of year 2, and how is year-2 inflation best described?",
+    "ru": "Индекс потребительских цен изначально равен 100. Инфляция составляет 8% в первом году и 3% во втором. Если каждый процент применяется к уровню цен предыдущего года, чему равен индекс в конце второго года и как характеризуется инфляция во втором году?",
+    "uz": "Iste’mol narxlari indeksi boshida 100. Birinchi yilda inflyatsiya 8%, ikkinchisida 3%. Har yilgi foiz oldingi yil narx darajasiga qo‘llansa, ikkinchi yil oxiridagi indeks qancha va ikkinchi yil inflyatsiyasi qanday ataladi?",
+    "opt_en": [
+      "111; deflation",
+      "103; disinflation",
+      "111.24; deflation",
+      "111.24; disinflation"
+    ],
+    "opt_ru": [
+      "111; дефляция",
+      "103; дезинфляция",
+      "111,24; дефляция",
+      "111,24; дезинфляция"
+    ],
+    "opt_uz": [
+      "111; deflyatsiya",
+      "103; dezinflyatsiya",
+      "111,24; deflyatsiya",
+      "111,24; dezinflyatsiya"
+    ],
+    "why": [
+      "The index becomes 100×1.08×1.03 = 111.24. Inflation remains positive but slows, which is disinflation, not deflation.",
+      "Индекс равен 100×1,08×1,03 = 111,24. Темп инфляции остаётся положительным, но замедляется: это дезинфляция.",
+      "Indeks 100×1,08×1,03 = 111,24. Inflyatsiya musbat, ammo sur’ati pasaygan: bu dezinflyatsiya."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-004",
+    "options_en": [
+      "111; deflation",
+      "103; disinflation",
+      "111.24; deflation",
+      "111.24; disinflation"
+    ],
+    "options_ru": [
+      "111; дефляция",
+      "103; дезинфляция",
+      "111,24; дефляция",
+      "111,24; дезинфляция"
+    ],
+    "options_uz": [
+      "111; deflyatsiya",
+      "103; dezinflyatsiya",
+      "111,24; deflyatsiya",
+      "111,24; dezinflyatsiya"
+    ]
+  },
+  {
+    "n": 5,
+    "d": "hard",
+    "sec": 195,
+    "k": "A",
+    "en": "Domestic demand is Qd = 500 − 2P and short-run aggregate supply is initially Qs = 100 + 2P. Imported raw-material costs rise and shift supply to Qs = 60 + 2P, while demand is unchanged. Relative to the original equilibrium, what happens?",
+    "ru": "Совокупный спрос Qd = 500 − 2P, первоначальное краткосрочное предложение Qs = 100 + 2P. Подорожание импортного сырья изменяет предложение на Qs = 60 + 2P при неизменном спросе. Что происходит относительно первоначального равновесия?",
+    "uz": "Yalpi talab Qd = 500 − 2P, dastlabki qisqa muddatli taklif Qs = 100 + 2P. Import xomashyosi qimmatlashib, taklif Qs = 60 + 2P ga siljiydi, talab o‘zgarmaydi. Avvalgi muvozanatga nisbatan nima yuz beradi?",
+    "options_en": [
+      "Price +10; real output −20",
+      "Price −10; real output +20",
+      "Price +20; real output unchanged",
+      "Price unchanged; real output −40"
+    ],
+    "options_ru": [
+      "Уровень цен +10; реальный выпуск −20",
+      "Уровень цен −10; реальный выпуск +20",
+      "Уровень цен +20; реальный выпуск неизменен",
+      "Уровень цен неизменен; реальный выпуск −40"
+    ],
+    "options_uz": [
+      "Narx darajasi +10; real ishlab chiqarish −20",
+      "Narx darajasi −10; real ishlab chiqarish +20",
+      "Narx darajasi +20; real ishlab chiqarish o‘zgarmaydi",
+      "Narx darajasi o‘zgarmaydi; real ishlab chiqarish −40"
+    ],
+    "why": [
+      "Initially P = 100 and Q = 300; after the cost shock P = 110 and Q = 280. This is cost-push inflation with lower output.",
+      "Изначально P = 100, Q = 300, после шока P = 110, Q = 280. Рост издержек вызывает повышение цен и снижение выпуска.",
+      "Dastlab P = 100, Q = 300, shokdan so‘ng P = 110, Q = 280. Xarajatlar oshishi narxni ko‘tarib, ishlab chiqarishni kamaytiradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-005"
+  },
+  {
+    "n": 7,
+    "d": "hard",
+    "sec": 170,
+    "k": "C",
+    "en": "An economy initially has C = $430m, I = $120m, G = $180m, X = $80m and M = $110m. Next year government purchases rise by $30m, but imports also rise by $20m; all other components stay fixed. What are initial AD and new AD in the expenditure model?",
+    "ru": "Первоначально в экономике C = $430 млн, I = $120 млн, G = $180 млн, X = $80 млн, M = $110 млн. В следующем году государственные закупки растут на $30 млн, а импорт — на $20 млн; прочие составляющие неизменны. Найдите первоначальный и новый совокупный спрос по расходной модели.",
+    "uz": "Iqtisodiyotda dastlab C = $430 mln, I = $120 mln, G = $180 mln, X = $80 mln, M = $110 mln. Keyingi yili davlat xaridlari $30 mln, import esa $20 mln ga oshadi; boshqa tarkibiy qismlar o‘zgarmaydi. Xarajat modelidagi dastlabki va yangi yalpi talab qancha?",
+    "opts": [
+      "$700m → $750m",
+      "$810m → $820m",
+      "$700m → $710m",
+      "$700m → $690m"
+    ],
+    "why": [
+      "AD = C + I + G + X − M = 700. A +30 change in G and +20 change in imports produces a net +10, so AD = 710.",
+      "AD = C + I + G + X − M = 700. G +30 и импорт +20 дают чистое изменение +10: новый AD = 710.",
+      "AD = C + I + G + X − M = 700. G +30, import +20 bo‘lsa sof +10; yangi AD = 710."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-007",
+    "options_en": [
+      "$700m → $750m",
+      "$810m → $820m",
+      "$700m → $710m",
+      "$700m → $690m"
+    ],
+    "options_ru": [
+      "$700m → $750m",
+      "$810m → $820m",
+      "$700m → $710m",
+      "$700m → $690m"
+    ],
+    "options_uz": [
+      "$700m → $750m",
+      "$810m → $820m",
+      "$700m → $710m",
+      "$700m → $690m"
+    ]
+  },
+  {
+    "n": 10,
+    "d": "hard",
+    "sec": 190,
+    "k": "B",
+    "en": "Two households each earn $40,000 annually. Household A owns a house worth $200,000, while household B owns net assets of $30,000. House prices rise 10%, affecting only A's house, and both wages rise 5%. Other wealth components are fixed. How do their annual income gap and net-wealth gap change?",
+    "ru": "Два домохозяйства получают по $40 000 дохода в год. A владеет домом за $200 000, B — чистыми активами на $30 000. Цены на дома растут на 10%, затрагивая только дом A, а зарплаты обоих растут на 5%. Прочие активы неизменны. Как меняются разрыв доходов и разрыв чистого богатства?",
+    "uz": "Ikki uy xo‘jaligining har biri yiliga $40 000 topadi. A ning uyi $200 000, B ning sof aktivlari $30 000. Uy narxlari 10% ga oshib, faqat A uyiga ta’sir qiladi, ikkala ish haqi 5% ga oshadi. Boshqa aktivlar o‘zgarmaydi. Daromad va sof boylik tafovuti qanday o‘zgaradi?",
+    "options_en": [
+      "Income gap +$2,000; wealth gap unchanged",
+      "Income gap unchanged; wealth gap +$20,000",
+      "Income gap +$4,000; wealth gap +$20,000",
+      "Income gap unchanged; wealth gap −$20,000"
+    ],
+    "options_ru": [
+      "Разрыв доходов +$2 000; разрыв богатства неизменен",
+      "Разрыв доходов неизменен; разрыв богатства +$20 000",
+      "Разрыв доходов +$4 000; разрыв богатства +$20 000",
+      "Разрыв доходов неизменен; разрыв богатства −$20 000"
+    ],
+    "options_uz": [
+      "Daromad tafovuti +$2000; boylik tafovuti o‘zgarmaydi",
+      "Daromad tafovuti o‘zgarmaydi; boylik tafovuti +$20 000",
+      "Daromad tafovuti +$4000; boylik tafovuti +$20 000",
+      "Daromad tafovuti o‘zgarmaydi; boylik tafovuti −$20 000"
+    ],
+    "why": [
+      "Both incomes grow equally, leaving a zero income gap. A's house appreciates by $20,000, widening the wealth gap by $20,000.",
+      "Доходы остаются равными. Дом A дорожает на $20 000, поэтому разрыв богатства растёт на $20 000.",
+      "Ikkala daromad teng oshadi, tafovut nol. A uyi $20 000 ga qimmatlashib, boylik tafovutini $20 000 ga kengaytiradi."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-010"
+  },
+  {
+    "n": 12,
+    "d": "hard",
+    "sec": 175,
+    "k": "D",
+    "en": "Real GDP rises from $240bn to $252bn in one year, while population rises from 20 million to 21 million. Assuming both figures cover the same period, approximately how much does real GDP per person grow?",
+    "ru": "Реальный ВВП за год вырос с $240 млрд до $252 млрд, а население — с 20 млн до 21 млн. Если оба изменения относятся к одному периоду, на сколько примерно вырос реальный ВВП на человека?",
+    "uz": "Real YaIM bir yilda $240 mlrd dan $252 mlrd ga, aholi esa 20 mln dan 21 mln ga oshdi. Ikkala o‘zgarish bir davrga tegishli bo‘lsa, aholi jon boshiga real YaIM taxminan necha foiz oshdi?",
+    "opts": [
+      "10%",
+      "5%",
+      "2.5%",
+      "0%"
+    ],
+    "why": [
+      "GDP grows 5%, but population also grows 5%. Per-person GDP is $12,000 in both years, so growth is zero.",
+      "ВВП и население увеличились на 5%. ВВП на человека в обоих годах $12 000, прирост 0%.",
+      "YaIM va aholi har biri 5% ga oshgan. Jon boshiga YaIM ikki yilda ham $12 000; o‘sish 0%."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-012",
+    "options_en": [
+      "10%",
+      "5%",
+      "2.5%",
+      "0%"
+    ],
+    "options_ru": [
+      "10%",
+      "5%",
+      "2.5%",
+      "0%"
+    ],
+    "options_uz": [
+      "10%",
+      "5%",
+      "2.5%",
+      "0%"
+    ]
+  },
+  {
+    "n": 13,
+    "d": "hard",
+    "sec": 185,
+    "k": "C",
+    "en": "A country has GDP of $560bn. Domestic residents receive $18bn primary income from overseas while non-residents earn $38bn primary income domestically. Consumption of fixed capital is $30bn. What is net national income (NNI)?",
+    "ru": "ВВП страны составляет $560 млрд. Резиденты получают $18 млрд первичных доходов из-за рубежа, нерезиденты зарабатывают внутри страны $38 млрд. Потребление основного капитала составляет $30 млрд. Найдите чистый национальный доход (NNI).",
+    "uz": "Mamlakat YaIMi $560 mlrd. Rezidentlar chet eldan $18 mlrd birlamchi daromad oladi, norezidentlar mamlakat ichida $38 mlrd ishlab topadi. Asosiy kapital iste’moli $30 mlrd. Sof milliy daromad (NNI) qancha?",
+    "opts": [
+      "$530bn",
+      "$550bn",
+      "$510bn",
+      "$590bn"
+    ],
+    "why": [
+      "Net primary income from abroad is 18 − 38 = −20. GNI = 560 − 20 = 540; NNI = 540 − 30 = 510.",
+      "Чистые первичные доходы из-за рубежа: 18 − 38 = −20. GNI = 540, NNI = 540 − 30 = 510.",
+      "Chet eldan sof birlamchi daromad 18 − 38 = −20. YAMD = 540, NNI = 540 − 30 = 510."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-013",
+    "options_en": [
+      "$530bn",
+      "$550bn",
+      "$510bn",
+      "$590bn"
+    ],
+    "options_ru": [
+      "$530bn",
+      "$550bn",
+      "$510bn",
+      "$590bn"
+    ],
+    "options_uz": [
+      "$530bn",
+      "$550bn",
+      "$510bn",
+      "$590bn"
+    ]
+  },
+  {
+    "n": 14,
+    "d": "hard",
+    "sec": 170,
+    "k": "A",
+    "en": "A screening service costs $40 per person. Families mistakenly perceive only $20 private benefit, although the actual private benefit is $45 and benefits to others add $10. Which statement is best supported by the figures?",
+    "ru": "Профилактическое обследование стоит $40 на человека. Семьи ошибочно оценивают личную выгоду лишь в $20, хотя фактическая личная выгода $45 и польза другим людям ещё $10. Какой вывод наиболее обоснован данными?",
+    "uz": "Profilaktik tekshiruv kishi boshiga $40 turadi. Oilalar shaxsiy foydani xato ravishda $20 deb biladi, asl shaxsiy foyda $45 va boshqalarga qo‘shimcha foyda $10. Qaysi xulosa ma’lumotlarga mos?",
+    "opt_en": [
+      "Better information alone could make private willingness to pay exceed cost, while external benefits still exist.",
+      "Better information necessarily eliminates the external benefit.",
+      "Actual total social benefit is only $20.",
+      "The service is socially inefficient because its price exceeds perceived private benefit."
+    ],
+    "opt_ru": [
+      "Более полная информация сама по себе может поднять личную готовность платить выше затрат, при сохранении внешних выгод.",
+      "Более полная информация обязательно устраняет внешние выгоды.",
+      "Фактическая общая общественная выгода равна только $20.",
+      "Услуга неэффективна для общества, поскольку её цена выше субъективной личной выгоды."
+    ],
+    "opt_uz": [
+      "To‘liqroq axborot shaxsiy to‘lashga tayyorlikni xarajatdan yuqoriga olib chiqishi mumkin, tashqi foyda esa qoladi.",
+      "To‘liqroq axborot tashqi foydani albatta yo‘q qiladi.",
+      "Haqiqiy umumiy ijtimoiy foyda atigi $20.",
+      "Bahosi xato baholangan shaxsiy foydadan yuqori bo‘lgani uchun xizmat jamiyat uchun samarasiz."
+    ],
+    "why": [
+      "Perceived private benefit ($20) is below cost ($40), but actual private benefit ($45) exceeds it, even before the $10 external benefit. Information can therefore alter demand.",
+      "Субъективная выгода $20 ниже затрат $40, но реальная личная выгода $45 выше затрат даже без внешней пользы $10. Информация способна изменить спрос.",
+      "His qilingan foyda $20 xarajat $40 dan past, asl shaxsiy foyda $45 esa yuqori, $10 tashqi foydadan tashqari. Axborot talabni o‘zgartirishi mumkin."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-014",
+    "options_en": [
+      "Better information alone could make private willingness to pay exceed cost, while external benefits still exist.",
+      "Better information necessarily eliminates the external benefit.",
+      "Actual total social benefit is only $20.",
+      "The service is socially inefficient because its price exceeds perceived private benefit."
+    ],
+    "options_ru": [
+      "Более полная информация сама по себе может поднять личную готовность платить выше затрат, при сохранении внешних выгод.",
+      "Более полная информация обязательно устраняет внешние выгоды.",
+      "Фактическая общая общественная выгода равна только $20.",
+      "Услуга неэффективна для общества, поскольку её цена выше субъективной личной выгоды."
+    ],
+    "options_uz": [
+      "To‘liqroq axborot shaxsiy to‘lashga tayyorlikni xarajatdan yuqoriga olib chiqishi mumkin, tashqi foyda esa qoladi.",
+      "To‘liqroq axborot tashqi foydani albatta yo‘q qiladi.",
+      "Haqiqiy umumiy ijtimoiy foyda atigi $20.",
+      "Bahosi xato baholangan shaxsiy foydadan yuqori bo‘lgani uchun xizmat jamiyat uchun samarasiz."
+    ]
+  },
+  {
+    "n": 16,
+    "d": "hard",
+    "sec": 200,
+    "k": "B",
+    "en": "Before policy, the annual incomes of high- and low-income households are $1,000 and $200 respectively. The high-income household pays $200 tax; the low-income household receives $150 transfer. Ignore other responses. How much does the gap between their disposable incomes narrow?",
+    "ru": "До вмешательства годовые доходы богатого и бедного домохозяйств равны $1 000 и $200. Богатое домохозяйство платит $200 налога, бедное получает трансферт $150. Игнорируйте другие реакции. На сколько сужается разница их располагаемых доходов?",
+    "uz": "Siyosatgacha yuqori va past daromadli xonadonlar yiliga mos ravishda $1000 va $200 topadi. Boyroq xonadon $200 soliq to‘laydi, kambag‘al xonadon $150 transfer oladi. Boshqa ta’sirlarni e’tiborga olmang. Ularning ixtiyoridagi daromad tafovuti qanchaga qisqaradi?",
+    "opts": [
+      "$150",
+      "$350",
+      "$200",
+      "$450"
+    ],
+    "why": [
+      "Initially the gap is $800. Afterwards disposable incomes are $800 and $350, gap $450. Narrowing = $350.",
+      "Изначальный разрыв $800. Затем располагаемые доходы $800 и $350, разрыв $450. Сужение $350.",
+      "Dastlab farq $800. Keyin ixtiyordagi daromadlar $800 va $350, farq $450. Qisqarish $350."
+    ],
+    "ref": "EC9708:G2:EC9708-G2-T2-P-016",
+    "options_en": [
+      "$150",
+      "$350",
+      "$200",
+      "$450"
+    ],
+    "options_ru": [
+      "$150",
+      "$350",
+      "$200",
+      "$450"
+    ],
+    "options_uz": [
+      "$150",
+      "$350",
+      "$200",
+      "$450"
+    ]
+  }
+]
