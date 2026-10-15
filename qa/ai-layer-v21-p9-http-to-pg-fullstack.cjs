@@ -21,7 +21,7 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 let server=null,created=false;
 function command(program,args,options={}){
  const r=spawnSync(program,args,{cwd:ROOT,encoding:"utf8",timeout:60000,
-  env:{...process.env,PGPASSWORD:process.env.PGPASSWORD||"synthetic-only",PGCONNECT_TIMEOUT:"5"},...options});
+  env:{...process.env,PGAPPNAME:"iclub_ai_v21_local_scratch",PGPASSWORD:process.env.PGPASSWORD||"synthetic-only",PGCONNECT_TIMEOUT:"5"},...options});
  if(r.status!==0)throw Error(program+" failed: "+String(r.stderr||r.error).slice(-1300));
  return r.stdout.trim();
 }

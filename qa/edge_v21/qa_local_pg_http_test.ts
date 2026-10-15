@@ -28,7 +28,7 @@ const control=async(action:string)=>{
   body:JSON.stringify({action})});
  assert(response.ok,"Synthetic control failed: "+action);
 };
-let ha="",hb="";
+let ha="",hb="",tourHandle="";
 Deno.test("§120 actual local HTTP Auth -> real PG mint and independent owners",async()=>{
  const one=await send(TA,{action:"mint",sessionId:900,questionId:901});
  const two=await send(TB,{action:"mint",sessionId:910,questionId:911});
@@ -46,6 +46,10 @@ Deno.test("§120 actual local HTTP Auth -> real PG mint and independent owners",
 Deno.test("§121 actual Tour SQL and no separate release/provider spending",async()=>{
  const tour=await send(TA,{action:"mintTourArchive",tourAttemptId:401});
  assert(tour.data.ok===true,"A own tour denied "+JSON.stringify(tour.data));
+ tourHandle=String(tour.data.contextHandle);
+ assert((await svc.getScopedContext(A,ha))===null,"old Practice scope survived Tour switch");
+ assert((await svc.getScopedContext(A,tourHandle))?.ownerId===A,
+  "current owner Tour context not readable");
  assert((await send(TB,{action:"mintTourArchive",tourAttemptId:401})).data.ok===false,
  "B borrowed A tour");
  const live=await svc.getGlobalState();
@@ -65,8 +69,11 @@ Deno.test("§122 direct client invocation of PostgreSQL RPC denied and user revo
   body:JSON.stringify({p_user_id:A,p_session_id:900,p_question_id:901})
  });
  assert(direct.status===401,"learner directly reached privileged SQL");
+ assert((await svc.getScopedContext(A,tourHandle))?.ownerId===A,
+  "owner Tour context expired before deliberate revoke");
  await control("unenroll_a");
- assert((await svc.getScopedContext(A,ha))===null,"revoked enrolment didn't block A");
+ assert((await svc.getScopedContext(A,tourHandle))===null,
+  "revoked enrolment did not block ACTIVE Tour context");
  assert((await svc.getScopedContext(B,hb))?.ownerId===B,
  "A enrollment revocation must not remove B context");
 });
