@@ -68,8 +68,8 @@ test("frozen production shell remains unchanged, QA changes stay under qa/",()=>
   assert.equal(blobSha("global-ai-ui.js"),"023516d2127a838f8b12b398215745304fe11d9e");
   assert.equal(blobSha("global-ai-ui.css"),"27150c82d8204d423f178b56b01715a04cdbc1bc");
   assert.notEqual(js,read("global-ai-ui.js"),"Preview must be separate, never change production UI by import");
-  assert.match(js,/iclub-global-ai-mark-symbol/);
-  assert.match(css,/\.iclub-global-ai-mark-symbol/);
+  assert.match(js,/iclub-global-ai-mark-logo/);
+  assert.match(css,/\.iclub-global-ai-mark-logo/);
   assert.doesNotMatch(read("index.html"),/ai-v21-real-preview-ui-snapshot/);
   assert.doesNotMatch(app,/__ICLUB_AI_QA_PREVIEW__/);
 });
@@ -113,6 +113,13 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
   assert.equal(fs.readFileSync(path.join(dist,"app.js"),"utf8"),app);
   assert.equal(fs.readFileSync(path.join(dist,"global-ai-ui.js"),"utf8"),js);
   assert.equal(fs.readFileSync(path.join(dist,"global-ai-ui.css"),"utf8"),css);
+  const aiAsset=fs.readFileSync(path.join(dist,"iclub-ai-tutor-a.webp"));
+  assert.equal(aiAsset.length,3394);
+  assert.equal(aiAsset.subarray(0,4).toString("ascii"),"RIFF");
+  assert.equal(fs.readFileSync(path.join(dist,"logo.png")).length,
+    fs.readFileSync(path.join(root,"logo.png")).length,"Core logo must remain original");
+  assert.match(js,/src="iclub-ai-tutor-a\.webp"/);
+  assert.doesNotMatch(js,/mark-symbol|src="logo\.png"/);
   const output=fs.readFileSync(path.join(dist,"index.html"),"utf8");
   const expected=index
     .replace('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>',
