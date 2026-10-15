@@ -30,9 +30,12 @@ export function validBackendConfig(cfg:BackendConfig):boolean{
   const u=new URL(cfg.supabaseUrl);
   const local=(u.hostname==="localhost"||u.hostname==="127.0.0.1");
   const official=/^[a-z0-9-]+\.supabase\.co$/i.test(u.hostname);
-  return (u.protocol==="https:"&&official||u.protocol==="http:"&&local)
-   &&u.username===""&&u.password===""&&u.search===""&&u.hash===""
-   &&cfg.anonKey.length>=8&&cfg.serviceRoleKey.length>=8;
+  return (u.protocol==="https:"&&official&&u.port===""||
+    u.protocol==="http:"&&local)
+   &&u.pathname==="/"&&u.username===""&&u.password===""
+   &&u.search===""&&u.hash===""
+   &&cfg.anonKey.length>=8&&cfg.serviceRoleKey.length>=8
+   &&cfg.anonKey!==cfg.serviceRoleKey;
  }catch{return false;}
 }
 export class ServerRpcError extends Error{
@@ -81,7 +84,11 @@ export function createSupabaseServices(config:BackendConfig){
    const d=await safe(async()=>asObject(await call("/auth/v1/user",{
     method:"GET",headers:{Authorization:authorization}
    },false)),null);
-   return d&&UUID.test(str(d.id))?{authenticated:true,userId:str(d.id)}:null;
+   // The authenticated learner identity MUST come from Auth, not browser JSON.
+   // If Auth supplies an explicit role, a privileged role is never a learner.
+   return d&&UUID.test(str(d.id))&&
+    (d.role===undefined||d.role==="authenticated")?
+    {authenticated:true,userId:str(d.id)}:null;
   },
   getServerTimeMs:async()=>Date.now(),
   // These four read endpoints are proposed NEW v2 RPC contracts. They do not

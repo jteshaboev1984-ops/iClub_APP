@@ -72,6 +72,9 @@ on:
       - 'qa/ai-layer-v21-p9-live-metadata-readonly-snapshot.json'
       - 'qa/ai-layer-v21-p9-live-integration-preflight.cjs'
       - 'qa/ai-layer-v21-p9-live-integration-preflight.test.cjs'
+      - 'qa/edge_v21/qa_startup_guard.ts'
+      - 'qa/edge_v21/qa_startup_guard_test.ts'
+      - 'qa/edge_v21/auth_trust_boundary_test.ts'
       - 'qa/ai-layer-v21-p9-rpc-draft-manifest.json'
       - 'qa/ai-layer-v21-p9-policy-fingerprint-snapshot.json'
       - 'qa/ai-layer-v21-p9-draft-contract-gate.cjs'
@@ -185,9 +188,9 @@ jobs:
         with:
           deno-version: v2.x
       - name: Typecheck isolated Deno Edge transport
-        run: deno check qa/edge_v21/http.ts qa/edge_v21/context_core.ts qa/edge_v21/screen_proof_services.ts qa/edge_v21/screen_proof_services_test.ts qa/edge_v21/supabase_services.ts qa/edge_v21/runtime.ts qa/edge_v21/index.ts
+        run: deno check qa/edge_v21/qa_startup_guard.ts qa/edge_v21/qa_startup_guard_test.ts qa/edge_v21/auth_trust_boundary_test.ts qa/edge_v21/http.ts qa/edge_v21/context_core.ts qa/edge_v21/screen_proof_services.ts qa/edge_v21/screen_proof_services_test.ts qa/edge_v21/supabase_services.ts qa/edge_v21/runtime.ts qa/edge_v21/index.ts
       - name: Native Deno HTTP, Auth and source-gate regression
-        run: deno test --allow-read=qa --no-check qa/edge_v21/http_test.ts qa/edge_v21/screen_proof_services_test.ts qa/edge_v21/supabase_services_test.ts qa/edge_v21/runtime_test.ts qa/edge_v21/context_core_test.ts qa/edge_v21/source_proof_test.ts qa/edge_v21/authority_services_test.ts qa/edge_v21/e2e_synthetic_test.ts
+        run: deno test --allow-read=qa --no-check qa/edge_v21/qa_startup_guard_test.ts qa/edge_v21/auth_trust_boundary_test.ts qa/edge_v21/http_test.ts qa/edge_v21/screen_proof_services_test.ts qa/edge_v21/supabase_services_test.ts qa/edge_v21/runtime_test.ts qa/edge_v21/context_core_test.ts qa/edge_v21/source_proof_test.ts qa/edge_v21/authority_services_test.ts qa/edge_v21/e2e_synthetic_test.ts
       - name: Install ephemeral PostgreSQL client
         run: |
           if ! command -v psql >/dev/null; then

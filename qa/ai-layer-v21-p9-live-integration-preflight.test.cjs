@@ -76,6 +76,13 @@ test("P9 RLS, direct read grants, protected Exam Prep and UI drift are not ignor
  a.equal(has(checkLiveIntegrationReadiness({productionHtml:html}),
   "PRODUCTION_UI_GATE_DRIFT"),true);
 });
+test("§119 missing localhost guard blocks release readiness",()=>{
+ const baseline=readFileSync("qa/edge_v21/qa_startup_guard.ts","utf8");
+ const changed=baseline.replace('db.hostname==="127.0.0.1"','db.hostname==="example.invalid"');
+ const check=checkLiveIntegrationReadiness({bootstrapGuard:changed});
+ a.equal(has(check,"QA_REMOTE_BACKEND_GUARD_DRIFT"),true);
+ a.equal(check.status,"NO_GO");
+});
 test("P9 unknown, duplicate and missing live function inventories fail safely",()=>{
  const invalid=copy();invalid.observedV21RpcContracts=["unknown_rpc"];
  a.equal(has(checkLiveIntegrationReadiness({metadata:invalid}),

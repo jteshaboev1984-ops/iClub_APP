@@ -2,20 +2,24 @@
 // Manual Deno start must supply ICLUB_AI_V21_EXPLICIT_QA=isolated-preview-only.
 // No provider is connected; unavailable v2 RPCs fail closed.
 import {makeHttpHandler} from "./http.ts";
+import {isolatedQaStartupAllowed} from "./qa_startup_guard.ts";
 import {createQaEdgeCandidate} from "./runtime.ts";
 import {createSupabaseServices} from "./supabase_services.ts";
 import {makeContextCore} from "./context_core.ts";
 
-const enabled=Deno.env.get("ICLUB_AI_V21_EXPLICIT_QA")==="isolated-preview-only";
+const flag=Deno.env.get("ICLUB_AI_V21_EXPLICIT_QA")||"";
 const origin=Deno.env.get("ICLUB_AI_V21_QA_ORIGIN")||"";
+const supabaseUrl=Deno.env.get("SUPABASE_URL")||"";
+const anonKey=Deno.env.get("SUPABASE_ANON_KEY")||"";
+const serviceRoleKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
+const enabled=isolatedQaStartupAllowed({flag,origin,
+ backendUrl:supabaseUrl,anonKey,serviceRoleKey});
 let handler:((req:Request)=>Promise<Response>)|null=null;
 if(enabled){
  try{
   if(!/^https:\/\/[^/]+$/.test(origin))throw Error("qa_origin_required");
   const services=createSupabaseServices({
-   supabaseUrl:Deno.env.get("SUPABASE_URL")||"",
-   anonKey:Deno.env.get("SUPABASE_ANON_KEY")||"",
-   serviceRoleKey:Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||""
+   supabaseUrl,anonKey,serviceRoleKey
   });
   const candidate=createQaEdgeCandidate(services as unknown as Record<string,unknown>,[origin]);
   const answerHandler=makeHttpHandler(candidate,[origin]);

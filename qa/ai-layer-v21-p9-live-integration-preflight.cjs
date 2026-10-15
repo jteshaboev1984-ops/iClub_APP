@@ -31,6 +31,7 @@ function checkLiveIntegrationReadiness({
  metadata=snapshot,
  adapterSource=read("qa/edge_v21/supabase_services.ts"),
  edgeSource=read("qa/edge_v21/index.ts"),
+ bootstrapGuard=read("qa/edge_v21/qa_startup_guard.ts"),
  productionHtml=read("index.html"),
  productionApp=read("app.js"),
  commercialBaseline=commercial
@@ -102,6 +103,12 @@ function checkLiveIntegrationReadiness({
   !edgeSource.includes('isolated-preview-only')||
   !edgeSource.includes('No provider is connected'))
   add("QA_EDGE_SCOPE_DRIFT","Isolated-only candidate changed; inspect before deploying");
+ if(typeof bootstrapGuard!=="string"||
+  !bootstrapGuard.includes('c.flag!=="isolated-preview-only"')||
+  !bootstrapGuard.includes('db.hostname==="127.0.0.1"')||
+  !bootstrapGuard.includes('db.protocol==="http:"')||
+  !edgeSource.includes("isolatedQaStartupAllowed"))
+  add("QA_REMOTE_BACKEND_GUARD_DRIFT","QA backend must be localhost only");
  if(typeof productionHtml!=="string"||typeof productionApp!=="string"||
   ["ai-layer-v21-p6-study-route.cjs",
    "ai-layer-v21-p6-home-pg-http-gateway.cjs",

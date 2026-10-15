@@ -31,9 +31,15 @@ Deno.test("Deno backend rejects HTTP origins outside local/supabase scheme",()=>
  supabaseUrl:"https://synthetic.supabase.co"}));
  for(const url of ["http://malicious.example","https://evil.example",
   "https://name:pass@synthetic.supabase.co","https://synthetic.supabase.co/?key=foo",
-  "ftp://synthetic.supabase.co"]){
+  "ftp://synthetic.supabase.co",
+  "https://synthetic.supabase.co/private",
+  "https://synthetic.supabase.co:8443",
+  "http://127.0.0.1:54321/proxy"]){
   eq(validBackendConfig({...config,supabaseUrl:url}),false);
  }
+});
+Deno.test("Deno backend credentials must not reuse the anon key",()=>{
+ eq(validBackendConfig({...config,serviceRoleKey:config.anonKey}),false);
 });
 Deno.test("Deno Auth checks real bearer against /auth/v1/user, never trusts body user",async()=>{
  const x=syntheticBackend();
