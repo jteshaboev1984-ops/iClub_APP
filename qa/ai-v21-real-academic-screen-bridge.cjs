@@ -81,7 +81,8 @@ class QaV21RealAcademicScreenBridge {
   try{await this.client.leave();}catch{}
   return{ok:true};
  }
- async chooseReviewQuestion(row){
+ async chooseReviewQuestion(row,locale="ru"){
+  if(!["ru","uz","en"].includes(locale))return fail("invalid_locale");
   const candidate=this.readReviewCandidate(row);
   const epoch=this.epoch+1;
   await this.leave();
@@ -115,7 +116,7 @@ class QaV21RealAcademicScreenBridge {
   }
   if(mint?.ok!==true)return fail(mint?.reason||"server_context_unavailable");
   let status;
-  try{status=await this.client.status("ru");}
+  try{status=await this.client.status(locale);}
   catch{status=null;}
   if(epoch!==this.epoch||!this.same(candidate,row)){
    try{await this.client.leave();}catch{}
@@ -128,14 +129,16 @@ class QaV21RealAcademicScreenBridge {
   this.active=Object.freeze({
    row,attemptReference:candidate.attemptReference,
    questionId:candidate.questionId,subjectHint:candidate.subjectHint,
-   sessionId:resolved.sessionId,epoch:this.epoch
+   sessionId:resolved.sessionId,epoch:this.epoch,locale
   });
   return Object.freeze({ok:true,state:"available"});
  }
  async explainSelectedError(locale){
   const a=this.active;
+  // The source readiness decision belongs to one exact language. A valid
+  // Russian source cannot make an unpublished Uzbek/English source ready.
   if(!a||a.epoch!==this.epoch||!this.same(a,a.row)||
-     !["ru","uz","en"].includes(locale))return fail("screen_not_verified");
+     locale!==a.locale)return fail("screen_not_verified");
   if(this.client.isCurrent && !this.client.isCurrent())return fail("context_expired");
   let result;
   try{result=await this.client.askPrepared("practice_error",locale);}
