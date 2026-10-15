@@ -1049,3 +1049,55 @@
   order:5;grid-column:1/-1;background:transparent;
   color:#526277;border:1px solid #e5eaf2;
 }
+
+
+/* QA visual alignment / 2026-10-15:
+   Section headings were placed flush against the automatic white card surface.
+   Keep desktop/mobile spacing symmetrical without touching Practice logic. */
+.iclub-visual-v3 #courses-my-recs > .section {
+  padding-inline:4px;
+}
+.iclub-visual-v3 #courses-my-recs #my-recs-list > .iclub-sx-heading {
+  box-sizing:border-box;
+  padding:8px 14px;
+  min-width:0;
+}
+.iclub-visual-v3 #courses-my-recs #my-recs-list > .iclub-sx-heading h2 {
+  flex:1 1 auto;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs #my-recs-list > .iclub-sx-heading .iclub-sx-total {
+  flex:0 1 auto;
+  max-width:48%;
+  overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-my-recs #my-recs-list > #my-recs-topic-history {
+  box-sizing:border-box;
+  padding:8px 14px;
+}
+.iclub-visual-v3 #courses-my-recs #my-recs-list > #my-recs-tour-history {
+  box-sizing:border-box;
+  padding:13px 14px;
+}
+.iclub-visual-v3 #courses-my-recs #my-recs-list > #my-recs-topic-latest,
+.iclub-visual-v3 #courses-my-recs #my-recs-list > #my-recs-tour-latest,
+.iclub-visual-v3 #courses-my-recs #my-recs-list > .iclub-sx-groups {
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+.iclub-visual-v3 #courses-my-recs #my-recs-topic-latest .iclub-sx-last,
+.iclub-visual-v3 #courses-my-recs #my-recs-tour-latest .iclub-sx-tour-last {
+  margin-bottom:0;
+}
+@media (max-width:380px) {
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-head,
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-last,
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-rec-entry,
+  .iclub-visual-v3 #courses-my-recs .iclub-sx-tour-history-row {
+    padding-inline:14px;
+  }
+}
