@@ -68,6 +68,8 @@ on:
       - 'qa/sql_drafts/iclub_ai_v21_home_http_fixture_local_pg.psql'
       - 'qa/ai-layer-v21-p6-home-pg-http-gateway.cjs'
       - 'qa/ai-layer-v21-p6-home-pg-http.test.cjs'
+      - 'qa/ai-layer-v21-p6-home-pg-chromium.cjs'
+      - 'qa/preview_v21/home-pg-local.html'
       - 'qa/sql_drafts/iclub_ai_v21_real_schema_screen_proof_local_pg.psql'
       - 'qa/run-ai-layer-v21-postgres-local.sh'
       - 'docs/iclub-ai-layer-p7-real-schema-proof-audit-v2.1.md'
@@ -191,6 +193,7 @@ jobs:
           psql -X -w -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 \
             -U postgres -d "$db" \
             -f qa/sql_drafts/iclub_ai_v21_home_http_fixture_local_pg.psql
+          node qa/ai-layer-v21-p6-home-pg-chromium.cjs
           node --test qa/ai-layer-v21-p6-home-pg-http.test.cjs
       - name: Real two-worker durable delivery race in another empty scratch DB
         shell: bash
