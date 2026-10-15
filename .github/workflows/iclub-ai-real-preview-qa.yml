@@ -8,6 +8,7 @@ on:
       - '.github/workflows/iclub-ai-real-preview-qa.yml'
       - 'qa/ai-v21-real-preview-*'
       - 'qa/ai-v21-real-academic-screen-bridge*'
+      - 'qa/sql_drafts/iclub_ai_v21_practice_attempt_resolution_*'
       - 'global-ai-ui.js'
       - 'global-ai-ui.css'
       - 'app.js'
@@ -67,3 +68,41 @@ jobs:
           git diff --exit-code c565f9a8d70ceeb791137bec36e5bf1f2e21de4c HEAD -- global-ai-ui.js global-ai-ui.css
           test -z "$(git diff --name-only 9afc7b44aead03b2a30544e6e7d4c4eb8670efbf HEAD -- app.js index.html exam-prep/ supabase/migrations/)"
           echo 'QA real-app preview: verified no protected source changes'
+
+  isolated-practice-mapping-postgres:
+    if: github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: qa-disposable-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGUSER: postgres
+      PGPASSWORD: qa-disposable-only
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+    steps:
+      - name: Checkout QA-only SQL (no Git credentials)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Create brand-new disposable database and validate only V4 mapping
+        shell: bash
+        run: |
+          set -euo pipefail
+          db=iclub_ai_v21_scratch_resolver
+          createdb -w "$db"
+          trap 'dropdb -w --if-exists "$db"' EXIT
+          psql -X -w -v ON_ERROR_STOP=1 -d "$db" -f             qa/sql_drafts/iclub_ai_v21_practice_attempt_resolution_local_pg.psql
+          echo 'QA V4 identity mapping isolated PostgreSQL GREEN'
