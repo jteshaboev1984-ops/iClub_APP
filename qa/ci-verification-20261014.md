@@ -19,3 +19,5 @@ QA CI 2026-10-15: verify frozen existing global-ai-ui.js, commercial-access-ui.j
 2026-10-15 §96–§97: actual HTTP + scratch PG + server HMAC + native Chromium across 3 locales; QA-to-QA only, NO MERGE.
 
 2026-10-15 §97 rerun: PostgreSQL boolean EXISTS::text uses 'true' (not libpq display 't'); check actual local HTTP + Chromium only on disposable PG.
+
+2026-10-15 §98: verify real scratch editorial rights/revocation/source fingerprints through signed Home HTTP and Chromium; QA only, no Supabase, no merge.
