@@ -20091,9 +20091,9 @@ try {
         <div style="font-weight:900">${escapeHTML(recText.resultTitle)}</div>
         <div class="muted small" style="margin-top:6px">${escapeHTML(line)}</div>
         <div style="margin-top:10px">
-          <button class="btn" type="button" data-action="my-rec-repeat-drill">
+          ${isTopicRec ? "" : `<button class="btn" type="button" data-action="my-rec-repeat-drill">
             ${escapeHTML(recText.resultRepeat)}
-          </button>
+          </button>`}
         </div>
       </div>
     `;
@@ -20126,9 +20126,9 @@ const mistakesHeaderHtml = `
       <div style="font-weight:900">${escapeHTML(recText.mistakesTitle)}</div>
       <span class="pill">${escapeHTML(String(totalMistakes))}</span>
     </div>
-    <div class="muted small" style="margin-top:6px">
+    ${isTopicRec ? "" : `<div class="muted small" style="margin-top:6px">
       ${escapeHTML(recText.mistakesSubtitle)}
-    </div>
+    </div>`}
   </div>
 `;
      
@@ -20212,9 +20212,9 @@ const mistakesHtml = totalMistakes
     <div style="font-weight:900">
       ${escapeHTML(t("rec_read_title") || "Что прочитать")}
     </div>
-    <div class="muted small" style="margin-top:6px">
+    ${isTopicRec ? "" : `<div class="muted small" style="margin-top:6px">
       ${escapeHTML((t("rec_read_line") || 'Тема в книге — "{topic}".').replace("{topic}", String(rec.topic || "").trim()))}
-    </div>
+    </div>`}
   </div>
 
   ${refsHtml}
