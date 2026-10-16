@@ -272,9 +272,19 @@ async function main(){
       await client.evaluate("document.querySelector('[data-qa-app-help=\""+screen+"\"]').click();true");
       await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
         "one-tap global Tutor opens in "+screen);
-      await client.until("document.querySelector('[data-global-ai-messages] .is-assistant')?."+
-        "textContent.includes("+JSON.stringify(expectedText)+")",
-        "readable, section-aware answer for "+screen);
+      try {
+        await client.until("document.querySelector('[data-global-ai-messages] .is-assistant')?."+
+          "textContent.includes("+JSON.stringify(expectedText)+")",
+          "readable, section-aware answer for "+screen);
+      } catch (error) {
+        const diag=await client.evaluate("({route:window.iClubGlobalAiShell?.context?.(),"+
+          "title:document.querySelector('[data-global-ai-title]')?.textContent,"+
+          "body:document.querySelector('[data-global-ai-messages]')?.textContent,"+
+          "hidden:document.querySelector('#iclub-global-ai-panel')?.hidden,"+
+          "mark:document.querySelector('#iclub-global-ai-mark')?.hidden,"+
+          "button:document.querySelector('[data-qa-app-help]')?.textContent})");
+        throw Error(screen+": "+JSON.stringify(diag)+" / "+String(error));
+      }
       const result=await client.evaluate("({thread:window.iClubGlobalAiShell.context().threadKey,"+
         "users:document.querySelectorAll('[data-global-ai-messages] .is-user').length,"+
         "replies:document.querySelectorAll('[data-global-ai-messages] .is-assistant').length})");
