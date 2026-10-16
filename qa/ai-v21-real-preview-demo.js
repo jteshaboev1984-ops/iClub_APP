@@ -211,9 +211,9 @@
     container.prepend(btn);
   }
   function attach(){
-    createEntry(document.getElementById("view-home"),"iclub-qa-demo-home-entry");
+    // Keep the original explanatory example only at the relevant
+    // completed-Practice entry, not on Home or every subject page.
     createEntry(document.getElementById("courses-practice-start"),"iclub-qa-demo-practice-entry");
-    createEntry(document.getElementById("courses-subject-hub"),"iclub-qa-demo-subject-entry");
     // A synthetic question must never survive navigation to another screen.
     const observer=new MutationObserver(()=>{
       if(active&&!isReview())clear();
