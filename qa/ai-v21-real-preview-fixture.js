@@ -184,8 +184,16 @@
       return plain(null,{message:"qa_rpc_not_available"});
     },
     functions:{
-      invoke:async(name,{body}={})=>
-        name==="global-ai"?plain(answer(body||{})):blocked()
+      invoke:async(name,{body}={})=>{
+        if(name!=="global-ai")return blocked();
+        if(body?.prompt_key==="practice_error" &&
+           window.__ICLUB_AI_QA_DEMO__?.ready?.()===true){
+          // The answer is a local fixed text, NOT AI generation. Simulate the
+          // short processing interval so the user can see the chat working.
+          await new Promise(resolve=>setTimeout(resolve,850));
+        }
+        return plain(answer(body||{}));
+      }
     },
     storage:{from:()=>({upload:blocked,download:blocked,getPublicUrl:()=>({data:{publicUrl:""}})})},
     channel:()=>({on(){return this;},subscribe(){return this;}}),
