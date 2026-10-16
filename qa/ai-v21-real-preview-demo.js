@@ -75,12 +75,16 @@
       el.classList.toggle("is-active",el.id==="courses-all-subjects");
     });
   }
-  function enter() {
+  async function enter() {
     if (document.getElementById("courses-practice-quiz")?.classList.contains("is-active") ||
         document.getElementById("courses-tour-quiz")?.classList.contains("is-active")) return;
     clear();
     document.querySelector('#tabbar [data-tab="courses"]')?.click();
     const scope=document.getElementById("view-courses");
+    // The real iClub tab transition is async; do not assume click is complete.
+    for(let i=0;i<30&&!scope?.classList.contains("is-active");i++){
+      await new Promise(resolve=>setTimeout(resolve,80));
+    }
     if(!scope?.classList.contains("is-active"))return;
     active=true;
     document.querySelectorAll("#view-courses .stack-screen").forEach(el=>{
