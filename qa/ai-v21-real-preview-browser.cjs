@@ -211,17 +211,26 @@ async function main(){
     await client.evaluate("(()=>{const b=document.querySelector('.iclub-qa-demo-main-btn');b.click();b.click();return true;})()");
     await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
       "single-tap AI panel open");
-    await client.until("document.querySelector('[data-global-ai-input]')?.value.includes('f′(3)')",
-      "chat visibly auto-fills the selected question");
-    await client.until("document.querySelector('[data-global-ai-messages] .is-user')?.textContent.includes('f′(3)')",
-      "prepared request automatically submitted");
-    await client.until("document.querySelector('[data-global-ai-messages] .is-assistant')?.textContent.includes('f′(3) = 2·3 + 2')",
-      "answer appears automatically without a second Explain click");
-    const once=await client.evaluate("({users:document.querySelectorAll('[data-global-ai-messages] .is-user').length,replies:document.querySelectorAll('[data-global-ai-messages] .is-assistant:not(.is-typing)').length})");
-    assert.deepEqual(once,{users:1,replies:1},"single-tap must not duplicate messages");
+    await client.until("document.querySelector('[data-qa-practice-context]')?.textContent.includes('f′(3)')",
+      "question context appears immediately in the same Tutor sheet");
+    await client.until("document.querySelector('[data-global-ai-messages] .is-user')?.textContent.includes('ответ 6 неверный')",
+      "question sent automatically, without a staged keyboard animation");
+    const inFlight=await client.evaluate("({draft:document.querySelector('[data-global-ai-input]')?.value,quick:document.querySelector('[data-global-ai-quick]')?.hidden})");
+    assert.deepEqual(inFlight,{draft:"",quick:true},
+      "no fake typing and no duplicate Explain button");
+    await client.until("document.querySelectorAll('.iclub-qa-explain-steps li').length===3",
+      "three formatted explanation steps automatically appear",12000);
+    const once=await client.evaluate("({users:document.querySelectorAll('[data-global-ai-messages] .is-user').length,replies:document.querySelectorAll('[data-global-ai-messages] .is-assistant:not(.is-typing)').length,steps:document.querySelectorAll('.iclub-qa-explain-steps li').length})");
+    assert.deepEqual(once,{users:1,replies:1,steps:3},
+      "rapid double tap must show just one request and three steps");
     const answer=await client.evaluate("document.querySelector('[data-global-ai-messages]')?.textContent");
-    assert.match(answer,/не реальный результат ученика/);
-    assert.match(answer,/8/);
+    assert.match(answer,/Производная x² равна 2x/);
+    assert.match(answer,/2 × 3 \+ 2 = 8/);
+    assert.match(answer,/Демонстрационный пример/);
+    const item=await client.evaluate("(()=>{const p=document.querySelector('#iclub-global-ai-panel');const scroll=p?.querySelector('[data-global-ai-scroll]');const title=p?.querySelector('.iclub-qa-explain-title');return {panel:!p?.hidden,visible:!!title,top:title?.getBoundingClientRect().top,scrollTop:scroll?.getBoundingClientRect().top}})()");
+    assert.equal(item.panel,true);
+    assert.ok(item.visible&&item.top>=(item.scrollTop-8),
+      "after response, reader should see the START of the explanation");
     await client.evaluate("document.querySelector('.iclub-qa-demo-back').click();true");
     await client.until("!window.__ICLUB_AI_QA_DEMO__?.active",
       "demo exited without user data writes");
