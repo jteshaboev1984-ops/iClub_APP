@@ -129,7 +129,8 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
     .replace("<head>",'<head>\n<meta http-equiv="Content-Security-Policy" content="'+
       vercel.headers[0].headers.find(h=>h.key==="Content-Security-Policy").value
        .replaceAll("&","&amp;").replaceAll('"',"&quot;")+'">')
-    .replace("</body>",'<script src="ai-v21-real-preview-demo.js"></script>\n</body>');
+    .replace("</body>",'<script src="ai-v21-real-preview-demo.js"></script>\n</body>')
+    .replace("</body>",'<script src="ai-v21-appwide-context-help.js"></script>\n</body>');
   assert.equal(output,expected);
   assert.doesNotMatch(output,/cdn\.jsdelivr\.net\/npm\/@supabase/);
   assert.match(output,/<meta http-equiv="Content-Security-Policy"/);
@@ -148,6 +149,10 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
     read("qa/ai-v21-real-preview-demo.js"));
   assert.doesNotMatch(app,/__ICLUB_AI_QA_DEMO__/);
   assert.match(output,/src="ai-v21-real-preview-demo.js"/);
+  assert.equal(fs.readFileSync(path.join(dist,"ai-v21-appwide-context-help.js"),"utf8"),
+    read("qa/ai-v21-appwide-context-help.js"));
+  assert.match(output,/src="ai-v21-appwide-context-help.js"/);
+  assert.doesNotMatch(app,/__ICLUB_AI_QA_APPWIDE__/);
 });
 
 test("QA bundler refuses production or the wrong existing branch",()=>{
