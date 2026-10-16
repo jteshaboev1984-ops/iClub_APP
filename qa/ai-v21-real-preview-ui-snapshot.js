@@ -1152,12 +1152,8 @@
       openPanel();
     });
 
-    // Dedicated non-interactive rail: the button never lies over learner
-    // cards or competes with the four existing navigation tabs.
-    const rail = document.createElement("div");
-    rail.className = "iclub-global-ai-dock";
-    rail.setAttribute("aria-hidden", "true");
-    host.appendChild(rail);
+    // Single discreet button anchored to the app shell, with no additional
+    // bottom panel, stripe, fifth tab or full-width UI surface.
     host.appendChild(button);
     document.body.appendChild(host);
     return host;
