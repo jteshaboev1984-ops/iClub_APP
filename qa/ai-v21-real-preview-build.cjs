@@ -84,7 +84,15 @@ assert.equal(html.split(sdk).length,2,"SDK script anchor changed: fail closed");
 assert.equal(html.split(telegram).length,2,"Telegram anchor changed: fail closed");
 assert.ok(html.includes('src="app.js?'),"Must use the real app.js");
 assert.ok(html.includes('src="global-ai-ui.js?'),"Must use the real global-ai-ui.js");
-html=html.replace(sdk,'<script src="ai-v21-real-preview-fixture.js"></script>');
+const typedHelpSource=path.join(__dirname,"ai-v21-preview-typed-app-help.js");
+assert.ok(fs.existsSync(typedHelpSource),"Missing QA typed public-help candidate");
+const typedHelp=fs.readFileSync(typedHelpSource,"utf8");
+assert.ok(typedHelp.includes("NOT an LLM")&&typedHelp.includes("noProductionWrites===true"),
+  "Only explicitly synthetic, local typed help may be emitted");
+fs.writeFileSync(path.join(out,"ai-v21-preview-typed-app-help.js"),typedHelp);
+html=html.replace(sdk,
+  '<script src="ai-v21-preview-typed-app-help.js"></script>\n'+
+  '<script src="ai-v21-real-preview-fixture.js"></script>');
 html=html.replace(telegram,"<!-- External Telegram SDK disabled in offline QA -->");
 // An original, clearly disclosed Practice demonstration runs in the REAL
 // app's existing review screen. No detached HTML screens, storage or network.
