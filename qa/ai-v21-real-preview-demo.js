@@ -143,8 +143,11 @@
     if (document.getElementById("courses-practice-quiz")?.classList.contains("is-active") ||
         document.getElementById("courses-tour-quiz")?.classList.contains("is-active")) return;
     clear();
-    document.querySelector('#tabbar [data-tab="courses"]')?.click();
     const scope=document.getElementById("view-courses");
+    // Clicking the already-active Study tab can reset its nested screen.
+    // Keep the actual Study route intact when entering from Practice.
+    if(!scope?.classList.contains("is-active"))
+      document.querySelector('#tabbar [data-tab="courses"]')?.click();
     // The real iClub tab transition is async; do not assume click is complete.
     for(let i=0;i<30&&!scope?.classList.contains("is-active");i++){
       await new Promise(resolve=>setTimeout(resolve,80));
