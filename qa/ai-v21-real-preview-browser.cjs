@@ -151,6 +151,11 @@ async function main(){
     await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
     await client.until("document.querySelector('[data-global-ai-quick]')?.textContent.includes('Объяснить результат')",
       "Practice result quick action");
+    await client.until("document.querySelector('[data-global-ai-messages]')?.textContent.includes('После реальной Practice')",
+      "one-click help explains next steps without personal claims");
+    await client.until("(()=>{const b=[...document.querySelectorAll('[data-global-ai-quick] button')]"+
+      ".find(e=>e.textContent.includes('Объяснить результат'));return b&&!b.disabled})()",
+      "follow-up prompt becomes available after automatic first answer");
     await client.evaluate("(()=>{const btn=[...document.querySelectorAll('[data-global-ai-quick] button')]"+
       ".find(e=>e.textContent.includes('Объяснить результат'));"+
       "if(!btn)throw Error('Result prompt missing');btn.click();return true;})()");
