@@ -136,6 +136,14 @@
     if (key==="practice_rules" || key==="app_help_practice") return response(copy.rules);
     if (key==="practice_after") return response(copy.after);
     if (key==="practice_result") return response(copy.result,false,"qa_no_verified_result");
+    // A distinct original QA example is allowed ONLY inside the actual review
+    // screen after the reviewer selects it; never reuses real Practice evidence.
+    if (key==="practice_error" && screen==="practice-review" &&
+        window.__ICLUB_AI_QA_DEMO__?.ready?.()===true) {
+      const prepared=window.__ICLUB_AI_QA_DEMO__.reply(lang);
+      if(typeof prepared==="string"&&prepared.length>30)
+        return response(prepared,true,"");
+    }
     if (key==="practice_error") return response(copy.error,false,"qa_no_verified_question");
     if (key==="practice_next") return response(copy.next);
     if (key==="tour_rules" || key==="app_help_tours") return response(copy.tours);
