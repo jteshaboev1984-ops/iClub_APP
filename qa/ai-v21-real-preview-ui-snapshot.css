@@ -803,3 +803,72 @@ html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-topic-action-wrap] 
 }
 
 
+
+
+/* QA onboarding: quiet transient callout anchored to the existing AI icon.
+   No extra tab, no duplicate CTA, no whole-screen shade or personal storage. */
+.iclub-global-ai-intro {
+  position: fixed;
+  right: 16px;
+  bottom: calc(64px + var(--safe-bottom) + 72px);
+  width: min(286px, calc(100vw - 32px));
+  padding: 13px 34px 13px 14px;
+  border: 1px solid rgba(41,99,185,.14);
+  border-radius: 16px;
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 7px 24px rgba(18,53,105,.12);
+  display: flex;
+  align-items: flex-start;
+  pointer-events: auto;
+  animation: iclub-qa-answer-arrive 220ms ease-out both;
+}
+.iclub-global-ai-intro[hidden] {display:none !important;}
+.iclub-global-ai-intro strong {
+  display: block; color: #163e7e; font-size: 13px; line-height: 1.4;
+}
+.iclub-global-ai-intro p {
+  color: #526782; font-size: 12px; line-height: 1.45;
+  margin: 4px 0 0;
+}
+.iclub-global-ai-intro button {
+  position: absolute; right: 7px; top: 6px;
+  width: 30px; height: 30px; border: 0; border-radius: 9px;
+  background: transparent; color: #657894; font-size: 21px; cursor: pointer;
+}
+.iclub-global-ai-intro button:focus-visible {
+  outline: 3px solid rgba(47,111,214,.3); outline-offset: 1px;
+}
+.iclub-global-ai-status {
+  margin-top: 3px;
+  color: #5577a2;
+  font-size: 10.5px;
+  line-height: 1.25;
+  font-weight: 550;
+  letter-spacing: 0;
+}
+.iclub-global-ai-first-info {
+  text-align: left;
+  margin-top: 15px;
+  padding: 12px;
+  border: 1px solid #e0eaf8;
+  background: #f6f9ff;
+  border-radius: 12px;
+}
+.iclub-global-ai-first-info[hidden] {display:none !important;}
+.iclub-global-ai-first-info strong {
+  display: block;
+  font-size: 12px;
+  color: #1b539c;
+}
+.iclub-global-ai-first-info p {
+  margin: 5px 0 0;
+  color: #536b8c;
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+@media (max-width:340px) {
+  .iclub-global-ai-intro {right:10px;width:min(275px,calc(100vw - 20px));}
+}
+@media (prefers-reduced-motion: reduce) {
+  .iclub-global-ai-intro {animation: none !important;}
+}
