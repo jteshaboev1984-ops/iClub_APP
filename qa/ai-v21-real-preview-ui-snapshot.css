@@ -782,3 +782,52 @@ html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-topic-action-wrap] 
     animation: none !important;
   }
 }
+
+
+/* One contextual AI help action on actual app sections — QA Preview only.
+   Uses the architect-approved AI mark, with quiet, consistent sizing. */
+.iclub-qa-appwide-help {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 28px);
+  max-width: 640px;
+  min-height: 46px;
+  margin: 10px 14px 16px;
+  padding: 9px 12px 9px 10px;
+  border-radius: 13px;
+  border: 1px solid rgba(43,106,197,.18);
+  background: #f3f8ff;
+  color: #194982;
+  text-align: left;
+  font: 700 13px/1.35 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 9px rgba(28,72,135,.035);
+}
+.iclub-qa-appwide-help[hidden] { display:none !important; }
+.iclub-qa-appwide-help > img {
+  width: 26px;height: 26px;
+  flex: 0 0 26px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.iclub-qa-appwide-help-label { flex: 1; min-width: 0; }
+.iclub-qa-appwide-help-arrow {
+  flex: 0 0 12px;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 400;
+  color: #4778b6;
+}
+.iclub-qa-appwide-help:hover { background: #e9f2ff; }
+.iclub-qa-appwide-help:active { background:#dceafd; }
+.iclub-qa-appwide-help:focus-visible {
+  outline: 3px solid #2775e4;
+  outline-offset: 3px;
+}
+.iclub-qa-appwide-help:disabled {opacity:.65;cursor:default;}
+#view-ratings .iclub-qa-appwide-help,
+#view-profile .iclub-qa-appwide-help { margin-top: 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .iclub-qa-appwide-help { transition:none !important; }
+}
