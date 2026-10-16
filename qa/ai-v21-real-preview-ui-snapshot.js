@@ -15,7 +15,12 @@
     biology: ["biology", "биология", "biologiya"],
     chemistry: ["chemistry", "химия", "kimyo"],
     economics: ["economics", "экономика", "iqtisodiyot"],
-    informatics: ["informatics", "информатика", "informatika"]
+    informatics: ["informatics", "информатика", "informatika"],
+    english_a1: ["english a1", "английский a1", "ingliz tili a1"],
+    english_a2: ["english a2", "английский a2", "ingliz tili a2"],
+    english_b1: ["english b1", "английский b1", "ingliz tili b1"],
+    sat: ["sat"],
+    ielts: ["ielts"]
   };
 
   const COPY = {
@@ -60,12 +65,27 @@
       subjectStudy: "Как изучать предмет?",
       catalogHelp: "Как открыть предмет?",
       profileMeaning: "Что означают показатели?",
+      ratings: "Как работает рейтинг?",
+      notifications: "Как устроены уведомления?",
+      community: "Как пользоваться сообществом?",
+      certificates: "Как получить сертификат?",
+      support: "Как обратиться за помощью?",
+      about: "Что такое iClub?",
+      books: "Как пользоваться книгами?",
+      recs: "Как работают рекомендации?",
+      archive: "Когда доступен архив?",
+      video: "Как открыть видеоуроки?",
+      appNav: "Помоги разобраться в разделе",
+      subtitle: "Помощь в этом разделе",
+      sectionNames: {"home":"Главная","ratings":"Рейтинг","profile":"Профиль","notifications":"Уведомления","community":"Сообщество","certificates":"Сертификаты","support":"Поддержка","support-topic":"Поддержка","about":"О проекте","archive":"Архив","courses":"Обучение"},
       subjectNames: {
         mathematics: "Математика",
         biology: "Биология",
         chemistry: "Химия",
         economics: "Экономика",
-        informatics: "Информатика"
+        informatics: "Информатика",
+        english_a1:"Английский A1",english_a2:"Английский A2",
+        english_b1:"Английский B1",sat:"SAT",ielts:"IELTS"
       }
     },
     uz: {
@@ -109,12 +129,27 @@
       subjectStudy: "Fanni qanday o‘rganaman?",
       catalogHelp: "Fanni qanday ochaman?",
       profileMeaning: "Ko‘rsatkichlar nimani anglatadi?",
+      ratings: "Reyting qanday ishlaydi?",
+      notifications: "Bildirishnomalar qanday ishlaydi?",
+      community: "Hamjamiyatdan qanday foydalanaman?",
+      certificates: "Sertifikatni qanday olaman?",
+      support: "Qanday yordam so‘rayman?",
+      about: "iClub nima?",
+      books: "Kitoblardan qanday foydalanaman?",
+      recs: "Tavsiyalar qanday ishlaydi?",
+      archive: "Arxiv qachon ochiladi?",
+      video: "Video darslarni qanday ochaman?",
+      appNav: "Shu bo‘limni tushuntir",
+      subtitle: "Ushbu bo‘lim bo‘yicha yordam",
+      sectionNames: {"home":"Bosh sahifa","ratings":"Reyting","profile":"Profil","notifications":"Bildirishnomalar","community":"Hamjamiyat","certificates":"Sertifikatlar","support":"Yordam","support-topic":"Yordam","about":"Loyiha haqida","archive":"Arxiv","courses":"O‘qish"},
       subjectNames: {
         mathematics: "Matematika",
         biology: "Biologiya",
         chemistry: "Kimyo",
         economics: "Iqtisodiyot",
-        informatics: "Informatika"
+        informatics: "Informatika",
+        english_a1:"Ingliz tili A1",english_a2:"Ingliz tili A2",
+        english_b1:"Ingliz tili B1",sat:"SAT",ielts:"IELTS"
       }
     },
     en: {
@@ -158,12 +193,27 @@
       subjectStudy: "How do I study this subject?",
       catalogHelp: "How do I open a subject?",
       profileMeaning: "What do the indicators mean?",
+      ratings: "How do leaderboards work?",
+      notifications: "How do notifications work?",
+      community: "How do I use Community?",
+      certificates: "How do I earn certificates?",
+      support: "How do I get support?",
+      about: "What is iClub?",
+      books: "How do I use Books?",
+      recs: "How do recommendations work?",
+      archive: "When does the archive open?",
+      video: "How do I open video lessons?",
+      appNav: "Help with this section",
+      subtitle: "Help with this section",
+      sectionNames: {"home":"Home","ratings":"Leaderboard","profile":"Profile","notifications":"Notifications","community":"Community","certificates":"Certificates","support":"Support","support-topic":"Support","about":"About","archive":"Archive","courses":"Study"},
       subjectNames: {
         mathematics: "Mathematics",
         biology: "Biology",
         chemistry: "Chemistry",
         economics: "Economics",
-        informatics: "Informatics"
+        informatics: "Informatics",
+        english_a1:"English A1",english_a2:"English A2",
+        english_b1:"English B1",sat:"SAT",ielts:"IELTS"
       }
     }
   };
@@ -288,15 +338,15 @@
         };
       }
       return {
-        threadKey: "general", subjectKey: "general", scopeCode: "global",
+        threadKey: "app_study_catalog", subjectKey: "general", scopeCode: "global",
         screenCode, academic: false, componentCode: "", skillCode: "",
-        subjectLabel: "", subtitle: copy().subtitleGeneral
+        subjectLabel: "", subtitle: copy().sectionNames?.courses || copy().subtitleGeneral
       };
     }
     return {
-      threadKey: "general", subjectKey: "general", scopeCode: "global",
+      threadKey: "app_" + view, subjectKey: "general", scopeCode: "global",
       screenCode: view, academic: false, componentCode: "", skillCode: "",
-      subjectLabel: "", subtitle: copy().subtitleGeneral
+      subjectLabel: "", subtitle: copy().sectionNames?.[view] || copy().subtitleGeneral
     };
   }
 
@@ -439,11 +489,22 @@
       "tour-result": [["tour_rules",c.tourRules],["tour_archive",c.tourArchive]],
       "tour-review": [["tour_archive",c.tourArchive],["tour_rules",c.tourRules]],
       "lessons": [["topic_study",c.topicStudy]],
-      "video": [["topic_study",c.topicStudy]],
+      "video": [["video_help",c.video]],
+      "books": [["books_help",c.books]],
+      "my-recs": [["recs_help",c.recs]],
+      "my-rec-detail": [["recs_help",c.recs]],
       "subject-hub": [["subject_study",c.subjectStudy],["practice_rules",c.practiceRules]],
       "all-subjects": [["catalog_help",c.catalogHelp],["app_help_here",c.appHere]],
       "home": [["home_next",c.homeNext],["practice_rules",c.practiceRules]],
-      "profile": [["profile_meaning",c.profileMeaning],["app_help_results",c.appResults]]
+      "profile": [["profile_meaning",c.profileMeaning],["app_help_results",c.appResults]],
+      "ratings": [["ratings_help",c.ratings],["app_help_results",c.appResults]],
+      "notifications": [["notifications_help",c.notifications]],
+      "community": [["community_help",c.community]],
+      "certificates": [["certificates_help",c.certificates]],
+      "archive": [["archive_help",c.archive]],
+      "support": [["support_help",c.support]],
+      "support-topic": [["support_help",c.support]],
+      "about": [["about_help",c.about]]
     };
     if (Object.prototype.hasOwnProperty.call(prompts, screen)) {
       return prompts[screen].map(([key,label])=>({key,label}));
@@ -809,6 +870,52 @@
     p.hidden = false;
     mark()?.setAttribute("aria-expanded", "true");
     renderPanel();
+  }
+
+  // QA-only, context-aware one-click help available across existing iClub
+  // screens. The same existing AI panel is reused; no new tutoring provider.
+  // Never submits grades, alters progress, or infers unverified results.
+  const QA_CONTEXT_HELP = Object.freeze({
+    home:"home_next","all-subjects":"catalog_help","subject-hub":"subject_study",
+    video:"video_help",lessons:"topic_study",books:"books_help",
+    "my-recs":"recs_help","my-rec-detail":"recs_help",
+    "practice-start":"practice_rules","practice-result":"practice_next",
+    "practice-recs":"practice_next",tours:"tour_rules",
+    "tour-rules":"tour_rules","tour-result":"tour_archive",
+    "tour-review":"tour_archive",ratings:"ratings_help",
+    profile:"profile_meaning",notifications:"notifications_help",
+    community:"community_help",certificates:"certificates_help",
+    archive:"archive_help",support:"support_help",
+    "support-topic":"support_help",about:"about_help"
+  });
+  let qaContextHelpBusy = false;
+  async function runQaContextHelp(screenExpected) {
+    if (qaContextHelpBusy || state.busy ||
+        window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites !== true ||
+        currentBlocked() || !isEligibleView() ||
+        state.bootstrap?.visible !== true ||
+        window.__ICLUB_AI_QA_DEMO__?.active === true) return false;
+    reconcileContext();
+    const context = { ...state.context };
+    const screen = context.screenCode;
+    if (screen !== screenExpected || context.scopeCode === "exam_prep") return false;
+    const key = QA_CONTEXT_HELP[screen];
+    if (!key) return false;
+    const suggested = quickPrompts(context).find(p => p.key === key);
+    if (!suggested) return false;
+    qaContextHelpBusy = true;
+    try {
+      const authEpoch = state.authEpoch, contextEpoch = state.contextEpoch;
+      openPanel();
+      if (panel()?.hidden || currentBlocked() ||
+          authEpoch !== state.authEpoch ||
+          contextEpoch !== state.contextEpoch ||
+          state.context?.screenCode !== screen) return false;
+      await sendMessage({
+        promptKey:key,displayText:suggested.label,userText:suggested.label
+      });
+      return true;
+    } finally { qaContextHelpBusy = false; }
   }
 
   // QA only: a selected Practice action opens ONE contextual conversation.
@@ -1287,6 +1394,7 @@
     close: () => closePanel(),
     // Does not bypass any protected Practice/Tour/source checks.
     runQaPracticeDemo,
+    runQaContextHelp,
     context: () => ({ ...(state.context || resolveContext()) })
   });
 
