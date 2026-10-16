@@ -12,7 +12,7 @@ function syntheticBackend({generalReady=false}:{generalReady?:boolean}={}){
   if(uri.endsWith("/auth/v1/user")){
    if(new Headers(init?.headers).get("authorization")!=="Bearer synthetic-jwt-12345")
     return new Response('{"error":"invalid"}',{status:401});
-   return Response.json({id:user});
+   return Response.json({id:user,role:"authenticated",aud:"authenticated"});
   }
   if(uri.includes("get_iclub_ai_v21_general_scope_service"))
    return Response.json({allowed:generalReady,scope:"general",release_approved:generalReady});
@@ -49,6 +49,29 @@ Deno.test("Deno Auth checks real bearer against /auth/v1/user, never trusts body
  const auth=x.calls.find(v=>v.url.endsWith("/auth/v1/user"));
  eq(new Headers(auth?.init.headers).get("authorization"),"Bearer synthetic-jwt-12345");
  eq(new Headers(auth?.init.headers).get("apikey"),config.anonKey);
+});
+Deno.test("Auth response requires explicit learner role and valid optional audience",async()=>{
+ for(const result of [
+  {id:user},{id:user,role:"service_role"},
+  {id:user,role:"anon"},{id:user,role:"authenticated",aud:"service_role"},
+  {id:user,role:"authenticated",aud:["authenticated"]},
+  {id:user,role:"authenticated",aud:"external"},
+  {id:"bad",role:"authenticated"},
+  {id:user,role:null}
+ ]){
+  const fetcher=(async(url:URL|string|Request)=>{
+   if(String(url).endsWith("/auth/v1/user"))return Response.json(result);
+   return Response.json({ready:false});
+  }) as typeof fetch;
+  const srv=createSupabaseServices({...config,fetcher});
+  eq(await srv.authenticate("Bearer synthetic-jwt-12345"),null);
+ }
+});
+Deno.test("Signed-looking JWT never bypasses an Auth denial",async()=>{
+ const fetcher=(async()=>new Response("invalid",{status:401})) as typeof fetch;
+ const srv=createSupabaseServices({...config,fetcher});
+ const fake="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMTExMTExMS0xMTExLTQxMTEtODExMS0xMTExMTExMTExMTEifQ.signature";
+ eq(await srv.authenticate("Bearer "+fake),null);
 });
 Deno.test("New missing protected assessment RPC blocks in safe default",async()=>{
  const x=syntheticBackend();eq(await x.services.isProtected(user),true);
