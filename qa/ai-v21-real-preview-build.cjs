@@ -103,8 +103,15 @@ assert.ok(fs.existsSync(appWideFile),"QA app-wide contextual helper missing");
 const appWideJs=fs.readFileSync(appWideFile,"utf8");
 assert.ok(appWideJs.includes("noProductionWrites !== true"),
   "App-wide help must be limited to synthetic no-write Preview");
-assert.ok(appWideJs.includes("practice-quiz") && appWideJs.includes("tour-quiz"),
-  "App-wide help must conceal itself during active quizzes");
+// This file now updates only the single shell icon's label. Protected
+// quiz visibility is still enforced by the actual shell and CSS.
+assert.ok(!appWideJs.includes("createHelp(") &&
+          appWideJs.includes("iclub-global-ai-mark"),
+  "App-wide layer must never inject duplicate in-page buttons");
+const liveCss=fs.readFileSync(path.join(out,"global-ai-ui.css"),"utf8");
+assert.ok(liveCss.includes("body:has(#courses-practice-quiz.is-active)") &&
+          liveCss.includes("body:has(#courses-tour-quiz.is-active)"),
+  "AI dock must remain hidden in protected Practice/Tour questions");
 assert.equal(html.split("</body>").length,2);
 html=html.replace("</body>",
   '<script src="ai-v21-appwide-context-help.js"></script>\n</body>');
