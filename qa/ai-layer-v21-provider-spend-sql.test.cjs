@@ -12,6 +12,9 @@ test("Budget is disabled at first and ONLY separate owner configuration can enab
  assert.match(sql,/enabled boolean NOT NULL DEFAULT false/);
  assert.match(sql,/lifetime_cap_microusd bigint NOT NULL DEFAULT 0/);
  assert.match(sql,/per_request_ceiling_microusd bigint NOT NULL DEFAULT 0/);
+ assert.match(sql,/daily_cap_microusd bigint NOT NULL DEFAULT 0/);
+ assert.match(sql,/per_user_daily_cap_microusd bigint NOT NULL DEFAULT 0/);
+ assert.match(sql,/max_concurrent_requests smallint NOT NULL DEFAULT 0/);
  assert.match(sql,/release_approved/);
  assert.match(sql,/generation_enabled/);
  assert.doesNotMatch(sql,/UPDATE private\.iclub_ai_v21_provider_spend_control/i);
@@ -28,6 +31,19 @@ test("Budget counts live reserved, dispatched and unknown at worst-case ceiling"
  assert.match(sql,/pg_advisory_xact_lock/);
  assert.match(sql,/FOR UPDATE/);
  assert.match(sql,/provider_budget_insufficient/);
+});
+test("Global UTC-day, per-user UTC-day and concurrency caps are atomic",()=>{
+ for(const x of [
+  "today_utc:=date_trunc('day',now() AT TIME ZONE 'UTC')",
+  "user_daily_microusd","daily_microusd","active_requests",
+  "provider_daily_budget_insufficient","provider_concurrency_busy",
+  "c.max_concurrent_requests",
+  "daily_cap_microusd<=lifetime_cap_microusd",
+  "per_user_daily_cap_microusd<=daily_cap_microusd"
+ ]) assert.ok(sql.includes(x),x);
+ for(const message of ["Global UTC daily limit failed",
+  "Per-user UTC daily limit failed"])
+ assert.ok(pg.includes(message),message);
 });
 test("Provider can be refunded only if definitely uncalled; ambiguous retains liability",()=>{
  assert.match(sql,/p_outcome='no_charge' AND e.state<>'reserved'/);
