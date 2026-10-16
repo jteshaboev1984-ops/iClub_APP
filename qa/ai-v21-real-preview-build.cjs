@@ -91,9 +91,9 @@ html=html.replace(telegram,"<!-- External Telegram SDK disabled in offline QA --
 const demoSrc=path.join(__dirname,"ai-v21-real-preview-demo.js");
 assert.ok(fs.existsSync(demoSrc),"Missing protected Practice example");
 const demoJs=fs.readFileSync(demoSrc,"utf8");
-assert.ok(demoJs.includes("not a real lesson or solution")||
-          demoJs.includes("not a real lesson or solution".replace("real ","actual "))||
-          demoJs.includes("no actual answer"),"QA demo must disclose synthetic source");
+assert.ok(demoJs.includes("не результат ученика") &&
+          demoJs.includes("not a real learner result"),
+  "QA demo must disclose that it is an illustrative, non-learner example");
 assert.equal(html.split("</body>").length,2,"Unexpected body end");
 html=html.replace("</body>",
   '<script src="ai-v21-real-preview-demo.js"></script>\n</body>');
