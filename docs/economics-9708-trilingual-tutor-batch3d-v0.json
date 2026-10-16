@@ -1,0 +1,202 @@
+{
+  "manifest": {
+    "version": "economics_9708_batch3d_v0",
+    "scope": "A Level pricing strategy, policy failure and currency indexes",
+    "basis": "Cambridge syllabus 9708 2026-2028 v2 and supplied Economics 4th ed textbook",
+    "status": "Unpublished editorial drafts",
+    "qa_required": "academic, calculations, original examples and three-language review",
+    "no_protected_exam_keys": true,
+    "runtime_allowed": false
+  },
+  "cards": [
+    {
+      "syllabus_point": "7.8.4",
+      "provisional_skill_key": "ECON-9708-7.8.4-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 37,
+      "tour": 4,
+      "locale": "en",
+      "title": "Limit pricing, predatory pricing and price leadership",
+      "explanations": {
+        "main": "Limit pricing involves an established firm maintaining a price low enough to make entry unattractive, even though it could charge more in the short run. Predatory pricing involves making short-term sacrifices, potentially pricing below a relevant measure of cost, to weaken or drive out competitors and later recover losses; showing unlawful predation requires more than observing a low price. Price leadership occurs when a prominent firm changes its price and others follow, sometimes because it is a price setter in an oligopoly rather than because of an explicit agreement. Compare objectives, time horizon and likely impact on consumers and potential entrants. These strategies are not synonyms and do not always prove a cartel.",
+        "simple": "Limit pricing discourages new rivals. Predatory pricing targets existing rivals through unsustainably low prices. Price leadership means other firms follow a leading firm's price.",
+        "alternative": "Suppose a firm could earn more at $25 but sets $20 to make new entry unattractive: limit pricing. It temporarily charges $14 when avoidable cost is $18 in an attempt to force a rival out and recoup later: potential predation. A dominant firm raises its price and rivals imitate: leadership.",
+        "focus": "Does a low price by itself prove predation? No. Can firms follow a price leader without a written cartel agreement? Yes."
+      },
+      "worked_example": "Classify based on evidence: deter ENTRY → limit pricing; sacrifice/recoup to exclude competitors → possible predation; followers respond to announced market price → leadership.",
+      "diagram_blueprint_en": "Three conceptual panels: limit-pricing incumbent chooses less than unrestrained short-run profit maximum to deter entry; predatory pricing timeline below relevant cost and possible later recoupment; price leadership as follower price responses. Labels must not imply they are legally or economically identical.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.8.4",
+      "provisional_skill_key": "ECON-9708-7.8.4-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 37,
+      "tour": 4,
+      "locale": "ru",
+      "title": "Ограничительное, хищническое ценообразование и ценовое лидерство",
+      "explanations": {
+        "main": "Ограничительное ценообразование (limit pricing) предполагает, что действующая фирма устанавливает цену достаточно низко, чтобы сделать вход новых конкурентов непривлекательным, хотя в краткосрочном периоде она могла бы назначить более высокую цену. Хищническое ценообразование (predatory pricing) связано с краткосрочными жертвами прибыли, иногда с продажей ниже соответствующих издержек, чтобы ослабить или вытеснить соперников и затем компенсировать потери. Сам факт низкой цены ещё не доказывает незаконное вытеснение. При ценовом лидерстве заметная фирма меняет цену, а другие следуют за ней; это не обязательно письменный сговор. Сравни цели, временной горизонт и последствия для потребителей и конкурентов.",
+        "simple": "Limit pricing мешает новым фирмам войти на рынок. Predatory pricing направлено против действующих соперников через временно очень низкую цену. Ценовое лидерство — повторение цены, заданной ведущей фирмой.",
+        "alternative": "Компания могла бы получать больше при цене $25, но держит $20 ради сдерживания входа — limit pricing. Она временно продаёт по $14 при соответствующих издержках $18, чтобы вытеснить конкурента, — возможное predatory pricing. За изменением цены лидера следуют другие — ценовое лидерство.",
+        "focus": "Доказывает ли низкая цена сама по себе хищническую стратегию? Нет. Может ли ценовое лидерство существовать без официального картеля? Да."
+      },
+      "worked_example": "Ориентируйся на цель: отпугивание НОВЫХ фирм — ограничительная цена; вытеснение конкурентов с расчётом на будущую компенсацию потерь — возможная хищническая; повторение цены ведущей фирмы — лидерство.",
+      "diagram_blueprint_en": "Three conceptual panels: limit-pricing incumbent chooses less than unrestrained short-run profit maximum to deter entry; predatory pricing timeline below relevant cost and possible later recoupment; price leadership as follower price responses. Labels must not imply they are legally or economically identical.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.8.4",
+      "provisional_skill_key": "ECON-9708-7.8.4-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 37,
+      "tour": 4,
+      "locale": "uz",
+      "title": "Limit, yirtqich va yetakchi narx belgilash",
+      "explanations": {
+        "main": "Limit narxlashda bozordagi firma qisqa muddatda balandroq narx belgilashi mumkin bo‘lsa ham, yangi raqobatchilarning kirishini foydasiz qilish uchun narxni pastroq ushlab turadi. Yirtqich narxlashda firma raqiblarni zaiflashtirish yoki bozordan chiqarish, keyinchalik yo‘qotishlarni qoplash maqsadida vaqtincha foydadan voz kechadi va ayrim hollarda tegishli xarajatlardan ham past narxda sotadi. Narxning oddiy pastligi bunday noqonuniy harakatni isbotlamaydi. Narx yetakchiligida yirik firma narxni o‘zgartiradi va boshqalar unga ergashadi; bu har doim rasmiy kelishuv degani emas. Uch strategiyani maqsad, vaqt va iste’molchi hamda raqiblarga ta’sir bo‘yicha farqla.",
+        "simple": "Limit narx yangi raqibni kiritmaslikka, yirtqich narx mavjud raqibni siqib chiqarishga qaratilishi mumkin. Narx yetakchiligida boshqa firmalar yetakchi belgilagan narxga ergashadi.",
+        "alternative": "Firma $25 narxda ko‘proq foyda topishi mumkin, lekin yangi raqiblar kirmasligi uchun $20 qo‘yadi — limit narxlash. Xarajat $18 bo‘lgan tovarni raqibni chiqarish uchun vaqtincha $14 ga sotadi — ehtimol yirtqich narxlash. Yetakchi narxiga boshqalar ergashadi — yetakchilik.",
+        "focus": "Faqat past narx yirtqich narxlashni isbotlaydimi? Yo‘q. Yozma kartel kelishuvisiz ham narx yetakchiligi bo‘lishi mumkinmi? Ha."
+      },
+      "worked_example": "Maqsadga qaragin: yangi raqibning KIRISHIGA to‘sqinlik — limit; raqibni chiqarib, keyin zararni qoplash — ehtimol yirtqich; yetakchi narxiga ergashish — narx yetakchiligi.",
+      "diagram_blueprint_en": "Three conceptual panels: limit-pricing incumbent chooses less than unrestrained short-run profit maximum to deter entry; predatory pricing timeline below relevant cost and possible later recoupment; price leadership as follower price responses. Labels must not imply they are legally or economically identical.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "10.3.3",
+      "provisional_skill_key": "ECON-9708-10.3.3-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 47,
+      "tour": 6,
+      "locale": "en",
+      "title": "Government failure in macroeconomic policies",
+      "explanations": {
+        "main": "Government failure occurs when state intervention produces a net outcome worse than a feasible alternative because of mistaken incentives, weak information or ineffective implementation. In macro policy this might involve a poorly timed fiscal stimulus: by the time infrastructure spending begins, an economy may already be near full capacity, so extra aggregate demand raises prices more than real output. Alternatively, a subsidised programme may be captured by special interests or fail to reach its target group. Monetary action can work weakly when banks do not lend. Evaluate implementation lags, forecasting error, administrative costs, political incentives, opportunity cost and side effects. A policy missing one target does not automatically prove failure: compare the outcome against a realistic counterfactual and all macro objectives.",
+        "simple": "A policy meant to help the economy can make it worse. This is possible when the government has poor information, acts too late or creates unwanted incentives.",
+        "alternative": "Government approves recession stimulus, but construction starts after strong recovery. With factories at capacity, spending may push up inflation rather than employment. The timing problem matters as much as the intention.",
+        "focus": "If fiscal stimulus misses its growth target, is that automatically evidence of government failure? No. Compare costs, benefits and realistic alternatives."
+      },
+      "worked_example": "A sound answer should identify the intervention, intended mechanism, source of failure, measurable consequences and a balanced alternative.",
+      "diagram_blueprint_en": "Decision/counterfactual flow: macro problem → instrument → intended transmission → implementation lag/incentives/information → observed policy side-effects. Not a falsely deterministic AD/AS curve shift.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "10.3.3",
+      "provisional_skill_key": "ECON-9708-10.3.3-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 47,
+      "tour": 6,
+      "locale": "ru",
+      "title": "Ошибки государства в макроэкономической политике",
+      "explanations": {
+        "main": "Провал государственного вмешательства возникает, когда действия государства дают худший совокупный результат, чем достижимая альтернатива, из-за неправильных стимулов, недостатка информации или слабого исполнения. В макроэкономике примером может быть запоздалая бюджетная поддержка: пока строительство начинается, экономика уже достигает полной загрузки, поэтому дополнительные расходы сильнее разгоняют цены, чем увеличивают выпуск. Субсидии могут достаться не тем группам; смягчение денежной политики может плохо работать, если банки не кредитуют. Оценивай временные задержки, ошибки прогнозирования, административные затраты, политические стимулы, альтернативные издержки и побочные эффекты. Невыполнение одной цели не всегда равно провалу: сравни с реалистичным сценарием без этой политики.",
+        "simple": "Государство может хотеть помочь экономике, но ухудшить результат из-за ошибочных данных, позднего вмешательства или неправильных стимулов.",
+        "alternative": "Власти объявили поддержку во время спада, но строительство началось уже после восстановления. При полной загрузке дополнительных работников найти трудно, поэтому вероятнее рост цен, чем занятости.",
+        "focus": "Если стимулирование не достигло цели по росту, значит ли это автоматически провал государства? Нет. Надо оценить выгоды, издержки и альтернативы."
+      },
+      "worked_example": "Для оценки назови меру, ожидаемый механизм, причину проблемы, последствия и обоснованную альтернативу.",
+      "diagram_blueprint_en": "Decision/counterfactual flow: macro problem → instrument → intended transmission → implementation lag/incentives/information → observed policy side-effects. Not a falsely deterministic AD/AS curve shift.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "10.3.3",
+      "provisional_skill_key": "ECON-9708-10.3.3-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 47,
+      "tour": 6,
+      "locale": "uz",
+      "title": "Makroiqtisodiy siyosatda davlat muvaffaqiyatsizligi",
+      "explanations": {
+        "main": "Davlat aralashuvi noto‘g‘ri rag‘batlar, yetarli ma’lumot yo‘qligi yoki samarasiz ijro sababli mavjud oqilona muqobildan yomonroq natija bersa, davlat muvaffaqiyatsizligi yuzaga kelishi mumkin. Masalan, tanazzul paytida tasdiqlangan budjet rag‘batlantirishi amalda ishga tushguncha iqtisodiyot tiklanib, quvvatlar to‘la band bo‘lib qoladi. Shunda xarajat real ishlab chiqarishdan ko‘ra narxlarni ko‘proq oshirishi mumkin. Subsidiyalar kerakli guruhga yetmasligi, foiz stavkasi pasayganda esa banklar kredit bermasligi mumkin. Vaqt kechikishi, prognoz xatosi, boshqaruv xarajati, siyosiy rag‘batlar va yon ta’sirlarni bahola. Bitta maqsad bajarilmagani har doim muvaffaqiyatsizlik emas: natijani real muqobil bilan solishtir.",
+        "simple": "Davlat iqtisodiyotga yordam bermoqchi bo‘lib, ma’lumot xatosi, kechikish yoki noto‘g‘ri rag‘bat tufayli zarar keltirishi mumkin.",
+        "alternative": "Hukumat pasayish paytida qurilishni qo‘lladi, ammo loyiha iqtisodiyot tiklangandan keyin boshlandi. To‘liq quvvatda qo‘shimcha xarajat bandlikdan ko‘ra inflyatsiyani oshirishi mumkin.",
+        "focus": "Rag‘batlantirish o‘sish maqsadiga erishmadi. Bu avtomatik davlat muvaffaqiyatsizligimi? Yo‘q. Xarajat, foyda va muqobilni bahola."
+      },
+      "worked_example": "Javobda siyosatni, kutilgan ta’sirni, xato sababini, oqibatni va oqilona alternativani ko‘rsat.",
+      "diagram_blueprint_en": "Decision/counterfactual flow: macro problem → instrument → intended transmission → implementation lag/incentives/information → observed policy side-effects. Not a falsely deterministic AD/AS curve shift.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "11.2.1",
+      "provisional_skill_key": "ECON-9708-11.2.1-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 49,
+      "tour": 7,
+      "locale": "en",
+      "title": "Nominal, real and trade-weighted exchange rates",
+      "explanations": {
+        "main": "A nominal bilateral exchange rate compares two currency units; always state the quotation direction. For example, E=2 units of domestic currency per unit of foreign currency. A real exchange rate adjusts for price-level differences: using this convention q=E×Pforeign/Pdomestic, so a rise in q is a real depreciation of the domestic currency and can indicate greater price competitiveness, other things equal. A trade-weighted exchange-rate index summarises currency movements against several trading partners using weights reflecting their economic importance; its construction and index direction must be stated. A rise in an index defined as domestic-currency strength means appreciation, not depreciation. Avoid confusing nominal depreciation with a guaranteed real depreciation if domestic inflation also rises.",
+        "simple": "Nominal: one currency's price in another. Real: nominal rate adjusted for relative prices. Trade-weighted: a basket of exchange rates weighted by trade.",
+        "alternative": "If E=2 domestic units per foreign unit, foreign price index=100 and domestic=250, then q=2×100/250=0.8. If E increases to 2.2 with price indices unchanged, q becomes 0.88, a real depreciation in this quotation.",
+        "focus": "If E is quoted as domestic per foreign and rises, has the domestic currency appreciated? No, it has depreciated nominally."
+      },
+      "worked_example": "Illustrative trade-weighted strength index: partner A weight 0.6 and exchange index 105; partner B weight 0.4 and index 98. Simple weighted index=0.6×105+0.4×98=102.2 (base=100). Actual published index methods may differ.",
+      "diagram_blueprint_en": "Three labelled exhibits: (1) nominal bilateral rate with explicit quote E=domestic currency units/foreign unit; (2) real index q=E Pforeign/Pdomestic, q up = real depreciation by this definition; (3) trade-weighted nominal index with stated basket weights and baseline index 100. Label direction convention to prevent sign error.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "11.2.1",
+      "provisional_skill_key": "ECON-9708-11.2.1-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 49,
+      "tour": 7,
+      "locale": "ru",
+      "title": "Номинальный, реальный и торгово-взвешенный валютный курс",
+      "explanations": {
+        "main": "Номинальный двусторонний курс сопоставляет две валюты; всегда уточняй направление котировки. Например, E=2 единицы национальной валюты за одну единицу иностранной. Реальный курс учитывает различия уровней цен: в такой записи q=E×Pиностранный/Pвнутренний, поэтому рост q означает реальное обесценение национальной валюты и при прочих равных может улучшать ценовую конкурентоспособность. Торгово-взвешенный индекс объединяет изменения курса относительно нескольких торговых партнёров с весами, отражающими их значение. Определение индекса и направление изменения необходимо назвать. Если индекс определён как сила национальной валюты, его рост означает укрепление. Номинальное ослабление не гарантирует реального, если одновременно ускоряется внутренняя инфляция.",
+        "simple": "Номинальный курс — цена валюты в другой валюте. Реальный учитывает относительные цены. Торгово-взвешенный объединяет курсы основных партнёров.",
+        "alternative": "Пусть E=2 национальные единицы за иностранную; зарубежный индекс цен 100, внутренний 250. Тогда q=2×100/250=0,8. При E=2,2 и прежних ценах q=0,88: реальное ослабление в выбранной записи.",
+        "focus": "Если E выражен как национальные единицы за иностранную и растёт, национальная валюта укрепляется? Нет, ослабевает."
+      },
+      "worked_example": "Условный взвешенный индекс: вес партнёра A=0,6, индекс 105; B=0,4, индекс 98. Получаем 0,6×105+0,4×98=102,2 при базе 100. Реальные методы индексов могут отличаться.",
+      "diagram_blueprint_en": "Three labelled exhibits: (1) nominal bilateral rate with explicit quote E=domestic currency units/foreign unit; (2) real index q=E Pforeign/Pdomestic, q up = real depreciation by this definition; (3) trade-weighted nominal index with stated basket weights and baseline index 100. Label direction convention to prevent sign error.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "11.2.1",
+      "provisional_skill_key": "ECON-9708-11.2.1-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 49,
+      "tour": 7,
+      "locale": "uz",
+      "title": "Nominal, real va savdo vaznli valyuta kurslari",
+      "explanations": {
+        "main": "Nominal ikki tomonlama kurs bir valyutaning boshqa valyutadagi narxidir; kotirovka yo‘nalishini aniq aytish kerak. Masalan, E bir birlik xorijiy valyutaga to‘g‘ri keladigan 2 birlik milliy valyuta bo‘lsin. Real kurs narx darajalari farqini hisobga oladi: shu ta’rifda q=E×Pxorijiy/Pmilliy. q oshsa, milliy valyuta real qadrsizlangan bo‘ladi va boshqa sharoitlar teng bo‘lganda narx raqobatbardoshligi ortishi mumkin. Savdo vaznli kurs indeksi bir nechta savdo hamkorlarining kurslarini ular savdodagi ahamiyatiga qarab birlashtiradi. Indeks yo‘nalishini aniq belgilash kerak: milliy valyuta kuchini o‘lchaydigan indeks oshsa, valyuta mustahkamlangan bo‘ladi. Ichki inflyatsiya ham oshsa, nominal qadrsizlanish real qadrsizlanishni kafolatlamaydi.",
+        "simple": "Nominal kurs — valyutaning boshqa valyutadagi narxi. Real kurs nisbiy narxlarni hisobga oladi. Savdo vaznli indeks bir necha hamkor kursini jamlaydi.",
+        "alternative": "E=2 milliy birlik/xorijiy birlik, xorijiy narx indeksi 100 va milliy 250 bo‘lsa, q=2×100/250=0,8. E=2,2 ga oshib, narxlar o‘zgarmasa, q=0,88 bo‘ladi: shu ta’rifda real qadrsizlanish.",
+        "focus": "E milliy birlik/xorijiy birlik bo‘lib oshsa, milliy valyuta mustahkamlanadimi? Yo‘q, nominal qadrsizlanadi."
+      },
+      "worked_example": "Oddiy vaznli indeks: A hamkor vazni 0,6 va indeksi 105; B vazni 0,4 va indeksi 98. Indeks=0,6×105+0,4×98=102,2 (baza=100). Amaldagi indeks usullari farq qilishi mumkin.",
+      "diagram_blueprint_en": "Three labelled exhibits: (1) nominal bilateral rate with explicit quote E=domestic currency units/foreign unit; (2) real index q=E Pforeign/Pdomestic, q up = real depreciation by this definition; (3) trade-weighted nominal index with stated basket weights and baseline index 100. Label direction convention to prevent sign error.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    }
+  ]
+}
