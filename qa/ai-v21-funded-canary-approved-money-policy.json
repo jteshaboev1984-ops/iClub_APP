@@ -1,6 +1,6 @@
 {
   "schema_version": "2026-10-16-first-canary-only",
-  "status": "OWNER_APPROVED_BUDGET_NOT_ACTIVATED",
+  "status": "OWNER_APPROVED_BUDGET_LIVE_ISOLATED_LEDGER_AND_DORMANT_EDGE",
   "owner_approved_utc_date": "2026-10-16",
   "currency": "USD",
   "money_caps_microusd": {
@@ -16,5 +16,13 @@
   "existing_exam_prep_integration": "unchanged",
   "commercial_plan_activation": false,
   "allow_real_students": false,
-  "needs_actual_billing_check": true
+  "needs_actual_billing_check": true,
+  "production_finance_migration": "iclub_ai_paid_canary_operator_ledger_v1_20261016",
+  "production_edge_function": {
+    "slug": "iclub-ai-paid-canary",
+    "version": 1,
+    "verify_jwt": true
+  },
+  "production_money_ledger_enabled": false,
+  "next_external_approval_step": "Confirm the protected Edge function has OPENAI_API_KEY and enable ICLUB_AI_PAID_CANARY_ENABLED only after operator test setup"
 }
