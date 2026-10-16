@@ -469,7 +469,58 @@
     row.className = `iclub-global-ai-message is-${message.role}${message.kind === "notice" ? " is-notice" : ""}`;
     const bubble = document.createElement("div");
     bubble.className = "iclub-global-ai-bubble";
-    bubble.textContent = message.text;
+    if (message.kind === "qa_practice_explanation" &&
+        window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true &&
+        window.__ICLUB_AI_QA_DEMO__?.active === true) {
+      const lang = locale();
+      const verifiedSample = window.__ICLUB_AI_QA_DEMO__.reply(lang);
+      const content = window.__ICLUB_AI_QA_DEMO__.presentation?.(lang);
+      if (verifiedSample === message.text && content) {
+        row.classList.add("is-qa-explanation");
+        const label = document.createElement("span");
+        label.className = "iclub-qa-explain-label";
+        label.textContent = content.label;
+        const title = document.createElement("h3");
+        title.className = "iclub-qa-explain-title";
+        title.textContent = content.title;
+        const intro = document.createElement("p");
+        intro.className = "iclub-qa-explain-intro";
+        intro.textContent = content.intro;
+        bubble.append(label, title, intro);
+        const steps = document.createElement("ol");
+        steps.className = "iclub-qa-explain-steps";
+        for (const step of content.steps) {
+          const item = document.createElement("li");
+          const heading = document.createElement("strong");
+          heading.textContent = step.title;
+          const formula = document.createElement("div");
+          formula.className = "iclub-qa-explain-formula";
+          formula.textContent = step.formula;
+          const detail = document.createElement("p");
+          detail.textContent = step.detail;
+          item.append(heading,formula,detail);
+          steps.append(item);
+        }
+        const check = document.createElement("div");
+        check.className = "iclub-qa-explain-check";
+        const checkTitle = document.createElement("strong");
+        checkTitle.textContent = content.checkTitle;
+        const checkQuestion = document.createElement("p");
+        checkQuestion.textContent = content.checkQuestion;
+        const checkAnswer = document.createElement("p");
+        checkAnswer.className = "iclub-qa-explain-check-answer";
+        checkAnswer.textContent = content.checkAnswer;
+        const footer = document.createElement("small");
+        footer.className = "iclub-qa-explain-disclosure";
+        footer.textContent = content.disclosure;
+        check.append(checkTitle,checkQuestion,checkAnswer);
+        bubble.append(steps,check,footer);
+      } else {
+        bubble.textContent = message.text;
+      }
+    } else {
+      bubble.textContent = message.text;
+    }
     row.appendChild(bubble);
     return row;
   }
@@ -492,16 +543,42 @@
     const empty = p.querySelector("[data-global-ai-empty]");
     if (!body || !empty) return;
 
-    body.replaceChildren();
-    const messages = thread(state.context.threadKey).messages;
+    // Keep existing message nodes in place: rebuilding the entire chat on each
+    // state update replays animations and causes visible jumpiness.
+    const threadKey = state.context.threadKey;
+    const scroll = p.querySelector("[data-global-ai-scroll]");
+    const autoScroll = !scroll || scroll.scrollHeight - scroll.scrollTop -
+      scroll.clientHeight < 72;
+    if (body.dataset.threadKey !== threadKey) {
+      body.replaceChildren();
+      body.dataset.threadKey = threadKey;
+    }
+    const typing = body.querySelector(":scope > .is-typing");
+    if (typing) typing.remove();
+    const messages = thread(threadKey).messages;
     empty.hidden = messages.length > 0 || state.busy;
-    messages.forEach((message) => body.appendChild(createMessageNode(message)));
-    if (state.busy) body.appendChild(typingNode());
-
-    queueMicrotask(() => {
-      const scroll = p.querySelector("[data-global-ai-scroll]");
-      if (scroll) scroll.scrollTop = scroll.scrollHeight;
+    let changed = false;
+    messages.forEach((message, i) => {
+      const existing = body.children[i];
+      if (existing?.__iclubMessageRef === message) return;
+      const node = createMessageNode(message);
+      node.__iclubMessageRef = message;
+      if (existing) existing.replaceWith(node); else body.appendChild(node);
+      changed = true;
     });
+    while (body.children.length > messages.length) {
+      body.lastElementChild.remove();
+      changed = true;
+    }
+    if (state.busy) {
+      body.appendChild(typingNode());
+      changed = true;
+    }
+    if (changed && autoScroll) {
+      queueMicrotask(() => {
+        if (scroll?.isConnected) scroll.scrollTop = scroll.scrollHeight;
+      });
+    }
   }
 
   function renderQuickPrompts() {
@@ -510,6 +587,13 @@
     const host = p.querySelector("[data-global-ai-quick]");
     if (!host) return;
     host.replaceChildren();
+    // An action already selected in Practice should not ask for the same
+    // action again inside the conversation.
+    const isSelectedDemo = window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true &&
+      state.context.threadKey === "qa_original_practice_demo" &&
+      window.__ICLUB_AI_QA_DEMO__?.active === true;
+    host.hidden = isSelectedDemo;
+    if (isSelectedDemo) return;
 
     const prompts = quickPrompts(state.context);
     for (const prompt of prompts) {
@@ -590,10 +674,35 @@
     }
   }
 
+  function renderDemoContext() {
+    const p = panel();
+    const host = p?.querySelector("[data-qa-practice-context]");
+    if (!host) return;
+    const isDemo = state.context?.threadKey === "qa_original_practice_demo" &&
+      window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true &&
+      window.__ICLUB_AI_QA_DEMO__?.active === true;
+    host.hidden = !isDemo;
+    if (!isDemo) return;
+    const c = window.__ICLUB_AI_QA_DEMO__.context?.(locale());
+    if (!c) { host.hidden = true; return; }
+    host.replaceChildren();
+    const title = document.createElement("span");
+    title.className = "iclub-qa-context-label";
+    title.textContent = c.label;
+    const question = document.createElement("strong");
+    question.className = "iclub-qa-context-question";
+    question.textContent = c.question;
+    const answer = document.createElement("span");
+    answer.className = "iclub-qa-context-answer";
+    answer.textContent = c.answer;
+    host.append(title,question,answer);
+  }
+
   function renderPanel() {
     if (!panel()) return;
     renderHeader();
     renderEmpty();
+    renderDemoContext();
     renderMessages();
     renderQuickPrompts();
     renderLimit();
@@ -639,6 +748,7 @@
           <div class="iclub-global-ai-empty-title" data-global-ai-empty-title></div>
           <div class="iclub-global-ai-empty-copy" data-global-ai-empty-copy></div>
         </div>
+        <div class="iclub-qa-practice-context" data-qa-practice-context hidden></div>
         <div class="iclub-global-ai-messages" data-global-ai-messages aria-live="polite"></div>
       </div>
       <div class="iclub-global-ai-quick" data-global-ai-quick></div>
@@ -690,15 +800,13 @@
     renderPanel();
   }
 
-  // QA-only direct handoff from the selected, original Practice example.
-  // User makes ONE explicit click in the review. The same AI conversation
-  // opens, visibly fills the draft, submits and renders the prepared reply.
-  // Never exposed by the production script or real learner sessions.
+  // QA only: a selected Practice action opens ONE contextual conversation.
+  // No fake keystrokes, no redundant in-chat confirmation and no user writes.
   let qaDemoHandoffBusy = false;
   const QA_DEMO_PROMPT = Object.freeze({
-    ru: "Объясни ошибку: f(x) = x² + 2x, f′(3) = 6",
-    uz: "Xatoni tushuntir: f(x) = x² + 2x, f′(3) = 6",
-    en: "Explain my mistake: f(x) = x² + 2x, f′(3) = 6"
+    ru: "Почему ответ 6 неверный?",
+    uz: "Nega 6 javobi noto‘g‘ri?",
+    en: "Why is the answer 6 incorrect?"
   });
 
   async function runQaPracticeDemo() {
@@ -719,22 +827,16 @@
         window.__ICLUB_AI_QA_DEMO__?.ready?.() === true &&
         state.context?.threadKey === "qa_original_practice_demo" &&
         !panel()?.hidden;
+      // The approved QA sample is a separate conversation. A new selection
+      // clears only this sample thread, never subject-specific learner chats.
+      state.threads.delete("qa_original_practice_demo");
       openPanel();
-      const input = panel()?.querySelector("[data-global-ai-input]");
-      if (!input || !stillValid()) return false;
-      const draft = QA_DEMO_PROMPT[locale()] || QA_DEMO_PROMPT.ru;
-      // Deliberately visible brief draft animation, not a second interaction.
-      input.value = "";
-      for (let n = 1; n <= 6; n++) {
-        await new Promise(resolve => setTimeout(resolve, 85));
-        if (!stillValid()) return false;
-        input.value = draft.slice(0, Math.ceil(draft.length * n / 6));
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-      }
-      await new Promise(resolve => setTimeout(resolve, 240));
-      if (!stillValid() || state.busy) return false;
+      if (!stillValid()) return false;
+      // Request is already explicit in the clicked "Explain" action.
+      // The contextual question is displayed immediately above the messages.
+      const prompt = QA_DEMO_PROMPT[locale()] || QA_DEMO_PROMPT.ru;
       await sendMessage({
-        promptKey: "practice_error", displayText: draft, userText: draft
+        promptKey: "practice_error", displayText: prompt, userText: prompt
       });
       return true;
     } finally {
@@ -829,7 +931,13 @@
       const message = String(data.message || "").trim();
 
       if (data.ok === true && message) {
-        appendMessage(threadKey, "assistant", message);
+        const isApprovedQaSample = promptKey === "practice_error" &&
+          context.threadKey === "qa_original_practice_demo" &&
+          window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true &&
+          window.__ICLUB_AI_QA_DEMO__?.ready?.() === true &&
+          window.__ICLUB_AI_QA_DEMO__.reply(locale()) === message;
+        appendMessage(threadKey, "assistant", message,
+          isApprovedQaSample ? "qa_practice_explanation" : "message");
         if (data.usage_exhausted === true) {
           setUsageExhausted(data.reset_at || null);
         }
