@@ -114,6 +114,14 @@ async function main(){
     assert.ok(aiImage.ok&&aiImage.width===40&&aiImage.height===40,
       "approved AI icon fit incorrect "+JSON.stringify(aiImage));
     assert.equal(identity.profile,"Демонстрационный профиль");
+    await client.until("!document.querySelector('[data-global-ai-intro]')?.hidden",
+      "launch intro appears after valid AI bootstrap");
+    const welcome=await client.evaluate("({title:document.querySelector('[data-global-ai-intro-title]')?.textContent,"+
+      "content:document.querySelector('[data-global-ai-intro-text]')?.textContent,"+
+      "storage:[...Object.keys(localStorage)].filter(x=>x.includes('ai_intro'))})");
+    assert.match(welcome.title,/Знакомьтесь, iClub AI/);
+    assert.match(welcome.content,/разобраться в iClub/);
+    assert.equal(welcome.storage.length,0,"onboarding must not track students in localStorage");
     await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
     await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
       "Home AI open");
@@ -122,6 +130,21 @@ async function main(){
     assert.equal(await client.evaluate(
       "document.querySelector('[data-global-ai-quick]')?.textContent.includes('Что делать дальше?')"),
       true,"Home needs specific prompts");
+    const initial=await client.evaluate("({users:document.querySelectorAll('[data-global-ai-messages] .is-user').length,"+
+      "answers:document.querySelectorAll('[data-global-ai-messages] .is-assistant').length,"+
+      "status:document.querySelector('[data-global-ai-status]')?.textContent,"+
+      "info:document.querySelector('[data-global-ai-first-info]')?.textContent,"+
+      "welcomeHidden:document.querySelector('[data-global-ai-intro]')?.hidden})");
+    assert.deepEqual([initial.users,initial.answers],[0,0],
+      "opening iClub AI must NEVER generate a message");
+    assert.match(initial.status,/Демо/);
+    assert.match(initial.info,/не меняет оценки или прогресс/);
+    assert.equal(initial.welcomeHidden,true,"launch tip disappears on opening");
+
+    await client.evaluate("(()=>{const b=[...document.querySelectorAll('[data-global-ai-quick] button')]"+
+      ".find(x=>x.textContent.includes('Что делать дальше?'));if(!b)throw Error('Missing Home quick question');b.click();return true})()");
+    await client.until("document.querySelector('[data-global-ai-messages] .is-assistant')?.textContent.includes('не буду выдумывать')",
+      "only user-selected question receives response");
     // Genuine app router via its existing Study tab.
     await client.evaluate("document.querySelector('#tabbar [data-tab=\"courses\"]').click();true");
     await client.until("document.querySelector('#view-courses')?.classList.contains('is-active')",
@@ -151,20 +174,12 @@ async function main(){
     await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
     await client.until("document.querySelector('[data-global-ai-quick]')?.textContent.includes('Объяснить результат')",
       "Practice result quick action");
-    try {
-      await client.until("document.querySelector('[data-global-ai-messages]')?.textContent.includes('После реальной Practice')",
-        "one-click help explains next steps without personal claims");
-    } catch (err) {
-      const diag=await client.evaluate("({context:window.iClubGlobalAiShell?.context?.(),"+
-        "messages:document.querySelector('[data-global-ai-messages]')?.textContent,"+
-        "panelHidden:document.querySelector('#iclub-global-ai-panel')?.hidden,"+
-        "markHidden:document.querySelector('#iclub-global-ai-mark')?.hidden,"+
-        "quick:[...document.querySelectorAll('[data-global-ai-quick] button')].map(b=>({text:b.textContent,disabled:b.disabled}))})");
-      throw Error("Practice result automatic help: "+JSON.stringify(diag)+" / "+String(err));
-    }
+    assert.equal(await client.evaluate(
+      "document.querySelectorAll('[data-global-ai-messages] .is-user').length"),0,
+      "Practice result icon must not automatically explain or charge");
     await client.until("(()=>{const b=[...document.querySelectorAll('[data-global-ai-quick] button')]"+
       ".find(e=>e.textContent.includes('Объяснить результат'));return b&&!b.disabled})()",
-      "follow-up prompt becomes available after automatic first answer");
+      "Practice result quick question is ready for explicit selection");
     await client.evaluate("(()=>{const btn=[...document.querySelectorAll('[data-global-ai-quick] button')]"+
       ".find(e=>e.textContent.includes('Объяснить результат'));"+
       "if(!btn)throw Error('Result prompt missing');btn.click();return true;})()");
@@ -277,9 +292,8 @@ async function main(){
     await client.until("document.querySelector('#iclub-global-ai-panel')?.hidden",
       "old demo AI context is closed");
 
-    // One global iClub AI across real Home / Study / Subject / Lessons /
-    // Tours / Leaderboard / Profile / Community / Support without fake scores.
-    // Each CTA opens the SAME Tutor and sends its section-specific request.
+    // Across the real app, the global icon opens a contextual conversation
+    // only. Choosing an offered question is the sole trigger for an answer.
     const appScreens=[
       ["courses","all-subjects","Откройте Study","general"],
       ["courses","subject-hub","В выбранном предмете","biology"],
@@ -323,6 +337,14 @@ async function main(){
       await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
       await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
         "one-tap global Tutor opens in "+screen);
+      const idle=await client.evaluate("({thread:window.iClubGlobalAiShell.context().threadKey,"+
+        "users:document.querySelectorAll('[data-global-ai-messages] .is-user').length,"+
+        "replies:document.querySelectorAll('[data-global-ai-messages] .is-assistant').length})");
+      const previous=seenThreads.get(idle.thread)||0;
+      assert.deepEqual([idle.users,idle.replies],[previous,previous],
+        "opening a global AI chat must not send an automatic question: "+screen);
+      await client.evaluate("(()=>{const b=document.querySelector('[data-global-ai-quick] button');"+
+        "if(!b || b.disabled)throw Error('No ready suggested question');b.click();return true})()");
       try {
         await client.until("(()=>{const a=[...document.querySelectorAll('[data-global-ai-messages] .is-assistant')];"+
           "return a.length&&a.at(-1)?.textContent.includes("+JSON.stringify(expectedText)+")})()",
