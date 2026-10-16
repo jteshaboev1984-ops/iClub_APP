@@ -338,7 +338,11 @@
         };
       }
       return {
-        threadKey: "app_study_catalog", subjectKey: "general", scopeCode: "global",
+        // An unknown subject is NEVER the same conversation as the
+        // catalogue. Keep the screen boundary explicit and fail closed.
+        threadKey: screenCode === "all-subjects"
+          ? "app_study_catalog" : "app_course_" + screenCode,
+        subjectKey: "general", scopeCode: "global",
         screenCode, academic: false, componentCode: "", skillCode: "",
         subjectLabel: "", subtitle: copy().sectionNames?.courses || copy().subtitleGeneral
       };
