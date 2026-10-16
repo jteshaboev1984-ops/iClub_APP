@@ -55,6 +55,70 @@
     uz:"**Namuna tahlili — haqiqiy o‘quvchi natijasi emas.**\n\nf(x) = x² + 2x funksiyaning hosilasi f′(x) = 2x + 2. x = 3 qo‘ysak: f′(3) = 2·3 + 2 = **8**.\n\nNamunadagi 6 javobi x² hosilasini topib, +2x ning hosilasini unutish natijasida kelib chiqadi. Uning hosilasi 2, 0 emas.\n\n**O‘xshash tekshiruv:** g(x) = x² + 4x bo‘lsa, g′(2) nechaga teng? Javob: 8.\n\nBu iClub AI interfeysini tekshirish uchun mualliflik namunasi. Haqiqiy Practice ma’lumotlari ishlatilmaydi.",
     en:"**Illustrative review — not a real learner result.**\n\nFor f(x) = x² + 2x, the derivative is f′(x) = 2x + 2. Substitute x = 3: f′(3) = 2·3 + 2 = **8**.\n\nThe illustrative answer 6 results from differentiating x² but forgetting the term +2x. Its derivative is 2, not 0.\n\n**Similar check:** If g(x) = x² + 4x, what is g′(2)? Answer: 8.\n\nThis is an original example solely for reviewing the iClub AI interface. No actual Practice records are used."
   });
+  // Original sample, reviewed for the DEMO UX only. No learner evidence.
+  // Subject-specific content for real questions still requires editorial release.
+  const presentation = Object.freeze({
+    ru:{
+      label:"ПРИМЕР РАЗБОРА · МАТЕМАТИКА",
+      title:"Почему ответ 6 неверный?",
+      intro:"Похоже, в примере пропущена производная второго слагаемого. Проверим по шагам.",
+      steps:[
+        {title:"Находим производную",formula:"f′(x) = 2x + 2",
+         detail:"Производная x² равна 2x, а производная 2x равна 2."},
+        {title:"Подставляем x = 3",formula:"f′(3) = 2 × 3 + 2 = 8",
+         detail:"Сначала находим производную всей функции, затем подставляем число."},
+        {title:"Находим причину ошибки",formula:"6 вместо 8",
+         detail:"В демонстрационном ответе потеряно +2. Важно не пропускать линейное слагаемое."}
+      ],
+      checkTitle:"Проверь понимание",
+      checkQuestion:"Если g(x) = x² + 4x, чему равно g′(2)?",
+      checkAnswer:"Проверка: 2 × 2 + 4 = 8.",
+      disclosure:"Демонстрационный пример iClub AI. Не является ответом на реальную Practice."
+    },
+    uz:{
+      label:"TAHLIL NAMUNASI · MATEMATIKA",
+      title:"Nega 6 javobi noto‘g‘ri?",
+      intro:"Namunada ikkinchi hadning hosilasi tushib qolgan. Birgalikda tekshiramiz.",
+      steps:[
+        {title:"Hosilani topamiz",formula:"f′(x) = 2x + 2",
+         detail:"x² ning hosilasi 2x, 2x ning hosilasi esa 2."},
+        {title:"x = 3 ni qo‘yamiz",formula:"f′(3) = 2 × 3 + 2 = 8",
+         detail:"Avval butun funksiyaning hosilasini topib, so‘ng qiymatni qo‘yamiz."},
+        {title:"Xatoni aniqlaymiz",formula:"6 o‘rniga 8",
+         detail:"Namuna javobida +2 unutilgan. Chiziqli had hosilasini ham hisoblang."}
+      ],
+      checkTitle:"Tushunganingizni tekshiring",
+      checkQuestion:"Agar g(x) = x² + 4x bo‘lsa, g′(2) nechaga teng?",
+      checkAnswer:"Tekshirish: 2 × 2 + 4 = 8.",
+      disclosure:"iClub AI namuna tahlili. Haqiqiy Practice javobi emas."
+    },
+    en:{
+      label:"ILLUSTRATIVE REVIEW · MATHEMATICS",
+      title:"Why is the answer 6 incorrect?",
+      intro:"The example appears to omit the derivative of the second term. Let's check each step.",
+      steps:[
+        {title:"Differentiate the function",formula:"f′(x) = 2x + 2",
+         detail:"The derivative of x² is 2x; the derivative of 2x is 2."},
+        {title:"Substitute x = 3",formula:"f′(3) = 2 × 3 + 2 = 8",
+         detail:"Differentiate the full function first, then substitute the value."},
+        {title:"Spot the mistake",formula:"6 instead of 8",
+         detail:"The illustrative answer left out +2. Remember the linear term."}
+      ],
+      checkTitle:"Check your understanding",
+      checkQuestion:"If g(x) = x² + 4x, what is g′(2)?",
+      checkAnswer:"Check: 2 × 2 + 4 = 8.",
+      disclosure:"Illustrative iClub AI example. Not feedback on an actual Practice attempt."
+    }
+  });
+  const context = Object.freeze({
+    ru:{label:"Математика · пример ошибки",question:"f(x) = x² + 2x · f′(3) = ?",
+      answer:"Ответ в примере: 6 · правильное значение: 8"},
+    uz:{label:"Matematika · xato namunasi",question:"f(x) = x² + 2x · f′(3) = ?",
+      answer:"Namuna javobi: 6 · to‘g‘ri qiymat: 8"},
+    en:{label:"Mathematics · sample mistake",question:"f(x) = x² + 2x · f′(3) = ?",
+      answer:"Illustrative answer: 6 · correct value: 8"}
+  });
+
   let active = false, selected = false;
   const locale=()=>{
     const lang=String(window.i18n?.getLang?.()||"ru").toLowerCase();
@@ -165,6 +229,8 @@
     // The existing chat renders plain text, not Markdown; remove typography
     // markers instead of showing literal ** characters to the reviewer.
     reply:(lang)=>explanation[lang]?.replace(/\*\*/g,"")||null,
+    presentation:(lang)=>presentation[lang]||null,
+    context:(lang)=>context[lang]||null,
     enter, exit:toStudy,
     get selected(){return selected;},
     get active(){return active;}
