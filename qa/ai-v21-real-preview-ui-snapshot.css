@@ -556,3 +556,80 @@ html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-topic-action-wrap] 
     animation: none !important;
   }
 }
+
+
+/* QA ONLY: original, non-learner Practice example on existing app screens. */
+.iclub-qa-demo-entry {
+  display:block;
+  width:calc(100% - 32px);
+  margin:16px auto;
+  padding:13px 16px;
+  min-height:48px;
+  border:1px solid rgba(37,99,235,.22);
+  border-radius:14px;
+  background:#ecf4ff;
+  color:#134ca4;
+  font:700 13px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  text-align:center;
+  box-shadow:0 5px 14px rgba(30,88,160,.07);
+  cursor:pointer;
+}
+.iclub-qa-demo-entry:focus-visible,
+.iclub-qa-demo-main-btn:focus-visible,
+.iclub-qa-demo-back:focus-visible {
+  outline:3px solid #2576ee;
+  outline-offset:3px;
+}
+.iclub-qa-demo-active #courses-practice-review > .actions-row {display:none !important;}
+.iclub-qa-demo-active #practice-review-list > .empty {display:none !important;}
+.iclub-qa-demo-card {
+  padding:18px 16px;
+  margin:8px 0 22px;
+  max-width:620px;
+  border-radius:20px;
+  border:1px solid #dbe6f4;
+  background:#fff;
+  color:#10214b;
+  box-shadow:0 12px 32px rgba(15,41,85,.09);
+  font:14px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.iclub-qa-demo-card h3 {
+  margin:8px 0;
+  color:#071d50;
+  font-size:19px;
+  line-height:1.25;
+  letter-spacing:-.02em;
+}
+.iclub-qa-demo-kicker {
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.055em;
+  color:#175cbb;
+}
+.iclub-qa-demo-note {
+  margin:10px 0 18px;
+  padding:10px 12px;
+  border:1px solid #d9e6fa;
+  border-radius:12px;
+  background:#f3f7ff;
+  color:#485f88;
+  font-size:12px;
+}
+.iclub-qa-demo-subject {font-size:12px;color:#4269a9;font-weight:700;}
+.iclub-qa-demo-question {font-size:17px;font-weight:700;color:#10265b;margin:9px 0 17px;}
+.iclub-qa-demo-answer-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:18px;}
+.iclub-qa-demo-answer {border-radius:12px;border:1px solid #dce5f0;padding:11px;min-width:0;display:grid;gap:5px;}
+.iclub-qa-demo-answer span {font-size:11px;color:#56678a;}
+.iclub-qa-demo-answer strong {font-size:19px;color:#123568;}
+.iclub-qa-demo-answer.wrong {background:#fff7f6;border-color:#f4cfcb;}
+.iclub-qa-demo-answer.correct {background:#f0faf5;border-color:#c5ead3;}
+.iclub-qa-demo-answer.wrong strong {color:#a82e37;}
+.iclub-qa-demo-answer.correct strong {color:#197047;}
+.iclub-qa-demo-main-btn {
+  width:100%;min-height:48px;border:0;border-radius:13px;
+  background:#1767d6;color:#fff;font-size:14px;font-weight:750;
+  cursor:pointer;
+}
+.iclub-qa-demo-footer {font-size:11px;color:#566d8e;margin:12px 0 4px;}
+.iclub-qa-demo-back {min-height:40px;padding:8px 0;border:0;background:transparent;color:#155cbb;font-size:13px;font-weight:700;cursor:pointer;}
