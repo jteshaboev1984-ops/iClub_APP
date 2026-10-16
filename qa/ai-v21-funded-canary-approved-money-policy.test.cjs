@@ -16,7 +16,7 @@ test("approved owner cap is $1 LIFETIME, $0.50 UTC day, $0.05 user day, $0.01 re
  assert.equal(p.max_output_tokens,220);
 });
 test("money approval NEVER automatically opens a real provider or students",()=>{
- assert.equal(p.status,"OWNER_APPROVED_BUDGET_NOT_ACTIVATED");
+ assert.equal(p.status,"OWNER_APPROVED_BUDGET_LIVE_ISOLATED_LEDGER_AND_DORMANT_EDGE");
  assert.equal(p.provider_calls_enabled,false);
  assert.equal(p.allow_real_students,false);
  assert.equal(p.commercial_plan_activation,false);
