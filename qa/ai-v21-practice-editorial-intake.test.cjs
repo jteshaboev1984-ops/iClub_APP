@@ -137,3 +137,29 @@ test("editorial evidence verifier refuses unsigned, fake or draft publication da
  assert.equal(verifyEditorialEvidence({manifest:forged,
   signatures:[],trustRegistry:{revision:"synthetic",reviewers:[]},nowMs:1200}).ok,false);
 });
+
+test("checked-in editorial handoff remains an empty NOT APPROVED template",()=>{
+ const path="qa/ai-v21-practice-editorial-candidate.UNAPPROVED.json";
+ const raw=JSON.parse(fs.readFileSync(path,"utf8"));
+ assert.equal(raw.status,"DRAFT_NOT_APPROVED");
+ assert.equal(raw.releaseAllowed,false);
+ assert.equal(raw.subject,null);
+ assert.equal(raw.questionId,null);
+ assert.equal(raw.sourceId,null);
+ assert.equal(raw.sourceHash,null);
+ assert.equal(raw.rightsEvidenceId,null);
+ for(const locale of LOCALES){
+  assert.equal(raw.prepared[locale].text,null,locale);
+  assert.equal(raw.prepared[locale].reviewed,false,locale);
+ }
+ assert.equal(inspectDraft(raw,proof()).ok,false);
+});
+test("null/undefined evidence IDs must never pass regex string coercion",()=>{
+ for(const key of ["sourceId","sourceVersion","provenanceId","rightsEvidenceId"]){
+  for(const invalid of [null,undefined,1,{},[]]){
+   const draft=buildSyntheticDraft();
+   draft[key]=invalid;
+   assert.equal(inspectDraft(draft,proof()).ok,false,key+" "+String(invalid));
+  }
+ }
+});
