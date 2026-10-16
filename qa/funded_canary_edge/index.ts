@@ -42,6 +42,11 @@ Deno.serve(async request=>{
     body=raw as Data;
   }catch{return deny(400,"invalid_request");}
   if(body.intent==="status"&&Object.keys(body).length===1){
+    // Dashboard may use anon/session JWT. Non-operator status is a
+    // minimally informative, strictly zero-spend health probe.
+    if(request.headers.get("authorization")!=="Bearer "+c.key)
+      return ok({pilot:"operator_only",modelConfigured:c.openai.length>12,
+        canRun:false,paidCallsStarted:false});
     try{
       const s=await rpc("status_iclub_ai_paid_canary_v1",{},c.url,c.key);
       return ok({edgeEnabled:enabled(),modelConfigured:c.openai.length>12,
