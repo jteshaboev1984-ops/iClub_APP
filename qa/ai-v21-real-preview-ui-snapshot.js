@@ -245,6 +245,7 @@
     destroyed: false,
     introShown: false,
     introRead: false,
+    firstOpenNote: false,
     introTimer: null
   };
 
@@ -519,6 +520,7 @@
   }
 
   function closePanel() {
+    state.firstOpenNote = false;
     const p = panel();
     if (!p) return;
     p.setAttribute("data-expanded", "false");
@@ -797,6 +799,13 @@
     }
     if (title) title.textContent = state.context.academic ? copy().titleAcademic : copy().titleGeneral;
     if (subtitle) subtitle.textContent = state.context.subtitle || copy().subtitleGeneral;
+    const status = p.querySelector("[data-global-ai-status]");
+    if (status) {
+      const t = introCopy();
+      status.textContent = state.usageExhausted ? t.limits :
+        window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true ? t.demo :
+        state.bootstrap?.visible === true ? t.online : t.offline;
+    }
     if (close) close.setAttribute("aria-label", copy().close);
   }
 
@@ -806,15 +815,15 @@
     const title = p.querySelector("[data-global-ai-empty-title]");
     const text = p.querySelector("[data-global-ai-empty-copy]");
     if (title) title.textContent = copy().emptyTitle;
-    if (text) {
-      const previewGuidance = {
-        ru: "В этом защищённом Preview проверьте кнопку AI, смену экранов и его скрытие во время заданий. Реальные оценки и ответы по учебным вопросам здесь не подключены.",
-        uz: "Ushbu himoyalangan Previewda AI tugmasi, ekranlar almashinuvi va savollar vaqtida uning yashirilishini tekshiring. Haqiqiy natijalar va fan javoblari ulanmagan.",
-        en: "In this protected Preview, check the AI button, screen changes and blackout during questions. Real grades and academic answers are not connected."
-      };
-      text.textContent = window.__ICLUB_AI_QA_PREVIEW__
-        ? previewGuidance[locale()] || previewGuidance.ru
-        : copy().emptyCopy;
+    if (text) text.textContent = copy().emptyCopy;
+    const info = p.querySelector("[data-global-ai-first-info]");
+    if (info) {
+      info.hidden = !state.firstOpenNote;
+      if (state.firstOpenNote) {
+        const c = introCopy();
+        info.querySelector("[data-global-ai-first-title]").textContent = c.infoTitle;
+        info.querySelector("[data-global-ai-first-text]").textContent = c.info;
+      }
     }
   }
 
@@ -877,6 +886,7 @@
         <div class="iclub-global-ai-head-copy">
           <div class="iclub-global-ai-title" data-global-ai-title></div>
           <div class="iclub-global-ai-subtitle" data-global-ai-subtitle></div>
+          <div class="iclub-global-ai-status" data-global-ai-status></div>
         </div>
         <div class="iclub-global-ai-head-actions">
           <button class="iclub-global-ai-expand" type="button" data-global-ai-expand aria-pressed="false">
@@ -891,6 +901,10 @@
         <div class="iclub-global-ai-empty" data-global-ai-empty>
           <div class="iclub-global-ai-empty-title" data-global-ai-empty-title></div>
           <div class="iclub-global-ai-empty-copy" data-global-ai-empty-copy></div>
+          <aside class="iclub-global-ai-first-info" data-global-ai-first-info hidden>
+            <strong data-global-ai-first-title></strong>
+            <p data-global-ai-first-text></p>
+          </aside>
         </div>
         <div class="iclub-qa-practice-context" data-qa-practice-context hidden></div>
         <div class="iclub-global-ai-messages" data-global-ai-messages aria-live="polite"></div>
@@ -940,7 +954,10 @@
     const p = ensurePanel();
     if (!p) return;
     hideIntro();
-    if (!state.introRead) state.introRead = true;
+    if (!state.introRead) {
+      state.introRead = true;
+      state.firstOpenNote = true;
+    }
     p.hidden = false;
     mark()?.setAttribute("aria-expanded", "true");
     renderPanel();
@@ -1298,13 +1315,13 @@
     }
 
     if (blocked) { closePanel(); hideIntro(); }
-    else maybeShowIntro();
     if (announceBlock && blocked && !state.lastBlocked) {
       showToast(copy().assessmentStart);
     }
 
     state.lastBlocked = blocked;
     renderPanel();
+    if (!blocked) maybeShowIntro();
   }
 
   function reconcileTourBlock({ announce = false } = {}) {
