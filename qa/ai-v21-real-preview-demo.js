@@ -122,11 +122,13 @@
     const action=document.createElement("button");action.type="button";
     action.className="iclub-qa-demo-main-btn";action.textContent=c.analyze;
     action.addEventListener("click",()=>{
-      if(!active||!isReview())return;
+      if(!active||!isReview() ||
+         document.getElementById("courses-practice-quiz")?.classList.contains("is-active") ||
+         document.getElementById("courses-tour-quiz")?.classList.contains("is-active"))return;
       selected=true;
-      const mark=document.getElementById("iclub-global-ai-mark");
-      if(!mark||mark.hidden)return;
-      if(document.getElementById("iclub-global-ai-panel")?.hidden!==false)mark.click();
+      // One click -> Tutor opens, types and sends through the shared AI
+      // conversation. No second "Explain mistake" click is required.
+      void window.iClubGlobalAiShell?.runQaPracticeDemo?.();
     });
     const footer=document.createElement("p");footer.className="iclub-qa-demo-footer";footer.textContent=c.footer;
     const exit=document.createElement("button");exit.type="button";exit.className="iclub-qa-demo-back";
