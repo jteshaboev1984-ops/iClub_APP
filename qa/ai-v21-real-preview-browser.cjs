@@ -151,8 +151,17 @@ async function main(){
     await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
     await client.until("document.querySelector('[data-global-ai-quick]')?.textContent.includes('Объяснить результат')",
       "Practice result quick action");
-    await client.until("document.querySelector('[data-global-ai-messages]')?.textContent.includes('После реальной Practice')",
-      "one-click help explains next steps without personal claims");
+    try {
+      await client.until("document.querySelector('[data-global-ai-messages]')?.textContent.includes('После реальной Practice')",
+        "one-click help explains next steps without personal claims");
+    } catch (err) {
+      const diag=await client.evaluate("({context:window.iClubGlobalAiShell?.context?.(),"+
+        "messages:document.querySelector('[data-global-ai-messages]')?.textContent,"+
+        "panelHidden:document.querySelector('#iclub-global-ai-panel')?.hidden,"+
+        "markHidden:document.querySelector('#iclub-global-ai-mark')?.hidden,"+
+        "quick:[...document.querySelectorAll('[data-global-ai-quick] button')].map(b=>({text:b.textContent,disabled:b.disabled}))})");
+      throw Error("Practice result automatic help: "+JSON.stringify(diag)+" / "+String(err));
+    }
     await client.until("(()=>{const b=[...document.querySelectorAll('[data-global-ai-quick] button')]"+
       ".find(e=>e.textContent.includes('Объяснить результат'));return b&&!b.disabled})()",
       "follow-up prompt becomes available after automatic first answer");
