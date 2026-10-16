@@ -89,7 +89,17 @@
         profile:"В этом Preview показатели учебного прогресса не подтверждены сервером. Я могу объяснить назначение раздела, но не могу оценить вашу готовность или изменить результат.",
         topic:"В Preview у AI нет проверенного материала текущего урока. Откройте сам урок; объяснение точной темы станет доступно после подключения утверждённого источника.",
         general:"Это безопасный Preview интерфейса iClub AI. Я могу объяснять навигацию, правила Practice и Tours, но здесь нет генерации по учебным материалам и доступа к реальным оценкам.",
-        custom:"Это тестовый AI с ограниченными готовыми ответами, а не полноценный Tutor. На произвольный учебный вопрос я не буду выдумывать объяснение без подтверждённой темы и источника."
+        custom:"Это тестовый AI с ограниченными готовыми ответами, а не полноценный Tutor. На произвольный учебный вопрос я не буду выдумывать объяснение без подтверждённой темы и источника.",
+        ratings:"В Рейтинге можно переключать масштаб: район, область и республика. Место зависит от опубликованных результатов и правил подсчёта. Для подробностей откройте значок информации рядом с заголовком. Здесь нет подтверждённых личных баллов: я не называю ваше место и не сравниваю с другими учениками.",
+        notifications:"Уведомления показывают системные сообщения и важные события. Откройте нужное уведомление, чтобы посмотреть детали. Очистка удаляет сообщения из списка, но не меняет оценки, сертификаты и результаты. В этом Preview реальные уведомления не загружаются.",
+        community:"В разделе «Сообщество» есть официальный канал iClub и чат обсуждений. Канал предназначен для объявлений, а чат — для общения участников. Не публикуйте личные данные или ответы на активные задания. AI не отправляет сообщения в канал за вас.",
+        certificates:"Сертификаты появляются по итогам Tours и других достижений, когда выполнены установленные правила. Проверяйте наличие в разделе «Сертификаты». Публичная проверка подлинности — отдельная функция. В этом Preview я не могу подтвердить выдачу личного сертификата.",
+        support:"В «Поддержке» сначала выберите тему, затем прочитайте подсказки или откройте форму обращения. Не отправляйте пароль, код входа и полные личные данные. AI может помочь понять раздел, но не создаёт и не отправляет обращения от вашего имени.",
+        about:"В разделе «О проекте» можно узнать об iClub, его правилах и команде. Для учебных действий откройте Study; для соревнований — Tours, а для своих показателей — Профиль. Эта тестовая помощь не изменяет учётную запись.",
+        books:"«Книги» — список доступных учебных материалов выбранного предмета. Если в списке пусто, это не ошибка AI: материалы могли ещё не быть опубликованы. AI не создаёт доступ к закрытой книге и не копирует защищённые страницы.",
+        recs:"В «Моих рекомендациях» находятся сохранённые рекомендации по чтению и следующие учебные шаги, когда они доступны. Откройте карточку, чтобы посмотреть подробности. Без подтверждённого результата Practice я не называю персональные слабые темы.",
+        archive_help:"Архив содержит завершённые Tours для самопроверки. Разбор конкретного тура и ответы показываются только после официального открытия соответствующего архива. Если архив закрыт, AI не раскрывает задания.",
+        video:"Видео-уроки выбранного предмета доступны через раздел «Видео». В текущей версии материалы могут открываться через Telegram. Выберите доступный урок и следуйте ссылке. AI может объяснять точную тему только после утверждения её учебного источника."
       },
       uz: {
         rules:"Practice mavzularni mustahkamlashga yordam beradi. Savollarni yechish paytida AI butunlay yashiriladi va javobga yordam bermaydi.",
@@ -106,7 +116,17 @@
         profile:"Bu Previewda shaxsiy natijalar server tomonidan tasdiqlanmagan. Ularni baholay olmayman va o‘zgartirmayman.",
         topic:"Bu Previewda joriy dars uchun tasdiqlangan manba yo‘q. Aniq tushuntirish keyinroq mavjud bo‘ladi.",
         general:"Bu iClub AI interfeysining xavfsiz sinov Previewidir. Men navigatsiya va qoidalarni tushuntiraman, haqiqiy natijalarni o‘qimayman.",
-        custom:"Bu cheklangan tayyor javobli sinov AI. Tasdiqlangan manbasiz o‘quv savoliga javob to‘qib chiqarmayman."
+        custom:"Bu cheklangan tayyor javobli sinov AI. Tasdiqlangan manbasiz o‘quv savoliga javob to‘qib chiqarmayman.",
+        ratings:"Reytingda hudud miqyosini tanlash mumkin: tuman, viloyat yoki respublika. O‘rin e’lon qilingan natijalar va hisoblash qoidalariga bog‘liq. Ma’lumot belgisi orqali qoidalarni ko‘ring. Bu Previewda sizning haqiqiy reytingingiz tasdiqlanmagan.",
+        notifications:"Bildirishnomalarda tizim xabarlari va muhim voqealar ko‘rsatiladi. Tafsilotlar uchun xabarni oching. Ro‘yxatni tozalash baholar, sertifikatlar va natijalarni o‘zgartirmaydi. Haqiqiy bildirishnomalar bu Previewda mavjud emas.",
+        community:"Hamjamiyatda iClub rasmiy kanali va muhokama chati bor. Kanal — e’lonlar uchun, chat — ishtirokchilar muloqoti uchun. Shaxsiy ma’lumotlar va faol topshiriq javoblarini ulashmang. AI sizning o‘rningizga xabar yubormaydi.",
+        certificates:"Sertifikatlar Tours va boshqa yutuqlar qoidalari bajarilganda beriladi. Ularni Sertifikatlar bo‘limida ko‘ring. Haqiqiylikni tekshirish alohida xizmat. Bu Previewda shaxsiy sertifikat mavjudligini tasdiqlay olmayman.",
+        support:"Yordam bo‘limida mavzuni tanlang, ko‘rsatmalarni o‘qing yoki murojaat shaklini oching. Parol va tasdiqlash kodlarini yubormang. AI bo‘limni tushuntiradi, ammo sizning o‘rningizga murojaat yubormaydi.",
+        about:"Loyiha haqida bo‘limida iClub, uning qoidalari va jamoasi haqida ma’lumot bor. Darslar uchun Study, musobaqalar uchun Tours, o‘z ko‘rsatkichlaringiz uchun Profil bo‘limini oching.",
+        books:"Kitoblar bo‘limida tanlangan fanning mavjud o‘quv resurslari ko‘rsatiladi. Ro‘yxat bo‘sh bo‘lsa, materiallar hali joylanmagan bo‘lishi mumkin. AI yopiq kitobga kirish huquqini bermaydi.",
+        recs:"Mening tavsiyalarim bo‘limida mavjud bo‘lganda saqlangan o‘qish tavsiyalari va keyingi qadamlar ko‘rsatiladi. Batafsil ko‘rish uchun kartani oching. Tasdiqlangan Practice natijasisiz shaxsiy zaif mavzularni aytmayman.",
+        archive_help:"Arxivda yakunlangan Tours mavjud bo‘lishi mumkin. Aniq tur savollari va javoblari faqat tegishli arxiv rasman ochilgach ko‘rsatiladi.",
+        video:"Tanlangan fanning video darslari Video bo‘limida joylashgan. Hozirgi versiyada materiallar Telegram orqali ochilishi mumkin. Aniq mavzuni AI faqat tasdiqlangan manbaga asoslanib tushuntiradi."
       },
       en: {
         rules:"Practice reinforces learning. While questions are active, AI is fully hidden and cannot supply answers.",
@@ -123,7 +143,17 @@
         profile:"No personal progress indicators in this Preview are verified by the server. I cannot assess readiness or modify results.",
         topic:"There is no verified source for the current lesson in this Preview. Topic-specific explanations require approved material.",
         general:"This is a safe iClub AI interface Preview. I can describe navigation and rules, but not generate real academic explanations or access scores.",
-        custom:"This test AI has a small set of prepared replies, not a full Tutor. I will not invent answers to arbitrary academic questions."
+        custom:"This test AI has a small set of prepared replies, not a full Tutor. I will not invent answers to arbitrary academic questions.",
+        ratings:"The leaderboard lets you switch between district, region and national scopes. Placement follows published results and ranking rules. Use the information icon near the heading for details. This Preview has no verified personal ranking, so I will not invent your position.",
+        notifications:"Notifications show system messages and important events. Open an item to read more. Clearing the notification list does not change grades, certificates or results. Real notifications are not loaded in this Preview.",
+        community:"Community provides an official iClub channel for announcements and a discussion chat for members. Avoid sharing private information or answers to active assessments. AI does not send messages on your behalf.",
+        certificates:"Certificates appear when the requirements for Tours or other eligible achievements are met. Check the Certificates section. Public authenticity verification is separate. This Preview cannot confirm that you personally earned a certificate.",
+        support:"In Support, choose a topic, read the guidance and use the request form if needed. Never submit passwords or one-time codes. AI can explain navigation but cannot submit a support request for you.",
+        about:"About introduces iClub, its rules and team. Open Study to learn, Tours for competitions and Profile for your indicators. This preview help does not change account information.",
+        books:"Books lists available resources for the selected subject. An empty list may mean materials are not published yet. AI cannot grant access to restricted books or reproduce protected pages.",
+        recs:"My Recommendations lists saved reading suggestions and next steps when available. Open a card for details. Without a verified Practice result I cannot claim personalized weak areas.",
+        archive_help:"The Archive contains previous Tours for self-checking when they are released. Questions and answer explanations become available only when that exact Tour archive officially opens.",
+        video:"Video lessons for the selected subject are found under Video. In the current app some materials may open through Telegram. A topic-specific AI explanation requires an approved academic source."
       }
     }[lang];
     if (["practice-quiz","tour-quiz"].includes(screen)) return {
@@ -146,6 +176,14 @@
     }
     if (key==="practice_error") return response(copy.error,false,"qa_no_verified_question");
     if (key==="practice_next") return response(copy.next);
+    const sectionHelp={
+      ratings_help:copy.ratings,notifications_help:copy.notifications,
+      community_help:copy.community,certificates_help:copy.certificates,
+      support_help:copy.support,about_help:copy.about,
+      books_help:copy.books,recs_help:copy.recs,
+      archive_help:copy.archive_help,video_help:copy.video
+    };
+    if(Object.hasOwn(sectionHelp,key))return response(sectionHelp[key]);
     if (key==="tour_rules" || key==="app_help_tours") return response(copy.tours);
     if (key==="tour_archive") return response(copy.archive);
     if (key==="subject_study") return response(copy.subject);
