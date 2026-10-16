@@ -98,6 +98,17 @@ assert.equal(html.split("</body>").length,2,"Unexpected body end");
 html=html.replace("</body>",
   '<script src="ai-v21-real-preview-demo.js"></script>\n</body>');
 fs.writeFileSync(path.join(out,"ai-v21-real-preview-demo.js"),demoJs);
+const appWideFile=path.join(__dirname,"ai-v21-appwide-context-help.js");
+assert.ok(fs.existsSync(appWideFile),"QA app-wide contextual helper missing");
+const appWideJs=fs.readFileSync(appWideFile,"utf8");
+assert.ok(appWideJs.includes("noProductionWrites !== true"),
+  "App-wide help must be limited to synthetic no-write Preview");
+assert.ok(appWideJs.includes("practice-quiz") && appWideJs.includes("tour-quiz"),
+  "App-wide help must conceal itself during active quizzes");
+assert.equal(html.split("</body>").length,2);
+html=html.replace("</body>",
+  '<script src="ai-v21-appwide-context-help.js"></script>\n</body>');
+fs.writeFileSync(path.join(out,"ai-v21-appwide-context-help.js"),appWideJs);
 // Defense-in-depth: local static servers do not set Vercel response headers.
 // Inject the *same* CSP as an early meta element before every script or link.
 const vercel=JSON.parse(fs.readFileSync(path.join(root,"vercel.json"),"utf8"));
