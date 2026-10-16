@@ -207,14 +207,18 @@ async function main(){
     assert.match(sample.question,/x² \+ 2x/);
     assert.equal(sample.answer,"8");
     assert.match(sample.notice,/не результат ученика/);
-    await client.evaluate("document.querySelector('.iclub-qa-demo-main-btn').click();true");
+    // Two rapid taps must still make ONE request; no chat-side second tap.
+    await client.evaluate("(()=>{const b=document.querySelector('.iclub-qa-demo-main-btn');b.click();b.click();return true;})()");
     await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
-      "AI opens on selected illustrative question");
-    await client.until("document.querySelector('[data-global-ai-quick]')?.textContent.includes('Объяснить ошибку')",
-      "real Practice review AI action");
-    await client.evaluate("(()=>{const b=[...document.querySelectorAll('[data-global-ai-quick] button')].find(e=>e.textContent.includes('Объяснить ошибку'));if(!b)throw Error('Demo action absent');b.click();return true;})()");
-    await client.until("document.querySelector('[data-global-ai-messages]')?.textContent.includes('f′(3) = 2·3 + 2')",
-      "AI explains original sample answer");
+      "single-tap AI panel open");
+    await client.until("document.querySelector('[data-global-ai-input]')?.value.includes('f′(3)')",
+      "chat visibly auto-fills the selected question");
+    await client.until("document.querySelector('[data-global-ai-messages] .is-user')?.textContent.includes('f′(3)')",
+      "prepared request automatically submitted");
+    await client.until("document.querySelector('[data-global-ai-messages] .is-assistant')?.textContent.includes('f′(3) = 2·3 + 2')",
+      "answer appears automatically without a second Explain click");
+    const once=await client.evaluate("({users:document.querySelectorAll('[data-global-ai-messages] .is-user').length,replies:document.querySelectorAll('[data-global-ai-messages] .is-assistant:not(.is-typing)').length})");
+    assert.deepEqual(once,{users:1,replies:1},"single-tap must not duplicate messages");
     const answer=await client.evaluate("document.querySelector('[data-global-ai-messages]')?.textContent");
     assert.match(answer,/не реальный результат ученика/);
     assert.match(answer,/8/);
