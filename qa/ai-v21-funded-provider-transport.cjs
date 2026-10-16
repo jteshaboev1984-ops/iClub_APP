@@ -3,6 +3,7 @@
 // Purpose: make the money/HTTP boundary testable BEFORE real provider spend.
 // No API keys in source or frontend. No network calls unless an injected
 // trusted service has reserved AND dispatched a durable money lease.
+const {createHash}=require("node:crypto");
 const MODEL="gpt-5.6-luna";
 const INPUT_PER_MILLION_MICROUSD=200_000; // USD 0.20 / 1M
 const OUTPUT_PER_MILLION_MICROUSD=1_200_000; // USD 1.20 / 1M
@@ -82,7 +83,7 @@ function readText(data){
     /<\s*script|javascript:|NO_APPROVED_SOURCE/i.test(result))return null;
  return result;
 }
-async function fundedCanary({requestId,locale,sourceText,question,auth,
+async function fundedCanary({requestId,locale,question,auth,
   services,httpRequest,apiKey,allowedOrigin}={}){
  if(!isUuid(requestId)||allowedOrigin!=="qa_funded_canary_controlled"||
     typeof auth!=="string"||!auth||
@@ -91,15 +92,23 @@ async function fundedCanary({requestId,locale,sourceText,question,auth,
     !services||["authorize","reserveAndClaim","reserveMoney","dispatchMoney",
       "finishMoney","finishLearner","recheck"].some(s=>typeof services[s]!=="function"))
   return {ok:false,reason:"canary_unconfigured",providerCalled:false};
- const plan=quote({locale,sourceText,question});
- if(!plan.ok)return {ok:false,reason:plan.reason,providerCalled:false};
+ // The approved source must be returned by the trusted server after Auth,
+ // never copied from the browser or an unscreened caller parameter.
+ if(!LOCALES.has(locale)||typeof question!=="string"||!question.trim())
+  return {ok:false,reason:"unapproved_request",providerCalled:false};
  let first;
  try{first=await services.authorize({requestId,auth,locale});}catch{return {ok:false,reason:"not_authorized",providerCalled:false}}
  if(first?.authorized!==true||first?.scope!=="approved_public_app_help"||
     first?.releaseApproved!==true||first?.activeProtectedAssessment!==false||
-    first?.sourceApproved!==true||first?.locale===undefined||first?.locale!==locale)
+    first?.sourceApproved!==true||first?.locale!==locale||
+    typeof first.approvedSourceText!=="string"||
+    typeof first.sourceSha256!=="string"||
+    createHash("sha256").update(first.approvedSourceText).digest("hex")!==first.sourceSha256)
   return {ok:false,reason:"not_authorized",providerCalled:false};
- const scope={requestId,auth,plan,userId:first.userId};
+ const sourceText=first.approvedSourceText;
+ const plan=quote({locale,sourceText,question});
+ if(!plan.ok)return {ok:false,reason:plan.reason,providerCalled:false};
+ const scope={requestId,auth,plan,userId:first.userId,sourceHash:first.sourceSha256};
  if(!isUuid(first.userId))return {ok:false,reason:"not_authorized",providerCalled:false};
  let claimed,money;
  try{claimed=await services.reserveAndClaim(scope);}catch{}
