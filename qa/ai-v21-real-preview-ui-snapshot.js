@@ -575,8 +575,19 @@
       changed = true;
     }
     if (changed && autoScroll) {
+      const last = messages[messages.length - 1];
+      const newest = body.children[messages.length - 1];
       queueMicrotask(() => {
-        if (scroll?.isConnected) scroll.scrollTop = scroll.scrollHeight;
+        if (!scroll?.isConnected) return;
+        if (last?.kind === "qa_practice_explanation" && newest?.isConnected) {
+          // A long pedagogical explanation opens at STEP ONE, not its footer.
+          const top = newest.getBoundingClientRect().top -
+            scroll.getBoundingClientRect().top + scroll.scrollTop - 8;
+          scroll.scrollTo({ top, behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+            ? "instant" : "smooth" });
+        } else {
+          scroll.scrollTop = scroll.scrollHeight;
+        }
       });
     }
   }
