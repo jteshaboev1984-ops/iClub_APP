@@ -6,6 +6,7 @@ const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[0-9a-f]
 const CODE=/^[a-z][a-z0-9_]{1,79}$/;
 const SHA=/^[a-f0-9]{64}$/;
 const LOCALES=Object.freeze(["ru","uz","en"]);
+const SUBJECTS=new Set(["mathematics","biology","chemistry","economics","informatics"]);
 const FIELDS=["protocol","status","surface","feature","promptKey","subject",
  "questionId","sourceId","sourceVersion","sourceHash","sourceOwner",
  "rightsEvidenceId","provenanceId","sourceKind","prepared",
@@ -28,7 +29,7 @@ function canonicalPracticeRef(evidence){
     evidence.kind!=="finalized_practice_question_v4"||
     evidence.owned!==true||evidence.finalized!==true||
     evidence.serverChecked!==true||evidence.protectedAssessment!==false||
-    !CODE.test(evidence.subject)||!id(evidence.questionId)||
+    !SUBJECTS.has(evidence.subject)||!id(evidence.questionId)||
     evidence.topic!==("question_"+evidence.questionId))
    return deny("trusted_question_proof_required");
  return Object.freeze({ok:true,surface:"practice",
