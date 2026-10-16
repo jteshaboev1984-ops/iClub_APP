@@ -93,7 +93,7 @@ body:has(#courses-tour-quiz.is-active) .iclub-global-ai-panel {
   flex-direction: column;
   pointer-events: auto;
   transform-origin: right bottom;
-  animation: iclub-global-ai-panel-in 170ms ease-out both;
+  animation: iclub-global-ai-panel-in 250ms cubic-bezier(.22, 1, .36, 1) both;
 }
 
 .iclub-global-ai-panel[hidden] {
@@ -633,3 +633,152 @@ html.iclub-global-ai-active #exam-prep-host-root [data-ep-ai-topic-action-wrap] 
 }
 .iclub-qa-demo-footer {font-size:11px;color:#566d8e;margin:12px 0 4px;}
 .iclub-qa-demo-back {min-height:40px;padding:8px 0;border:0;background:transparent;color:#155cbb;font-size:13px;font-weight:700;cursor:pointer;}
+
+
+/* QA-only contextual review: same approved iClub Tutor panel, calmer motion.
+   No artificial keyboard playback, and no layout shift when messages update. */
+.iclub-global-ai-quick[hidden],
+.iclub-qa-practice-context[hidden] { display: none !important; }
+
+.iclub-qa-practice-context {
+  border: 1px solid #dce7f6;
+  border-radius: 14px;
+  background: #f6f9fe;
+  padding: 11px 12px;
+  margin-bottom: 14px;
+  display: grid;
+  gap: 4px;
+}
+.iclub-qa-context-label {
+  color: #42679d;
+  font-size: 11px;
+  font-weight: 750;
+}
+.iclub-qa-context-question {
+  color: #152e5e;
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.iclub-qa-context-answer {
+  color: #526789;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.iclub-global-ai-message.is-qa-explanation {
+  min-width: 0;
+}
+.iclub-global-ai-message.is-qa-explanation .iclub-global-ai-bubble {
+  width: 100%;
+  max-width: 100%;
+  padding: 16px 15px;
+  background: #fff;
+  border: 1px solid #e1e8f5;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(24, 64, 127, .05);
+  white-space: normal;
+  animation: iclub-qa-answer-arrive 280ms cubic-bezier(.22,1,.36,1) both;
+}
+.iclub-qa-explain-label {
+  color: #2b67bf;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .045em;
+}
+.iclub-qa-explain-title {
+  margin: 8px 0 5px;
+  font-size: 17px;
+  letter-spacing: -.015em;
+  line-height: 1.35;
+  color: #102859;
+}
+.iclub-qa-explain-intro {
+  margin: 0 0 14px;
+  color: #415574;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.iclub-qa-explain-steps {
+  padding: 0;
+  margin: 0 0 12px;
+  list-style: none;
+  counter-reset: iClubDemoStep;
+  display: grid;
+  gap: 10px;
+}
+.iclub-qa-explain-steps li {
+  position: relative;
+  counter-increment: iClubDemoStep;
+  padding: 12px 11px 12px 41px;
+  border-radius: 13px;
+  background: #f5f8fd;
+}
+.iclub-qa-explain-steps li::before {
+  content: counter(iClubDemoStep);
+  position: absolute;
+  top: 12px;
+  left: 11px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  color: #185ec5;
+  background: #e0eeff;
+  font-size: 11px;
+  font-weight: 850;
+}
+.iclub-qa-explain-steps strong {
+  font-size: 13px;
+  color: #142b57;
+  line-height: 1.35;
+}
+.iclub-qa-explain-formula {
+  margin: 7px 0;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -.012em;
+  color: #175fc7;
+  overflow-wrap: anywhere;
+}
+.iclub-qa-explain-steps p {
+  margin: 0;
+  color: #4b6184;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.iclub-qa-explain-check {
+  padding: 12px;
+  background: #f0f7ff;
+  border: 1px solid #dbe9fc;
+  border-radius: 13px;
+  color: #1c3d70;
+}
+.iclub-qa-explain-check strong {
+  font-size: 12px;
+  color: #1456ad;
+}
+.iclub-qa-explain-check p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.iclub-qa-explain-check-answer {
+  color: #285b88;
+}
+.iclub-qa-explain-disclosure {
+  display: block;
+  margin-top: 12px;
+  color: #7385a1;
+  font-size: 10px;
+  line-height: 1.5;
+}
+@keyframes iclub-qa-answer-arrive {
+  from {opacity: 0; transform: translateY(5px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+@media (prefers-reduced-motion: reduce) {
+  .iclub-global-ai-message.is-qa-explanation .iclub-global-ai-bubble {
+    animation: none !important;
+  }
+}
