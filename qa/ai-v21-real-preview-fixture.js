@@ -188,9 +188,10 @@
         if(name!=="global-ai")return blocked();
         if(body?.prompt_key==="practice_error" &&
            window.__ICLUB_AI_QA_DEMO__?.ready?.()===true){
-          // The answer is a local fixed text, NOT AI generation. Simulate the
-          // short processing interval so the user can see the chat working.
-          await new Promise(resolve=>setTimeout(resolve,850));
+          // QA-local prepared text, NOT a model generation. A short response
+          // latency allows the existing inline status to appear naturally;
+          // no fake keystrokes or artificial token-by-token streaming.
+          await new Promise(resolve=>setTimeout(resolve,360));
         }
         return plain(answer(body||{}));
       }
