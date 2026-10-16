@@ -23,6 +23,8 @@ on:
       - 'qa/edge_v21/index.ts'
       - 'qa/edge_v21/practice_resolver_*'
       - 'qa/sql_drafts/iclub_ai_v21_practice_attempt_resolution_*'
+      - 'qa/sql_drafts/iclub_ai_v21_provider_spend_*'
+      - 'qa/ai-layer-v21-provider-spend-sql.test.cjs'
       - 'global-ai-ui.js'
       - 'global-ai-ui.css'
       - 'app.js'
@@ -69,6 +71,7 @@ jobs:
           node --test qa/ai-v21-practice-source-governed-error-e2e.test.cjs
           node --test qa/ai-v21-practice-editorial-intake.test.cjs
           node --test qa/ai-v21-local-signed-auth.test.cjs
+          node --test qa/ai-layer-v21-provider-spend-sql.test.cjs
           node --test qa/ai-v21-live-release-safety-gate.test.cjs
           node --test qa/ai-layer-v21-p9-live-integration-preflight.test.cjs
       - name: Install Deno for isolated Edge contract checks
@@ -137,6 +140,11 @@ jobs:
           trap 'dropdb -w --if-exists "$db"' EXIT
           psql -X -w -v ON_ERROR_STOP=1 -d "$db" -f             qa/sql_drafts/iclub_ai_v21_practice_attempt_resolution_local_pg.psql
           echo 'QA V4 identity mapping isolated PostgreSQL GREEN'
+          money_db=iclub_ai_v21_scratch_finance
+          createdb -w "$money_db"
+          trap 'dropdb -w --if-exists "$money_db"; dropdb -w --if-exists "$db"' EXIT
+          PGAPPNAME=iclub_ai_v21_local_scratch psql -X -w -v ON_ERROR_STOP=1 -d "$money_db" -f qa/sql_drafts/iclub_ai_v21_provider_spend_local_pg.psql
+          echo 'QA finance: zero-default, lifetime+UTC daily+user daily, unknown liabilities GREEN'
 
   real-http-postgres-resolver:
     if: github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012'
