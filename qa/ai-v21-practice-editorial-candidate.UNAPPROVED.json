@@ -1,0 +1,64 @@
+{
+  "protocol": "iclub-ai-practice-editorial-v1",
+  "status": "DRAFT_NOT_APPROVED",
+  "releaseAllowed": false,
+  "surface": "practice",
+  "feature": "answer_explanation",
+  "promptKey": "practice_error",
+  "subject": null,
+  "questionId": null,
+  "topic": "question_<server_verified_question_id>",
+  "sourceId": null,
+  "sourceVersion": null,
+  "sourceHash": null,
+  "sourceKind": "iclub_original",
+  "sourceOwner": null,
+  "provenanceId": null,
+  "rightsEvidenceId": null,
+  "prepared": {
+    "ru": {
+      "text": null,
+      "sha256": null,
+      "sourceHash": null,
+      "sourceVersion": null,
+      "reviewed": false
+    },
+    "uz": {
+      "text": null,
+      "sha256": null,
+      "sourceHash": null,
+      "sourceVersion": null,
+      "reviewed": false
+    },
+    "en": {
+      "text": null,
+      "sha256": null,
+      "sourceHash": null,
+      "sourceVersion": null,
+      "reviewed": false
+    }
+  },
+  "review": {
+    "authorVerified": false,
+    "rightsVerified": false,
+    "sourceVersionVerified": false,
+    "academicReviewed": false,
+    "negativeTestsPassed": false,
+    "examSecurityPassed": false,
+    "localeReviewed": false,
+    "accessibilityReviewed": false,
+    "editorialPublished": false
+  },
+  "sourceAuthorityNotes": "The official syllabus is a topic authority, not copyright permission. Do not reproduce textbook, Cambridge exam paper, or protected question text. Never use browser-selected topic or a synthetic green test as publication evidence.",
+  "selectedQuestionProof": null,
+  "blockers": [
+    "No server-verified actual finalised Practice question selected",
+    "No original authored and versioned answer with independent source mapping",
+    "No rights/originality provenance evidence",
+    "No content correctness review",
+    "No independent RU UZ EN review",
+    "No editorial ticket signatures from independently trusted reviewers",
+    "No permitted backend release, real Auth or user cohort",
+    "Global AI OFF"
+  ]
+}
