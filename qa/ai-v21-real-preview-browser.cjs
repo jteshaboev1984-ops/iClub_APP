@@ -192,6 +192,38 @@ async function main(){
       assert.ok(rect.top>=-1&&rect.bottom<=height+1,"vertical clip "+JSON.stringify(rect));
       await client.evaluate("document.querySelector('[data-global-ai-close]')?.click();true");
     }
+    // Full architect-facing walkthrough on the REAL application screens.
+    // No actual quiz submission and no real learner data is generated.
+    await client.evaluate("document.querySelector('#tabbar [data-tab=\"home\"]').click();true");
+    await client.until("document.querySelector('#view-home')?.classList.contains('is-active')",
+      "real Home for AI demo");
+    await client.until("!!document.getElementById('iclub-qa-demo-home-entry')",
+      "original Practice walkthrough entry");
+    await client.evaluate("document.getElementById('iclub-qa-demo-home-entry').click();true");
+    await client.until("document.querySelector('#courses-practice-review')?.classList.contains('is-active')",
+      "demo opens existing Practice review");
+    const sample=await client.evaluate("({active:window.__ICLUB_AI_QA_DEMO__?.active,question:document.querySelector('.iclub-qa-demo-question')?.textContent,answer:document.querySelector('.iclub-qa-demo-answer.correct strong')?.textContent,notice:document.querySelector('.iclub-qa-demo-note')?.textContent})");
+    assert.equal(sample.active,true);
+    assert.match(sample.question,/x² \+ 2x/);
+    assert.equal(sample.answer,"8");
+    assert.match(sample.notice,/не результат ученика/);
+    await client.evaluate("document.querySelector('.iclub-qa-demo-main-btn').click();true");
+    await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
+      "AI opens on selected illustrative question");
+    await client.until("document.querySelector('[data-global-ai-quick]')?.textContent.includes('Объяснить ошибку')",
+      "real Practice review AI action");
+    await client.evaluate("(()=>{const b=[...document.querySelectorAll('[data-global-ai-quick] button')].find(e=>e.textContent.includes('Объяснить ошибку'));if(!b)throw Error('Demo action absent');b.click();return true;})()");
+    await client.until("document.querySelector('[data-global-ai-messages]')?.textContent.includes('f′(3) = 2·3 + 2')",
+      "AI explains original sample answer");
+    const answer=await client.evaluate("document.querySelector('[data-global-ai-messages]')?.textContent");
+    assert.match(answer,/не реальный результат ученика/);
+    assert.match(answer,/8/);
+    await client.evaluate("document.querySelector('.iclub-qa-demo-back').click();true");
+    await client.until("!window.__ICLUB_AI_QA_DEMO__?.active",
+      "demo exited without user data writes");
+    await client.until("document.querySelector('#iclub-global-ai-panel')?.hidden",
+      "old demo AI context is closed");
+
     const outside=client.network.filter(r=>/^https?:\/\//.test(r.url)&&!r.url.startsWith(base));
     assert.deepEqual(outside,[],"No external network responses in Preview: "+
       JSON.stringify(outside));
