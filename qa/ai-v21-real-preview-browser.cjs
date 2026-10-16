@@ -180,6 +180,26 @@ async function main(){
       await client.send("Emulation.setDeviceMetricsOverride",{
         width,height,deviceScaleFactor:1,mobile:width<600
       });
+      // The premium button floats ABOVE the existing navigation. No new
+      // full-width stripe, separator, or pseudo fifth navigation row.
+      const floating = await client.evaluate("(()=>{const m=document.getElementById('iclub-global-ai-mark');"+
+        "const nav=document.getElementById('tabbar');const r=m.getBoundingClientRect(),t=nav.getBoundingClientRect();"+
+        "const main=getComputedStyle(document.querySelector('.main'));"+
+        "return {top:r.top,bottom:r.bottom,right:r.right,navTop:t.top,width:r.width,height:r.height,"+
+        "stripe:document.querySelectorAll('.iclub-global-ai-dock').length,"+
+        "background:getComputedStyle(document.querySelector('#iclub-global-ai-root')).backgroundColor,"+
+        "padding:parseFloat(main.paddingBottom)}})()");
+      assert.equal(floating.stripe,0,"no full-width AI navigation stripe at "+width+"px");
+      assert.ok(floating.top>=0&&floating.bottom<=floating.navTop-6,
+        "AI floating mark overlaps navigation at "+width+"px");
+      assert.ok(floating.navTop-floating.bottom<=22,
+        "AI mark detached from navigation at "+width+"px");
+      assert.ok(floating.right<=width-8&&floating.right>=width-28,
+        "AI mark horizontal inset unexpected "+width+"px");
+      assert.ok(floating.width>=44&&floating.height>=44,
+        "AI mark too small to tap "+width+"px");
+      assert.equal(floating.background,"rgba(0, 0, 0, 0)",
+        "AI shell must not paint a second navigation background");
       // Reset panel consistently between breakpoint changes, including pending UI timers.
       await client.evaluate("window.iClubGlobalAiShell.close();true");
       await delay(160);
@@ -286,16 +306,16 @@ async function main(){
       await client.until("(()=>{const b=document.getElementById('iclub-global-ai-mark');"+
         "return !!b&&!b.hidden&&getComputedStyle(b).display!=='none'})()",
         "single global AI action appears on "+screen);
-      const dock=await client.evaluate("(()=>{const r=document.querySelector('.iclub-global-ai-dock').getBoundingClientRect();"+
-        "const m=document.getElementById('iclub-global-ai-mark').getBoundingClientRect();"+
-        "const t=document.getElementById('tabbar').getBoundingClientRect();"+
-        "return {d:[r.top,r.bottom],m:[m.top,m.bottom,m.left,m.right],tabTop:t.top,"+
-        "duplicates:document.querySelectorAll('.iclub-qa-appwide-help').length}})()");
-      assert.equal(dock.duplicates,0,"no duplicate in-content AI entry on "+screen);
-      assert.ok(dock.m[0]>=dock.d[0]&&dock.m[1]<=dock.d[1],
-        "AI button must fit entirely inside its rail: "+screen);
-      assert.ok(Math.abs(dock.d[1]-dock.tabTop)<=2,
-        "dock must sit directly above navigation: "+screen);
+      const geometry=await client.evaluate("(()=>{const m=document.getElementById('iclub-global-ai-mark');"+
+        "const r=m.getBoundingClientRect(),t=document.getElementById('tabbar').getBoundingClientRect();"+
+        "return {mark:[r.top,r.bottom,r.left,r.right],tabTop:t.top,"+
+        "duplicates:document.querySelectorAll('.iclub-qa-appwide-help').length,"+
+        "stripe:document.querySelectorAll('.iclub-global-ai-dock').length}})()");
+      assert.equal(geometry.duplicates,0,"no duplicated AI button on "+screen);
+      assert.equal(geometry.stripe,0,"no artificial bottom stripe on "+screen);
+      assert.ok(geometry.mark[1]<=geometry.tabTop-6 &&
+        geometry.tabTop-geometry.mark[1]<=22,
+        "single floating AI mark must sit directly above original tabs: "+screen);
       const before=await client.evaluate("({route:window.iClubGlobalAiShell.context(),"+
         "panel:document.querySelector('#iclub-global-ai-panel')?.hidden})");
       assert.equal(before.route.subjectKey,expectedSubject,
