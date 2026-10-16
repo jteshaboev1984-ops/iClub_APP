@@ -72,6 +72,37 @@ BEGIN
  IF v->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'claim1 %',v;END IF;
  v:=public.reserve_iclub_ai_v21_provider_spend_service(rid,u,sid,fp);
  IF v->>'allowed' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'money1 %',v;END IF;
+ -- Concurrent money holds, with room in a temporary scratch-only budget,
+ -- must stop the third provider dispatch even when spending allows it.
+ UPDATE private.iclub_ai_v21_provider_spend_control
+ SET lifetime_cap_microusd=300,daily_cap_microusd=300,
+     per_user_daily_cap_microusd=300;
+ rid:='10000000-0000-4000-8000-000000000005';
+ v:=public.reserve_iclub_ai_usage_service_v2(rid,u,'plus_qa_v2','generated',fp);
+ IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'quotaConcurrency2 %',v;END IF;
+ v:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
+ IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'claimConcurrency2 %',v;END IF;
+ v:=public.reserve_iclub_ai_v21_provider_spend_service(rid,u,sid,fp);
+ IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'moneyConcurrency2 %',v;END IF;
+ rid:='10000000-0000-4000-8000-000000000006';
+ v:=public.reserve_iclub_ai_usage_service_v2(rid,u,'plus_qa_v2','generated',fp);
+ IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'quotaConcurrency3 %',v;END IF;
+ v:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
+ IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'claimConcurrency3 %',v;END IF;
+ v:=public.reserve_iclub_ai_v21_provider_spend_service(rid,u,sid,fp);
+ IF v->>'reason' IS DISTINCT FROM 'provider_concurrency_busy'
+ THEN RAISE EXCEPTION 'Concurrency guard permitted third provider: %',v;END IF;
+ v:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','released');
+ IF v->>'ok'<>'true' THEN RAISE EXCEPTION 'quotaConcurrency3Refund %',v;END IF;
+ rid:='10000000-0000-4000-8000-000000000005';
+ v:=public.finish_iclub_ai_v21_provider_spend_service(rid,u,sid,fp,'no_charge',NULL);
+ IF v->>'ok'<>'true' THEN RAISE EXCEPTION 'moneyConcurrency2Release %',v;END IF;
+ v:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','released');
+ IF v->>'ok'<>'true' THEN RAISE EXCEPTION 'quotaConcurrency2Release %',v;END IF;
+ UPDATE private.iclub_ai_v21_provider_spend_control
+ SET lifetime_cap_microusd=200,daily_cap_microusd=200,
+     per_user_daily_cap_microusd=200;
+ rid:='10000000-0000-4000-8000-000000000001';
  v:=public.reserve_iclub_ai_v21_provider_spend_service(rid,u,sid,fp);
  IF v->>'reason' IS DISTINCT FROM 'provider_request_already_seen' THEN
   RAISE EXCEPTION 'Same ID reserved money twice';END IF;
