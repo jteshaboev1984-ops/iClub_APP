@@ -428,7 +428,7 @@
     if (state.introShown || state.destroyed ||
         state.bootstrap?.visible !== true || currentBlocked() ||
         !isEligibleView() || activeViewName() !== "home" ||
-        !mark() || mark().hidden || !panel()?.hidden) return;
+        !mark() || mark().hidden || (panel() && !panel().hidden)) return;
     state.introShown = true;
     const tip = root()?.querySelector("[data-global-ai-intro]");
     if (!tip) return;
