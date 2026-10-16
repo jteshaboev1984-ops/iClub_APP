@@ -1136,10 +1136,28 @@
         return;
       }
       const p = panel();
-      if (p && !p.hidden) closePanel();
-      else openPanel();
+      if (p && !p.hidden) {
+        closePanel();
+        return;
+      }
+      // One main AI entry point across the real app: open the selected
+      // screen's guidance immediately, without another in-chat tap.
+      // A selected Practice error continues using its own guarded path.
+      if (window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true &&
+          !window.__ICLUB_AI_QA_DEMO__?.active &&
+          QA_CONTEXT_HELP[resolveContext()?.screenCode]) {
+        void runQaContextHelp(resolveContext().screenCode);
+        return;
+      }
+      openPanel();
     });
 
+    // Dedicated non-interactive rail: the button never lies over learner
+    // cards or competes with the four existing navigation tabs.
+    const rail = document.createElement("div");
+    rail.className = "iclub-global-ai-dock";
+    rail.setAttribute("aria-hidden", "true");
+    host.appendChild(rail);
     host.appendChild(button);
     document.body.appendChild(host);
     return host;
