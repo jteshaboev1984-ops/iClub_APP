@@ -128,7 +128,8 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
       "<!-- External Telegram SDK disabled in offline QA -->")
     .replace("<head>",'<head>\n<meta http-equiv="Content-Security-Policy" content="'+
       vercel.headers[0].headers.find(h=>h.key==="Content-Security-Policy").value
-       .replaceAll("&","&amp;").replaceAll('"',"&quot;")+'">');
+       .replaceAll("&","&amp;").replaceAll('"',"&quot;")+'">')
+    .replace("</body>",'<script src="ai-v21-real-preview-demo.js"></script>\n</body>');
   assert.equal(output,expected);
   assert.doesNotMatch(output,/cdn\.jsdelivr\.net\/npm\/@supabase/);
   assert.match(output,/<meta http-equiv="Content-Security-Policy"/);
@@ -143,6 +144,10 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
   });
   assert.equal(again.status,0,again.stderr);
   assert.equal(fs.readFileSync(path.join(dist,"index.html"),"utf8"),output);
+  assert.equal(fs.readFileSync(path.join(dist,"ai-v21-real-preview-demo.js"),"utf8"),
+    read("qa/ai-v21-real-preview-demo.js"));
+  assert.doesNotMatch(app,/__ICLUB_AI_QA_DEMO__/);
+  assert.match(output,/src="ai-v21-real-preview-demo.js"/);
 });
 
 test("QA bundler refuses production or the wrong existing branch",()=>{
