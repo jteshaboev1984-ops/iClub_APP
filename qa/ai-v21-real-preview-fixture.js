@@ -192,6 +192,25 @@
     if (key==="home_next") return response(copy.home);
     if (key==="profile_meaning") return response(copy.profile);
     if (key==="app_help_results") return response(copy.profile);
+    // Typed public-app questions use a conservative EXACT match to a
+    // published-in-the-preview help topic, never fuzzy keyword interception.
+    // All other free text remains a genuine AI-route candidate; the offline
+    // QA Preview cannot call a model, so responds honestly instead.
+    const selectedHelp = !key&&typed ?
+      window.__ICLUB_AI_QA_TYPED_APP_HELP__?.resolve?.(body):null;
+    if(selectedHelp){
+      const approvedPublicHelp={
+        support_help:copy.support,ratings_help:copy.ratings,
+        practice_rules:copy.rules,tour_rules:copy.tours,
+        catalog_help:copy.catalog,about_help:copy.about,
+        certificates_help:copy.certificates,books_help:copy.books,
+        notifications_help:copy.notifications,community_help:copy.community,
+        recs_help:copy.recs,archive_help:copy.archive_help,
+        video_help:copy.video,home_next:copy.home
+      };
+      if(Object.hasOwn(approvedPublicHelp,selectedHelp))
+        return response(approvedPublicHelp[selectedHelp]);
+    }
     if (typed) return response(copy.custom);
     if (["practice-result","practice-review"].includes(screen))
       return response(screen==="practice-result"?copy.result:copy.error,false,"qa_no_verified_evidence");
