@@ -53,7 +53,7 @@ BEGIN
  IF v->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'Absent budget control granted paid call';END IF;
  INSERT INTO private.iclub_ai_v21_provider_spend_control
- VALUES(1,false,200,80,'synthetic_budget_only');
+ VALUES(1,false,200,80,200,200,2,'synthetic_budget_only');
  INSERT INTO private.iclub_ai_v21_release_control VALUES(1,true);
  UPDATE private.iclub_global_ai_runtime_config SET
   kill_switch=false,ui_enabled=true,gateway_enabled=true,generation_enabled=true;
@@ -123,6 +123,20 @@ BEGIN
  IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'quota3 %',v;END IF;
  v:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
  IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'claim3 %',v;END IF;
+ -- The very same request must be refused by the UTC global daily cap
+ -- and by the per-user daily cap before it can consume money.
+ UPDATE private.iclub_ai_v21_provider_spend_control
+ SET daily_cap_microusd=150,per_user_daily_cap_microusd=150;
+ v:=public.reserve_iclub_ai_v21_provider_spend_service(rid,u,sid,fp);
+ IF v->>'reason' IS DISTINCT FROM 'provider_daily_budget_insufficient'
+ THEN RAISE EXCEPTION 'Global UTC daily limit failed %',v;END IF;
+ UPDATE private.iclub_ai_v21_provider_spend_control
+ SET daily_cap_microusd=200,per_user_daily_cap_microusd=150;
+ v:=public.reserve_iclub_ai_v21_provider_spend_service(rid,u,sid,fp);
+ IF v->>'reason' IS DISTINCT FROM 'provider_daily_budget_insufficient'
+ THEN RAISE EXCEPTION 'Per-user UTC daily limit failed %',v;END IF;
+ UPDATE private.iclub_ai_v21_provider_spend_control
+ SET per_user_daily_cap_microusd=200;
  v:=public.reserve_iclub_ai_v21_provider_spend_service(rid,u,sid,fp);
  IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'money3 %',v;END IF;
  -- Released only if never dispatched and provider definitively uncalled.
@@ -139,7 +153,9 @@ BEGIN
   RAISE EXCEPTION 'Kill switch allowed money reservation';END IF;
  UPDATE private.iclub_global_ai_runtime_config SET kill_switch=false;
  -- Budget can be lowered in scratch for negative test. Real policy NEVER set here.
- UPDATE private.iclub_ai_v21_provider_spend_control SET lifetime_cap_microusd=120;
+ UPDATE private.iclub_ai_v21_provider_spend_control SET
+   lifetime_cap_microusd=120,daily_cap_microusd=120,
+   per_user_daily_cap_microusd=120;
  v:=public.reserve_iclub_ai_usage_service_v2(rid,u,'plus_qa_v2','generated',fp);
  IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'quota4 %',v;END IF;
  v:=public.claim_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated');
@@ -149,7 +165,7 @@ BEGIN
   RAISE EXCEPTION 'Spending ceiling ignored: %',v;END IF;
  v:=public.finish_iclub_ai_delivery_service_v21(rid,u,sid,fp,'generated','released');
  IF v->>'ok'<>'true' THEN RAISE EXCEPTION 'Denied money left user charged';END IF;
- RAISE NOTICE 'P8 money ledger: exact claim, ceiling, unknown liability, charge/refund and no replay GREEN';
+ RAISE NOTICE 'P8 finance: lifetime, UTC day, user day, exact claim, unknown liability and refunds GREEN';
 END $tests$;
 ROLLBACK;
 \echo 'Money fixture rolled back; no real provider/user data used.'
