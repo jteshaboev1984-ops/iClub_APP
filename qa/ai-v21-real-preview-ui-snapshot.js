@@ -690,6 +690,58 @@
     renderPanel();
   }
 
+  // QA-only direct handoff from the selected, original Practice example.
+  // User makes ONE explicit click in the review. The same AI conversation
+  // opens, visibly fills the draft, submits and renders the prepared reply.
+  // Never exposed by the production script or real learner sessions.
+  let qaDemoHandoffBusy = false;
+  const QA_DEMO_PROMPT = Object.freeze({
+    ru: "Объясни ошибку: f(x) = x² + 2x, f′(3) = 6",
+    uz: "Xatoni tushuntir: f(x) = x² + 2x, f′(3) = 6",
+    en: "Explain my mistake: f(x) = x² + 2x, f′(3) = 6"
+  });
+
+  async function runQaPracticeDemo() {
+    if (qaDemoHandoffBusy || state.busy ||
+        window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites !== true ||
+        window.__ICLUB_AI_QA_DEMO__?.ready?.() !== true ||
+        currentBlocked() || !isEligibleView()) return false;
+    qaDemoHandoffBusy = true;
+    try {
+      reconcileContext();
+      if (state.context?.screenCode !== "practice-review" ||
+          state.context?.threadKey !== "qa_original_practice_demo" ||
+          state.bootstrap?.visible !== true) return false;
+      const epoch = state.contextEpoch;
+      const auth = state.authEpoch;
+      const stillValid = () => epoch === state.contextEpoch &&
+        auth === state.authEpoch && !currentBlocked() &&
+        window.__ICLUB_AI_QA_DEMO__?.ready?.() === true &&
+        state.context?.threadKey === "qa_original_practice_demo" &&
+        !panel()?.hidden;
+      openPanel();
+      const input = panel()?.querySelector("[data-global-ai-input]");
+      if (!input || !stillValid()) return false;
+      const draft = QA_DEMO_PROMPT[locale()] || QA_DEMO_PROMPT.ru;
+      // Deliberately visible brief draft animation, not a second interaction.
+      input.value = "";
+      for (let n = 1; n <= 6; n++) {
+        await new Promise(resolve => setTimeout(resolve, 85));
+        if (!stillValid()) return false;
+        input.value = draft.slice(0, Math.ceil(draft.length * n / 6));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      await new Promise(resolve => setTimeout(resolve, 240));
+      if (!stillValid() || state.busy) return false;
+      await sendMessage({
+        promptKey: "practice_error", displayText: draft, userText: draft
+      });
+      return true;
+    } finally {
+      qaDemoHandoffBusy = false;
+    }
+  }
+
   function requestId() {
     try {
       return crypto.randomUUID();
@@ -1114,6 +1166,8 @@
     version: "global_ai_conversations_v1",
     refresh: () => refreshBootstrap(),
     close: () => closePanel(),
+    // Does not bypass any protected Practice/Tour/source checks.
+    runQaPracticeDemo,
     context: () => ({ ...(state.context || resolveContext()) })
   });
 
