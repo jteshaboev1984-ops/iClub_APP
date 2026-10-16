@@ -253,6 +253,7 @@ async function main(){
       ["certificates","certificates","Сертификаты появляются","general"],
       ["notifications","notifications","Уведомления показывают","general"]
     ];
+    const seenThreads=new Map();
     for(const [view,screen,expectedText,expectedSubject] of appScreens){
       await client.evaluate("(()=>{document.querySelectorAll('.view').forEach(v=>"+
         "v.classList.toggle('is-active',v.id==='view-"+view+"'));"+
@@ -273,8 +274,8 @@ async function main(){
       await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
         "one-tap global Tutor opens in "+screen);
       try {
-        await client.until("document.querySelector('[data-global-ai-messages] .is-assistant')?."+
-          "textContent.includes("+JSON.stringify(expectedText)+")",
+        await client.until("(()=>{const a=[...document.querySelectorAll('[data-global-ai-messages] .is-assistant')];"+
+          "return a.length&&a.at(-1)?.textContent.includes("+JSON.stringify(expectedText)+")})()",
           "readable, section-aware answer for "+screen);
       } catch (error) {
         const diag=await client.evaluate("({route:window.iClubGlobalAiShell?.context?.(),"+
@@ -288,8 +289,11 @@ async function main(){
       const result=await client.evaluate("({thread:window.iClubGlobalAiShell.context().threadKey,"+
         "users:document.querySelectorAll('[data-global-ai-messages] .is-user').length,"+
         "replies:document.querySelectorAll('[data-global-ai-messages] .is-assistant').length})");
-      assert.ok(result.users===1&&result.replies===1,
-        "duplicate or mixed context in "+screen+": "+JSON.stringify(result));
+      const expectedCount=(seenThreads.get(result.thread)||0)+1;
+      seenThreads.set(result.thread,expectedCount);
+      assert.ok(result.users===expectedCount&&result.replies===expectedCount,
+        "duplicate or cross-thread replies in "+screen+": "+JSON.stringify(result)+
+        " expected "+expectedCount);
       await client.evaluate("window.iClubGlobalAiShell.close();true");
     }
     // The original controlled Mathematics Tutor is not modified by these
