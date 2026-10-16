@@ -12,6 +12,7 @@ on:
       - 'qa/ai-v21-practice-resolver-http-pg.cjs'
       - 'qa/ai-v21-practice-source-contract.test.cjs'
       - 'qa/ai-v21-practice-source-governed-error-e2e.test.cjs'
+      - 'qa/ai-v21-practice-editorial-*'
       - 'qa/ai-layer-v21-ui-transport.cjs'
       - 'qa/edge_v21/context_core.ts'
       - 'qa/edge_v21/index.ts'
@@ -59,6 +60,7 @@ jobs:
           node --test qa/ai-v21-resolver-transport.test.cjs
           node --test qa/ai-v21-practice-source-contract.test.cjs
           node --test qa/ai-v21-practice-source-governed-error-e2e.test.cjs
+          node --test qa/ai-v21-practice-editorial-intake.test.cjs
       - name: Install Deno for isolated Edge contract checks
         uses: denoland/setup-deno@v2
         with:
