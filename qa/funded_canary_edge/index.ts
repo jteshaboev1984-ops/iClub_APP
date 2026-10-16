@@ -46,7 +46,7 @@ Deno.serve(async request=>{
     // minimally informative, strictly zero-spend health probe.
     if(request.headers.get("authorization")!=="Bearer "+c.key)
       return ok({pilot:"operator_only",modelConfigured:c.openai.length>12,
-        canRun:false,paidCallsStarted:false});
+        canRun:false});
     try{
       const s=await rpc("status_iclub_ai_paid_canary_v1",{},c.url,c.key);
       return ok({edgeEnabled:enabled(),modelConfigured:c.openai.length>12,
