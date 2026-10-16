@@ -237,6 +237,54 @@ async function main(){
     await client.until("document.querySelector('#iclub-global-ai-panel')?.hidden",
       "old demo AI context is closed");
 
+    // One global iClub AI across real Home / Study / Subject / Lessons /
+    // Tours / Leaderboard / Profile / Community / Support without fake scores.
+    // Each CTA opens the SAME Tutor and sends its section-specific request.
+    const appScreens=[
+      ["courses","all-subjects","Откройте Study","general"],
+      ["courses","subject-hub","В выбранном предмете","biology"],
+      ["courses","video","Видео-уроки","biology"],
+      ["courses","tours","Во время активного тура","biology"],
+      ["courses","books","Книги","biology"],
+      ["ratings","ratings","В Рейтинге","general"],
+      ["profile","profile","не подтверждены сервером","general"],
+      ["community","community","официальный канал iClub","general"],
+      ["support","support","В «Поддержке»","general"],
+      ["certificates","certificates","Сертификаты появляются","general"],
+      ["notifications","notifications","Уведомления показывают","general"]
+    ];
+    for(const [view,screen,expectedText,expectedSubject] of appScreens){
+      await client.evaluate("(()=>{document.querySelectorAll('.view').forEach(v=>"+
+        "v.classList.toggle('is-active',v.id==='view-"+view+"'));"+
+        "document.querySelectorAll('#view-courses .stack-screen').forEach(v=>"+
+        "v.classList.toggle('is-active',v.id==='courses-"+screen+"'));"+
+        "document.getElementById('subject-hub-title').textContent='Биология';"+
+        "return true})()");
+      await client.until("window.iClubGlobalAiShell?.context?.()?.screenCode==='"+screen+"'",
+        "active real app section "+screen);
+      await client.until("(()=>{const b=document.querySelector('[data-qa-app-help=\""+screen+"\"]');"+
+        "return !!b&&!b.hidden&&getComputedStyle(b).display!=='none'})()",
+        "section-specific contextual AI action "+screen);
+      const before=await client.evaluate("({route:window.iClubGlobalAiShell.context(),"+
+        "panel:document.querySelector('#iclub-global-ai-panel')?.hidden})");
+      assert.equal(before.route.subjectKey,expectedSubject,
+        "App-wide subject context crossed boundaries: "+screen);
+      await client.evaluate("document.querySelector('[data-qa-app-help=\""+screen+"\"]').click();true");
+      await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
+        "one-tap global Tutor opens in "+screen);
+      await client.until("document.querySelector('[data-global-ai-messages] .is-assistant')?."+
+        "textContent.includes("+JSON.stringify(expectedText)+")",
+        "readable, section-aware answer for "+screen);
+      const result=await client.evaluate("({thread:window.iClubGlobalAiShell.context().threadKey,"+
+        "users:document.querySelectorAll('[data-global-ai-messages] .is-user').length,"+
+        "replies:document.querySelectorAll('[data-global-ai-messages] .is-assistant').length})");
+      assert.ok(result.users===1&&result.replies===1,
+        "duplicate or mixed context in "+screen+": "+JSON.stringify(result));
+      await client.evaluate("window.iClubGlobalAiShell.close();true");
+    }
+    // The original controlled Mathematics Tutor is not modified by these
+    // cross-app CTA routes; hidden active quizzes were already tested above.
+
     const outside=client.network.filter(r=>/^https?:\/\//.test(r.url)&&!r.url.startsWith(base));
     assert.deepEqual(outside,[],"No external network responses in Preview: "+
       JSON.stringify(outside));
