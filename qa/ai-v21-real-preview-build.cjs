@@ -91,8 +91,8 @@ assert.ok(typedHelp.includes("NOT an LLM")&&typedHelp.includes("noProductionWrit
   "Only explicitly synthetic, local typed help may be emitted");
 fs.writeFileSync(path.join(out,"ai-v21-preview-typed-app-help.js"),typedHelp);
 html=html.replace(sdk,
-  '<script src="ai-v21-preview-typed-app-help.js"></script>\n'+
-  '<script src="ai-v21-real-preview-fixture.js"></script>');
+  '<script src="ai-v21-real-preview-fixture.js"></script>\n'+
+  '<script src="ai-v21-preview-typed-app-help.js"></script>');
 html=html.replace(telegram,"<!-- External Telegram SDK disabled in offline QA -->");
 // An original, clearly disclosed Practice demonstration runs in the REAL
 // app's existing review screen. No detached HTML screens, storage or network.
