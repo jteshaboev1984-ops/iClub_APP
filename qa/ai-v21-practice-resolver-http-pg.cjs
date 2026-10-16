@@ -9,6 +9,7 @@ const {createServer}=require("node:http");
 const {readFileSync,writeFileSync,unlinkSync}=require("node:fs");
 const {resolve}=require("node:path");
 const assert=require("node:assert/strict");
+const {makeLocalSignedAuth}=require("./ai-v21-local-signed-auth.cjs");
 const ROOT=resolve(__dirname,"..");
 const DB="iclub_ai_v21_scratch_ci_resolver_http";
 const ROOT_SQL=resolve(ROOT,"qa/sql_drafts");
@@ -19,7 +20,7 @@ const B="22222222-2222-4222-8222-222222222222";
 const ANON="synthetic-resolver-anon";
 const ROLE="synthetic-resolver-service";
 const ORIGIN="https://preview.synthetic.invalid";
-let server=null,created=false,generated=false;
+let server=null,created=false,generated=false,localSignedAuth=null;
 function command(program,args){
  const result=spawnSync(program,args,{
   cwd:ROOT,encoding:"utf8",timeout:60000,
@@ -76,11 +77,12 @@ async function handle(req,res){
   if(route==="/auth/v1/user"){
    if(req.method!=="GET"||api!==ANON)
     return reply(res,401,{error:"missing_anon_api_key"});
-   if(auth==="Bearer qa-local-user-a")
-    return reply(res,200,{id:A,role:"authenticated"});
-   if(auth==="Bearer qa-local-user-b")
-    return reply(res,200,{id:B,role:"authenticated"});
-   return reply(res,401,{error:"invalid_synthetic_identity"});
+   // No plain synthetic identity strings: verify actual signed HS256 JWT.
+   // Per-run ephemeral QA key only; this is NOT hosted GoTrue/Supabase Auth.
+   const user=typeof auth==="string"&&auth.startsWith("Bearer ")?
+    localSignedAuth?.verify(auth.slice(7)):null;
+   return user?reply(res,200,user):
+    reply(res,401,{error:"invalid_synthetic_identity"});
   }
   if(route==="/__qa/control"){
    if(req.method!=="POST"||req.headers["x-local-qa-test"]!=="only-synthetic")
@@ -134,15 +136,31 @@ async function main(){
  command("createdb",[...pgArgs(),DB]);created=true;
  command("psql",[...pgArgs(),"-X","-v","ON_ERROR_STOP=1","-d",DB,"-f",GENERATED]);
  assert.equal(sql("SELECT count(*) FROM public.practice_sessions_v4;"),"2");
+ localSignedAuth=makeLocalSignedAuth();
+ const now=Math.floor(Date.now()/1000);
+ const validA=localSignedAuth.sign(A);
+ const validB=localSignedAuth.sign(B);
+ const tokenCases={
+  ICLUB_QA_JWT_A:validA,
+  ICLUB_QA_JWT_B:validB,
+  ICLUB_QA_JWT_BAD_SIG:validA.slice(0,-3)+"zzz",
+  ICLUB_QA_JWT_EXPIRED:localSignedAuth.sign(A,{
+   iat:now-720,nbf:now-720,exp:now-5}),
+  ICLUB_QA_JWT_FUTURE:localSignedAuth.sign(A,{iat:now+100,nbf:now+100,exp:now+600}),
+  ICLUB_QA_JWT_ADMIN:localSignedAuth.sign(A,{role:"service_role"}),
+  ICLUB_QA_JWT_FOREIGN_AUD:localSignedAuth.sign(A,{aud:"service_role"}),
+  ICLUB_QA_JWT_BAD_ISS:localSignedAuth.sign(A,{iss:"https://external.invalid"})
+ };
  server=createServer((req,res)=>{void handle(req,res);});
  await new Promise((resolve,reject)=>server.listen(0,"127.0.0.1",
   error=>error?reject(error):resolve()));
  const port=server.address().port;
  const env={...process.env,
   ICLUB_QA_BACKEND_URL:"http://127.0.0.1:"+port,
-  ICLUB_QA_ORIGIN:ORIGIN,ICLUB_QA_ANON:ANON,ICLUB_QA_ROLE:ROLE};
+  ICLUB_QA_ORIGIN:ORIGIN,ICLUB_QA_ANON:ANON,ICLUB_QA_ROLE:ROLE,
+  ...tokenCases};
  const child=spawn("deno",["test","--no-check","--allow-net=127.0.0.1",
-  "--allow-env=ICLUB_QA_BACKEND_URL,ICLUB_QA_ORIGIN,ICLUB_QA_ANON,ICLUB_QA_ROLE",
+  "--allow-env=ICLUB_QA_BACKEND_URL,ICLUB_QA_ORIGIN,ICLUB_QA_ANON,ICLUB_QA_ROLE,ICLUB_QA_JWT_A,ICLUB_QA_JWT_B,ICLUB_QA_JWT_BAD_SIG,ICLUB_QA_JWT_EXPIRED,ICLUB_QA_JWT_FUTURE,ICLUB_QA_JWT_ADMIN,ICLUB_QA_JWT_FOREIGN_AUD,ICLUB_QA_JWT_BAD_ISS",
   "qa/edge_v21/practice_resolver_real_pg_http_test.ts"],{
    cwd:ROOT,env,stdio:"inherit"
   });
@@ -152,7 +170,7 @@ async function main(){
  assert.equal(status,0,"Deno HTTP-to-real-PG integration failed");
  assert.equal(sql("SELECT count(*) FROM public.practice_session_answers_v4;"),"2",
   "QA resolver must never change answers");
- console.log("ICLUB_QA_HTTP_TO_REAL_PG_RESOLVER_GREEN: JWT identity shim, PostgreSQL, no academic writes");
+ console.log("ICLUB_QA_HTTP_TO_REAL_PG_RESOLVER_GREEN: locally signature-verified JWT via Auth HTTP, PostgreSQL, no academic writes");
 }
 (async()=>{
  let failure=null;
