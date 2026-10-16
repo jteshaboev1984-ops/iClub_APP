@@ -5,6 +5,7 @@ const {readFileSync}=require("node:fs");
 const {assessGlobalAiRolloutEvidence,QA_RESOLVER}=
  require("./ai-v21-live-release-safety-gate.cjs");
 const metadata=require("./ai-v21-live-release-metadata-observation-20261016.json");
+const authCatalog=require("./ai-v21-live-release-auth-catalog-readonly-20261016.json");
 const p9=require("./ai-layer-v21-p9-live-metadata-readonly-snapshot.json");
 const clone=(x)=>JSON.parse(JSON.stringify(x));
 test("read-only production observations require twenty-four core RPCs plus one resolver, NO GO",()=>{
@@ -78,4 +79,35 @@ test("already deployed Exam Prep and Practice AI remain independent of proposed 
  const result=assessGlobalAiRolloutEvidence({live:broken});
  assert.ok(result.reasons.includes("EXISTING_AI_TUTOR_METADATA_DRIFT"));
  assert.equal(result.status,"NO_GO");
+});
+
+test("live Auth/Practice catalog proves only RLS metadata; GoTrue runtime remains unknown",()=>{
+ const result=assessGlobalAiRolloutEvidence();
+ assert.equal(result.authCatalogVerifiedAsMetadataOnly,true);
+ assert.equal(result.releaseAuthorized,false);
+ assert.equal(result.realLearnerAccess,false);
+ assert.ok(result.reasons.includes("AUTH_HOSTED_RUNTIME_BEHAVIOR_NOT_TESTED"));
+ assert.deepEqual(authCatalog.tables.filter(x=>x.schema==="auth").map(x=>x.name).sort(),
+  ["audit_log_entries","identities","refresh_tokens","sessions","users"]);
+ assert.equal(authCatalog.containsLearnerRows,false);
+ assert.equal(authCatalog.containsAuthTokens,false);
+});
+test("grant drift, disabled RLS, weakened own policy or fake runtime approval fail closed",()=>{
+ for(const mutation of [
+  x=>{x.tables.find(t=>t.name==="users").authenticatedSelect=true;},
+  x=>{x.tables.find(t=>t.name==="practice_session_answers_v4").anonSelect=true;},
+  x=>{x.tables.find(t=>t.name==="practice_sessions_v4").rls=false;},
+  x=>{x.selectedPolicies.find(t=>t.command==="SELECT").predicate="true";},
+  x=>{x.selectedPolicies.find(t=>t.command==="ALL").predicate="true";},
+  x=>{x.authServiceBehaviorVerified=true;},
+  x=>{x.containsLearnerRows=true;},
+  x=>{x.releaseAuthorized=true;}
+ ]){
+  const copy=clone(authCatalog);
+  mutation(copy);
+  const result=assessGlobalAiRolloutEvidence({catalog:copy});
+  assert.equal(result.status,"NO_GO");
+  assert.equal(result.releaseAuthorized,false);
+  assert.ok(result.reasons.includes("LIVE_AUTH_RLS_METADATA_CHANGED"));
+ }
 });
