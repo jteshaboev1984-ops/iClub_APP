@@ -145,6 +145,26 @@ async function main(){
       ".find(x=>x.textContent.includes('Что делать дальше?'));if(!b)throw Error('Missing Home quick question');b.click();return true})()");
     await client.until("document.querySelector('[data-global-ai-messages] .is-assistant')?.textContent.includes('не буду выдумывать')",
       "only user-selected question receives response");
+    // User-entered text takes a distinct request route. This protected QA
+    // Preview responds honestly with a prepared fallback, not a fake model.
+    await client.evaluate("(()=>{const t=document.querySelector('[data-global-ai-input]');"+
+      "t.value='Как обратиться в поддержку?';t.dispatchEvent(new Event('input',{bubbles:true}));"+
+      "document.querySelector('[data-global-ai-send]').click();return true})()");
+    await client.until("document.querySelectorAll('[data-global-ai-messages] .is-user').length===2",
+      "typed input submits a separate free-text request");
+    await client.until("(()=>{const a=[...document.querySelectorAll('[data-global-ai-messages] .is-assistant')];"+
+      "return a.length===2&&a.at(-1)?.textContent.includes('тестовый AI')})()",
+      "typed text gets explicit QA-only model-not-connected explanation");
+    await client.evaluate("window.iClubGlobalAiShell.close();true");
+    await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
+    await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
+      "reopen iClub AI after first usage");
+    assert.equal(await client.evaluate(
+      "document.querySelector('[data-global-ai-first-info]')?.hidden"),true,
+      "privacy introduction is shown only once per app session");
+    assert.equal(await client.evaluate(
+      "document.querySelector('[data-global-ai-intro]')?.hidden"),true,
+      "launch tooltip cannot recur on every AI chat opening");
     // Genuine app router via its existing Study tab.
     await client.evaluate("document.querySelector('#tabbar [data-tab=\"courses\"]').click();true");
     await client.until("document.querySelector('#view-courses')?.classList.contains('is-active')",
