@@ -153,8 +153,15 @@ async function main(){
     await client.until("document.querySelectorAll('[data-global-ai-messages] .is-user').length===2",
       "typed input submits a separate free-text request");
     await client.until("(()=>{const a=[...document.querySelectorAll('[data-global-ai-messages] .is-assistant')];"+
-      "return a.length===2&&a.at(-1)?.textContent.includes('тестовый AI')})()",
-      "typed text gets explicit QA-only model-not-connected explanation");
+      "return a.length===2&&a.at(-1)?.textContent.includes('В «Поддержке»')})()",
+      "exact typed app question gets specific prepared navigation guidance");
+    // A personal academic question must NOT be misclassified as public app help.
+    await client.evaluate("(()=>{const t=document.querySelector('[data-global-ai-input]');"+
+      "t.value='Какой у меня балл по химии?';t.dispatchEvent(new Event('input',{bubbles:true}));"+
+      "document.querySelector('[data-global-ai-send]').click();return true})()");
+    await client.until("(()=>{const a=[...document.querySelectorAll('[data-global-ai-messages] .is-assistant')];"+
+      "return a.length===3&&a.at(-1)?.textContent.includes('тестовый AI')})()",
+      "personal academic question honestly declines without model or verified progress");
     await client.evaluate("window.iClubGlobalAiShell.close();true");
     await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
     await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
