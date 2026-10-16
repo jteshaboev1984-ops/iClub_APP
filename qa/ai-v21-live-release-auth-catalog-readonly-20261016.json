@@ -1,0 +1,112 @@
+{
+  "schema": "iclub_ai_v21_auth_catalog_readonly_v1",
+  "projectRef": "mmmduffgpvwjdpruzikw",
+  "observedOn": "2026-10-16",
+  "source": "LIVE_PG_CATALOG_METADATA_ONLY",
+  "containsLearnerRows": false,
+  "containsAuthTokens": false,
+  "authServiceBehaviorVerified": false,
+  "tables": [
+    {
+      "schema": "auth",
+      "name": "users",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "auth",
+      "name": "sessions",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "auth",
+      "name": "refresh_tokens",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "auth",
+      "name": "identities",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "auth",
+      "name": "audit_log_entries",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "public",
+      "name": "practice_sessions_v4",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "public",
+      "name": "practice_session_answers_v4",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "public",
+      "name": "questions",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "private",
+      "name": "iclub_global_ai_runtime_config",
+      "rls": true,
+      "anonSelect": false,
+      "authenticatedSelect": false
+    },
+    {
+      "schema": "public",
+      "name": "user_subjects",
+      "rls": true,
+      "anonSelect": true,
+      "authenticatedSelect": true
+    },
+    {
+      "schema": "public",
+      "name": "subjects",
+      "rls": true,
+      "anonSelect": true,
+      "authenticatedSelect": true
+    }
+  ],
+  "selectedPolicies": [
+    {
+      "schema": "public",
+      "table": "user_subjects",
+      "name": "user_subjects_select_own",
+      "command": "SELECT",
+      "predicate": "(user_id = auth.uid())"
+    },
+    {
+      "schema": "public",
+      "table": "user_subjects",
+      "name": "user_subjects_rw_own",
+      "command": "ALL",
+      "predicate": "(user_id = auth.uid())"
+    }
+  ],
+  "findings": [
+    "auth users/sessions/identities/refresh_tokens/audit metadata show RLS enabled and no direct SELECT grants to anon/authenticated",
+    "Practice V4 sessions/answers and questions likewise deny direct SELECT to anon/authenticated",
+    "user_subjects and subjects have SELECT grants with RLS; user_subjects SELECT and ALL policies include user_id=auth.uid()",
+    "Catalog-only metadata does not prove practical Auth credential validation, subject row coverage, or all policy behaviors",
+    "No user/session/token/answer rows read and no data or DDL written"
+  ],
+  "releaseAuthorized": false
+}
