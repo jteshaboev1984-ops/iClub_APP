@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/iclub-ai-real-preview-qa.yml'
       - 'qa/ai-v21-real-preview-*'
+      - 'qa/ai-v21-preview-typed-app-help*'
       - 'qa/ai-v21-real-academic-screen-bridge*'
       - 'qa/ai-v21-resolver-transport.test.cjs'
       - 'qa/ai-v21-practice-resolver-http-pg.cjs'
@@ -58,6 +59,8 @@ jobs:
           node --check qa/ai-v21-real-preview-browser.cjs
           node --check qa/ai-v21-real-preview-ui-snapshot.js
           node --check qa/ai-v21-real-preview-fixture.js
+          node --check qa/ai-v21-preview-typed-app-help.js
+          node --test qa/ai-v21-preview-typed-app-help.test.cjs
           node --test qa/ai-v21-real-preview-regression.test.cjs
           node --check qa/ai-v21-real-academic-screen-bridge.cjs
           node --test qa/ai-v21-real-academic-screen-bridge.test.cjs
