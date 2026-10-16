@@ -197,9 +197,15 @@ async function main(){
     await client.evaluate("document.querySelector('#tabbar [data-tab=\"home\"]').click();true");
     await client.until("document.querySelector('#view-home')?.classList.contains('is-active')",
       "real Home for AI demo");
-    await client.until("!!document.getElementById('iclub-qa-demo-home-entry')",
-      "original Practice walkthrough entry");
-    await client.evaluate("document.getElementById('iclub-qa-demo-home-entry').click();true");
+    assert.equal(await client.evaluate("!!document.getElementById('iclub-qa-demo-home-entry')"),false,
+      "Practice example must not clutter Home");
+    await client.evaluate("document.querySelector('#tabbar [data-tab=\"courses\"]').click();true");
+    await client.until("document.querySelector('#view-courses')?.classList.contains('is-active')",
+      "Study reached for the Practice-only example");
+    await client.evaluate(route("practice-start"));
+    await client.until("!!document.getElementById('iclub-qa-demo-practice-entry')",
+      "optional Practice example is available only in Practice");
+    await client.evaluate("document.getElementById('iclub-qa-demo-practice-entry').click();true");
     await client.until("document.querySelector('#courses-practice-review')?.classList.contains('is-active')",
       "demo opens existing Practice review");
     const sample=await client.evaluate("({active:window.__ICLUB_AI_QA_DEMO__?.active,question:document.querySelector('.iclub-qa-demo-question')?.textContent,answer:document.querySelector('.iclub-qa-demo-answer.correct strong')?.textContent,notice:document.querySelector('.iclub-qa-demo-note')?.textContent})");
@@ -263,14 +269,24 @@ async function main(){
         "return true})()");
       await client.until("window.iClubGlobalAiShell?.context?.()?.screenCode==='"+screen+"'",
         "active real app section "+screen);
-      await client.until("(()=>{const b=document.querySelector('[data-qa-app-help=\""+screen+"\"]');"+
+      await client.until("(()=>{const b=document.getElementById('iclub-global-ai-mark');"+
         "return !!b&&!b.hidden&&getComputedStyle(b).display!=='none'})()",
-        "section-specific contextual AI action "+screen);
+        "single global AI action appears on "+screen);
+      const dock=await client.evaluate("(()=>{const r=document.querySelector('.iclub-global-ai-dock').getBoundingClientRect();"+
+        "const m=document.getElementById('iclub-global-ai-mark').getBoundingClientRect();"+
+        "const t=document.getElementById('tabbar').getBoundingClientRect();"+
+        "return {d:[r.top,r.bottom],m:[m.top,m.bottom,m.left,m.right],tabTop:t.top,"+
+        "duplicates:document.querySelectorAll('.iclub-qa-appwide-help').length}})()");
+      assert.equal(dock.duplicates,0,"no duplicate in-content AI entry on "+screen);
+      assert.ok(dock.m[0]>=dock.d[0]&&dock.m[1]<=dock.d[1],
+        "AI button must fit entirely inside its rail: "+screen);
+      assert.ok(Math.abs(dock.d[1]-dock.tabTop)<=2,
+        "dock must sit directly above navigation: "+screen);
       const before=await client.evaluate("({route:window.iClubGlobalAiShell.context(),"+
         "panel:document.querySelector('#iclub-global-ai-panel')?.hidden})");
       assert.equal(before.route.subjectKey,expectedSubject,
         "App-wide subject context crossed boundaries: "+screen);
-      await client.evaluate("document.querySelector('[data-qa-app-help=\""+screen+"\"]').click();true");
+      await client.evaluate("document.getElementById('iclub-global-ai-mark').click();true");
       await client.until("!document.querySelector('#iclub-global-ai-panel')?.hidden",
         "one-tap global Tutor opens in "+screen);
       try {
@@ -283,7 +299,7 @@ async function main(){
           "body:document.querySelector('[data-global-ai-messages]')?.textContent,"+
           "hidden:document.querySelector('#iclub-global-ai-panel')?.hidden,"+
           "mark:document.querySelector('#iclub-global-ai-mark')?.hidden,"+
-          "button:document.querySelector('[data-qa-app-help]')?.textContent})");
+          "button:document.getElementById('iclub-global-ai-mark')?.title})");
         throw Error(screen+": "+JSON.stringify(diag)+" / "+String(error));
       }
       const result=await client.evaluate("({thread:window.iClubGlobalAiShell.context().threadKey,"+
