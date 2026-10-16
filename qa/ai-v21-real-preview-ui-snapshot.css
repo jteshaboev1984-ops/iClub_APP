@@ -8,46 +8,27 @@
   pointer-events: none;
 }
 
-/* One quiet app-shell rail, separate from scrolling learning cards.
-   The 64px navigation stays unchanged; iClub AI has its own 64px zone. */
-.iclub-global-ai-dock {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(64px + var(--safe-bottom));
-  height: 64px;
-  background: rgba(246, 248, 252, .98);
-  border-top: 1px solid rgba(27, 55, 104, .055);
-  box-shadow: 0 -6px 22px rgba(23, 48, 94, .025);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  pointer-events: none;
-}
-.iclub-global-ai-root:has(.iclub-global-ai-mark[hidden]) .iclub-global-ai-dock,
-body:has(#courses-practice-quiz.is-active) .iclub-global-ai-dock,
-body:has(#courses-tour-quiz.is-active) .iclub-global-ai-dock {
-  display: none !important;
-}
-/* Existing app padding accounts for 64px bottom tabs. Add the one rail,
-   without inserting padding into lesson cards, quiz UIs or subject data. */
+/* iClub AI is a SINGLE quiet action, not a new navigation row.
+   Only a scroll-end safe gap protects the final interactive card; it does
+   not paint a panel, separator or empty fixed strip. */
 html.iclub-global-ai-active:has(#iclub-global-ai-mark:not([hidden]))
   .main {
-  padding-bottom: calc(18px + 64px + 64px + var(--safe-bottom));
+  padding-bottom: calc(18px + 64px + 52px + var(--safe-bottom));
 }
 .iclub-global-ai-mark {
   position: fixed;
   z-index: 1;
   right: 16px;
-  bottom: calc(64px + var(--safe-bottom) + 8px);
+  bottom: calc(64px + var(--safe-bottom) + 12px);
   width: 48px;
   height: 48px;
   min-width: 48px;
   min-height: 48px;
   padding: 0;
-  border: 1px solid rgba(48, 104, 192, .15);
-  border-radius: 15px;
-  background: #fff;
-  box-shadow: 0 3px 10px rgba(18, 63, 128, .085);
+  border: 1px solid rgba(39, 101, 197, .12);
+  border-radius: 17px;
+  background: rgba(255, 255, 255, .99);
+  box-shadow: 0 4px 16px rgba(21, 72, 143, .11), 0 1px 3px rgba(21, 72, 143, .05);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -64,6 +45,13 @@ html.iclub-global-ai-active:has(#iclub-global-ai-mark:not([hidden]))
 .iclub-global-ai-mark[aria-expanded="true"] {
   border-color: rgba(47, 111, 214, .42);
   box-shadow: 0 0 0 3px rgba(47, 111, 214, .065);
+}
+/* The sheet has its own close control. The floating trigger politely
+   leaves the visual stage while the user reads the explanation. */
+.iclub-global-ai-root:has(.iclub-global-ai-panel:not([hidden]))
+  .iclub-global-ai-mark {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .iclub-global-ai-mark:focus-visible,
