@@ -26,6 +26,7 @@ on:
       - 'qa/edge_v21/practice_resolver_*'
       - 'qa/sql_drafts/iclub_ai_v21_practice_attempt_resolution_*'
       - 'qa/sql_drafts/iclub_ai_v21_provider_spend_*'
+      - 'qa/sql_drafts/iclub_ai_paid_canary_v1*'
       - 'qa/ai-layer-v21-provider-spend-sql.test.cjs'
       - 'global-ai-ui.js'
       - 'global-ai-ui.css'
@@ -150,6 +151,11 @@ jobs:
           trap 'dropdb -w --if-exists "$money_db"; dropdb -w --if-exists "$db"' EXIT
           PGAPPNAME=iclub_ai_v21_local_scratch psql -X -w -v ON_ERROR_STOP=1 -d "$money_db" -f qa/sql_drafts/iclub_ai_v21_provider_spend_local_pg.psql
           echo 'QA finance: zero-default, lifetime+UTC daily+user daily, unknown liabilities GREEN'
+          pilot_db=iclub_ai_v21_scratch_operator_pilot
+          createdb -w "$pilot_db"
+          trap 'dropdb -w --if-exists "$pilot_db"; dropdb -w --if-exists "$money_db"; dropdb -w --if-exists "$db"' EXIT
+          psql -X -w -v ON_ERROR_STOP=1 -d "$pilot_db" -f qa/sql_drafts/iclub_ai_paid_canary_v1_local_pg.psql
+          echo 'QA standalone operator-only funded canary: lifetime and concurrency limits GREEN'
 
   real-http-postgres-resolver:
     if: github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012'
