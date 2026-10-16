@@ -160,7 +160,9 @@
     ready:()=>active&&selected&&isReview()&&
       !document.getElementById("courses-practice-quiz")?.classList.contains("is-active") &&
       !document.getElementById("courses-tour-quiz")?.classList.contains("is-active"),
-    reply:(lang)=>explanation[lang]||null,
+    // The existing chat renders plain text, not Markdown; remove typography
+    // markers instead of showing literal ** characters to the reviewer.
+    reply:(lang)=>explanation[lang]?.replace(/\*\*/g,"")||null,
     enter, exit:toStudy,
     get selected(){return selected;},
     get active(){return active;}
