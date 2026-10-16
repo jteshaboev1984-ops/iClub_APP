@@ -86,6 +86,18 @@ assert.ok(html.includes('src="app.js?'),"Must use the real app.js");
 assert.ok(html.includes('src="global-ai-ui.js?'),"Must use the real global-ai-ui.js");
 html=html.replace(sdk,'<script src="ai-v21-real-preview-fixture.js"></script>');
 html=html.replace(telegram,"<!-- External Telegram SDK disabled in offline QA -->");
+// An original, clearly disclosed Practice demonstration runs in the REAL
+// app's existing review screen. No detached HTML screens, storage or network.
+const demoSrc=path.join(__dirname,"ai-v21-real-preview-demo.js");
+assert.ok(fs.existsSync(demoSrc),"Missing protected Practice example");
+const demoJs=fs.readFileSync(demoSrc,"utf8");
+assert.ok(demoJs.includes("not a real lesson or solution")||
+          demoJs.includes("not a real lesson or solution".replace("real ","actual "))||
+          demoJs.includes("no actual answer"),"QA demo must disclose synthetic source");
+assert.equal(html.split("</body>").length,2,"Unexpected body end");
+html=html.replace("</body>",
+  '<script src="ai-v21-real-preview-demo.js"></script>\n</body>');
+fs.writeFileSync(path.join(out,"ai-v21-real-preview-demo.js"),demoJs);
 // Defense-in-depth: local static servers do not set Vercel response headers.
 // Inject the *same* CSP as an early meta element before every script or link.
 const vercel=JSON.parse(fs.readFileSync(path.join(root,"vercel.json"),"utf8"));
