@@ -263,6 +263,18 @@
     const view = activeViewName();
     if (view === "courses") {
       const screenCode = activeCoursesScreen() || "all-subjects";
+      // A separately named thread keeps the illustrative example away from
+      // actual subject discussions, even within the offline QA Preview.
+      if (screenCode === "practice-review" &&
+          window.__ICLUB_AI_QA_DEMO__?.active === true) {
+        return {
+          threadKey: "qa_original_practice_demo",
+          subjectKey: "mathematics",scopeCode: "global",
+          screenCode,academic: true,componentCode: "",skillCode: "",
+          subjectLabel: subjectName("mathematics"),
+          subtitle: subjectName("mathematics") + " · Demo"
+        };
+      }
       const skill = examPrepSkillContext();
       if (skill) return { ...skill, screenCode: "exam_prep_skill" };
       // Never infer a current subject from a stale hub heading on the catalogue.
