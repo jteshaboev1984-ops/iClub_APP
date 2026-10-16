@@ -242,7 +242,10 @@
     usageExhausted: false,
     resetAt: null,
     threads: new Map(),
-    destroyed: false
+    destroyed: false,
+    introShown: false,
+    introRead: false,
+    introTimer: null
   };
 
   function locale() {
@@ -370,6 +373,71 @@
     return document.getElementById(PANEL_ID);
   }
 
+  // Friendly, strictly ephemeral onboarding; no localStorage, cookie, quota
+  // reservation or permanent user tracking. Show once per app runtime.
+  const INTRO_COPY = Object.freeze({
+    ru:{
+      title:"Знакомьтесь, iClub AI",
+      message:"Помогу разобраться в iClub и доступных материалах. Нажмите, чтобы задать вопрос.",
+      short:"iClub AI поможет с вопросами по приложению.",
+      dismiss:"Закрыть подсказку",
+      about:"О помощнике",
+      infoTitle:"Как работает iClub AI",
+      info:"Выберите готовый вопрос или напишите свой. Помощник использует только разрешённые данные и не меняет оценки или прогресс. Ответы могут быть неточными.",
+      demo:"Демо · готовые подсказки по iClub",
+      online:"Помощь по iClub доступна",
+      offline:"AI временно недоступен",
+      limits:"Лимит ответов достигнут"
+    },
+    uz:{
+      title:"iClub AI bilan tanishing",
+      message:"iClub va mavjud materiallarni tushunishga yordam beraman. Savol berish uchun belgini bosing.",
+      short:"iClub AI ilova bo‘yicha savollarga yordam beradi.",
+      dismiss:"Yopish",
+      about:"Yordamchi haqida",
+      infoTitle:"iClub AI qanday ishlaydi",
+      info:"Tayyor savolni tanlang yoki o‘zingiz yozing. Yordamchi faqat ruxsat etilgan ma’lumotlardan foydalanadi va ballar yoki o‘quv jarayonini o‘zgartirmaydi. Javoblar xato bo‘lishi mumkin.",
+      demo:"Namuna · iClub bo‘yicha tayyor javoblar",
+      online:"iClub bo‘yicha yordam mavjud",
+      offline:"AI vaqtincha ishlamayapti",
+      limits:"Javoblar limiti tugadi"
+    },
+    en:{
+      title:"Meet iClub AI",
+      message:"I can help you navigate iClub and available learning resources. Tap the icon to ask.",
+      short:"iClub AI can help with app questions.",
+      dismiss:"Dismiss tip",
+      about:"About the assistant",
+      infoTitle:"How iClub AI works",
+      info:"Choose a suggested question or type your own. The assistant uses only permitted information and never changes your grades or progress. Answers may be inaccurate.",
+      demo:"Demo · prepared iClub guidance",
+      online:"iClub help available",
+      offline:"AI temporarily unavailable",
+      limits:"Answer limit reached"
+    }
+  });
+  const introCopy = () => INTRO_COPY[locale()] || INTRO_COPY.ru;
+  function hideIntro() {
+    if (state.introTimer) clearTimeout(state.introTimer);
+    state.introTimer = null;
+    const tip = root()?.querySelector("[data-global-ai-intro]");
+    if (tip) tip.hidden = true;
+  }
+  function maybeShowIntro() {
+    if (state.introShown || state.destroyed ||
+        state.bootstrap?.visible !== true || currentBlocked() ||
+        !isEligibleView() || activeViewName() !== "home" ||
+        !mark() || mark().hidden || !panel()?.hidden) return;
+    state.introShown = true;
+    const tip = root()?.querySelector("[data-global-ai-intro]");
+    if (!tip) return;
+    const t = introCopy();
+    tip.querySelector("[data-global-ai-intro-title]").textContent = t.title;
+    tip.querySelector("[data-global-ai-intro-text]").textContent = t.message;
+    tip.querySelector("[data-global-ai-intro-close]").setAttribute("aria-label",t.dismiss);
+    tip.hidden = false;
+    state.introTimer = setTimeout(hideIntro,5000);
+  }
   function showToast(text, duration = 3000) {
     const toast = document.getElementById("toast");
     if (!toast || !text) return;
@@ -871,6 +939,8 @@
     if (!state.context) state.context = resolveContext();
     const p = ensurePanel();
     if (!p) return;
+    hideIntro();
+    if (!state.introRead) state.introRead = true;
     p.hidden = false;
     mark()?.setAttribute("aria-expanded", "true");
     renderPanel();
@@ -1140,21 +1210,26 @@
         closePanel();
         return;
       }
-      // One main AI entry point across the real app: open the selected
-      // screen's guidance immediately, without another in-chat tap.
-      // A selected Practice error continues using its own guarded path.
-      if (window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true &&
-          !window.__ICLUB_AI_QA_DEMO__?.active &&
-          QA_CONTEXT_HELP[resolveContext()?.screenCode]) {
-        void runQaContextHelp(resolveContext().screenCode);
-        return;
-      }
+      // Global AI icon is navigation ONLY: opening the chat cannot submit,
+      // generate, charge quota or replay a previous suggestion.
       openPanel();
     });
 
     // Single discreet button anchored to the app shell, with no additional
     // bottom panel, stripe, fifth tab or full-width UI surface.
     host.appendChild(button);
+    const tip = document.createElement("aside");
+    tip.className = "iclub-global-ai-intro";
+    tip.setAttribute("data-global-ai-intro","");
+    tip.setAttribute("aria-label","iClub AI");
+    tip.hidden = true;
+    tip.innerHTML =
+      '<div class="iclub-global-ai-intro-content">'+
+      '<strong data-global-ai-intro-title></strong>'+
+      '<p data-global-ai-intro-text></p></div>'+
+      '<button type="button" data-global-ai-intro-close aria-label="Close">×</button>';
+    tip.querySelector("[data-global-ai-intro-close]").addEventListener("click",hideIntro);
+    host.appendChild(tip);
     document.body.appendChild(host);
     return host;
   }
@@ -1199,6 +1274,7 @@
       closePanel();
       const host = root();
       if (host) host.hidden = true;
+      hideIntro();
       document.documentElement.classList.remove("iclub-global-ai-active");
       state.lastBlocked = currentBlocked();
       return;
@@ -1221,7 +1297,8 @@
       if (blocked) m.setAttribute("aria-expanded", "false");
     }
 
-    if (blocked) closePanel();
+    if (blocked) { closePanel(); hideIntro(); }
+    else maybeShowIntro();
     if (announceBlock && blocked && !state.lastBlocked) {
       showToast(copy().assessmentStart);
     }
