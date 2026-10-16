@@ -18,8 +18,15 @@ CREATE TABLE private.iclub_ai_v21_provider_spend_control(
  lifetime_cap_microusd bigint NOT NULL DEFAULT 0 CHECK(lifetime_cap_microusd>=0),
  per_request_ceiling_microusd bigint NOT NULL DEFAULT 0
   CHECK(per_request_ceiling_microusd>=0),
+ daily_cap_microusd bigint NOT NULL DEFAULT 0 CHECK(daily_cap_microusd>=0),
+ per_user_daily_cap_microusd bigint NOT NULL DEFAULT 0
+  CHECK(per_user_daily_cap_microusd>=0),
+ max_concurrent_requests smallint NOT NULL DEFAULT 0
+  CHECK(max_concurrent_requests BETWEEN 0 AND 2),
  policy_revision text NOT NULL DEFAULT 'not_approved',
- CHECK(per_request_ceiling_microusd<=lifetime_cap_microusd)
+ CHECK(daily_cap_microusd<=lifetime_cap_microusd),
+ CHECK(per_user_daily_cap_microusd<=daily_cap_microusd),
+ CHECK(per_request_ceiling_microusd<=per_user_daily_cap_microusd)
 );
 REVOKE ALL ON TABLE private.iclub_ai_v21_provider_spend_control
  FROM PUBLIC,anon,authenticated,service_role;
@@ -61,6 +68,10 @@ DECLARE
  r private.iclub_global_ai_runtime_config%rowtype;
  a private.iclub_ai_v21_release_control%rowtype;
  used_microusd bigint;
+ daily_microusd bigint;
+ user_daily_microusd bigint;
+ active_requests integer;
+ today_utc timestamptz;
 BEGIN
  IF p_request_id IS NULL OR p_user_id IS NULL
  OR p_session_fingerprint IS NULL OR p_session_fingerprint !~ '^[a-f0-9]{64}$'
@@ -83,6 +94,9 @@ BEGIN
  IF NOT coalesce(c.enabled,false)
  OR coalesce(c.lifetime_cap_microusd,0)<=0
  OR coalesce(c.per_request_ceiling_microusd,0)<=0
+ OR coalesce(c.daily_cap_microusd,0)<=0
+ OR coalesce(c.per_user_daily_cap_microusd,0)<=0
+ OR coalesce(c.max_concurrent_requests,0)<=0
  OR NOT coalesce(a.release_approved,false)
  OR NOT coalesce(r.gateway_enabled,false)
  OR NOT coalesce(r.generation_enabled,false)
@@ -108,6 +122,26 @@ BEGIN
  INTO used_microusd FROM private.iclub_ai_v21_provider_spend_leases;
  IF used_microusd>c.lifetime_cap_microusd-c.per_request_ceiling_microusd THEN
   RETURN jsonb_build_object('allowed',false,'reason','provider_budget_insufficient');
+ END IF;
+ -- UTC day, serialized under same advisory transaction lock. Unknown
+ -- provider bills retain FULL liability and count against all caps.
+ today_utc:=date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC';
+ SELECT
+   coalesce(sum(CASE WHEN state='charged' THEN actual_microusd
+    WHEN state='no_charge' THEN 0 ELSE held_microusd END)
+    FILTER (WHERE reserved_at>=today_utc),0)::bigint,
+   coalesce(sum(CASE WHEN state='charged' THEN actual_microusd
+    WHEN state='no_charge' THEN 0 ELSE held_microusd END)
+    FILTER (WHERE reserved_at>=today_utc AND user_id=p_user_id),0)::bigint,
+   count(*) FILTER (WHERE state IN ('reserved','dispatched'))
+  INTO daily_microusd,user_daily_microusd,active_requests
+  FROM private.iclub_ai_v21_provider_spend_leases;
+ IF daily_microusd>c.daily_cap_microusd-c.per_request_ceiling_microusd
+ OR user_daily_microusd>c.per_user_daily_cap_microusd-c.per_request_ceiling_microusd
+ THEN RETURN jsonb_build_object('allowed',false,'reason','provider_daily_budget_insufficient');
+ END IF;
+ IF active_requests>=c.max_concurrent_requests
+ THEN RETURN jsonb_build_object('allowed',false,'reason','provider_concurrency_busy');
  END IF;
  INSERT INTO private.iclub_ai_v21_provider_spend_leases(
   request_id,user_id,session_fingerprint,request_fingerprint,
