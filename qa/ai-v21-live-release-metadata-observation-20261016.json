@@ -1,0 +1,34 @@
+{
+  "schema": "iclub_ai_v21_production_metadata_delta_v1",
+  "observedOn": "2026-10-16",
+  "projectRef": "mmmduffgpvwjdpruzikw",
+  "evidence": "READ_ONLY_LIVE_SUPABASE_PG_CATALOG_AND_EDGE_LIST",
+  "noStudentRowsRead": true,
+  "noAuthTokensOrSecretsRead": true,
+  "globalAiCandidateDeployed": false,
+  "globalAiCoreRpcContractsDeployed": [],
+  "globalAiPracticeResolverDeployed": false,
+  "existingAI": [
+    {
+      "slug": "exam-prep-ai",
+      "status": "ACTIVE",
+      "verifyJwt": true
+    },
+    {
+      "slug": "practice-ai",
+      "status": "ACTIVE",
+      "verifyJwt": true
+    }
+  ],
+  "localCryptographicJwtCheck": "SYNTHETIC_LOCAL_AUTH_ONLY",
+  "realHostedSignedJwtAuthVerified": false,
+  "editorialRightsApproved": false,
+  "productionReleaseAuthorized": false,
+  "requireFreshPreflight": true,
+  "sourceNotes": [
+    "SQL read-only names from pg_catalog.pg_proc (public/private) showed four legacy global AI foundation/gateway functions and zero get_iclub_ai_v21_* or resolve_iclub_ai_v21_practice_attempt_service",
+    "Active Edge inventory contains exam-prep-ai and practice-ai with verify_jwt=true, but no candidate global-ai v2.1 Edge",
+    "Production user rows, Auth tokens, JWT secrets, source texts, grades and learner history were not read",
+    "The 24 core required RPCs belong to QA P9 preflight; the Practice resolver is an additional 25th proposed RPC"
+  ]
+}
