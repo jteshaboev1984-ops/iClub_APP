@@ -1,166 +1,86 @@
-// iClub AI v2.1 — ONE contextual help entry in the existing app screens.
-// QA-preview ONLY. Never imported by production, never uses learner records.
+// QA-only shell assistant metadata. No duplicate in-content AI buttons.
 (() => {
   "use strict";
   if (window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites !== true) return;
-
-  const screens = Object.freeze({
-    "home":"view-home",
-    "all-subjects":"courses-all-subjects",
-    "subject-hub":"courses-subject-hub",
-    "video":"courses-video",
-    "practice-start":"courses-practice-start",
-    "practice-result":"courses-practice-result",
-    "practice-recs":"courses-practice-recs",
-    "tours":"courses-tours",
-    "tour-rules":"courses-tour-rules",
-    "tour-result":"courses-tour-result",
-    "tour-review":"courses-tour-review",
-    "books":"courses-books",
-    "my-recs":"courses-my-recs",
-    "my-rec-detail":"courses-my-rec-detail",
-    "ratings":"view-ratings",
-    "profile":"view-profile",
-    "notifications":"view-notifications",
-    "community":"view-community",
-    "certificates":"view-certificates",
-    "archive":"view-archive",
-    "support":"view-support",
-    "support-topic":"view-support-topic",
-    "about":"view-about"
-  });
-  const labels = Object.freeze({
-    ru: {
-      "home":"Что делать дальше?","all-subjects":"Помочь выбрать раздел",
-      "subject-hub":"Как начать изучать предмет?","video":"Как открыть видеоуроки?",
-      "practice-start":"Как работает Practice?","practice-result":"Что делать после Practice?",
-      "practice-recs":"Как использовать рекомендации?","tours":"Как работают Tours?",
-      "tour-rules":"Объяснить правила тура","tour-result":"Когда откроется разбор?",
-      "tour-review":"Как пользоваться архивом?","books":"Как пользоваться книгами?",
-      "my-recs":"Как устроены рекомендации?","my-rec-detail":"Как использовать рекомендацию?",
-      "ratings":"Как работает рейтинг?","profile":"Что означают показатели?",
-      "notifications":"Как устроены уведомления?","community":"Как пользоваться сообществом?",
-      "certificates":"Как получить сертификат?","archive":"Когда доступен архив?",
-      "support":"Как обратиться за помощью?","support-topic":"Как обратиться за помощью?",
-      "about":"Что такое iClub?"
+  const labels=Object.freeze({
+    ru:{
+      home:"Главная", "all-subjects":"Обучение", "subject-hub":"Предмет",
+      video:"Видеоуроки","practice-start":"Practice",
+      "practice-result":"Результат Practice","practice-review":"Разбор ошибок",
+      "practice-recs":"Рекомендации",tours:"Туры",
+      "tour-rules":"Правила тура","tour-result":"Результат тура",
+      "tour-review":"Архив тура",books:"Книги","my-recs":"Мои рекомендации",
+      "my-rec-detail":"Рекомендация",ratings:"Рейтинг",profile:"Профиль",
+      notifications:"Уведомления",community:"Сообщество",
+      certificates:"Сертификаты",archive:"Архив",support:"Поддержка",
+      "support-topic":"Поддержка",about:"О проекте"
     },
-    uz: {
-      "home":"Keyingi qadam nima?","all-subjects":"Bo‘limni tanlashda yordam",
-      "subject-hub":"Fanni qanday o‘rganaman?","video":"Video darslarni qanday ochaman?",
-      "practice-start":"Practice qanday ishlaydi?","practice-result":"Practice'dan keyin nima qilaman?",
-      "practice-recs":"Tavsiyalardan qanday foydalanaman?","tours":"Tours qanday ishlaydi?",
-      "tour-rules":"Tur qoidalarini tushuntir","tour-result":"Tahlil qachon ochiladi?",
-      "tour-review":"Arxivdan qanday foydalanaman?","books":"Kitoblardan qanday foydalanaman?",
-      "my-recs":"Tavsiyalar qanday ishlaydi?","my-rec-detail":"Tavsiyadan qanday foydalanaman?",
-      "ratings":"Reyting qanday ishlaydi?","profile":"Ko‘rsatkichlar nimani anglatadi?",
-      "notifications":"Bildirishnomalar qanday ishlaydi?","community":"Hamjamiyatdan qanday foydalanaman?",
-      "certificates":"Sertifikatni qanday olaman?","archive":"Arxiv qachon ochiladi?",
-      "support":"Qanday yordam so‘rayman?","support-topic":"Qanday yordam so‘rayman?",
-      "about":"iClub nima?"
+    uz:{
+      home:"Bosh sahifa","all-subjects":"O‘qish","subject-hub":"Fan",
+      video:"Video darslar","practice-start":"Practice",
+      "practice-result":"Practice natijasi","practice-review":"Xatolar tahlili",
+      "practice-recs":"Tavsiyalar",tours:"Turlar",
+      "tour-rules":"Tur qoidalari","tour-result":"Tur natijasi",
+      "tour-review":"Tur arxivi",books:"Kitoblar","my-recs":"Tavsiyalarim",
+      "my-rec-detail":"Tavsiya",ratings:"Reyting",profile:"Profil",
+      notifications:"Bildirishnomalar",community:"Hamjamiyat",
+      certificates:"Sertifikatlar",archive:"Arxiv",support:"Yordam",
+      "support-topic":"Yordam",about:"Loyiha haqida"
     },
-    en: {
-      "home":"What should I do next?","all-subjects":"Help me choose a section",
-      "subject-hub":"How do I study this subject?","video":"How do I open video lessons?",
-      "practice-start":"How does Practice work?","practice-result":"What comes after Practice?",
-      "practice-recs":"How do I use recommendations?","tours":"How do Tours work?",
-      "tour-rules":"Explain Tour rules","tour-result":"When will review open?",
-      "tour-review":"How do I use the archive?","books":"How do I use Books?",
-      "my-recs":"How do recommendations work?","my-rec-detail":"How do I use a recommendation?",
-      "ratings":"How do leaderboards work?","profile":"What do the indicators mean?",
-      "notifications":"How do notifications work?","community":"How do I use Community?",
-      "certificates":"How do I earn certificates?","archive":"When does the archive open?",
-      "support":"How can I get support?","support-topic":"How can I get support?",
-      "about":"What is iClub?"
+    en:{
+      home:"Home","all-subjects":"Study","subject-hub":"Subject",
+      video:"Video lessons","practice-start":"Practice",
+      "practice-result":"Practice result","practice-review":"Mistake review",
+      "practice-recs":"Recommendations",tours:"Tours",
+      "tour-rules":"Tour rules","tour-result":"Tour result",
+      "tour-review":"Tour archive",books:"Books","my-recs":"My recommendations",
+      "my-rec-detail":"Recommendation",ratings:"Leaderboard",profile:"Profile",
+      notifications:"Notifications",community:"Community",
+      certificates:"Certificates",archive:"Archive",support:"Support",
+      "support-topic":"Support",about:"About"
     }
   });
   const locale=()=>{
-    const raw=String(window.i18n?.getLang?.() || "ru").toLowerCase();
-    return Object.hasOwn(labels,raw)?raw:"ru";
+    const lang=String(window.i18n?.getLang?.()||"ru").toLowerCase();
+    return labels[lang]?lang:"ru";
   };
   function activeScreen(){
     const view=document.querySelector(".view.is-active");
     if(!view)return "";
     if(view.id!=="view-courses")return String(view.dataset.view||"");
-    const el=view.querySelector(".stack-screen.is-active");
-    return String(el?.id||"").replace(/^courses-/,"");
-  }
-  function blocked(){
-    if(["practice-quiz","tour-quiz"].includes(activeScreen()))return true;
-    const exam=document.getElementById("exam-prep-host-root");
-    if(exam && !exam.hidden && exam.getAttribute("aria-hidden")!=="true")return true;
-    return document.getElementById("iclub-global-ai-mark")?.hidden!==false;
-  }
-  function createHelp(key,id){
-    const target=document.getElementById(id);
-    if(!target||target.querySelector(":scope > .iclub-qa-appwide-help"))return;
-    const button=document.createElement("button");
-    button.type="button";
-    button.className="iclub-qa-appwide-help";
-    button.setAttribute("data-qa-app-help",key);
-    const img=document.createElement("img");
-    img.src="iclub-ai-tutor-a.webp";img.alt="";
-    img.setAttribute("aria-hidden","true");img.width=26;img.height=26;img.decoding="async";
-    const label=document.createElement("span");
-    label.className="iclub-qa-appwide-help-label";
-    label.textContent=labels[locale()][key];
-    const arrow=document.createElement("span");
-    arrow.className="iclub-qa-appwide-help-arrow";
-    arrow.textContent="›";arrow.setAttribute("aria-hidden","true");
-    button.append(img,label,arrow);
-    let pending=false;
-    button.addEventListener("click",async()=>{
-      if(pending||blocked()||activeScreen()!==key)return;
-      const shell=window.iClubGlobalAiShell;
-      if(typeof shell?.runQaContextHelp!=="function")return;
-      pending=true;button.disabled=true;
-      try { await shell.runQaContextHelp(key); }
-      finally{pending=false;button.disabled=false;}
-    });
-    const top=target.firstElementChild;
-    if(top?.classList.contains("section")||
-       top?.classList.contains("subject-hub-head")||
-       top?.classList.contains("lb-header")){
-      top.insertAdjacentElement("afterend",button);
-    }else{
-      const content=target.querySelector(":scope > .content");
-      if(content){
-        const header=content.querySelector(":scope > .lb-header");
-        if(header)header.insertAdjacentElement("afterend",button);
-        else content.prepend(button);
-      }else{
-        target.prepend(button);
-      }
-    }
+    return String(view.querySelector(".stack-screen.is-active")?.id||"")
+      .replace(/^courses-/,"");
   }
   function update(){
-    const lang=locale();
-    for(const button of document.querySelectorAll(".iclub-qa-appwide-help")){
-      const key=button.getAttribute("data-qa-app-help");
-      if(!Object.hasOwn(screens,key))continue;
-      const title=labels[lang][key];
-      button.querySelector(".iclub-qa-appwide-help-label").textContent=title;
-      button.setAttribute("aria-label","iClub AI · "+title);
-      button.hidden=blocked() || activeScreen()!==key;
-    }
+    const mark=document.getElementById("iclub-global-ai-mark");
+    if(!mark)return;
+    const lang=locale(),screen=activeScreen();
+    const section=labels[lang][screen];
+    const title=section?("iClub AI · "+section):"iClub AI";
+    mark.setAttribute("aria-label",title);
+    mark.title=title;
+    // The mark is the sole screen-wide action. Study/review policy is
+    // still enforced by the existing global AI shell.
   }
   let scheduled=false;
   function schedule(){
-    if(scheduled)return;scheduled=true;
-    setTimeout(()=>{scheduled=false;update();},55);
+    if(scheduled)return;
+    scheduled=true;
+    setTimeout(()=>{scheduled=false;update();},60);
   }
   function attach(){
-    for(const [key,id] of Object.entries(screens))createHelp(key,id);
-    const root=document.querySelector("main");
-    if(root)new MutationObserver(schedule).observe(root,{
-      attributes:true,subtree:true,attributeFilter:["class","hidden","aria-hidden"]
+    const main=document.querySelector(".main");
+    if(main)new MutationObserver(schedule).observe(main,{
+      subtree:true,attributes:true,attributeFilter:["class","hidden","aria-hidden"]
     });
     document.addEventListener("click",schedule,true);
     document.addEventListener("iclub:language-change",schedule);
+    window.addEventListener("focus",schedule);
     update();
+    setTimeout(update,600);
   }
+  window.__ICLUB_AI_QA_APPWIDE__=Object.freeze({activeScreen});
   if(document.readyState==="loading")
     document.addEventListener("DOMContentLoaded",attach,{once:true});
   else attach();
-  // Exposed for read-only synthetic QA diagnostics only.
-  window.__ICLUB_AI_QA_APPWIDE__=Object.freeze({activeScreen});
 })();
