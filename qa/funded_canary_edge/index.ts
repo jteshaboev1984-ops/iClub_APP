@@ -29,11 +29,10 @@ const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 Deno.serve(async request=>{
   if(request.method!=="POST")return deny(405,"method_not_allowed");
   const c=config();
-  // Only a service-role JWT (not a learner JWT) can call this protected
-  // Supabase Edge function; deployment additionally enables verify_jwt.
-  if(!c.key||request.headers.get("authorization")!=="Bearer "+c.key)
-    return deny(403,"operator_only");
-  if(!c.url)return deny(503,"backend_unconfigured");
+  // Supabase verifies the request JWT before this handler runs.
+  // Read-only status is safe for the Dashboard's normal test identity;
+  // only the paid "run" action below requires exact service-role identity.
+  if(!c.url||!c.key)return deny(503,"backend_unconfigured");
   let body:Data;
   try{
     const text=await request.text();
@@ -51,6 +50,10 @@ Deno.serve(async request=>{
         activeRequests:s.inflight||0});
     }catch{return deny(503,"money_status_unavailable");}
   }
+  // Neither student sessions nor the Dashboard's normal test token can
+  // dispatch a paid request. No privileged secrets are returned by status.
+  if(!c.key||request.headers.get("authorization")!=="Bearer "+c.key)
+    return deny(403,"operator_only");
   if(body.intent!=="run"||Object.keys(body).sort().join(",")!=="intent,request_id"||
      typeof body.request_id!=="string"||!UUID.test(body.request_id))
     return deny(400,"invalid_request");
