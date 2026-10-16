@@ -123,7 +123,8 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
   const output=fs.readFileSync(path.join(dist,"index.html"),"utf8");
   const expected=index
     .replace('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>',
-      '<script src="ai-v21-real-preview-fixture.js"></script>')
+      '<script src="ai-v21-real-preview-fixture.js"></script>\n'+
+      '<script src="ai-v21-preview-typed-app-help.js"></script>')
     .replace('<script src="https://telegram.org/js/telegram-web-app.js"></script>',
       "<!-- External Telegram SDK disabled in offline QA -->")
     .replace("<head>",'<head>\n<meta http-equiv="Content-Security-Policy" content="'+
@@ -152,6 +153,10 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
   assert.equal(fs.readFileSync(path.join(dist,"ai-v21-appwide-context-help.js"),"utf8"),
     read("qa/ai-v21-appwide-context-help.js"));
   assert.match(output,/src="ai-v21-appwide-context-help.js"/);
+  assert.equal(fs.readFileSync(path.join(dist,"ai-v21-preview-typed-app-help.js"),"utf8"),
+    read("qa/ai-v21-preview-typed-app-help.js"));
+  assert.match(output,/src="ai-v21-preview-typed-app-help.js"/);
+  assert.doesNotMatch(app,/__ICLUB_AI_QA_TYPED_APP_HELP__/);
   assert.doesNotMatch(app,/__ICLUB_AI_QA_APPWIDE__/);
 });
 
