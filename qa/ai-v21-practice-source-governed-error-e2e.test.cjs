@@ -38,11 +38,11 @@ function make(){
   getScopedContext:async(u,h)=>state.handle&&u===U&&h===H?{
    ownerId:U,active:true,routeAuthority:"unified_ai",
    protectedAssessment:false,expiresAtMs:90000,contextRevision:"practice-proof-900-202",
-   surface:"practice_result",subject:"biology",feature:"error_explanation",topic:"q202"
+   surface:"practice",subject:"biology",feature:"answer_explanation",topic:"question_202"
   }:null,
   getSubjectActive:async()=>state.subject,
   isRolloutAuthorized:async()=>state.subject,
-  getPublishedRelease:async ref=>state.release.has(ref.locale)&&ref.topic==="q202"?
+  getPublishedRelease:async ref=>state.release.has(ref.locale)&&ref.surface==="practice"&&ref.feature==="answer_explanation"&&ref.topic==="question_202"?
    {ready:true,...ref,source_id:"qa-source-202",
     source_version:"qa-only-v1",source_hash:SHA,revision:1}:null,
   getLiveSourceProof:async ref=>({...ref,approved:state.rights,
