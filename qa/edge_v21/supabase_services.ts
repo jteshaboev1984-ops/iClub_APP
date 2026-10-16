@@ -84,10 +84,14 @@ export function createSupabaseServices(config:BackendConfig){
    const d=await safe(async()=>asObject(await call("/auth/v1/user",{
     method:"GET",headers:{Authorization:authorization}
    },false)),null);
-   // The authenticated learner identity MUST come from Auth, not browser JSON.
-   // If Auth supplies an explicit role, a privileged role is never a learner.
+   // Only an explicit authenticated user returned by verified Auth can
+   // create learner authority. A missing role or elevated service/anon role
+   // must never silently inherit rights from an id-shaped JSON object.
+   // Optional audience is validated if Auth includes it; omission is not
+   // interpreted as a JWT verification grant.
    return d&&UUID.test(str(d.id))&&
-    (d.role===undefined||d.role==="authenticated")?
+    d.role==="authenticated"&&
+    (d.aud===undefined||d.aud==="authenticated")?
     {authenticated:true,userId:str(d.id)}:null;
   },
   getServerTimeMs:async()=>Date.now(),
