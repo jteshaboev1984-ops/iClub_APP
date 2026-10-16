@@ -58,10 +58,13 @@ function actualInvoice(data){
  const writes=usage.input_tokens_details?.cache_write_tokens||0;
  if(!Number.isSafeInteger(cached)||!Number.isSafeInteger(writes)||
     cached<0||writes<0||cached+writes>usage.input_tokens)return null;
- // Grossly conservative: charge at uncached input rate, with 2x buffer
- // to safely encompass cache writes and unknown billing adjustments.
+ // Provider-reported token accounting. The *pre-request* quote already
+ // reserved $0.01, while the final invoice uses pinned uncached/cached/
+ // cache-write token rates. Unknown price variants must not be enabled.
+ const plain=usage.input_tokens-cached-writes;
  const measured=Math.ceil(
-   (usage.input_tokens*INPUT_PER_MILLION_MICROUSD*2+
+   (plain*INPUT_PER_MILLION_MICROUSD+
+     cached*20_000+writes*250_000+
      usage.output_tokens*OUTPUT_PER_MILLION_MICROUSD)/1_000_000);
  if(measured>PER_REQUEST_CEILING_MICROUSD)return null;
  return {inputTokens:usage.input_tokens,outputTokens:usage.output_tokens,
