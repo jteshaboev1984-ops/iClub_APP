@@ -5,6 +5,7 @@ const {createHash}=require("node:crypto");
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[0-9a-f]{12}$/i;
 const CODE=/^[a-z][a-z0-9_]{1,79}$/;
 const SHA=/^[a-f0-9]{64}$/;
+const codeValue=v=>typeof v==="string"&&CODE.test(v);
 const LOCALES=Object.freeze(["ru","uz","en"]);
 const SUBJECTS=new Set(["mathematics","biology","chemistry","economics","informatics"]);
 const FIELDS=["protocol","status","surface","feature","promptKey","subject",
@@ -45,11 +46,11 @@ function inspectDraft(draft,serverEvidence){
     draft.surface!=="practice"||draft.feature!=="answer_explanation"||
     draft.promptKey!=="practice_error"||
     draft.questionId!==canonical.questionId||draft.subject!==canonical.subject||
-    !CODE.test(draft.sourceId)||!CODE.test(draft.sourceVersion)||
+    !codeValue(draft.sourceId)||!codeValue(draft.sourceVersion)||
     !SHA.test(draft.sourceHash)||
     draft.sourceKind!=="iclub_original"||
-    !UUID.test(draft.sourceOwner)||!CODE.test(draft.provenanceId)||
-    !CODE.test(draft.rightsEvidenceId)||
+    !UUID.test(draft.sourceOwner)||!codeValue(draft.provenanceId)||
+    !codeValue(draft.rightsEvidenceId)||
     !exact(draft.review,REVIEW_FIELDS)||
     REVIEW_FIELDS.some(field=>draft.review[field]!==false))
    return deny("draft_not_governed");
