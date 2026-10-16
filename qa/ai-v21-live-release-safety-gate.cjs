@@ -6,12 +6,14 @@ const {join}=require("node:path");
 const {checkLiveIntegrationReadiness,expectedRpcNames}=
   require("./ai-layer-v21-p9-live-integration-preflight.cjs");
 const observation=require("./ai-v21-live-release-metadata-observation-20261016.json");
+const authCatalog=require("./ai-v21-live-release-auth-catalog-readonly-20261016.json");
 const OLD=require("./ai-layer-v21-p9-live-metadata-readonly-snapshot.json");
 const read=(p)=>readFileSync(join(__dirname,"..",p),"utf8");
 const QA_RESOLVER="resolve_iclub_ai_v21_practice_attempt_service";
 const bool=(x)=>x===true;
 function assessGlobalAiRolloutEvidence({
  live=observation,
+ catalog=authCatalog,
  prior=OLD,
  adapter=read("qa/edge_v21/supabase_services.ts"),
  resolver=read("qa/edge_v21/practice_resolver_service.ts"),
@@ -42,6 +44,37 @@ function assessGlobalAiRolloutEvidence({
   live.productionReleaseAuthorized===false&&
   live.requireFreshPreflight===true;
  if(!structurallyValid)deny("LIVE_OBSERVATION_UNTRUSTED_OR_CHANGED");
+ // Independent read-only Auth and V4 RLS catalog evidence, never an
+ // impersonation of GoTrue runtime behavior or a user permissions grant.
+ const protectedTables=[
+  "auth.users","auth.sessions","auth.refresh_tokens","auth.identities",
+  "auth.audit_log_entries","public.practice_sessions_v4",
+  "public.practice_session_answers_v4","public.questions",
+  "private.iclub_global_ai_runtime_config"
+ ];
+ const rows=Array.isArray(catalog?.tables)?catalog.tables:[];
+ const protectedSafe=protectedTables.every(name=>{
+  const found=rows.filter(x=>x.schema+"."+x.name===name);
+  return found.length===1&&found[0].rls===true&&
+    found[0].anonSelect===false&&found[0].authenticatedSelect===false;
+ });
+ const ownPolicies=Array.isArray(catalog?.selectedPolicies)?
+  catalog.selectedPolicies:[];
+ const ownSelect=["SELECT","ALL"].every(cmd=>ownPolicies.some(p=>
+  p.schema==="public"&&p.table==="user_subjects"&&
+  p.command===cmd&&p.predicate==="(user_id = auth.uid())"));
+ const subjects=rows.filter(x=>x.schema==="public"&&x.name==="user_subjects");
+ const catalogSafe=catalog?.schema==="iclub_ai_v21_auth_catalog_readonly_v1"&&
+  catalog.projectRef==="mmmduffgpvwjdpruzikw"&&
+  catalog.observedOn==="2026-10-16"&&
+  catalog.source==="LIVE_PG_CATALOG_METADATA_ONLY"&&
+  catalog.containsLearnerRows===false&&catalog.containsAuthTokens===false&&
+  catalog.authServiceBehaviorVerified===false&&
+  catalog.releaseAuthorized===false&&protectedSafe&&ownSelect&&
+  subjects.length===1&&subjects[0].rls===true;
+ if(!catalogSafe)deny("LIVE_AUTH_RLS_METADATA_CHANGED");
+ if(catalog?.authServiceBehaviorVerified!==true)
+  deny("AUTH_HOSTED_RUNTIME_BEHAVIOR_NOT_TESTED");
  if(!Array.isArray(expected)||expected.length!==24||
     priorResult.status!=="NO_GO"||priorResult.releaseAllowed!==false)
   deny("P9_RELEASE_BLOCKER_DRIFT");
@@ -72,6 +105,7 @@ function assessGlobalAiRolloutEvidence({
  return Object.freeze({
   status:"NO_GO",releaseAuthorized:false,realLearnerAccess:false,
   metadataOnly:true,localJwtDoesNotProveHostedAuth:true,
+  authCatalogVerifiedAsMetadataOnly:catalogSafe,
   coreRpcRequired:24,extraPracticeResolverRequired:1,
   totalProposedRpc:25,
   previousReadOnlyCheckStatus:priorResult.status,
