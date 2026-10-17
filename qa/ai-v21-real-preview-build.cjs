@@ -124,13 +124,28 @@ assert.equal(html.split("</body>").length,2);
 html=html.replace("</body>",
   '<script src="ai-v21-appwide-context-help.js"></script>\n</body>');
 fs.writeFileSync(path.join(out,"ai-v21-appwide-context-help.js"),appWideJs);
+const liveBridgePath=path.join(__dirname,"ai-v21-connected-chat-bridge.js");
+const liveBridge=fs.readFileSync(liveBridgePath,"utf8");
+assert.ok(liveBridge.includes("explicit") &&
+  liveBridge.includes("__ICLUB_AI_QA_LIVE_BRIDGE__") &&
+  liveBridge.includes("credentials:\"omit\"") &&
+  !liveBridge.includes("localStorage.setItem") &&
+  !liveBridge.includes("SUPABASE_SERVICE_ROLE_KEY"),
+  "Never persist JWTs or embed service_role in Preview");
+fs.writeFileSync(path.join(out,"ai-v21-connected-chat-bridge.js"),liveBridge);
+assert.equal(html.split("</body>").length,2);
+html=html.replace("</body>",
+  '<script src="ai-v21-connected-chat-bridge.js"></script>\\n</body>');
+
 // Defense-in-depth: local static servers do not set Vercel response headers.
 // Inject the *same* CSP as an early meta element before every script or link.
 const vercel=JSON.parse(fs.readFileSync(path.join(root,"vercel.json"),"utf8"));
 const csp=vercel.headers?.[0]?.headers?.find(h=>
   h.key.toLowerCase()==="content-security-policy")?.value;
-assert.ok(csp && csp.includes("connect-src 'none'") &&
-  csp.includes("form-action 'none'"),"Missing mandatory no-network CSP");
+assert.ok(csp && csp.includes("connect-src https://mmmduffgpvwjdpruzikw.supabase.co") &&
+  csp.includes("form-action 'none'") &&
+  !csp.includes("connect-src *"),
+  "Connected QA CSP must allow Supabase ONLY, not arbitrary network");
 assert.equal(html.split("<head>").length,2,"Unexpected HTML head structure");
 const htmlAttr=String(csp).replaceAll("&","&amp;").replaceAll('"',"&quot;");
 html=html.replace("<head>",
@@ -140,4 +155,4 @@ fs.copyFileSync(path.join(__dirname,"ai-v21-real-preview-fixture.js"),
   path.join(out,"ai-v21-real-preview-fixture.js"));
 assert.ok(!html.includes("cdn.jsdelivr.net/npm/@supabase/"),"SDK must be absent");
 assert.ok(html.includes('src="app.js?'),"Real product runtime must remain");
-console.log("ICLUB_AI_REAL_APP_PREVIEW_BUILD_GREEN: original app shell, offline synthetic data, no production writes");
+console.log("ICLUB_AI_REAL_APP_PREVIEW_BUILD_GREEN: original synthetic academic screens; optional signed-in operator QA calls only");
