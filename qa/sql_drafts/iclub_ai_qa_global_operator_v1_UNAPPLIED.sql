@@ -2,7 +2,7 @@
 -- Mathematics Exam Prep, Practice AI and all learner data.
 -- Default: no enabled users and no paid requests.
 CREATE TABLE IF NOT EXISTS private.iclub_ai_qa_global_operator_v1 (
- user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE RESTRICT,
+ user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
  enabled boolean NOT NULL DEFAULT false,
  admitted_at timestamptz NOT NULL DEFAULT now(),
  note text NOT NULL DEFAULT 'approved operator QA only'
