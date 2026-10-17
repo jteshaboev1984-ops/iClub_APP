@@ -164,6 +164,11 @@ jobs:
           trap 'dropdb -w --if-exists "$pilot_db"; dropdb -w --if-exists "$money_db"; dropdb -w --if-exists "$db"' EXIT
           psql -X -w -v ON_ERROR_STOP=1 -d "$pilot_db" -f qa/sql_drafts/iclub_ai_paid_canary_v1_local_pg.psql
           echo 'QA standalone operator-only funded canary: lifetime and concurrency limits GREEN'
+          gate_db=iclub_ai_v21_scratch_app_operators
+          createdb -w "$gate_db"
+          trap 'dropdb -w --if-exists "$gate_db"; dropdb -w --if-exists "$pilot_db"; dropdb -w --if-exists "$money_db"; dropdb -w --if-exists "$db"' EXIT
+          psql -X -w -v ON_ERROR_STOP=1 -d "$gate_db" -f qa/sql_drafts/iclub_ai_qa_global_operator_v1_local_pg.psql
+          echo 'QA real app AI operator allowlist and money kill switch GREEN'
 
   real-http-postgres-resolver:
     if: github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012'
