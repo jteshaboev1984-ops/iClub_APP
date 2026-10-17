@@ -98,6 +98,9 @@
   }
  }
  function attach(){
+  // Shared synthetic Preview: no registration, live-model controls or Auth writes.
+  // A signed-in operator test, if later authorized, must use a distinct vetted shell.
+  if(window.__ICLUB_AI_QA_PREVIEW__?.syntheticIdentity)return;
   const h=head();if(!h||ui())return;
   const bar=document.createElement("div");bar.id="iclub-ai-qa-live-connect";
   bar.setAttribute("role","status");
