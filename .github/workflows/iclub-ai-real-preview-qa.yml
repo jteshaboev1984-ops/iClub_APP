@@ -28,6 +28,9 @@ on:
       - 'qa/sql_drafts/iclub_ai_v21_provider_spend_*'
       - 'qa/sql_drafts/iclub_ai_paid_canary_v1*'
       - 'qa/funded_canary_edge/**'
+      - 'qa/ai_live_gateway_v1/**'
+      - 'qa/ai-v21-connected-chat-bridge.js'
+      - 'qa/sql_drafts/iclub_ai_qa_global_operator_v1_UNAPPLIED.sql'
       - 'qa/ai-layer-v21-provider-spend-sql.test.cjs'
       - 'global-ai-ui.js'
       - 'global-ai-ui.css'
@@ -90,6 +93,8 @@ jobs:
           set -euo pipefail
           deno test --no-check             qa/edge_v21/context_core_test.ts             qa/edge_v21/practice_resolver_http_test.ts             qa/edge_v21/supabase_services_test.ts
           deno check qa/funded_canary_edge/index.ts
+          deno check qa/ai_live_gateway_v1/index.ts
+          deno test qa/ai_live_gateway_v1/policy_test.ts
           deno eval 'import {upperCost,MAX_OUTPUT_TOKENS} from "./qa/funded_canary_edge/policy.ts"; if (upperCost(4096,MAX_OUTPUT_TOKENS)===null || upperCost(1000000,1)!==null) throw Error("paid canary token envelope unsafe");'
       - name: Browser test on loopback network only
         run: |
