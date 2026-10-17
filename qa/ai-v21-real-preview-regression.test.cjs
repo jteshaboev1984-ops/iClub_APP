@@ -254,3 +254,15 @@ test("CSS safeguards active Practice and Tour, and no accidental product logo as
   assert.match(js,/state\.contextEpoch === sentContextEpoch/);
   assert.match(js,/state\.threads\.clear\(\)/);
 });
+
+test("existing Mathematics beta authentication never creates a new Supabase account",()=>{
+  const bridge=read("qa/ai-v21-connected-chat-bridge.js");
+  assert.match(bridge,/auth\?\.getSession/);
+  assert.match(bridge,/syntheticIdentity/);
+  assert.match(bridge,/qa-fixture/);
+  assert.match(bridge,/Explicit click only/);
+  assert.doesNotMatch(bridge,/\/auth\/v1\/signup|signInAnonymously\s*\(|signUp\s*\(|password\s*[:=]/i);
+  assert.doesNotMatch(bridge,/localStorage\.(setItem|getItem)|sessionStorage\.(setItem|getItem)/);
+  assert.match(bridge,/credentials:"omit"/);
+  assert.match(bridge,/qa_access_not_approved/);
+});
