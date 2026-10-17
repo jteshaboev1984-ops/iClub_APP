@@ -135,7 +135,7 @@ assert.ok(liveBridge.includes("Explicit click only") &&
 fs.writeFileSync(path.join(out,"ai-v21-connected-chat-bridge.js"),liveBridge);
 assert.equal(html.split("</body>").length,2);
 html=html.replace("</body>",
-  '<script src="ai-v21-connected-chat-bridge.js"></script>\\n</body>');
+  '<script src="ai-v21-connected-chat-bridge.js"></script>\n</body>');
 
 // Defense-in-depth: local static servers do not set Vercel response headers.
 // Inject the *same* CSP as an early meta element before every script or link.
