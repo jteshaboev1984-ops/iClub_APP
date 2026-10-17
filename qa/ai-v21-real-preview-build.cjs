@@ -126,7 +126,7 @@ html=html.replace("</body>",
 fs.writeFileSync(path.join(out,"ai-v21-appwide-context-help.js"),appWideJs);
 const liveBridgePath=path.join(__dirname,"ai-v21-connected-chat-bridge.js");
 const liveBridge=fs.readFileSync(liveBridgePath,"utf8");
-assert.ok(liveBridge.includes("explicit") &&
+assert.ok(liveBridge.includes("Explicit click only") &&
   liveBridge.includes("__ICLUB_AI_QA_LIVE_BRIDGE__") &&
   liveBridge.includes("credentials:\"omit\"") &&
   !liveBridge.includes("localStorage.setItem") &&
