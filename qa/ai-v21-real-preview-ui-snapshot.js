@@ -803,6 +803,8 @@
     if (status) {
       const t = introCopy();
       status.textContent = state.usageExhausted ? t.limits :
+        window.__ICLUB_AI_QA_LIVE_BRIDGE__?.ready?.() === true ?
+          "Настоящий AI · закрытый тест" :
         window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true ? t.demo :
         state.bootstrap?.visible === true ? t.online : t.offline;
     }
