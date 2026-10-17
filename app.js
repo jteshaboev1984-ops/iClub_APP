@@ -18162,7 +18162,7 @@ try {
     // Show difficulty for governed Economics Gen2 Practice and Tour questions if reused in Practice.
     // Do not expose a Tour-only difficulty badge during the competitive Tour itself.
     const ecoRef = String(q.book_ref || q.bookReference || "");
-    const isUnratedEconomicsGen2 = ecoRef.startsWith("EC9708:G2:") && !/^EC9708:G2:EC9708-G2-T[1-7]-(?:P|T)-[0-9]{3}(?:-V2)?$/.test(ecoRef);
+    const isUnratedEconomicsGen2 = ecoRef.startsWith("EC9708:G2:") && !/^EC9708:G2:EC9708-G2-T[1-7]-(?:P|T)-[0-9]{3}(?:-V[1-9]\d*)?$/.test(ecoRef);
     if (!isUnratedEconomicsGen2) {
       const diff = document.createElement("div");
       diff.className = "muted small";
