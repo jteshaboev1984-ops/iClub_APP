@@ -270,7 +270,7 @@
   // A permanent visible QA label prevents any suggestion that these are live student results.
   const label=document.createElement("div");
   label.id="iclub-ai-qa-notice";
-  label.textContent="iClub AI · защищённый тестовый Preview · данные не сохраняются";
+  label.textContent="iClub AI · тестовый Preview · оценки и учебный прогресс не изменяются";
   label.setAttribute("role","note");
   label.style.cssText="position:fixed;z-index:1000;left:12px;top:env(safe-area-inset-top,0px);max-width:calc(100% - 24px);padding:5px 10px;border-radius:0 0 12px 12px;background:#153b70;color:#fff;font:600 11px/1.4 system-ui,sans-serif;pointer-events:none;box-shadow:0 2px 8px #13284833";
   const put=()=>document.body?.appendChild(label);
