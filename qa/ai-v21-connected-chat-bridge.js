@@ -51,13 +51,19 @@
   connecting=true;update();
   try{
    if(!token){
-    // Explicit click only. Creates an ephemeral Supabase Auth QA identity,
-    // never stores a password or JWT in localStorage/cookies.
-    const response=await requestJson("/auth/v1/signup",{data:{qa_ai_pilot:true}},null);
-    const data=response.body;
-    if(response.status>=300||!data?.access_token||!data?.user?.id)
-     throw Error("Временная тестовая авторизация недоступна.");
-    token=data.access_token;userId=String(data.user.id);
+    // Explicit click only. Reuse an EXISTING verified iClub Auth session.
+    // Never sign up an anonymous user, paste a token, or import student data.
+    const client=window.sb;
+    const sessionResult=await client?.auth?.getSession?.();
+    const session=sessionResult?.data?.session||null;
+    const id=String(session?.user?.id||"");
+    const jwt=String(session?.access_token||"");
+    const isSynthetic=id===String(window.__ICLUB_AI_QA_PREVIEW__?.syntheticIdentity||"") ||
+      session?.user?.app_metadata?.provider==="qa-fixture";
+    if(isSynthetic||!(/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(id))||
+       !/^eyJ[A-Za-z0-9_-]{10,}\./.test(jwt)||jwt.length>4000)
+     throw Error("Нужна действующая сессия существующего beta-аккаунта iClub. Тестовый Preview не создаёт аккаунты.");
+    token=jwt;userId=id;
    }
    const response=await requestJson("/functions/v1/iclub-ai-qa-global",{intent:"status"});
    eligible=response.status===200&&response.body?.eligible===true;
