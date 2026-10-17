@@ -138,6 +138,8 @@ async function main(){
     assert.deepEqual([initial.users,initial.answers],[0,0],
       "opening iClub AI must NEVER generate a message");
     assert.match(initial.status,/Демо/);
+    assert.equal(await client.evaluate("document.getElementById('iclub-ai-qa-live-connect')===null"),true,
+      "Shared synthetic preview must not offer unusable live-account registration");
     assert.match(initial.info,/не меняет оценки или прогресс/);
     assert.equal(initial.welcomeHidden,true,"launch tip disappears on opening");
 
