@@ -93,7 +93,7 @@ test("Vercel Preview blocks external network and indexing at response level",()=
   assert.equal(vercel.buildCommand,"node qa/ai-v21-real-preview-build.cjs");
   assert.equal(vercel.outputDirectory,"qa/ai-v21-real-preview-dist");
   const headers=Object.fromEntries(vercel.headers[0].headers.map(x=>[x.key.toLowerCase(),x.value]));
-  assert.match(headers["content-security-policy"],/connect-src 'none'/);
+  assert.match(headers["content-security-policy"],/connect-src https:\/\/mmmduffgpvwjdpruzikw\.supabase\.co/);
   assert.match(headers["content-security-policy"],/form-action 'none'/);
   assert.match(headers["content-security-policy"],/frame-src 'none'/);
   assert.match(headers["content-security-policy"],/object-src 'none'/);
@@ -135,7 +135,7 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
   assert.equal(output,expected);
   assert.doesNotMatch(output,/cdn\.jsdelivr\.net\/npm\/@supabase/);
   assert.match(output,/<meta http-equiv="Content-Security-Policy"/);
-  assert.match(output,/connect-src 'none'/);
+  assert.match(output,/connect-src https:\/\/mmmduffgpvwjdpruzikw\.supabase\.co/);
   assert.ok(fs.existsSync(path.join(dist,"logo.png")),"Real app logo is preserved elsewhere");
   for(const banned of ["supabase","docs","qa",".github"]){
     assert.equal(fs.existsSync(path.join(dist,banned)),false,banned);
@@ -153,6 +153,11 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
   assert.equal(fs.readFileSync(path.join(dist,"ai-v21-appwide-context-help.js"),"utf8"),
     read("qa/ai-v21-appwide-context-help.js"));
   assert.match(output,/src="ai-v21-appwide-context-help.js"/);
+  assert.equal(fs.readFileSync(path.join(dist,"ai-v21-connected-chat-bridge.js"),"utf8"),
+    read("qa/ai-v21-connected-chat-bridge.js"));
+  assert.match(output,/src="ai-v21-connected-chat-bridge.js"/);
+  assert.doesNotMatch(read("qa/ai-v21-connected-chat-bridge.js"),/localStorage\.setItem\s*\(/);
+  assert.doesNotMatch(read("qa/ai-v21-connected-chat-bridge.js"),/SUPABASE_SERVICE_ROLE_KEY/);
   assert.equal(fs.readFileSync(path.join(dist,"ai-v21-preview-typed-app-help.js"),"utf8"),
     read("qa/ai-v21-preview-typed-app-help.js"));
   assert.match(output,/src="ai-v21-preview-typed-app-help.js"/);
