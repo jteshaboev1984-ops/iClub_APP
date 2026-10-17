@@ -131,7 +131,8 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
       vercel.headers[0].headers.find(h=>h.key==="Content-Security-Policy").value
        .replaceAll("&","&amp;").replaceAll('"',"&quot;")+'">')
     .replace("</body>",'<script src="ai-v21-real-preview-demo.js"></script>\n</body>')
-    .replace("</body>",'<script src="ai-v21-appwide-context-help.js"></script>\n</body>');
+    .replace("</body>",'<script src="ai-v21-appwide-context-help.js"></script>\n</body>')
+    .replace("</body>",'<script src="ai-v21-connected-chat-bridge.js"></script>\n</body>');
   assert.equal(output,expected);
   assert.doesNotMatch(output,/cdn\.jsdelivr\.net\/npm\/@supabase/);
   assert.match(output,/<meta http-equiv="Content-Security-Policy"/);
