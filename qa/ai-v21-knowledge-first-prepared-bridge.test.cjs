@@ -142,6 +142,7 @@ test("No source, entitlement or active exam means no prepared text, no debit",as
   a.equal(x.state.units,0,field);
   a.equal(x.state.chargeCalls,0,field);
   a.equal(x.state.providerCalls,0,field);
+  if(field==="protected")a.equal(r.body.state,"hidden");
  }
 });
 test("Independent server source must match the Knowledge First source ID",async()=>{

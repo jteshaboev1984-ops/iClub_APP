@@ -43,6 +43,8 @@ function createPreparedKnowledgeFirstQaBridge({knowledge,services,allowedOrigins
      locale:body.appLocale,intent:"practice_card",promptKey:"explain_error"
     });
    }catch{return denied(body.appLocale);}
+   // An active protected assessment must remain fully hidden, not advertise help.
+   if(proof?.reason==="active_assessment")return denied(body.appLocale,"hidden");
    // The metadata proof cannot itself release content or grant a new plan.
    if(proof?.ok!==true||proof.reason!=="qa_source_verified"||
       proof.route!=="practice_card"||proof.releaseAllowed!==false||
