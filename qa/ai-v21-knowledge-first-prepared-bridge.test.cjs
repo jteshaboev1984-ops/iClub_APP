@@ -14,7 +14,11 @@ function rig(){
  const state={active:true,protected:false,rights:true,source:true,
   edgeRelease:true,edgeSource:SOURCE,auth:true,units:0,
   attempts:new Map(),claims:new Map(),providerCalls:0,bundleCalls:0,
-  chargeCalls:0,contentRevokedDuringBundle:false};
+  chargeCalls:0,contentRevokedDuringBundle:false,
+  answerState:"incorrect",missingIncorrectProof:false,
+  editorVersion:"v1",editorHash:HASH,editorRevision:1,
+  edgeVersion:"v1",edgeHash:HASH,edgeRevision:1,
+  changeOnReserve:null,bundleVariantMismatch:null};
  const deadline=Date.now()+60000;
  const auth=async authorization=>authorization===TOKEN&&state.auth?
   {authenticated:true,userId:OWNER,proof:"verified_supabase_auth_v1"}:null;
@@ -22,14 +26,16 @@ function rig(){
   ownerId:OWNER,contextHandle:CTX,revision:5,expiresAtMs:deadline,
   locale:"ru",screenCode:"practice-review",scopeCode:"global",
   subjectKey:"biology",finalized:true,ownsAnsweredQuestion:true,
-  questionId:42,assessmentActive:false});
+  questionId:42,assessmentActive:false,
+  confirmedIncorrectAnswer:!state.missingIncorrectProof});
  const card={locale:"ru",subject_key:"biology",question_id:42,
   card_type:"answer_explanation",source_card_key:SOURCE,
   content_hash:HASH,source_version:"v1",
   body_text:"Verified prepared original QA text for a finalized answer."};
  const readers={
   authenticate:auth,nowMs:()=>Date.now(),
-  readCurrentScope:async()=>state.active?screen():null,
+  // The synthetic server mimics SQL refusing a correct or unanswered item.
+  readCurrentScope:async()=>state.active&&state.answerState==="incorrect"?screen():null,
   readProtected:async()=>({proof:"owner_bound_assessment_guard_v1",
    ownerId:OWNER,contextRevision:5,protected:state.protected}),
   verifySubjectRights:async()=>({proof:"server_entitlement_v1",
@@ -39,7 +45,9 @@ function rig(){
   readApprovedSource:async()=>({
    approved:state.source,rightsApproved:true,runtimeAllowed:true,
    contentApproved:true,conflict:false,qaPassed:true,locale:"ru",
-   subjectKey:"biology",sourceKey:SOURCE,cardHash:HASH,contentVersion:"v1"})
+   subjectKey:"biology",sourceKey:SOURCE,
+   cardHash:state.editorHash,contentVersion:state.editorVersion,
+   publicationRevision:state.editorRevision})
  };
  const base=createKnowledgeFirstReadOnlyGate(readers);
  const knowledge={__syntheticQaOnly:true,resolve:base.resolve};
@@ -60,11 +68,13 @@ function rig(){
   isRolloutAuthorized:async()=>state.rights,
   getPublishedRelease:async ref=>state.edgeRelease?({
    ready:true,...ref,source_id:state.edgeSource,
-   source_version:"v1",source_hash:HASH,revision:1}):null,
+   source_version:state.edgeVersion,source_hash:state.edgeHash,
+   revision:state.edgeRevision}):null,
   getLiveSourceProof:async ref=>({
    ...ref,approved:state.source,rightsApproved:true,
    runtimeAllowed:true,sourceConflict:false,
-   source_id:state.edgeSource,source_version:"v1",source_hash:HASH}),
+   source_id:state.edgeSource,source_version:state.edgeVersion,
+   source_hash:state.edgeHash}),
   getPolicy:async()=>"free_qa_v2",
   getSourceBundle:async bound=>{
    state.bundleCalls++;
@@ -72,7 +82,8 @@ function rig(){
    return{approved:true,rightsApproved:true,integrityVerified:true,
     qaPassed:true,runtimeAllowed:true,conflict:false,
     sourceId:bound.sourceId,sourceVersion:bound.sourceVersion,
-    sourceHash:bound.sourceHash,revision:bound.revision,
+    sourceHash:state.bundleVariantMismatch==="hash"?"b".repeat(64):bound.sourceHash,
+    revision:state.bundleVariantMismatch==="revision"?bound.revision+1:bound.revision,
     variants:{explain_error:"Reviewed exact prepared QA explanation for the answered question."}};
   },
   providerBudgetAllows:async()=>false,
@@ -87,6 +98,10 @@ function rig(){
    if(state.units>=3)return{allowed:false,reason:"route_insufficient"};
    state.units++;
    state.attempts.set(req.requestId,{...req,status:"reserved"});
+   if(state.changeOnReserve==="version")state.edgeVersion="v2";
+   if(state.changeOnReserve==="hash")state.edgeHash="b".repeat(64);
+   if(state.changeOnReserve==="revision")state.edgeRevision=2;
+   if(state.changeOnReserve==="correct")state.answerState="correct";
    return{allowed:true};
   },
   claimDelivery:async req=>{
@@ -133,6 +148,7 @@ test("Knowledge First exact verified Practice source -> existing server prepared
  a.equal(x.state.attempts.get(RID).status,"completed");
  a.equal(x.state.providerCalls,0);
  a.equal(x.state.bundleCalls,1);
+ a.equal(x.state.chargeCalls,1);
 });
 test("No source, entitlement or active exam means no prepared text, no debit",async()=>{
  for(const field of ["source","rights","active","protected"]){
@@ -175,4 +191,47 @@ test("Replay, generated questions and browser-forged academic fields are refused
  }
  a.equal((await rig().call({}, {origin:"https://prod.invalid"})).status,403);
  a.equal((await rig().call({}, {authorization:"Bearer stolen"})).body.ok,false);
+});
+test("Correct, unanswered and ungraded Practice cannot become AI error explanations",async()=>{
+ for(const answerState of ["correct","unanswered","unknown"]){
+  const x=rig();x.state.answerState=answerState;
+  const r=await x.call();
+  a.notEqual(r.body.ok,true,answerState);
+  a.equal(x.state.bundleCalls,0,answerState);
+  a.equal(x.state.units,0,answerState);
+  a.equal(x.state.chargeCalls,0,answerState);
+  a.equal(x.state.providerCalls,0,answerState);
+ }
+ const missing=rig();missing.state.missingIncorrectProof=true;
+ a.equal((await missing.call()).body.ok,false);
+ a.equal(missing.state.units,0);
+});
+test("All four source attributes must match independent publication and bundle",async()=>{
+ for(const key of ["version","hash","revision"]){
+  const x=rig();
+  if(key==="version")x.state.edgeVersion="v2";
+  if(key==="hash")x.state.edgeHash="b".repeat(64);
+  if(key==="revision")x.state.edgeRevision=2;
+  const r=await x.call();
+  a.notEqual(r.body.ok,true,key);
+  a.equal(x.state.bundleCalls,0,key);
+  a.equal(x.state.units,0,key);
+ }
+ for(const key of ["hash","revision"]){
+  const x=rig();x.state.bundleVariantMismatch=key;
+  const r=await x.call();
+  a.notEqual(r.body.ok,true,key);
+  a.equal(x.state.units,0,key);
+ }
+});
+test("Wrong answer and version/hash/revision revocation after quota reserve refunds",async()=>{
+ for(const key of ["correct","version","hash","revision"]){
+  const x=rig();x.state.changeOnReserve=key;
+  const r=await x.call();
+  a.notEqual(r.body.ok,true,key);
+  a.equal(x.state.attempts.get(RID)?.status,"released",key);
+  a.equal(x.state.units,0,key);
+  a.equal(x.state.providerCalls,0,key);
+  a.equal(x.state.chargeCalls,1,key);
+ }
 });

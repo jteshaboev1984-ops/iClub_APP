@@ -47,26 +47,52 @@ function createPreparedKnowledgeFirstQaBridge({knowledge,services,allowedOrigins
    if(proof?.reason==="active_assessment")return denied(body.appLocale,"hidden");
    // The metadata proof cannot itself release content or grant a new plan.
    if(proof?.ok!==true||proof.reason!=="qa_source_verified"||
-      proof.route!=="practice_card"||proof.releaseAllowed!==false||
+      proof.route!=="practice_card"||
+      proof.confirmedIncorrectAnswer!==true||proof.releaseAllowed!==false||
       proof.providerCalled!==false||proof.billed!==false||
       typeof proof.sourceKey!=="string"||
-      !/^[A-Za-z0-9][A-Za-z0-9:_-]{7,119}$/.test(proof.sourceKey))
+      !/^[A-Za-z0-9][A-Za-z0-9:_-]{7,119}$/.test(proof.sourceKey)||
+      typeof proof.sourceVersion!=="string"||
+      !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,119}$/.test(proof.sourceVersion)||
+      typeof proof.sourceHash!=="string"||
+      !/^[a-f0-9]{64}$/.test(proof.sourceHash)||
+      !Number.isSafeInteger(proof.publicationRevision)||
+      proof.publicationRevision<1)
     return denied(body.appLocale);
-   const pinnedSource=proof.sourceKey;
+   const pinnedSource=Object.freeze({
+    id:proof.sourceKey,version:proof.sourceVersion,
+    hash:proof.sourceHash,revision:proof.publicationRevision
+   });
+   // Same identifier with a changed payload, locale version or republished
+   // editorial revision cannot cross the knowledge-to-delivery handoff.
+   const matchesRelease=row=>row?.source_id===pinnedSource.id&&
+    row.source_version===pinnedSource.version&&
+    row.source_hash===pinnedSource.hash&&
+    row.revision===pinnedSource.revision;
+   const matchesProof=row=>row?.source_id===pinnedSource.id&&
+    row.source_version===pinnedSource.version&&
+    row.source_hash===pinnedSource.hash;
+   const matchesBundle=bundle=>bundle?.sourceId===pinnedSource.id&&
+    bundle.sourceVersion===pinnedSource.version&&
+    bundle.sourceHash===pinnedSource.hash&&
+    bundle.revision===pinnedSource.revision;
    const pinned={
     ...services,
     getPublishedRelease:async ref=>{
      const row=await services.getPublishedRelease(ref);
-     return row?.source_id===pinnedSource?row:null;
+     return matchesRelease(row)?row:null;
     },
     getLiveSourceProof:async ref=>{
      const result=await services.getLiveSourceProof(ref);
-     return result?.source_id===pinnedSource?result:null;
+     return matchesProof(result)?result:null;
     },
     getSourceBundle:async args=>{
-     if(args.sourceId!==pinnedSource)return null;
+     if(args.sourceId!==pinnedSource.id||
+        args.sourceVersion!==pinnedSource.version||
+        args.sourceHash!==pinnedSource.hash||
+        args.revision!==pinnedSource.revision)return null;
      const bundle=await services.getSourceBundle(args);
-     return bundle?.sourceId===pinnedSource?bundle:null;
+     return matchesBundle(bundle)?bundle:null;
     }
    };
    // CandidateEdgeRequest independently reauthenticates and rechecks current
