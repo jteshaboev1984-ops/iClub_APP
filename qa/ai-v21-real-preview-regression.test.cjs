@@ -255,14 +255,18 @@ test("CSS safeguards active Practice and Tour, and no accidental product logo as
   assert.match(js,/state\.threads\.clear\(\)/);
 });
 
-test("existing Mathematics beta authentication never creates a new Supabase account",()=>{
+test("isolated Preview Auth profile is opt-in and never copies learner access",()=>{
   const bridge=read("qa/ai-v21-connected-chat-bridge.js");
-  assert.match(bridge,/auth\?\.getSession/);
-  assert.match(bridge,/syntheticIdentity/);
-  assert.match(bridge,/qa-fixture/);
   assert.match(bridge,/Explicit click only/);
-  assert.doesNotMatch(bridge,/\/auth\/v1\/signup|signInAnonymously\s*\(|signUp\s*\(|password\s*[:=]/i);
-  assert.doesNotMatch(bridge,/localStorage\.(setItem|getItem)|sessionStorage\.(setItem|getItem)/);
+  assert.match(bridge,/button\.addEventListener\("click"/);
+  assert.match(bridge,/requestJson\("\/auth\/v1\/signup"/);
+  assert.match(bridge,/iclub_global_ai_preview_pilot:"v1"/);
+  assert.match(bridge,/no_academic_data:true/);
+  assert.match(bridge,/sessionStorage\.setItem\(SESSION_KEY/);
   assert.match(bridge,/credentials:"omit"/);
   assert.match(bridge,/qa_access_not_approved/);
+  assert.doesNotMatch(bridge,/window\.sb\.auth|localStorage\.setItem|SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(bridge,/ru:\{live:/);
+  assert.match(bridge,/uz:\{live:/);
+  assert.match(bridge,/en:\{live:/);
 });
