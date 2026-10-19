@@ -142,10 +142,10 @@
   const h=head();if(!h||ui())return;
   const bar=document.createElement("div");bar.id="iclub-ai-qa-live-connect";
   bar.setAttribute("role","status");
-  bar.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;border-bottom:1px solid #e4ecf8;background:#f8faff;font:500 11px/1.4 system-ui;color:#456388";
+  bar.style.cssText="display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:10px 14px;border-bottom:1px solid #e4ecf8;background:#f8faff;font:500 12px/1.5 system-ui;color:#456388";
   const span=document.createElement("span");span.setAttribute("data-qa-pilot-state","");
   const button=document.createElement("button");button.type="button";
-  button.style.cssText="border:1px solid #d4e2f4;background:white;border-radius:9px;padding:6px 8px;font:600 11px system-ui;color:#285fad;white-space:nowrap;cursor:pointer";
+  button.style.cssText="align-self:flex-end;max-width:100%;border:1px solid #d4e2f4;background:white;border-radius:10px;padding:8px 12px;font:600 12px system-ui;color:#285fad;white-space:normal;cursor:pointer";
   button.addEventListener("click",()=>{void connect();});
   bar.append(span,button);h.insertAdjacentElement("afterend",bar);update();
  }
