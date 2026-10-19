@@ -62,7 +62,7 @@ function scenario({subject="biology",surface="lesson",locale="ru",ready=true}:
   state.logs.push({endpoint,args});
   if(endpoint.endsWith("/auth/v1/user")){
    return state.authOn&&new Headers(init?.headers).get("authorization")===JWT?
-     Response.json({id:state.authenticatedUser}):
+     Response.json({id:state.authenticatedUser,role:"authenticated",aud:"authenticated"}):
      Response.json({error:"unavailable"},{status:401});
   }
   if(endpoint.includes("/rest/v1/subjects")){
