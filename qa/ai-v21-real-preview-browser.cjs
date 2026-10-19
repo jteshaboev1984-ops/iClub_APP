@@ -138,8 +138,14 @@ async function main(){
     assert.deepEqual([initial.users,initial.answers],[0,0],
       "opening iClub AI must NEVER generate a message");
     assert.match(initial.status,/Демо/);
-    assert.equal(await client.evaluate("document.getElementById('iclub-ai-qa-live-connect')===null"),true,
-      "Shared synthetic preview must not offer unusable live-account registration");
+    await client.until("!!document.getElementById('iclub-ai-qa-live-connect')",
+      "Voluntary isolated test access visible only when AI panel opens");
+    assert.equal(await client.evaluate(
+      "document.querySelector('#iclub-ai-qa-live-connect button')?.textContent"),"Создать тестовый доступ");
+    assert.equal(await client.evaluate(
+      "document.querySelector('#iclub-ai-qa-live-connect [data-qa-pilot-state]')?.textContent.includes('Ваши оценки и прогресс не используются')"),true);
+    assert.equal(client.network.some(r=>r.url.includes('/auth/v1/signup')),false,
+      "Opening Preview alone must never create a Supabase Auth user");
     assert.match(initial.info,/не меняет оценки или прогресс/);
     assert.equal(initial.welcomeHidden,true,"launch tip disappears on opening");
 
