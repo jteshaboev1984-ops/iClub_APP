@@ -138,12 +138,12 @@ async function main(){
     assert.deepEqual([initial.users,initial.answers],[0,0],
       "opening iClub AI must NEVER generate a message");
     assert.match(initial.status,/Демо/);
-    await client.until("!!document.getElementById('iclub-ai-qa-live-connect')",
-      "Voluntary isolated test access visible only when AI panel opens");
     assert.equal(await client.evaluate(
-      "document.querySelector('#iclub-ai-qa-live-connect button')?.textContent"),"Создать тестовый доступ");
+      "document.getElementById('iclub-ai-qa-live-connect')===null"),true,
+      "Free first-party Help must not offer paid trial registration");
     assert.equal(await client.evaluate(
-      "document.querySelector('#iclub-ai-qa-live-connect [data-qa-pilot-state]')?.textContent.includes('Ваши оценки и прогресс не используются')"),true);
+      "window.__ICLUB_AI_QA_LIVE_BRIDGE__===undefined"),true,
+      "Free Preview must not mount the paid provider bridge");
     assert.equal(client.network.some(r=>r.url.includes('/auth/v1/signup')),false,
       "Opening Preview alone must never create a Supabase Auth user");
     assert.match(initial.info,/не меняет оценки или прогресс/);
@@ -331,7 +331,7 @@ async function main(){
     // only. Choosing an offered question is the sole trigger for an answer.
     const appScreens=[
       ["courses","all-subjects","Откройте Study","general"],
-      ["courses","subject-hub","В выбранном предмете","biology"],
+      ["courses","subject-hub","Чтобы изучать предмет","biology"],
       ["courses","video","Видео-уроки","biology"],
       ["courses","tours","Во время активного тура","biology"],
       ["courses","books","Книги","biology"],
