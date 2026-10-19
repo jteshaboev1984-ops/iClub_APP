@@ -22,15 +22,13 @@
     region:"Ташкент",district:"",subjects:QA_SUBJECTS,
     telegram:{id:null,username:null,first_name:"Демо",last_name:""}
   };
-  // This origin is an isolated immutable Vercel Preview; no real credentials are read.
-  for (const key of Object.keys(localStorage)) {
-    if (/^sb-.*-auth-token$/.test(key)) localStorage.removeItem(key);
-  }
+  // This origin is a protected synthetic Preview; preserve existing storage
+  // even when it contains unrelated keys. The fixture never reads Auth tokens.
   if (!localStorage.getItem("iclub_profile_v1")) {
     localStorage.setItem("iclub_profile_v1", JSON.stringify(profile));
   }
   window.__ICLUB_AI_QA_PREVIEW__ = Object.freeze({
-    offline:true,noProductionWrites:true,optInIsolatedAuth:true,syntheticIdentity:QA_UID
+    offline:true,noProductionWrites:true,optInIsolatedAuth:false,syntheticIdentity:QA_UID
   });
   const user = {id:QA_UID,role:"authenticated",app_metadata:{provider:"qa-fixture"},user_metadata:{}};
   const session = {user,access_token:"QA_ONLY_NOT_A_JWT",expires_at:4102444800};
@@ -157,8 +155,11 @@
         video:"Video lessons for the selected subject are found under Video. In the current app some materials may open through Telegram. A topic-specific AI explanation requires an approved academic source."
       }
     }[lang];
-    if (["practice-quiz","tour-quiz"].includes(screen)) return {
+    if (["practice-quiz","tour-quiz","exam-prep","exam_prep_assessment"].includes(screen)) return {
       ok:false, reason:"active_assessment",academic_state_changed:false
+    };
+    if (body?.scope_code==="exam_prep" || screen==="exam_prep_skill") return {
+      ok:false, reason:"in_development",academic_state_changed:false
     };
     const response=(message,ok=true,reason="")=>({
       ok,reason,message,academic_state_changed:false,
@@ -245,10 +246,8 @@
     functions:{
       invoke:async(name,{body}={})=>{
         if(name!=="global-ai")return blocked();
-        // Opt-in operator QA session can call the actual, money-gated model.
-        // The rest of the app remains synthetic, including ALL grades and
-        // Practice/Tour results. Legacy Exam Prep remains untouched.
-        // Free, approved iClub guidance is resolved locally before any provider route.
+        // Free, approved iClub guidance only. No Auth signup, production
+        // calls or academic writes; the old separate QA trial is not mounted.
         if(body?.prompt_key==="practice_error" &&
            window.__ICLUB_AI_QA_DEMO__?.ready?.()===true){
           // QA-local prepared text, NOT a model generation. A short response

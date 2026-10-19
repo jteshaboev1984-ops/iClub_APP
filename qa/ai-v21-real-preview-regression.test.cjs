@@ -93,7 +93,7 @@ test("Vercel Preview blocks external network and indexing at response level",()=
   assert.equal(vercel.buildCommand,"node qa/ai-v21-real-preview-build.cjs");
   assert.equal(vercel.outputDirectory,"qa/ai-v21-real-preview-dist");
   const headers=Object.fromEntries(vercel.headers[0].headers.map(x=>[x.key.toLowerCase(),x.value]));
-  assert.match(headers["content-security-policy"],/connect-src https:\/\/mmmduffgpvwjdpruzikw\.supabase\.co/);
+  assert.match(headers["content-security-policy"],/connect-src 'none'/);
   assert.match(headers["content-security-policy"],/form-action 'none'/);
   assert.match(headers["content-security-policy"],/frame-src 'none'/);
   assert.match(headers["content-security-policy"],/object-src 'none'/);
@@ -135,7 +135,7 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
   assert.equal(output,expected);
   assert.doesNotMatch(output,/cdn\.jsdelivr\.net\/npm\/@supabase/);
   assert.match(output,/<meta http-equiv="Content-Security-Policy"/);
-  assert.match(output,/connect-src https:\/\/mmmduffgpvwjdpruzikw\.supabase\.co/);
+  assert.match(output,/connect-src 'none'/);
   assert.ok(fs.existsSync(path.join(dist,"logo.png")),"Real app logo is preserved elsewhere");
   for(const banned of ["supabase","docs","qa",".github"]){
     assert.equal(fs.existsSync(path.join(dist,banned)),false,banned);

@@ -91,7 +91,8 @@
      ![null,undefined,""].includes(body.prompt_key))return null;
   if(!LOCALES.includes(body.locale))return null;
   if(!["global","",undefined].includes(body.scope_code))return null;
-  if(["practice-quiz","tour-quiz","exam_prep_skill"].includes(body.screen_code))
+  if(["practice-quiz","tour-quiz","exam_prep_skill",
+      "exam-prep","exam_prep_assessment"].includes(body.screen_code))
    return null;
   const q=normalize(body.user_text);
   if(!q)return null;

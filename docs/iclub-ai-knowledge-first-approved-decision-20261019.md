@@ -23,3 +23,7 @@ Preview отправлял любой запрос через `__ICLUB_AI_QA_LIV
 - Финансовый контроллер `private.iclub_ai_paid_canary_control_v1.enabled` отключён; QA-операторы тоже отключены отдельно; старый подтверждённый эксперимент оплачен и сохранён в журнале. Повторный расход не разрешён.
 
 **Не считать этот Preview полноценным источником реального ученического прогресса или генеративным AI Tutor.** Для production потребуется отдельно подключить редакционно утверждённые справки, авторизованную проекцию данных и source-governed Math/Practice карточки. Основная академическая оценка, P1/P5 изоляция и пользовательский прогресс неизменны.
+
+## Free-first hardening batch (19 October 2026)
+
+The QA Preview now has `connect-src 'none'` in both Vercel CSP and the early HTML policy, so it cannot call any remote Auth, Supabase Edge, model or student API even if a disconnected old UI handler runs. The isolated paid QA Edge remains a separate dormant backend and is not packaged in this Preview. The synthetic fixture no longer deletes any pre-existing localStorage/Auth keys on opening. Its global help handler refuses protected live Practice, Tour and Exam Prep assessment screens and refuses to substitute public help for the existing canonical Exam Prep Tutor. The public AI panel status now always indicates curated QA guidance, never falsely claims a model connection. The existing dedicated Auth pilot and funded canary are both disabled in hosted Supabase.

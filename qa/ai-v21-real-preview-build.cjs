@@ -134,9 +134,9 @@ assert.ok(!html.includes("ai-v21-connected-chat-bridge.js"),
 const vercel=JSON.parse(fs.readFileSync(path.join(root,"vercel.json"),"utf8"));
 const csp=vercel.headers?.[0]?.headers?.find(h=>
   h.key.toLowerCase()==="content-security-policy")?.value;
-assert.ok(csp && csp.includes("connect-src https://mmmduffgpvwjdpruzikw.supabase.co") &&
+assert.ok(csp && csp.includes("connect-src 'none'") &&
   csp.includes("form-action 'none'") &&
-  !csp.includes("connect-src *"),
+  !csp.includes("connect-src https") && !csp.includes("connect-src *"),
   "Connected QA CSP must allow Supabase ONLY, not arbitrary network");
 assert.equal(html.split("<head>").length,2,"Unexpected HTML head structure");
 const htmlAttr=String(csp).replaceAll("&","&amp;").replaceAll('"',"&quot;");

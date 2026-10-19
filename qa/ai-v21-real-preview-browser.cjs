@@ -102,7 +102,7 @@ async function main(){
       "profile:JSON.parse(localStorage.getItem('iclub_profile_v1')||'{}')?.full_name"+
       "})");
     assert.equal(await client.evaluate(
-      "document.querySelector('meta[http-equiv=\"Content-Security-Policy\"]')?.getAttribute('content')?.includes('connect-src https://mmmduffgpvwjdpruzikw.supabase.co')"),
+      "document.querySelector('meta[http-equiv=\"Content-Security-Policy\"]')?.getAttribute('content')?.includes(\"connect-src 'none'\")"),
       true,"QA CSP allows Supabase only, including on local static servers");
     assert.equal(identity.qa,true,JSON.stringify(identity));
     assert.equal(identity.screen,"home");
