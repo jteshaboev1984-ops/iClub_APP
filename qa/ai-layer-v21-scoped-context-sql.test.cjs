@@ -115,3 +115,12 @@ test('mint and reread require INCORRECT timestamped Practice answer',()=>{
  a.match(pg,/Correct answer masqueraded as learner error/);
  a.match(pg,/\(940,941,true,now\(\)\)/);
 });
+
+test('source and publisher PostgreSQL fixtures keep actual Practice V4 wrong-answer columns',()=>{
+ for(const file of ['qa/sql_drafts/iclub_ai_source_proof_bundle_local_pg.psql',
+   'qa/sql_drafts/iclub_ai_editorial_ticket_local_pg.psql']){
+   const fixture=fs.readFileSync(file,'utf8');
+   a.match(fixture,/is_correct boolean,answered_at timestamptz/);
+   a.match(fixture,/\(900,901,false,now\(\)\)/);
+ }
+});
