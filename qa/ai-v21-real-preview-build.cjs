@@ -124,18 +124,10 @@ assert.equal(html.split("</body>").length,2);
 html=html.replace("</body>",
   '<script src="ai-v21-appwide-context-help.js"></script>\n</body>');
 fs.writeFileSync(path.join(out,"ai-v21-appwide-context-help.js"),appWideJs);
-const liveBridgePath=path.join(__dirname,"ai-v21-connected-chat-bridge.js");
-const liveBridge=fs.readFileSync(liveBridgePath,"utf8");
-assert.ok(liveBridge.includes("Explicit click only") &&
-  liveBridge.includes("__ICLUB_AI_QA_LIVE_BRIDGE__") &&
-  liveBridge.includes("credentials:\"omit\"") &&
-  !liveBridge.includes("localStorage.setItem") &&
-  !liveBridge.includes("SUPABASE_SERVICE_ROLE_KEY"),
-  "Never persist JWTs or embed service_role in Preview");
-fs.writeFileSync(path.join(out,"ai-v21-connected-chat-bridge.js"),liveBridge);
-assert.equal(html.split("</body>").length,2);
-html=html.replace("</body>",
-  '<script src="ai-v21-connected-chat-bridge.js"></script>\n</body>');
+// This Preview is free-first only: no login button, Auth signup, or paid
+// provider bridge. The separate gated backend remains dormant.
+assert.ok(!html.includes("ai-v21-connected-chat-bridge.js"),
+  "Unexpected paid trial bridge in Preview shell");
 
 // Defense-in-depth: local static servers do not set Vercel response headers.
 // Inject the *same* CSP as an early meta element before every script or link.
@@ -155,4 +147,4 @@ fs.copyFileSync(path.join(__dirname,"ai-v21-real-preview-fixture.js"),
   path.join(out,"ai-v21-real-preview-fixture.js"));
 assert.ok(!html.includes("cdn.jsdelivr.net/npm/@supabase/"),"SDK must be absent");
 assert.ok(html.includes('src="app.js?'),"Real product runtime must remain");
-console.log("ICLUB_AI_REAL_APP_PREVIEW_BUILD_GREEN: original synthetic academic screens; optional signed-in operator QA calls only");
+console.log("ICLUB_AI_REAL_APP_PREVIEW_BUILD_GREEN: synthetic academic screens; free prepared iClub guidance only");
