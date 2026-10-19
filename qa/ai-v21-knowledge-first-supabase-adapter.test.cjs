@@ -101,22 +101,6 @@ test("configuration rejects SSRF, untrusted scheme, query, credentials and ident
 test("existing signed Auth uses ONLY public anon key, and service RPC uses service key",async()=>{
  const r=rig();r.state.release=true;
  const x=await r.math();
- if(!x.ok){
-  const route={type:"math_card",subjectKey:"mathematics",locale:"ru",
-   componentCode:"P1",skillCode:"P1-CIR-01"};
-  const card=await r.adapter.qaReaders.readMathTutorCard(route,OWNER);
-  const src=card?await r.adapter.qaReaders.readApprovedSource(route,card):null;
-  const {validCard,publicationOk}=require("./ai-v21-knowledge-first-readonly-gate.cjs");
-  console.error("QA_DIAGNOSTIC",JSON.stringify({
-   authorized:!!await r.adapter.qaReaders.authenticate(TOKEN),
-   cardAvailable:!!card,publicationAvailable:!!src,
-   validCard:card?validCard(route,card):null,
-   publicationValid:src?publicationOk(src,route,card):null,
-   sourceShape:src?Object.fromEntries(Object.entries(src).map(([k,v])=>
-     [k,typeof v==="boolean"?v:typeof v==="string"?v.slice(0,40):v])):null,
-   requests:r.state.requests.map(v=>v.url.split("/").slice(-2).join("/"))
-  }));
- }
  a.equal(x.ok,true,JSON.stringify(x));
  a.equal(x.releaseAllowed,false);a.equal(x.providerCalled,false);
  a.equal(x.learnerVisibleText,null);a.equal(x.billed,false);
@@ -125,7 +109,7 @@ test("existing signed Auth uses ONLY public anon key, and service RPC uses servi
  a.equal(auth[0].headers.apikey,config.anonKey);
  a.equal(auth[0].headers.authorization,TOKEN);
  const rpc=r.state.requests.filter(q=>q.url.includes("/rest/v1/rpc/"));
- a.equal(rpc.length,4,"two source+card reads, including release recheck");
+ a.equal(rpc.length,3,"one approved card plus two source rechecks");
  for(const q of rpc){
   a.equal(q.method,"POST");
   a.equal(q.redirect,"error");
