@@ -138,7 +138,7 @@ function createKnowledgeFirstReadOnlyGate(services){
     const screen=await services.readCurrentScope(userId,contextHandle,locale);
     if(!verifiedScreen(screen,userId,contextHandle,locale,now))return denied();
     if(PROTECTED.has(screen.screenCode))return denied("active_assessment");
-    const protection=await services.readProtected(userId);
+    const protection=await services.readProtected(userId,screen.revision);
     if(!verifiedProtection(protection,userId,screen.revision))
       return denied("active_assessment");
     const route=locate(screen,intent,promptKey);
@@ -154,7 +154,7 @@ function createKnowledgeFirstReadOnlyGate(services){
         !["candidate_only","selection_required"].includes(selection.status))
       return denied();
      const last=await services.readCurrentScope(userId,contextHandle);
-     const safe=await services.readProtected(userId);
+     const safe=await services.readProtected(userId,screen.revision);
      if(!match(last,screen)||!match(safe,protection)||
        services.nowMs()>=screen.expiresAtMs)return denied();
      return Object.freeze({ok:true,reason:"qa_home_candidate_only",
@@ -175,7 +175,7 @@ function createKnowledgeFirstReadOnlyGate(services){
     // across asynchronous reads. Recheck them all before a QA-only handoff.
     const latestRights=await services.verifySubjectRights(userId,screen,intent);
     const latestSource=await services.readApprovedSource(route,card);
-    const latestProtected=await services.readProtected(userId);
+    const latestProtected=await services.readProtected(userId,screen.revision);
     const latestScreen=await services.readCurrentScope(userId,contextHandle,locale);
     const finished=services.nowMs();
     if(!verifiedRights(latestRights,userId,screen,intent)||
