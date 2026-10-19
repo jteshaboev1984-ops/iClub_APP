@@ -360,3 +360,59 @@ test('Duplicate generated request ID never spends budget or calls model twice',a
  assert.equal(x.s.moneyReserveCalls,1);
  assert.equal(x.s.moneyDispatchCalls,1);
 });
+
+
+test('Knowledge First prepared replies reject executable markup before quota or provider',async()=>{
+ for(const payload of [
+  '<img src=x onerror=alert(1)>',
+  '<svg/onload=alert(1)>',
+  '<a href="https://safe.invalid" onclick="alert(1)">Click</a>',
+  '<math><mtext>unsafe embedded HTML</mtext></math>',
+  'A\u202E deceptive direction marker'
+ ]){
+  const x=fixture({plan:'free_qa_v2'});
+  const original=x.services.getSourceBundle;
+  x.services.getSourceBundle=async info=>({
+   ...await original(info),variants:{topic_main:payload}
+  });
+  const r=await x.send();
+  assert.equal(r.body.ok,false,payload);
+  assert.equal(r.body.state,'in_development',payload);
+  assert.equal(x.s.usage.size,0,payload);
+  assert.equal(x.s.claims.size,0,payload);
+  assert.equal(x.s.providerCalls,0,payload);
+  assert.equal(x.s.moneyReserveCalls,0,payload);
+ }
+});
+
+test('Safe mathematical inequalities remain valid in a prepared reply',async()=>{
+ const x=fixture({plan:'free_qa_v2'});
+ const original=x.services.getSourceBundle;
+ x.services.getSourceBundle=async info=>({
+  ...await original(info),
+  variants:{topic_main:'For real values, x < 5 and y > 0 are inequalities.'}
+ });
+ const r=await x.send();
+ assert.equal(r.status,200);
+ assert.equal(r.body.ok,true);
+ assert.equal(x.s.units.get(U),1);
+ assert.equal(x.s.providerCalls,0);
+});
+
+test('Unsafe generated markup is withheld, usage refunded, provider liability retained',async()=>{
+ const x=fixture({plan:'plus_qa_v2'});
+ let invoked=0;
+ x.services.generateSynthetic=async()=>{invoked++;
+  return '<svg/onload=alert(1)>';
+ };
+ const r=await x.send({
+  promptKey:undefined,question:'Почему это происходит?'
+ });
+ assert.equal(r.body.ok,false);
+ assert.equal(r.body.reason,'output_rejected');
+ assert.equal(x.s.units.get(U),0);
+ assert.equal(x.s.usage.get(RID)?.status,'released');
+ assert.equal(x.s.money.get(RID)?.state,'unknown');
+ assert.equal(invoked,1,'No retry of an already-dispatched paid request');
+ assert.equal(x.s.moneyDispatchCalls,1);
+});

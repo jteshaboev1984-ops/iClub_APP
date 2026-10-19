@@ -14,8 +14,12 @@ const LIMIT_BYTES=4096;
 const reason=(code,locale,details={})=>({ok:false,reason:code,...details});
 const hash=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const clean=x=>typeof x==='string'?x.trim():'';
+const UNSAFE_HTML_TAG=/<\s*\/?\s*[a-z][^>]*>/i;
+const UNSAFE_TEXT_CONTROL=/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\u202a-\u202e\u2066-\u2069]/;
 const validateText=reply=>typeof reply==='string'&&reply.trim().length>0&&
- reply.length<=3000&&!/<\s*script\b|javascript\s*:|<\s*iframe\b/i.test(reply);
+ reply.length<=3000&&!UNSAFE_HTML_TAG.test(reply)&&
+ !UNSAFE_TEXT_CONTROL.test(reply)&&
+ !/javascript\s*:/i.test(reply);
 const same=(a,b)=>a?.state==='available'&&b?.state==='available'&&
  ['sourceId','sourceVersion','sourceHash','revision','contextRevision',
    'route','surface','subject','proofRevision','proofHash'].every(k=>a[k]===b[k]);

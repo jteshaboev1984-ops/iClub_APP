@@ -49,6 +49,7 @@ jobs:
           node qa/ai-v21-real-preview-build.cjs
           node --test qa/ai-v21-main-parity-regression.test.cjs
           node --test qa/ai-v21-knowledge-first-readonly-gate.test.cjs qa/ai-v21-knowledge-first-supabase-adapter.test.cjs qa/ai-v21-knowledge-first-scoped-authority.test.cjs qa/ai-v21-real-academic-screen-bridge.test.cjs
+          node --test qa/ai-layer-v21-edge-request.test.cjs
           node --check qa/ai-v21-real-preview-dist/app.js
           node --check qa/ai-v21-real-preview-dist/practice-results-tabs.js
       - name: Real main Home, Study, protected assessments in offline Chromium
