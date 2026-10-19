@@ -153,11 +153,8 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
   assert.equal(fs.readFileSync(path.join(dist,"ai-v21-appwide-context-help.js"),"utf8"),
     read("qa/ai-v21-appwide-context-help.js"));
   assert.match(output,/src="ai-v21-appwide-context-help.js"/);
-  assert.equal(fs.readFileSync(path.join(dist,"ai-v21-connected-chat-bridge.js"),"utf8"),
-    read("qa/ai-v21-connected-chat-bridge.js"));
-  assert.match(output,/src="ai-v21-connected-chat-bridge.js"/);
-  assert.doesNotMatch(read("qa/ai-v21-connected-chat-bridge.js"),/localStorage\.setItem\s*\(/);
-  assert.doesNotMatch(read("qa/ai-v21-connected-chat-bridge.js"),/SUPABASE_SERVICE_ROLE_KEY/);
+  assert.equal(fs.existsSync(path.join(dist,"ai-v21-connected-chat-bridge.js")),false);
+  assert.doesNotMatch(output,/src="ai-v21-connected-chat-bridge.js"/);
   assert.equal(fs.readFileSync(path.join(dist,"ai-v21-preview-typed-app-help.js"),"utf8"),
     read("qa/ai-v21-preview-typed-app-help.js"));
   assert.match(output,/src="ai-v21-preview-typed-app-help.js"/);
@@ -257,7 +254,7 @@ test("CSS safeguards active Practice and Tour, and no accidental product logo as
 test("approved free-first Preview never ships registration or paid gateway",()=>{
   const bundler=read("qa/ai-v21-real-preview-build.cjs");
   assert.doesNotMatch(bundler,/html=html\.replace\([^;]*ai-v21-connected-chat-bridge\.js/s);
-  assert.match(bundler,/free first-party prepared help/);
+  assert.match(bundler,/free-first only/);
   assert.doesNotMatch(fixture,/__ICLUB_AI_QA_LIVE_BRIDGE__\?\.ready\?\.\(\)/);
   assert.doesNotMatch(fixture,/auth\/v1\/signup|fetch\s*\(/);
   const output=read("qa/ai-v21-real-preview-dist/index.html");
