@@ -93,6 +93,8 @@ BEGIN
  IF private.iclub_ai_has_active_protected_assessment_v1(p_user_id) THEN
   RETURN jsonb_build_object('allowed',false,'reason','active_assessment');
  END IF;
+ -- Only a VERIFIED INCORRECT finalized answer may use this specific error route.
+ -- A correct, unscored or unanswered item must not masquerade as an error.
  -- Read-only, grounded in live Practice tables. Content readiness NOT guessed.
  SELECT subj.subject_key INTO v_subject
  FROM public.practice_sessions_v4 s
@@ -104,6 +106,7 @@ BEGIN
   AND EXISTS(
     SELECT 1 FROM public.practice_session_answers_v4 a
     WHERE a.session_id=s.id AND a.question_id=p_question_id
+     AND a.is_correct IS FALSE AND a.answered_at IS NOT NULL
   )
   AND EXISTS(
     SELECT 1 FROM public.user_subjects us
@@ -202,6 +205,7 @@ BEGIN
    AND EXISTS(
     SELECT 1 FROM public.practice_session_answers_v4 a
     WHERE a.session_id=s.id AND a.question_id=v.practice_question_id
+     AND a.is_correct IS FALSE AND a.answered_at IS NOT NULL
    )
    AND EXISTS(
     SELECT 1 FROM public.user_subjects us

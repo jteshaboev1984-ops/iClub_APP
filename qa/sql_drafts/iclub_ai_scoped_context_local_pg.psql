@@ -46,6 +46,7 @@ CREATE TABLE public.practice_sessions_v4(
  question_ids bigint[] not null);
 CREATE TABLE public.practice_session_answers_v4(
  session_id bigint not null,question_id bigint not null,
+ is_correct boolean,answered_at timestamptz,
  primary key(session_id,question_id));
 CREATE TABLE public.tours(id bigint primary key,subject_id bigint not null,
  end_date date,is_active boolean);
@@ -81,9 +82,12 @@ INSERT INTO public.practice_sessions_v4 VALUES
  (900,'11111111-1111-4111-8111-111111111111',10,'finalized',now(),ARRAY[901,902]),
  (910,'11111111-1111-4111-8111-111111111111',12,'finalized',now(),ARRAY[911]),
  (920,'11111111-1111-4111-8111-111111111111',11,'in_progress',NULL,ARRAY[921]),
- (930,'11111111-1111-4111-8111-111111111111',13,'finalized',now(),ARRAY[931]);
+ (930,'11111111-1111-4111-8111-111111111111',13,'finalized',now(),ARRAY[931]),
+ (940,'11111111-1111-4111-8111-111111111111',11,'finalized',now(),ARRAY[941]);
 INSERT INTO public.practice_session_answers_v4 VALUES
- (900,901),(910,911),(920,921),(930,931);
+ (900,901,false,now()),(910,911,false,now()),
+ (920,921,false,now()),(930,931,false,now()),
+ (940,941,true,now());
 INSERT INTO public.tours VALUES
  (40,12,(now() AT TIME ZONE 'Asia/Tashkent')::date-1,false),
  (41,12,(now() AT TIME ZONE 'Asia/Tashkent')::date,true);
@@ -120,6 +124,9 @@ BEGIN
  result:=public.get_iclub_ai_v21_screen_evidence_service(learner,'current_screen');
  IF result->>'allowed' IS DISTINCT FROM 'false' THEN
   RAISE EXCEPTION 'No current screen may be available before mint: %',result;END IF;
+ result:=public.mint_iclub_ai_v21_practice_context_service(learner,940,941);
+ IF result->>'reason' IS DISTINCT FROM 'practice_context_not_authorized' THEN
+  RAISE EXCEPTION 'Correct answer masqueraded as learner error: %',result;END IF;
  result:=public.mint_iclub_ai_v21_practice_context_service(stranger,900,901);
  IF result->>'reason' IS DISTINCT FROM 'practice_context_not_authorized' THEN
   RAISE EXCEPTION 'Foreign session minted: %',result;END IF;

@@ -13,6 +13,7 @@ const cases = [
  "qa/ai-layer-v21-interface-guard.test.cjs",
  "qa/ai-layer-v21-sql-draft.test.cjs",
  "qa/ai-layer-v21-math-frozen-parity.test.cjs",
+ "qa/ai-v21-knowledge-first-production-boundary.test.cjs",
  "qa/ai-layer-v21-math-tutor-bridge.test.cjs",
  "qa/ai-layer-v21-math-source-catalog.test.cjs",
  "qa/ai-layer-v21-reply-receipts.test.cjs",

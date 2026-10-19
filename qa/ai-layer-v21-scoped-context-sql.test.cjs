@@ -107,3 +107,11 @@ test('App-wide view scopes cannot impersonate Practice, lessons or Tour records'
   "mint_iclub_ai_v21_app_view_context_service"
  ])a.ok(sql.includes(marker),marker);
 });
+
+// A 'mistake' explanation must refer only to a confirmed wrong answer.
+test('mint and reread require INCORRECT timestamped Practice answer',()=>{
+ a.match(sql,/WHERE a\.session_id=s\.id AND a\.question_id=p_question_id\s+AND a\.is_correct IS FALSE AND a\.answered_at IS NOT NULL/);
+ a.match(sql,/WHERE a\.session_id=s\.id AND a\.question_id=v\.practice_question_id\s+AND a\.is_correct IS FALSE AND a\.answered_at IS NOT NULL/);
+ a.match(pg,/Correct answer masqueraded as learner error/);
+ a.match(pg,/\(940,941,true,now\(\)\)/);
+});

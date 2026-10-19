@@ -10,6 +10,9 @@ on:
       - 'qa/ai-v21-knowledge-first-readonly-gate*'
       - 'qa/ai-v21-knowledge-first-supabase-adapter*'
       - 'qa/ai-v21-knowledge-first-scoped-authority*'
+      - 'qa/ai-v21-knowledge-first-production-boundary*'
+      - 'qa/sql_drafts/iclub_ai_scoped_context_v21_UNAPPLIED.sql'
+      - 'qa/sql_drafts/iclub_ai_scoped_context_local_pg.psql'
       - 'qa/ai-v21-preview-typed-app-help*'
       - 'qa/ai-v21-funded-provider-transport*'
       - 'qa/ai-v21-funded-canary-approved-money-policy*'
@@ -76,6 +79,8 @@ jobs:
           node --test qa/ai-v21-knowledge-first-readonly-gate.test.cjs
           node --test qa/ai-v21-knowledge-first-supabase-adapter.test.cjs
           node --test qa/ai-v21-knowledge-first-scoped-authority.test.cjs
+          node --test qa/ai-v21-knowledge-first-production-boundary.test.cjs
+          node qa/ai-v21-knowledge-first-production-boundary.cjs
           node --test qa/ai-v21-real-preview-regression.test.cjs
           node --check qa/ai-v21-real-academic-screen-bridge.cjs
           node --test qa/ai-v21-real-academic-screen-bridge.test.cjs
