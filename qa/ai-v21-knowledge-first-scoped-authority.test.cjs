@@ -15,11 +15,12 @@ function rig(){
  const state={calls:[],network:[],on:true,scoped:true,revoked:false,
   protected:false,release:true,source:true,right:true,
   owner:OWNER,questionId:42,subject:"chemistry",revision:"screen_8",
-  returnedQuestion:42,extraGeneric:true,lateDrift:false,scopeReads:0};
+  returnedQuestion:42,extraGeneric:true,lateDrift:false,scopeReads:0,
+  expiry:Date.now()+45000};
  const context=()=>({
   owner_id:state.owner,route_authority:"unified_ai",
   active:!state.revoked,protected_assessment:false,
-  expires_at_ms:Date.now()+45000,context_revision:state.revision,
+  expires_at_ms:state.expiry,context_revision:state.revision,
   current_view:"courses",surface:"practice",subject:state.subject,
   feature:"answer_explanation",topic:"question_"+state.questionId,
   practice_session_id:7801,question_id:state.questionId
