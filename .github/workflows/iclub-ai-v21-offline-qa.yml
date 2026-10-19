@@ -16,6 +16,7 @@ on:
       - 'qa/ai-layer-v21-edge-request.cjs'
       - 'qa/edge_v21/**'
       - 'qa/ai-layer-v21-scoped-context-sql.test.cjs'
+      - 'qa/run-ai-layer-v21-budget-race.sh'
       - 'qa/ai-layer-v21-p6-navigation-candidates.test.cjs'
       - 'qa/ai-layer-v21-p6-navigation-candidates.snapshot.json'
       - 'qa/ai-layer-v21-p6-navigation-editorial-drafts.snapshot.json'
