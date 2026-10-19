@@ -247,9 +247,7 @@
         // Opt-in operator QA session can call the actual, money-gated model.
         // The rest of the app remains synthetic, including ALL grades and
         // Practice/Tour results. Legacy Exam Prep remains untouched.
-        if(window.__ICLUB_AI_QA_LIVE_BRIDGE__?.ready?.()===true){
-          return await window.__ICLUB_AI_QA_LIVE_BRIDGE__.invoke(body||{});
-        }
+        // Free, approved iClub guidance is resolved locally before any provider route.
         if(body?.prompt_key==="practice_error" &&
            window.__ICLUB_AI_QA_DEMO__?.ready?.()===true){
           // QA-local prepared text, NOT a model generation. A short response
