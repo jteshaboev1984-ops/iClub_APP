@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/iclub-ai-real-preview-qa.yml'
       - 'qa/ai-v21-real-preview-*'
+      - 'qa/ai-v21-knowledge-first-readonly-gate*'
       - 'qa/ai-v21-preview-typed-app-help*'
       - 'qa/ai-v21-funded-provider-transport*'
       - 'qa/ai-v21-funded-canary-approved-money-policy*'
@@ -70,6 +71,7 @@ jobs:
           node --check qa/ai-v21-real-preview-fixture.js
           node --check qa/ai-v21-preview-typed-app-help.js
           node --test qa/ai-v21-preview-typed-app-help.test.cjs
+          node --test qa/ai-v21-knowledge-first-readonly-gate.test.cjs
           node --test qa/ai-v21-real-preview-regression.test.cjs
           node --check qa/ai-v21-real-academic-screen-bridge.cjs
           node --test qa/ai-v21-real-academic-screen-bridge.test.cjs
