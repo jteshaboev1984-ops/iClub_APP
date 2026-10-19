@@ -16,6 +16,7 @@ function rig(){
   protected:false,release:true,source:true,right:true,
   owner:OWNER,questionId:42,subject:"chemistry",revision:"screen_8",
   returnedQuestion:42,extraGeneric:true,lateDrift:false,scopeReads:0,
+  answerState:"incorrect",
   expiry:Date.now()+45000};
  const context=()=>({
   owner_id:state.owner,route_authority:"unified_ai",
@@ -32,7 +33,7 @@ function rig(){
     kill_switch:!state.on,release_approved:state.on};
   if(name==="get_iclub_ai_v21_scoped_context_service"){
    state.scopeReads++;
-   return{allowed:state.scoped,context:{
+   return{allowed:state.scoped&&state.answerState==="incorrect",context:{
     ...context(),context_revision:state.lateDrift&&state.scopeReads>1?
        "screen_9":state.revision}};
   }
@@ -80,6 +81,10 @@ test("complete signed Auth → owner scoped finalized context → editorial + ex
  const x=rig(),r=await x.ask();
  a.equal(r.ok,true,JSON.stringify(r));a.equal(r.reason,"qa_source_verified");
  a.equal(r.route,"practice_card");
+ a.equal(r.confirmedIncorrectAnswer,true);
+ a.equal(r.sourceVersion,"v1");
+ a.equal(r.sourceHash,SHA);
+ a.equal(r.publicationRevision,1);
  a.equal(r.learnerVisibleText,null);a.equal(r.releaseAllowed,false);
  a.equal(r.providerCalled,false);a.equal(r.billed,false);
  a.equal(r.academicStateChanged,false);
@@ -143,4 +148,11 @@ test("missing backend RPC returns unavailable, never downgrades to local guessin
  const x=await trusted.readCurrentScope(OWNER,HANDLE,"ru");
  a.equal(x,null);
  a.throws(()=>createKnowledgeFirstScopedAuthority({rpc:null}),/trusted_rpc_required/);
+});
+test("Scoped SQL refuses correct, unanswered and unknown Practice answers",async()=>{
+ for(const answerState of ["correct","unanswered","unknown"]){
+  const x=rig();x.state.answerState=answerState;
+  a.equal((await x.ask()).ok,false,answerState);
+  a.equal(x.state.network.some(q=>q.url.includes("get_practice_ai_source_cards")),false);
+ }
 });

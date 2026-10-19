@@ -167,7 +167,10 @@ function createKnowledgeFirstSupabaseAdapter(config,verified){
       release.contentVersion!==contentVersion||
       release.componentCode!==(route.componentCode??null)||
       release.skillCode!==(route.skillCode??null)||
-      release.questionId!==(route.questionId??null))return null;
+      release.questionId!==(route.questionId??null)||
+      (route.type==="practice_card"&&
+       (!Number.isSafeInteger(release.publicationRevision)||
+        release.publicationRevision<1)))return null;
    return{
     approved:release.approved===true,
     rightsApproved:release.rightsApproved===true,
@@ -177,6 +180,7 @@ function createKnowledgeFirstSupabaseAdapter(config,verified){
     qaPassed:release.qaPassed===true,
     locale:route.locale,subjectKey:route.subjectKey,
     sourceKey:source.sourceKey,cardHash:card.content_hash,
+    publicationRevision:route.type==="practice_card"?release.publicationRevision:null,
     contentVersion
    };
   }catch{return null;}

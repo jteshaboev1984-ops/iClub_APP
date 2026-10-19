@@ -64,7 +64,10 @@ function createKnowledgeFirstScopedAuthority({rpc,nowMs=Date.now}={}){
    screenCode:"practice-review",scopeCode:"global",
    subjectKey:c.subject,assessmentActive:false,
    practiceSessionId:c.practice_session_id,questionId:c.question_id,
-   finalized:true,ownsAnsweredQuestion:true
+   finalized:true,ownsAnsweredQuestion:true,
+   // Trusted scoped SQL requires is_correct IS FALSE AND answered_at IS NOT NULL
+   // at context mint and each read; never derived from the browser.
+   confirmedIncorrectAnswer:true
   };
  }
  async function readProtected(userId,revision){
@@ -131,7 +134,7 @@ function createKnowledgeFirstScopedAuthority({rpc,nowMs=Date.now}={}){
    componentCode:null,skillCode:null,questionId:p.questionId,
    sourceKey:p.sourceKey,sourceHash:p.sourceHash,
    sourceVersion:p.sourceVersion,cardHash:p.cardHash,
-   contentVersion:p.contentVersion,
+   contentVersion:p.contentVersion,publicationRevision:release.revision,
    approved:true,rightsApproved:true,runtimeAllowed:true,
    contentApproved:true,qaPassed:true,conflict:false
   };

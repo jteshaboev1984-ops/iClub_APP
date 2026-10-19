@@ -39,7 +39,8 @@ function rig(){
    contentApproved:true,conflict:false,qaPassed:true,
    locale:"ru",subjectKey:x.screen.subjectKey,
    sourceKey:card.source_card_key||card.help_key,
-   cardHash:card.content_hash,contentVersion:card.content_version||card.source_version
+   cardHash:card.content_hash,contentVersion:card.content_version||card.source_version,
+   publicationRevision:1
   }),
   readPreparedHelp:async()=>({...x.card}),
   readMathTutorCard:async()=>({...x.card}),
@@ -100,12 +101,20 @@ test("Math approved P1/P5 cards are isolated by exact skill and existing Tutor r
 test("Exact finalized and owned Practice mistake only; generic question fallback denied",async()=>{
  const z=rig();z.x.screen={...z.x.screen,screenCode:"practice-review",
   scopeCode:"global",subjectKey:"biology",finalized:true,
-  ownsAnsweredQuestion:true,questionId:42};
+  ownsAnsweredQuestion:true,confirmedIncorrectAnswer:true,questionId:42};
  z.x.card={locale:"ru",subject_key:"biology",question_id:42,
   card_type:"answer_explanation",source_card_key:"practice:chemistry:p1:q42:ru:v1",
   content_hash:SHA,source_version:VERSION,
   body_text:"An approved explanation of the confirmed answered question."};
- a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,true);
+ const approved=await z.run({intent:"practice_card",promptKey:"explain_error"});
+ a.equal(approved.ok,true);
+ a.equal(approved.confirmedIncorrectAnswer,true);
+ a.equal(approved.sourceVersion,VERSION);
+ a.equal(approved.sourceHash,SHA);
+ a.equal(approved.publicationRevision,1);
+ z.x.screen.confirmedIncorrectAnswer=false;
+ a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,false);
+ z.x.screen.confirmedIncorrectAnswer=true;
  z.x.card.question_id=null;
  a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,false);
  z.x.card.question_id=42;z.x.screen.finalized=false;
@@ -158,7 +167,7 @@ test("Missing trusted backend, thrown reader or expired owner scope always fail 
 test("Real service card-key syntax is accepted; mismatched source typing remains denied",async()=>{
  const z=rig();z.x.screen={...z.x.screen,screenCode:"practice-review",
   scopeCode:"global",subjectKey:"economics",finalized:true,
-  ownsAnsweredQuestion:true,questionId:1188};
+  ownsAnsweredQuestion:true,confirmedIncorrectAnswer:true,questionId:1188};
  z.x.card={locale:"ru",subject_key:"economics",question_id:1188,
   card_type:"answer_explanation",source_card_key:"practice:economics:t1:q1188:ru:v1",
   content_hash:SHA,source_version:VERSION,
@@ -168,5 +177,21 @@ test("Real service card-key syntax is accepted; mismatched source typing remains
  a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,false);
  z.x.card.card_type="answer_explanation";
  z.x.card.source_card_key="practice/economics/..";
+ a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,false);
+});
+test("Practice requires positive independently approved publication revision",async()=>{
+ const z=rig();Object.assign(z.x.screen,{
+  screenCode:"practice-review",scopeCode:"global",subjectKey:"economics",
+  finalized:true,ownsAnsweredQuestion:true,confirmedIncorrectAnswer:true,
+  questionId:19
+ });
+ z.x.card={locale:"ru",subject_key:"economics",question_id:19,
+  card_type:"answer_explanation",source_card_key:"practice:economics:19:ru:v1",
+  content_hash:SHA,source_version:VERSION,
+  body_text:"Precisely scoped and reviewed synthetic answer for this question."};
+ const original=z.services.readApprovedSource;
+ z.services.readApprovedSource=async(...args)=>({
+  ...await original(...args),publicationRevision:0
+ });
  a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,false);
 });

@@ -75,7 +75,8 @@ function rig(){
    const release={...p,
     proof:"independent_editorial_publication_service_v1",
     approved:state.release,rightsApproved:true,runtimeAllowed:true,
-    contentApproved:true,conflict:false,qaPassed:true};
+    contentApproved:true,conflict:false,qaPassed:true,
+    publicationRevision:1};
    return release;
   }
  };
@@ -152,10 +153,15 @@ test("invalid Auth, changed screens and protected active assessments deny withou
 test("exact finalized Practice explanation rejects RPC generic fallbacks and duplicates",async()=>{
  const r=rig();r.state.release=true;
  Object.assign(r.screen,{screenCode:"practice-review",scopeCode:"global",
-  subjectKey:"chemistry",finalized:true,ownsAnsweredQuestion:true,questionId:42});
+  subjectKey:"chemistry",finalized:true,ownsAnsweredQuestion:true,
+  confirmedIncorrectAnswer:true,questionId:42});
  const x=await r.practiceCall();
  a.equal(x.ok,true,JSON.stringify(x));
  a.equal(x.learnerVisibleText,null);
+ a.equal(x.confirmedIncorrectAnswer,true);
+ a.equal(x.sourceVersion,"v1");
+ a.equal(x.sourceHash,SHA);
+ a.equal(x.publicationRevision,1);
  const p=r.state.requests.find(x=>x.url.includes("get_practice_ai_source_cards_service_v1"));
  a.deepEqual(JSON.parse(p.body),{
   p_subject_key:"chemistry",p_locale:"ru",p_card_type:"answer_explanation",

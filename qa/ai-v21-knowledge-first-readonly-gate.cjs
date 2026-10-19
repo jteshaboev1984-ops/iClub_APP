@@ -67,7 +67,7 @@ function locate(s,intent,promptKey){
  if(intent==="practice_card"){
   if(s.screenCode!=="practice-review"||s.scopeCode!=="global"||
      s.subjectKey==="general"||s.finalized!==true||
-     s.ownsAnsweredQuestion!==true||
+     s.ownsAnsweredQuestion!==true||s.confirmedIncorrectAnswer!==true||
      !Number.isSafeInteger(s.questionId)||s.questionId<1||
      promptKey!=="explain_error")return null;
   return{type:"practice_card",key:"explain_error",locale:s.locale,
@@ -116,7 +116,9 @@ const publicationOk=(p,route,card)=>
  p.locale===route.locale&&p.subjectKey===route.subjectKey&&
  p.sourceKey===meta(route,card).sourceKey&&
  p.cardHash===meta(route,card).cardHash&&
- p.contentVersion===meta(route,card).contentVersion;
+ p.contentVersion===meta(route,card).contentVersion&&
+ (route.type!=="practice_card"||
+  (Number.isSafeInteger(p.publicationRevision)&&p.publicationRevision>0));
 function createKnowledgeFirstReadOnlyGate(services){
  if(!object(services)||SERVICES.some(k=>typeof services[k]!=="function"))
   throw Error("missing_trusted_server_service");
@@ -191,6 +193,12 @@ function createKnowledgeFirstReadOnlyGate(services){
     // is required before any learner-visible card/text can be returned.
     return Object.freeze({ok:true,reason:"qa_source_verified",
      route:intent,sourceKey:meta(route,card).sourceKey,
+     ...(intent==="practice_card"?{
+      confirmedIncorrectAnswer:true,
+      sourceVersion:meta(route,card).contentVersion,
+      sourceHash:meta(route,card).cardHash,
+      publicationRevision:published.publicationRevision
+     }:{}),
      releaseAllowed:false,learnerVisibleText:null,
      providerCalled:false,billed:false,academicStateChanged:false,
      existingExamPrepTutorPreserved:intent==="math_card"});
