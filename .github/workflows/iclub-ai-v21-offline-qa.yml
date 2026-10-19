@@ -10,6 +10,8 @@ on:
       - qa/iclub-ai-layer-v21-20261012
     paths:
       - '.github/workflows/iclub-ai-v21-offline-qa.yml'
+      - 'qa/ai-v21-knowledge-first-prepared-bridge.cjs'
+      - 'qa/ai-v21-knowledge-first-prepared-bridge.test.cjs'
       - 'qa/ai-layer-v21-trusted-server-adapter.cjs'
       - 'qa/ai-layer-v21-trusted-server-adapter.test.cjs'
       - 'qa/ai-layer-v21-app-wide-admission.cjs'
@@ -181,6 +183,11 @@ jobs:
           node-version: '22'
       - name: Run complete offline QA and frozen Exam Prep regression
         run: node qa/run-ai-layer-v21-offline.cjs
+      - name: Knowledge First exact prepared source to existing quota and delivery claim
+        env:
+          CI: 'true'
+          ICLUB_AI_QA_BOUND_PREPARED: synthetic-only
+        run: node --test qa/ai-v21-knowledge-first-prepared-bridge.test.cjs
       - name: Headless Chrome actual viewport and interaction QA, synthetic only
         run: |
           set -euo pipefail
