@@ -106,9 +106,14 @@ test("existing signed Auth uses ONLY public anon key, and service RPC uses servi
    componentCode:"P1",skillCode:"P1-CIR-01"};
   const card=await r.adapter.qaReaders.readMathTutorCard(route,OWNER);
   const src=card?await r.adapter.qaReaders.readApprovedSource(route,card):null;
+  const {validCard,publicationOk}=require("./ai-v21-knowledge-first-readonly-gate.cjs");
   console.error("QA_DIAGNOSTIC",JSON.stringify({
    authorized:!!await r.adapter.qaReaders.authenticate(TOKEN),
    cardAvailable:!!card,publicationAvailable:!!src,
+   validCard:card?validCard(route,card):null,
+   publicationValid:src?publicationOk(src,route,card):null,
+   sourceShape:src?Object.fromEntries(Object.entries(src).map(([k,v])=>
+     [k,typeof v==="boolean"?v:typeof v==="string"?v.slice(0,40):v])):null,
    requests:r.state.requests.map(v=>v.url.split("/").slice(-2).join("/"))
   }));
  }
