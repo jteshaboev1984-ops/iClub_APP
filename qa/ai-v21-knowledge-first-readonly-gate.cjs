@@ -135,7 +135,7 @@ function createKnowledgeFirstReadOnlyGate(services){
        !UUID.test(auth.userId||""))return denied();
     const userId=auth.userId,now=services.nowMs();
     if(!Number.isSafeInteger(now))return denied();
-    const screen=await services.readCurrentScope(userId,contextHandle);
+    const screen=await services.readCurrentScope(userId,contextHandle,locale);
     if(!verifiedScreen(screen,userId,contextHandle,locale,now))return denied();
     if(PROTECTED.has(screen.screenCode))return denied("active_assessment");
     const protection=await services.readProtected(userId);
@@ -176,7 +176,7 @@ function createKnowledgeFirstReadOnlyGate(services){
     const latestRights=await services.verifySubjectRights(userId,screen,intent);
     const latestSource=await services.readApprovedSource(route,card);
     const latestProtected=await services.readProtected(userId);
-    const latestScreen=await services.readCurrentScope(userId,contextHandle);
+    const latestScreen=await services.readCurrentScope(userId,contextHandle,locale);
     const finished=services.nowMs();
     if(!verifiedRights(latestRights,userId,screen,intent)||
        !match(latestRights,rights)||
