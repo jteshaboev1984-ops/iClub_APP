@@ -60,8 +60,10 @@ INSERT INTO private.iclub_ai_request_tombstones_v21 VALUES
 SQL
 sql -f qa/sql_drafts/iclub_ai_v21_provider_spend_UNAPPLIED.sql >/dev/null
 sql -c "INSERT INTO private.iclub_ai_v21_provider_spend_control
- (singleton,enabled,lifetime_cap_microusd,per_request_ceiling_microusd,policy_revision)
- VALUES(1,true,80,80,'synthetic_money_race');" >/dev/null
+ (singleton,enabled,lifetime_cap_microusd,per_request_ceiling_microusd,
+  daily_cap_microusd,per_user_daily_cap_microusd,max_concurrent_requests,
+  policy_revision)
+ VALUES(1,true,80,80,80,80,2,'synthetic_money_race');" >/dev/null
 q1="SELECT public.reserve_iclub_ai_v21_provider_spend_service(
 '11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222',
 repeat('a',64),repeat('b',64))->>'allowed';"
