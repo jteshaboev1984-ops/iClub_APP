@@ -9,7 +9,7 @@
    "support_help","ratings_help","practice_rules","tour_rules",
    "catalog_help","about_help","certificates_help","books_help",
    "notifications_help","community_help","recs_help",
-   "archive_help","video_help","home_next"
+   "archive_help","video_help","home_next","subject_study"
  ]);
  const mapping={
   ru:{
@@ -26,7 +26,8 @@
    recs_help:["как работают рекомендации","где мои рекомендации"],
    archive_help:["когда доступен архив","когда откроется архив"],
    video_help:["как открыть видеоуроки","где видеоуроки"],
-   home_next:["что делать дальше","с чего начать в iclub"]
+   home_next:["что делать дальше","с чего начать в iclub"],
+   subject_study:["как изучать предмет"]
   },
   uz:{
    support_help:["qanday yordam so‘rayman","yordamga qanday murojaat qilaman"],
@@ -42,7 +43,8 @@
    recs_help:["tavsiyalar qanday ishlaydi","tavsiyalarim qayerda"],
    archive_help:["arxiv qachon ochiladi","arxiv qachon mavjud"],
    video_help:["video darslarni qanday ochaman","video darslar qayerda"],
-   home_next:["keyingi qadam nima","qayerdan boshlayman"]
+   home_next:["keyingi qadam nima","qayerdan boshlayman"],
+   subject_study:["fanni qanday o‘rganaman"]
   },
   en:{
    support_help:["how do i contact support","how can i get support"],
@@ -58,7 +60,8 @@
    recs_help:["how do recommendations work","where are my recommendations"],
    archive_help:["when does the archive open"],
    video_help:["how do i open video lessons","where are video lessons"],
-   home_next:["what should i do next","where do i start"]
+   home_next:["what should i do next","where do i start"],
+   subject_study:["how do i study this subject"]
   }
  };
  const normalize=v=>{
@@ -92,7 +95,15 @@
    return null;
   const q=normalize(body.user_text);
   if(!q)return null;
-  return lookup.get(body.locale+"|"+q)||null;
+  const matched=lookup.get(body.locale+"|"+q)||null;
+  if(matched==="subject_study"){
+    // This is navigation guidance, not mathematical or academic solving.
+    // The real app must already be on a verified known subject hub.
+    if(body.screen_code!=="subject-hub"||
+       !["mathematics","biology","chemistry","economics","informatics"]
+        .includes(body.subject_key))return null;
+  }
+  return matched;
  }
  const api=Object.freeze({resolve,normalize});
  if(typeof module!=="undefined"&&module.exports)module.exports=api;
