@@ -59,7 +59,8 @@ function rig(){
   isProtected:async()=>state.protected,
   getGlobalState:async()=>({uiEnabled:true,gatewayEnabled:true,
    killSwitch:false,releaseApproved:true}),
-  getScopedContext:async()=>state.active?({
+  // Every Edge recheck mirrors the authoritative SQL read-time incorrect-answer rule.
+  getScopedContext:async()=>state.active&&state.answerState==="incorrect"?({
    ownerId:OWNER,routeAuthority:"unified_ai",active:true,
    protectedAssessment:false,expiresAtMs:deadline,
    contextRevision:"rev_5",surface:"practice",subject:"biology",
