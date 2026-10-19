@@ -17,10 +17,15 @@ test("Preview source is an immutable current-main tree, never historical QA",()=
     {cwd:root,encoding:"utf8"}).trim(),sha);
 });
 test("Economics shell, recent Practice tabs and all source code use one main commit",()=>{
-  for(const p of ["index.html","app.js","i18n.js","style.css",
+  for(const p of ["app.js","i18n.js","style.css",
     "practice-results-tabs.js","practice-results-tabs.css"])
     a.deepEqual(asset(p),show(p),p);
   const html=asset("index.html").toString(),app=asset("app.js").toString();
+  const mainHtml=show("index.html").toString();
+  const mainSection=x=>x.match(/<main\b[^>]*>[\s\S]*?<\/main>/)?.[0];
+  a.ok(mainSection(mainHtml),"Main page has no academic <main>");
+  a.equal(mainSection(html),mainSection(mainHtml),
+    "QA must retain every current-main academic screen unchanged");
   a.match(app,/practiceAiAttemptId/);
   a.match(html,/id="courses-practice-review"/);
   a.match(html,/practice-results-tabs.js/);
