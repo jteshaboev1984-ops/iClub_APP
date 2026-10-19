@@ -8,7 +8,7 @@ const VERSION="v1",SHA="a".repeat(64),MD5="b".repeat(32);
 const BASE={authorization:"Bearer syntheticQaVerifiedAuthentication",contextHandle:HANDLE,
  locale:"ru",intent:"app_help",promptKey:"support_help",userId:OTHER};
 function rig(){
- const x={now:100000,readCount:0,deniedRights:false,sourceRevoked:false,
+ const x={now:100000,readCount:0,protectedReads:0,deniedRights:false,sourceRevoked:false,
   protected:false,protectedLate:false,deliberatelyStale:false,
   screen:{proof:"server_owner_current_screen_v1",ownerId:OWNER,
    contextHandle:HANDLE,revision:5,expiresAtMs:120000,locale:"ru",
@@ -25,7 +25,8 @@ function rig(){
     revision:x.deliberatelyStale&&x.readCount>1?6:x.screen.revision};
   },
   readProtected:async()=>{
-   const active=x.protected||(x.protectedLate&&x.readCount>1);
+   x.protectedReads++;
+   const active=x.protected||(x.protectedLate&&x.protectedReads>1);
    return{proof:"owner_bound_assessment_guard_v1",ownerId:OWNER,
     contextRevision:x.screen.revision,protected:active};
   },
