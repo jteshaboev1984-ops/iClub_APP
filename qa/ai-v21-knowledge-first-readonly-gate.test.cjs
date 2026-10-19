@@ -84,7 +84,7 @@ test("Math approved P1/P5 cards are isolated by exact skill and existing Tutor r
    ...z.x.screen,screenCode:"exam_prep_skill",scopeCode:"exam_prep",
    subjectKey:"mathematics",componentCode:component,skillCode:skill};
   z.x.card={locale:"ru",component_code:component,skill_code:skill,
-   tutor_card_key:"math_card",source_card_key:"math_source",
+   tutor_card_key:"p1:P1-ALG-01:tutor:ru:v3",source_card_key:"p1:P1-ALG-01:theory:ru:v2",
    content_version:"v1",content_hash:MD5,
    main_explanation:"Detailed source-backed explanation for the verified skill.",
    simple_explanation:"Simpler source-backed explanation for this exact skill.",
@@ -102,7 +102,7 @@ test("Exact finalized and owned Practice mistake only; generic question fallback
   scopeCode:"global",subjectKey:"biology",finalized:true,
   ownsAnsweredQuestion:true,questionId:42};
  z.x.card={locale:"ru",subject_key:"biology",question_id:42,
-  card_type:"error_explanation",source_card_key:"practice_source",
+  card_type:"answer_explanation",source_card_key:"practice:chemistry:p1:q42:ru:v1",
   content_hash:SHA,source_version:VERSION,
   body_text:"An approved explanation of the confirmed answered question."};
  a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,true);
@@ -153,4 +153,20 @@ test("Missing trusted backend, thrown reader or expired owner scope always fail 
  a.equal((await a1.run()).ok,false);
  const ex=rig();ex.x.now=120000;
  a.equal((await ex.run()).ok,false);
+});
+
+test("Real service card-key syntax is accepted; mismatched source typing remains denied",async()=>{
+ const z=rig();z.x.screen={...z.x.screen,screenCode:"practice-review",
+  scopeCode:"global",subjectKey:"economics",finalized:true,
+  ownsAnsweredQuestion:true,questionId:1188};
+ z.x.card={locale:"ru",subject_key:"economics",question_id:1188,
+  card_type:"answer_explanation",source_card_key:"practice:economics:t1:q1188:ru:v1",
+  content_hash:SHA,source_version:VERSION,
+  body_text:"A verified prepared explanation for the finalized Economics answer."};
+ a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,true);
+ z.x.card.card_type="result_context";
+ a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,false);
+ z.x.card.card_type="answer_explanation";
+ z.x.card.source_card_key="practice/economics/..";
+ a.equal((await z.run({intent:"practice_card",promptKey:"explain_error"})).ok,false);
 });

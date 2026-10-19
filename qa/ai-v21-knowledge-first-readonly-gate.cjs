@@ -7,6 +7,8 @@ const HASH64=/^[a-f0-9]{64}$/;
 const HASH32=/^[a-f0-9]{32}$/;
 const LANG=new Set(["ru","uz","en"]);
 const KEY=/^[a-z][a-z0-9_]{2,79}$/;
+// Actual canonical keys include colons, hyphens and uppercase skills.
+const CARD_KEY=/^[A-Za-z0-9][A-Za-z0-9:_-]{7,119}$/;
 const HELP=new Set(["support_help","ratings_help","practice_rules","tour_rules",
  "catalog_help","about_help","certificates_help","books_help",
  "notifications_help","community_help","recs_help","archive_help",
@@ -84,7 +86,7 @@ const validCard=(route,card)=>{
  if(route.type==="math_card")
   return card.component_code===route.componentCode&&
    card.skill_code===route.skillCode&&
-   KEY.test(card.tutor_card_key||"")&&KEY.test(card.source_card_key||"")&&
+   CARD_KEY.test(card.tutor_card_key||"")&&CARD_KEY.test(card.source_card_key||"")&&
    HASH32.test(card.content_hash||"")&&
    typeof card.content_version==="string"&&card.content_version.length>0&&
    ["main_explanation","simple_explanation","alternative_explanation",
@@ -93,8 +95,8 @@ const validCard=(route,card)=>{
  if(route.type==="practice_card")
   return card.subject_key===route.subjectKey&&
    card.question_id===route.questionId&&
-   card.card_type==="error_explanation"&&
-   KEY.test(card.source_card_key||"")&&
+   card.card_type==="answer_explanation"&&
+   CARD_KEY.test(card.source_card_key||"")&&
    HASH64.test(card.content_hash||"")&&
    typeof card.source_version==="string"&&card.source_version.length>0&&
    typeof card.body_text==="string"&&card.body_text.length>10&&

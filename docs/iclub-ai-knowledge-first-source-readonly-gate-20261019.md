@@ -25,3 +25,7 @@ The result is deliberately **metadata-only and QA-only** (`releaseAllowed:false`
 4. Only then perform read-only integration of ready per-user source content in a controlled beta. No test registration, migration, student data edits or AI spending is authorized by this QA candidate.
 
 No new Vercel deployment, no changes to `main`/`app.js`/`exam-prep/`, no Supabase schema/data writes.
+
+## Grounding correction after inspecting actual live card schemas
+
+The approved Practice source type is **`answer_explanation`**, not `error_explanation`; only **111 of 357** approved Practice cards have an exact `question_id` (33 Chemistry + 4 Economics per locale). The other 243 answer cards are generic and 3 are result context cards; these are **not** authorized to explain an individual's exact finalized error. Cards are not currently available for other Practice subjects. Both Mathematics and Practice `source_card_key` values contain colons and uppercase/hyphenated identifiers, e.g. `p1:P1-CIR-01:theory:en:v2`; strict safe code accepts these actual keys rather than a false lowercase-only regex. The Mathematics Tutor's approved `content_hash` uses 32 hex digits whereas Practice uses 64. The gate was corrected before any user-facing integration, with realistic source-key/type regressions.
