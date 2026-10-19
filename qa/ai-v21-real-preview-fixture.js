@@ -83,7 +83,7 @@
         next:"После реальной Practice откройте результат, затем разбор ошибок и повторите сложную тему. Здесь это только демонстрация интерфейса: личный следующий шаг недоступен.",
         tours:"Во время активного тура AI недоступен. Он может объяснить правила, но разбор заданий разрешён лишь после официального открытия архива.",
         archive:"В Preview нет подтверждения открытия архива конкретного тура. AI не раскрывает вопросы или правильные ответы до разрешённой даты.",
-        subject:"В выбранном предмете доступны разделы обучения, Practice и Tours в зависимости от доступа. Этот тестовый AI не подтверждает освоение темы и не меняет ваш прогресс.",
+        subject:"Чтобы изучать предмет, откройте доступный урок, разберите тему, затем закрепите её в Practice. После завершённой проверки посмотрите ошибки и повторите сложные темы. В этом Preview личный прогресс не загружается.",
         catalog:"Откройте Study, выберите доступный предмет и зайдите в его уроки или Practice. Это тестовый профиль без реальных учебных результатов.",
         study:"Откройте доступный урок, изучите объяснение, затем закрепите знания в Practice. AI сможет разбирать конкретную тему только с подтверждённым учебным источником.",
         home:"Я не вижу подтверждённый прогресс настоящего ученика в этом Preview, поэтому не буду выдумывать персональную рекомендацию. Для знакомства с приложением откройте Study и выберите предмет.",
@@ -110,7 +110,7 @@
         next:"Haqiqiy Practice'dan keyin natija va xatolar tahlilini oching. Bu Preview shaxsiy o‘quv tavsiyasini bermaydi.",
         tours:"Tur davomida AI mavjud emas. Savollar faqat arxiv rasmiy ochilgandan keyin tahlil qilinadi.",
         archive:"Bu Previewda aniq tur arxivi ochilgani tasdiqlanmagan. AI yopiq savollarni ko‘rsatmaydi.",
-        subject:"Tanlangan fan ichida darslar, Practice va Tours mavjud bo‘lishi mumkin. Bu test AI o‘zlashtirish darajasini o‘zgartirmaydi.",
+        subject:"Fanni o‘rganish uchun mavjud darsni oching, mavzuni ko‘rib chiqing, so‘ng Practice'da mustahkamlang. Tekshiruv tugagach, xatolarni ko‘rib chiqib, qiyin mavzuni qaytaring. Bu Previewda shaxsiy natijalar yuklanmaydi.",
         catalog:"Study bo‘limini oching, mavjud fanni tanlang va darslarga o‘ting. Bu test profilda haqiqiy natijalar yo‘q.",
         study:"Mavjud darsni o‘rganing, keyin Practice bilan mustahkamlang. AI aniq mavzuni faqat tasdiqlangan manbadan tushuntiradi.",
         home:"Bu Previewda haqiqiy o‘quvchi natijalari tasdiqlanmagan. Shaxsiy tavsiya to‘qib chiqarmayman. Study bo‘limini ochishingiz mumkin.",
@@ -137,7 +137,7 @@
         next:"After actual Practice, open the result, review verified mistakes and revisit the relevant lesson. This Preview cannot choose a personal next step.",
         tours:"AI is unavailable during an active Tour. Question reviews are allowed only after the archive is officially opened.",
         archive:"This Preview cannot verify that a specific Tour archive is open, so it cannot disclose questions or answer keys.",
-        subject:"The selected subject offers Lessons, Practice and Tours where permitted. This preview AI does not change mastery or progress.",
+        subject:"To study a subject, open an available lesson, learn the topic, then practise it in Practice. After a completed assessment, review mistakes and revisit difficult topics. This Preview does not load personal learning progress.",
         catalog:"Open Study, select an available subject and navigate to lessons or Practice. This synthetic profile contains no genuine academic results.",
         study:"Study an available lesson and then reinforce it in Practice. A specific-topic explanation requires an approved source.",
         home:"I have no verified learner progress in this Preview, so I cannot invent a personal recommendation. Explore a subject under Study.",
@@ -207,7 +207,8 @@
         certificates_help:copy.certificates,books_help:copy.books,
         notifications_help:copy.notifications,community_help:copy.community,
         recs_help:copy.recs,archive_help:copy.archive_help,
-        video_help:copy.video,home_next:copy.home
+        video_help:copy.video,home_next:copy.home,
+        subject_study:copy.subject
       };
       if(Object.hasOwn(approvedPublicHelp,selectedHelp))
         return response(approvedPublicHelp[selectedHelp]);
