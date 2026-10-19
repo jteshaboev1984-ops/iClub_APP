@@ -4,9 +4,36 @@
 const fs=require("node:fs");
 const crypto=require("node:crypto");
 const path=require("node:path");
+const {execFileSync}=require("node:child_process");
 const assert=require("node:assert/strict");
 const root=path.resolve(__dirname,"..");
 const out=path.join(__dirname,"ai-v21-real-preview-dist");
+// Only opt-in, disposable GitHub Actions main-parity source. Not a deploy.
+const mainSource=process.env.ICLUB_QA_MAIN_PARITY_SOURCE||"";
+const mainSha=process.env.ICLUB_QA_MAIN_PARITY_SHA||"";
+if(Boolean(mainSource)!==Boolean(mainSha))throw Error("Both pinned main SHA and archive required");
+if(mainSource&&process.env.VERCEL)throw Error("Main parity is CI-only, never deploy");
+if(mainSource&&!/^[a-f0-9]{40}$/.test(mainSha))throw Error("Invalid main SHA");
+const sourceRoot=mainSource?fs.realpathSync(mainSource):root;
+if(mainSource){
+  assert.notEqual(sourceRoot,root,"Cannot overwrite QA source with main archive");
+  assert.ok(fs.statSync(sourceRoot).isDirectory());
+  const remote=execFileSync("git",["rev-parse","refs/remotes/origin/main"],
+    {cwd:root,encoding:"utf8",timeout:8000}).trim();
+  assert.equal(remote,mainSha,"Main SHA differs from verified origin/main");
+  for(const file of [
+    "index.html","app.js","i18n.js","style.css",
+    "practice-results-tabs.js","practice-results-tabs.css",
+    "global-ai-ui.js","global-ai-ui.css",
+    "exam-prep/exam-prep-live.js","exam-prep/exam-prep-ai-ui.js",
+    "exam-prep/exam-prep-api.js","exam-prep/exam-prep.css"
+  ]){
+    const expected=execFileSync("git",["rev-parse",mainSha+":"+file],
+      {cwd:root,encoding:"utf8",timeout:8000}).trim();
+    assert.equal(blobSha(path.join(sourceRoot,file)),expected,
+      "Unverified current-main archive file "+file);
+  }
+}
 if (process.env.VERCEL && process.env.VERCEL_ENV !== "preview") {
   throw Error("QA real-app Preview must never deploy to production/staging");
 }
@@ -50,10 +77,13 @@ assert.ok(fs.existsSync(path.join(root,"app.js")),"Real app engine missing");
 assert.ok(fs.existsSync(path.join(root,"global-ai-ui.js")),"Real AI interface missing");
 fs.rmSync(out,{recursive:true,force:true});
 fs.mkdirSync(out,{recursive:true});
-for(const name of fs.readdirSync(root)){
+for(const name of fs.readdirSync(sourceRoot)){
   if(banned.has(name)||name.startsWith("."))continue;
-  copySafe(path.join(root,name),path.join(out,name));
+  copySafe(path.join(sourceRoot,name),path.join(out,name));
 }
+if(mainSource)fs.writeFileSync(path.join(out,"iclub-ai-main-parity.json"),
+  JSON.stringify({qaPreviewOnly:true,source:"main",sha:mainSha,
+    studentDataCopied:false,productionWrites:false},null,2)+"\n");
 // The product files remain frozen. Only the emitted disposable Preview
 // receives a visually approved QA-only overlay, never imported in main.
 for(const [productFile,fixtureFile] of [
@@ -147,4 +177,4 @@ fs.copyFileSync(path.join(__dirname,"ai-v21-real-preview-fixture.js"),
   path.join(out,"ai-v21-real-preview-fixture.js"));
 assert.ok(!html.includes("cdn.jsdelivr.net/npm/@supabase/"),"SDK must be absent");
 assert.ok(html.includes('src="app.js?'),"Real product runtime must remain");
-console.log("ICLUB_AI_REAL_APP_PREVIEW_BUILD_GREEN: synthetic academic screens; free prepared iClub guidance only");
+console.log("ICLUB_AI_REAL_APP_PREVIEW_BUILD_GREEN: synthetic academic screens; free prepared iClub guidance only"+(mainSource?" MAIN_PARITY_SHA="+mainSha:""));

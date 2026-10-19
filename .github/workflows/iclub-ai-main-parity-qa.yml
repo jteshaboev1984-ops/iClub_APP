@@ -1,0 +1,74 @@
+name: iClub AI — current main integration QA only
+# No deploy, no production secrets, no SQL. QA workflow only.
+on:
+  push:
+    branches:
+      - qa/iclub-ai-layer-v21-20261012
+    paths:
+      - 'qa/ai-v21-real-preview-build.cjs'
+      - 'qa/ai-v21-main-parity-regression.test.cjs'
+      - 'qa/ai-v21-real-preview-browser.cjs'
+      - 'qa/ai-v21-knowledge-first-*'
+      - '.github/workflows/iclub-ai-main-parity-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: iclub-ai-main-parity-qa
+  cancel-in-progress: true
+jobs:
+  current-main-with-isolated-ai:
+    if: github.ref == 'refs/heads/qa/iclub-ai-layer-v21-20261012'
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - name: Checkout QA and fetch actual main history
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Export immutable main into disposable scratch without touching QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_sha="$(git rev-parse refs/remotes/origin/main)"
+          test "$(git rev-parse --verify "$main_sha^{commit}")" = "$main_sha"
+          scratch="$(mktemp -d)"
+          mkdir -p "$scratch/main"
+          git archive --format=tar "$main_sha" | tar -xf - -C "$scratch/main"
+          echo "ICLUB_QA_MAIN_PARITY_SHA=$main_sha" >> "$GITHUB_ENV"
+          echo "ICLUB_QA_MAIN_PARITY_SOURCE=$scratch/main" >> "$GITHUB_ENV"
+      - name: Test approved screen/source gates, build and verify main integration
+        run: |
+          set -euo pipefail
+          node qa/ai-v21-knowledge-first-production-boundary.cjs
+          node qa/ai-v21-real-preview-build.cjs
+          node --test qa/ai-v21-main-parity-regression.test.cjs
+          node --test qa/ai-v21-knowledge-first-readonly-gate.test.cjs qa/ai-v21-knowledge-first-supabase-adapter.test.cjs qa/ai-v21-knowledge-first-scoped-authority.test.cjs qa/ai-v21-real-academic-screen-bridge.test.cjs
+          node --check qa/ai-v21-real-preview-dist/app.js
+          node --check qa/ai-v21-real-preview-dist/practice-results-tabs.js
+      - name: Real main Home, Study, protected assessments in offline Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome || command -v chromium
+          cd qa/ai-v21-real-preview-dist
+          python3 -m http.server 4175 --bind 127.0.0.1 > /tmp/iclub-ai-main-parity-http.log 2>&1 &
+          server=$!
+          cd ../..
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          for attempt in {1..35}; do
+            if curl -fsS http://127.0.0.1:4175/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node qa/ai-v21-real-preview-browser.cjs
+      - name: Verify protected code remains untouched
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain --untracked-files=no)"
+          test -z "$(git diff --name-only 9afc7b44aead03b2a30544e6e7d4c4eb8670efbf HEAD -- index.html app.js i18n.js style.css exam-prep/ supabase/migrations/)"
+          echo "QA_MAIN_PARITY_NO_GO_FOR_PRODUCTION"
