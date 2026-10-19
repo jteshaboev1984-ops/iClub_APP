@@ -131,8 +131,7 @@ test("real Preview bundler is deterministic, isolated and fails closed",()=>{
       vercel.headers[0].headers.find(h=>h.key==="Content-Security-Policy").value
        .replaceAll("&","&amp;").replaceAll('"',"&quot;")+'">')
     .replace("</body>",'<script src="ai-v21-real-preview-demo.js"></script>\n</body>')
-    .replace("</body>",'<script src="ai-v21-appwide-context-help.js"></script>\n</body>')
-    .replace("</body>",'<script src="ai-v21-connected-chat-bridge.js"></script>\n</body>');
+    .replace("</body>",'<script src="ai-v21-appwide-context-help.js"></script>\n</body>');
   assert.equal(output,expected);
   assert.doesNotMatch(output,/cdn\.jsdelivr\.net\/npm\/@supabase/);
   assert.match(output,/<meta http-equiv="Content-Security-Policy"/);
@@ -255,18 +254,14 @@ test("CSS safeguards active Practice and Tour, and no accidental product logo as
   assert.match(js,/state\.threads\.clear\(\)/);
 });
 
-test("isolated Preview Auth profile is opt-in and never copies learner access",()=>{
-  const bridge=read("qa/ai-v21-connected-chat-bridge.js");
-  assert.match(bridge,/Explicit click only/);
-  assert.match(bridge,/button\.addEventListener\("click"/);
-  assert.match(bridge,/requestJson\("\/auth\/v1\/signup"/);
-  assert.match(bridge,/iclub_global_ai_preview_pilot:"v1"/);
-  assert.match(bridge,/no_academic_data:true/);
-  assert.match(bridge,/sessionStorage\.setItem\(SESSION_KEY/);
-  assert.match(bridge,/credentials:"omit"/);
-  assert.match(bridge,/qa_access_not_approved/);
-  assert.doesNotMatch(bridge,/window\.sb\.auth|localStorage\.setItem|SUPABASE_SERVICE_ROLE_KEY/);
-  assert.match(bridge,/ru:\{live:/);
-  assert.match(bridge,/uz:\{live:/);
-  assert.match(bridge,/en:\{live:/);
+test("approved free-first Preview never ships registration or paid gateway",()=>{
+  const bundler=read("qa/ai-v21-real-preview-build.cjs");
+  assert.doesNotMatch(bundler,/html=html\.replace\([^;]*ai-v21-connected-chat-bridge\.js/s);
+  assert.match(bundler,/free first-party prepared help/);
+  assert.doesNotMatch(fixture,/__ICLUB_AI_QA_LIVE_BRIDGE__\?\.ready\?\.\(\)/);
+  assert.doesNotMatch(fixture,/auth\/v1\/signup|fetch\s*\(/);
+  const output=read("qa/ai-v21-real-preview-dist/index.html");
+  assert.doesNotMatch(output,/src="ai-v21-connected-chat-bridge\.js"/);
+  assert.equal(fs.existsSync(path.join(root,vercel.outputDirectory,
+    "ai-v21-connected-chat-bridge.js")),false);
 });
