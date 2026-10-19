@@ -1,5 +1,6 @@
 // QA ONLY. Loaded before the unchanged production application scripts.
-// This Preview has no live Supabase SDK, network capability or real auth.
+// The academic app remains synthetic. A separate opt-in Auth test identity
+// may be created ONLY from the user's explicit QA panel button.
 (() => {
   "use strict";
   const QA_UID = "00000000-0000-4000-8000-000000000125";
@@ -29,7 +30,7 @@
     localStorage.setItem("iclub_profile_v1", JSON.stringify(profile));
   }
   window.__ICLUB_AI_QA_PREVIEW__ = Object.freeze({
-    offline:true,noProductionWrites:true,syntheticIdentity:QA_UID
+    offline:true,noProductionWrites:true,optInIsolatedAuth:true,syntheticIdentity:QA_UID
   });
   const user = {id:QA_UID,role:"authenticated",app_metadata:{provider:"qa-fixture"},user_metadata:{}};
   const session = {user,access_token:"QA_ONLY_NOT_A_JWT",expires_at:4102444800};
