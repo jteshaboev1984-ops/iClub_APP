@@ -173,7 +173,7 @@ function createKnowledgeFirstSupabaseAdapter(config,verified){
     rightsApproved:release.rightsApproved===true,
     runtimeAllowed:release.runtimeAllowed===true,
     contentApproved:release.contentApproved===true,
-    conflict:release.conflict===false,
+    conflict:release.conflict!==false,
     qaPassed:release.qaPassed===true,
     locale:route.locale,subjectKey:route.subjectKey,
     sourceKey:source.sourceKey,cardHash:card.content_hash,
