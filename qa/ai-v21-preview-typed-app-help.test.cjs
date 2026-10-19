@@ -70,3 +70,22 @@ test("the router never matches by substring and cannot self-approve any sources"
   assert.equal(resolve(q("помоги решить задачу","ru",fake)),null);
  }
 });
+
+test("subject learning navigation is free but only inside a recognized subject hub",()=>{
+ for(const [question,locale] of [
+   ["Как изучать предмет?","ru"],
+   ["Fanni qanday o‘rganaman?","uz"],
+   ["How do I study this subject?","en"]
+ ]){
+   const approved={screen_code:"subject-hub",subject_key:"mathematics"};
+   assert.equal(resolve(q(question,locale,approved)),"subject_study");
+   for(const other of [
+    {screen_code:"home",subject_key:"mathematics"},
+    {screen_code:"subject-hub",subject_key:"other"},
+    {screen_code:"practice-quiz",subject_key:"mathematics"},
+    {screen_code:"exam_prep_skill",subject_key:"mathematics"}
+   ])assert.equal(resolve(q(question,locale,other)),null);
+ }
+ assert.equal(resolve(q("Реши уравнение", "ru",
+   {screen_code:"subject-hub",subject_key:"mathematics"})),null);
+});
