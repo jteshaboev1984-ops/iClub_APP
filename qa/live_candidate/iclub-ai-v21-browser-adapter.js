@@ -8,9 +8,36 @@
     "support_help","catalog_help","ratings_help","home_next",
     "practice_rules","tour_rules","books_help","about_help",
     "notifications_help","community_help","certificates_help",
-    "profile_meaning","video_help","recs_help","archive_help"
+    "profile_meaning","video_help","recs_help","archive_help",
+    "nav_home","nav_courses","nav_ratings","nav_profile","nav_about","nav_support"
   ]);
   const LOCALES=new Set(["ru","uz","en"]);
+  const NAV_INPUTS={
+    ru:{"где главная":"nav_home","как открыть главную":"nav_home",
+      "где учёба":"nav_courses","как открыть учёбу":"nav_courses",
+      "где рейтинг":"nav_ratings","как открыть рейтинг":"nav_ratings",
+      "где профиль":"nav_profile","как открыть профиль":"nav_profile",
+      "где о проекте":"nav_about","как открыть о проекте":"nav_about",
+      "где поддержка":"nav_support","как открыть поддержку":"nav_support"},
+    uz:{"bosh sahifa qayerda":"nav_home","bosh sahifani qanday ochaman":"nav_home",
+      "o‘qish qayerda":"nav_courses","o‘qishni qanday ochaman":"nav_courses",
+      "reyting qayerda":"nav_ratings","reytingni qanday ochaman":"nav_ratings",
+      "profil qayerda":"nav_profile","profilni qanday ochaman":"nav_profile",
+      "loyiha haqida qayerda":"nav_about","yordam qayerda":"nav_support"},
+    en:{"where is home":"nav_home","how do i open home":"nav_home",
+      "where is study":"nav_courses","how do i open study":"nav_courses",
+      "where is ratings":"nav_ratings","how do i open ratings":"nav_ratings",
+      "where is profile":"nav_profile","how do i open profile":"nav_profile",
+      "where is about":"nav_about","how do i open about":"nav_about",
+      "where is support":"nav_support","how do i open support":"nav_support"}
+  };
+  function verifiedNavigationKey(text,lang){
+    if(typeof text!=="string"||text.length>120)return "";
+    const key=text.normalize("NFKC").toLowerCase()
+      .replace(/[’ʻ']/g,"‘").replace(/[?!.。؟]+$/g,"")
+      .replace(/\s+/g," ").trim();
+    return NAV_INPUTS[lang]?.[key]||"";
+  }
   let sequence=0, lastUser="", permission=null;
   const closed=(reason="in_development")=>({ok:false,reason,
     academic_state_changed:false});
@@ -183,17 +210,18 @@
     return result?.ok===true&&result.recorded===true?
       {ok:true,recorded:true}:closed("consent_unavailable");
   }
-  async function askPrepared({promptKey,locale}={}){
+  async function askPrepared({promptKey,locale,userText}={}){
     const localeCode=String(locale||"");
-    if(!LOCALES.has(localeCode)||typeof promptKey!=="string"||
-       !ALLOWED.has(promptKey))return closed();
+    if(!LOCALES.has(localeCode)||typeof promptKey!=="string")return closed();
+    const key=promptKey===""?verifiedNavigationKey(userText,localeCode):promptKey;
+    if(!ALLOWED.has(key))return closed();
     const current=await status();
     if(!current.eligible||protectedNow())return closed("beta_not_enabled");
     const user=lastUser,epoch=sequence;
     const id=window.crypto?.randomUUID?.();
     if(typeof id!=="string")return closed("request_unavailable");
     const answer=await invoke({intent:"ask",request_id:id,
-      prompt_key:promptKey,locale:localeCode});
+      prompt_key:key,locale:localeCode});
     if(epoch!==sequence||user!==await identity()||protectedNow())
       return closed("context_changed");
     if(answer?.ok!==true||answer.academic_state_changed!==false||
