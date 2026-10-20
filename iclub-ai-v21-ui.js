@@ -1610,8 +1610,10 @@
   // One source-driven launch hook for Practice, Lessons and Tour archive.
   // The service derives the owner and all academic facts, never the browser.
   function explainAcademic({surface,recordId,questionId=null,displayText}={}){
-    const views={practice_error:"practice-review",
-      lesson_topic:"video",tour_archive:"tour-review"};
+    // Video is a subject-level Telegram hub, not a confirmed lesson view.
+    // Keep the generic server lesson contract for the future true lesson screen,
+    // but never bind the first/primary lesson ID to this content.
+    const views={practice_error:"practice-review",tour_archive:"tour-review"};
     const code=views[surface];
     if(!code||!Number.isSafeInteger(recordId)||recordId<=0||
        (surface==="practice_error"

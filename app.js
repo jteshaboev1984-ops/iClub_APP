@@ -15801,14 +15801,6 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
     async function renderVideo() {
   const subjectKey = String(state?.courses?.subjectKey || "").trim().toLowerCase();
-  // Only a selector; server independently proves lesson enrollment and source.
-  const academicVideo=document.getElementById("courses-video");
-  if(academicVideo){
-    const id=Number(state?.courses?.lessonId||0);
-    if(Number.isSafeInteger(id)&&id>0)
-      academicVideo.dataset.iclubAiLessonId=String(id);
-    else delete academicVideo.dataset.iclubAiLessonId;
-  }
   const subj = subjectByKey(subjectKey);
 
   const tEl = $("#video-title");
