@@ -58,3 +58,34 @@ test("No client-readable owner grants, no provider call or learner academic writ
    "Stale question fingerprint not blocked","Removed Practice source still admitted"
  ]) assert.ok(scratch.includes(failure));
 });
+
+test("Read-only editorial preflight never confuses metadata correctness with formal approval",()=>{
+ const preflight=read("iclub_ai_v21_qbank_editorial_preflight_READ_ONLY_20261020.sql");
+ assert.match(preflight,/STRICTLY SELECT ONLY/);
+ assert.match(preflight,/PENDING_HUMAN_ACADEMIC_RIGHTS_LOCALE_AND_OWNER_RELEASE/);
+ assert.match(preflight,/private\.iclub_ai_v21_target_fingerprint_v1/);
+ assert.match(preflight,/private\.iclub_ai_v21_source_admitted_v1/);
+ assert.match(preflight,/still_unapproved/);
+ assert.match(preflight,/admitted_unexpected/);
+ assert.match(preflight,/no_legacy_beta_release/);
+ assert.match(preflight,/metadata_preflight_ok/);
+ assert.doesNotMatch(preflight,/(?:^|\n)\s*(?:UPDATE|INSERT|DELETE|DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE|CALL|DO)\b/im);
+ assert.doesNotMatch(preflight,/\b(user_id|student_id|practice_answers|practice_sessions_v4|academic_deliveries)\b/i);
+});
+test("70-row editorial issue queue is explicitly unapproved, with 8 actionable findings",()=>{
+ const csv=read("../../docs/iclub-ai-v21-qbank-70-editorial-review-queue-20261020.csv");
+ const lines=csv.trim().split(/\r?\n/),headers=lines[0].split(",");
+ assert.equal(lines.length,71);
+ for(const header of ["academic_review","rights_review","en_ru_uz_equivalence",
+ "independent_editorial_publication","owner_beta_release","precheck_issues_severity",
+ "remediation_instruction"])assert.ok(headers.includes(header),header);
+ const flagged=lines.slice(1).filter(line=>/,"(MEDIUM|LOW)","/.test(line));
+ assert.equal(flagged.length,8);
+ for(const id of ["9241","10063","10073","10077","10081","10095","9465","9723"]){
+   assert.ok(flagged.some(x=>x.includes(',"'+id+'",')),id);
+ }
+ for(const line of lines.slice(1)){
+   assert.match(line,/"PENDING","PENDING","PENDING","PENDING","PENDING","NOT_APPROVED","NOT_AUTHORIZED"/);
+ }
+ assert.doesNotMatch(csv,/,"APPROVED","APPROVED"/);
+});
