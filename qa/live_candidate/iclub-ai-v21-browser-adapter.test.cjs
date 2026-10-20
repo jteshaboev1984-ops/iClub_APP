@@ -12,7 +12,8 @@ const USER_A="11111111-1111-4111-8111-111111111111";
 const USER_B="22222222-2222-4222-8222-222222222222";
 function rig(){
  const state={user:USER_A,candidate:true,consented:false,
-  eligible:false,requests:[],active:false,authListeners:[]};
+  eligible:false,requests:[],active:false,authListeners:[],
+  activateOnConsent:false,panelRefreshCalls:0};
  const root={
   window:{
    sb:{
@@ -29,6 +30,7 @@ function rig(){
        consented:state.consented},error:null};
       if(body.intent==="consent"){
        state.consented=true;
+       if(state.activateOnConsent)state.eligible=true;
        return{data:{ok:true,recorded:true},error:null};
       }
       if(body.intent==="ask")return{data:{
@@ -40,7 +42,8 @@ function rig(){
     }
    },
    crypto:{randomUUID:()=> "33333333-3333-4333-8333-333333333333"},
-   i18n:{getLang:()=>"en"}
+   i18n:{getLang:()=>"en"},
+   iClubGlobalAiShell:{refresh:async()=>{state.panelRefreshCalls++;}}
   },
   document:{
    readyState:"loading",addEventListener(){},
@@ -127,4 +130,19 @@ test("No unapproved or academic question is mapped to navigation",async()=>{
   assert.equal(r.ok,false);
  }
  assert.equal(x.state.requests.filter(y=>y.intent==="ask").length,0);
+});
+test("Separate opt-in immediately reveals prepared AI with no provider call",async()=>{
+ const x=rig();x.state.activateOnConsent=true;
+ assert.equal((await x.api.status()).eligible,false);
+ assert.equal(x.state.panelRefreshCalls,0);
+ assert.equal((await x.api.consentFromExplicitUserAction(false)).ok,false);
+ assert.equal(x.state.panelRefreshCalls,0);
+ const result=await x.api.consentFromExplicitUserAction(true);
+ assert.equal(result.ok,true);assert.equal(result.recorded,true);
+ assert.equal(result.ready,true);
+ assert.equal(x.state.panelRefreshCalls,1);
+ assert.equal((await x.api.status()).eligible,true);
+ const approved=await x.api.askPrepared({promptKey:"nav_support",locale:"en"});
+ assert.equal(approved.ok,true);
+ assert.equal(approved.provider_called,false);
 });
