@@ -2,6 +2,9 @@
 // Authenticated, cohort/consent/rights-gated. No model, new users or academic writes.
 const BASE = "https://mmmduffgpvwjdpruzikw.supabase.co";
 const SERVICE_FN = "deliver_iclub_ai_v21_beta_prepared_service";
+const ACADEMIC_FN = "deliver_iclub_ai_v21_academic_service";
+const CAPABILITIES_FN = "get_iclub_ai_v21_academic_capabilities_service";
+const ACADEMIC_SURFACES = new Set(["practice_error","lesson_topic","tour_archive"]);
 const KEYS = new Set([
  "support_help","catalog_help","ratings_help","home_next",
  "practice_rules","practice_after","tour_rules","books_help","about_help",
@@ -44,9 +47,11 @@ Deno.serve(async(req:Request)=>{
  let body:Obj;
  try{const b:unknown=JSON.parse(raw);if(!object(b))throw Error();body=b;}
  catch{return send(400,{ok:false,reason:"invalid_request"},origin);}
- if(Object.keys(body).some(k=>!["intent","request_id","prompt_key","locale","consent_version"].includes(k)))
+ if(Object.keys(body).some(k=>!["intent","request_id","prompt_key","locale","consent_version",
+      "surface","record_id","question_id"].includes(k)))
   return send(400,{ok:false,reason:"invalid_request"},origin);
- if(body.intent!=="status"&&body.intent!=="ask"&&body.intent!=="consent")
+ if(body.intent!=="status"&&body.intent!=="ask"&&body.intent!=="consent"&&
+    body.intent!=="academic"&&body.intent!=="academic_available")
   return send(400,{ok:false,reason:"invalid_request"},origin);
  const bearer=req.headers.get("authorization")||"";
  if(!/^Bearer [A-Za-z0-9._-]{24,4000}$/.test(bearer))
@@ -67,6 +72,59 @@ Deno.serve(async(req:Request)=>{
  if(!authenticated||!UUID.test(String(authenticated.id||""))||
     authenticated.role!=="authenticated")
   return send(401,{ok:false,reason:"authentication_required"},origin);
+ // Generic academic contract: neither a subject list nor study content
+ // belongs in the Edge binary. The server derives subject and finalized state
+ // from the signed learner's actual records and independently published source.
+ if(body.intent==="academic"||body.intent==="academic_available"){
+  const discovery=body.intent==="academic_available";
+  const allowed=discovery
+   ?["intent","surface","record_id","locale"]
+   :["intent","surface","record_id","question_id","request_id","locale"];
+  if(Object.keys(body).some(k=>!allowed.includes(k))||
+    typeof body.surface!=="string"||!ACADEMIC_SURFACES.has(body.surface)||
+    !Number.isSafeInteger(body.record_id)||Number(body.record_id)<=0||
+    !["ru","uz","en"].includes(String(body.locale))||
+    (!discovery&&
+     (typeof body.request_id!=="string"||!UUID.test(body.request_id)||
+      (body.surface==="practice_error"
+       ?!Number.isSafeInteger(body.question_id)||Number(body.question_id)<=0
+       :body.question_id!==null))))
+   return send(400,{ok:false,reason:"invalid_request"},origin);
+  const rpc=discovery?CAPABILITIES_FN:ACADEMIC_FN;
+  let result:Obj|null=null;
+  try{
+   result=await safeJson(await fetch(BASE+"/rest/v1/rpc/"+rpc,{
+    method:"POST",
+    headers:{"apikey":service,"authorization":"Bearer "+service,
+      "content-type":"application/json"},
+    body:JSON.stringify(discovery?
+      {p_user_id:authenticated.id,p_surface:body.surface,
+       p_record_id:body.record_id,p_locale:body.locale}:
+      {p_user_id:authenticated.id,p_request_id:body.request_id,
+       p_surface:body.surface,p_record_id:body.record_id,
+       p_question_id:body.question_id,p_locale:body.locale}),
+    signal:AbortSignal.timeout(8000)
+   }));
+  }catch{return send(503,{ok:false,reason:"backend_unavailable"},origin);}
+  if(!result)return send(503,{ok:false,reason:"backend_unavailable"},origin);
+  if(discovery){
+   const available=Array.isArray(result.available)?result.available
+    .filter(x=>Number.isSafeInteger(x)&&Number(x)>0).slice(0,12):[];
+   return send(200,{ok:result.ok===true,available},origin);
+  }
+  if(result.ok===true&&typeof result.message==="string"&&
+     result.message.length>=30&&result.message.length<=6000&&
+     result.mode==="prepared"&&result.provider_called===false&&
+     result.academic_state_changed===false)
+    return send(200,{ok:true,message:result.message,mode:"prepared",
+      academic_state_changed:false,provider_called:false},origin);
+  return send(200,{ok:false,
+    reason:["usage_exhausted","active_assessment","context_not_authorized",
+      "in_development","beta_not_enabled","request_conflict"].includes(
+       String(result.reason))?String(result.reason):"in_development",
+    ...(result.reason==="usage_exhausted"&&result.reset_at
+       ?{reset_at:result.reset_at}:{})},origin);
+ }
  // Real signed-identity beta status, not a preview-only UI guess.
  if(body.intent==="status"){
   if(Object.keys(body).length!==1)return send(400,{ok:false,reason:"invalid_request"},origin);
