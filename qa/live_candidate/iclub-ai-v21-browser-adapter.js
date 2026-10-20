@@ -68,6 +68,7 @@
   const WORDS={
     ru:{
       offer:"Участвовать в тестировании iClub AI",
+      detail:"Добровольное участие в закрытой бете",
       title:"Тестирование iClub AI",
       info:"На первом этапе помощник использует только проверенную справку iClub. Он не меняет оценки и прогресс. Участие добровольное; доступ откроется после отдельного запуска беты.",
       confirm:"Согласен участвовать",later:"Не сейчас",
@@ -76,6 +77,7 @@
     },
     uz:{
       offer:"iClub AI sinovida qatnashish",
+      detail:"Yopiq sinovda ixtiyoriy ishtirok",
       title:"iClub AI sinovi",
       info:"Birinchi bosqichda yordamchi faqat iClub’ning tekshirilgan ma’lumotlaridan foydalanadi. U baholar yoki o‘quv natijalarini o‘zgartirmaydi. Ishtirok ixtiyoriy; kirish beta boshlangandan so‘ng ochiladi.",
       confirm:"Ishtirok etishga roziman",later:"Hozir emas",
@@ -83,7 +85,7 @@
       error:"Rozilik saqlanmadi. Keyinroq qayta urinib ko‘ring."
     },
     en:{
-      offer:"Join iClub AI testing",title:"iClub AI beta",
+      offer:"Join iClub AI testing",detail:"Optional closed beta",title:"iClub AI beta",
       info:"At first, the assistant uses only verified iClub help. It does not change grades or learning progress. Participation is optional, and access opens only after the beta is launched.",
       confirm:"I agree to participate",later:"Not now",
       saved:"Consent recorded. Access will open when beta starts.",
@@ -96,28 +98,52 @@
   function removeInvite(){document.getElementById(inviteId)?.remove();}
   function renderInvite(){
     const profile=document.getElementById("view-profile");
+    const main=document.getElementById("profile-main");
+    const support=main?.querySelector?.('[data-action="open-support"]');
+    const section=support?.closest?.(".profile-section");
     const mark=document.getElementById("iclub-global-ai-mark");
-    if(!permission?.candidate||permission.consented||
-       !profile?.classList.contains("is-active")||
-       (mark&&!mark.hidden&&mark.getClientRects().length>0)){
-      removeInvite();return;
-    }
+    const show=permission?.candidate&&!permission.consented&&
+      profile?.classList.contains("is-active")&&
+      main&&!main.hidden&&section&&
+      !(mark&&!mark.hidden&&mark.getClientRects().length>0);
+    if(!show){removeInvite();return;}
     let invite=document.getElementById(inviteId);
-    if(invite){invite.textContent=words().offer;return;}
-    invite=document.createElement("button");
-    invite.id=inviteId;invite.type="button";
-    invite.textContent=words().offer;
-    Object.assign(invite.style,{
-      position:"fixed",right:"16px",
-      bottom:"calc(86px + env(safe-area-inset-bottom))",
-      zIndex:"1050",padding:"12px 16px",
-      maxWidth:"calc(100vw - 32px)",border:"0",borderRadius:"14px",
-      color:"#fff",background:"#163e68",
-      font:"600 14px/1.4 system-ui, sans-serif",
-      boxShadow:"0 8px 22px rgba(0,0,0,.2)",cursor:"pointer"
-    });
-    invite.addEventListener("click",showConsentDialog);
-    document.body.appendChild(invite);
+    if(!invite){
+      invite=document.createElement("div");
+      invite.id=inviteId;
+      invite.className="profile-section";
+      const group=document.createElement("div");
+      group.className="profile-row-list";
+      const button=document.createElement("button");
+      button.className="profile-row";
+      button.type="button";
+      button.setAttribute("data-ai-beta-consent","true");
+      const left=document.createElement("div");left.className="profile-row-left";
+      const icon=document.createElement("div");icon.className="profile-row-ico";
+      const image=document.createElement("img");
+      image.src="iclub-ai-tutor-a.webp";
+      image.alt="";image.setAttribute("aria-hidden","true");
+      image.width=18;image.height=18;icon.appendChild(image);
+      left.appendChild(icon);
+      const middle=document.createElement("div");
+      middle.className="profile-row-mid";
+      const title=document.createElement("div");
+      title.className="profile-row-title";
+      title.setAttribute("data-ai-beta-invite-title","");
+      const detail=document.createElement("div");
+      detail.className="muted small";
+      detail.setAttribute("data-ai-beta-invite-detail","");
+      middle.append(title,detail);
+      const arrow=document.createElement("div");
+      arrow.className="profile-row-right";arrow.textContent="›";
+      button.append(left,middle,arrow);
+      button.addEventListener("click",showConsentDialog);
+      group.appendChild(button);
+      invite.appendChild(group);
+      section.after(invite);
+    }
+    invite.querySelector("[data-ai-beta-invite-title]").textContent=words().offer;
+    invite.querySelector("[data-ai-beta-invite-detail]").textContent=words().detail;
   }
   function showConsentDialog(){
     if(document.getElementById(dialogId)||!permission?.candidate||
