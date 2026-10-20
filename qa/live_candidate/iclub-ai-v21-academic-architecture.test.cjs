@@ -150,3 +150,16 @@ test("Actual current MAIN instrumentation is tiny and idempotent",()=>{
  a.ok(edited.length-original.length<1400);
  a.doesNotMatch(edited.slice(original.length),/localStorage/);
 });
+test("Subject-level Telegram video can never masquerade as a selected Study lesson",()=>{
+ const main=process.env.ICLUB_QA_MAIN_PARITY_SOURCE;
+ if(main){
+  const app=fs.readFileSync(path.join(main,"app.js"),"utf8");
+  assert.match(app,/const primaryLessonId = await getSubjectPrimaryLessonId\(subjectKey\)/);
+  assert.match(app,/state\.courses\.lessonId = primaryLessonId \|\| null/);
+ }
+ assert.doesNotMatch(adapter,/lesson_topic:\{screen:"video"/);
+ assert.doesNotMatch(adapter,/const roots=\[[^\]]*"courses-video"/);
+ assert.doesNotMatch(shell,/lesson_topic:"video"/);
+ assert.match(catalog,/p_surface='lesson_topic'/);
+ assert.match(capability,/p_surface='lesson_topic'/);
+});

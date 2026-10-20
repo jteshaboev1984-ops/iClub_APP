@@ -342,8 +342,6 @@
   const scopeFor={
     practice_error:{screen:"practice-review",container:"practice-review-list",
       root:"courses-practice-review",record:"practiceAiAttemptId"},
-    lesson_topic:{screen:"video",container:"courses-video",
-      root:"courses-video",record:"iclubAiLessonId"},
     tour_archive:{screen:"tour-review",container:"tour-review-list",
       root:"courses-tour-review",record:"iclubAiTourAttemptId"}
   };
@@ -395,7 +393,9 @@
     }
   }
   function setupAcademicAutoAttach(){
-    const roots=["courses-practice-review","courses-video","courses-tour-review"];
+    // The subject-level Telegram video screen does not select a real lesson.
+    // Do not present lesson-specific explanation until a true per-lesson view exists.
+    const roots=["courses-practice-review","courses-tour-review"];
     for(const id of roots){
       const root=document.getElementById(id);
       if(!root||typeof MutationObserver!=="function")continue;
@@ -407,7 +407,7 @@
         // One in-flight fetch per source context, irrespective of DOM mutations.
         void scanAcademic(surface);
       }).observe(root,{attributes:true,attributeFilter:["class","data-practice-ai-attempt-id",
-        "data-iclub-ai-lesson-id","data-iclub-ai-tour-attempt-id"],
+        "data-iclub-ai-tour-attempt-id"],
         childList:true,subtree:true});
     }
     document.addEventListener("iclub:practice-ai-context-changed",()=>{
