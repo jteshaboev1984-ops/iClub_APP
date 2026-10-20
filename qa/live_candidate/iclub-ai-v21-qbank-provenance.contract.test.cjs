@@ -89,3 +89,24 @@ test("70-row editorial issue queue is explicitly unapproved, with 8 actionable f
  }
  assert.doesNotMatch(csv,/,"APPROVED","APPROVED"/);
 });
+
+test("Closed three-language editorial revision preserves immutable history without runtime grants",()=>{
+ const sql=read("iclub_ai_v21_source_revision_history_QA_ONLY_UNAPPLIED_20261020.sql");
+ const negative=read("iclub_ai_v21_revision_ledger_SCRATCH_TEST_ONLY_20261020.sql");
+ for(const s of [
+  "CREATE TABLE private.iclub_ai_v21_source_revision_archive",
+  "BEFORE UPDATE OR DELETE",
+  "CREATE FUNCTION private.iclub_ai_v21_stage_three_locale_revision_v1",
+  "p_new_version",
+  "FOR UPDATE",
+  "private.iclub_ai_v21_academic_deliveries",
+  "private.iclub_ai_v21_qbank_owner_beta_releases",
+  "private.iclub_ai_v21_source_admitted_v1",
+  "source_card_key=v_new_key",
+  "published=false,revoked=true,approved_at=NULL",
+  "REVOKE ALL ON FUNCTION private.iclub_ai_v21_stage_three_locale_revision_v1"
+ ])assert.ok(sql.includes(s),s);
+ assert.doesNotMatch(sql,/GRANT EXECUTE ON FUNCTION|UPDATE public.questions|DELETE FROM public.questions/);
+ for(const s of ["Stale source version","Partial locale set admitted","Archived history was mutable",
+  "Old released sources changed","Delivered source overwritten"])assert.ok(negative.includes(s),s);
+});
