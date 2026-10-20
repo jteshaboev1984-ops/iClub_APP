@@ -238,6 +238,17 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y -qq postgresql-client
           fi
+      - name: Isolated three-locale question provenance SQL proof (NO production)
+        shell: bash
+        run: |
+          set -euo pipefail
+          db=iclub_ai_v21_scratch_ci_qbank_origin
+          createdb -h 127.0.0.1 -p 5432 -U postgres "$db"
+          cleanup() { dropdb -h 127.0.0.1 -p 5432 -U postgres "$db"; }
+          trap cleanup EXIT
+          PGDATABASE="$db" PGHOST=127.0.0.1 PGPORT=5432 \
+            node qa/live_candidate/iclub-ai-v21-qbank-provenance.pgtest.cjs
+          node --test qa/live_candidate/iclub-ai-v21-qbank-provenance.contract.test.cjs
       - name: Run fifteen independent scratch PostgreSQL suites
         shell: bash
         run: |
