@@ -1063,6 +1063,15 @@
   }
 
   async function invokeGlobalAi(body) {
+    // Only an explicitly loaded, separately authorized connected-beta adapter
+    // can route this QA copy to the real prepared-only server.
+    const beta = window.iClubAiV21BetaClient;
+    if (beta && typeof beta.askPrepared === "function") {
+      const answer = await beta.askPrepared({
+        promptKey: body?.prompt_key, locale: body?.locale
+      });
+      return { data: answer, error: null };
+    }
     const client = window.sb;
     if (!client?.functions || typeof client.functions.invoke !== "function") {
       return { data: null, error: { message: "functions_unavailable" } };
@@ -1399,7 +1408,20 @@
 
     state.bootstrapInFlight = (async () => {
       try {
-        const { data, error } = await client.rpc("get_iclub_ai_ui_bootstrap_v1");
+        const beta = window.iClubAiV21BetaClient;
+        let data, error;
+        if (beta && typeof beta.status === "function") {
+          const permission = await beta.status();
+          data = {
+            visible: permission?.eligible === true,
+            locale: locale(),
+            assessment_blocked: false,
+            usage_exhausted: false
+          };
+          error = permission?.ok === true ? null : { message: "beta_gate_unavailable" };
+        } else {
+          ({ data, error } = await client.rpc("get_iclub_ai_ui_bootstrap_v1"));
+        }
         // An old account's in-flight bootstrap must not show its UI in the
         // newly signed-in account, even when its request finishes last.
         if (epoch !== state.authEpoch) return null;
