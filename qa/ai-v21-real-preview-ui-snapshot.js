@@ -553,6 +553,38 @@
     }
 
     const screen = ctx?.screenCode || activeViewName();
+    // Connected closed beta: show approved first-party navigation questions.
+    // Keep the architect-approved panel/layout. Other academic prompts remain
+    // unavailable until independent sources and product permissions exist.
+    if (window.iClubAiV21BetaClient?.askPrepared) {
+      const localized = {
+        ru: {
+          nav_home:"Где Главная?",nav_courses:"Где Учёба?",
+          nav_ratings:"Где Рейтинг?",nav_profile:"Где Профиль?",
+          nav_about:"Где «О проекте»?",nav_support:"Где Поддержка?"
+        },
+        uz: {
+          nav_home:"Bosh sahifa qayerda?",nav_courses:"O‘qish qayerda?",
+          nav_ratings:"Reyting qayerda?",nav_profile:"Profil qayerda?",
+          nav_about:"Loyiha haqida qayerda?",nav_support:"Yordam qayerda?"
+        },
+        en: {
+          nav_home:"Where is Home?",nav_courses:"Where is Study?",
+          nav_ratings:"Where is Ratings?",nav_profile:"Where is Profile?",
+          nav_about:"Where is About?",nav_support:"Where is Support?"
+        }
+      };
+      const keys = ({
+        home:["nav_courses","nav_profile","nav_support"],
+        courses:["nav_home","nav_ratings","nav_support"],
+        ratings:["nav_home","nav_courses","nav_profile"],
+        profile:["nav_support","nav_about","nav_courses"],
+        support:["nav_profile","nav_home","nav_courses"],
+        about:["nav_home","nav_profile","nav_support"]
+      })[screen] || ["nav_home","nav_courses","nav_support"];
+      const text = localized[locale()] || localized.ru;
+      return keys.map(key => ({key,label:text[key]}));
+    }
     const prompts = {
       "practice-start": [["practice_rules",c.practiceRules],["practice_after",c.practiceAfter]],
       "practice-result": [["practice_result",c.practiceResult],["practice_next",c.practiceNext]],
