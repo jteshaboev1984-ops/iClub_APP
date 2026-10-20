@@ -43,9 +43,9 @@ Deno.serve(async(req:Request)=>{
  let body:Obj;
  try{const b:unknown=JSON.parse(raw);if(!object(b))throw Error();body=b;}
  catch{return send(400,{ok:false,reason:"invalid_request"},origin);}
- if(Object.keys(body).some(k=>!["intent","request_id","prompt_key","locale"].includes(k)))
+ if(Object.keys(body).some(k=>!["intent","request_id","prompt_key","locale","consent_version"].includes(k)))
   return send(400,{ok:false,reason:"invalid_request"},origin);
- if(body.intent!=="status"&&body.intent!=="ask")
+ if(body.intent!=="status"&&body.intent!=="ask"&&body.intent!=="consent")
   return send(400,{ok:false,reason:"invalid_request"},origin);
  const bearer=req.headers.get("authorization")||"";
  if(!/^Bearer [A-Za-z0-9._-]{24,4000}$/.test(bearer))
@@ -66,10 +66,43 @@ Deno.serve(async(req:Request)=>{
  if(!authenticated||!UUID.test(String(authenticated.id||""))||
     authenticated.role!=="authenticated")
   return send(401,{ok:false,reason:"authentication_required"},origin);
- // Do not advertise membership or readiness in a health check while beta is OFF.
- if(body.intent==="status")
-  return send(200,{ok:true,service:"iclub_ai_v21_prepared_beta",
+ // Real signed-identity beta status, not a preview-only UI guess.
+ if(body.intent==="status"){
+  if(Object.keys(body).length!==1)return send(400,{ok:false,reason:"invalid_request"},origin);
+  let status:Obj|null=null;
+  try{
+   status=await safeJson(await fetch(BASE+
+    "/rest/v1/rpc/get_iclub_ai_v21_beta_status_service",{
+    method:"POST",
+    headers:{"apikey":service,"authorization":"Bearer "+service,
+      "content-type":"application/json"},
+    body:JSON.stringify({p_user_id:authenticated.id}),
+    signal:AbortSignal.timeout(5000)
+   }));
+  }catch{return send(503,{ok:false,reason:"backend_unavailable"},origin);}
+  if(!status||status.ok!==true)return send(503,{ok:false,reason:"backend_unavailable"},origin);
+  return send(200,{ok:true,eligible:status.eligible===true,
+    candidate:status.candidate===true,consented:status.consented===true,
     preparedOnly:true,providerEnabled:false},origin);
+ }
+ if(body.intent==="consent"){
+  if(Object.keys(body).length!==2||body.consent_version!=="global_ai_beta_v21")
+   return send(400,{ok:false,reason:"invalid_consent"},origin);
+  let consent:Obj|null=null;
+  try{
+   consent=await safeJson(await fetch(BASE+
+    "/rest/v1/rpc/iclub_ai_v21_beta_opt_in_service_v1",{
+    method:"POST",
+    headers:{"apikey":anon,"authorization":bearer,
+      "content-type":"application/json"},
+    body:JSON.stringify({p_consent_version:"global_ai_beta_v21"}),
+    signal:AbortSignal.timeout(5000)
+   }));
+  }catch{return send(503,{ok:false,reason:"backend_unavailable"},origin);}
+  if(!consent)return send(503,{ok:false,reason:"backend_unavailable"},origin);
+  return send(200,{ok:consent.ok===true,recorded:consent.recorded===true,
+    reason:consent.ok===true?"consent_recorded":"not_eligible_or_already_recorded"},origin);
+ }
  if(typeof body.request_id!=="string"||!UUID.test(body.request_id)||
     typeof body.prompt_key!=="string"||!KEYS.has(body.prompt_key)||
     !["ru","uz","en"].includes(String(body.locale)))
