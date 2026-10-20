@@ -12,6 +12,7 @@ on:
       - '.github/workflows/iclub-ai-v21-offline-qa.yml'
       - 'qa/ai-v21-knowledge-first-prepared-bridge.cjs'
       - 'qa/ai-v21-knowledge-first-prepared-bridge.test.cjs'
+      - 'qa/live_candidate/**'
       - 'qa/ai-layer-v21-trusted-server-adapter.cjs'
       - 'qa/ai-layer-v21-trusted-server-adapter.test.cjs'
       - 'qa/ai-layer-v21-app-wide-admission.cjs'
@@ -188,6 +189,8 @@ jobs:
           CI: 'true'
           ICLUB_AI_QA_BOUND_PREPARED: synthetic-only
         run: node --test qa/ai-v21-knowledge-first-prepared-bridge.test.cjs
+      - name: Universal real academic source contracts, approved UI and permissions
+        run: node --test qa/live_candidate/iclub-ai-v21-academic-architecture.test.cjs qa/live_candidate/iclub-ai-v21-browser-adapter.test.cjs qa/live_candidate/iclub-ai-v21-product-ux.test.cjs
       - name: Headless Chrome actual viewport and interaction QA, synthetic only
         run: |
           set -euo pipefail
