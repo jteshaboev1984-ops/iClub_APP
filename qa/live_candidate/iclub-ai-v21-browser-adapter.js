@@ -291,6 +291,130 @@
     return{ok:true,message:answer.message,mode:"prepared",
       academic_state_changed:false,provider_called:false};
   }
+
+  // Unified learner-scoped source bridge. Selectors are not grants:
+  // the server verifies real owner, finalization, publication and entitlement.
+  const academicTypes=new Set(["practice_error","lesson_topic","tour_archive"]);
+  const positiveInt=x=>Number.isSafeInteger(x)&&x>0;
+  async function availableAcademic({surface,recordId,locale}={}){
+    if(!academicTypes.has(surface)||!positiveInt(recordId)||
+       !LOCALES.has(locale))return [];
+    const current=await status();
+    if(!current.eligible||protectedNow())return [];
+    const user=lastUser,epoch=authEpoch;
+    const response=await invoke({intent:"academic_available",
+      surface,record_id:recordId,locale});
+    if(user!==await identity()||epoch!==authEpoch||protectedNow()||
+       response?.ok!==true||!Array.isArray(response.available))return [];
+    return response.available.filter(positiveInt).slice(0,12);
+  }
+  async function askAcademic({surface,recordId,questionId=null,locale}={}){
+    if(!academicTypes.has(surface)||!positiveInt(recordId)||
+       !LOCALES.has(locale)||
+       (surface==="practice_error"
+        ?!positiveInt(questionId):questionId!==null))return closed();
+    const current=await status();
+    if(!current.eligible||protectedNow())return closed("beta_not_enabled");
+    const user=lastUser,epoch=authEpoch;
+    const requestId=window.crypto?.randomUUID?.();
+    if(!requestId)return closed("request_unavailable");
+    const result=await invoke({intent:"academic",request_id:requestId,
+      surface,record_id:recordId,question_id:questionId,locale});
+    if(user!==await identity()||epoch!==authEpoch||protectedNow())
+      return closed("context_changed");
+    if(result?.ok!==true||result.provider_called!==false||
+       result.academic_state_changed!==false||typeof result.message!=="string")
+      return closed(String(result?.reason||"in_development"));
+    return{ok:true,message:result.message,mode:"prepared",
+      provider_called:false,academic_state_changed:false};
+  }
+  const academicLabels={
+    ru:{practice_error:"Объяснить ошибку",lesson_topic:"Объяснить тему",
+      tour_archive:"Объяснить результаты тура"},
+    uz:{practice_error:"Xatoni tushuntirish",lesson_topic:"Mavzuni tushuntirish",
+      tour_archive:"Tur natijasini tushuntirish"},
+    en:{practice_error:"Explain the mistake",lesson_topic:"Explain the topic",
+      tour_archive:"Explain the Tour result"}
+  };
+  const localeNow=()=>String(window.i18n?.getLang?.()||"ru");
+  const active=(code)=>document.getElementById("courses-"+code)
+    ?.classList.contains("is-active")===true;
+  const scopeFor={
+    practice_error:{screen:"practice-review",container:"practice-review-list",
+      root:"courses-practice-review",record:"practiceAiAttemptId"},
+    lesson_topic:{screen:"video",container:"courses-video",
+      root:"courses-video",record:"iclubAiLessonId"},
+    tour_archive:{screen:"tour-review",container:"tour-review-list",
+      root:"courses-tour-review",record:"iclubAiTourAttemptId"}
+  };
+  const lastScan=new Map();
+  function academicButton(container,surface,recordId,questionId=null){
+    const identifier=surface+":"+recordId+":"+(questionId||0);
+    if(container.querySelector?.('[data-iclub-ai-academic-button="'+identifier+'"]'))
+      return;
+    const button=document.createElement("button");
+    button.type="button";button.className="btn";
+    button.dataset.iclubAiAcademicButton=identifier;
+    button.textContent=(academicLabels[localeNow()]||academicLabels.ru)[surface];
+    button.addEventListener("click",event=>{
+      event.stopPropagation();
+      if(!active(scopeFor[surface].screen)||protectedNow())return;
+      const sourceRoot=document.getElementById(scopeFor[surface].root);
+      if(Number(sourceRoot?.dataset?.[scopeFor[surface].record]||0)!==recordId)
+        return;
+      void window.iClubGlobalAiShell?.explainAcademic?.({
+        surface,recordId,questionId,locale:localeNow(),
+        displayText:(academicLabels[localeNow()]||academicLabels.ru)[surface]
+      });
+    });
+    container.appendChild(button);
+  }
+  async function scanAcademic(surface){
+    const conf=scopeFor[surface];
+    if(!conf||!active(conf.screen)||protectedNow())return;
+    const el=document.getElementById(conf.root);
+    const container=document.getElementById(conf.container);
+    const id=Number(el?.dataset?.[conf.record]||0);
+    if(!positiveInt(id)||!container)return;
+    const key=surface+":"+id+":"+localeNow();
+    if(lastScan.get(surface)===key)return;
+    lastScan.set(surface,key);
+    const available=await availableAcademic({surface,recordId:id,locale:localeNow()});
+    if(!active(conf.screen)||!el?.isConnected||Number(el.dataset?.[conf.record]||0)!==id)
+      return;
+    if(surface==="practice_error"){
+      const rows=container.querySelectorAll?.("[data-practice-ai-question-id]")||[];
+      for(const row of rows){
+        const questionId=Number(row.dataset.practiceAiQuestionId||0);
+        // The server returns ONLY wrong, finalized, source-published IDs.
+        if(positiveInt(questionId)&&available.includes(questionId))
+          academicButton(row,surface,id,questionId);
+      }
+    }else if(available.includes(id)){
+      academicButton(container,surface,id);
+    }
+  }
+  function setupAcademicAutoAttach(){
+    const roots=["courses-practice-review","courses-video","courses-tour-review"];
+    for(const id of roots){
+      const root=document.getElementById(id);
+      if(!root||typeof MutationObserver!=="function")continue;
+      new MutationObserver(()=>{
+        const surface=Object.keys(scopeFor).find(s=>scopeFor[s].root===id);
+        if(!surface||!active(scopeFor[surface].screen)){
+          lastScan.delete(surface);return;
+        }
+        // One in-flight fetch per source context, irrespective of DOM mutations.
+        void scanAcademic(surface);
+      }).observe(root,{attributes:true,attributeFilter:["class","data-practice-ai-attempt-id",
+        "data-iclub-ai-lesson-id","data-iclub-ai-tour-attempt-id"],
+        childList:true,subtree:true});
+    }
+    document.addEventListener("iclub:practice-ai-context-changed",()=>{
+      lastScan.delete("practice_error");void scanAcademic("practice_error");
+    });
+  }
+
   function resetOnIdentityChange(){
     sequence++;authEpoch++;permission=null;lastUser="";
     removeInvite();
@@ -305,7 +429,11 @@
   if(document.readyState==="loading")
     document.addEventListener("DOMContentLoaded",listenForInvite,{once:true});
   else listenForInvite();
+  if(document.readyState==="loading")
+    document.addEventListener("DOMContentLoaded",setupAcademicAutoAttach,{once:true});
+  else setupAcademicAutoAttach();
   window.iClubAiV21BetaClient=Object.freeze({
-    status,consentFromExplicitUserAction,askPrepared,resetOnIdentityChange
+    status,consentFromExplicitUserAction,askPrepared,
+    availableAcademic,askAcademic,resetOnIdentityChange
   });
 })();
