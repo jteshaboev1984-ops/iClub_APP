@@ -118,9 +118,9 @@ assert.ok(html.includes('src="app.js?'),"Must use the real app.js");
 // bootstrap resources with its pre-existing synthetic QA fixture. It never
 // authenticates or accesses a real learner, Supabase or the provider.
 if(mainSource && html.includes('src="iclub-ai-v21-ui.js?')){
-  const client=/<script src="iclub-ai-v21-beta-client\\.js\\?[^"]+"><\\/script>\\s*/g;
-  const shell=/src="iclub-ai-v21-ui\\.js\\?[^"]+"/g;
-  const style=/href="iclub-ai-v21-ui\\.css\\?[^"]+"/g;
+  const client=/<script src="iclub-ai-v21-beta-client\.js\?[^"]+"><\/script>\s*/g;
+  const shell=/src="iclub-ai-v21-ui\.js\?[^"]+"/g;
+  const style=/href="iclub-ai-v21-ui\.css\?[^"]+"/g;
   assert.equal((html.match(client)||[]).length,1,
     "Actual main must contain one separately gated client script");
   assert.equal((html.match(shell)||[]).length,1,
