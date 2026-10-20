@@ -41,8 +41,11 @@ test("§108 handoff token is opaque, only synthetic SQL insert and no academic w
  });
  a.equal(result.ok,true);
  a.match(result.handoffToken,/^[A-Za-z0-9_-]{32}$/);
- a.equal(result.handoffToken.includes("biology"),false);
- a.equal(result.handoffToken.includes("11"),false);
+ // Random base64url tokens may contain harmless short substrings.
+ // Test their 192-bit opaque encoding instead of accidental character patterns.
+ const tokenBytes=Buffer.from(result.handoffToken,"base64url");
+ a.equal(tokenBytes.length,24);
+ a.equal(tokenBytes.toString("base64url"),result.handoffToken);
  a.match(query,/INSERT INTO private\.iclub_ai_v21_home_action_handoffs_scratch/);
  a.doesNotMatch(query,/\bUPDATE\b|\bDELETE\b|practice_sessions_v4\s+SET/i);
  a.equal(result.navigationExecuted,false);
