@@ -137,3 +137,65 @@ test("Trilingual reviewed-content proposal remains a hash-pinned unapproved draf
   assert.ok(shift.translations[l].includes("370 − 2P = 70 + P"));
  }
 });
+
+test("P4 editorial handoff: all 70 live questions have hash-bound trilingual pending review, no fabricated signoffs",()=>{
+ const csv=read("../../docs/iclub-ai-v21-qbank-70-editorial-review-queue-20261020.csv");
+ const decode=line=>{
+  let quote=false,buf="",cells=[];
+  for(let i=0;i<line.length;i++){
+   const ch=line[i];
+   if(ch==='"'){if(quote&&line[i+1]==='"'){buf+='"';i++;}else quote=!quote;}
+   else if(ch===','&&!quote){cells.push(buf);buf="";}
+   else buf+=ch;
+  }
+  cells.push(buf);
+  return cells;
+ };
+ const lines=csv.trimEnd().split(/\r?\n/),head=decode(lines[0]);
+ assert.equal(lines.length,71);
+ const required=[
+  "snapshot_source_version","snapshot_publication_revision","snapshot_target_sha256",
+  "snapshot_content_sha256_en","snapshot_content_sha256_ru","snapshot_content_sha256_uz",
+  "technical_integrity_preflight","p4_existing_contract",
+  "content_gate","rights_gate","source_version_gate","correctness_gate",
+  "negative_tests_gate","exam_security_gate","locale_gate","accessibility_gate",
+  "signed_content_review","signed_rights_review","signed_technical_review",
+  "release_owner_authorization"
+ ];
+ required.forEach(k=>assert.ok(head.includes(k),k));
+ const counts={chemistry:0,economics:0}, seen=new Set(),keys=new Set();
+ for(const line of lines.slice(1)){
+  const val=decode(line);
+  assert.equal(val.length,head.length);
+  const r=Object.fromEntries(head.map((k,i)=>[k,val[i]]));
+  assert.ok(["chemistry","economics"].includes(r.subject_key));
+  assert.ok(!seen.has(r.subject_key+":"+r.question_id));
+  seen.add(r.subject_key+":"+r.question_id);
+  counts[r.subject_key]++;
+  assert.equal(r.snapshot_source_version,"qbank_exact_explanation_draft_v1");
+  assert.equal(r.snapshot_publication_revision,"1");
+  assert.match(r.snapshot_target_sha256,/^[a-f0-9]{64}$/);
+  for(const lang of ["en","ru","uz"]){
+   assert.match(r["snapshot_content_sha256_"+lang],/^[a-f0-9]{64}$/);
+   assert.ok(r["source_card_key_"+lang]);
+   assert.ok(!keys.has(r["source_card_key_"+lang]));
+   keys.add(r["source_card_key_"+lang]);
+  }
+  assert.equal(r.technical_integrity_preflight,"PASS_HASH_AND_ACTIVE_SOURCE_ONLY");
+  assert.equal(r.p4_existing_contract,"DIFFERENT_SURFACE_AND_STORAGE__NO_AUTOMATIC_RELEASE");
+  for(const g of ["content_gate","rights_gate","source_version_gate",
+   "correctness_gate","negative_tests_gate","exam_security_gate",
+   "locale_gate","accessibility_gate"])assert.equal(r[g],"PENDING",g);
+  for(const g of ["signed_content_review","signed_rights_review",
+   "signed_technical_review"])assert.equal(r[g],"MISSING");
+  assert.equal(r.release_owner_authorization,"NOT_AUTHORIZED");
+  assert.equal(r.independent_editorial_publication,"NOT_APPROVED");
+ }
+ assert.deepEqual(counts,{chemistry:35,economics:35});
+ assert.equal(keys.size,210);
+ const p4Source=read("../sql_drafts/iclub_ai_source_proof_bundle_v21_UNAPPLIED.sql");
+ const liveGateway=read("iclub_ai_v21_qbank_owner_provenance_GATE_ONLY_UNAPPLIED_20261020.sql");
+ assert.match(p4Source,/\(surface_code='practice' AND feature_code='answer_explanation'\)/);
+ assert.match(liveGateway,/src.surface_code='practice_error'/);
+ assert.doesNotMatch(csv,/"APPROVED","APPROVED"/);
+});
