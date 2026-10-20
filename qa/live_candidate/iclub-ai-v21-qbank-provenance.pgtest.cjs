@@ -203,9 +203,7 @@ DO $assert$ BEGIN
 END $assert$;
 SELECT 'PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE' result;
 `;
-const sql=schema+"
-"+gateOnly+"
-"+fixtures;
+const sql=[schema,gateOnly,fixtures].join(String.fromCharCode(10));
 try{
  const result=cp.execFileSync("psql",["-X","-v","ON_ERROR_STOP=1"],{input:sql,encoding:"utf8",timeout:90000,maxBuffer:2_000_000});
  assert.match(result,/PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE/);
