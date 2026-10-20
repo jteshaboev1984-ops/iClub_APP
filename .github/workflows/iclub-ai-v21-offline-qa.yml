@@ -190,7 +190,7 @@ jobs:
           ICLUB_AI_QA_BOUND_PREPARED: synthetic-only
         run: node --test qa/ai-v21-knowledge-first-prepared-bridge.test.cjs
       - name: Universal real academic source contracts, approved UI and permissions
-        run: node --test qa/live_candidate/iclub-ai-v21-academic-architecture.test.cjs qa/live_candidate/iclub-ai-v21-source-intake.test.cjs qa/live_candidate/iclub-ai-v21-browser-adapter.test.cjs qa/live_candidate/iclub-ai-v21-product-ux.test.cjs
+        run: node --test qa/live_candidate/iclub-ai-v21-academic-architecture.test.cjs qa/live_candidate/iclub-ai-v21-source-intake.test.cjs qa/live_candidate/iclub-ai-v21-owner-beta-release.test.cjs qa/live_candidate/iclub-ai-v21-browser-adapter.test.cjs qa/live_candidate/iclub-ai-v21-product-ux.test.cjs
       - name: Headless Chrome actual viewport and interaction QA, synthetic only
         run: |
           set -euo pipefail

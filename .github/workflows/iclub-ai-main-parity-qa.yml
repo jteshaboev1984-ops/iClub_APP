@@ -56,6 +56,7 @@ jobs:
           node --test qa/live_candidate/iclub-ai-v21-product-ux.test.cjs
           node --test qa/live_candidate/iclub-ai-v21-academic-architecture.test.cjs
           node --test qa/live_candidate/iclub-ai-v21-source-intake.test.cjs
+          node --test qa/live_candidate/iclub-ai-v21-owner-beta-release.test.cjs
           node --test qa/live_candidate/iclub-ai-v21-same-origin-release.test.cjs
           CI=true ICLUB_AI_QA_BOUND_PREPARED=synthetic-only node --test qa/ai-v21-knowledge-first-prepared-bridge.test.cjs
           node --check qa/ai-v21-real-preview-dist/app.js
