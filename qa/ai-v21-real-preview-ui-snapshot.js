@@ -1068,7 +1068,8 @@
     const beta = window.iClubAiV21BetaClient;
     if (beta && typeof beta.askPrepared === "function") {
       const answer = await beta.askPrepared({
-        promptKey: body?.prompt_key, locale: body?.locale
+        promptKey: body?.prompt_key, locale: body?.locale,
+        userText: body?.user_text
       });
       return { data: answer, error: null };
     }
