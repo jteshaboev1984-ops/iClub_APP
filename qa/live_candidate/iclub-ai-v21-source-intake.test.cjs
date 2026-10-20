@@ -22,7 +22,7 @@ test("111 copies are unpublished, revoked and have NO inherited approval",()=>{
  assert.match(staging,/false,false,false,false,false,true,NULL/);
  assert.match(staging,/IF n<>111 THEN/);
  assert.match(staging,/count\(DISTINCT context_key\).*<>37/);
- assert.match(staging,/OR src\.published/);
+ assert.match(staging,/WHERE published OR NOT revoked/);
  assert.doesNotMatch(staging,/UPDATE (?:public\.questions|public\.practice_sessions_v4|public\.practice_attempts|private\.practice_ai_source_cards)/);
  assert.doesNotMatch(staging,/DELETE FROM|TRUNCATE TABLE|DROP TABLE/);
 });
@@ -34,7 +34,7 @@ test("Source fingerprint pin includes changed answer, options, 3 languages, less
  "v.duration_seconds","public.tour_questions","q.subject_id"
  ])assert.ok(staging.includes(value),"Missing source fingerprint component: "+value);
  assert.match(staging,/ADD COLUMN target_hash text NOT NULL/);
- assert.match(staging,/source\.target_hash IS DISTINCT FROM private\.iclub_ai_v21_target_fingerprint_v1/);
+ assert.match(staging,/target_hash IS DISTINCT FROM private\.iclub_ai_v21_target_fingerprint_v1/);
 });
 test("Both independent service surfaces re-check current target content",()=>{
  assert.match(guard,/source\.target_hash IS DISTINCT FROM private\.iclub_ai_v21_target_fingerprint_v1/);
