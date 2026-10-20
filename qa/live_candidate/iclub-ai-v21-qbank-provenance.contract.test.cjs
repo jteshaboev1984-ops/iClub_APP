@@ -238,3 +238,24 @@ test("Former P4 signed verifier cannot silently publish unreconciled live source
  assert.equal(unsafeBooleanShortcut.reason,"trust_registry_missing");
  assert.equal("attestation" in unsafeBooleanShortcut,false);
 });
+
+test("Five original taxonomy corrections are explicit, source-bound and require human approval",()=>{
+ const x=JSON.parse(read("../../docs/iclub-ai-v21-5-taxonomy-correction-proposals-20261020.json"));
+ assert.equal(x.status,"QA_PROPOSAL_ONLY");
+ assert.equal(x.production_question_changes,0);
+ assert.equal(x.reviewers,"PENDING");
+ assert.equal(x.proposals.length,5);
+ assert.deepEqual(x.proposals.map(p=>p.question_id).sort((a,b)=>a-b),
+  [9241,10063,10073,10077,10081]);
+ for(const p of x.proposals){
+  assert.equal(p.subject_key,"chemistry");
+  assert.equal(p.academic_review,"PENDING");
+  assert.equal(p.locale_review,"PENDING");
+  assert.equal(p.metadata_change_authorized,false);
+  assert.equal(p.requires_fingerprint_recheck_before_any_future_publication,true);
+  assert.ok(p.current_topic!==p.proposed_topic ||
+   p.current_subtopic!==p.proposed_subtopic);
+  assert.match(p.original_target_hash,/^[a-f0-9]{64}$/);
+  assert.ok(p.reason.length>30);
+ }
+});
