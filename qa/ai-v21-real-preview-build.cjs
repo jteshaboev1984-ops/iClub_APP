@@ -113,7 +113,30 @@ const telegram='<script src="https://telegram.org/js/telegram-web-app.js"></scri
 assert.equal(html.split(sdk).length,2,"SDK script anchor changed: fail closed");
 assert.equal(html.split(telegram).length,2,"Telegram anchor changed: fail closed");
 assert.ok(html.includes('src="app.js?'),"Must use the real app.js");
-assert.ok(html.includes('src="global-ai-ui.js?'),"Must use the real global-ai-ui.js");
+// Current main now includes the approved beta UI and a signed-session
+// transport. Offline Chromium deliberately replaces ONLY those two
+// bootstrap resources with its pre-existing synthetic QA fixture. It never
+// authenticates or accesses a real learner, Supabase or the provider.
+if(mainSource && html.includes('src="iclub-ai-v21-ui.js?')){
+  const client=/<script src="iclub-ai-v21-beta-client\\.js\\?[^"]+"><\\/script>\\s*/g;
+  const shell=/src="iclub-ai-v21-ui\\.js\\?[^"]+"/g;
+  const style=/href="iclub-ai-v21-ui\\.css\\?[^"]+"/g;
+  assert.equal((html.match(client)||[]).length,1,
+    "Actual main must contain one separately gated client script");
+  assert.equal((html.match(shell)||[]).length,1,
+    "Actual main must contain one approved AI UI script");
+  assert.equal((html.match(style)||[]).length,1,
+    "Actual main must contain one approved AI style");
+  html=html.replace(client,"");
+  html=html.replace(shell,'src="global-ai-ui.js?offline-main-parity"');
+  html=html.replace(style,'href="global-ai-ui.css?offline-main-parity"');
+  // Never include an authenticated Supabase transport in the disconnected
+  // 100% synthetic and CSP-blocked preview.
+  fs.rmSync(path.join(out,"iclub-ai-v21-beta-client.js"),{force:true});
+}
+assert.ok(html.includes('src="global-ai-ui.js?'),"Must load approved offline AI UI");
+assert.ok(!html.includes("iclub-ai-v21-beta-client.js"),
+  "No signed-session client in disconnected Preview");
 const typedHelpSource=path.join(__dirname,"ai-v21-preview-typed-app-help.js");
 assert.ok(fs.existsSync(typedHelpSource),"Missing QA typed public-help candidate");
 const typedHelp=fs.readFileSync(typedHelpSource,"utf8");
