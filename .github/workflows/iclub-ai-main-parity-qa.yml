@@ -9,6 +9,8 @@ on:
       - 'qa/ai-v21-main-parity-regression.test.cjs'
       - 'qa/ai-v21-real-preview-browser.cjs'
       - 'qa/ai-v21-knowledge-first-*'
+      - 'qa/live_candidate/**'
+      - 'qa/ai-v21-real-preview-ui-snapshot.js'
       - '.github/workflows/iclub-ai-main-parity-qa.yml'
   workflow_dispatch:
 permissions:
