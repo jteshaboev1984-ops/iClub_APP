@@ -197,6 +197,11 @@ test("P4 editorial handoff: all 70 live questions have hash-bound trilingual pen
  const liveGateway=read("iclub_ai_v21_qbank_owner_provenance_GATE_ONLY_UNAPPLIED_20261020.sql");
  assert.match(p4Source,/\(surface_code='practice' AND feature_code='answer_explanation'\)/);
  assert.match(liveGateway,/src.surface_code='practice_error'/);
+ // Old P4 hashes an envelope, live runtime hashes just answer text.
+ // Copying a live digest into a P4 ticket is NOT a valid source proof.
+ assert.ok(p4Source.includes("v.source_text||E'\\n'||v.prepared_variants::text"));
+ assert.ok(liveGateway.includes("convert_to(src.body_text,'UTF8')"));
+ assert.match(p4Source,/PRIMARY KEY\(surface_code,subject_key,feature_code,topic_key,locale,source_id,source_version\)/);
  assert.doesNotMatch(csv,/"APPROVED","APPROVED"/);
 });
 
