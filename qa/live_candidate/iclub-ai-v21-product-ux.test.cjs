@@ -115,7 +115,7 @@ for(const lang of ["ru","uz","en"]){
 test("Connected AI chips are substantive and only published prepared source keys",()=>{
  for(const key of ["catalog_help","practice_rules","practice_after",
    "recs_help","tour_rules","books_help","support_help"]){
-  assert.match(panelSource,new RegExp(key+":\\""));
+  assert.ok(panelSource.includes(key+':"'),key);
   assert.match(publishedSql,new RegExp("'"+key+"'"));
  }
  for(const forbidden of ['nav_home:"Где Главная?"','nav_courses:"Где Учёба?"']){
