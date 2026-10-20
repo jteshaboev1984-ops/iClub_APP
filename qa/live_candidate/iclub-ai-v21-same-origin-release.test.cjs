@@ -53,5 +53,17 @@ test("same-origin beta release uses unchanged original app plus accepted UI",()=
    a.equal(index.split(newCss).length,2);
    a.equal(index.split('src="iclub-ai-v21-beta-client.js').length,2);
    a.equal(index.split('src="iclub-ai-v21-ui.js').length,2);
+   // Post-production install: compare exact bytes to the previously approved
+   // QA visual and connected beta adapter, not a screenshot substitute.
+   a.equal(fs.readFileSync(path.join(main,"iclub-ai-v21-beta-client.js"),"utf8"),adapter);
+   a.equal(fs.readFileSync(path.join(main,"iclub-ai-v21-ui.js"),"utf8"),src);
+   a.equal(fs.readFileSync(path.join(main,"iclub-ai-v21-ui.css"),"utf8"),css);
+   const icon=fs.readFileSync(path.join(main,"iclub-ai-tutor-a.webp"));
+   a.equal(icon.length,3394);
+   a.equal(icon.subarray(0,4).toString("ascii"),"RIFF");
+   a.equal(icon.subarray(8,12).toString("ascii"),"WEBP");
+   a.ok(index.indexOf('src="app.js?')<index.indexOf('src="iclub-ai-v21-beta-client.js'));
+   a.ok(index.indexOf('src="iclub-ai-v21-beta-client.js')<
+     index.indexOf('src="iclub-ai-v21-ui.js'));
  }
 });
