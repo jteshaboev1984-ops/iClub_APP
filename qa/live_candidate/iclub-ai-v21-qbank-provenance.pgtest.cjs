@@ -103,10 +103,11 @@ FROM private.iclub_ai_v21_academic_sources WHERE source_card_key='old_601_en';
 const fixtures=`
 INSERT INTO private.iclub_ai_v21_qbank_owner_beta_releases
 (source_card_key,source_version,content_hash,target_hash,subject_key,question_id,
- locale,owner_release_ref,rights_evidence_ref,academic_evidence_ref,
- locale_evidence_ref,enabled,released_at)
+ locale,original_source_hash,owner_release_ref,rights_evidence_ref,
+ academic_evidence_ref,locale_evidence_ref,enabled,released_at)
 SELECT a.source_card_key,a.source_version,a.content_hash,a.target_hash,
  a.subject_key,substring(a.context_key from 10)::bigint,a.locale,
+ encode(extensions.digest(convert_to(btrim(a.body_text),'UTF8'),'sha256'),'hex'),
  'SYNTHETIC_OWNER_APPROVAL_ONLY',
  'SYNTHETIC_RIGHTS_EVIDENCE_ONLY',
  'SYNTHETIC_ACADEMIC_REVIEW_ONLY',
@@ -200,6 +201,59 @@ DO $assert$ BEGIN
   WHERE published OR NOT revoked OR content_reviewed OR rights_reviewed
    OR locale_reviewed OR academic_qa_passed OR approved_at IS NOT NULL)
  THEN RAISE EXCEPTION 'Synthetic QA forged independent editorial status'; END IF;
+END $assert$;
+-- Versioned editorial correction is kept ONLY in AI source rows. The
+-- student's original question and assessment remain immutable.
+UPDATE private.iclub_ai_v21_academic_sources
+SET source_version='qbank_curated_revision_v2',
+ body_text=CASE locale
+ WHEN 'en' THEN 'Curated explanation: the answer follows from the exact conditions of the question. A full worked explanation is reviewed and signed independently for learners.'
+ WHEN 'ru' THEN 'Исправленное объяснение: ответ следует из условий исходного задания. Полный разбор проверяется и утверждается отдельно, без изменения оценок и вопросов.'
+ ELSE 'Tahrirlangan izoh: javob ayni savolning shartlariga tayangan. To‘liq tahlil mustaqil tekshirilib tasdiqlanadi, savol va oldingi baholar o‘zgarmaydi.' END
+WHERE context_key='question_502';
+UPDATE private.iclub_ai_v21_academic_sources
+SET content_hash=encode(extensions.digest(convert_to(body_text,'UTF8'),'sha256'),'hex')
+WHERE context_key='question_502';
+UPDATE private.iclub_ai_v21_qbank_owner_beta_releases beta
+SET origin_basis='original_iclub_curated_revision',
+ source_version=src.source_version,
+ content_hash=src.content_hash,
+ editorial_revision_ref='SYNTHETIC_CURATED_EDITS_502_R2',
+ enabled=true,released_at=clock_timestamp()
+FROM private.iclub_ai_v21_academic_sources src
+WHERE beta.source_card_key=src.source_card_key
+ AND beta.question_id=502;
+DO $assert$ BEGIN
+ IF (SELECT count(*) FROM private.iclub_ai_v21_academic_sources a
+     WHERE private.iclub_ai_v21_source_admitted_v1(a))<>7
+ THEN RAISE EXCEPTION 'Curated exact-question localized revision did not admit 3 versions'; END IF;
+END $assert$;
+-- A forged editorial revision reference in one language blocks all 3.
+UPDATE private.iclub_ai_v21_qbank_owner_beta_releases
+SET editorial_revision_ref='SYNTHETIC_WRONG_REVISION_REF'
+WHERE question_id=502 AND locale='uz';
+DO $assert$ BEGIN
+ IF (SELECT count(*) FROM private.iclub_ai_v21_academic_sources a
+     WHERE private.iclub_ai_v21_source_admitted_v1(a))<>4
+ THEN RAISE EXCEPTION 'Curated language revision mismatch did not fail closed'; END IF;
+END $assert$;
+UPDATE private.iclub_ai_v21_qbank_owner_beta_releases
+SET editorial_revision_ref='SYNTHETIC_CURATED_EDITS_502_R2'
+WHERE question_id=502 AND locale='uz';
+-- A stale snapshot of original bank text stops every new language.
+UPDATE private.iclub_ai_v21_qbank_owner_beta_releases
+SET original_source_hash=repeat('0',64)
+WHERE question_id=502 AND locale='ru';
+DO $assert$ BEGIN
+ IF (SELECT count(*) FROM private.iclub_ai_v21_academic_sources a
+     WHERE private.iclub_ai_v21_source_admitted_v1(a))<>4
+ THEN RAISE EXCEPTION 'Broken origin snapshot SHA did not fail closed'; END IF;
+END $assert$;
+-- An unapproved revision MUST NOT alter learner answers/grades.
+DO $assert$ BEGIN
+ IF (SELECT count(*) FROM private.iclub_ai_v21_academic_sources a
+     WHERE private.iclub_ai_v21_source_admitted_v1(a))<>4
+ THEN RAISE EXCEPTION 'Pre-release source admission unexpectedly widened'; END IF;
 END $assert$;
 SELECT 'PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE' result;
 `;
