@@ -199,3 +199,37 @@ test("P4 editorial handoff: all 70 live questions have hash-bound trilingual pen
  assert.match(liveGateway,/src.surface_code='practice_error'/);
  assert.doesNotMatch(csv,/"APPROVED","APPROVED"/);
 });
+
+test("Former P4 signed verifier cannot silently publish unreconciled live sources",()=>{
+ const {verifyEditorialEvidence,GATES}=require("../ai-layer-v21-editorial-evidence.cjs");
+ const draft=Object.fromEntries(GATES.map(k=>[k,false]));
+ const make=(surface,qaEvidence)=>({
+  protocol:"iclub-ai-editorial-evidence-v21",
+  ticketId:"77777777-7777-4777-8777-777777777777",action:"publish",
+  surface,subject:"economics",feature:"answer_explanation",
+  topic:"question_9465",locale:"en",
+  sourceId:"iclub_qbank_draft_20261020_economics_9465_en",
+  sourceVersion:"qbank_exact_explanation_draft_v1",
+  sourceHash:"d57ac7f27b1901506b66dc979e27c8c8468e518ed329f193f75c4b57974d4f88",
+  expectedRevision:1,qaEvidence,reason:"",
+  issuedAtMs:1800000000000,expiresAtMs:1800000050000
+ });
+ const nowMs=1800000001000;
+ const oldRoute=verifyEditorialEvidence({
+  manifest:make("practice_error",draft),trustRegistry:null,signatures:[],nowMs
+ });
+ assert.equal(oldRoute.ok,false);
+ assert.equal(oldRoute.reason,"manifest_invalid"); // Different surface grammar.
+ const canonicalButNotReviewed=verifyEditorialEvidence({
+  manifest:make("practice",draft),trustRegistry:null,signatures:[],nowMs
+ });
+ assert.equal(canonicalButNotReviewed.ok,false);
+ assert.equal(canonicalButNotReviewed.reason,"manifest_invalid");
+ const unsafeBooleanShortcut=verifyEditorialEvidence({
+  manifest:make("practice",Object.fromEntries(GATES.map(k=>[k,true]))),
+  trustRegistry:null,signatures:[],nowMs
+ });
+ assert.equal(unsafeBooleanShortcut.ok,false);
+ assert.equal(unsafeBooleanShortcut.reason,"trust_registry_missing");
+ assert.equal("attestation" in unsafeBooleanShortcut,false);
+});
