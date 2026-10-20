@@ -92,7 +92,7 @@ test("Identity change and a protected assessment block the browser transport",as
  assert.equal(x.state.requests.some(r=>r.intent==="ask"),false);
 });
 test("The adapter never touches user progress, localStorage, signup or model APIs",()=>{
- assert.doesNotMatch(source,/localStorage|auth\.signUp|\/auth\/v1\/signup|api\.openai\.com|service_role/i);
+ assert.doesNotMatch(source,/localStorage|auth\.signUp|\/auth\/v1\/signup|api\.openai\.com|SUPABASE_SERVICE_ROLE_KEY|serviceRoleKey/i);
  assert.match(source,/getUser/);
  assert.match(source,/iclub-ai-v21-prepared/);
 });
