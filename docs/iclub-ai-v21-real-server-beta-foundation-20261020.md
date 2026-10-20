@@ -9,3 +9,14 @@ The isolated Edge function \`iclub-ai-v21-prepared\` verifies real Supabase Auth
 **Release state remains OFF** after installation. Before opening beta: independently review rights/content and source integrity in each language; confirm working source hashes and exact current app navigation, prepare opt-in on real same-origin authenticated app; get the architect's exact approved learners/consents; test the real connected QA UI; only then enable beta. Existing Mathematics AI permission is not Global AI consent.
 
 Source installation cannot be replaced with any of the original \`*_UNAPPLIED.sql\` scratch files; those remain untouched.
+
+
+### Published navigation batch (2026-10-20)
+
+The architect expressly authorized publishing the existing six iClub navigation responses in RU/UZ/EN while retaining the previously approved AI screen visual. Source was rechecked against exact main `453127c3`: four real bottom-tab routes plus the real About and Support page actions; the displayed label and parent route were checked in `index.html`, `app.js`, and `i18n.js`. **18/18** owner-approved first-party navigation responses were published through `qa/live_candidate/iclub_ai_v21_navigation_18_release_20261020.sql`. Each stored localized byte string has an independently calculated SHA-256 digest and source version `app-nav-main-453127c3-v1`.
+
+This publication adds no academic explanations, no personal Home planning, and no learner history. Only the six precise `nav_*` keys are newly admitted in the existing prepared-only RPC and verified-JWT Edge route `iclub-ai-v21-prepared` v3. A QA browser adapter can use exactly recognized trilingual typed navigation queries; unrelated study questions remain unavailable. The existing Math Tutor remains independent. The architect-approved AI mark, panel structure and styles were not redesigned or deployed into main.
+
+Live Supabase postpublication: 18 published source rows, 18 matching digests, six source keys, three disabled unconsented candidate accounts, zero deliveries, zero usage, and all Global AI beta controls OFF. The original global AI runtime remains OFF independently. Product UI integration is still a QA candidate; **the new transport is not included in production main** and no live learner beta is claimed.
+
+Verification: current-main integration QA [run 39364049210](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/39364049210) passed; protected offline Preview [run 39364004647](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/39364004647) passed. The ready-to-test beta will require accepted same-origin app integration, exact Global AI opt-in by staged students, explicit cohort/release enablement, and direct QA of actual signed user sessions. No payments, no model calls, no Math Tutor changes.
