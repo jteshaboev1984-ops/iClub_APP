@@ -162,6 +162,8 @@ Deno.serve(async(req:Request)=>{
   return send(200,{ok:consent.ok===true,recorded:consent.recorded===true,
     reason:consent.ok===true?"consent_recorded":"not_eligible_or_already_recorded"},origin);
  }
+ if(Object.keys(body).some(k=>!["intent","request_id","prompt_key","locale"].includes(k)))
+  return send(400,{ok:false,reason:"invalid_request"},origin);
  if(typeof body.request_id!=="string"||!UUID.test(body.request_id)||
     typeof body.prompt_key!=="string"||!KEYS.has(body.prompt_key)||
     !["ru","uz","en"].includes(String(body.locale)))
