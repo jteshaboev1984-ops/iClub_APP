@@ -26,7 +26,7 @@ END $preflight$;
 INSERT INTO private.iclub_ai_v21_beta_members(
  user_id,enabled,consent_version,consent_at
 )
-SELECT DISTINCT q.user_id,false,NULL,NULL
+SELECT DISTINCT q.user_id,false,NULL::text,NULL::timestamptz
 FROM private.iclub_ai_qa_global_operator_v1 q
 JOIN private.exam_prep_beta_members m ON m.user_id=q.user_id
 JOIN private.exam_prep_feature_entitlements e ON e.user_id=q.user_id
