@@ -42,7 +42,7 @@ BEGIN
  IF n<>3 THEN RAISE EXCEPTION 'Only 3 currently eligible existing Math-beta candidates may be staged'; END IF;
 END $guard$;
 
--- Only allow voluntary consent for ALREADY admitted beta candidates.
+-- The explicit consent atomically enables only the pre-staged learner.\n-- The new table constraint forbids enabled=true without separate consent.
 -- No enrollment is produced merely by the Math-beta consent.
 CREATE OR REPLACE FUNCTION public.iclub_ai_v21_beta_opt_in_service_v1(
  p_consent_version text
@@ -53,9 +53,9 @@ BEGIN
  IF v_uid IS NULL OR p_consent_version<>'global_ai_beta_v21' THEN
   RETURN jsonb_build_object('ok',false,'reason','invalid_consent'); END IF;
  UPDATE private.iclub_ai_v21_beta_members
- SET consent_at=coalesce(consent_at,clock_timestamp()),
+ SET enabled=true,consent_at=coalesce(consent_at,clock_timestamp()),
      consent_version='global_ai_beta_v21',updated_at=clock_timestamp()
- WHERE user_id=v_uid AND enabled=true AND consent_at IS NULL;
+ WHERE user_id=v_uid AND enabled=false AND consent_at IS NULL;
  IF FOUND THEN RETURN jsonb_build_object('ok',true,'recorded',true); END IF;
  RETURN jsonb_build_object('ok',false,'reason','not_eligible_or_already_recorded');
 END $consent$;
@@ -64,10 +64,7 @@ REVOKE ALL ON FUNCTION public.iclub_ai_v21_beta_opt_in_service_v1(text)
 GRANT EXECUTE ON FUNCTION public.iclub_ai_v21_beta_opt_in_service_v1(text)
  TO authenticated;
 
--- Cohort enablement alone grants NO access: no one has separately consented.
-UPDATE private.iclub_ai_v21_beta_members
-SET enabled=true,updated_at=clock_timestamp()
-WHERE consent_at IS NULL AND consent_version IS NULL AND enabled=false;
+-- Pre-staged candidates remain disabled until their own explicit click.
 
 -- Prepared-only beta release is independent from older disabled global AI.
 -- It can deliver only exact owner-checked, integrity-checked public navigation.
@@ -80,7 +77,7 @@ WHERE singleton=1 AND NOT beta_enabled AND NOT prepared_enabled
 
 DO $verify$
 BEGIN
- IF (SELECT count(*) FROM private.iclub_ai_v21_beta_members WHERE enabled)<>3
+ IF (SELECT count(*) FROM private.iclub_ai_v21_beta_members WHERE enabled)<>0
  OR (SELECT count(*) FROM private.iclub_ai_v21_beta_members WHERE consent_at IS NOT NULL)<>0
  OR (SELECT count(*) FROM private.iclub_ai_v21_beta_control
      WHERE beta_enabled AND prepared_enabled AND NOT generation_enabled
