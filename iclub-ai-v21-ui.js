@@ -34,6 +34,8 @@
       restore: "Обычный размер",
       emptyTitle: "Чем помочь?",
       emptyCopy: "Выбери быстрый запрос или напиши свой вопрос.",
+      betaIntro: "Помогу освоить Practice, разбор ошибок и учебные материалы. Объяснения учебных задач пока готовятся.",
+      betaScope: "Пока доступны проверенные подсказки по работе с iClub. Учебные объяснения подключаем постепенно.",
       input: "Спросить iClub AI…",
       send: "Отправить",
       appHere: "Что можно делать здесь?",
@@ -98,6 +100,8 @@
       restore: "Odatdagi o‘lcham",
       emptyTitle: "Qanday yordam beray?",
       emptyCopy: "Tezkor so‘rovni tanla yoki o‘z savolingni yoz.",
+      betaIntro: "Practice, xatolar tahlili va o‘quv materiallaridan foydalanishga yordam beraman. Masalalar izohi hali tayyorlanmoqda.",
+      betaScope: "Hozircha iClub’dan foydalanish bo‘yicha tekshirilgan yordam mavjud. Fanlarga oid izohlar keyinroq qo‘shiladi.",
       input: "iClub AI'dan so‘rash…",
       send: "Yuborish",
       appHere: "Bu yerda nima qilish mumkin?",
@@ -162,6 +166,8 @@
       restore: "Restore panel size",
       emptyTitle: "How can I help?",
       emptyCopy: "Choose a quick prompt or type your own question.",
+      betaIntro: "I can guide you through Practice, mistake review and study resources. Subject explanations are being prepared.",
+      betaScope: "Verified help with iClub is available now. Subject explanations are being added gradually.",
       input: "Ask iClub AI…",
       send: "Send",
       appHere: "What can I do here?",
@@ -540,6 +546,70 @@
 
   function quickPrompts(ctx) {
     const c = copy();
+    // Prepared-only beta: practical, editorially verified product guidance,
+    // never fake personalized academic answers. Keep original panel/design.
+    if (window.iClubAiV21BetaClient?.askPrepared) {
+      const labels = {
+        ru:{
+          catalog_help:"С чего начать обучение?",
+          practice_rules:"Как эффективнее проходить Practice?",
+          practice_after:"Как разобрать и исправить ошибки?",
+          recs_help:"Что повторять после тренировки?",
+          tour_rules:"Как подготовиться к туру?",
+          books_help:"Где найти материал для повторения?",
+          support_help:"Как получить помощь?"
+        },
+        uz:{
+          catalog_help:"O‘qishni nimadan boshlash kerak?",
+          practice_rules:"Practice’dan samarali foydalanish yo‘li?",
+          practice_after:"Xatolarni qanday tahlil qilaman?",
+          recs_help:"Mashqdan keyin nimani takrorlash kerak?",
+          tour_rules:"Turga qanday tayyorlanaman?",
+          books_help:"Takrorlash uchun materiallar qayerda?",
+          support_help:"Qanday yordam olish mumkin?"
+        },
+        en:{
+          catalog_help:"Where should I begin studying?",
+          practice_rules:"How can I use Practice effectively?",
+          practice_after:"How do I review and fix mistakes?",
+          recs_help:"What should I revisit after Practice?",
+          tour_rules:"How should I prepare for a Tour?",
+          books_help:"Where can I find review materials?",
+          support_help:"How can I get support?"
+        }
+      };
+      const context=ctx?.screenCode||activeViewName();
+      const screens={
+        home:["catalog_help","practice_after","tour_rules"],
+        "all-subjects":["catalog_help","practice_rules","books_help"],
+        "subject-hub":["catalog_help","practice_rules","books_help"],
+        "practice-start":["practice_rules","practice_after","recs_help"],
+        "practice-result":["practice_after","recs_help","practice_rules"],
+        "practice-review":["practice_after","recs_help","books_help"],
+        "practice-recs":["recs_help","practice_rules","books_help"],
+        tours:["tour_rules","practice_rules","books_help"],
+        "tour-rules":["tour_rules","practice_rules"],
+        "tour-result":["tour_rules","support_help"],
+        "tour-review":["tour_rules","support_help"],
+        lessons:["catalog_help","books_help","practice_rules"],
+        video:["books_help","catalog_help"],
+        books:["books_help","practice_rules"],
+        "my-recs":["recs_help","practice_after","books_help"],
+        "my-rec-detail":["recs_help","practice_after"],
+        profile:["recs_help","support_help","catalog_help"],
+        ratings:["practice_rules","tour_rules","support_help"],
+        support:["support_help","catalog_help"],
+        "support-topic":["support_help"],
+        about:["catalog_help","support_help"],
+        community:["support_help","catalog_help"],
+        certificates:["tour_rules","support_help"],
+        archive:["tour_rules","support_help"],
+        notifications:["support_help","catalog_help"]
+      };
+      const keys=screens[context]||["catalog_help","practice_after","tour_rules"];
+      const t=labels[locale()]||labels.ru;
+      return keys.map(key=>({key,label:t[key]}));
+    }
     if (ctx?.subjectKey === "mathematics"
         && ctx?.scopeCode === "exam_prep"
         && ctx?.componentCode
@@ -553,38 +623,6 @@
     }
 
     const screen = ctx?.screenCode || activeViewName();
-    // Connected closed beta: show approved first-party navigation questions.
-    // Keep the architect-approved panel/layout. Other academic prompts remain
-    // unavailable until independent sources and product permissions exist.
-    if (window.iClubAiV21BetaClient?.askPrepared) {
-      const localized = {
-        ru: {
-          nav_home:"Где Главная?",nav_courses:"Где Учёба?",
-          nav_ratings:"Где Рейтинг?",nav_profile:"Где Профиль?",
-          nav_about:"Где «О проекте»?",nav_support:"Где Поддержка?"
-        },
-        uz: {
-          nav_home:"Bosh sahifa qayerda?",nav_courses:"O‘qish qayerda?",
-          nav_ratings:"Reyting qayerda?",nav_profile:"Profil qayerda?",
-          nav_about:"Loyiha haqida qayerda?",nav_support:"Yordam qayerda?"
-        },
-        en: {
-          nav_home:"Where is Home?",nav_courses:"Where is Study?",
-          nav_ratings:"Where is Ratings?",nav_profile:"Where is Profile?",
-          nav_about:"Where is About?",nav_support:"Where is Support?"
-        }
-      };
-      const keys = ({
-        home:["nav_courses","nav_profile","nav_support"],
-        courses:["nav_home","nav_ratings","nav_support"],
-        ratings:["nav_home","nav_courses","nav_profile"],
-        profile:["nav_support","nav_about","nav_courses"],
-        support:["nav_profile","nav_home","nav_courses"],
-        about:["nav_home","nav_profile","nav_support"]
-      })[screen] || ["nav_home","nav_courses","nav_support"];
-      const text = localized[locale()] || localized.ru;
-      return keys.map(key => ({key,label:text[key]}));
-    }
     const prompts = {
       "practice-start": [["practice_rules",c.practiceRules],["practice_after",c.practiceAfter]],
       "practice-result": [["practice_result",c.practiceResult],["practice_next",c.practiceNext]],
@@ -847,7 +885,7 @@
     const title = p.querySelector("[data-global-ai-empty-title]");
     const text = p.querySelector("[data-global-ai-empty-copy]");
     if (title) title.textContent = copy().emptyTitle;
-    if (text) text.textContent = copy().emptyCopy;
+    if (text) text.textContent = window.iClubAiV21BetaClient ? copy().betaIntro : copy().emptyCopy;
     const info = p.querySelector("[data-global-ai-first-info]");
     if (info) {
       info.hidden = !state.firstOpenNote;
@@ -1221,7 +1259,7 @@
       if (["in_development", "subject_not_ready", "approved_source_missing",
            "source_not_ready", "no_source", "topic_not_released"].includes(reason)
           || data.mode === "in_development") {
-        appendMessage(threadKey, "assistant", copy().inDevelopment, "notice");
+        appendMessage(threadKey, "assistant", window.iClubAiV21BetaClient ? copy().betaScope : copy().inDevelopment, "notice");
         return;
       }
 
@@ -1558,6 +1596,7 @@
   window.iClubGlobalAiShell = Object.freeze({
     version: "global_ai_conversations_v1",
     refresh: () => refreshBootstrap(),
+    open: () => openPanel(),
     close: () => closePanel(),
     // Does not bypass any protected Practice/Tour/source checks.
     runQaPracticeDemo,
