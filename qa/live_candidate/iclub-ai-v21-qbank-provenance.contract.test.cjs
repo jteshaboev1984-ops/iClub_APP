@@ -110,3 +110,30 @@ test("Closed three-language editorial revision preserves immutable history witho
  for(const s of ["Old version admitted for overwrite","Partial locale set admitted","Archived history was mutable",
   "Old released sources changed","Delivered source overwritten"])assert.ok(negative.includes(s),s);
 });
+
+test("Trilingual reviewed-content proposal remains a hash-pinned unapproved draft",()=>{
+ const p=JSON.parse(read("../../docs/iclub-ai-v21-3-trilingual-curated-content-proposals-20261020.json"));
+ assert.equal(p.status,"NOT_APPROVED_NOT_STAGED_NOT_RELEASED");
+ assert.equal(p.owner_release,"NOT_AUTHORIZED");
+ for(const k of ["editorial_reviewer","rights_reviewer","language_reviewer"])
+  assert.equal(p[k],"PENDING");
+ assert.equal(p.cards.length,3);
+ assert.deepEqual(p.cards.map(x=>x.question_id).sort((a,b)=>a-b),[9465,9723,10095]);
+ for(const c of p.cards){
+  assert.match(c.target_hash,/^[a-f0-9]{64}$/);
+  assert.equal(c.source_version_current,"qbank_exact_explanation_draft_v1");
+  assert.equal(Object.keys(c.translations).sort().join(","),"en,ru,uz");
+  for(const lang of ["en","ru","uz"]){
+   assert.match(c.original_hashes[lang],/^[a-f0-9]{64}$/);
+   assert.ok(c.translations[lang].length>=100);
+  }
+ }
+ const econ=p.cards.find(x=>x.question_id===9465);
+ assert.match(econ.translations.uz,/40.*50.*30/);
+ assert.match(econ.translations.uz,/35.*45.*50/);
+ const shift=p.cards.find(x=>x.question_id===9723);
+ for(const l of ["en","ru","uz"]){
+  assert.ok(shift.translations[l].includes("400 − 2P = 100 + P"));
+  assert.ok(shift.translations[l].includes("370 − 2P = 70 + P"));
+ }
+});
