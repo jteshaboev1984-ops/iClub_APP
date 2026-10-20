@@ -1,0 +1,11 @@
+# iClub AI v2.1 — first real server foundation (beta OFF)
+
+Scope: independent **prepared General Help only**, not entire academic tutor. This is an additive production schema candidate, reviewed separately from scratch-only 24-RPC scripts. It does **not** change Mathematics Exam Prep, academic tables, existing AI runtime flags, production tariff contracts or Vercel.
+
+The production migration creates five **new** private beta tables and one service-role-only delivery function. Install defaults to zero beta members, zero content rows, and disabled beta/prepared/generation. No real learners are automatically enrolled. A stored control constraint prevents enabling generation in this first release. The RPC verifies per-user separately recorded Global AI consent, ongoing Practice/Tour/Math protection, independent per-locale editorial publication and immutable SHA-256 source, and a small temporary prepared-only 3-use / 5-hour beta quota. Source publication remains a distinct human decision. Replays with the same request ID are idempotent and do not debit twice. **This temporary beta period is not the final v2.1 paid model.**
+
+The isolated Edge function \`iclub-ai-v21-prepared\` verifies real Supabase Auth with the actual session JWT, then invokes the RPC exclusively with service_role. The browser can send only request UUID, locale and an allowlisted General Help key — never marks, student ID, exam answers, a content body or AI provider prompt. There are no paid model calls, registrations, data ingestion, external content reads or AI academic writes. Origin is limited to known iClub Vercel origins. The endpoint returns only public prepared help **after** rights+consent+cohort+source release, and refuses all others.
+
+**Release state remains OFF** after installation. Before opening beta: independently review rights/content and source integrity in each language; confirm working source hashes and exact current app navigation, prepare opt-in on real same-origin authenticated app; get the architect's exact approved learners/consents; test the real connected QA UI; only then enable beta. Existing Mathematics AI permission is not Global AI consent.
+
+Source installation cannot be replaced with any of the original \`*_UNAPPLIED.sql\` scratch files; those remain untouched.
