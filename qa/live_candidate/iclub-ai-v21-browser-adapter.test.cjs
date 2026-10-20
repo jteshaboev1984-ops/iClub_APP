@@ -146,3 +146,25 @@ test("Separate opt-in immediately reveals prepared AI with no provider call",asy
  assert.equal(approved.ok,true);
  assert.equal(approved.provider_called,false);
 });
+
+test("Every visible premium quick question has both client and server authority",()=>{
+ const fs=require("node:fs"),path=require("node:path");
+ const panel=fs.readFileSync(path.join(__dirname,"../ai-v21-real-preview-ui-snapshot.js"),"utf8");
+ const edge=fs.readFileSync(path.join(__dirname,"iclub-ai-v21-prepared/index.ts"),"utf8");
+ const uiBegin=panel.indexOf("const labels = {",panel.indexOf("function quickPrompts("));
+ const uiEnd=panel.indexOf("const context=ctx?.screenCode",uiBegin);
+ assert.ok(uiBegin>0&&uiEnd>uiBegin,"Current premium prompt definition");
+ const ui=new Set([...panel.slice(uiBegin,uiEnd).matchAll(/([a-z]+(?:_[a-z]+)*):"/g)].map(x=>x[1]));
+ const clientStart=source.indexOf("const ALLOWED=new Set([");
+ const clientEnd=source.indexOf("]);",clientStart);
+ const serverStart=edge.indexOf("const KEYS = new Set([");
+ const serverEnd=edge.indexOf("]);",serverStart);
+ assert.ok(clientStart>0&&clientEnd>clientStart&&serverStart>0&&serverEnd>serverStart);
+ const client=new Set([...source.slice(clientStart,clientEnd).matchAll(/"([a-z_]+)"/g)].map(x=>x[1]));
+ const server=new Set([...edge.slice(serverStart,serverEnd).matchAll(/"([a-z_]+)"/g)].map(x=>x[1]));
+ assert.equal(ui.size,7);
+ for(const key of ui){
+  assert.equal(client.has(key),true,key+" is missing in the installed client");
+  assert.equal(server.has(key),true,key+" is missing in the prepared server");
+ }
+});
