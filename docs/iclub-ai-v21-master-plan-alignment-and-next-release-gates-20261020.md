@@ -46,3 +46,10 @@
 Добавлен `docs/iclub-ai-v21-3-trilingual-curated-content-proposals-20261020.json` — три технически подготовленных редакционных предложения (Chemistry #10095, Economics #9465 и #9723, полный EN/RU/UZ). Их девять строк привязаны к предыдущей версии и исходным SHA-256, но не заменяют текущий контент и не подписаны Content/Academic/Rights/Language reviewers. Новые QA-тесты проверяют структуру и вычислительные шаги; не заявлять публикацию.
 
 Блокер теперь конкретен: произвести независимый академический/правовой/языковой review исходных **70**, включая 8 отмеченных вопросов, получить явное решение на реальную малую партию, затем установить проверенный общий source gate + archive в отдельном обратимом релизе. Перед проверкой нового route на ученике нужен настоящий неправильный ответ в **завершённой** Practice и отдельное согласие; ни тестовые попытки, ни чужие данные, ни активные экзамены не используются.
+
+## Final CI acceptance of curated proposals (same QA branch)
+- Isolated real PostgreSQL history, negative grants/versions, all legacy safeguards and Chromium: **SUCCESS** [39433780886](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/39433780886).
+- Actual current-main integration parity: **SUCCESS** [39433780419](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/39433780419).
+- Both certify exact source code commit `f6d50304d82863d8487b7ee066d34c3b18605bf0`. Later documentation edits do not alter tested source code.
+- `docs/iclub-ai-v21-3-trilingual-curated-content-proposals-20261020.json` stays editorial/rights/locale PENDING and `NOT_APPROVED_NOT_STAGED_NOT_RELEASED`.
+- These passes do not constitute academic reviewer approval, real account E2E, or production deployment permission.
