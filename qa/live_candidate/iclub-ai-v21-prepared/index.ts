@@ -6,7 +6,8 @@ const KEYS = new Set([
  "support_help","catalog_help","ratings_help","home_next",
  "practice_rules","tour_rules","books_help","about_help",
  "notifications_help","community_help","certificates_help",
- "profile_meaning","video_help","recs_help","archive_help"
+ "profile_meaning","video_help","recs_help","archive_help",
+ "nav_home","nav_courses","nav_ratings","nav_profile","nav_about","nav_support"
 ]);
 const ORIGIN = /^https:\/\/(?:i-club-app\.vercel\.app|i-club-[a-z0-9-]+-jasurbeks-projects-c5451f97\.vercel\.app)$/i;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
