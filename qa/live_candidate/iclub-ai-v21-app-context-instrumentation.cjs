@@ -7,20 +7,6 @@ function instrumentAcademicContext(source){
   throw Error("main_app_screen_contract_changed");
  const inserts=[
   {
-   start:"function renderVideo() {",
-   before:'  const subj = subjectByKey(subjectKey);',
-   code:[
-    '  // Only a selector; server independently proves lesson enrollment and source.',
-    '  const academicVideo=document.getElementById("courses-video");',
-    '  if(academicVideo){',
-    '    const id=Number(state?.courses?.lessonId||0);',
-    '    if(Number.isSafeInteger(id)&&id>0)',
-    '      academicVideo.dataset.iclubAiLessonId=String(id);',
-    '    else delete academicVideo.dataset.iclubAiLessonId;',
-    '  }',''
-   ].join("\n")
-  },
-  {
    start:"function renderTourReview() {",
    before:'  const localPayload = state?.courses?.lastTourReviewPayload || null;',
    code:[
@@ -41,7 +27,7 @@ function instrumentAcademicContext(source){
   if(first<0||next<first||next-first>1400)
    throw Error("screen_anchor_changed:"+x.start);
   const middle=result.slice(first,next);
-  if(middle.includes("academicVideo")||middle.includes("academicTourReview")){
+  if(middle.includes("academicTourReview")){
    if(!middle.includes(x.code.trim()))throw Error("partial_screen_instrumentation");
    continue;
   }

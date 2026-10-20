@@ -143,7 +143,7 @@ test("Actual current MAIN instrumentation is tiny and idempotent",()=>{
  const original=fs.readFileSync(path.join(from,"app.js"),"utf8");
  const edited=instrumentAcademicContext(original);
  a.equal(instrumentAcademicContext(edited),edited);
- a.ok(edited.includes("dataset.iclubAiLessonId"));
+ a.ok(!edited.includes("dataset.iclubAiLessonId"));
  a.ok(edited.includes("dataset.iclubAiTourAttemptId"));
  a.ok(edited.includes("function syncPracticeAiDomContext()"));
  a.ok(edited.includes("window.iClubExamPrep"));
@@ -156,6 +156,7 @@ test("Subject-level Telegram video can never masquerade as a selected Study less
   const app=fs.readFileSync(path.join(main,"app.js"),"utf8");
   a.match(app,/const primaryLessonId = await getSubjectPrimaryLessonId\(subjectKey\)/);
   a.match(app,/state\.courses\.lessonId = primaryLessonId \|\| null/);
+  a.doesNotMatch(app,/dataset\.iclubAiLessonId/);
  }
  a.doesNotMatch(adapter,/lesson_topic:\{screen:"video"/);
  a.doesNotMatch(adapter,/const roots=\[[^\]]*"courses-video"/);
