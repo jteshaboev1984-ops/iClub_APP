@@ -44,3 +44,15 @@ The automated isolated PostgreSQL test covers positive deliberately synthetic th
 - QA branch `qa/iclub-ai-layer-v21-20261012`; no new branch.
 - Source preflight `qa/live_candidate/iclub_ai_v21_qbank_editorial_preflight_READ_ONLY_20261020.sql` verified against real Supabase through read-only SQL; **70/70 passed structural conditions**.
 - Source security and curated-version QA are under the existing offline GitHub Action; mark PASS **only after the latest run succeeds**. Neither earlier generic PASS nor a SELECT alone proves new revision-mode runtime correctness.
+
+## Final QA evidence after restoring the clean SQL
+
+The first trial detected an incorrectly formed SQL test-file replacement and was **NOT approved**. The SQL was reconstructed from the last known good QA file using a safe literal replacement method. No malformed candidate SQL was executed against production.
+
+- [Isolated PostgreSQL + full offline Chromium / original Math preservation — PASS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/39430068610), source commit `cd1a751b328df41e8da039c1fed339b6faf10411`.
+- [Current main parity — PASS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/39430068591), same tested source commit.
+- The new isolated step passed real scratch PostgreSQL both for unchanged originals and for new separately curated three-language AI explanations. Regression suites completed with no failures.
+- Final live read-only check: **321** academic source rows, **210** new fully closed/unreviewed draft locale cards, **111** existing source cards still admitted, **111** old owner allowlist rows unchanged, **0** real academic deliveries, `provider_enabled=false`.
+- New qbank provenance table in production: `NULL` (not installed); existing production Vercel deployment remains `READY` at main SHA `7ea6c2960e6be1b1c46bf7b8506ee3106ad974e7`.
+
+**GO for tested QA code only. NO-GO for production installation or releasing 210 additional locale drafts without specific owner approval and actual independent academic, language, provenance/rights review.** Technical preflight and AI-assisted content review cannot be relabelled as human editor signatures.
