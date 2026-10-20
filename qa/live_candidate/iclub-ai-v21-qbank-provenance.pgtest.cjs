@@ -7,6 +7,7 @@ const start=file.indexOf("CREATE TABLE private.iclub_ai_v21_qbank_owner_beta_rel
 const end=file.indexOf("-- The new pathway must remain entirely OFF",start);
 assert.ok(start>0&&end>start,"Expected isolated release table and function");
 const gateOnly=file.slice(start,end);
+const revisionStage=fs.readFileSync(path.join(__dirname,"iclub_ai_v21_source_revision_history_QA_ONLY_UNAPPLIED_20261020.sql"),"utf8");
 assert.ok(!gateOnly.includes("UPDATE public.questions")&&!gateOnly.includes("DELETE FROM"));
 assert.ok(process.env.PGDATABASE?.startsWith("iclub_ai_v21_scratch_"),"Refuse non-scratch DB");
 const schema=`
@@ -41,7 +42,7 @@ CREATE TABLE private.iclub_ai_v21_academic_sources(
 CREATE TABLE private.iclub_ai_v21_owner_beta_source_releases(
  source_card_key text PRIMARY KEY,source_version text,content_hash text,
  target_hash text,release_basis text,enabled boolean);
-CREATE TABLE private.practice_ai_source_cards(
+CREATE TABLE private.iclub_ai_v21_academic_deliveries(request_id uuid PRIMARY KEY,subject_key text,context_key text,source_card_key text);\nCREATE TABLE private.practice_ai_source_cards(
  source_card_key text PRIMARY KEY,subject_key text,question_id bigint,
  source_version text,locale text,card_type text,approval_status text,
  rights_status text,is_runtime_allowed boolean,approved_at timestamptz,
@@ -257,7 +258,7 @@ DO $assert$ BEGIN
 END $assert$;
 SELECT 'PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE' result;
 `;
-const sql=[schema,gateOnly,fixtures].join(String.fromCharCode(10));
+const sql=[schema,gateOnly,revisionStage,fixtures].join(String.fromCharCode(10));
 try{
  const result=cp.execFileSync("psql",["-X","-v","ON_ERROR_STOP=1"],{input:sql,encoding:"utf8",timeout:90000,maxBuffer:2_000_000});
  assert.match(result,/PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE/);
