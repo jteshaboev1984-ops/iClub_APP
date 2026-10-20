@@ -4,7 +4,7 @@ const BASE = "https://mmmduffgpvwjdpruzikw.supabase.co";
 const SERVICE_FN = "deliver_iclub_ai_v21_beta_prepared_service";
 const KEYS = new Set([
  "support_help","catalog_help","ratings_help","home_next",
- "practice_rules","tour_rules","books_help","about_help",
+ "practice_rules","practice_after","tour_rules","books_help","about_help",
  "notifications_help","community_help","certificates_help",
  "profile_meaning","video_help","recs_help","archive_help",
  "nav_home","nav_courses","nav_ratings","nav_profile","nav_about","nav_support"
