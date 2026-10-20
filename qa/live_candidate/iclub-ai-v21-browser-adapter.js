@@ -38,7 +38,7 @@
       .replace(/\s+/g," ").trim();
     return NAV_INPUTS[lang]?.[key]||"";
   }
-  let sequence=0, lastUser="", permission=null;
+  let sequence=0, authEpoch=0, lastUser="", permission=null;
   const closed=(reason="in_development")=>({ok:false,reason,
     academic_state_changed:false});
   const identity=async()=>{
@@ -229,9 +229,9 @@
     const current=await status();
     if(!current.candidate||current.consented||protectedNow())
       return closed("not_eligible_or_already_recorded");
-    const epoch=sequence,user=lastUser;
+    const epoch=authEpoch,user=lastUser;
     const result=await invoke({intent:"consent",consent_version:"global_ai_beta_v21"});
-    if(epoch!==sequence||user!==await identity())return closed("account_changed");
+    if(epoch!==authEpoch||user!==await identity())return closed("account_changed");
     await status();
     return result?.ok===true&&result.recorded===true?
       {ok:true,recorded:true}:closed("consent_unavailable");
@@ -243,12 +243,12 @@
     if(!ALLOWED.has(key))return closed();
     const current=await status();
     if(!current.eligible||protectedNow())return closed("beta_not_enabled");
-    const user=lastUser,epoch=sequence;
+    const user=lastUser,epoch=authEpoch;
     const id=window.crypto?.randomUUID?.();
     if(typeof id!=="string")return closed("request_unavailable");
     const answer=await invoke({intent:"ask",request_id:id,
       prompt_key:key,locale:localeCode});
-    if(epoch!==sequence||user!==await identity()||protectedNow())
+    if(epoch!==authEpoch||user!==await identity()||protectedNow())
       return closed("context_changed");
     if(answer?.ok!==true||answer.academic_state_changed!==false||
        answer.provider_called!==false||typeof answer.message!=="string")
@@ -257,7 +257,7 @@
       academic_state_changed:false,provider_called:false};
   }
   function resetOnIdentityChange(){
-    sequence++;permission=null;lastUser="";
+    sequence++;authEpoch++;permission=null;lastUser="";
     removeInvite();
     document.getElementById(dialogId)?.remove();
   }
