@@ -1,0 +1,16 @@
+# iClub AI v2.1 — universal academic release architecture (2026-10-20)
+
+## Product intent
+Implement the **one-time technical plumbing** for any subject and future question/content batch: controlled publication of verified, owner-relevant explanations for (1) finalized incorrect Practice answers, (2) enrolled Study lessons, (3) released Tour archives. Existing Math Exam Prep and its 3 Tutor rights are an independent subsystem, never reinterpreted as Global AI source publication. The existing premium Option A AI panel and current users' state are untouched.
+
+## Runtime + publication
+- `private.iclub_ai_v21_academic_sources` is one universal cross-subject, cross-language editorial release registry. A future subject/content batch is published with **data only**: surface, verified subject key, exact question/lesson/tour reference, locale, unique source key, version, SHA-256 and independent rights/content/locale/academic-QA approvals. No hardcoded chemistry/economics lists.
+- `private.iclub_ai_v21_tour_archive_permissions` separately releases each competition archive no earlier than its official end; finished attempts are not enough.
+- `private.iclub_ai_v21_academic_policy` is independent from the existing beta switch. Installation defaults OFF, with **zero source rows**. The first real academic release requires explicit editorial GO; not authorized by legacy approved status alone.
+- `public.deliver_iclub_ai_v21_academic_service` is a single service-role-only, server-derived resolver. It accepts **untrusted ID selectors** but derives owner, enrollment, subject, finalized status, wrong/answered evidence, live-assessment protection, archive access and selected locale within the same transaction. Content hash, active revision, publication rights and quota are checked before delivery. Existing 3-per-5-hour learner quota is shared across prepared and academic routes. Replayed request IDs cannot change owner or source.
+- The legacy Practice UI exposes `data-practice-ai-attempt-id` on its result/review and `data-practice-ai-question-id` on question rows, already. It exposes the **legacy attempt ID**, resolved through `practice_sessions_v4.legacy_attempt_id` inside trusted server SQL. Unmapped or wrong context fails closed. All subject/course mapping is server-derived.
+- Exact sources currently available in previous Practice card RPC are **not independently published Global AI sources**, despite legacy `approved` status. They require reviewer attribution and independent publication into this registry. Content in Cambridge coursebooks is not to be redistributed automatically.
+- The first migration adds four private tables and one service-only RPC; it does not modify existing Math Tutor, academic source cards, grade tables, progress, tariffs, Vercel or legacy Global AI configuration. `academic_policy.enabled=false` and no source rows ensure zero academic responses until explicit publication.
+
+## QA release gates
+One coherent upgrade: SQL/PG self-check, JWT Edge academic intent, browser context bridge, automated screen-ownership checks, source publication governance, tour release/time embargo, wrong/correct/unanswered tests, concurrency, quota/refund and original Mathematics Exam Prep preservation. No additional per-subject code releases once the generic resolver is installed.
