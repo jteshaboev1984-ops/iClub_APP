@@ -107,6 +107,6 @@ test("Closed three-language editorial revision preserves immutable history witho
   "REVOKE ALL ON FUNCTION private.iclub_ai_v21_stage_three_locale_revision_v1"
  ])assert.ok(sql.includes(s),s);
  assert.doesNotMatch(sql,/GRANT EXECUTE ON FUNCTION|UPDATE public.questions|DELETE FROM public.questions/);
- for(const s of ["Stale source version","Partial locale set admitted","Archived history was mutable",
+ for(const s of ["Old version admitted for overwrite","Partial locale set admitted","Archived history was mutable",
   "Old released sources changed","Delivered source overwritten"])assert.ok(negative.includes(s),s);
 });
