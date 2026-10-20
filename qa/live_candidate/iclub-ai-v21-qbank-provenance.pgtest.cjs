@@ -42,7 +42,8 @@ CREATE TABLE private.iclub_ai_v21_academic_sources(
 CREATE TABLE private.iclub_ai_v21_owner_beta_source_releases(
  source_card_key text PRIMARY KEY,source_version text,content_hash text,
  target_hash text,release_basis text,enabled boolean);
-CREATE TABLE private.iclub_ai_v21_academic_deliveries(request_id uuid PRIMARY KEY,subject_key text,context_key text,source_card_key text);\nCREATE TABLE private.practice_ai_source_cards(
+CREATE TABLE private.iclub_ai_v21_academic_deliveries(request_id uuid PRIMARY KEY,subject_key text,context_key text,source_card_key text);
+CREATE TABLE private.practice_ai_source_cards(
  source_card_key text PRIMARY KEY,subject_key text,question_id bigint,
  source_version text,locale text,card_type text,approval_status text,
  rights_status text,is_runtime_allowed boolean,approved_at timestamptz,
