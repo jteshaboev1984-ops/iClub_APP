@@ -1136,6 +1136,15 @@
     // Only an explicitly loaded, separately authorized connected-beta adapter
     // can route this QA copy to the real prepared-only server.
     const beta = window.iClubAiV21BetaClient;
+    if (body?.intent === "academic") {
+      if (typeof beta?.askAcademic !== "function")
+        return {data:null,error:{message:"academic_unavailable"}};
+      const answer = await beta.askAcademic({
+        surface:body.surface,recordId:body.record_id,
+        questionId:body.question_id,locale:body.locale
+      });
+      return {data:answer,error:null};
+    }
     if (beta && typeof beta.askPrepared === "function") {
       const answer = await beta.askPrepared({
         promptKey: body?.prompt_key, locale: body?.locale,
@@ -1154,7 +1163,7 @@
     ]);
   }
 
-  async function sendMessage({ promptKey, displayText, userText }) {
+  async function sendMessage({ promptKey, displayText, userText, academicContext=null }) {
     if (state.busy || currentBlocked() || state.usageExhausted || !state.context) return;
 
     const context = { ...state.context };
@@ -1192,6 +1201,11 @@
         scope_code: context.scopeCode,
         prompt_key: promptKey || "",
         user_text: cleanText,
+        ...(academicContext ? {
+          intent:"academic",surface:academicContext.surface,
+          record_id:academicContext.recordId,
+          question_id:academicContext.questionId
+        } : {}),
         component_code: context.componentCode || "",
         skill_code: context.skillCode || "",
         ...(window.__ICLUB_AI_QA_PREVIEW__ ? {screen_code: context.screenCode || ""} : {})
@@ -1593,11 +1607,36 @@
     setTimeout(() => { void refreshBootstrap(); }, 0);
   }
 
+  // One source-driven launch hook for Practice, Lessons and Tour archive.
+  // The service derives the owner and all academic facts, never the browser.
+  function explainAcademic({surface,recordId,questionId=null,displayText}={}){
+    const views={practice_error:"practice-review",
+      lesson_topic:"video",tour_archive:"tour-review"};
+    const code=views[surface];
+    if(!code||!Number.isSafeInteger(recordId)||recordId<=0||
+       (surface==="practice_error"
+        ?!Number.isSafeInteger(questionId)||questionId<=0
+        :questionId!==null)||
+       state.bootstrap?.visible!==true||state.busy||
+       currentBlocked()||!isEligibleView()||
+       activeViewName()!=="courses"||activeCoursesScreen()!==code)
+      return false;
+    reconcileContext();
+    openPanel();
+    const c=copy();
+    const label=surface==="practice_error"?c.practiceError:
+      surface==="lesson_topic"?c.topicMain:c.tourArchive;
+    void sendMessage({promptKey:"",displayText:displayText||label,
+      userText:"",academicContext:{surface,recordId,questionId}});
+    return true;
+  }
+
   window.iClubGlobalAiShell = Object.freeze({
     version: "global_ai_conversations_v1",
     refresh: () => refreshBootstrap(),
     open: () => openPanel(),
     close: () => closePanel(),
+    explainAcademic,
     // Does not bypass any protected Practice/Tour/source checks.
     runQaPracticeDemo,
     runQaContextHelp,

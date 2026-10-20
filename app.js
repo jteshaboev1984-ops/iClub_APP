@@ -15801,6 +15801,14 @@ async function renderSubjectHubMentorCard(subjectKey) {
 
     async function renderVideo() {
   const subjectKey = String(state?.courses?.subjectKey || "").trim().toLowerCase();
+  // Only a selector; server independently proves lesson enrollment and source.
+  const academicVideo=document.getElementById("courses-video");
+  if(academicVideo){
+    const id=Number(state?.courses?.lessonId||0);
+    if(Number.isSafeInteger(id)&&id>0)
+      academicVideo.dataset.iclubAiLessonId=String(id);
+    else delete academicVideo.dataset.iclubAiLessonId;
+  }
   const subj = subjectByKey(subjectKey);
 
   const tEl = $("#video-title");
@@ -22400,6 +22408,13 @@ async function updateTourAttempt(attemptId, patch) {
   if (!wrap) return;
 
   const attemptId = Number(state?.courses?.lastTourAttemptId || 0);
+  // Only a selector; the server enforces Tour embargo and editorial release.
+  const academicTourReview=document.getElementById("courses-tour-review");
+  if(academicTourReview){
+    if(Number.isSafeInteger(attemptId)&&attemptId>0)
+      academicTourReview.dataset.iclubAiTourAttemptId=String(attemptId);
+    else delete academicTourReview.dataset.iclubAiTourAttemptId;
+  }
   const localPayload = state?.courses?.lastTourReviewPayload || null;
   const payloadItems = Array.isArray(localPayload?.items) ? localPayload.items : [];
   const pending = attemptId ? beginUiLoading(wrap, "iclub-review-pending", () =>
