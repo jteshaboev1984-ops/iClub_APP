@@ -72,7 +72,8 @@
       title:"Тестирование iClub AI",
       info:"На первом этапе помощник использует только проверенную справку iClub. Он не меняет оценки и прогресс. Участие добровольное; доступ откроется после отдельного запуска беты.",
       confirm:"Согласен участвовать",later:"Не сейчас",
-      saved:"Согласие принято. Доступ откроется после запуска беты.",
+      saved:"Согласие принято. Откройте iClub AI с помощью фирменного значка.",
+      pending:"Согласие принято. Доступ откроется после запуска беты.",
       error:"Не удалось сохранить согласие. Попробуйте позже."
     },
     uz:{
@@ -81,14 +82,16 @@
       title:"iClub AI sinovi",
       info:"Birinchi bosqichda yordamchi faqat iClub’ning tekshirilgan ma’lumotlaridan foydalanadi. U baholar yoki o‘quv natijalarini o‘zgartirmaydi. Ishtirok ixtiyoriy; kirish beta boshlangandan so‘ng ochiladi.",
       confirm:"Ishtirok etishga roziman",later:"Hozir emas",
-      saved:"Rozilik qabul qilindi. Kirish beta boshlanganda ochiladi.",
+      saved:"Rozilik qabul qilindi. iClub AI belgisini bosib yordamchini oching.",
+      pending:"Rozilik qabul qilindi. Kirish beta boshlanganda ochiladi.",
       error:"Rozilik saqlanmadi. Keyinroq qayta urinib ko‘ring."
     },
     en:{
       offer:"Join iClub AI testing",detail:"Optional closed beta",title:"iClub AI beta",
       info:"At first, the assistant uses only verified iClub help. It does not change grades or learning progress. Participation is optional, and access opens only after the beta is launched.",
       confirm:"I agree to participate",later:"Not now",
-      saved:"Consent recorded. Access will open when beta starts.",
+      saved:"Consent recorded. Tap the iClub AI icon to open the assistant.",
+      pending:"Consent recorded. Access will open when beta starts.",
       error:"Consent could not be saved. Please try again."
     }
   };
@@ -186,7 +189,7 @@
     agree.addEventListener("click",async()=>{
       agree.disabled=true;later.disabled=true;
       const result=await consentFromExplicitUserAction(true);
-      info.textContent=result.ok?words().saved:words().error;
+      info.textContent=result.ok?(result.ready?words().saved:words().pending):words().error;
       agree.remove();later.textContent=words().later;later.disabled=false;
       if(result.ok)removeInvite();
     });
@@ -233,8 +236,11 @@
     const result=await invoke({intent:"consent",consent_version:"global_ai_beta_v21"});
     if(epoch!==authEpoch||user!==await identity())return closed("account_changed");
     await status();
-    return result?.ok===true&&result.recorded===true?
-      {ok:true,recorded:true}:closed("consent_unavailable");
+    if(result?.ok===true&&result.recorded===true){
+      await window.iClubGlobalAiShell?.refresh?.();
+      return {ok:true,recorded:true,ready:permission?.eligible===true};
+    }
+    return closed("consent_unavailable");
   }
   async function askPrepared({promptKey,locale,userText}={}){
     const localeCode=String(locale||"");
