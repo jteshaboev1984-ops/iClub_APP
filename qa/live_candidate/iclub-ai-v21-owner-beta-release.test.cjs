@@ -42,7 +42,8 @@ test("Exact wrong-question / subject / signed-owner / protected exam gates survi
  a.doesNotMatch(stage,/GRANT EXECUTE ON FUNCTION public\.deliver_iclub_ai_v21_academic_service[\s\S]+?\bTO authenticated/);
 });
 test("No subject-list routing, and all three discoverable surfaces share one admission policy",()=>{
- a.equal((stage.match(/private\.iclub_ai_v21_source_admitted_v1\(src\)/g)||[]).length,3);
+ // Three subject-agnostic discovery surfaces plus the staging audit COUNT.
+ a.equal((stage.match(/private\.iclub_ai_v21_source_admitted_v1\(src\)/g)||[]).length,4);
  a.equal((stage.match(/private\.iclub_ai_v21_source_admitted_v1\(source\)/g)||[]).length,1);
  a.match(stage,/p_surface='tour_archive'/);
  a.match(stage,/p_surface='lesson_topic'/);
