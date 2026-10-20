@@ -99,8 +99,8 @@ BEGIN
  ) INTO ready;
  RETURN jsonb_build_object('ok',true,
   'candidate',m.user_id IS NOT NULL,
-  'consented',m.consent_version='global_ai_beta_v21'
-   AND m.consent_at IS NOT NULL,
+  'consented',coalesce(m.consent_version='global_ai_beta_v21'
+   AND m.consent_at IS NOT NULL,false),
   'eligible',coalesce(c.beta_enabled,false)
    AND coalesce(c.prepared_enabled,false)
    AND NOT coalesce(c.generation_enabled,true)
