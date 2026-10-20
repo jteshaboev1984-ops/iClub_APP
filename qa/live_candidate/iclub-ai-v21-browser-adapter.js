@@ -70,8 +70,10 @@
       offer:"Участвовать в тестировании iClub AI",
       detail:"Добровольное участие в закрытой бете",
       title:"Тестирование iClub AI",
-      info:"На первом этапе помощник использует только проверенную справку iClub. Он не меняет оценки и прогресс. Участие добровольное; доступ откроется после отдельного запуска беты.",
-      confirm:"Согласен участвовать",later:"Не сейчас",
+      info:"В закрытой бете iClub AI помогает освоить Practice, разбор ошибок, Tours и учебные материалы. Он пока не решает задания и не изменяет оценки или прогресс. Участие добровольное.",
+      confirm:"Согласен участвовать",later:"Позже",
+      close:"Закрыть",open:"Открыть iClub AI",done:"Готово",
+      successTitle:"Доступ к iClub AI открыт",
       saved:"Согласие принято. Откройте iClub AI с помощью фирменного значка.",
       pending:"Согласие принято. Доступ откроется после запуска беты.",
       error:"Не удалось сохранить согласие. Попробуйте позже."
@@ -80,16 +82,20 @@
       offer:"iClub AI sinovida qatnashish",
       detail:"Yopiq sinovda ixtiyoriy ishtirok",
       title:"iClub AI sinovi",
-      info:"Birinchi bosqichda yordamchi faqat iClub’ning tekshirilgan ma’lumotlaridan foydalanadi. U baholar yoki o‘quv natijalarini o‘zgartirmaydi. Ishtirok ixtiyoriy; kirish beta boshlangandan so‘ng ochiladi.",
-      confirm:"Ishtirok etishga roziman",later:"Hozir emas",
+      info:"Yopiq sinovda iClub AI Practice, xatolar tahlili, Tours va o‘quv materiallaridan foydalanishni tushuntiradi. Hozircha u masalalarni yechmaydi, baho yoki o‘quv natijalarini o‘zgartirmaydi. Ishtirok ixtiyoriy.",
+      confirm:"Ishtirok etishga roziman",later:"Keyinroq",
+      close:"Yopish",open:"iClub AI’ni ochish",done:"Tayyor",
+      successTitle:"iClub AI’dan foydalanish mumkin",
       saved:"Rozilik qabul qilindi. iClub AI belgisini bosib yordamchini oching.",
       pending:"Rozilik qabul qilindi. Kirish beta boshlanganda ochiladi.",
       error:"Rozilik saqlanmadi. Keyinroq qayta urinib ko‘ring."
     },
     en:{
       offer:"Join iClub AI testing",detail:"Optional closed beta",title:"iClub AI beta",
-      info:"At first, the assistant uses only verified iClub help. It does not change grades or learning progress. Participation is optional, and access opens only after the beta is launched.",
-      confirm:"I agree to participate",later:"Not now",
+      info:"In this closed beta, iClub AI helps you use Practice, mistake review, Tours and study resources. It does not yet solve questions or change grades or progress. Participation is optional.",
+      confirm:"I agree to participate",later:"Later",
+      close:"Close",open:"Open iClub AI",done:"Done",
+      successTitle:"Your iClub AI access is ready",
       saved:"Consent recorded. Tap the iClub AI icon to open the assistant.",
       pending:"Consent recorded. Access will open when beta starts.",
       error:"Consent could not be saved. Please try again."
@@ -189,9 +195,32 @@
     agree.addEventListener("click",async()=>{
       agree.disabled=true;later.disabled=true;
       const result=await consentFromExplicitUserAction(true);
-      info.textContent=result.ok?(result.ready?words().saved:words().pending):words().error;
-      agree.remove();later.textContent=words().later;later.disabled=false;
-      if(result.ok)removeInvite();
+      if(result.ok){
+        removeInvite();
+        title.textContent=result.ready?words().successTitle:words().title;
+        info.textContent=result.ready?words().saved:words().pending;
+        // Consent has already been recorded. Never leave a "Later" action
+        // here: it misleadingly suggests that consent could still be deferred.
+        const action=document.createElement("button");
+        action.type="button";
+        action.textContent=result.ready?words().open:words().done;
+        Object.assign(action.style,{
+          padding:"11px 16px",borderRadius:"10px",border:"0",
+          background:"#163e68",color:"#fff",cursor:"pointer",
+          font:"600 14px system-ui"
+        });
+        action.addEventListener("click",()=>{
+          close();
+          if(result.ready)window.iClubGlobalAiShell?.open?.();
+        },{once:true});
+        row.replaceChildren(action);
+        action.focus();
+      }else{
+        info.textContent=words().error;
+        agree.disabled=false;
+        later.textContent=words().close;
+        later.disabled=false;
+      }
     });
     row.append(later,agree);card.append(title,info,row);overlay.append(card);
     document.body.appendChild(overlay);later.focus();
