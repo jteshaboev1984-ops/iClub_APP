@@ -154,12 +154,12 @@ test("Subject-level Telegram video can never masquerade as a selected Study less
  const main=process.env.ICLUB_QA_MAIN_PARITY_SOURCE;
  if(main){
   const app=fs.readFileSync(path.join(main,"app.js"),"utf8");
-  assert.match(app,/const primaryLessonId = await getSubjectPrimaryLessonId\(subjectKey\)/);
-  assert.match(app,/state\.courses\.lessonId = primaryLessonId \|\| null/);
+  a.match(app,/const primaryLessonId = await getSubjectPrimaryLessonId\(subjectKey\)/);
+  a.match(app,/state\.courses\.lessonId = primaryLessonId \|\| null/);
  }
- assert.doesNotMatch(adapter,/lesson_topic:\{screen:"video"/);
- assert.doesNotMatch(adapter,/const roots=\[[^\]]*"courses-video"/);
- assert.doesNotMatch(shell,/lesson_topic:"video"/);
- assert.match(catalog,/p_surface='lesson_topic'/);
- assert.match(capability,/p_surface='lesson_topic'/);
+ a.doesNotMatch(adapter,/lesson_topic:\{screen:"video"/);
+ a.doesNotMatch(adapter,/const roots=\[[^\]]*"courses-video"/);
+ a.doesNotMatch(shell,/lesson_topic:"video"/);
+ a.match(catalog,/p_surface='lesson_topic'/);
+ a.match(capability,/p_surface='lesson_topic'/);
 });
