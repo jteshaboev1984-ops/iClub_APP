@@ -259,9 +259,12 @@ DO $assert$ BEGIN
 END $assert$;
 SELECT 'PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE' result;
 `;
-const sql=[schema,gateOnly,revisionStage,fixtures].join(String.fromCharCode(10));
+const revisionTests=fs.readFileSync(path.join(__dirname,
+ "iclub_ai_v21_revision_ledger_SCRATCH_TEST_ONLY_20261020.sql"),"utf8");
+const sql=[schema,gateOnly,revisionStage,fixtures,revisionTests].join(String.fromCharCode(10));
 try{
  const result=cp.execFileSync("psql",["-X","-v","ON_ERROR_STOP=1"],{input:sql,encoding:"utf8",timeout:90000,maxBuffer:2_000_000});
  assert.match(result,/PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE/);
+ assert.match(result,/PASS_SOURCE_IMMUTABLE_HISTORY/);
  console.log("PASS: exact old legacy + new gate + multi-locale + revoke + SHA + active pool + permissions (scratch only)");
 }catch(error){console.error(error.stdout||"",error.stderr||"");throw error;}
