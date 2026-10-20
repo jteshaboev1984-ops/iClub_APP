@@ -96,3 +96,35 @@ test("The adapter never touches user progress, localStorage, signup or model API
  assert.match(source,/getUser/);
  assert.match(source,/iclub-ai-v21-prepared/);
 });
+
+test("Six first-party navigation routes support exact RU/UZ/EN questions",async()=>{
+ const samples=[
+  ["ru","Как открыть Главную?","nav_home"],
+  ["ru","Где Учёба?","nav_courses"],
+  ["uz","Reyting qayerda?","nav_ratings"],
+  ["uz","Profil qayerda?","nav_profile"],
+  ["en","Where is About?","nav_about"],
+  ["en","Where is Support?","nav_support"]
+ ];
+ for(const [locale,question,expected] of samples){
+  const x=rig();x.state.eligible=true;x.state.consented=true;
+  const r=await x.api.askPrepared({promptKey:"",locale,userText:question});
+  assert.equal(r.ok,true,question);
+  const sent=x.state.requests.filter(y=>y.intent==="ask");
+  assert.equal(sent.length,1);
+  assert.equal(sent[0].prompt_key,expected);
+ }
+});
+test("No unapproved or academic question is mapped to navigation",async()=>{
+ const x=rig();x.state.eligible=true;x.state.consented=true;
+ for(const question of [
+  "Explain derivatives",
+  "What are my exam scores?",
+  "Which subject should I study next?",
+  "Where is Support and what is the exam solution?"
+ ]){
+  const r=await x.api.askPrepared({promptKey:"",locale:"en",userText:question});
+  assert.equal(r.ok,false);
+ }
+ assert.equal(x.state.requests.filter(y=>y.intent==="ask").length,0);
+});
