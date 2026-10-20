@@ -69,7 +69,7 @@ test("Tour archives require separately granted embargo and completed user attemp
   a.ok(catalog.includes(term),"Tour embargo missing "+term);
 });
 test("Source discovery returns only exact released, owner-scoped matching content",()=>{
- for(const term of ["source_hash","answer.is_correct IS FALSE",
+ for(const term of ["src.content_hash","answer.is_correct IS FALSE",
    "src.published AND NOT src.revoked","src.academic_qa_passed",
    "private.iclub_ai_v21_academic_policy",
    "src.context_key='lesson_'||p_record_id::text",
@@ -124,8 +124,8 @@ test("Correct/untrusted selectors never dispatch and protected tests remain hidd
  }
  a.equal(x.x.requests.filter(y=>y.intent==="academic").length,0);
  x.x.active=true;
- a.deepEqual(await x.client.availableAcademic({
-  surface:"practice_error",recordId:101,locale:"en"}),[]);
+ a.equal(JSON.stringify(await x.client.availableAcademic({
+  surface:"practice_error",recordId:101,locale:"en"})),"[]");
  a.equal((await x.client.askAcademic({
   surface:"lesson_topic",recordId:25,locale:"en"})).ok,false);
  a.equal(x.x.requests.filter(y=>y.intent==="academic").length,0);
