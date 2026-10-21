@@ -33,3 +33,9 @@ F. One consenting real beta learner asks a free-form question against published 
 
 **Owner action still required before funded pilot:** select beta eligibility and total real-model spend cap. Until confirmed, retain generation OFF and all current production settings.
 
+
+## QA acceptance and live readback
+- [Full independent QA run 39559491882 — SUCCESS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/39559491882). Tested code SHA `9d8ace048ca4f52185d0b943a24aaa8715c11a25`. Includes the QA-only freeform provider adapter tests and existing Edge mock end-to-end free-text route alongside protected Chromium/PostgreSQL/Math regressions.
+- A production Supabase SELECT **after testing** confirms `generation_enabled=false`, academic `provider_enabled=false`, no live v2 money registry, 111 existing eligible source locales, 0 new qbank releases, 0 real academic deliveries.
+- Production Vercel remains `READY` on previous source SHA `482c1b79d2dee10d9da751f5e8f008cf3777087d`.
+- **Actual live generated model calls performed during this change: 0.** Synthetic provider responses do not constitute a user-facing real generative AI launch.
