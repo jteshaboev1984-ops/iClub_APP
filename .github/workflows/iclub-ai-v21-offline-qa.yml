@@ -262,7 +262,9 @@ jobs:
             qa/live_candidate/iclub_ai_v21_freeform_shared_beta_quota_GATE_UNAPPLIED_20261021.sql \
             qa/live_candidate/iclub_ai_v21_freeform_shared_beta_quota_SCRATCH_TEST_20261021.sql \
             qa/live_candidate/iclub_ai_v21_freeform_general_help_source_UNAPPLIED_20261021.sql \
-            qa/live_candidate/iclub_ai_v21_freeform_general_help_source_SCRATCH_TEST_20261021.sql; do
+            qa/live_candidate/iclub_ai_v21_freeform_general_help_source_SCRATCH_TEST_20261021.sql \
+            qa/live_candidate/iclub_ai_v21_freeform_quota_complete_recheck_v2_UNAPPLIED_20261021.sql \
+            qa/live_candidate/iclub_ai_v21_freeform_quota_complete_recheck_v2_SCRATCH_TEST_20261021.sql; do
             psql -X -w -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 \
               -U postgres -d "$db" -f "$path"
           done
