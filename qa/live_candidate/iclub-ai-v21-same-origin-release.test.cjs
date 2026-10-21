@@ -61,7 +61,22 @@ test("same-origin beta release uses unchanged original app plus accepted UI",()=
    // Check exact production==QA bytes, THEN remove only the reviewed additions
    // and insist every former prepared, academic, Math and original UI byte
    // still matches the immutable pre-pilot fixture.
-   a.equal(currentClient,read("iclub-ai-v21-beta-client.js"));
+   const proposedClient=read("iclub-ai-v21-beta-client.js");
+   const stripTransport=source=>{
+     const start=source.indexOf("  async function askGenerated(");
+     const end=source.indexOf("  // Unified learner-scoped source bridge.",start);
+     a.ok(start>0&&end>start,"Generated beta function boundaries missing");
+     return source.slice(0,start)+"  /* reviewed freeform transport only */\\n"+source.slice(end);
+   };
+   a.equal(stripTransport(currentClient),stripTransport(proposedClient),
+     "Unreviewed modification outside isolated freeform method");
+   // QA direct-auth transport is deliberately not deployed to main until full
+   // isolated QA passes. Everything else is exactly the installed release.
+   if(currentClient!==proposedClient){
+     a.match(currentClient,/client\\.functions\\.invoke\\("iclub-ai-v21-freeform-beta"/);
+     a.match(proposedClient,/client\\.auth\\.getSession\\(\\)/);
+     a.match(proposedClient,/fetch\\(/);
+   }
    a.equal(currentUi,read("iclub-ai-v21-ui.js"));
    const start=currentClient.indexOf("  // Separate owner-authorized $5 General Help model pilot.");
    const end=currentClient.indexOf("  // Unified learner-scoped source bridge.",start);
