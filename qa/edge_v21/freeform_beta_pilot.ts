@@ -29,7 +29,10 @@ function reply(code:number,data:Record<string,unknown>,origin:string|null){
  if(origin&&ORIGIN.test(origin)){
   h.set("access-control-allow-origin",origin);
   h.set("access-control-allow-methods","POST, OPTIONS");
-  h.set("access-control-allow-headers","authorization, apikey, content-type, x-client-info");
+  // Keep a fixed, minimal SDK-compatible allowlist (current Supabase v2).
+   // Older four-header CORS blocked Telegram WebView before POST dispatch.
+   h.set("access-control-allow-headers",
+    "authorization, x-client-info, apikey, content-type, x-retry-count, traceparent, tracestate, baggage");
  }
  return new Response(code===204?null:JSON.stringify(data),{status:code,headers:h});
 }
