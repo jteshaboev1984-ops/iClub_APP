@@ -29,7 +29,7 @@ END $guard$;
 -- Database constraints require references, but do NOT cryptographically verify reviewers.
 -- Consequently no row is populated or approved by this technical migration.
 CREATE TABLE private.iclub_ai_v21_qbank_owner_beta_releases(
- source_card_key text PRIMARY KEY
+ source_card_key text NOT NULL
    REFERENCES private.iclub_ai_v21_academic_sources(source_card_key),
  source_version text NOT NULL,
  content_hash text NOT NULL CHECK(content_hash ~ '^[a-f0-9]{64}$'),
@@ -53,7 +53,8 @@ CREATE TABLE private.iclub_ai_v21_qbank_owner_beta_releases(
  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
  released_at timestamptz,
  CHECK (NOT enabled OR released_at IS NOT NULL),
- UNIQUE(subject_key,question_id,locale)
+ PRIMARY KEY(source_card_key,source_version,content_hash),
+ UNIQUE(subject_key,question_id,locale,source_version)
 );
 ALTER TABLE private.iclub_ai_v21_qbank_owner_beta_releases ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE private.iclub_ai_v21_qbank_owner_beta_releases
@@ -72,7 +73,7 @@ DO $roles$ BEGIN
  END IF;
 END $roles$;
 CREATE TABLE private.iclub_ai_v21_qbank_signed_review_receipts(
- source_card_key text PRIMARY KEY
+ source_card_key text NOT NULL
   REFERENCES private.iclub_ai_v21_academic_sources(source_card_key),
  subject_key text NOT NULL,
  question_id bigint NOT NULL CHECK(question_id>0),
@@ -95,6 +96,7 @@ CREATE TABLE private.iclub_ai_v21_qbank_signed_review_receipts(
   CHECK(length(btrim(evidence_record_ref)) BETWEEN 12 AND 512),
  verified_at timestamptz NOT NULL DEFAULT clock_timestamp(),
  suspended_at timestamptz,
+ PRIMARY KEY(source_card_key,source_version,content_hash),
  UNIQUE(subject_key,question_id,locale,source_version),
  CHECK (
   content_reviewer<>rights_reviewer AND
@@ -196,6 +198,8 @@ AS $admit$
     FROM private.iclub_ai_v21_qbank_owner_beta_releases beta
     JOIN private.iclub_ai_v21_qbank_signed_review_receipts proof
       ON proof.source_card_key=beta.source_card_key
+     AND proof.source_version=beta.source_version
+     AND proof.content_hash=beta.content_hash
     JOIN public.questions q ON q.id=beta.question_id
     JOIN public.subjects subject ON subject.id=q.subject_id
     WHERE beta.source_card_key=src.source_card_key
@@ -252,6 +256,8 @@ AS $admit$
        FROM private.iclub_ai_v21_qbank_owner_beta_releases sibling
        JOIN private.iclub_ai_v21_qbank_signed_review_receipts signed_sibling
          ON signed_sibling.source_card_key=sibling.source_card_key
+        AND signed_sibling.source_version=sibling.source_version
+        AND signed_sibling.content_hash=sibling.content_hash
        JOIN private.iclub_ai_v21_academic_sources other
          ON other.source_card_key=sibling.source_card_key
        WHERE sibling.question_id=beta.question_id
