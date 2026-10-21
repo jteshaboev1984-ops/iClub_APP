@@ -54,3 +54,26 @@ SELECT 'synthetic_help_'||s.i,s.loc,
  true,true,true,true,false,now()
 FROM (SELECT i,loc FROM generate_series(1,13) AS i
  CROSS JOIN (VALUES('en'),('ru'),('uz')) AS l(loc)) AS s;
+
+-- Global AI layout selector synthetic fixture; NEVER update live runtime here.
+CREATE TABLE private.iclub_global_ai_runtime_config(
+ id smallint PRIMARY KEY,global_ai_rollout_mode text NOT NULL,
+ kill_switch boolean NOT NULL,ui_enabled boolean NOT NULL,
+ gateway_enabled boolean NOT NULL);
+INSERT INTO private.iclub_global_ai_runtime_config VALUES(1,'off',true,false,false);
+CREATE FUNCTION private.iclub_is_product_canary_v1(p_user_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=''
+AS $stub$ SELECT false $stub$;
+CREATE FUNCTION private.iclub_rollout_allows_user_v1(
+ p_user_id uuid,p_rollout_mode text)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=''
+AS $stub$
+ SELECT CASE WHEN p_user_id IS NULL THEN false
+ WHEN p_rollout_mode='all' THEN true
+ WHEN p_rollout_mode='canary'
+ THEN private.iclub_is_product_canary_v1(p_user_id) ELSE false END;
+$stub$;
+REVOKE ALL ON FUNCTION private.iclub_rollout_allows_user_v1(uuid,text)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION private.iclub_rollout_allows_user_v1(uuid,text)
+ TO service_role;
