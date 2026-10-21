@@ -259,3 +259,29 @@ test("Five original taxonomy corrections are explicit, source-bound and require 
   assert.ok(p.reason.length>30);
  }
 });
+
+test("Signed receipt authority cannot be satisfied by owner permission alone",()=>{
+ const sql=read("iclub_ai_v21_qbank_owner_provenance_GATE_ONLY_UNAPPLIED_20261020.sql");
+ const pg=read("iclub-ai-v21-qbank-provenance.pgtest.cjs");
+ for(const marker of [
+ "CREATE TABLE private.iclub_ai_v21_qbank_signed_review_receipts",
+ "CREATE ROLE iclub_ai_v21_qbank_review_importer NOLOGIN",
+ "CREATE ROLE iclub_ai_v21_qbank_review_safety NOLOGIN",
+ "proof.source_card_key=beta.source_card_key",
+ "signed_sibling.source_card_key=sibling.source_card_key",
+ "proof.suspended_at IS NULL",
+ "signed_sibling.suspended_at IS NULL",
+ "proof.p4_source_envelope_hash=encode(extensions.digest(",
+ "signed_sibling.p4_source_envelope_hash=encode(extensions.digest(",
+ "proof.original_source_hash=beta.original_source_hash",
+ "GRANT INSERT ON private.iclub_ai_v21_qbank_signed_review_receipts",
+ "GRANT UPDATE(suspended_at)",
+ "WITH CHECK(suspended_at IS NOT NULL)",
+ "(SELECT count(*) FROM private.iclub_ai_v21_qbank_signed_review_receipts)<>0"
+ ]) assert.ok(sql.includes(marker),marker);
+ assert.match(sql,/REVOKE ALL ON TABLE private\.iclub_ai_v21_qbank_signed_review_receipts[\s\S]+?authenticated,service_role/);
+ assert.match(pg,/Unsigned owner permission exposed new question/);
+ assert.match(pg,/Suspended editorial evidence still exposed a card/);
+ assert.match(pg,/PASS_P4_SOURCE_ENVELOPE_POSTGRES_SHA/);
+ assert.doesNotMatch(sql,/GRANT INSERT ON private\.iclub_ai_v21_qbank_signed_review_receipts\s+TO service_role/);
+});
