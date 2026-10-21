@@ -1,4 +1,6 @@
 name: iClub AI — public OPTIONS CORS probe (zero model calls)
+# Revalidate the exact previously failing live OPTIONS request after Edge v5.
+# No learner token, no POST, no model or budget write.
 on:
   push:
     branches:
