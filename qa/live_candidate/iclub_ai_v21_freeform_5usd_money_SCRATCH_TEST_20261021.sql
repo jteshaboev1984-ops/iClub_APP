@@ -73,5 +73,8 @@ BEGIN
   'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',user2,h,s,v,'v1','en');
  IF r->>'reason'<>'pilot_budget_exhausted'
  THEN RAISE EXCEPTION 'Lifetime $5 cap bypassed';END IF;
+ -- Return synthetic fixture to the exact production-ready OFF state so
+ -- a second independent feature-gate migration can be installed safely.
+ UPDATE private.iclub_ai_v21_freeform_budget_control SET enabled=false;
 END $test$;
 SELECT 'PASS_5USD_BETA_FREE_AND_LIFETIME_LIABILITY_SCRATCH' result;
