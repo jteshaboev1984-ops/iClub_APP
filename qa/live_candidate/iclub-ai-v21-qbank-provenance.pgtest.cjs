@@ -343,12 +343,31 @@ Second synthetic line.$body$||E'\\n'||'{}'::jsonb::text,'UTF8'),
  END IF;
 END $p4hash$;
 SELECT 'PASS_P4_SOURCE_ENVELOPE_POSTGRES_SHA' result;`;
-const sql=[schema,gateOnly,revisionStage,fixtures,revisionTests,p4Proof]
- .join(String.fromCharCode(10));
+const lifecycle=fs.readFileSync(path.join(__dirname,
+ "iclub_ai_v21_qbank_versioned_lifecycle_20261021_UNAPPLIED.sql"),"utf8");
+const lifeStart=lifecycle.indexOf("-- One snapshot per source/revision:");
+const lifeEnd=lifecycle.indexOf("-- No new source releases,");
+assert.ok(lifeStart>0&&lifeEnd>lifeStart,"Missing real ledger schema boundaries");
+// The PROD migration preflight intentionally expects 321 real source records.
+// This SCRATCH fixture contains only 10 synthetic records. Remove ONLY the
+// two hard-coded aggregate-count assertions, not any source-integrity guards.
+let lifeCore=lifecycle.slice(lifeStart,lifeEnd);
+for(const [first,last] of [
+ ["DO $count$ BEGIN","END $count$;"],
+ ["DO $verify_reports$ BEGIN","END $verify_reports$;"]]){
+ const x=lifeCore.indexOf(first),y=lifeCore.indexOf(last,x);
+ assert.ok(x>=0&&y>x,"Expected scratch-only aggregate guard");
+ lifeCore=lifeCore.slice(0,x)+lifeCore.slice(y+last.length);
+}
+const lifeTests=fs.readFileSync(path.join(__dirname,
+ "iclub_ai_v21_qbank_versioned_lifecycle_SCRATCH_TEST_20261021.sql"),"utf8");
+const sql=[schema,gateOnly,revisionStage,fixtures,revisionTests,p4Proof,
+ lifeCore,lifeTests].join(String.fromCharCode(10));
 try{
  const result=cp.execFileSync("psql",["-X","-v","ON_ERROR_STOP=1"],{input:sql,encoding:"utf8",timeout:90000,maxBuffer:2_000_000});
  assert.match(result,/PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE/);
  assert.match(result,/PASS_SOURCE_IMMUTABLE_HISTORY/);
  assert.match(result,/PASS_P4_SOURCE_ENVELOPE_POSTGRES_SHA/);
+ assert.match(result,/PASS_321_SOURCE_VERSIONED_LIFECYCLE_SYNTHETIC/);
  console.log("PASS: exact old legacy + new gate + multi-locale + revoke + SHA + active pool + permissions (scratch only)");
 }catch(error){console.error(error.stdout||"",error.stderr||"");throw error;}
