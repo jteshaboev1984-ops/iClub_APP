@@ -164,7 +164,8 @@ class ContentHandoffGate {
   // this again immediately before model use and before returning its answer.
   return {...localized(lang,'available'),sourceId:source.source_id,
     sourceVersion:source.source_version,sourceHash:source.source_hash,
-    revision:source.revision,contextRevision:context.contextRevision};
+    revision:source.revision,contextRevision:context.contextRevision,
+    surface:ref.surface,subject:ref.subject,feature:ref.feature,topic:ref.topic};
  }
 }
 async function verifiedGeneral(S,ref){
