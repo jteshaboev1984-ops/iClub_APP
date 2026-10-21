@@ -57,7 +57,10 @@ FROM (SELECT i,loc FROM generate_series(1,13) AS i
 
 -- Global AI layout selector synthetic fixture; NEVER update live runtime here.
 CREATE TABLE private.iclub_global_ai_runtime_config(
- id smallint PRIMARY KEY,global_ai_rollout_mode text NOT NULL,
+ id smallint PRIMARY KEY,
+ global_ai_rollout_mode text NOT NULL
+ CONSTRAINT iclub_global_ai_runtime_config_global_ai_rollout_mode_check
+ CHECK(global_ai_rollout_mode IN('off','canary','all')),
  kill_switch boolean NOT NULL,ui_enabled boolean NOT NULL,
  gateway_enabled boolean NOT NULL);
 INSERT INTO private.iclub_global_ai_runtime_config VALUES(1,'off',true,false,false);
