@@ -73,9 +73,9 @@ test("same-origin beta release uses unchanged original app plus accepted UI",()=
    // QA direct-auth transport is deliberately not deployed to main until full
    // isolated QA passes. Everything else is exactly the installed release.
    if(currentClient!==proposedClient){
-     a.match(currentClient,/client\\.functions\\.invoke\\("iclub-ai-v21-freeform-beta"/);
-     a.match(proposedClient,/client\\.auth\\.getSession\\(\\)/);
-     a.match(proposedClient,/fetch\\(/);
+     a.ok(currentClient.includes('client.functions.invoke("iclub-ai-v21-freeform-beta"'));
+     a.ok(proposedClient.includes("client.auth.getSession()"));
+     a.ok(proposedClient.includes("fetch("));
    }
    a.equal(currentUi,read("iclub-ai-v21-ui.js"));
    const start=currentClient.indexOf("  // Separate owner-authorized $5 General Help model pilot.");
