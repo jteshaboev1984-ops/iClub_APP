@@ -102,7 +102,8 @@ BEGIN
  IF c.enabled IS DISTINCT FROM true OR c.owner_permitted IS DISTINCT FROM true
   OR c.include_free_beta IS DISTINCT FROM true
   OR b.beta_enabled IS DISTINCT FROM true
-  OR b.generation_enabled IS DISTINCT FROM true
+  OR b.prepared_enabled IS DISTINCT FROM true
+  OR b.generation_enabled IS DISTINCT FROM false
   OR c.model<>'gpt-5.4-mini'
   OR NOT EXISTS(SELECT 1 FROM private.iclub_ai_v21_beta_members
      WHERE user_id=p_user_id AND enabled AND consent_at IS NOT NULL
@@ -149,7 +150,10 @@ BEGIN
  OR l.user_id IS DISTINCT FROM p_user_id
  OR l.session_fingerprint IS DISTINCT FROM p_session_fingerprint
  OR l.request_fingerprint IS DISTINCT FROM p_request_fingerprint
- OR c.enabled IS DISTINCT FROM true OR b.generation_enabled IS DISTINCT FROM true
+ OR c.enabled IS DISTINCT FROM true
+ OR b.beta_enabled IS DISTINCT FROM true
+ OR b.prepared_enabled IS DISTINCT FROM true
+ OR b.generation_enabled IS DISTINCT FROM false
  OR NOT EXISTS(SELECT 1 FROM private.iclub_ai_v21_beta_members
    WHERE user_id=p_user_id AND enabled AND consent_at IS NOT NULL
    AND consent_version='global_ai_beta_v21')
