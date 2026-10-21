@@ -118,6 +118,20 @@ GRANT INSERT ON private.iclub_ai_v21_qbank_signed_review_receipts
  TO iclub_ai_v21_qbank_review_importer;
 GRANT UPDATE(suspended_at) ON private.iclub_ai_v21_qbank_signed_review_receipts
  TO iclub_ai_v21_qbank_review_safety;
+CREATE POLICY iclub_qbank_signed_receipt_import_only
+ ON private.iclub_ai_v21_qbank_signed_review_receipts
+ FOR INSERT TO iclub_ai_v21_qbank_review_importer
+ WITH CHECK(suspended_at IS NULL);
+-- Safety can only disable a signed receipt, never clear the suspension.
+GRANT SELECT ON private.iclub_ai_v21_qbank_signed_review_receipts
+ TO iclub_ai_v21_qbank_review_safety;
+CREATE POLICY iclub_qbank_signed_receipt_safety_read
+ ON private.iclub_ai_v21_qbank_signed_review_receipts
+ FOR SELECT TO iclub_ai_v21_qbank_review_safety USING(true);
+CREATE POLICY iclub_qbank_signed_receipt_safety_disable
+ ON private.iclub_ai_v21_qbank_signed_review_receipts
+ FOR UPDATE TO iclub_ai_v21_qbank_review_safety
+ USING(true) WITH CHECK(suspended_at IS NOT NULL);
 -- PostgreSQL does NOT verify Ed25519: an independent credentialed importer
 -- must verify all 5 roles using the exact existing P4 message format BEFORE
 -- importing a receipt. No live import credentials and NO initial rows.
