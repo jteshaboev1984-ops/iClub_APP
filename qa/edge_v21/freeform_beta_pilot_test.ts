@@ -200,3 +200,43 @@ Deno.test("provider parameter HTTP 400 fails closed with potential spending liab
  equal(f.logs.find(x=>x.name==="settle_iclub_ai_v21_freeform_budget_v1")?.payload.p_outcome,
  "unknown","provider rejection liability retained");
 });
+
+Deno.test("full Supabase SDK v2 headers and Telegram WebView origin pass OPTIONS before any POST or charge",async()=>{
+ let network=0;
+ const handler=makeFreeformPilotHandler({
+  url:HOST,anon:"anon-synthetic-key-very-long-00001",
+  service:"service-synthetic-key-long-00002",
+  providerKey:"provider-synthetic-key-long-003",
+  enabled:true,fetcher:async()=>{network++;throw Error("OPTIONS has zero network calls");}
+ });
+ const requested=[
+  "authorization","x-client-info","apikey","content-type",
+  "x-retry-count","traceparent","tracestate","baggage"
+ ];
+ const res=await handler(new Request("https://fake.test",{
+  method:"OPTIONS",headers:{
+   "origin":ORIGIN,
+   "access-control-request-method":"POST",
+   "access-control-request-headers":requested.join(", "),
+   "user-agent":"Mozilla/5.0 Telegram-Android/13.0.2.0"
+  }
+ }));
+ equal(res.status,204,"preflight 204");
+ equal(res.headers.get("access-control-allow-origin"),ORIGIN,"exact origin");
+ const allowed=(res.headers.get("access-control-allow-headers")||"")
+  .toLowerCase().split(",").map(x=>x.trim());
+ for(const name of requested){
+  if(!allowed.includes(name))throw Error("SDK browser preflight blocked by "+name);
+ }
+ if(allowed.includes("x-user-id")||allowed.includes("*"))
+  throw Error("Unexpectedly open CORS header policy");
+ equal(network,0,"preflight must not fetch provider/DB");
+ const unsafe=await handler(new Request("https://fake.test",{
+  method:"OPTIONS",headers:{"origin":"https://attacker.example",
+   "access-control-request-method":"POST",
+   "access-control-request-headers":requested.join(", ")}
+ }));
+ equal(unsafe.status,403,"untrusted origin denied");
+ equal(unsafe.headers.get("access-control-allow-origin"),null,"untrusted origin not reflected");
+ equal(network,0,"rejected preflight must not contact network");
+});
