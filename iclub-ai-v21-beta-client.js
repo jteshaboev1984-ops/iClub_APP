@@ -311,7 +311,7 @@
     // The SDK Functions wrapper can add dynamic custom headers during a
     // Telegram WebView preflight; the model route needs only these 3.
     const expectedOrigin="https://mmmduffgpvwjdpruzikw.supabase.co";
-    if(String(client.supabaseUrl||"").replace(/\\/$/,"")!==expectedOrigin)
+    if(String(client.supabaseUrl||"").replace(/\/+$/,"")!==expectedOrigin)
       return closed("unavailable");
     const publicKey=String(client.supabaseKey||"");
     if(publicKey.length<24)return closed("unavailable");
