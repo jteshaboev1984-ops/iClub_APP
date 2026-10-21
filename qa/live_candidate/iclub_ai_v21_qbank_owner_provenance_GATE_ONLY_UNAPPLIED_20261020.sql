@@ -59,6 +59,70 @@ ALTER TABLE private.iclub_ai_v21_qbank_owner_beta_releases ENABLE ROW LEVEL SECU
 REVOKE ALL ON TABLE private.iclub_ai_v21_qbank_owner_beta_releases
  FROM PUBLIC,anon,authenticated,service_role;
 
+-- Separate signed editorial evidence ingest. NOLOGIN roles have no key,
+-- may not be assumed by learner service_role, and are NOT provisioned live.
+DO $roles$ BEGIN
+ IF NOT EXISTS(SELECT 1 FROM pg_roles
+    WHERE rolname='iclub_ai_v21_qbank_review_importer') THEN
+  CREATE ROLE iclub_ai_v21_qbank_review_importer NOLOGIN;
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM pg_roles
+    WHERE rolname='iclub_ai_v21_qbank_review_safety') THEN
+  CREATE ROLE iclub_ai_v21_qbank_review_safety NOLOGIN;
+ END IF;
+END $roles$;
+CREATE TABLE private.iclub_ai_v21_qbank_signed_review_receipts(
+ source_card_key text PRIMARY KEY
+  REFERENCES private.iclub_ai_v21_academic_sources(source_card_key),
+ subject_key text NOT NULL,
+ question_id bigint NOT NULL CHECK(question_id>0),
+ locale text NOT NULL CHECK(locale IN ('en','ru','uz')),
+ source_version text NOT NULL,
+ content_hash text NOT NULL CHECK(content_hash ~ '^[a-f0-9]{64}$'),
+ target_hash text NOT NULL CHECK(target_hash ~ '^[a-f0-9]{64}$'),
+ original_source_hash text NOT NULL CHECK(original_source_hash ~ '^[a-f0-9]{64}$'),
+ p4_source_envelope_hash text NOT NULL CHECK(p4_source_envelope_hash ~ '^[a-f0-9]{64}$'),
+ signed_manifest_hash text NOT NULL CHECK(signed_manifest_hash ~ '^[a-f0-9]{64}$'),
+ ticket_id uuid NOT NULL UNIQUE,
+ trusted_registry_revision text NOT NULL
+  CHECK(length(btrim(trusted_registry_revision)) BETWEEN 5 AND 100),
+ content_reviewer uuid NOT NULL,
+ rights_reviewer uuid NOT NULL,
+ technical_reviewer uuid NOT NULL,
+ academic_reviewer uuid NOT NULL,
+ language_reviewer uuid NOT NULL,
+ evidence_record_ref text NOT NULL
+  CHECK(length(btrim(evidence_record_ref)) BETWEEN 12 AND 512),
+ verified_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+ suspended_at timestamptz,
+ UNIQUE(subject_key,question_id,locale,source_version),
+ CHECK (
+  content_reviewer<>rights_reviewer AND
+  content_reviewer<>technical_reviewer AND
+  content_reviewer<>academic_reviewer AND
+  content_reviewer<>language_reviewer AND
+  rights_reviewer<>technical_reviewer AND
+  rights_reviewer<>academic_reviewer AND
+  rights_reviewer<>language_reviewer AND
+  technical_reviewer<>academic_reviewer AND
+  technical_reviewer<>language_reviewer AND
+  academic_reviewer<>language_reviewer
+ )
+);
+ALTER TABLE private.iclub_ai_v21_qbank_signed_review_receipts ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE private.iclub_ai_v21_qbank_signed_review_receipts
+ FROM PUBLIC,anon,authenticated,service_role;
+GRANT USAGE ON SCHEMA private TO iclub_ai_v21_qbank_review_importer,
+ iclub_ai_v21_qbank_review_safety;
+GRANT INSERT ON private.iclub_ai_v21_qbank_signed_review_receipts
+ TO iclub_ai_v21_qbank_review_importer;
+GRANT UPDATE(suspended_at) ON private.iclub_ai_v21_qbank_signed_review_receipts
+ TO iclub_ai_v21_qbank_review_safety;
+-- PostgreSQL does NOT verify Ed25519: an independent credentialed importer
+-- must verify all 5 roles using the exact existing P4 message format BEFORE
+-- importing a receipt. No live import credentials and NO initial rows.
+-- A receipt does not itself release content; an owner beta release is separate.
+
 -- Independent curated revisions may differ from the stored bank explanation
 -- only with a version-pinned original SHA, signed-review record references,
 -- matching live question hash and a shared three-language editorial revision.
@@ -116,10 +180,22 @@ AS $admit$
    AND EXISTS(
     SELECT 1
     FROM private.iclub_ai_v21_qbank_owner_beta_releases beta
+    JOIN private.iclub_ai_v21_qbank_signed_review_receipts proof
+      ON proof.source_card_key=beta.source_card_key
     JOIN public.questions q ON q.id=beta.question_id
     JOIN public.subjects subject ON subject.id=q.subject_id
     WHERE beta.source_card_key=src.source_card_key
      AND beta.enabled AND beta.released_at IS NOT NULL
+     AND proof.suspended_at IS NULL
+     AND proof.subject_key=src.subject_key
+     AND proof.question_id=q.id AND proof.locale=src.locale
+     AND proof.source_version=src.source_version
+     AND proof.content_hash=src.content_hash
+     AND proof.target_hash=src.target_hash
+     AND proof.original_source_hash=beta.original_source_hash
+     AND proof.p4_source_envelope_hash=encode(extensions.digest(
+      convert_to(src.body_text||E'\n'||'{}'::jsonb::text,'UTF8'),
+      'sha256'),'hex')
      AND beta.origin_basis IN ('original_iclub_question_bank',
        'original_iclub_curated_revision')
      AND beta.original_source_hash=encode(extensions.digest(
@@ -160,6 +236,8 @@ AS $admit$
      AND (
        SELECT count(DISTINCT sibling.locale)
        FROM private.iclub_ai_v21_qbank_owner_beta_releases sibling
+       JOIN private.iclub_ai_v21_qbank_signed_review_receipts signed_sibling
+         ON signed_sibling.source_card_key=sibling.source_card_key
        JOIN private.iclub_ai_v21_academic_sources other
          ON other.source_card_key=sibling.source_card_key
        WHERE sibling.question_id=beta.question_id
@@ -173,6 +251,15 @@ AS $admit$
              WHEN 'ru' THEN q.explanation_ru
              WHEN 'uz' THEN q.explanation_uz END),'UTF8'),'sha256'),'hex')
          AND sibling.released_at IS NOT NULL
+         AND signed_sibling.suspended_at IS NULL
+         AND signed_sibling.subject_key=sibling.subject_key
+         AND signed_sibling.question_id=q.id
+         AND signed_sibling.locale=sibling.locale
+         AND signed_sibling.source_version=sibling.source_version
+         AND signed_sibling.content_hash=sibling.content_hash
+         AND signed_sibling.target_hash=sibling.target_hash
+         AND signed_sibling.original_source_hash=sibling.original_source_hash
+         AND signed_sibling.locale IN ('en','ru','uz')
          AND sibling.locale IN ('en','ru','uz')
          AND other.surface_code='practice_error'
          AND other.subject_key=src.subject_key
@@ -187,6 +274,9 @@ AS $admit$
          AND other.approved_at IS NULL
          AND other.content_hash=encode(extensions.digest(
            convert_to(other.body_text,'UTF8'),'sha256'),'hex')
+         AND signed_sibling.p4_source_envelope_hash=encode(extensions.digest(
+           convert_to(other.body_text||E'\n'||'{}'::jsonb::text,'UTF8'),
+           'sha256'),'hex')
          AND (
            (sibling.origin_basis='original_iclub_question_bank'
              AND btrim(other.body_text)=btrim(CASE sibling.locale
@@ -212,6 +302,7 @@ GRANT EXECUTE ON FUNCTION private.iclub_ai_v21_source_admitted_v1(
 DO $verify$
 BEGIN
  IF (SELECT count(*) FROM private.iclub_ai_v21_qbank_owner_beta_releases)<>0
+ OR (SELECT count(*) FROM private.iclub_ai_v21_qbank_signed_review_receipts)<>0
  OR (SELECT count(*) FROM private.iclub_ai_v21_academic_sources src
    WHERE private.iclub_ai_v21_source_admitted_v1(src))<>111
  OR (SELECT count(*) FROM private.iclub_ai_v21_academic_sources
