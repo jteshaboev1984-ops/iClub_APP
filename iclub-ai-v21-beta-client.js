@@ -298,7 +298,7 @@
     const code=String(locale||"");
     const question=String(userText||"").trim();
     const id=String(requestId||"");
-    if(!LOCALES.has(code)||question.length<8||question.length>1800||
+    if(!LOCALES.has(code)||question.length<8||question.length>2000||
        !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))
       return closed("invalid_question");
     const current=await status();
