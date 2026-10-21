@@ -313,7 +313,7 @@
         client.functions.invoke("iclub-ai-v21-freeform-beta",{
           body:{intent:"ask",request_id:id,locale:code,question}
         }),
-        new Promise(resolve=>setTimeout(()=>resolve({timedOut:true}),25000))
+        new Promise(resolve=>setTimeout(()=>resolve({timedOut:true}),55000))
       ]);
       answer=response?.timedOut?{ok:false,reason:"timeout"}:
         response?.error?null:response?.data;
