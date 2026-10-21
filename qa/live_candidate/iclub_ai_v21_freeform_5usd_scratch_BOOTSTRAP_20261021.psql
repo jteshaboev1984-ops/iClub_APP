@@ -62,8 +62,14 @@ CREATE TABLE private.iclub_global_ai_runtime_config(
  CONSTRAINT iclub_global_ai_runtime_config_global_ai_rollout_mode_check
  CHECK(global_ai_rollout_mode IN('off','canary','all')),
  kill_switch boolean NOT NULL,ui_enabled boolean NOT NULL,
- gateway_enabled boolean NOT NULL);
-INSERT INTO private.iclub_global_ai_runtime_config VALUES(1,'off',true,false,false);
+ gateway_enabled boolean NOT NULL,
+ generation_enabled boolean NOT NULL DEFAULT false,
+ plans_ui_enabled boolean NOT NULL DEFAULT false,
+ checkout_enabled boolean NOT NULL DEFAULT false,
+ updated_at timestamptz NOT NULL DEFAULT now());
+INSERT INTO private.iclub_global_ai_runtime_config
+ (id,global_ai_rollout_mode,kill_switch,ui_enabled,gateway_enabled)
+ VALUES(1,'off',true,false,false);
 CREATE FUNCTION private.iclub_is_product_canary_v1(p_user_id uuid)
 RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path=''
 AS $stub$ SELECT false $stub$;
