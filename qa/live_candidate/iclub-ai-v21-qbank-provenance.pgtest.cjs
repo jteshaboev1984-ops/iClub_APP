@@ -128,6 +128,53 @@ BEGIN
   'private.iclub_ai_v21_qbank_owner_beta_releases','INSERT')
  THEN RAISE EXCEPTION 'Private release permissions are unsafe'; END IF;
 END $assert$;
+-- Owner permission alone never replaces independently signed review evidence.
+UPDATE private.iclub_ai_v21_qbank_owner_beta_releases
+ SET enabled=true,released_at=clock_timestamp() WHERE question_id=501;
+DO $guard$ BEGIN
+ IF (SELECT count(*) FROM private.iclub_ai_v21_academic_sources s
+  WHERE private.iclub_ai_v21_source_admitted_v1(s))<>1
+ THEN RAISE EXCEPTION 'Unsigned owner permission exposed new question'; END IF;
+END $guard$;
+UPDATE private.iclub_ai_v21_qbank_owner_beta_releases
+ SET enabled=false,released_at=NULL WHERE question_id=501;
+
+-- SYNTHETIC TEST RECEIPTS ONLY. They simulate a separately verified five-role
+-- importer. No real private keys or reviewer approvals are supplied.
+INSERT INTO private.iclub_ai_v21_qbank_signed_review_receipts(
+ source_card_key,subject_key,question_id,locale,source_version,
+ content_hash,target_hash,original_source_hash,p4_source_envelope_hash,
+ signed_manifest_hash,ticket_id,trusted_registry_revision,
+ content_reviewer,rights_reviewer,technical_reviewer,academic_reviewer,
+ language_reviewer,evidence_record_ref)
+SELECT a.source_card_key,a.subject_key,substring(a.context_key FROM 10)::bigint,
+ a.locale,a.source_version,a.content_hash,a.target_hash,
+ encode(extensions.digest(convert_to(btrim(CASE a.locale
+  WHEN 'en' THEN q.explanation_en WHEN 'ru' THEN q.explanation_ru
+  ELSE q.explanation_uz END),'UTF8'),'sha256'),'hex'),
+ encode(extensions.digest(convert_to(
+  a.body_text||chr(10)||'{}'::jsonb::text,'UTF8'),'sha256'),'hex'),
+ encode(extensions.digest(convert_to(
+  'SYNTHETIC_SIGNATURE_MANIFEST_'||a.source_card_key,'UTF8'),
+  'sha256'),'hex'),gen_random_uuid(),'synthetic_review_registry_v1',
+ 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
+ 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'::uuid,
+ 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'::uuid,
+ 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid,
+ 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'::uuid,
+ 'SYNTHETIC_IMPORTER_RECEIPT_NOT_REAL_SIGNOFF'
+FROM private.iclub_ai_v21_academic_sources a
+JOIN public.questions q ON q.id=substring(a.context_key FROM 10)::bigint
+WHERE a.source_card_key LIKE 'draft_%';
+DO $guard$ BEGIN
+ IF (SELECT count(*) FROM private.iclub_ai_v21_qbank_signed_review_receipts)<>6
+ OR has_table_privilege('service_role',
+ 'private.iclub_ai_v21_qbank_signed_review_receipts','SELECT')
+ OR has_table_privilege('authenticated',
+ 'private.iclub_ai_v21_qbank_signed_review_receipts','INSERT')
+ THEN RAISE EXCEPTION 'Signed receipts missing or readable by clients'; END IF;
+END $guard$;
+
 -- No partial-language accidental exposure:
 UPDATE private.iclub_ai_v21_qbank_owner_beta_releases
 SET enabled=true,released_at=clock_timestamp()
@@ -156,6 +203,16 @@ DO $assert$ BEGIN
 END $assert$;
 UPDATE private.iclub_ai_v21_qbank_owner_beta_releases SET enabled=true
 WHERE question_id=501 AND locale='ru';
+-- Independently suspending ONE locale must revoke all new variants.
+UPDATE private.iclub_ai_v21_qbank_signed_review_receipts
+ SET suspended_at=clock_timestamp() WHERE source_card_key='draft_501_ru';
+DO $guard$ BEGIN
+ IF (SELECT count(*) FROM private.iclub_ai_v21_academic_sources s
+  WHERE private.iclub_ai_v21_source_admitted_v1(s))<>1
+ THEN RAISE EXCEPTION 'Suspended editorial evidence still exposed a card'; END IF;
+END $guard$;
+UPDATE private.iclub_ai_v21_qbank_signed_review_receipts
+ SET suspended_at=NULL WHERE source_card_key='draft_501_ru';
 -- Invalid text snapshot: no query/question DB mutation, only synthetic source copy.
 UPDATE private.iclub_ai_v21_academic_sources SET body_text='Tampered text'
 WHERE source_card_key='draft_501_ru';
