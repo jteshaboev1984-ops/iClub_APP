@@ -115,7 +115,7 @@ export function makeFreeformPilotHandler(conf:Runtime){
   if(keys.length!==4||keys.some(k=>!["intent","request_id","locale","question"].includes(k))||
    data.intent!=="ask"||!str(data.request_id)||!UUID.test(data.request_id)||
    !["ru","uz","en"].includes(String(data.locale))||
-   !str(data.question)||data.question.trim().length<8||data.question.length>1800||
+   !str(data.question)||data.question.trim().length<8||data.question.length>2000||
    CTRL.test(data.question)||HTML.test(data.question))
    return send(400,{ok:false,reason:"invalid_request"});
   const uid=await auth(bearer);
