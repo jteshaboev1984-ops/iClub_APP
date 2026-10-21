@@ -28,3 +28,29 @@ CREATE TABLE public.practice_sessions_v4(user_id uuid,status text);
 CREATE FUNCTION private.iclub_ai_has_active_protected_assessment_v1(p_uid uuid)
 RETURNS boolean LANGUAGE sql STABLE SET search_path=''
 AS $stub$ SELECT false $stub$;
+
+CREATE SCHEMA extensions;
+CREATE EXTENSION pgcrypto WITH SCHEMA extensions;
+CREATE TABLE private.iclub_ai_v21_beta_help_sources(
+ help_key text NOT NULL,locale text NOT NULL,
+ message text NOT NULL,source_version text NOT NULL,
+ publication_revision bigint NOT NULL,
+ source_hash text NOT NULL,content_reviewed boolean NOT NULL,
+ rights_reviewed boolean NOT NULL,locale_reviewed boolean NOT NULL,
+ published boolean NOT NULL,revoked boolean NOT NULL,
+ approved_at timestamptz NOT NULL,
+ PRIMARY KEY(help_key,locale)
+);
+INSERT INTO private.iclub_ai_v21_beta_help_sources
+(help_key,locale,message,source_version,publication_revision,source_hash,
+ content_reviewed,rights_reviewed,locale_reviewed,published,revoked,approved_at)
+SELECT 'synthetic_help_'||s.i,s.loc,
+ repeat('Synthetic source for General Help in iClub with navigation instructions. ',2),
+ CASE WHEN s.i<=7 THEN 'synthetic_guidance_v1' ELSE 'synthetic_nav_v1' END,
+ 1,
+ encode(extensions.digest(convert_to(repeat(
+ 'Synthetic source for General Help in iClub with navigation instructions. ',2),
+ 'UTF8'),'sha256'),'hex'),
+ true,true,true,true,false,now()
+FROM (SELECT i,loc FROM generate_series(1,13) AS i
+ CROSS JOIN (VALUES('en'),('ru'),('uz')) AS l(loc)) AS s;
