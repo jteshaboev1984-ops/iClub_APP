@@ -416,3 +416,64 @@ test('Unsafe generated markup is withheld, usage refunded, provider liability re
  assert.equal(invoked,1,'No retry of an already-dispatched paid request');
  assert.equal(x.s.moneyDispatchCalls,1);
 });
+
+test('Free-form learner question reaches source-bound model AFTER auth, budget, money hold and frozen-context checks',async()=>{
+ const {createQaFreeformGenerator}=require('./ai-layer-v21-freeform-generation.cjs');
+ const x=fixture({plan:'plus_qa_v2',subject:'economics',locale:'en'});
+ const SOURCE='Injections: investment 40, government spending 50, exports 30, total 120. Leakages: saving 35, taxes 45, imports 50, total 130. The net withdrawal is 10 million. A complete income change requires the marginal propensities and multiplier.';
+ const original=x.services.getSourceBundle;
+ x.services.getSourceBundle=async input=>({...await original(input),sourceText:SOURCE});
+ let inputSeen=null,realProviderCalls=0;
+ const generator=createQaFreeformGenerator({config:{
+  enabled:true,environment:'isolated_mock_only',model:'mock-tutor-v1'},
+  provider:async req=>{
+   inputSeen=req;realProviderCalls++;
+   return{status:'completed',model:'mock-tutor-v1',
+    usage:{input_tokens:280,output_tokens:48},
+    output:[{type:'message',role:'assistant',content:[{type:'output_text',
+     text:'Leakages exceed injections by 10 million. The total income impact depends on the multiplier, which is not given here.'}]}]};
+  }});
+ x.services.generateSynthetic=async verified=>{
+  const result=await generator(verified);
+  if(!result.ok)throw Error(result.reason);
+  return result.answer;
+ };
+ const question='Why do withdrawals of ten million not always reduce income by ten million?';
+ const response=await x.send({promptKey:undefined,question});
+ assert.equal(response.status,200);
+ assert.equal(response.body.ok,true);
+ assert.match(response.body.reply,/multiplier/);
+ assert.equal(realProviderCalls,1);
+ assert.equal(x.s.moneyReserveCalls,1);
+ assert.equal(x.s.moneyDispatchCalls,1);
+ assert.equal(x.s.units.get(U),3);
+ assert.equal(inputSeen.model,'mock-tutor-v1');
+ assert.deepEqual(inputSeen.tools,[]);
+ assert.ok(inputSeen.instructions.includes(SOURCE));
+ assert.ok(inputSeen.input.includes(question));
+ assert.equal(inputSeen.instructions.includes(U),false);
+ assert.ok(!JSON.stringify(response.body).includes('sourceHash'));
+});
+test('Free-form no-source model refusal releases learner quota and keeps monetary exposure',async()=>{
+ const {createQaFreeformGenerator}=require('./ai-layer-v21-freeform-generation.cjs');
+ const x=fixture({plan:'plus_qa_v2',subject:'economics',locale:'en'});
+ const source='An illustrative economics source on the investment, exports and tax components of a national income calculation. Any unavailable marginal propensity cannot be inferred from this information alone.';
+ const original=x.services.getSourceBundle;
+ x.services.getSourceBundle=async input=>({...await original(input),sourceText:source});
+ let called=0;
+ const g=createQaFreeformGenerator({config:{enabled:true,
+ environment:'isolated_mock_only',model:'mock-tutor-v1'},
+  provider:async()=>{called++;return{status:'completed',model:'mock-tutor-v1',
+   usage:{input_tokens:120,output_tokens:12},output:[{type:'message',role:'assistant',
+     content:[{type:'output_text',text:'ICLUB_NO_APPROVED_SOURCE'}]}]};}});
+ x.services.generateSynthetic=async options=>{
+  const r=await g(options);if(!r.ok)throw Error(r.reason);return r.answer;
+ };
+ const response=await x.send({promptKey:undefined,
+  question:'Explain the price of an unrelated chemical compound using this economics source.'});
+ assert.equal(response.body.ok,false);
+ assert.equal(response.body.reason,'processing_unavailable');
+ assert.equal(called,1);
+ assert.equal(x.s.units.get(U),0);
+ assert.equal(x.s.money.get(RID).state,'unknown');
+});
