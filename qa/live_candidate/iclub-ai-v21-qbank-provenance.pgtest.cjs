@@ -261,10 +261,24 @@ SELECT 'PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE' result;
 `;
 const revisionTests=fs.readFileSync(path.join(__dirname,
  "iclub_ai_v21_revision_ledger_SCRATCH_TEST_ONLY_20261020.sql"),"utf8");
-const sql=[schema,gateOnly,revisionStage,fixtures,revisionTests].join(String.fromCharCode(10));
+const {sourceEnvelopeHash}=require("./iclub-ai-v21-qbank-p4-signed-triad-bridge.cjs");
+const p4Body="Синтетический материал с Unicode и новой строкой\nSecond synthetic line.";
+// Actual PostgreSQL proof: P4 source hash binds source_text + LF + '{}'::jsonb.
+const p4Proof=`DO $p4hash$ BEGIN
+ IF encode(extensions.digest(convert_to(
+ $body$Синтетический материал с Unicode и новой строкой
+Second synthetic line.$body$||E'\\n'||'{}'::jsonb::text,'UTF8'),
+ 'sha256'),'hex')<>'${sourceEnvelopeHash(p4Body)}' THEN
+  RAISE EXCEPTION 'P4 signed source envelope differs from PostgreSQL digest';
+ END IF;
+END $p4hash$;
+SELECT 'PASS_P4_SOURCE_ENVELOPE_POSTGRES_SHA' result;`;
+const sql=[schema,gateOnly,revisionStage,fixtures,revisionTests,p4Proof]
+ .join(String.fromCharCode(10));
 try{
  const result=cp.execFileSync("psql",["-X","-v","ON_ERROR_STOP=1"],{input:sql,encoding:"utf8",timeout:90000,maxBuffer:2_000_000});
  assert.match(result,/PASS_REAL_SCRATCH_PG_OWNER_QBANK_PROVENANCE/);
  assert.match(result,/PASS_SOURCE_IMMUTABLE_HISTORY/);
+ assert.match(result,/PASS_P4_SOURCE_ENVELOPE_POSTGRES_SHA/);
  console.log("PASS: exact old legacy + new gate + multi-locale + revoke + SHA + active pool + permissions (scratch only)");
 }catch(error){console.error(error.stdout||"",error.stderr||"");throw error;}
