@@ -249,6 +249,7 @@ jobs:
           PGDATABASE="$db" PGHOST=127.0.0.1 PGPORT=5432 \
             node qa/live_candidate/iclub-ai-v21-qbank-provenance.pgtest.cjs
           node --test qa/live_candidate/iclub-ai-v21-qbank-provenance.contract.test.cjs
+          node --test qa/live_candidate/iclub-ai-v21-qbank-p4-signed-triad-bridge.test.cjs
       - name: Run fifteen independent scratch PostgreSQL suites
         shell: bash
         run: |
