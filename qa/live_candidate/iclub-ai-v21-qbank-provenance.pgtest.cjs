@@ -67,7 +67,7 @@ INSERT INTO public.questions VALUES
   'An iClub original Economics explanation in English.',
   'Оригинальное объяснение iClub по экономике.',
   'Iqtisodiyot bo‘yicha original iClub izohi.'),
- (601,1,true,'published','Old original explanation','Старое объяснение','Eski izoh');
+ (601,1,true,'published','Old original explanation preserved for immutable academic history','Старое объяснение сохранено для исторической проверки','Eski o‘quv izohi ilmiy tarix uchun saqlangan');
 INSERT INTO public.practice_pools VALUES (11,1,true),(12,2,true);
 INSERT INTO public.practice_pool_questions VALUES (501,11,true),(502,12,true);
 INSERT INTO private.iclub_ai_v21_academic_sources(
