@@ -11,7 +11,14 @@ test("real current production beta UI can be parsed and uses additive model rout
  a.match(client,/async function askPrepared/);
  a.match(client,/async function askAcademic/);
  a.match(client,/async function askGenerated/);
- a.match(client,/client\.functions\.invoke\("iclub-ai-v21-freeform-beta"/);
+ a.match(client,/client\.auth\.getSession\(\)/);
+ a.match(client,/fetch\(/);
+ a.match(client,/expectedOrigin\+"\\/functions\\/v1\\/iclub-ai-v21-freeform-beta"/);
+ a.match(client,/credentials:"omit"/);
+ a.match(client,/signal:controller\.signal/);
+ a.match(client,/clearTimeout\(timer\)/);
+ a.doesNotMatch(client.slice(client.indexOf("async function askGenerated"),
+   client.indexOf("// Unified learner-scoped source bridge")),/functions\.invoke/);
  a.match(client,/status,consentFromExplicitUserAction,askPrepared,askGenerated/);
  a.match(ui,/body\?\.subject_key === "general"/);
  a.match(ui,/body\?\.prompt_key === ""/);
