@@ -233,6 +233,10 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Typecheck and test real-model freeform beta HTTP route with 0 external network calls
+        run: |
+          deno check qa/edge_v21/freeform_beta_pilot.ts qa/edge_v21/freeform_beta_entrypoint.ts qa/edge_v21/freeform_beta_pilot_test.ts
+          deno test qa/edge_v21/freeform_beta_pilot_test.ts
       - name: Typecheck isolated Deno Edge transport
         run: deno check qa/edge_v21/qa_startup_guard.ts qa/edge_v21/qa_startup_guard_test.ts qa/edge_v21/auth_trust_boundary_test.ts qa/edge_v21/http.ts qa/edge_v21/context_core.ts qa/edge_v21/screen_proof_services.ts qa/edge_v21/screen_proof_services_test.ts qa/edge_v21/supabase_services.ts qa/edge_v21/runtime.ts qa/edge_v21/index.ts
       - name: Native Deno HTTP, Auth and source-gate regression
