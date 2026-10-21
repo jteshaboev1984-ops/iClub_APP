@@ -20,6 +20,7 @@ on:
       - 'iclub-ai-v21-beta-client.js'
       - 'iclub-ai-v21-ui.js'
       - 'qa/ai-v21-freeform-beta-current-ui-contract.test.cjs'
+      - 'qa/ai-v21-freeform-real-client-transport.test.cjs'
       - 'qa/ai-layer-v21-edge-request.test.cjs'
       - 'qa/ai-layer-v21-freeform-generation.cjs'
       - 'qa/ai-layer-v21-freeform-generation.test.cjs'
