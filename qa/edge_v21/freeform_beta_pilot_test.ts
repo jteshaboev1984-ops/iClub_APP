@@ -145,3 +145,24 @@ Deno.test("pilot starts disabled and cannot even authenticate",async()=>{
  const r=await f.send();equal(r.status,503,"disabled");
  equal(f.logs.length,0,"no network calls");
 });
+
+Deno.test("Supabase browser CORS preflight includes x-client-info without requiring a paid request",async()=>{
+ const f=await fixture();
+ const endpoint=makeFreeformPilotHandler({
+  url:HOST,anon:"anon-synthetic-key-very-long-00001",
+  service:"service-synthetic-key-long-00002",
+  providerKey:"provider-synthetic-key-long-003",
+  enabled:true,fetcher:async()=>{throw Error("OPTIONS must not use network");}
+ });
+ const r=await endpoint(new Request("https://fake.test",{
+  method:"OPTIONS",headers:{"origin":ORIGIN,
+   "access-control-request-method":"POST",
+   "access-control-request-headers":"authorization, apikey, content-type, x-client-info"}
+ }));
+ equal(r.status,204,"preflight success");
+ if(!(r.headers.get("access-control-allow-headers")||"").includes("x-client-info"))
+  throw Error("Browser x-client-info header forbidden");
+ equal(r.headers.get("access-control-allow-origin"),ORIGIN,"allowed production origin");
+ equal(r.headers.get("access-control-allow-methods"),"POST, OPTIONS","allowed methods");
+ equal(f.logs.length,0,"no mock paid requests");
+});
