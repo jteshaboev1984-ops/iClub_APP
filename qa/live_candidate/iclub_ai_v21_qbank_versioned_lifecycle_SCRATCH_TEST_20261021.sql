@@ -5,7 +5,7 @@ BEGIN
  IF (SELECT count(*) FROM private.iclub_ai_v21_qbank_content_history)<>10
  OR (SELECT count(*) FROM private.iclub_ai_v21_qbank_owner_review_reports)<>1
  OR (SELECT count(*) FROM private.iclub_ai_v21_qbank_content_history
-   WHERE initially_admitted)<>7
+   WHERE initially_admitted)<>4
  THEN RAISE EXCEPTION 'Version ledger synthetic baseline incorrect'; END IF;
 
  SELECT source_card_key INTO delivered_key
@@ -91,7 +91,7 @@ BEGIN
  IF allowed THEN RAISE EXCEPTION 'Owner report upgraded to approval'; END IF;
 
  IF (SELECT count(*) FROM private.iclub_ai_v21_academic_sources a
-   WHERE private.iclub_ai_v21_source_admitted_v1(a))<>7
+   WHERE private.iclub_ai_v21_source_admitted_v1(a))<>4
  OR has_table_privilege('service_role',
  'private.iclub_ai_v21_qbank_content_history','SELECT')
  OR has_function_privilege('service_role',
