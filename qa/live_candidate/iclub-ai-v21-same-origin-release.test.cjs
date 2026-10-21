@@ -55,8 +55,28 @@ test("same-origin beta release uses unchanged original app plus accepted UI",()=
    a.equal(index.split('src="iclub-ai-v21-ui.js').length,2);
    // Post-production install: compare exact bytes to the previously approved
    // QA visual and connected beta adapter, not a screenshot substitute.
-   a.equal(fs.readFileSync(path.join(main,"iclub-ai-v21-beta-client.js"),"utf8"),adapter);
-   a.equal(fs.readFileSync(path.join(main,"iclub-ai-v21-ui.js"),"utf8"),src);
+   const currentClient=fs.readFileSync(path.join(main,"iclub-ai-v21-beta-client.js"),"utf8");
+   const currentUi=fs.readFileSync(path.join(main,"iclub-ai-v21-ui.js"),"utf8");
+   // The explicitly owner-approved *additive* freeform pilot is now deployed.
+   // Check exact production==QA bytes, THEN remove only the reviewed additions
+   // and insist every former prepared, academic, Math and original UI byte
+   // still matches the immutable pre-pilot fixture.
+   a.equal(currentClient,read("iclub-ai-v21-beta-client.js"));
+   a.equal(currentUi,read("iclub-ai-v21-ui.js"));
+   const start=currentClient.indexOf("  // Separate owner-authorized $5 General Help model pilot.");
+   const end=currentClient.indexOf("  // Unified learner-scoped source bridge.",start);
+   a.ok(start>0&&end>start);
+   const prevClient=(currentClient.slice(0,start)+currentClient.slice(end))
+     .replace("status,consentFromExplicitUserAction,askPrepared,askGenerated,",
+       "status,consentFromExplicitUserAction,askPrepared,")
+     .replace("new Promise(resolve=>setTimeout(()=>resolve({timedOut:true}),55000))",
+       "new Promise(resolve=>setTimeout(()=>resolve({timedOut:true}),25000))");
+   a.equal(prevClient,adapter,"Original prepared/academic beta was modified");
+   const uiStart=currentUi.indexOf("    // Only General Help can use the separately budgeted, real-model beta.");
+   const uiEnd=currentUi.indexOf('    if (beta && typeof beta.askPrepared === "function")',uiStart);
+   a.ok(uiStart>0&&uiEnd>uiStart);
+   a.equal(currentUi.slice(0,uiStart)+currentUi.slice(uiEnd),src,
+     "Original Math/Practice/Tour/UI paths were modified");
    a.equal(fs.readFileSync(path.join(main,"iclub-ai-v21-ui.css"),"utf8"),css);
    const icon=fs.readFileSync(path.join(main,"iclub-ai-tutor-a.webp"));
    a.equal(icon.length,3394);
