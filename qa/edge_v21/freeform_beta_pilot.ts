@@ -173,8 +173,9 @@ export function makeFreeformPilotHandler(conf:Runtime){
    "APPROVED_DATA_START",source.text,"APPROVED_DATA_END"
   ].join("\n");
   let model:Record<string,unknown>|null=null;
+  let providerHttpStatus=0,providerErrorClass="transport_error";
   try{
-   model=await readData(conf.fetcher("https://api.openai.com/v1/responses",{
+   const upstream=await conf.fetcher("https://api.openai.com/v1/responses",{
     method:"POST",headers:{"authorization":"Bearer "+conf.providerKey,
      "content-type":"application/json"},
     body:JSON.stringify({model:MODEL,instructions,
@@ -182,8 +183,29 @@ export function makeFreeformPilotHandler(conf:Runtime){
      max_output_tokens:384,reasoning:{effort:"none"},
      store:false,tools:[],truncation:"disabled"}),
     signal:AbortSignal.timeout(12000)
-   }));
-  }catch{/* unknown provider status retains full monetary hold */}
+   });
+   providerHttpStatus=upstream.status;
+   if(upstream.ok){
+    try{
+     const parsed=await upstream.json();
+     if(object(parsed)){model=parsed;providerErrorClass="accepted_response";}
+     else providerErrorClass="nonobject_response";
+    }catch{providerErrorClass="unparseable_response";}
+   }else{
+    providerErrorClass="upstream_http_error";
+    try{
+     const parsed=await upstream.json();
+     const rawCode=object(parsed)&&object(parsed.error)?parsed.error.code:null;
+     // Log ONLY a fixed, non-sensitive error category. Never log the question,
+     // source text, response content, request ID, user ID, keys or API headers.
+     if(str(rawCode)&&[
+      "invalid_api_key","insufficient_quota","model_not_found",
+      "rate_limit_exceeded","billing_hard_limit_reached",
+      "unsupported_parameter","invalid_request_error"
+     ].includes(rawCode))providerErrorClass=rawCode;
+    }catch{}
+   }
+  }catch{/* Unknown provider status retains the full reserved liability. */}
   const usage=object(model?.usage)?model.usage:null;
   const inputTokens=usage?.input_tokens,outputTokens=usage?.output_tokens;
   const tokenValid=positive(inputTokens)&&positive(outputTokens)&&
@@ -191,6 +213,15 @@ export function makeFreeformPilotHandler(conf:Runtime){
   const charge=tokenValid?
    Math.ceil(Number(inputTokens)*0.75+Number(outputTokens)*4.50):null;
   const validCharge=charge!==null&&charge>=0&&charge<=50000;
+  if(!validCharge){
+   console.warn("iclub_freeform_provider_validation_failed",JSON.stringify({
+    upstream_http_status:providerHttpStatus,
+    class:providerErrorClass,
+    response_completed:model?.status==="completed",
+    recognized_model:approvedModel(model?.model),
+    positive_token_usage:positive(inputTokens)&&positive(outputTokens)
+   }));
+  }
   const paid=await finishMoney(validCharge?"charged":"unknown",
    validCharge?charge:null);
   if(paid?.ok!==true){
