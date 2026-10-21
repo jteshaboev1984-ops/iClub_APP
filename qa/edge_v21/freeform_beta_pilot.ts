@@ -27,7 +27,7 @@ function reply(code:number,data:Record<string,unknown>,origin:string|null){
  if(origin&&ORIGIN.test(origin)){
   h.set("access-control-allow-origin",origin);
   h.set("access-control-allow-methods","POST, OPTIONS");
-  h.set("access-control-allow-headers","authorization, apikey, content-type");
+  h.set("access-control-allow-headers","authorization, apikey, content-type, x-client-info");
  }
  return new Response(code===204?null:JSON.stringify(data),{status:code,headers:h});
 }
