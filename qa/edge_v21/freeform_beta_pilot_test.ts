@@ -14,6 +14,7 @@ const hash=async(s:string)=>{
 };
 async function fixture(changes:{blocked?:boolean;noSource?:boolean;
  budgetDenied?:boolean;providerFailure?:boolean;sentinel?:boolean;
+ snapshot?:boolean;reasoningEnvelope?:boolean;rogueModel?:boolean;http400?:boolean;
  contextDrift?:boolean;enabled?:boolean}={}){
  const logs:{name:string;payload:Record<string,unknown>}[]=[];
  const originSource=await hash(SOURCE);
@@ -46,9 +47,13 @@ async function fixture(changes:{blocked?:boolean;noSource?:boolean;
   if(name==="finish_iclub_ai_v21_freeform_quota_v1")return Response.json({ok:true});
   if(url==="https://api.openai.com/v1/responses"){
    if(changes.providerFailure)return new Response("provider down",{status:503});
-   return Response.json({status:"completed",model:"gpt-5.4-mini",
+   if(changes.http400)return Response.json({error:{code:"unsupported_parameter"}},{status:400});
+   return Response.json({status:"completed",
+    model:changes.rogueModel?"gpt-5.6-luna":
+      changes.snapshot?"gpt-5.4-mini-2026-03-17":"gpt-5.4-mini",
     usage:{input_tokens:250,output_tokens:50},
-    output:[{type:"message",role:"assistant",content:[{type:"output_text",
+    output:[...(changes.reasoningEnvelope?[{type:"reasoning",summary:[]}]:[]),
+     {type:"message",role:"assistant",content:[{type:"output_text",
      text:changes.sentinel?"ICLUB_NO_APPROVED_SOURCE":
      "You can find Support in your Profile. The AI assistant cannot change your results."}]}]});
   }
@@ -165,4 +170,33 @@ Deno.test("Supabase browser CORS preflight includes x-client-info without requir
  equal(r.headers.get("access-control-allow-origin"),ORIGIN,"allowed production origin");
  equal(r.headers.get("access-control-allow-methods"),"POST, OPTIONS","allowed methods");
  equal(f.logs.length,0,"no mock paid requests");
+});
+
+Deno.test("official dated GPT-5.4-mini snapshot counts as a verified generated answer and exact charge",async()=>{
+ const f=await fixture({snapshot:true,reasoningEnvelope:true});
+ const r=await f.send();
+ equal(r.status,200,"snapshot status");
+ const d=await r.json();
+ equal(d.ok,true,"snapshot accepted");
+ equal(d.mode,"generated","mode");
+ equal(f.logs.find(x=>x.name==="settle_iclub_ai_v21_freeform_budget_v1")?.payload.p_outcome,
+ "charged","snapshot cost confirmed");
+ equal(f.logs.find(x=>x.name==="finish_iclub_ai_v21_freeform_quota_v1")?.payload.p_outcome,
+ "completed","student can see officially snapshotted response");
+});
+Deno.test("an unrelated model identity is still rejected and liability is retained",async()=>{
+ const f=await fixture({rogueModel:true});
+ const r=await f.send(),d=await r.json();
+ equal(d.ok,false,"model mismatch denied");
+ equal(f.logs.find(x=>x.name==="settle_iclub_ai_v21_freeform_budget_v1")?.payload.p_outcome,
+ "unknown","mismatched model monetary hold retained");
+ equal(f.logs.find(x=>x.name==="finish_iclub_ai_v21_freeform_quota_v1")?.payload.p_outcome,
+ "released","learner quota refunded");
+});
+Deno.test("provider parameter HTTP 400 fails closed with potential spending liability retained",async()=>{
+ const f=await fixture({http400:true});
+ const r=await f.send(),d=await r.json();
+ equal(d.ok,false,"upstream provider rejection denied");
+ equal(f.logs.find(x=>x.name==="settle_iclub_ai_v21_freeform_budget_v1")?.payload.p_outcome,
+ "unknown","provider rejection liability retained");
 });
