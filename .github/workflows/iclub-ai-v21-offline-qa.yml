@@ -243,6 +243,21 @@ jobs:
             sudo apt-get update -qq
             sudo apt-get install -y -qq postgresql-client
           fi
+      - name: Isolated $5 owner-approved Free beta money guard in disposable PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          db="iclub_ai_v21_scratch_ci_5usd_freeform"
+          createdb -h 127.0.0.1 -p 5432 -U postgres "$db"
+          cleanup() { dropdb -h 127.0.0.1 -p 5432 -U postgres "$db"; }
+          trap cleanup EXIT
+          for path in \
+            qa/live_candidate/iclub_ai_v21_freeform_5usd_scratch_BOOTSTRAP_20261021.psql \
+            qa/live_candidate/iclub_ai_v21_freeform_5usd_money_GATE_UNAPPLIED_20261021.sql \
+            qa/live_candidate/iclub_ai_v21_freeform_5usd_money_SCRATCH_TEST_20261021.sql; do
+            psql -X -w -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 \
+              -U postgres -d "$db" -f "$path"
+          done
       - name: Isolated three-locale question provenance SQL proof (NO production)
         shell: bash
         run: |
