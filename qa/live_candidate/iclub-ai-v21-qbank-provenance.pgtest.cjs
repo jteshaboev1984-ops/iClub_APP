@@ -273,6 +273,19 @@ WHERE context_key='question_502';
 UPDATE private.iclub_ai_v21_academic_sources
 SET content_hash=encode(extensions.digest(convert_to(body_text,'UTF8'),'sha256'),'hex')
 WHERE context_key='question_502';
+-- QA fixture ONLY: simulate a new independently re-verified P4 receipt.
+-- Actual importer is INSERT-only; production must archive old source keys.
+UPDATE private.iclub_ai_v21_qbank_signed_review_receipts proof
+ SET source_version=src.source_version,
+ content_hash=src.content_hash,
+ p4_source_envelope_hash=encode(extensions.digest(
+   convert_to(src.body_text||chr(10)||'{}'::jsonb::text,'UTF8'),
+   'sha256'),'hex'),
+ signed_manifest_hash=encode(extensions.digest(
+   convert_to('SYNTHETIC_RESIGNED_'||src.source_card_key,'UTF8'),
+   'sha256'),'hex')
+ FROM private.iclub_ai_v21_academic_sources src
+ WHERE proof.source_card_key=src.source_card_key AND proof.question_id=502;
 UPDATE private.iclub_ai_v21_qbank_owner_beta_releases beta
 SET origin_basis='original_iclub_curated_revision',
  source_version=src.source_version,
