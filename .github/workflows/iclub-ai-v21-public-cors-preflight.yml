@@ -1,0 +1,42 @@
+name: iClub AI — public OPTIONS CORS probe (zero model calls)
+on:
+  push:
+    branches:
+      - qa/iclub-ai-layer-v21-20261012
+    paths:
+      - .github/workflows/iclub-ai-v21-public-cors-preflight.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-options-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Inspect real Supabase preflight with the SDK's full header list
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://mmmduffgpvwjdpruzikw.supabase.co/functions/v1/iclub-ai-v21-freeform-beta"
+          origin="https://i-club-app.vercel.app"
+          required="authorization x-client-info apikey content-type x-retry-count traceparent tracestate baggage"
+          # OPTIONS ONLY, no token, no user identity, no POST and no provider billing.
+          curl --proto '=https' --tlsv1.2 --silent --show-error \
+            --max-time 15 -D /tmp/iclub-preflight-headers -o /tmp/iclub-preflight-body \
+            -X OPTIONS "$url" \
+            -H "Origin: $origin" \
+            -H "Access-Control-Request-Method: POST" \
+            -H "Access-Control-Request-Headers: authorization, apikey, content-type, x-client-info, x-retry-count, traceparent, tracestate, baggage" \
+            -H "User-Agent: Mozilla/5.0 Telegram-Android/13.0.2.0"
+          grep -E -i '^HTTP/|^access-control-|^vary:' /tmp/iclub-preflight-headers
+          grep -Eq '^HTTP/[^ ]+ 204' /tmp/iclub-preflight-headers
+          grep -Eiq '^access-control-allow-origin: https://i-club-app\.vercel\.app' /tmp/iclub-preflight-headers
+          grep -Eiq '^access-control-allow-methods:.*POST' /tmp/iclub-preflight-headers
+          allowed="$(grep -i '^access-control-allow-headers:' /tmp/iclub-preflight-headers | tail -1 | tr '[:upper:]' '[:lower:]')"
+          for header in $required; do
+            if ! grep -Eq "(^|[, :])${header}([,[:space:]]|$)" <<< "$allowed"; then
+              echo "::error::Missing required CORS header: $header"
+              exit 1
+            fi
+          done
+          echo "PASS real browser-style Supabase CORS preflight; no model invocation"
