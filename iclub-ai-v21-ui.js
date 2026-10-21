@@ -1145,6 +1145,20 @@
       });
       return {data:answer,error:null};
     }
+    // Only General Help can use the separately budgeted, real-model beta.
+    // Keep ready-made buttons, protected academic routes and Tutor unchanged.
+    if (beta && typeof beta.askGenerated === "function" &&
+        body?.intent !== "academic" &&
+        body?.subject_key === "general" &&
+        body?.prompt_key === "" &&
+        typeof body?.user_text === "string" &&
+        body.user_text.trim().length >= 8) {
+      const answer = await beta.askGenerated({
+        requestId:body.request_id,locale:body.locale,
+        userText:body.user_text
+      });
+      return {data:answer,error:null};
+    }
     if (beta && typeof beta.askPrepared === "function") {
       const answer = await beta.askPrepared({
         promptKey: body?.prompt_key, locale: body?.locale,

@@ -292,6 +292,43 @@
       academic_state_changed:false,provider_called:false};
   }
 
+  // Separate owner-authorized $5 General Help model pilot.
+  // Do not change the prepared/academic endpoints or existing UI shell.
+  async function askGenerated({requestId,locale,userText}={}){
+    const code=String(locale||"");
+    const question=String(userText||"").trim();
+    const id=String(requestId||"");
+    if(!LOCALES.has(code)||question.length<8||question.length>2000||
+       !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))
+      return closed("invalid_question");
+    const current=await status();
+    if(!current.eligible||!current.consented||protectedNow())
+      return closed("beta_not_enabled");
+    const user=lastUser,epoch=authEpoch;
+    const client=window.sb;
+    if(typeof client?.functions?.invoke!=="function")return closed("unavailable");
+    let answer=null;
+    try{
+      const response=await Promise.race([
+        client.functions.invoke("iclub-ai-v21-freeform-beta",{
+          body:{intent:"ask",request_id:id,locale:code,question}
+        }),
+        new Promise(resolve=>setTimeout(()=>resolve({timedOut:true}),55000))
+      ]);
+      answer=response?.timedOut?{ok:false,reason:"timeout"}:
+        response?.error?null:response?.data;
+    }catch{return closed("unavailable");}
+    if(epoch!==authEpoch||user!==await identity()||protectedNow())
+      return closed("context_changed");
+    if(answer?.ok!==true||answer?.mode!=="generated"||
+       answer?.provider_called!==true||
+       answer?.academic_state_changed!==false||
+       typeof answer.message!=="string"||answer.message.length<20||
+       answer.message.length>2400)return closed(String(answer?.reason||"unavailable"));
+    return {ok:true,message:answer.message,mode:"generated",
+      provider_called:true,academic_state_changed:false};
+  }
+
   // Unified learner-scoped source bridge. Selectors are not grants:
   // the server verifies real owner, finalization, publication and entitlement.
   const academicTypes=new Set(["practice_error","lesson_topic","tour_archive"]);
@@ -433,7 +470,7 @@
     document.addEventListener("DOMContentLoaded",setupAcademicAutoAttach,{once:true});
   else setupAcademicAutoAttach();
   window.iClubAiV21BetaClient=Object.freeze({
-    status,consentFromExplicitUserAction,askPrepared,
+    status,consentFromExplicitUserAction,askPrepared,askGenerated,
     availableAcademic,askAcademic,resetOnIdentityChange
   });
 })();
