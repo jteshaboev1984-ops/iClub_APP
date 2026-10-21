@@ -42,3 +42,13 @@ jobs:
             fi
           done
           echo "PASS real browser-style Supabase CORS preflight; no model invocation"
+      - name: Checkout QA diagnostics (no saved credentials)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node 22 for native Chromium CDP
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Chromium live preflight and POST rejection (no account or model request)
+        run: node qa/live_candidate/iclub-ai-v21-production-preflight-browser-NO_AUTH.cjs
