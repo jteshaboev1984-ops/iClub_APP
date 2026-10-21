@@ -196,7 +196,10 @@ class CandidateEdgeRequest {
      if(!await again())modelFailed=true;
      else output=await this.services.generateSynthetic({
       userId:principal.userId,locale,question,sourceText:bundle.sourceText,
-      sourceHash:bundle.sourceHash,sourceId:readiness.sourceId
+      sourceBodyHash:createHash('sha256').update(bundle.sourceText,'utf8').digest('hex'),
+      sourceHash:bundle.sourceHash,sourceId:readiness.sourceId,
+      sourceVersion:readiness.sourceVersion,subject:readiness.subject,
+      contextApproved:true,assessmentActive:false
      });
     }catch{modelFailed=true;}
     // An external timeout does not prove zero provider cost. Until trusted
