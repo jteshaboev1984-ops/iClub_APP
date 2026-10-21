@@ -3,6 +3,8 @@
 // Requires independent DB money/quota controls before any paid call.
 const BASE="https://mmmduffgpvwjdpruzikw.supabase.co";
 const MODEL="gpt-5.4-mini";
+const MODEL_SNAPSHOT="gpt-5.4-mini-2026-03-17";
+const approvedModel=(name:unknown)=>name===MODEL||name===MODEL_SNAPSHOT;
 const UNKNOWN="ICLUB_NO_APPROVED_SOURCE";
 const ORIGIN=/^https:\/\/(?:i-club-app\.vercel\.app|i-club-[a-z0-9-]+-jasurbeks-projects-c5451f97\.vercel\.app)$/i;
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -38,9 +40,11 @@ async function readData(task:Promise<Response>):Promise<Record<string,unknown>|n
  }catch{return null;}
 }
 function modelText(data:Record<string,unknown>):string|null{
- if(data.status!=="completed"||data.model!==MODEL||!Array.isArray(data.output))return null;
+ if(data.status!=="completed"||!approvedModel(data.model)||!Array.isArray(data.output))return null;
  const texts:string[]=[];
  for(const item of data.output){
+  // A reasoning envelope (if present) is metadata, never shown to learners.
+  if(object(item)&&item.type==="reasoning")continue;
   if(!object(item)||item.type!=="message"||item.role!=="assistant"||
    !Array.isArray(item.content))return null;
   for(const part of item.content){
@@ -183,7 +187,7 @@ export function makeFreeformPilotHandler(conf:Runtime){
   const usage=object(model?.usage)?model.usage:null;
   const inputTokens=usage?.input_tokens,outputTokens=usage?.output_tokens;
   const tokenValid=positive(inputTokens)&&positive(outputTokens)&&
-   Number(outputTokens)<=384&&model?.model===MODEL;
+   Number(outputTokens)<=384&&approvedModel(model?.model);
   const charge=tokenValid?
    Math.ceil(Number(inputTokens)*0.75+Number(outputTokens)*4.50):null;
   const validCharge=charge!==null&&charge>=0&&charge<=50000;
