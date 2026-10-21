@@ -62,11 +62,11 @@ BEGIN
  source_fingerprint,source_version,locale,state,held_microusd,
  actual_microusd,finished_at)
  SELECT gen_random_uuid(),gen_random_uuid(),h,s,v,'fixture_v1','en',
- 'charged',50000,50000,clock_timestamp() FROM generate_series(1,99);
+ 'charged',50000,50000,clock_timestamp() FROM generate_series(1,98);
  SELECT SUM(CASE WHEN state='charged' THEN actual_microusd
   WHEN state='no_charge' THEN 0 ELSE held_microusd END)
  INTO expense FROM private.iclub_ai_v21_freeform_budget_ledger;
- IF expense<>5001200 THEN RAISE EXCEPTION 'Synthetic cost mismatch %',expense;END IF;
+ IF expense<>4951200 THEN RAISE EXCEPTION 'Synthetic cost mismatch %',expense;END IF;
  r:=public.reserve_iclub_ai_v21_freeform_budget_v1(
   'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',user2,h,s,v,'v1','en');
  IF r->>'reason'<>'pilot_budget_exhausted'
