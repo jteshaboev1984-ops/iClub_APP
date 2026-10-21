@@ -18,7 +18,9 @@ BEGIN
  IF r->>'reason'<>'beta_generation_disabled' THEN RAISE EXCEPTION 'Default OFF broken';END IF;
  -- TEST FIXTURE ONLY; live migration never enables these flags.
  UPDATE private.iclub_ai_v21_freeform_budget_control SET enabled=true;
- UPDATE private.iclub_ai_v21_beta_control SET generation_enabled=true;
+ -- Legacy beta generation_enabled=false MUST remain unchanged:
+ IF (SELECT generation_enabled FROM private.iclub_ai_v21_beta_control WHERE singleton=1)
+ THEN RAISE EXCEPTION 'Legacy prepared beta must remain unaffected'; END IF;
  r:=public.reserve_iclub_ai_v21_freeform_budget_v1(a,user3,h,s,v,'v1','ru');
  IF r->>'reason'<>'beta_generation_disabled' THEN RAISE EXCEPTION 'Unconsented member funded';END IF;
  r:=public.reserve_iclub_ai_v21_freeform_budget_v1(a,user1,h,s,v,'v1','en');
