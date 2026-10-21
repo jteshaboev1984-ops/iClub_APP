@@ -285,3 +285,39 @@ test("Signed receipt authority cannot be satisfied by owner permission alone",()
  assert.match(pg,/PASS_P4_SOURCE_ENVELOPE_POSTGRES_SHA/);
  assert.doesNotMatch(sql,/GRANT INSERT ON private\.iclub_ai_v21_qbank_signed_review_receipts\s+TO service_role/);
 });
+
+test("Version-aware owner and signed reviewer receipts retain past approvals",()=>{
+ const gate=read("iclub_ai_v21_qbank_owner_provenance_GATE_ONLY_UNAPPLIED_20261020.sql");
+ const life=read("iclub_ai_v21_qbank_versioned_lifecycle_20261021_UNAPPLIED.sql");
+ const tests=read("iclub_ai_v21_qbank_versioned_lifecycle_SCRATCH_TEST_20261021.sql");
+ for(const item of [
+ "PRIMARY KEY(source_card_key,source_version,content_hash)",
+ "UNIQUE(subject_key,question_id,locale,source_version)",
+ "proof.source_version=beta.source_version",
+ "signed_sibling.source_version=sibling.source_version",
+ "signed_sibling.content_hash=sibling.content_hash",
+ "(SELECT count(*) FROM private.iclub_ai_v21_qbank_signed_review_receipts)<>0"
+ ])assert.ok(gate.includes(item),item);
+ for(const item of [
+ "CREATE TABLE private.iclub_ai_v21_qbank_content_history",
+ "BEFORE UPDATE OR DELETE",
+ "CREATE TABLE private.iclub_ai_v21_qbank_owner_review_reports",
+ "expert_checks_reported_complete_by_owner",
+ "independent_signatures_verified boolean NOT NULL DEFAULT false",
+ "CHECK (released=false)",
+ "CREATE FUNCTION private.iclub_ai_v21_stage_qbank_revision_v2(",
+ "publication_revision=v_prev.publication_revision+1",
+ "private.iclub_ai_v21_owner_beta_source_releases",
+ "AND r.source_version=v_prev.source_version AND r.enabled",
+ "RETURN v_total"
+ ])assert.ok(life.includes(item),item);
+ assert.doesNotMatch(life,/UPDATE public\.questions|UPDATE private\.iclub_ai_v21_academic_deliveries|DELETE FROM private\.iclub_ai_v21_academic_deliveries/);
+ for(const item of [
+ "Question history or delivery identity changed",
+ "Existing owner-enabled content changed",
+ "Legacy owner-released content changed",
+ "Append-only history accepted update",
+ "Owner report upgraded to approval",
+ "PASS_321_SOURCE_VERSIONED_LIFECYCLE_SYNTHETIC"
+ ])assert.ok(tests.includes(item),item);
+});
