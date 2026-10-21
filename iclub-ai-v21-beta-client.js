@@ -306,18 +306,53 @@
       return closed("beta_not_enabled");
     const user=lastUser,epoch=authEpoch;
     const client=window.sb;
-    if(typeof client?.functions?.invoke!=="function")return closed("unavailable");
-    let answer=null;
+    if(typeof client?.auth?.getSession!=="function")return closed("unavailable");
+    // Use the same authenticated direct-fetch transport as Exam Prep.
+    // The SDK Functions wrapper can add dynamic custom headers during a
+    // Telegram WebView preflight; the model route needs only these 3.
+    const expectedOrigin="https://mmmduffgpvwjdpruzikw.supabase.co";
+    if(String(client.supabaseUrl||"").replace(/\\/$/,"")!==expectedOrigin)
+      return closed("unavailable");
+    const publicKey=String(client.supabaseKey||"");
+    if(publicKey.length<24)return closed("unavailable");
+    let session;
     try{
-      const response=await Promise.race([
-        client.functions.invoke("iclub-ai-v21-freeform-beta",{
-          body:{intent:"ask",request_id:id,locale:code,question}
-        }),
-        new Promise(resolve=>setTimeout(()=>resolve({timedOut:true}),55000))
-      ]);
-      answer=response?.timedOut?{ok:false,reason:"timeout"}:
-        response?.error?null:response?.data;
-    }catch{return closed("unavailable");}
+      const {data,error}=await client.auth.getSession();
+      if(error)return closed("authentication_required");
+      session=data?.session;
+    }catch{return closed("authentication_required");}
+    const accessToken=String(session?.access_token||"");
+    if(accessToken.length<24)return closed("authentication_required");
+    // Check identity again before transmitting any authenticated request.
+    if(epoch!==authEpoch||user!==await identity()||protectedNow())
+      return closed("context_changed");
+    let answer=null;
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),55000);
+    try{
+      const response=await fetch(
+        expectedOrigin+"/functions/v1/iclub-ai-v21-freeform-beta",{
+          method:"POST",mode:"cors",credentials:"omit",cache:"no-store",
+          headers:{
+            "Authorization":"Bearer "+accessToken,
+            "apikey":publicKey,
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify({intent:"ask",request_id:id,locale:code,question}),
+          signal:controller.signal
+        });
+      // A non-2xx reply is a refused request, never an answer to display.
+      const payload=await response.json().catch(()=>null);
+      if(response.ok&&payload&&typeof payload==="object"&&!Array.isArray(payload))
+        answer=payload;
+      else return closed(response.status===401?"authentication_required":
+        response.status===403?"source_or_access_unavailable":
+        response.status===409?"usage_or_budget_unavailable":"unavailable");
+    }catch(e){
+      return closed(e?.name==="AbortError"?"timeout":"unavailable");
+    }finally{
+      clearTimeout(timer);
+    }
     if(epoch!==authEpoch||user!==await identity()||protectedNow())
       return closed("context_changed");
     if(answer?.ok!==true||answer?.mode!=="generated"||
