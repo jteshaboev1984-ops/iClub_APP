@@ -1,0 +1,157 @@
+{
+  "asset_version": "economics_9708_P2_written_requirements_en_v1",
+  "publication_status": "INTERNAL_DRAFT_NO_LEARNER_ACCESS",
+  "paper": "P2",
+  "program_key": "economics_9708",
+  "program_version": "economics_2026_2028_v1",
+  "source_kind": "original_iclub_synthetic_not_cambridge_past_paper",
+  "source_syllabus": "https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf",
+  "kind": "answer_requirements_only_not_mark_scheme_or_model_essay",
+  "academic_QA": "pending",
+  "language_QA": "pending",
+  "localization": {
+    "en": "draft",
+    "ru": "pending",
+    "uz": "pending"
+  },
+  "max_paper_marks": 60,
+  "structure": "A mandatory; B one of two structured; C one of two structured",
+  "prototype_subpart_8_12_is_not_official": true,
+  "rubric_is_official": false,
+  "runtime_enabled": false,
+  "items": [
+    {
+      "task_ref": "P2.A.a",
+      "prompt_en": "Define a shortage in a market.",
+      "draft_marks": 2,
+      "requirements_en": [
+        "State an accurate definition using quantity demanded and quantity supplied at a particular price."
+      ]
+    },
+    {
+      "task_ref": "P2.A.b",
+      "prompt_en": "Using the source, calculate the weekly shortage of vegetables at the maximum price in thousands of kilograms. Show your working.",
+      "draft_marks": 2,
+      "requirements_en": [
+        "Choose the appropriate source figures.",
+        "Show the calculation and report the requested unit."
+      ]
+    },
+    {
+      "task_ref": "P2.A.c",
+      "prompt_en": "Explain, with reference to a correctly labelled demand-and-supply diagram where useful, how the fungal disease could affect the equilibrium price and quantity of vegetables if demand were unchanged.",
+      "draft_marks": 4,
+      "requirements_en": [
+        "Explain an adverse production shock with demand held constant.",
+        "Explain the direction of the changes in equilibrium price and quantity.",
+        "If using a diagram, label axes and initial/new market curves."
+      ]
+    },
+    {
+      "task_ref": "P2.A.d",
+      "prompt_en": "Analyse two reasons why a maximum price set below equilibrium might fail to improve the actual availability of vegetables.",
+      "draft_marks": 4,
+      "requirements_en": [
+        "Develop two economically distinct reasons rather than simply listing them.",
+        "Link each reason to market incentives, imbalance and actual availability."
+      ]
+    },
+    {
+      "task_ref": "P2.A.e",
+      "prompt_en": "Explain why a fall in the inflation rate from 8% to 6% does not necessarily mean that the overall consumer price level is falling.",
+      "draft_marks": 4,
+      "requirements_en": [
+        "Distinguish a change in inflation from a decline in the overall price level.",
+        "Use the stated rates accurately and recognise the difference between one product price and the consumer price index."
+      ]
+    },
+    {
+      "task_ref": "P2.A.f",
+      "prompt_en": "Evaluate whether removing the vegetable price ceiling would necessarily benefit low-income households.",
+      "draft_marks": 4,
+      "requirements_en": [
+        "Consider benefits from improved supply and access.",
+        "Consider changes in affordability and distribution.",
+        "Reach a conditional judgement linked to market responsiveness and household circumstances."
+      ]
+    },
+    {
+      "task_ref": "P2.B1.a",
+      "prompt_en": "Explain factors affecting the price elasticity of supply of an agricultural product.",
+      "draft_marks": 8,
+      "requirements_en": [
+        "Explain what price elasticity of supply measures.",
+        "Develop mechanisms involving production time, spare capacity, storability and resource availability.",
+        "Apply the explanation to agriculture."
+      ]
+    },
+    {
+      "task_ref": "P2.B1.b",
+      "prompt_en": "Assess whether a producer subsidy is always more effective than a maximum price in making essential food affordable.",
+      "draft_marks": 12,
+      "requirements_en": [
+        "Explain possible changes in supply, prices and affordability under a producer subsidy.",
+        "Contrast with the effects of a binding maximum price.",
+        "Evaluate costs, market response, distribution and conditions before a judgement."
+      ]
+    },
+    {
+      "task_ref": "P2.B2.a",
+      "prompt_en": "Explain how cross elasticity of demand differs for substitutes and complements.",
+      "draft_marks": 8,
+      "requirements_en": [
+        "Define and interpret cross elasticity of demand.",
+        "Distinguish substitutes from complements using suitable relationships and examples."
+      ]
+    },
+    {
+      "task_ref": "P2.B2.b",
+      "prompt_en": "Assess whether knowing price elasticity of demand is sufficient for a government to predict revenue from an indirect tax.",
+      "draft_marks": 12,
+      "requirements_en": [
+        "Explain the relevance of demand responsiveness to indirect-tax outcomes.",
+        "Analyse other relevant determinants including the tax rate, traded quantity and supply response.",
+        "Evaluate whether PED alone is sufficient."
+      ]
+    },
+    {
+      "task_ref": "P2.C1.a",
+      "prompt_en": "Explain how an increase in government expenditure can influence aggregate demand and output.",
+      "draft_marks": 8,
+      "requirements_en": [
+        "Identify the aggregate-demand channel affected by government expenditure.",
+        "Develop the link to output, considering spare capacity and multiplier conditions.",
+        "Use appropriate economic terms or a clear AD/AS diagram where relevant."
+      ]
+    },
+    {
+      "task_ref": "P2.C1.b",
+      "prompt_en": "Assess whether supply-side measures are likely to be more effective than a rise in government spending in improving economic growth.",
+      "draft_marks": 12,
+      "requirements_en": [
+        "Explain distinct mechanisms of demand-side and supply-side measures.",
+        "Compare short- and longer-term output effects and implementation constraints.",
+        "Reach a conditional judgement reflecting economic circumstances."
+      ]
+    },
+    {
+      "task_ref": "P2.C2.a",
+      "prompt_en": "Explain two causes of a current account deficit.",
+      "draft_marks": 8,
+      "requirements_en": [
+        "Explain the meaning and relevant components of the current account.",
+        "Develop two distinct economic mechanisms that may cause a deficit."
+      ]
+    },
+    {
+      "task_ref": "P2.C2.b",
+      "prompt_en": "Assess the effectiveness of an exchange-rate depreciation in reducing a persistent current account deficit.",
+      "draft_marks": 12,
+      "requirements_en": [
+        "Explain possible effects of depreciation on export/import competitiveness and values.",
+        "Analyse price elasticities, time lags and imported production inputs.",
+        "Evaluate when depreciation may or may not reduce the deficit."
+      ]
+    }
+  ]
+}
