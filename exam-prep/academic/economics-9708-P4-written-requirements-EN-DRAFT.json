@@ -1,0 +1,101 @@
+{
+  "asset_version": "economics_9708_P4_written_requirements_en_v1",
+  "publication_status": "INTERNAL_DRAFT_NO_LEARNER_ACCESS",
+  "paper": "P4",
+  "program_key": "economics_9708",
+  "program_version": "economics_2026_2028_v1",
+  "source_kind": "original_iclub_synthetic_not_cambridge_past_paper",
+  "source_syllabus": "https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf",
+  "kind": "answer_requirements_only_not_mark_scheme_or_model_essay",
+  "academic_QA": "pending",
+  "language_QA": "pending",
+  "localization": {
+    "en": "draft",
+    "ru": "pending",
+    "uz": "pending"
+  },
+  "max_paper_marks": 60,
+  "structure": "A mandatory; B one of two; C one of two",
+  "rubric_is_official": false,
+  "runtime_enabled": false,
+  "items": [
+    {
+      "task_ref": "P4.A.a",
+      "prompt_en": "Calculate Nerava’s Year B trade balance in goods and services. Show the method and state whether it is a deficit or surplus.",
+      "draft_marks": 2,
+      "requirements_en": [
+        "Select the appropriate figures from the supplied source.",
+        "Show the calculation and classify the resulting balance correctly."
+      ]
+    },
+    {
+      "task_ref": "P4.A.b",
+      "prompt_en": "Explain why the improvement in the goods and services trade balance cannot by itself establish whether Nerava has a current account surplus.",
+      "draft_marks": 4,
+      "requirements_en": [
+        "Distinguish the goods-and-services trade balance from the current account.",
+        "Identify other current-account information needed before making a conclusion."
+      ]
+    },
+    {
+      "task_ref": "P4.A.c",
+      "prompt_en": "Analyse two channels through which depreciation could change Nerava’s trade balance over time. Refer to the source.",
+      "draft_marks": 6,
+      "requirements_en": [
+        "Analyse two distinct mechanisms affecting export/import prices, quantities or receipts.",
+        "Use evidence from the source and recognise how effects may change over time."
+      ]
+    },
+    {
+      "task_ref": "P4.A.d",
+      "prompt_en": "Assess whether vocational training is likely to do more than exchange-rate intervention to improve Nerava’s long-run growth and external trade position.",
+      "draft_marks": 8,
+      "requirements_en": [
+        "Explain appropriate channels linking training and exchange-rate intervention to output, competitiveness and trade.",
+        "Analyse relevant costs, time lags and source conditions.",
+        "Develop a conditional and supported comparative judgement."
+      ]
+    },
+    {
+      "task_ref": "P4.B1",
+      "prompt_en": "Assess whether an oligopolistic market is necessarily less economically efficient than a perfectly competitive market.",
+      "draft_marks": 20,
+      "requirements_en": [
+        "Use relevant concepts of allocative, productive and dynamic efficiency.",
+        "Compare important market characteristics and incentives.",
+        "Analyse efficiency losses from market power and potential gains from economies of scale or innovation.",
+        "Evaluate whether the claim holds in every case and justify the conclusion."
+      ]
+    },
+    {
+      "task_ref": "P4.B2",
+      "prompt_en": "Evaluate whether an indirect tax is the most effective government response to a negative externality arising from industrial production.",
+      "draft_marks": 20,
+      "requirements_en": [
+        "Apply relevant external-cost analysis to explain the market failure.",
+        "Analyse likely effects and limitations of an indirect tax.",
+        "Compare at least one defensible alternative intervention and reach a conditional judgement."
+      ]
+    },
+    {
+      "task_ref": "P4.C1",
+      "prompt_en": "Assess the extent to which monetary policy can achieve sustained economic growth in an open economy without worsening inflation.",
+      "draft_marks": 20,
+      "requirements_en": [
+        "Explain monetary-policy transmission through economic demand, interest rates and exchange rates.",
+        "Distinguish short-run demand effects from sustained growth in productive capacity.",
+        "Evaluate trade-offs, constraints, inflation and time lags in an open economy."
+      ]
+    },
+    {
+      "task_ref": "P4.C2",
+      "prompt_en": "Evaluate the view that real GDP per head should be the primary measure used to judge a country’s economic development.",
+      "draft_marks": 20,
+      "requirements_en": [
+        "Explain what real GDP per head captures and why it is used.",
+        "Analyse limitations including inequality, wider welfare and sustainability.",
+        "Compare with suitable additional development indicators and reach a supported judgement."
+      ]
+    }
+  ]
+}
