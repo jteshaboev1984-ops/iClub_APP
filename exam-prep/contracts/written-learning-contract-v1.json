@@ -1,0 +1,167 @@
+{
+  "contract_version": "exam_prep_written_learning_v1",
+  "date": "2026-10-22",
+  "status": "DESIGN_ONLY_NOT_LEARNER_RUNTIME",
+  "scope": "all_exam_prep_subjects",
+  "authority": {
+    "core": [
+      "task_delivery",
+      "criteria_display",
+      "deterministic_answer_marking_only_where_valid",
+      "plan_navigation",
+      "objective_skill_evidence"
+    ],
+    "ai_assist": [
+      "approved_theory_explanation",
+      "criteria_meaning_explanation",
+      "established_error_explanation"
+    ],
+    "mentor_care": [
+      "human_written_review_with_active_assignment"
+    ],
+    "forbidden": {
+      "core": [
+        "automated_essay_score",
+        "pretend_written_mastery"
+      ],
+      "ai_assist": [
+        "essay_marking",
+        "essay_scoring",
+        "mentor_decisions",
+        "independent_plan_mutation"
+      ],
+      "mentor_care": [
+        "queue_without_active_assignment",
+        "overwrite_raw_attempt"
+      ]
+    }
+  },
+  "written_core": {
+    "mode": "external_self_work",
+    "required_student_actions": [
+      "view_task",
+      "next"
+    ],
+    "optional_student_actions": [
+      "view_criteria",
+      "ask_teacher_or_assigned_mentor"
+    ],
+    "required_submissions": [],
+    "does_not_require": [
+      "essay_text",
+      "photo",
+      "self_mark",
+      "checklist",
+      "ai_feedback",
+      "mentor_review"
+    ],
+    "criteria_are_not": [
+      "worked_solution",
+      "personal_feedback",
+      "model_essay"
+    ],
+    "next_event_semantics": "advanced_in_plan_only",
+    "next_must_not_produce": [
+      "academic_score",
+      "objective_mastery",
+      "mentor_queue_item",
+      "ai_evaluation"
+    ],
+    "next_idempotency_required": true,
+    "offline_must_not_claim_server_confirmation": true,
+    "paper_simulation_specific_criteria": "after_attempt_finalized",
+    "normal_practice_criteria": "on_explicit_request"
+  },
+  "server_owned_entitlements": [
+    "core_access",
+    "ai_assist",
+    "mentor_care_entitled",
+    "mentor_assignment_active"
+  ],
+  "client_plan_name_does_not_grant_access": true,
+  "mentor_queue_requires": [
+    "mentor_care_entitled",
+    "mentor_assignment_active"
+  ],
+  "progress_disclosure": {
+    "advanced_is_score": false,
+    "advanced_is_mastery": false,
+    "human_review_separate": true
+  },
+  "ui_copy": {
+    "ru": {
+      "criteria": "Критерии",
+      "requirements": "Требования к ответу",
+      "next": "Далее",
+      "mentor_hint": "Для проверки письменной работы обратитесь к преподавателю или назначенному ментору."
+    },
+    "uz": {
+      "criteria": "Baholash mezonlari",
+      "requirements": "Javobga qo‘yiladigan talablar",
+      "next": "Keyingi",
+      "mentor_hint": "Yozma ishingizni tekshirtirish uchun o‘qituvchingizga yoki biriktirilgan mentorga murojaat qiling."
+    },
+    "en": {
+      "criteria": "Criteria",
+      "requirements": "Answer requirements",
+      "next": "Next",
+      "mentor_hint": "For feedback on written work, ask your teacher or assigned mentor."
+    }
+  },
+  "economics_9708": {
+    "status": "DRAFT_LAUNCH_OFF",
+    "papers": {
+      "P1": {
+        "kind": "mcq",
+        "questions": 30,
+        "minutes": 60,
+        "max_marks": 30
+      },
+      "P2": {
+        "kind": "written",
+        "minutes": 120,
+        "max_marks": 60,
+        "section_a_marks": 20,
+        "section_b_marks": 20,
+        "section_c_marks": 20,
+        "essay_structure": "structured"
+      },
+      "P3": {
+        "kind": "mcq",
+        "questions": 30,
+        "minutes": 75,
+        "max_marks": 30
+      },
+      "P4": {
+        "kind": "written",
+        "minutes": 120,
+        "max_marks": 60,
+        "section_a_marks": 20,
+        "section_b_marks": 20,
+        "section_c_marks": 20,
+        "essay_structure": "unstructured"
+      }
+    },
+    "source_uri": "https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf",
+    "written_draft_publication_allowed": false,
+    "structured_subpart_8_12_is_official": false
+  },
+  "publication_gates": [
+    "approved_question",
+    "approved_specific_criteria",
+    "approved_localization_or_exam_language_policy",
+    "security_qa",
+    "browser_regression",
+    "no_student_data_loss",
+    "explicit_program_enable_after_all_gates"
+  ],
+  "legacy_preservation": [
+    "mathematics_legacy_adapter",
+    "practice",
+    "tours",
+    "existing_sessions",
+    "existing_responses",
+    "user_progress",
+    "local_storage"
+  ]
+}
