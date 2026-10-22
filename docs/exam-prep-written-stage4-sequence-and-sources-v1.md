@@ -65,3 +65,17 @@ P4 goods/services balance Year A `−12`, Year B `−9` млрд USD; улучш
 5. Любое включение Economics — только после полного QA и решения архитектора iClub.
 
 **Не делать:** не открывать Economics ученикам; не выдавать баллы за эссе; не отправлять письменные работы через AI; не создавать mentor queue без активной услуги; не переписывать Mathematics.
+
+## Stage 4 consolidation — актуальное состояние после проверки
+
+В Supabase затем применена миграция `20261022153349_iclub_exam_core_written_concurrent_stage4_consolidation_v1` (исходник: `supabase/migrations/20261022153349_iclub_exam_core_written_concurrent_stage4_consolidation_v1.sql`). Она безопасно удалила только временно дублировавшие закрытые объекты после предварительной проверки пустоты новых learner runtime-таблиц.
+
+**Подтверждено запросом к действующей базе:**
+- Канонический server-only lookup: `private.iclub_exam_core_written_plan_next_v1`.
+- Канонический переход: `private.iclub_exam_core_written_advance_v1`.
+- Дополнительные обязательные функции: `private.iclub_exam_core_written_open_v1`, `private.iclub_exam_core_written_criteria_v1`, `private.iclub_exam_core_written_status_v1`.
+- Удалены временные `written_next_item_v1` и `written_advance_v2`; удалён дублирующий индекс `iclub_exam_written_one_active_plan_v1`.
+- Сохранён один активный индекс `iclub_exam_core_written_one_active_plan_v1`.
+- Economics по-прежнему `draft/off`, 22 tasks черновые, 0 опубликованных и 0 learner access/plans/steps.
+
+История дублирования описана выше для аудита; **она больше не является открытой задачей**. Следующая реализация должна опираться только на единственный канонический closed path. Authenticated E2E и смешанный учебный план ещё не готовы. Процедуры Mathematics не изменялись в рамках этого этапа.
