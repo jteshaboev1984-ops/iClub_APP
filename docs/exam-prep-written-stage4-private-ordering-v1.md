@@ -53,3 +53,13 @@ These are count/permission/denial checks, **not** authenticated positive-path, c
 No historical rows were migrated or altered. The migration adds one index and two private functions; they are unused by the production host. If a later integration fails, keep the Economics flag OFF and revert the new transport/deployment without deleting attempts, data, migrations or user history.
 
 **Next engineering unit:** native Economics plan selection and ordered open/criteria/status transport in a closed environment, with authenticated testing after academic sign-off; then the MCQ bank QA and fully governed diagnostic runtime.
+
+## Synchronization addendum — parallel Stage 4 migration (2026-10-22)
+
+A separate existing actor applied `20261022152815_iclub_exam_core_written_sequential_navigation_v1.sql` **before** our `20261022152858` migration, while the two activities overlapped. The earlier migration already hardened `open_v1`, `criteria_v1`, and `advance_v1` to enforce ordered progression, and added `private.iclub_exam_core_written_plan_next_v1(uuid)` and unique active-plan index `iclub_exam_core_written_one_active_plan_v1`.
+
+To avoid two independent algorithms for the same learner path, the newer duplicate objects were removed via **successful** migration `20261022153349_iclub_exam_core_written_concurrent_stage4_consolidation_v1.sql`, after asserting there were no written plans, steps or access assignments and that the earlier canonical path exists. The objects removed were **only** `next_item_v1`, `advance_v2`, and duplicate index `iclub_exam_written_one_active_plan_v1`; all originally deployed Stage 3/early Stage 4 functions and the original index are preserved.
+
+**Canonical closed navigation now:** `private.iclub_exam_core_written_plan_next_v1` + `private.iclub_exam_core_written_open_v1` + `private.iclub_exam_core_written_criteria_v1` + `private.iclub_exam_core_written_advance_v1` + `private.iclub_exam_core_written_status_v1`. All are service-role-only; no learner transport is released. The earlier Stage4 statements describing V2 and `next_item_v1` are preserved above as historical migration notes, **not** current implementation.
+
+The overlap was detected through GitHub commit `235e86e` and live SQL function-definition checks. This addendum supersedes the description of the active Stage4 objects in earlier sections. Economics remains OFF/NO-GO.
