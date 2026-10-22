@@ -1,65 +1,55 @@
-# iClub Exam Prep — Stage 4: ordered private written-plan path
+# iClub Exam Prep — Stage 4: закрытая последовательная письменная практика
 
-**Date:** 2026-10-22  
-**Status:** PRIVATE SERVER HARDENING INSTALLED / ECONOMICS NO-GO.  
-**Migration:** `20261022152858_iclub_exam_core_written_ordered_path_private_v1.sql`.  
-**Scope:** additive changes only to private Economics-compatible written-plan infrastructure. Existing Mathematics, Practice, Tours, localStorage and learner history remain outside the change.
+**Дата:** 22.10.2026  
+**Итог:** PRIVATE BACKEND INSTALLED / ECONOMICS NO-GO.  
+**Production:** действующие Mathematics, Practice, Tours и клиентские маршруты не изменялись.
 
-## Why this stage exists
+## Фактическое состояние после сверки параллельных изменений
 
-Stage 3 introduced a private `open / criteria / advance / status` service. Its `advance_v1` is idempotent and checks learner/program/task access, but does not itself enforce an earlier `open` or previous ordered steps. `advance_v1` remains private and unchanged. Future student integration **must not** call it as the authoritative ordered-plan progression method.
+Почти одновременно были установлены две миграции Stage 4:
+- `20261022152815_iclub_exam_core_written_sequential_navigation_v1.sql` — основная серверная последовательность, вызовы и ограничение на один активный план;
+- `20261022152858_iclub_exam_core_written_ordered_path_private_v1.sql` — альтернативные закрытые функции и второе ограничение плана.
 
-## Implemented, not released
+Чтобы исключить двойную реализацию, установлена третья миграция
+`20261022153349_iclub_exam_core_written_concurrent_stage4_consolidation_v1.sql`.
+Она удаляет **только дубликаты второй миграции**, после проверки отсутствия назначенных учеников, планов и шагов. Исторические миграции остаются в GitHub и Supabase; ни одну не скрывали и не переписывали.
 
-1. A partial unique index on `(learner_user_id, program_key, version_key)` where plan `status='active'`. Exactly one active plan per learner/program/version; drafts and historical closed plans remain intact.
-2. `private.iclub_exam_core_written_next_item_v1(program_key, version_key, language)` finds the *first* pending step by plan order. It does not skip a draft/unreleased first step and never returns answer requirements. It checks auth identity, active learner access, published native program, enable switch, released/academically reviewed task and available localization.
-3. `private.iclub_exam_core_written_advance_v2(item_id, task_key, task_version, task_token, idempotency_key)` checks all Stage 3 ownership, program, content and service gates **plus** `opened_at IS NOT NULL` and no lower-priority pending steps. It atomically advances the row, protecting duplicate requests using the existing nonce and row lock.
-4. Both functions are accessible only to `service_role`; `anon` and `authenticated` have no direct `EXECUTE` privilege. No public wrappers, UI imports, new learner entitlements or content publication were added.
+## Единый текущий серверный маршрут
 
-**Academic semantics:** `advanced` means only a study-plan navigation fact. No score, mastery, readiness, text submission, AI rating or mentor task is written or inferred.
+`private.iclub_exam_core_written_plan_next_v1(uuid)` →  
+`private.iclub_exam_core_written_open_v1(uuid,text)` →  
+`private.iclub_exam_core_written_criteria_v1(uuid,text,text,uuid,text)` (необязательно) →  
+`private.iclub_exam_core_written_advance_v1(uuid,text,text,uuid,text)` →  
+`private.iclub_exam_core_written_status_v1(uuid,text,text,uuid)` (восстановление).
 
-## Post-migration database checks (2026-10-22)
+Все эти операции закрыты в private schema и имеют service-role-only EXECUTE; публичных student endpoints нет. `advance_v1`, `open_v1` и `criteria_v1` теперь проверяют порядок шага. `advance_v1` требует предварительное `opened_at`; повторный вызов не создаёт повторного продвижения. Единственный активный план на ученика/программу/версию обеспечен индексом `iclub_exam_core_written_one_active_plan_v1`.
 
-| Check | Observed |
+**Правило:** «Далее» фиксирует только прохождение письменного учебного шага. Не записываются эссе, фотографии, оценки, mastery, AI-решения или mentor task. Обычная письменная практика не является полноценным проверенным пробным Paper 2/4.
+
+## Проверено в живой Supabase после консолидации
+
+| Проверка | Результат |
 |---|---|
-| Migration installed | 20261022152858 |
-| Private tasks | 22 EN-only drafts |
-| Released written tasks | 0 |
-| Learner written plans / steps / access assignments | 0 / 0 / 0 |
-| Economics program | `draft`, `launch_enabled=false` |
-| New partial unique index | Present |
-| New functions directly executable by anon/authenticated | No |
-| New functions executable by service_role | Yes |
-| No-auth guard on both new functions | Passed SQL expected-denial test |
-| Legacy Mathematics sessions / responses | 543 / 1976 |
-| Legacy Practice attempts / answers | 502 / 4816 |
-| User-subject selections | 2098 |
+| Активный индекс на план | ровно 1 |
+| Канонические private-функции | 5 |
+| Дублирующие функции | 0 |
+| Доступ `anon/authenticated` к `plan_next` | отсутствует |
+| Доступ `service_role` к `plan_next` | есть |
+| Экономика | `draft`, `launch_enabled=false` |
+| Письменные задания | 22 черновика, 0 выпущенных |
+| Learner plans / plan items / access | 0 / 0 / 0 |
+| Mathematics sessions / responses | 543 / 1 976 |
+| Practice attempts / answers | 502 / 4 816 |
+| User-subject selections | 2 098 |
 
-These are count/permission/denial checks, **not** authenticated positive-path, concurrency, end-to-end or row-checksum verification. Production learner E2E has **not** passed.
+Числа истории сверены с переданным baseline; это не полноценные построчные хеши. Не выполнены authenticated happy-path, cross-user, concurrent-click, offline-recovery и browser QA.
 
-## Critical implementation rules for next stage
+## Блокировки и следующий инженерный шаг
 
-- Build the native plan generator as a separate, versioned service. Order by explicit `priority_order`, do not copy Mathematics plan tables and do not pre-create active user plans merely because they have opened the subject.
-- For normal written practice, use the Stage 4 ordered advancement, not the old `advance_v1`. Preserve existing `written-core-controller-v1.js` until it is intentionally paired with a newly reviewed transport.
-- The presently private `open_v1` can open a known item ID without checking earlier pending items. If the UX requires strict ordered opening, build and test an **ordered open successor** before releasing a student endpoint. No direct access to the existing private RPCs is allowed from the browser.
-- A protected public RPC or Edge Function transport must use the learner JWT and server-side access checks; never ship service_role credentials to the client. Test cross-account isolation, repeated `Next`, lost responses/recovery and disconnection before granting use.
-- Academic QA and RU/UZ/EN localization for all 22 draft tasks remain pending. Section A source documents, diagrams and command-words must be verified. Do not make them `approved`/released prematurely.
-- Strict sequence is currently a **closed implementation assumption**. Before learner rollout the architect must decide whether future plan entries can be deliberately opened out of order; any deviation needs explicit scoped policy, not bypassing `advance_v2`.
-- Full timed Paper 2/4 essay storage/marking is a separate unresolved policy. No automatic unreviewed essay scores.
-- Keep `Economics NO-GO` and `launch_enabled=false` until native server plan + authenticated E2E + browser QA + release authorization.
+1. Подготовить `native` генератор плана с проверяемым порядком, индивидуальными правилами AS/A Level и версиями заданий; не использовать старые Mathematics plan tables.
+2. Создать защищённый learner transport в отдельном тестовом контуре. Нельзя передавать `service_role` в браузер или открывать student access без проверки прав и полного пути.
+3. Академически проверить и локализовать все 22 P2/P4 черновика (EN/RU/UZ); добавить правильные источники данных Section A, графики и точные требования, не копируя защищённый контент.
+4. Проверить реальные тестовые JWT, доступ разных пользователей, идентичность статуса после обрыва связи, двойной «Далее», порядок шагов и включение/отключение режима.
+5. Провести E2E в существующем математическом дизайне и отдельный MCQ academic QA (1644 кандидата) до release decision.
 
-## Preservation and rollback
-
-No historical rows were migrated or altered. The migration adds one index and two private functions; they are unused by the production host. If a later integration fails, keep the Economics flag OFF and revert the new transport/deployment without deleting attempts, data, migrations or user history.
-
-**Next engineering unit:** native Economics plan selection and ordered open/criteria/status transport in a closed environment, with authenticated testing after academic sign-off; then the MCQ bank QA and fully governed diagnostic runtime.
-
-## Synchronization addendum — parallel Stage 4 migration (2026-10-22)
-
-A separate existing actor applied `20261022152815_iclub_exam_core_written_sequential_navigation_v1.sql` **before** our `20261022152858` migration, while the two activities overlapped. The earlier migration already hardened `open_v1`, `criteria_v1`, and `advance_v1` to enforce ordered progression, and added `private.iclub_exam_core_written_plan_next_v1(uuid)` and unique active-plan index `iclub_exam_core_written_one_active_plan_v1`.
-
-To avoid two independent algorithms for the same learner path, the newer duplicate objects were removed via **successful** migration `20261022153349_iclub_exam_core_written_concurrent_stage4_consolidation_v1.sql`, after asserting there were no written plans, steps or access assignments and that the earlier canonical path exists. The objects removed were **only** `next_item_v1`, `advance_v2`, and duplicate index `iclub_exam_written_one_active_plan_v1`; all originally deployed Stage 3/early Stage 4 functions and the original index are preserved.
-
-**Canonical closed navigation now:** `private.iclub_exam_core_written_plan_next_v1` + `private.iclub_exam_core_written_open_v1` + `private.iclub_exam_core_written_criteria_v1` + `private.iclub_exam_core_written_advance_v1` + `private.iclub_exam_core_written_status_v1`. All are service-role-only; no learner transport is released. The earlier Stage4 statements describing V2 and `next_item_v1` are preserved above as historical migration notes, **not** current implementation.
-
-The overlap was detected through GitHub commit `235e86e` and live SQL function-definition checks. This addendum supersedes the description of the active Stage4 objects in earlier sections. Economics remains OFF/NO-GO.
+**NO-GO:** Экзаменационный Economics не включать. Дополнительные функции не импортированы в `index.html`, пользовательский путь не доступен; нельзя объявлять Vercel READY свидетельством завершённого Exam Prep.
