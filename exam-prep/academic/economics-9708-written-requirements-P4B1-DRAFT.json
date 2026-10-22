@@ -1,0 +1,64 @@
+{
+  "asset_version": "economics9708_p4_b1_requirements_pilot_v1",
+  "publication_status": "INTERNAL_DRAFT_NOT_FOR_LEARNERS",
+  "program_key": "economics_9708",
+  "program_version": "economics_2026_2028_v1",
+  "paper_code": "P4",
+  "section": "B",
+  "source_draft_reference": "economics_P4_complete_60_mark_INTERNAL_DRAFT_EN.json/section_B/options/B1",
+  "source_kind": "original_iclub_proposal_not_cambridge_past_paper",
+  "question_version": "p4_b1_draft_v1",
+  "max_marks_display": 20,
+  "is_official_cambridge_mark_scheme": false,
+  "teacher_grading_in_core": false,
+  "ai_grading_in_core": false,
+  "specific_skill_mapping_approved": false,
+  "related_syllabus_points": [
+    "7.3.1",
+    "7.3.2",
+    "7.3.4",
+    "7.6.1",
+    "7.6.2",
+    "7.6.4"
+  ],
+  "draft_content": {
+    "en": {
+      "question": "Assess whether an oligopolistic market is necessarily less economically efficient than a perfectly competitive market.",
+      "criteria_title": "Answer requirements",
+      "requirements": [
+        "Use the relevant meaning of allocative, productive and dynamic efficiency, explaining which concept is being compared.",
+        "Compare important characteristics of oligopoly and perfect competition, including competition and entry conditions.",
+        "Develop economically justified arguments on both sides of the claim; make assumptions and relevant diagrams clear where useful.",
+        "Make an informed, conditional judgement about whether the word 'necessarily' is justified."
+      ]
+    },
+    "ru": {
+      "question": "Оцените, обязательно ли олигополистический рынок менее экономически эффективен, чем рынок совершенной конкуренции.",
+      "criteria_title": "Требования к ответу",
+      "requirements": [
+        "Корректно используйте понятия аллокативной, производственной и динамической эффективности и поясните, какую именно эффективность сравниваете.",
+        "Сопоставьте существенные особенности олигополии и совершенной конкуренции, в том числе конкуренцию и условия входа на рынок.",
+        "Развивайте экономически обоснованные аргументы в пользу разных выводов; при необходимости поясните допущения и используйте подходящие диаграммы.",
+        "Сделайте аргументированный вывод о том, действительно ли утверждение справедливо во всех случаях."
+      ]
+    },
+    "uz": {
+      "question": "Oligopolistik bozor mukammal raqobat bozoriga nisbatan har doim iqtisodiy jihatdan samarasizroq bo‘ladimi? Baholang.",
+      "criteria_title": "Javobga qo‘yiladigan talablar",
+      "requirements": [
+        "Resurslarni taqsimlash, ishlab chiqarish va dinamik samaradorlik tushunchalarini to‘g‘ri qo‘llang va qaysi samaradorlik turini taqqoslayotganingizni tushuntiring.",
+        "Oligopoliya va mukammal raqobatning muhim xususiyatlarini, jumladan raqobat darajasi hamda bozorga kirish sharoitlarini taqqoslang.",
+        "Turli xulosalarni qo‘llab-quvvatlovchi iqtisodiy asoslangan dalillarni rivojlantiring; zarur bo‘lsa, taxminlarni izohlang va tegishli diagrammalardan foydalaning.",
+        "Ushbu fikr barcha holatlarda ham to‘g‘rimi, degan savolga asoslangan va shartlarga bog‘liq xulosa chiqaring."
+      ]
+    }
+  },
+  "release_gates": {
+    "academic_review": "pending",
+    "language_review": "pending",
+    "specific_skill_mapping": "pending",
+    "question_source_rights": "original_draft_verification_pending",
+    "integration_QA": "pending"
+  },
+  "runtime_enabled": false
+}
