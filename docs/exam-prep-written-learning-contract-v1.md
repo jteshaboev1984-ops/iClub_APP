@@ -142,3 +142,17 @@ Economics Exam Prep сейчас `draft` и `launch_enabled=false`. Не отк�
 **Текущее состояние:** Economics `draft`, `launch_enabled=false`. В базе 22 непроверенных written tasks, 0 learner access/plans/steps. Серверный authenticated happy-path и browser QA не завершены. Нельзя выставлять баллы, запускать AI-оценку эссе или обращаться к ментору без подключённой услуги.
 
 **Подробный Stage 4 audit:** `docs/exam-prep-written-stage4-sequence-and-sources-v1.md`. Следующий этап — устранить дублирующий private API path, создать смешанный native plan для MCQ + письменных заданий и завершить контентный QA RU/UZ/EN, затем закрытое E2E тестирование.
+
+## Stage 4 consolidation — актуальное состояние после проверки
+
+В Supabase затем применена миграция `20261022153349_iclub_exam_core_written_concurrent_stage4_consolidation_v1` (исходник: `supabase/migrations/20261022153349_iclub_exam_core_written_concurrent_stage4_consolidation_v1.sql`). Она безопасно удалила только временно дублировавшие закрытые объекты после предварительной проверки пустоты новых learner runtime-таблиц.
+
+**Подтверждено запросом к действующей базе:**
+- Канонический server-only lookup: `private.iclub_exam_core_written_plan_next_v1`.
+- Канонический переход: `private.iclub_exam_core_written_advance_v1`.
+- Дополнительные обязательные функции: `private.iclub_exam_core_written_open_v1`, `private.iclub_exam_core_written_criteria_v1`, `private.iclub_exam_core_written_status_v1`.
+- Удалены временные `written_next_item_v1` и `written_advance_v2`; удалён дублирующий индекс `iclub_exam_written_one_active_plan_v1`.
+- Сохранён один активный индекс `iclub_exam_core_written_one_active_plan_v1`.
+- Economics по-прежнему `draft/off`, 22 tasks черновые, 0 опубликованных и 0 learner access/plans/steps.
+
+История дублирования описана выше для аудита; **она больше не является открытой задачей**. Следующая реализация должна опираться только на единственный канонический closed path. Authenticated E2E и смешанный учебный план ещё не готовы. Процедуры Mathematics не изменялись в рамках этого этапа.
