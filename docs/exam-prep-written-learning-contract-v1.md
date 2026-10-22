@@ -1,8 +1,8 @@
 # iClub APP — Written Learning in Universal Exam Prep
 
-**Версия:** 1.0 · **Дата:** 22.10.2026 · **Статус:** согласованная продуктовая логика / реализация поэтапная.
+**Версия:** 1.3 · **Дата:** 22.10.2026 · **Статус:** согласованная продуктовая логика / реализация поэтапная.
 **Владелец логики:** архитектор iClub. **Область:** Mathematics, Economics, Biology, Chemistry, Computer Science и будущие предметы.
-**Редактируемая расширенная версия:** `iClub_Exam_Prep_Written_Learning_Contract_v1.0.docx` (рабочий артефакт).
+**Редактируемая расширенная версия:** `iClub_Exam_Prep_Written_Learning_Contract_v1.3.docx` (рабочий артефакт).
 **Изменения:** фиксировать версию, основание и результат QA ниже. Этот документ сохраняет принятые решения.
 
 ## 1. Принятое правило
@@ -130,3 +130,15 @@ Economics Exam Prep сейчас `draft` и `launch_enabled=false`. Не отк�
 **Подробный статус, миграции, ограничения и следующий план:** `docs/exam-prep-written-stage3-private-backend-v1.md`.
 
 **Неизменная продуктовая граница:** Core организует подготовку; AI только объясняет в рамках программы; Mentor Care — отдельная проверка человеком. Кнопка «Далее» означает переход по плану, никогда не академическую правильность.
+
+## 11. Этап 4 — защита последовательности и источники P2/P4 (22.10.2026)
+
+**Closed backend:** Supabase `20261022152815_iclub_exam_core_written_sequential_navigation_v1`, код `supabase/migrations/20261022152815_iclub_exam_core_written_sequential_navigation_v1.sql`. Добавлены проверки последовательного прохождения native written steps, обязательного открытия шага перед «Далее», один active written plan на программу/ученика и private lookup следующего шага. Старый Mathematics runtime не меняли. Привилегии только для закрытого сервисного контура, не для учеников.
+
+**Обнаруженная параллельная реализация:** Supabase `20261022152858_iclub_exam_core_written_ordered_path_private_v1` также добавила `next_item_v1` и `advance_v2`. **Запрещено подключать две линии одновременно**. Перед общей API/UI-интеграцией провести контрактный аудит, выбрать одну каноническую последовательность и убрать неоднозначность.
+
+**Academic source completion, DRAFT ONLY:** `exam-prep/academic/economics-9708-P2-P4-sectionA-source-EN-DRAFT.json` связывает источники Isara и Nerava с 10 заданиями обязательной Section A двух Paper. Source calculations/refs: **20 deterministic JS checks PASS**, 0 fails; закрытый source validation script добавлен в `scripts/qa-economics-9708-written-source-v1.cjs`. Это **не одобрение содержания**.
+
+**Текущее состояние:** Economics `draft`, `launch_enabled=false`. В базе 22 непроверенных written tasks, 0 learner access/plans/steps. Серверный authenticated happy-path и browser QA не завершены. Нельзя выставлять баллы, запускать AI-оценку эссе или обращаться к ментору без подключённой услуги.
+
+**Подробный Stage 4 audit:** `docs/exam-prep-written-stage4-sequence-and-sources-v1.md`. Следующий этап — устранить дублирующий private API path, создать смешанный native plan для MCQ + письменных заданий и завершить контентный QA RU/UZ/EN, затем закрытое E2E тестирование.
