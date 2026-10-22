@@ -1,0 +1,242 @@
+{
+  "schema": "iclub_exam_prep_subject_spec_v1",
+  "subject": "economics",
+  "program_key": "economics_9708",
+  "program_version": "economics_2026_2028_v1",
+  "syllabus": "Cambridge International AS & A Level Economics 9708, examinations 2026–2028, version 2",
+  "source_url": "https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf",
+  "status": "DRAFT_NOT_LEARNER_VISIBLE",
+  "launch_enabled": false,
+  "ui_host_contract": "Mathematics Subject Hub + exam-prep-host-root + responsive shared CSS and route semantics",
+  "routes": [
+    "AS_only",
+    "A_staged",
+    "A_linear"
+  ],
+  "shared_stages": [
+    "exam_setup",
+    "diagnostic",
+    "diagnostic_result",
+    "learning_plan",
+    "topic_learning",
+    "error_correction",
+    "delayed_retest",
+    "timed_paper",
+    "readiness_review"
+  ],
+  "paper_weight_as_pct": {
+    "P1": 33,
+    "P2": 67
+  },
+  "paper_weight_full_a_pct": {
+    "P1": 17,
+    "P2": 33,
+    "P3": 17,
+    "P4": 33
+  },
+  "assessment_objectives": {
+    "AO1": "Knowledge and understanding",
+    "AO2": "Analysis",
+    "AO3": "Evaluation"
+  },
+  "approx_ao_weight_per_paper_pct": {
+    "P1": [
+      47,
+      40,
+      13
+    ],
+    "P2": [
+      33,
+      37,
+      30
+    ],
+    "P3": [
+      47,
+      40,
+      13
+    ],
+    "P4": [
+      33,
+      37,
+      30
+    ]
+  },
+  "written_scoring": {
+    "automatic_official_marks": false,
+    "ai_draft_feedback_allowed_only_after_submission": true,
+    "auto_mark_key_only": "deterministic calculation / closed questions with verified answer",
+    "essay_never_auto_count_as_authoritative_readiness": true,
+    "self_review_evidence_status": "practice_only",
+    "rubric_dimensions": [
+      "AO1 economics accuracy",
+      "AO2 reasoning and causal chains",
+      "AO2 source/diagram use",
+      "AO3 counterargument/limitations",
+      "AO3 supported judgement",
+      "command word response"
+    ],
+    "feedback_both_strengths_and_next_action": true,
+    "retain_original_response_and_rubric_version": true
+  },
+  "subject_specific_practice_modes": [
+    "source_interpretation",
+    "data_calculation",
+    "causal_chain",
+    "diagram_construction",
+    "diagram_interpretation",
+    "command_word_drill",
+    "short_structured_writing",
+    "unstructured_essay",
+    "balanced_evaluation",
+    "synoptic_case"
+  ],
+  "economics_content_gates": {
+    "direct_A_level_exam_questions_on_AS_topic": false,
+    "AS_knowledge_is_prerequisite_for_A_level": true,
+    "graphics_must_be_labelled": true,
+    "formulas_not_provided_in_official_papers": true,
+    "calculators_allowed_in_official_papers": true,
+    "paper1_3_mcq_not_sufficient_for_paper2_4_readiness": true
+  },
+  "reuse_from_math": {
+    "host_navigation": true,
+    "user_subject_entitlement": true,
+    "read_only_theory_tutor": true,
+    "versioned_sessions": true,
+    "error_history": true,
+    "delayed_retests": true,
+    "weekly_plan_navigation": true,
+    "timed_exam_shell": true
+  },
+  "must_not_copy_math": {
+    "P1_P5_static_components": true,
+    "mathematics_answer_equivalence": true,
+    "math_written_method_marks": true,
+    "math_mark_to_AO_mapping": true,
+    "math_grade_calibration": true,
+    "self_rated_written_equals_official": true
+  },
+  "security": {
+    "answers_sent_before_submission": false,
+    "private_keys_in_browser": false,
+    "student_progress_legacy_updates": false,
+    "exam_mode_unlocked": false,
+    "paper_content_served_to_learners": false
+  },
+  "papers": {
+    "P1": {
+      "level": "AS",
+      "format": "mcq",
+      "duration_seconds": 3600,
+      "marks": 30,
+      "mcq_count": 30,
+      "skills_scope": "1–6",
+      "sections": [
+        {
+          "id": "mcq",
+          "required": true,
+          "questions": 30,
+          "marks": 30
+        }
+      ]
+    },
+    "P2": {
+      "level": "AS",
+      "format": "data_response_essays",
+      "duration_seconds": 7200,
+      "marks": 60,
+      "skills_scope": "1–6",
+      "sections": [
+        {
+          "id": "A",
+          "required": true,
+          "kind": "data_response",
+          "questions_available": 1,
+          "questions_to_answer": 1,
+          "approx_parts": 6,
+          "marks": 20,
+          "source_formats": [
+            "written",
+            "numerical",
+            "diagram"
+          ]
+        },
+        {
+          "id": "B",
+          "required": true,
+          "kind": "micro_essay",
+          "questions_available": 2,
+          "questions_to_answer": 1,
+          "parts_per_question": 2,
+          "marks": 20
+        },
+        {
+          "id": "C",
+          "required": true,
+          "kind": "macro_essay",
+          "questions_available": 2,
+          "questions_to_answer": 1,
+          "parts_per_question": 2,
+          "marks": 20
+        }
+      ]
+    },
+    "P3": {
+      "level": "A",
+      "format": "mcq",
+      "duration_seconds": 4500,
+      "marks": 30,
+      "mcq_count": 30,
+      "skills_scope": "7–11; AS assumed background only",
+      "sections": [
+        {
+          "id": "mcq",
+          "required": true,
+          "questions": 30,
+          "marks": 30
+        }
+      ]
+    },
+    "P4": {
+      "level": "A",
+      "format": "data_response_essays",
+      "duration_seconds": 7200,
+      "marks": 60,
+      "skills_scope": "7–11; AS assumed background only",
+      "sections": [
+        {
+          "id": "A",
+          "required": true,
+          "kind": "data_response",
+          "questions_available": 1,
+          "questions_to_answer": 1,
+          "parts_per_question": 4,
+          "marks": 20,
+          "source_formats": [
+            "written",
+            "numerical",
+            "diagram"
+          ]
+        },
+        {
+          "id": "B",
+          "required": true,
+          "kind": "micro_essay",
+          "questions_available": 2,
+          "questions_to_answer": 1,
+          "parts_per_question": 0,
+          "marks": 20
+        },
+        {
+          "id": "C",
+          "required": true,
+          "kind": "macro_essay",
+          "questions_available": 2,
+          "questions_to_answer": 1,
+          "parts_per_question": 0,
+          "marks": 20
+        }
+      ]
+    }
+  }
+}
