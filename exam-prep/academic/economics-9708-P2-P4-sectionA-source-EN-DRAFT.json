@@ -1,0 +1,131 @@
+{
+  "asset_version": "economics_9708_sectionA_sources_en_draft_v1",
+  "publication_status": "INTERNAL_DRAFT_NOT_FOR_LEARNERS",
+  "source_kind": "original_iclub_synthetic_fictional_data",
+  "disclaimer_en": "Fictional countries and illustrative figures. Not a Cambridge past paper or official mark scheme.",
+  "program_key": "economics_9708",
+  "version_key": "economics_2026_2028_v1",
+  "locales": {
+    "en": "draft",
+    "ru": "missing",
+    "uz": "missing"
+  },
+  "paper_sources": [
+    {
+      "paper_code": "P2",
+      "source_id": "P2-A-Isara-v1",
+      "linked_task_keys": [
+        "P2.A.a",
+        "P2.A.b",
+        "P2.A.c",
+        "P2.A.d",
+        "P2.A.e",
+        "P2.A.f"
+      ],
+      "original_file": "economics_P2_complete_60_mark_INTERNAL_DRAFT_EN.json",
+      "title_en": "Isara: vegetable price controls and inflation",
+      "narrative_en": [
+        "Isara has introduced a maximum price of $5 per kilogram for fresh vegetables. Without the ceiling, analysts estimate that the current market would clear near $7. At the controlled price, weekly quantity demanded is 160 thousand kilograms and quantity supplied is 100 thousand kilograms. Illegal resale and long queues have been reported in some districts.",
+        "An outbreak of fungal disease reduced the most recent vegetable harvest. The government is considering either removing the price ceiling or subsidising growers. Neither proposal has yet been implemented.",
+        "Annual consumer price inflation declined from 8% in Year A to 6% in Year B. Fresh vegetable retail prices fell slightly in Year B, while several other consumer prices continued to rise. These statistics are illustrative, not real-world data."
+      ],
+      "data": [
+        {
+          "indicator": "Maximum retail price, $/kg",
+          "value": 5
+        },
+        {
+          "indicator": "Estimated market-clearing price, $/kg",
+          "value": 7
+        },
+        {
+          "indicator": "Quantity demanded at $5, thousand kg/week",
+          "value": 160
+        },
+        {
+          "indicator": "Quantity supplied at $5, thousand kg/week",
+          "value": 100
+        },
+        {
+          "indicator": "Consumer inflation, Year A, %",
+          "value": 8
+        },
+        {
+          "indicator": "Consumer inflation, Year B, %",
+          "value": 6
+        }
+      ],
+      "internal_deterministic_qa": {
+        "shortage_thousand_kg_per_week": 60,
+        "positive_inflation_both_years": true
+      }
+    },
+    {
+      "paper_code": "P4",
+      "source_id": "P4-A-Nerava-v1",
+      "linked_task_keys": [
+        "P4.A.a",
+        "P4.A.b",
+        "P4.A.c",
+        "P4.A.d"
+      ],
+      "original_file": "economics_P4_complete_60_mark_INTERNAL_DRAFT_EN.json",
+      "title_en": "Nerava: depreciation and trade",
+      "narrative_en": [
+        "Nerava has experienced a depreciation of its currency from US$0.50 to US$0.40 per nerav in two years. Its statistics office published provisional cross-border trade figures. Values below are in billions of US dollars, for the same coverage and definitions in each year.",
+        "Manufacturers import energy and machine parts, so depreciation can raise input costs while lowering export prices in foreign currency. The central bank is considering exchange-rate intervention; the labour ministry proposes vocational training. Economists disagree about the timing and magnitude of effects.",
+        "The table covers goods and services trade only. It does not include primary or secondary income, or financial and capital account flows; the full current account cannot be derived from the figures given."
+      ],
+      "trade_table": {
+        "unit": "US$ billions",
+        "columns": [
+          "Indicator",
+          "Year A",
+          "Year B"
+        ],
+        "rows": [
+          [
+            "Exports of goods",
+            30,
+            34
+          ],
+          [
+            "Imports of goods",
+            46,
+            48
+          ],
+          [
+            "Exports of services",
+            12,
+            14
+          ],
+          [
+            "Imports of services",
+            8,
+            9
+          ]
+        ]
+      },
+      "exchange_rate": {
+        "year_A": "US$0.50 per nerav",
+        "year_B": "US$0.40 per nerav"
+      },
+      "internal_deterministic_qa": {
+        "year_A_goods_services_balance_usd_bn": -12,
+        "year_B_goods_services_balance_usd_bn": -9,
+        "balance_improvement_usd_bn": 3,
+        "current_account_from_trade_only": false
+      }
+    }
+  ],
+  "blocking_gates": [
+    "P2 and P4 source-context content consistency review",
+    "EN economics academic review",
+    "RU/UZ editorial and academic review",
+    "task_version-to-source_version pinning before release",
+    "cross-language table labels",
+    "browser rendering of narrative and numeric tables",
+    "explicit release permission"
+  ],
+  "runtime_enabled": false
+}
