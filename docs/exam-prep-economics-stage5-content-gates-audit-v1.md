@@ -42,3 +42,11 @@ Read-only Supabase query по `private.iclub_exam_core_question_candidates_v1` �
 Документы: `docs/exam-prep-economics-stage5-native-weekly-plan-v1.md` и `docs/exam-prep-written-stage4-private-ordering-v1.md`.
 
 **Без изменений:** legacy Mathematics/Practice/Tours, current user records, history, localStorage, exams, releases, tariffs и feature flags.
+
+## Дополнительный аудит syllabus coverage (23.10.2026)
+
+SQL-проверка `syllabus_point` по всем 16 P1-кандидатам дала **100% Unit 2**: 16 вопросов, 15 уникальных skills, **0 вопросов Unit 1, 3, 4, 5, 6** в новом candidate mapping. Полный Cambridge P1 пробник или диагностику из этого пилота строить нельзя, даже если все 16 кандидатов впоследствии будут приняты. Баланс покрытия должен соответствовать действующему официальному syllabus и отдельно утверждённой test blueprint, без искусственных квот по главам.
+
+Внутренне прочитаны EN условия, варианты, объяснения и привязки всех 16 кандидатов. Были проверены основные арифметические примеры (эластичности, изменения surplus, дефицита) на очевидные ошибки. **Это предварительный editorial scan, не академический QA sign-off и не одобрение ответа/перевода.** В частности, привязки demand-for-substitutes/derived-demand к `2.4.3` (legacy question IDs 8618, 8622) требуют содержательной проверки против точной формулировки syllabus point; не переносить их автоматически в approved catalog. Состояние всех четырёх QA-полей и `status=candidate` неизменно.
+
+**Приоритет следующего контентного цикла:** подготовить оригинальные seed-кандидаты и source mapping по недостающим AS Units 1/3/4/5/6, отдельно A Level Units 7–11 для P3, затем сделать независимую QA правильных ответов и переводов. Без достаточного охвата релиз P1/P3 диагностики запрещён.
