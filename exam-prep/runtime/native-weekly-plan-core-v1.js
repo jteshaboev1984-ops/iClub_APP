@@ -54,18 +54,15 @@ function buildPlan(input) {
   }).sort((a,b)=>(a.priority??999)-(b.priority??999)||
     String(a.task_key).localeCompare(String(b.task_key))||String(a.task_version).localeCompare(String(b.task_version)));
   const tasks=[], blockers=[], used=new Set();
+  const proposalQueues=new Map(input.target_papers.map(p=>[p,[]]));
   let minutes=0;
   function choose(paper,kind,skillKey,reason) {
     const match=available.find(x=>x.paper_code===paper && x.kind===kind &&
       (skillKey===null ? (x.skill_key===null || x.skill_key===undefined) : x.skill_key===skillKey) &&
       !used.has(x.task_key+"|"+x.task_version+"|"+x.paper_code));
     if (!match) {blockers.push({paper_code:paper,kind,skill_key:skillKey,reason:"approved_content_missing"});return;}
-    if (tasks.length>=input.max_items || minutes+match.estimated_minutes>budget.economics_minutes) {
-      blockers.push({paper_code:paper,kind,skill_key:skillKey,reason:"weekly_capacity_reached"});return;
-    }
     used.add(match.task_key+"|"+match.task_version+"|"+match.paper_code);
-    minutes+=match.estimated_minutes;
-    tasks.push({
+    proposalQueues.get(paper).push({
       paper_code:paper,kind,skill_key:match.skill_key??null,
       task_key:match.task_key,task_version:match.task_version,
       estimated_minutes:match.estimated_minutes,
@@ -97,6 +94,24 @@ function buildPlan(input) {
     if (state.stage>=3) choose(paper,"mixed",null,"mixed_application");
     if (state.stage>=4) choose(paper,"timed",null,"timed_transfer");
     if (state.stage>=5) choose(paper,"paper",null,"paper_rehearsal");
+  }
+  // Schedule one step per paper per round. Paper ordering is fixed by the
+  // authorized exam profile; a dense P1 catalog must not starve P2.
+  let more=true;
+  while (more) {
+    more=false;
+    for (const paper of input.target_papers) {
+      const queue=proposalQueues.get(paper);
+      if (!queue.length) continue;
+      more=true;
+      const step=queue.shift();
+      if (tasks.length>=input.max_items || minutes+step.estimated_minutes>budget.economics_minutes) {
+        blockers.push({paper_code:paper,kind:step.kind,skill_key:step.skill_key,reason:"weekly_capacity_reached"});
+        continue;
+      }
+      minutes+=step.estimated_minutes;
+      tasks.push(step);
+    }
   }
   return Object.freeze({
     contract_version:"native_weekly_plan_draft_v1",
