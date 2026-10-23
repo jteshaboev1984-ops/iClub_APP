@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d" viewBox="0 0 600 420" width="600" height="420"><title id="t">Short-run and long-run Phillips curves with inflation expectations</title><desc id="d">Two downward sloping short-run Phillips curves and a vertical long-run Phillips curve at natural unemployment. A temporary movement toward lower unemployment occurs on the original SRPC; greater expected inflation shifts SRPC up.</desc><rect x="0" y="0" width="600" height="420" fill="#ffffff"/><style>text{font-family:Inter,Arial,sans-serif;fill:#263447;font-size:14px} .axis{stroke:#516073;stroke-width:2.3} .guide{stroke:#98a6b5;stroke-width:1.5;stroke-dasharray:6 6} .strong{font-weight:700} .small{font-size:12px;fill:#5c6a79} .large{font-weight:700;font-size:17px}</style><text x="30" y="29" class="large">Inflation expectations and unemployment</text><path class="axis" d="M90 56 V344 H531"/>
+<text x="27" y="55" class="strong">Inflation</text><text x="453" y="376" class="small">Unemployment rate</text>
+<line x1="105" y1="221" x2="490" y2="327" stroke="#2563eb" stroke-width="3.3"/>
+<line x1="105" y1="125" x2="490" y2="231" stroke="#0f9884" stroke-width="3.3"/>
+<line x1="312" y1="70" x2="312" y2="344" stroke="#d97706" stroke-width="3" stroke-dasharray="8 5"/>
+<text x="485" y="318" class="strong">SRPC₀</text><text x="485" y="225" class="strong">SRPC₁</text><text x="323" y="83" class="strong">LRPC</text>
+<path class="guide" d="M312 278 H90 M312 183 H90 M312 344 V360"/>
+<circle cx="312" cy="278" r="6" fill="#2563eb"/><circle cx="232" cy="256" r="6" fill="#2563eb"/><circle cx="312" cy="183" r="6" fill="#0f9884"/>
+<text x="321" y="296" class="small">A</text><text x="211" y="248" class="small">B</text><text x="323" y="173" class="small">C</text><text x="307" y="361" class="small">uₙ</text>
+<text x="101" y="403" class="small">Higher expected inflation shifts SRPC upward; LRPC is vertical at uₙ.</text></svg>
