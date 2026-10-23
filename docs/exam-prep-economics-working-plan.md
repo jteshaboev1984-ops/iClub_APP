@@ -73,11 +73,12 @@
 
 - [x] Stage 5A: закрытый planner, 20 fixture PASS.
 - [x] Stage 5B.1: закрытый catalog preflight, 25 read-only PASS, миграции сохранены в main.
+- [x] Рабочий план сохранён и в личную ChatGPT Library (`/iClub APP/Exam Prep/`), и в репозиторий (`docs/exam-prep-economics-working-plan.md`).
 - [x] Согласована размерность банка: 5 тематических блоков × партии 24–36, 4 уровня пакета/контроля.
-- [ ] **Ближайший этап:** Stage 5B.2 closed content allowlist + QA.
-- [ ] **Ближайший пакет:** AS-1 — точечный quality audit ранее отобранных 16 P1 Unit 2; определить пул Unit 1 и недостающие аспекты; только pending кандидаты до независимой приёмки.
+- [x] **Stage 5B.2:** closed Theory/MCQ allowlist service-only; миграция `20261023072744`, 27/27 read-only QA PASS. Письменные закрыты до approved task/skill mapping; реальная выдача ученикам запрещена.
+- [ ] **Активный пакет AS-1:** сформирован read-only shortlist **30 вопросов** (16 существующих P1 Unit 2 + 14 отобранных Unit 1 без активных Practice/Tours и без provenance Tour); 30/30 trilingual fields присутствуют, 4 старых P1 кандидата используются Practice: `8616, 8619, 8621, 8625`. Все 30 остаются академически `pending`, 14 новых **НЕ добавлены в Exam Prep candidate table**. Файл `exam-prep/academic/economics-9708-mcq/AS1-P1-Units1-2-30-question-review-shortlist-v0.1.json`. Unit1 methodology требует новых оригинальных вопросов.
 - [ ] AS-2 / AS-3 / A-1 / A-2, по одному содержательному проходу, потом расширение по coverage.
 - [ ] Письменный банк P2/P4, полный verified grade policy для mocks.
 - [ ] Персональный auth/evidence план, Host, E2E и beta.
 
-**Следующее действие:** сначала сохранить этот план в GitHub + личную Library. Затем получить read-only inventory по AS-1 (точное соответствие Unit 1/2), провести неформальный смысловой аудит существующих 16, и реализовать Stage 5B.2 исключительно закрытой allowlist без релиза ученикам. После каждого фактически завершённого блока обновлять это поле и статус.
+**Следующее действие:** провести ОДИН полноценный академический проход **AS-1 по 30 кандидатам** (точный Cambridge syllabus/skill mapping, EN/RU/UZ смысл, правильный ключ/дистракторы, подсчёты/графики, source integrity/права, дубли и 4 пересечения Practice) и подготовить оригинальные вопросы по Unit 1 Economic methodology, сохраняя `pending` до независимой приёмки. Затем переходить к AS-2 как к следующему содержательному пакету; параллельно проектировать только закрытые серверные evidence/auth источники Stage5B.3. Отчёт: `docs/exam-prep-economics-stage5b2-and-AS1-audit-v1.md`. Без GO, без правок legacy, без новой ветки.
