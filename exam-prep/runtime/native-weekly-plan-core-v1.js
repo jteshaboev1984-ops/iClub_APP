@@ -7,7 +7,7 @@
 "use strict";
 function buildPlan(input) {
   "use strict";
-  const supportedPapers = Object.freeze({AS:["P1","P2"],staged:["P3","P4"],linear:["P1","P2","P3","P4"]});
+  const supportedPapers = Object.freeze({AS:["P1","P2"],staged:["P1","P2","P3","P4"],linear:["P1","P2","P3","P4"]});
   const papersByKind = {P1:"mcq",P2:"written",P3:"mcq",P4:"written"};
   const kinds = new Set(["diagnostic","theory","mcq","written","correction","retest","mixed","timed","paper"]);
   if (!input || input.program_key!=="economics_9708" || input.program_version!=="economics_2026_2028_v1")
@@ -46,7 +46,8 @@ function buildPlan(input) {
     if (["mcq","diagnostic","retest","mixed","timed","paper"].includes(x.kind) &&
         x.checking_contract!=="server_objective" && x.checking_contract!=="no_automatic_score") return false;
     if (x.kind==="mcq" && papersByKind[x.paper_code]!=="mcq") return false;
-    if (x.kind==="written" && papersByKind[x.paper_code]!=="written") return false;
+    if (x.kind==="written" &&
+        (papersByKind[x.paper_code]!=="written" || x.checking_contract!=="no_automatic_score")) return false;
     if (x.kind==="paper" && papersByKind[x.paper_code]==="written" &&
         x.checking_contract!=="no_automatic_score") return false;
     if (x.kind!=="theory" && x.link_role!=="direct") return false;
