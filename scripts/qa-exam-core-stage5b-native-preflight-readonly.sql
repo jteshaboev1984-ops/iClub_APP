@@ -25,6 +25,11 @@ SELECT
  NOT has_function_privilege('anon','private.iclub_exam_core_native_plan_preflight_v1(text,text)','EXECUTE') AS anon_denied_pass,
  NOT has_function_privilege('authenticated','private.iclub_exam_core_native_plan_preflight_v1(text,text)','EXECUTE') AS auth_denied_pass,
  has_function_privilege('service_role','private.iclub_exam_core_native_plan_preflight_v1(text,text)','EXECUTE') AS service_allowed_pass,
+ (private.iclub_exam_core_native_plan_preflight_v1('math_as_p1_p5','p1_p5_canonical_v1_0')->>'state'='program_unavailable') AS math_legacy_not_migrated_pass,
+ (private.iclub_exam_core_native_plan_preflight_v1('chemistry_9701','chemistry_2025_2027_v1')->>'state'='blocked') AS chemistry_draft_stays_off_pass,
+ (private.iclub_exam_core_native_plan_preflight_v1('chemistry_9701','chemistry_2025_2027_v1')->>'launch_enabled'='false') AS chemistry_no_enable_pass,
+ (private.iclub_exam_core_native_plan_preflight_v1('economics_9708','wrong_version')->>'state'='program_unavailable') AS no_version_fallback_pass,
+ NOT (data ? 'learner_id' OR data ? 'grade' OR data ? 'mastery' OR data ? 'response_text' OR data ? 'answer_key') AS no_personal_grading_fields_pass,
  (SELECT count(*) FROM private.iclub_exam_core_written_plans_v1)=0 AS no_written_plans_pass,
  (SELECT count(*) FROM private.iclub_exam_core_written_plan_items_v1)=0 AS no_written_plan_items_pass,
  (SELECT count(*) FROM private.iclub_exam_core_written_access_v1)=0 AS no_written_assignments_pass
