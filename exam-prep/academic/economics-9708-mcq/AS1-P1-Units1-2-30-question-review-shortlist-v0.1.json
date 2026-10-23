@@ -1,0 +1,331 @@
+{
+  "contract": "economics_9708_p1_AS1_batch0_shortlist_v0.1",
+  "program_key": "economics_9708",
+  "version_key": "economics_2026_2028_v1",
+  "paper_code": "P1",
+  "academic_release": false,
+  "source": "live SELECT public.questions, private.iclub_exam_core_question_candidates_v1, tour_questions, practice_pool_questions on 2026-10-23",
+  "note": "REVIEW SHORTLIST ONLY. Not a playable exam, question approval or validated question-key/language quality.",
+  "status": "review_pending",
+  "summary": {
+    "total": 30,
+    "unit1": 14,
+    "unit2": 16,
+    "active_published_mcq": 30,
+    "full_ru_uz_en_fields_present": 30,
+    "active_tour_reuse": 0,
+    "active_practice_reuse": 4,
+    "source_ref_tagged_tour": 0,
+    "exam_mapping_approved": 0
+  },
+  "candidates": [
+    {
+      "legacy_question_id": 8607,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8613,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8614,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8616,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": true,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8617,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8618,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8619,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": true,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8620,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8621,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": true,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8622,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8623,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8624,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8625,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": true,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8626,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8628,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8629,
+      "syllabus_unit": 2,
+      "paper_code": "P1",
+      "current_exam_mapping": "candidate",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8608,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8615,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8633,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8634,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8609,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8635,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8641,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8610,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8611,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8651,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8630,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8632,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8663,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    },
+    {
+      "legacy_question_id": 8654,
+      "syllabus_unit": 1,
+      "paper_code": "P1",
+      "current_exam_mapping": "not_created",
+      "academic_check": "pending",
+      "locale_check": "pending",
+      "practice_reuse": false,
+      "exam_mock_allow": false
+    }
+  ],
+  "known_review_notes": [
+    "Existing P1 candidate mappings for legacy IDs 8618 and 8622 require exact syllabus-point review; topic label alone cannot justify current 2.4.3 mapping.",
+    "Practice reuse for IDs 8616, 8619, 8621, 8625 must be resolved before allocating independent diagnostic/mock pools.",
+    "Among published active Unit-1 questions with no active Practice or Tour assignment and with G2 source P-refs, economic-methodology questions are absent; create original non-overlapping content for this part.",
+    "A provenance T- reference can signal Tour source even when absent from active tour_questions; T-refs excluded from the new Unit-1 shortlist.",
+    "All 30 have RU/UZ/EN fields filled, but that is not a verified translation review.",
+    "Source-snapshot hashes of 16 pre-existing candidates matched private review and current question content at audit time; this does not prove academic validity."
+  ]
+}
