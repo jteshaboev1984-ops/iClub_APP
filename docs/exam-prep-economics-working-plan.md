@@ -395,3 +395,27 @@
 При отдельном решении или инциденте можно выставить private.iclub_exam_core_programs_v1.launch_enabled=false строго для economics_9708 / economics_2026_2028_v1. Тогда новых задач не выдать, старые attempts/results останутся, Math beta не затрагивается. Без причины эту операцию не запускать.
 
 **Продолжение работы:** мониторинг первых реальных Economics beta попыток, конкретные UX/assessment баги, затем независимая подготовка письменных P2/P4. Не повторять QA 72 approved MCQ, не открывать всем до отдельного решения.
+
+## 19. АКТУАЛЬНЫЙ CHECKPOINT — ECONOMICS ONE-TAP ANSWERS И УЧЕБНЫЙ ПЛАН СРАЗУ ПОСЛЕ ЭКЗАМЕНА
+
+**Сейчас Economics beta активен для тех же 3 Math beta users. Не сбрасывать их попытки.**
+
+### Что пользователь заметил после настоящего открытия
+
+- Ненужная кнопка «Сохранить ответ» после выбора A/B/C/D у каждого вопроса.
+- Персональный учебный план был скрыт до финализации Paper; в истории был только просмотр результатов.
+- Важное сравнение с настоящим Math кодом: Economics ранее был сокращённой реализацией Paper→result→7-day error plan→retest. Он НЕ имел Math setup, progressive Stage0 diagnostics, placement, weekly goals/queues/delayed retest и полноценной P2/P4. **Не утверждать полную parity Math и Economics.**
+
+### Изменено в этом ходе в GitHub и Supabase
+
+1. **Новый рабочий SQL patch**: supabase/migrations/20261027000100_iclub_economics_native_editable_mcq_answers_v1.sql применён Supabase SUCCESS. SECURITY DEFINER public.iclub_exam_native_mcq_answer_v1 теперь принимает повторный выбор A–D **пока конкретная owned P1/P3 попытка active и серверный дедлайн не истёк**. Первый и последний выбор в серверном JSONB, UPDATE под row lock; одинаковый повтор идемпотентен; после финализации любые новые ответы отклоняются. У уже завершённых реальных попыток и Math таблиц нет изменений.
+2. **Узкий native UI patch**: exam-prep/exam-prep-economics-native.js. Radio input change вызывает RPC автоматически, disables options пока ответ отправляется, после серверного подтверждения локально обновляет сохранённый ответ и переход к следующему неотвеченному вопросу. Кнопка «Сохранить ответ» удалена. Можно вернуться «Предыдущий» и изменить ответ до завершения. В случае ошибки выдаётся отдельное состояние с безопасной повторной загрузкой, не объявляется ложное сохранение.
+3. Для первичного входа видимая подсказка: «Учебный план появится после первого завершённого экзамена». В истории **каждой завершённой** попытки есть собственная кнопка «Мой учебный план», не надо снова листать результат по 30 заданиям. После finalization ученик автоматически открывает план, с баллами и разбивкой по Units; оттуда возврат к разбору MCQ.
+4. exam-prep/exam-prep-economics-native.css: симметричные адаптивные кнопки истории, подсказки сохранения, keyboard focus; index.html — новые versioned JS/CSS assets.
+5. **Фактические тесты:** PostgreSQL authenticated role от текущего Math beta с временной P3 attempted session (ROLLBACK): first 0, revise to 2, repeat 2, get shows revised 2, finish, further edit returns attempt_closed_or_expired. Проверено после rollback: одна прежняя finalized beta попытка сохранена, 3 beta допущены, Math active1. JS synthetic DOM на точной GitHub версии: nonbeta mount denies, first radio change saves без кнопки, автоматически переходит к следующему, back and change updates, finish **сразу открывает** план, lobby/history opens plan again. Проверки passed. Ни одна тестовая попытка не осталась.
+
+### НЕСКРЫТАЯ РАЗНИЦА С MATH EXAM PREP
+
+Math: setup→staged diagnostics→placement→personal plan/weekly task→correction→delayed retest→timed exam (P1/P5). Econ сейчас: selection Paper1/3→full 30-MCQ exam→server result→7-day Theory plan→self-check + mark studied→same-Paper retest. **Это ещё не одно и то же по логике или образовательному охвату.**
+
+**Следующее существенное совершенствование:** построить под Economics отдельную лёгкую начальную диагностику, результаты по exact skills и UI-guided route, сохранять конкретные учебные шаги, correction и отложенную проверку, синхронизируясь с Math поведенческим контрактом. Не копировать Math SQL напрямую и не стирать уже накопленные Economics attempts. P2/P4 письменные — отдельный academic workflow.
