@@ -1,49 +1,61 @@
-# iClub Exam Prep — Chemistry 9701 protected authoring checkpoint
+# iClub APP — Chemistry 9701 / текущая контрольная точка I-06
 
-Date: 2026-10-26. Working branch: `work/chemistry-9701-stage-h-20261026`.
+**Дата:** 26 октября 2026 г.  
+**Контур:** Production Supabase, закрытый академический реестр; GitHub — только технический код без новых заданий и ключей.  
+**Предмет:** Cambridge Chemistry 9701, syllabus 2025–2027.  
+**Статус:** разработка продолжается, для учеников **OFF / NO-GO**.
 
-## Non-negotiable security rule
+## 1. Уточнение архитектора о 26 вариантах
 
-The main `iClub_APP` GitHub repository is **public**. Therefore **no unpublished exam question bodies, complete multiple-choice options, answer keys, answer explanations, scoring logic tied to answers, or unpublished assessment rubrics may be committed to this repository**, including non-main branches. Branch names and draft states provide no confidentiality.
+Архитектор iClub прямо сообщил: **никто не видел 26 ранее подготовленных вариантов, они не являются доказанно скомпрометированными**. Принимаем это уточнение. Не утверждать, будто просмотр, копирование, утечка или нарушение экзаменационной честности установлены.
 
-The previous working branch contained 26 original item drafts with keys and explanations. That branch reference was moved back to the latest known `main` commit via a conditional lease. **This does not guarantee erasure of copies or historical Git objects.** Those 26 drafts are permanently excluded from graded Exam Prep selection and assessment authority.
+Одновременно остаётся технически проверенным другое обстоятельство: текст и ключи этих черновиков некоторое время находились в **публичной** рабочей ветке GitHub. Публичная доступность не тождественна фактическому просмотру. После обнаружения этого обстоятельства ветка была возвращена к актуальному тогда `main`; исторические объекты Git теоретически могут сохраняться. Сами **26 текстов сохранены полностью**, без изменений, в приватной таблице `private.iclub_exam_core_chemistry_p1_quarantine_v1`.
 
-## Where confidential drafts actually live
+Текущее ограничение таблицы запрещает прямую выдачу из *этого архивного хранилища* для оцениваемых заданий. **Это техническая мера, а не вывод об утечке или окончательное решение выбросить контент.** Дальнейший статус оригиналов может быть определён академическим и продуктовым решением: обучение/неоцениваемая практика либо проверенная отдельная версия через безопасный маршрут. Не включать их автоматически в graded Exam Prep и не удалять.
 
-Supabase project `mmmduffgpvwjdpruzikw` has two distinct **private** FORCED-RLS tables:
+## 2. Что фактически завершено
 
-1. `private.iclub_exam_core_chemistry_p1_quarantine_v1` — 26 formerly public-Git-exposed drafts, **permanently non-releasable** by table CHECK constraints. Supabase migration `20261026101900`. Archive count 26, no source hash mismatch, no ordinary-user read privileges.
-2. `private.iclub_exam_core_chemistry_p1_secure_drafts_v1` — freshly authored, never committed to public Git; as of this checkpoint, **9 new trilingual P1 draft-only items for AS syllabus topics 5–13**. Supabase migration `20261026102221`. All have `academic_review=language_review=format_review=pending`, and `release_enabled=exam_candidate_eligible=credit_mastery=false`.
+| Срез | Состояние |
+|---|---|
+| Обычная Chemistry Theory | 154 навыка, 462 Tutor-языковых карточки |
+| Практические P3/P5 | 12 карточек, по 6 на Paper, в отдельном `cross_tour` каталоге |
+| Приватная объединённая академическая карта | 166 уникальных навыков, 348 связей с P1–P5 |
+| Старый банк | 1180 вопросов в приватном review-реестре, исходные вопросы не изменялись |
+| Первоначальные P1-кандидаты из старого банка | 30, все `candidate`, утверждённых 0; 4 записанных QA-дефекта |
+| 26 прежних оригинальных черновиков | Сохранены в `...chemistry_p1_quarantine_v1`; факт просмотра **не подтверждён** |
+| **Новые приватные оригинальные P1-вопросы** | **18 заданий; ровно по одному на каждую AS тему 5–22** в `private.iclub_exam_core_chemistry_p1_secure_drafts_v1` |
+| QA по 18 новым вопросам | **126 отдельных позиций = 18 × 7**, все `pending` в `private.iclub_exam_core_chemistry_p1_qa_slots_v1` |
+| Письменные пилоты P2/P4/P5 | 3 задания, все `draft/pending/release_enabled=false` |
+| Реальная выдача ученикам Chemistry | **Запрещена**: программа `draft`, запуск `false`, библиотека скрыта, native preflight `blocked` |
 
-These tables are not callable by the student UI and have no integration with native Exam Prep question issuing. `anon` and `authenticated` cannot SELECT. Service role has SELECT-only for review, not write. A standalone authorized academic review/promotion mechanism would be separate and versioned; do not reuse this public repository for item keys.
+Новые **18** заданий никогда не записывались с ответами в публичный GitHub; они созданы непосредственно в приватном Supabase.
 
-## Other previous groundwork still present in Supabase
+## 3. Выполненный QA без утверждения академической готовности
 
-- `private.iclub_exam_core_chemistry_paper_catalog_preview_v1` — isolated draft-only combined skill catalog, 154 regular + 12 practical skills; 348 Paper links.
-- `private.iclub_exam_core_chemistry_p1_duplicates_preview_v1` — 37 exact normalized English-stem duplicate pairs (74 IDs), 13 with differing answer letters/options; review only.
-- `private.iclub_exam_core_question_review_v1` — 1,180 snapshotted legacy Chemistry source questions, no edits to `public.questions`.
-- `private.iclub_exam_core_question_candidates_v1` — 30 P1 legacy references, all still candidate, zero approved; four have recorded format/locale QA failures.
-- `private.iclub_exam_core_written_tasks_v1` — three trilingual P2/P4/P5 authored drafts, all pending/release off.
+- 18 разных пунктов/тем syllabus, темы 5–22.
+- Каждому заданию соответствует существующая прямая связь P1–skill.
+- Для каждого задания есть EN/RU/UZ, четыре варианта ответа и объяснения.
+- 0 дубликатов вариантов внутри MCQ, 0 точных повторов новых английских формулировок.
+- 0 точных английских совпадений с действующим старым банком Chemistry.
+- 0 несовпадений хешей, 0 включённых релизных/оценочных флагов.
+- Приватные таблицы используют `FORCE ROW LEVEL SECURITY`, `anon`/`authenticated` не имеют прямого SELECT.
+- Создано **7 QA-проверок для каждого задания**: `syllabus_scope`, `answer_and_distractors`, `locale_en`, `locale_ru`, `locale_uz`, `exam_format`, `content_rights`.
+- Независимая профессиональная академическая и языковая оценка **ещё не проведена и не заявляется как пройденная**. Все 126 позиции QA остаются `pending`.
+- Отдельный read-only регрессионный скрипт `scripts/qa-chemistry-9701-i06-private-draft-review-gates-readonly.sql` выполнен: **19/19 проверок PASS**.
 
-## Completed private QA for new 9 drafts
+## 4. Реальный следующий этап (без возврата к прежним аудитам)
 
-- Exactly 9 distinct syllabus units, numbered 5 through 13; no duplicates.
-- 9 mapped to existing direct P1 skills.
-- All three locales, four answer options, explanations in each.
-- Zero exact English-stem matches against existing published Chemistry source bank.
-- All stored-content digests valid; no permission leaks or unexpected release/academic approvals.
-- All key and translation reviews remain **pending**, not claimed as independent professional verification.
+**I-07 — содержательное утверждение, а не дальнейшее увеличение счётчика:** организовать предметную проверку всех 18 новых P1-черновиков по каждому syllabus outcome, с независимым пересчётом ответов/дистракторов и сверкой трёх языков. Заполнять QA-evidence только действительным подтверждённым reviewer, с привязкой к точному хешу. Не выставлять `pass` от имени несуществующего эксперта.
 
-## Next actions (advance from here, do not repeat prior inventories)
+**I-08 — достаточность P1:** после проверок обеспечить банк для реального 40-вопросного Paper 1, резерв по темам и сложностям, предотвращение смысловых/текстовых повторов и безопасное управление ключами. 18 новых черновиков + 30 старых кандидатов нельзя автоматически считать 48 готовыми экзаменационными заданиями: 0 утверждено.
 
-1. Independently inspect the new private drafts' complete chemistry reasoning and translations, without changing historical questions. Record findings separately.
-2. Author **new** protected content for the remaining AS topics 14–22 in the same private source (not the previously exposed versions), still draft-only.
-3. Define a private assessor/reviewer signoff flow with provenance, immutable version hashes, test matrix and no premature mastery claims. Never use leaked drafts for grading.
-4. Progress Chemistry P2/P4/P5 separately, respecting written/practical evidence and the already registered three pilot tasks. Locate original 24-item authoring package if it exists; do not manufacture its provenance.
-5. Build the native question issuer only after source-quality and access gates are demonstrated; verify Maths legacy adapter, Practice, Tours, and stored histories. Final launch flags require owner GO.
+**I-09 — письменные P2/P4/P5 и лабораторный P3:** продолжить исходные 3 письменных пилота и 12 практических навыков; не создавать фиктивных экзаменационных баллов, не делать AI/Mentor обязательными. Прежде чем импортировать ранее упомянутые 24 multipart задания, нужен их реальный файл-источник.
 
-## Production freeze
+**J/K/L:** новый native-путь Core Chemistry → локали → диагностика/обучение/повтор/готовность → проверка сессий и всех соседних модулей → отдельный GO архитектора для контролируемого релиза. Mathematics legacy, Tours, Practice, рейтинг, localStorage и пользовательский прогресс не менять.
 
-At this checkpoint: Chemistry program `draft`, `launch_enabled=false`, Library `visible_to_learners=false`, native plan preflight `blocked`. The previously live Maths, Tours and Practice paths have not been modified by this protected authoring work.
+## 5. Source of truth
 
-**This checkpoint contains NO unpublished question content or answer keys.**
+- База: `private.iclub_exam_core_chemistry_p1_secure_drafts_v1` — 18 приватных текстов/ключей; `private.iclub_exam_core_chemistry_p1_qa_slots_v1` — 126 QA-slot; `private.iclub_exam_core_chemistry_p1_quarantine_v1` — 26 сохранённых предыдущих вариантов.
+- Supabase migration версии: `20261026101900` (архив), `20261026102221` (новое закрытое хранилище), `20261026111618` (семь QA-гейтов на каждый из 18 черновиков).
+- GitHub рабочая ветка: `work/chemistry-9701-stage-h-20261026`. В публичный репозиторий можно помещать только миграции, read-only тесты и статусные документы **без** исходных экзаменационных заданий и ответов.
+- `main`, Vercel, public.questions и таблицы данных пользователей этой фазой не изменялись.
