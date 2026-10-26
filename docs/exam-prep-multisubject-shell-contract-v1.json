@@ -27,10 +27,12 @@
     "no_cross_subject_score_or_mastery_migration": true,
     "subject_paper_and_skill_configuration_server_owned": true,
     "written_marking_not_fabricated": true,
-    "no_new_exam_prep_navigation_until_safe_runtime_qa": false,
+    "no_new_exam_prep_navigation_until_safe_runtime_qa": true,
     "economics_paper_2_4_written_not_live": true,
     "math_active_legacy_adapter_not_modified": true,
-    "exam_profile_isolated_between_subjects": true
+    "exam_profile_isolated_between_subjects": true,
+    "economics_p1_p3_beta_server_runtime_qa_passed": true,
+    "future_subjects_must_pass_separate_e2e": true
   },
   "shared_learner_path": [
     "exam_profile",
