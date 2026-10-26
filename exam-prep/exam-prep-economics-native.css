@@ -95,3 +95,14 @@
  .ep-native-guided-grid .ep-native-paper { min-height:unset; }
  .ep-native-paper-actions { gap:8px; }
 }
+
+
+/* Economics learner setup follows the same Exam Prep card/field rhythm as Math. */
+.ep-native-profile { margin:12px 0 20px; padding:15px; border:1px solid var(--ep-border,rgba(110,126,152,.3)); border-radius:14px; min-width:0; }
+.ep-native-profile-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.ep-native-profile-summary { display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:12px; font-size:.9rem; line-height:1.5; }
+.ep-native-profile-field { display:flex; flex-direction:column; gap:7px; margin-top:13px; font-size:.9rem; font-weight:600; }
+.ep-native-profile-field input,.ep-native-profile-field select { width:100%; min-width:0; padding:10px 12px; color:inherit; background:var(--ep-card,transparent); border:1px solid var(--ep-border,rgba(110,126,152,.4)); border-radius:10px; font:inherit; }
+.ep-native-profile-feedback { font-size:.87rem; margin:10px 0; line-height:1.5; }
+.ep-native-profile .ep-host-btn { min-height:42px; }
+@media(max-width:640px){.ep-native-profile-head{align-items:stretch;flex-direction:column}.ep-native-profile-head .ep-host-btn,.ep-native-profile>.ep-host-btn{width:100%}}
