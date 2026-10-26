@@ -121,7 +121,7 @@ BEGIN
  RETURN jsonb_build_object('ok',true,'session_id',v_id,'status','active',
  'resumed',false,'deadline_at',v_start+interval '75 minutes','total_items',40);
 END;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION private.iclub_exam_chemistry_p1_shadow_get_v1(p_owner uuid, p_session_id uuid, p_language text DEFAULT 'ru'::text)
  RETURNS jsonb
@@ -174,7 +174,7 @@ BEGIN
  'items',coalesce(v_rows,'[]'::jsonb),
  'qa_only',true,'can_credit_mastery',false);
 END;
-$function$
+$function$;
 
 REVOKE ALL ON FUNCTION private.iclub_exam_chemistry_p1_shadow_start_v1(uuid,text) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION private.iclub_exam_chemistry_p1_shadow_get_v1(uuid,uuid,text) FROM PUBLIC,anon,authenticated;
