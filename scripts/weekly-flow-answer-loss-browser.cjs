@@ -48,6 +48,7 @@ async function scenario(browser,language,width,kind,mode) {
         submitResponse:async(id,order,payload,key)=>{
           assert.strictEqual(id,s.sessionId);assert.strictEqual(order,1);
           s.sendCount++;s.keys.push(key);s.payloads.push(structuredClone(payload));
+          if(s.sendCount===1&&s.mode==='hung') return new Promise(()=>{});
           if(s.sendCount===1&&s.mode==='after_commit') {s.answered=true;throw Error('Lost acknowledgment after commit');}
           if(s.sendCount===1&&s.mode==='before_commit') throw Error('Lost connection before commit');
           s.answered=true;return ok({is_correct:kind==='written'?null:true});
@@ -72,12 +73,14 @@ async function scenario(browser,language,width,kind,mode) {
     await page.evaluate(() => document.querySelector('[data-ep-live-plan="P1"]').click());
     await page.click('[data-ep-live-plan-item="1"]');
     await page.waitForSelector('[data-ep-live-submit]');
+    if(mode==='hung') await page.clock.install();
     if(kind==='written') {
       await page.fill('textarea[name="ep_live_written_answer"]','My original detailed solution; keep this exact draft.');
       await page.waitForSelector('[data-ep-written-understanding-check]');
       await page.check('input[name="ep_written_understanding_1"][value="0"]');
     } else await page.check('input[name="ep_live_answer"][value="0"]');
     await page.click('[data-ep-live-submit]');
+    if(mode==='hung') await page.clock.fastForward(16000);
     if(mode==='after_commit') {
       await page.waitForFunction(()=>window.__answerTest.finalized);
       const s=await page.evaluate(()=>window.__answerTest);
@@ -117,6 +120,8 @@ async function scenario(browser,language,width,kind,mode) {
         for(const kind of ['mcq','written'])
           for(const mode of ['before_commit','after_commit'])
             await scenario(browser,language,width,kind,mode);
-    console.log('GREEN 24 lost-acknowledgment real-DOM scenarios; synthetic only, no network.');
+    for(const language of ['ru','uz','en'])
+      await scenario(browser,language,390,'written','hung');
+    console.log('GREEN 24 lost-acknowledgment plus 3 hung-written-RPC real-DOM scenarios; synthetic only, no network.');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
