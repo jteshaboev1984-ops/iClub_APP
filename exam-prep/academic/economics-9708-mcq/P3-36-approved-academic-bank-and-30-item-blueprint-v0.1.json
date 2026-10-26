@@ -1,0 +1,118 @@
+{
+  "contract": "economics9708_p3_approved_academic_bank_blueprint_v0.1",
+  "created_at": "2026-10-26",
+  "academic_approval_source": "private.iclub_exam_core_question_candidates_v1 + sk.status reviewed + paper_skills.status approved",
+  "program_key": "economics_9708",
+  "version_key": "economics_2026_2028_v1",
+  "paper_code": "P3",
+  "purpose": "MCQ bank is academically approved for future controlled Exam Prep Paper3 integration. Not currently learner-executable, not actual scored test, not official Cambridge past paper.",
+  "official_structure": {
+    "mcq_count": 30,
+    "duration_seconds": 4500,
+    "level": "A",
+    "units": [
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "unit_quota_note": "Below is an internal distribution for example only, not an official Cambridge subject-unit quota."
+  },
+  "status": {
+    "approved_mcq_source_links": 36,
+    "exam_prep_paper_status": "draft",
+    "program_status": "draft",
+    "launch_enabled": false,
+    "learner_can_issue": false,
+    "frontend_integrated": false,
+    "assessment_runtime_verified": false
+  },
+  "unit_approved_counts": {
+    "unit7": 10,
+    "unit8": 8,
+    "unit9": 4,
+    "unit10": 4,
+    "unit11": 10
+  },
+  "example_30_id_blueprint": {
+    "unit7": [
+      8904,
+      9134,
+      8877,
+      8892,
+      8882,
+      8900,
+      9121,
+      8893
+    ],
+    "unit8": [
+      9179,
+      9183,
+      9173,
+      9168,
+      9155,
+      9150,
+      9176
+    ],
+    "unit9": [
+      8969,
+      8994,
+      9003,
+      9011
+    ],
+    "unit10": [
+      8989,
+      9019,
+      9009
+    ],
+    "unit11": [
+      9060,
+      9077,
+      9109,
+      9034,
+      9083,
+      9113,
+      9081,
+      9039
+    ]
+  },
+  "reserve_6_source_ids": {
+    "unit7": [
+      9135,
+      9138
+    ],
+    "unit8": [
+      9162
+    ],
+    "unit9": [],
+    "unit10": [
+      9231
+    ],
+    "unit11": [
+      9029,
+      9072
+    ]
+  },
+  "decision_update": "Architect explicitly states that previous possible visibility of questions in Practice is NOT an Exam Prep content-approval blocker. Remove any requirement to author 18 extra original questions merely to claim unseen.",
+  "presentation_policy": "Never claim these questions are brand-new or never seen. Reuse is allowed in diagnostic, learning and retest according to application rules; results indicate performance on presented material, not guaranteed first exposure. Avoid duplicates inside one assessment and minimize repetition between attempts when possible; 6 reserve items provide some variation.",
+  "preflight_verified": {
+    "allowlist": "closed_catalog_preview",
+    "server_only_mcq_metadata_count": 36,
+    "can_issue_learner_task": false,
+    "preflight_state": "blocked",
+    "blockers": [
+      "paper_not_published",
+      "assessment_runtime_not_verified",
+      "learner_diagnostic_and_plan_evidence_missing"
+    ],
+    "math_active_versions": 1,
+    "ordinary_user_can_read_private_sources": false
+  },
+  "excluded_id_policy": {
+    "9044": "hold: EN stem urbanisation ambiguous vs RU/UZ",
+    "9732": "exclude: wrong published correct-answer letter"
+  },
+  "next": "Paper1 syllabus-graded QA and approval using existing source shortlist, then prepare approved controlled runtime/learner evidence and separate P2/P4 essays before product launch.",
+  "do_not": "Do not publish app, open P3, overwrite legacy source, rescore attempts, add new tables, or put answers in public GitHub."
+}
