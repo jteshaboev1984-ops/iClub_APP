@@ -1,0 +1,389 @@
+{
+  "contract": "economics_9708_AS3_P1_units5_6_review_v0.1",
+  "as_of": "2026-10-26",
+  "program_key": "economics_9708",
+  "program_version": "economics_2026_2028_v1",
+  "paper": "P1",
+  "release_enabled": false,
+  "exam_approved": 0,
+  "syllabus_source": "Cambridge Economics 9708 2026-2028 v2, printed pp 21-23: https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf",
+  "scope": "24 existing published legacy MCQ read-only selection + six original private drafts. Metadata ONLY; no stems/keys and no learner assignments.",
+  "summary": {
+    "legacy_selected": 24,
+    "unit5": 10,
+    "unit6": 14,
+    "private_originals": 6,
+    "originals_unit5": 3,
+    "originals_unit6": 3,
+    "total_working_items": 30,
+    "legacy_candidate_mappings_written": 0,
+    "legacy_exam_approved": 0,
+    "selected_active_practice_links": 0,
+    "selected_active_tour_links": 0,
+    "legacy_four_options_ru_uz_en_present": 24,
+    "legacy_qa_state": "preliminary_content_screen_not_release"
+  },
+  "items": [
+    {
+      "legacy_question_id": 8787,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.1.1",
+      "proposed_skill_key": "ECON-9708-5.1.1-02",
+      "learning_focus": "reducing demand-deficient unemployment",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8816,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.1.1",
+      "proposed_skill_key": "ECON-9708-5.1.1-03",
+      "learning_focus": "real GDP measurement for economic growth goal",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8873,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.1.1",
+      "proposed_skill_key": "ECON-9708-5.1.1-03",
+      "learning_focus": "real output per person and material living standards",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8798,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.2.6",
+      "proposed_skill_key": "ECON-9708-5.2.6-BASE",
+      "learning_focus": "contractionary fiscal stance",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8812,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.2.3",
+      "proposed_skill_key": "ECON-9708-5.2.3-01",
+      "learning_focus": "budget deficit flow and accumulated national debt",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8831,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.2.4",
+      "proposed_skill_key": "ECON-9708-5.2.4-01",
+      "learning_focus": "direct versus indirect taxes",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8796,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.3.2",
+      "proposed_skill_key": "ECON-9708-5.3.2-03",
+      "learning_focus": "credit control growth ceiling",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8805,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.3.2",
+      "proposed_skill_key": "ECON-9708-5.3.2-01",
+      "learning_focus": "interest-rate transmission to demand",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8806,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.3.3",
+      "proposed_skill_key": "ECON-9708-5.3.3-BASE",
+      "learning_focus": "contractionary monetary policy",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8843,
+      "syllabus_unit": 5,
+      "syllabus_point": "5.3.2",
+      "proposed_skill_key": "ECON-9708-5.3.2-03",
+      "learning_focus": "LTV ceiling and credit regulation arithmetic",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8788,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.1.3",
+      "proposed_skill_key": "ECON-9708-6.1.3-01",
+      "learning_focus": "terms of trade index arithmetic",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8799,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.1.1",
+      "proposed_skill_key": "ECON-9708-6.1.1-BASE",
+      "learning_focus": "comparative-advantage opportunity costs",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8811,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.1.3",
+      "proposed_skill_key": "ECON-9708-6.1.3-02",
+      "learning_focus": "terms of trade deteriorate",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8824,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.1.2",
+      "proposed_skill_key": "ECON-9708-6.1.2-02",
+      "learning_focus": "gains from trade beyond own PPC",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8792,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.2.2",
+      "proposed_skill_key": "ECON-9708-6.2.2-04",
+      "learning_focus": "embargo protection",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8794,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.2.2",
+      "proposed_skill_key": "ECON-9708-6.2.2-01",
+      "learning_focus": "specific tariff revenue calculation",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8807,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.2.2",
+      "proposed_skill_key": "ECON-9708-6.2.2-02",
+      "learning_focus": "quota rent captured by licence holders",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8822,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.3.2",
+      "proposed_skill_key": "ECON-9708-6.3.2-03",
+      "learning_focus": "goods and services trade balance",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8823,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.3.2",
+      "proposed_skill_key": "ECON-9708-6.3.2-02",
+      "learning_focus": "services exports less imports",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8836,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.3.2",
+      "proposed_skill_key": "ECON-9708-6.3.2-01",
+      "learning_focus": "goods-trade deficit comparison",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8837,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.3.1",
+      "proposed_skill_key": "ECON-9708-6.3.1-02",
+      "learning_focus": "current account deficit sign",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8795,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.4.3",
+      "proposed_skill_key": "ECON-9708-6.4.3-BASE",
+      "learning_focus": "floating currency appreciation with quoted exchange rate",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8797,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.4.4",
+      "proposed_skill_key": "ECON-9708-6.4.4-BASE",
+      "learning_focus": "currency supply increase through foreign bond purchases",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    },
+    {
+      "legacy_question_id": 8818,
+      "syllabus_unit": 6,
+      "syllabus_point": "6.4.2",
+      "proposed_skill_key": "ECON-9708-6.4.2-BASE",
+      "learning_focus": "floating FX equilibrium with increased currency demand",
+      "source_status": "published_active_legacy_question",
+      "paper_mapping": "proposal_only_not_written",
+      "locale_presence": "verified",
+      "full_locale_semantic_signoff": "not_claimed",
+      "exam_approval": false
+    }
+  ],
+  "exclusions": [
+    {
+      "legacy_question_id": 8813,
+      "reason": "flood-protection public provision overlaps AS2 original 001 free-rider case; hold for teaching pool, not independent mock"
+    },
+    {
+      "legacy_question_id": 8791,
+      "reason": "skills/infrastructure LRAS-right mirrors AS2 legacy 8704; no extra diagnostic value"
+    },
+    {
+      "legacy_question_id": 8860,
+      "reason": "straight currency-unit multiplication is low-discrimination compared to retained FX quotation and floating FX mechanism items"
+    },
+    {
+      "legacy_question_id": 8821,
+      "reason": "simple tariff label overlaps retained tariff revenue 8794 and broader protectionism classification"
+    }
+  ],
+  "concept_reuse_warnings": [
+    "8805 (rate cut) and 8806 (rate rise) test opposite transmission directions: keep separate in short unseen assessments.",
+    "8795 (quoted local currency appreciation) and 8818 (FX demand appreciation) share an outcome though distinct reasoning; diversify sets.",
+    "8822/8823/8836 all involve external-account arithmetic: use a blueprint quota so one mock is not dominated by numerical balances.",
+    "8807 quota rent scenario assumes tradable licence and zero licence-auction cost; its mathematical magnitude is not asked.",
+    "No Unit6.5 policy question survived from AS-only legacy: one private original targeted at current-account supply-side policy.",
+    "No legacy 5.4 supply-side item selected because 8791 is substantially repeated in AS2 8704; private original tests distinctive AD/AS outcome."
+  ],
+  "original_private": [
+    {
+      "item_key": "EC9708-AS3-ORIG-001",
+      "syllabus_point": "5.2.4",
+      "coverage": "marginal versus average tax rate",
+      "source": "private ChatGPT Library; no public answer key",
+      "exam_approval": false
+    },
+    {
+      "item_key": "EC9708-AS3-ORIG-002",
+      "syllabus_point": "5.2.7",
+      "coverage": "expansionary fiscal policy AD/AS",
+      "source": "private ChatGPT Library; no public answer key",
+      "exam_approval": false
+    },
+    {
+      "item_key": "EC9708-AS3-ORIG-003",
+      "syllabus_point": "5.4.4",
+      "coverage": "supply-side policy AD/AS",
+      "source": "private ChatGPT Library; no public answer key",
+      "exam_approval": false
+    },
+    {
+      "item_key": "EC9708-AS3-ORIG-004",
+      "syllabus_point": "6.3.2",
+      "coverage": "full current-account balance arithmetic",
+      "source": "private ChatGPT Library; no public answer key",
+      "exam_approval": false
+    },
+    {
+      "item_key": "EC9708-AS3-ORIG-005",
+      "syllabus_point": "6.4.5",
+      "coverage": "depreciation channels in AD/AS",
+      "source": "private ChatGPT Library; no public answer key",
+      "exam_approval": false
+    },
+    {
+      "item_key": "EC9708-AS3-ORIG-006",
+      "syllabus_point": "6.5.2",
+      "coverage": "supply-side policy and current-account balance",
+      "source": "private ChatGPT Library; no public answer key",
+      "exam_approval": false
+    }
+  ],
+  "raw_new_drafts_location": "Personal Library /iClub APP/Exam Prep/iClub_Economics_AS3_6_original_drafts_PRIVATE_2026-10-26.json",
+  "raw_new_drafts_sha256": "5d094abdfb6bd60a6106b9a38b44b66db0913510a1368589d013e848e5d15633",
+  "next": "Move to A-1 P3 Units7–8 only after this AS3 package checkpoint; AS3 is a first content pass, not full P1 coverage or GO."
+}
