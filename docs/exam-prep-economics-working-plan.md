@@ -365,3 +365,33 @@
 - При следующем коде лучше исправлять наблюдаемые UX defects, не делать массовые повторные аудиты и не переписывать работающее.
 
 **Никакого automatic launch:** пока \`draft/off\` и тесты synthetic-only; подключение native frontend не означает, что Economics открыт ученикам. Написанный код уже в main; отдельный deploy не требуется при Git integration. Проверить Vercel READY + DB disabled.
+
+## 18. АКТУАЛЬНЫЙ CHECKPOINT 26.10.2026 — ECONOMICS P1/P3 ОТКРЫТ ТЕМ ЖЕ ТРЁМ MATH BETA-УЧЕНИКАМ
+
+**НОВАЯ АКТУАЛЬНАЯ ТОЧКА. Пользователь распорядился открыть Economics именно действующим Mathematics beta ученикам. Выполнено в production.**
+
+### Реальная аудитория
+
+- Production cohort math_as_p1_p5_beta_2026_09_01: canary, wave1. В private.exam_prep_beta_members есть 3 active ai_assist members с 3 granted consents; все трое имеют активное Math Core entitlement и Economics enrollment. Ещё одна запись member_status=removed НЕ допущена.
+- Math feature_config.qa_open_all_core=true — широкий технический доступ Mathematics, а НЕ список трёх beta. Его не распространять на Economics.
+- 424 остальных уже записанных на Economics учеников не получают доступа к Exam Prep. Production результат после релиза: 3 разрешены, 424 запрещены.
+- Economics authorization динамически следует активному членству Math beta, consent granted/not revoked, active valid Core entitlement, cohort canary/active + wave, Math Core enabled/not killed, наличию Economics enrollment и профиля. UUID участников не копируются и не фиксируются в файлах.
+
+### Фактически изменено
+
+1. Новая applied миграция: supabase/migrations/20261026210000_iclub_exam_economics_math_beta_same_users_access_v1.sql. Добавлена приватная function private.iclub_exam_native_economics_beta_allowed_v1(uuid), закрытая для anon/auth; existing public.get_my_exam_prep_program_shell_v1 для Economics возвращает пустой shell не-beta; existing public.iclub_exam_native_mcq_start_v1 отказывает им с beta_not_authorized. Mathematics и другие программы не затронуты.
+2. До активации production ROLLBACK test на 3 реальных beta identities: shell показывает P1/P3, P1 дает 30 source items без ключей до завершения. Обычный enrolled Economics пользователь не видит shell и не может start P3. Все тестовые attempts ROLLBACK.
+3. Applied migration: supabase/migrations/20261026214500_iclub_economics_beta_release_same_math_members_v1.sql. Atomic guard: exactly 3 eligible, validated Theory, P1 AS 30 MCQ/60 min и P3 A 30 MCQ/75 min, 36+36 QA approved sources, no broken 8751/9044/9732; Math active version 1, private data boundaries preserved. Экономика program: status=published, launch_enabled=true; P1 и P3 status=published; письменные P2/P4 по-прежнему draft.
+4. После публикации ROLLBACK tests под настоящей PostgreSQL role authenticated: бета-пользователь получил enabled shell P1/P3, start P1 30 questions/get without correct keys. Обычный enrolled Economics пользователь получил пустой shell и beta_not_authorized при start. 0 test user attempts осталось. В production Math active 1, Vercel release READY.
+
+### Продуктовый результат
+
+Три действующих Mathematics beta участника увидят Economics Exam Prep (P1/P3) на обычном Subject Hub после перезагрузки. Server-сессия, ответ, таймер, результат, история, персональный план и retest доступны. Остальным показывается прежнее «Скоро» и API не выдает им предмет/экзамен. P2/P4 НЕ открыты.
+
+**Не утверждать, что проведено визуальное E2E на реальном мобильном браузере:** пока доказаны SQL под authenticated role и synthetic UI. Новые beta реальные попытки мониторить без изменения пользовательского прогресса.
+
+### Быстрое выключение только Economics без потери данных
+
+При отдельном решении или инциденте можно выставить private.iclub_exam_core_programs_v1.launch_enabled=false строго для economics_9708 / economics_2026_2028_v1. Тогда новых задач не выдать, старые attempts/results останутся, Math beta не затрагивается. Без причины эту операцию не запускать.
+
+**Продолжение работы:** мониторинг первых реальных Economics beta попыток, конкретные UX/assessment баги, затем независимая подготовка письменных P2/P4. Не повторять QA 72 approved MCQ, не открывать всем до отдельного решения.
