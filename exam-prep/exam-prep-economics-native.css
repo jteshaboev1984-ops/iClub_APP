@@ -36,3 +36,30 @@
  .ep-native-history-item { flex-direction:column; align-items:stretch; }
  .ep-native-history-item .ep-host-btn { width:100%; }
 }
+
+
+/* Economics: diagnostic result → topic review → self-check → retest */
+.ep-native-plan-stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:14px 0 22px; }
+.ep-native-plan-stat { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; min-height:90px; padding:12px 8px; text-align:center; border:1px solid var(--ep-border,rgba(110,126,152,.3)); border-radius:12px; }
+.ep-native-plan-stat strong { font-size:1.4rem; font-variant-numeric:tabular-nums; line-height:1.2; }
+.ep-native-plan-stat span { opacity:.82; font-size:.79rem; line-height:1.35; }
+.ep-native-plan-units { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-bottom:20px; }
+.ep-native-plan-unit { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0; padding:11px 14px; border-radius:10px; background:rgba(122,132,153,.07); }
+.ep-native-plan-unit strong { font-variant-numeric:tabular-nums; }
+.ep-native-study-tasks { display:grid; gap:14px; margin:12px 0 22px; }
+.ep-native-study-task { display:flex; flex-direction:column; align-items:flex-start; gap:10px; min-width:0; padding:18px; border:1px solid var(--ep-border,rgba(110,126,152,.3)); border-radius:15px; }
+.ep-native-study-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; width:100%; }
+.ep-native-study-head strong { flex:1 1 200px; line-height:1.45; overflow-wrap:anywhere; }
+.ep-native-study-day { flex:none; padding:5px 10px; border-radius:99px; background:rgba(120,132,152,.12); font-size:.79rem; font-weight:650; }
+.ep-native-study-label { font-weight:700; font-size:.87rem; }
+.ep-native-study-text,.ep-native-study-trap,.ep-native-check-answer { margin:0; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+.ep-native-study-trap { padding:11px 13px; border-radius:10px; background:rgba(120,132,152,.08); width:100%; }
+.ep-native-check-answer:not([hidden]) { padding:10px 12px; border-radius:10px; background:rgba(38,134,93,.08); width:100%; }
+.ep-native-study-done { font-weight:650; color:var(--ep-positive,#27825d); }
+.ep-native-study-task .ep-host-btn { min-height:40px; }
+@media(max-width:640px) {
+ .ep-native-plan-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .ep-native-plan-units { grid-template-columns:1fr; }
+ .ep-native-study-task { padding:14px; }
+ .ep-native-study-task .ep-host-btn { width:100%; }
+}
