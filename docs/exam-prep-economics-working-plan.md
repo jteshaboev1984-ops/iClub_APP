@@ -343,7 +343,7 @@
    - \`public.iclub_exam_native_mcq_mark_studied_v1(p_session_id,p_skill_key,p_studied)\`: SECURITY DEFINER authenticated RPC. Меняет ТОЛЬКО свой ошибочный/пропущенный skill из своей завершённой сессии. Идемпотентный upsert/undo; \`mastery_proven=false\`, потому что прочитанный урок НЕ доказательство знаний.
    - **Критически верный retest evidence:** \`retested_correct\` появляется только когда **более поздняя завершённая серверная попытка того же Paper** содержит тот же canonical skill и ученик выбрал правильный ответ. Ни посещение урока, ни отметка \`studied\`, ни правильная буква без новой попытки не подтверждают усвоение. После подтверждения skill исключается из текущих приоритетов, но историческая ошибка не стирается.
    - После отметки первых 5 studied skills сервер **поднимает следующие ещё не изученные ошибки**, а не оставляет всё время те же карточки; migration priority refresh меняет сортировку, не пользовательские данные. Список ошибок, scores и attempts остаётся immutable.
-2. **ТРИ apply_migration SUCCESS в GitHub+Supabase**:
+2. **ДВЕ apply_migration SUCCESS в GitHub+Supabase**:
    - \`supabase/migrations/20261026193000_iclub_exam_native_economics_study_plan_v1.sql\` — новая minimal progress table + две RPC;
    - \`supabase/migrations/20261026201000_iclub_exam_native_economics_study_plan_priority_refresh_v1.sql\` — обновление server-side приоритета неизученных ошибок (без новых таблиц).
    Обе миграции additive в существующей Economics native ветке, ни Math, ни Practice/Tours, ни старые \`public.questions\`, ни пользовательские legacy scores не редактируют.
