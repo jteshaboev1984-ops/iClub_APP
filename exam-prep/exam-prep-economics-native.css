@@ -63,3 +63,11 @@
  .ep-native-study-task { padding:14px; }
  .ep-native-study-task .ep-host-btn { width:100%; }
 }
+
+
+.ep-native-result-actions { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:14px 0 16px; }
+.ep-native-result-actions .ep-native-result { margin:0; }
+@media(max-width:640px) {
+ .ep-native-result-actions { flex-direction:column; align-items:stretch; }
+ .ep-native-result-actions .ep-host-btn { width:100%; }
+}
