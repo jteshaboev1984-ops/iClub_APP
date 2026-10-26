@@ -39,7 +39,7 @@ BEGIN
  RETURN jsonb_build_object('ok',true,'saved',true,'unchanged',false,
  'revised',v_prior IS NOT NULL,'selected_index',p_choice);
 END;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION private.iclub_exam_chemistry_p1_shadow_finish_v1(p_owner uuid, p_session_id uuid)
  RETURNS jsonb
@@ -84,7 +84,7 @@ BEGIN
  'completed_after_deadline',v_done>=v.deadline_at,
  'duplicate',false,'can_credit_mastery',false,'qa_only',true);
 END;
-$function$
+$function$;
 
 REVOKE ALL ON FUNCTION private.iclub_exam_chemistry_p1_shadow_answer_v1(uuid,uuid,integer,integer)
  FROM PUBLIC,anon,authenticated;
