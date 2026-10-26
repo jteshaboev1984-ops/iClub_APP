@@ -205,5 +205,29 @@
     "Do not mark these or previous 24 status=approved until a controlled teaching-versus-exam bank policy and independent learner evidence exist.",
     "Do not flip Economics launch or publish papers; no changes to Practice/Tours, Math, scores or localStorage.",
     "Do not put unpublished new original keys in public repository; original drafts remain in personal private Library."
-  ]
+  ],
+  "actual_closed_candidate_staging": {
+    "date": "2026-10-26",
+    "operation": "single atomic guarded SQL transaction into existing private.iclub_exam_core_question_candidates_v1, no new schema/migration",
+    "added_records": 12,
+    "newly_staged_status": "candidate",
+    "four_QA_columns": "pass",
+    "source_MD5": "original private.review snapshot equals current live source at insertion for each of 12",
+    "preconditions": "canonical A-level P3 direct skill/syllabus match; published active source, 4 distinct choices per locale, all EN/RU/UZ explanations/stems, no active Practice/Tours, no source Tour tag, paper still draft/off, no old Exam Core duplicate",
+    "verified_total_P3_QA_pass_closed_candidates": 36,
+    "status_approved_count": 0,
+    "question_9044_added": false,
+    "post_write_protection": {
+      "program_status": "draft",
+      "launch_enabled": false,
+      "metadata_allowlist_state": "closed_catalog_preview",
+      "metadata_allowlist_mcq_count": 0,
+      "can_issue_learner_task": false,
+      "anon_private_select": false,
+      "authenticated_private_select": false,
+      "math_active_versions": 1
+    },
+    "exposure_policy": "Legacy source may have been historically in Practice. Source is NOT a proven protected unseen question and may ONLY be considered for controlled instructional rehearsal until learner-specific exposure and independent exam pool design.",
+    "user_data_mutated": false
+  }
 }
