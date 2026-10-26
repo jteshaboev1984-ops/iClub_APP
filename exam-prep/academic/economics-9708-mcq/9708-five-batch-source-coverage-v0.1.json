@@ -1,0 +1,143 @@
+{
+  "contract": "economics9708_five_batch_coverage_first_sweep_v0.1",
+  "as_of": "2026-10-26",
+  "program": "economics_9708",
+  "version": "economics_2026_2028_v1",
+  "status": "NO_GO_source_review_inventory_not_academic_approval",
+  "totals": {
+    "legacy": 138,
+    "originals": 30,
+    "working": 168,
+    "distinctSkillTargets": 163,
+    "units": {
+      "1": 20,
+      "2": 15,
+      "3": 12,
+      "4": 17,
+      "5": 11,
+      "6": 17,
+      "7": 18,
+      "8": 17,
+      "9": 13,
+      "10": 8,
+      "11": 15
+    },
+    "per": [
+      {
+        "group": "AS-1",
+        "legacy": 30,
+        "originals": 6,
+        "working": 36,
+        "unique_skill_targets": 35,
+        "unit_counts": {
+          "1": 20,
+          "2": 15
+        }
+      },
+      {
+        "group": "AS-2",
+        "legacy": 24,
+        "originals": 6,
+        "working": 30,
+        "unique_skill_targets": 29,
+        "unit_counts": {
+          "3": 12,
+          "4": 17
+        }
+      },
+      {
+        "group": "AS-3",
+        "legacy": 24,
+        "originals": 6,
+        "working": 30,
+        "unique_skill_targets": 28,
+        "unit_counts": {
+          "5": 11,
+          "6": 17
+        }
+      },
+      {
+        "group": "A-1",
+        "legacy": 30,
+        "originals": 6,
+        "working": 36,
+        "unique_skill_targets": 35,
+        "unit_counts": {
+          "7": 18,
+          "8": 17
+        }
+      },
+      {
+        "group": "A-2",
+        "legacy": 30,
+        "originals": 6,
+        "working": 36,
+        "unique_skill_targets": 36,
+        "unit_counts": {
+          "9": 13,
+          "10": 8,
+          "11": 15
+        }
+      }
+    ]
+  },
+  "limits": "Unique skill target count means at least one proposed item mapped to this skill, NOT independent proficiency coverage, academic approval, full objective sufficiency or a completed 30-question Paper. Denominator of 498 refers to canonical skills, 200 AS and 298 A, not Cambridge's item requirements.",
+  "sources": [
+    {
+      "group": "AS-1",
+      "path": "exam-prep/academic/economics-9708-mcq/AS1-P1-Units1-2-30-item-provisional-QA-dossier-v0.2.json",
+      "legacy_question_ids": 30,
+      "original_private_item_count": 6
+    },
+    {
+      "group": "AS-2",
+      "path": "exam-prep/academic/economics-9708-mcq/AS2-P1-Units3-4-24-item-review-shortlist-v0.1.json",
+      "legacy_question_ids": 24,
+      "original_private_item_count": 6
+    },
+    {
+      "group": "AS-3",
+      "path": "exam-prep/academic/economics-9708-mcq/AS3-P1-Units5-6-24-item-review-shortlist-v0.1.json",
+      "legacy_question_ids": 24,
+      "original_private_item_count": 6
+    },
+    {
+      "group": "A-1",
+      "path": "exam-prep/academic/economics-9708-mcq/A1-P3-Units7-8-30-item-review-shortlist-v0.1.json",
+      "legacy_question_ids": 30,
+      "original_private_item_count": 6
+    },
+    {
+      "group": "A-2",
+      "path": "exam-prep/academic/economics-9708-mcq/A2-P3-Units9-11-30-item-review-shortlist-v0.1.json",
+      "legacy_question_ids": 30,
+      "original_private_item_count": 6
+    }
+  ],
+  "privacy": "No answer keys/new exam texts in public GitHub. All 30 original items are held in five private Library JSON artifacts.",
+  "paper_coverage": {
+    "P1": {
+      "working_items": 96,
+      "legacy": 78,
+      "private_originals": 18,
+      "academic_approved": 0,
+      "active_Practice_overlap_legacy": 4
+    },
+    "P3": {
+      "working_items": 72,
+      "legacy": 60,
+      "private_originals": 12,
+      "academic_approved": 0,
+      "as_prerequisite_as_direct_A": false
+    }
+  },
+  "identified_qc_risks": [
+    "Published Economics legacy source ID 9732 has an incorrect stored correct-answer letter; stored explanation itself gives contradictory arithmetic. Excluded from all five batches. Resolve with an explicit reviewed fix, not a silent rewrite of user history.",
+    "Source 8982 requires narrow wording review of expenditure-gap terminology before unseen diagnostic placement.",
+    "Four P1 source IDs 8616,8619,8621,8625 are exposed through active Practice.",
+    "No academic status approvals or QA flag writes took place: existing Exam Prep question candidates in DB remain only 16 candidate P1, 0 approved P1/P3.",
+    "Full RU/UZ distractor-meaning checks are not completed globally. Locale presence and correct-choice reading do not prove complete semantic equivalence.",
+    "Selection pools are sampling inventories, not released exam sets; 30-question timed mock cannot be built honestly from currently approved source (0)."
+  ],
+  "next": "Move from five topical first sweeps to one targeted release-gap/coverage pass: independently check only known suspect items and unseen-equivalence risk, prioritize missing syllabus points and full paper-balanced pools, then prepare controlled academic approval and source mapping in existing private Exam Core without adding tables. Written Paper2/4 and learner evidence remain separate."
+}
