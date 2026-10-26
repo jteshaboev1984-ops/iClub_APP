@@ -592,5 +592,52 @@
   ],
   "single_mock_blueprint_note": "Avoid including 8614 and 8620 in same 30-item version as same direct skill; 36 accepted items are not all 36 distinct skill objectives. Normal item reuse allowed, but no exact repeated item inside one test.",
   "source_rights_and_delivery_caveat": "Uses app's own previously published question source; this review does not independently establish Cambridge licensing of copied materials. No claim of official past paper, licensed reproduction or fully functioning session.",
-  "next": "Guards + atomic existing-core candidate staging for exactly 36, then academic approval of 35 distinct skills and direct paper links with 36 question candidate approvals while Economics remains draft/off. Service-only allowlist must show metadata without answers but learner task issuance always false."
+  "next": "Guards + atomic existing-core candidate staging for exactly 36, then academic approval of 35 distinct skills and direct paper links with 36 question candidate approvals while Economics remains draft/off. Service-only allowlist must show metadata without answers but learner task issuance always false.",
+  "production_outcome_verified": {
+    "at": "2026-10-26",
+    "operation": "one bounded guarded atomic SQL transaction against existing Exam Core private tables, no new schema or functions",
+    "source_qa_records_passed": 36,
+    "hold_question_8751_not_mapped": true,
+    "preexisting_P1_candidate_fourQA_pending_updated_to_pass": 16,
+    "new_P1_candidate_source_links_created_with_fourQA_pass": 20,
+    "distinct_AS_level_theory_skills_marked_reviewed": 35,
+    "distinct_direct_P1_paper_skill_links_marked_approved": 35,
+    "P1_question_candidate_links_marked_approved": 36,
+    "P3_question_candidate_links_still_approved": 36,
+    "snapshot_guard": "Exact MD5 live source=frozen initial private review=existing/inserted candidate, other language/format and syllabus constraints; any failure causes rollback",
+    "allow_P1_Practice_overlap_as_architect_policy": [
+      8616,
+      8619,
+      8621,
+      8625
+    ],
+    "launch_status": "draft/off",
+    "P1_paper_status": "draft",
+    "P3_paper_status": "draft",
+    "post_write_service_only_allowlist": {
+      "P1_mcq_metadata": 36,
+      "P3_mcq_metadata": 36,
+      "state": "closed_catalog_preview",
+      "can_issue_learner_task": false
+    },
+    "post_write_native_preflight": {
+      "state": "blocked",
+      "can_issue_learner_plan": false,
+      "shared_P1_P3_blockers": [
+        "paper_not_published",
+        "assessment_runtime_not_verified",
+        "learner_diagnostic_and_plan_evidence_missing"
+      ]
+    },
+    "private_permissions": {
+      "anon_candidate_select": false,
+      "authenticated_candidate_select": false,
+      "anon_allowlist_execute": false,
+      "authenticated_allowlist_execute": false
+    },
+    "math_active_program_versions": 1,
+    "legacy_questions_or_existing_student_attempts_changed": false,
+    "new_original_public_keys_or_texts": false,
+    "limitation": "Content is academically reviewed against syllabus and source, not an official Cambridge past paper. Whole student exam runtime is still unverified and disabled."
+  }
 }
