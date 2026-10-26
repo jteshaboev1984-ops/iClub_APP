@@ -1048,7 +1048,7 @@
   }
 
   async function loadSession(sessionId) {
-    clearTimer(); renderLoading(); const result = await internal.api.getSession(sessionId, state.language);
+    clearTimer(); renderLoading(); const result = await awaitServerConfirmation(() => internal.api.getSession(sessionId, state.language), 12000);
     if (!result?.ok) { renderError(); return; }
     state.session = result.data;
     const items = Array.isArray(state.session?.items) ? state.session.items : [], next = items.find(item => item && item.answered !== true);
@@ -1056,7 +1056,7 @@
     if (timed && state.session?.status === "active" && deadlineMs(state.session) && Date.now() >= deadlineMs(state.session)) { await finishTimed("time_expired"); return; }
     if (!next && state.session?.status === "active") {
       if (timed) { await finishTimed("submitted"); return; }
-      const finalized = await internal.api.finalizeSession(sessionId, key("ep-session-finalize"));
+      const finalized = await awaitServerConfirmation(() => internal.api.finalizeSession(sessionId, key("ep-session-finalize")), 15000);
       if (!finalized?.ok) { renderError(); return; }
       const finishedType = state.session.session_type, component = state.session.component_code;
       state.session = null;
@@ -1109,6 +1109,23 @@
     });
     root.querySelector('[data-ep-live-end]')?.addEventListener('click', async () => { if (window.confirm(c.endConfirm)) await finishTimed("administrative_stop"); });
     if (timed) startTimer(state.session.session_id);
+  }
+
+  // A lost / endlessly pending network acknowledgement is NOT proof that a
+  // response failed to save. Bound UI waiting, then read server state before
+  // offering an explicit retry with the identical idempotency key.
+  async function awaitServerConfirmation(request, deadlineMs) {
+    let timer = null;
+    try {
+      return await Promise.race([
+        Promise.resolve().then(request).catch(() => ({ ok: false, reason: "request_exception" })),
+        new Promise(resolve => {
+          timer = setTimeout(() => resolve({ ok: false, reason: "request_timeout" }), deadlineMs);
+        })
+      ]);
+    } finally {
+      if (timer !== null) clearTimeout(timer);
+    }
   }
 
   // The guarded weekly route never discards a learner's answer before the
@@ -1172,7 +1189,7 @@
     state.busy=true;
     showAnswerRecovery(pending);
     let read=null;
-    try { read=await internal.api.getSession(pending.sessionId,state.language); } catch (_) {}
+    try { read=await awaitServerConfirmation(() => internal.api.getSession(pending.sessionId,state.language), 12000); } catch (_) {}
     if (state.pendingSubmission !== pending) { state.busy=false; return; }
     const same=read?.ok && read.data?.session_id===pending.sessionId &&
       read.data?.component_code===pending.component;
@@ -1198,8 +1215,8 @@
     root?.querySelectorAll('[data-ep-answer-check],[data-ep-answer-retry]').forEach(button => { button.disabled=true; });
     let result;
     try {
-      result=await internal.api.submitResponse(pending.sessionId,pending.itemOrder,
-        pending.payload,pending.idempotencyKey,pending.elapsedMs,state.language);
+      result=await awaitServerConfirmation(() => internal.api.submitResponse(pending.sessionId,pending.itemOrder,
+        pending.payload,pending.idempotencyKey,pending.elapsedMs,state.language), 15000);
     } catch (_) { result={ok:false,reason:'unknown_response'}; }
     if (state.pendingSubmission !== pending) { state.busy=false; return; }
     if (result?.ok) {
