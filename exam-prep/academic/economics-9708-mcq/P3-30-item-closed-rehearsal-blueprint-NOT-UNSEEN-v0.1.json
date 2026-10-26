@@ -1,0 +1,109 @@
+{
+  "contract": "economics_9708_p3_closed_rehearsal_blueprint_not_unseen_v0.1",
+  "created": "2026-10-26",
+  "program": "economics_9708",
+  "version": "economics_2026_2028_v1",
+  "paper": "P3",
+  "official_reference": "Cambridge Economics 9708 2026–2028 v2, 30 MCQ / 75 minutes, A Level tested directly; AS prior knowledge assumed. https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf",
+  "classification": "INTERNAL_REHEARSAL_BLUEPRINT_ONLY_NOT_AN_ACTUAL_TEST_NOT_ISSUABLE_NOT_UNSEEN",
+  "count": 30,
+  "reserve": 6,
+  "working_slots_by_unit": {
+    "unit7": {
+      "selected": 8,
+      "reserve": 2
+    },
+    "unit8": {
+      "selected": 7,
+      "reserve": 1
+    },
+    "unit9": {
+      "selected": 4,
+      "reserve": 0
+    },
+    "unit10": {
+      "selected": 3,
+      "reserve": 1
+    },
+    "unit11": {
+      "selected": 8,
+      "reserve": 2
+    }
+  },
+  "proposed_rehearsal_question_ids_by_unit": {
+    "unit7": [
+      8904,
+      9134,
+      8877,
+      8892,
+      8882,
+      8900,
+      9121,
+      8893
+    ],
+    "unit8": [
+      9179,
+      9183,
+      9173,
+      9168,
+      9155,
+      9150,
+      9176
+    ],
+    "unit9": [
+      8969,
+      8994,
+      9003,
+      9011
+    ],
+    "unit10": [
+      8989,
+      9019,
+      9009
+    ],
+    "unit11": [
+      9060,
+      9077,
+      9109,
+      9034,
+      9083,
+      9113,
+      9081,
+      9039
+    ]
+  },
+  "reserve_question_ids_by_unit": {
+    "unit7": [
+      9135,
+      9138
+    ],
+    "unit8": [
+      9162
+    ],
+    "unit9": [],
+    "unit10": [
+      9231
+    ],
+    "unit11": [
+      9029,
+      9072
+    ]
+  },
+  "constraints": [
+    "Source is the existing 36 QA-pass P3 candidate mappings in private Exam Core, all still status=candidate, none approved.",
+    "Question list is planning metadata only; no text, answers, marks, scoring, student assignment, session state or user exposure.",
+    "Not claimed to replicate any unofficial exact syllabus weighting: Cambridge confirms 30 A Level MCQ but does not require the 8/7/4/3/8 split represented here.",
+    "Full unit spread and qualitative diversity are achieved for rehearsal only, not a proven independent diagnostic.",
+    "All 36 source IDs, like the prior 84 checked, have historical inactive Practice pool assignments. No stored answer events across five queryable answer tables for 84 checked IDs. Neither guarantees never displayed nor proves learner-level exposure.",
+    "Even though 30 are listed, reserve of only 6 is insufficient for two fully nonoverlapping 30-item retests.",
+    "9009 and 9231 test Phillips curve shift versus movement and are separated into main and reserve, not treated as independent completely unrelated constructs.",
+    "Never turn this metadata file into student-facing question pool or auto-set status=approved.",
+    "ID 9044 excluded for material EN/RU/UZ urbanisation condition mismatch. ID 9732 blocked for incorrect stored key. ID 8982 under limited targeted terminology review, not part of this plan."
+  ],
+  "release_preconditions": [
+    "Create/validate distinct protected questions for truly unseen diagnostic and retest pools; do not infer novelty from zero answer rows.",
+    "Secure versioned source snapshots, per-item full academic QA across EN/RU/UZ and a defensible actual 30-question blueprint before any final approval.",
+    "Paper3 source pool must not be released until explicit user-owned delivery/scoring/evidence protections and written P2/P4 policies are ready.",
+    "Program remains draft/off; private allowlist must remain closed and return zero MCQ for learners."
+  ]
+}
