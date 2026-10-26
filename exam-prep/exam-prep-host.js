@@ -4,6 +4,7 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const MATHEMATICS_KEY = "mathematics";
   const ECONOMICS_KEY = "economics";
+  const CHEMISTRY_KEY = "chemistry";
   const state = {
     open: false,
     subjectKey: null,
@@ -12,6 +13,7 @@
     capabilities: null,
     invitation: null,
     economicsShell: null,
+    chemistryShell: null,
     consentBusy: false,
     consentError: false,
     returnFocusEl: null
@@ -265,7 +267,8 @@
 
   function showable() {
     return (state.subjectKey === MATHEMATICS_KEY && (allowed(state.capabilities) || invited())) ||
-      (state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true);
+      (state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true) ||
+      (state.subjectKey === CHEMISTRY_KEY && state.chemistryShell?.enabled === true);
   }
 
   function serviceModeText(mode, text) {
@@ -289,7 +292,8 @@
     const openOffer = inviteOnly && item.openRecruitment === true;
     const aiActive = allowed(state.capabilities) && state.capabilities?.aiAssist === true;
     const econActive = state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true;
-    const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY && !econActive);
+    const chemActive = state.subjectKey === CHEMISTRY_KEY && state.chemistryShell?.enabled === true;
+    const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY && !econActive && !chemActive);
     const econSub = state.language === "uz"
       ? "Paper 1 va Paper 3: imtihon, javoblar va natijalar"
       : state.language === "en"
@@ -311,6 +315,19 @@
     if (p5) p5.textContent = econActive ? "Paper 3 · A Level · 75 min" : text.entryP5;
     if (note) note.textContent = econActive ? econSub : (comingSoon ? text.comingSoonNote : (aiActive ? text.entryAiNote : text.entryNote));
     if (cta) cta.textContent = econActive ? text.entryCta : (comingSoon ? text.comingSoonCta : (openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta)));
+    if (p5?.parentElement) p5.parentElement.style.display = chemActive ? "none" : "";
+    if (chemActive) {
+      if (badge) badge.textContent = "Cambridge · Chemistry 9701";
+      if (sub) sub.textContent = state.language === "uz" ? "Paper 1 · 40 ta savol · 75 daqiqa"
+        : state.language === "en" ? "Paper 1 · 40 questions · 75 minutes"
+        : "Paper 1 · 40 вопросов · 75 минут";
+      if (p1) p1.textContent = "Paper 1 · AS Level · 75 min";
+      if (note) note.textContent = state.language === "uz"
+        ? "Javoblaringiz va avvalgi natijalaringiz saqlanadi."
+        : state.language === "en" ? "Your answers and previous results remain saved."
+        : "Ваши ответы и прежние результаты сохраняются.";
+      if (cta) cta.textContent = text.entryCta;
+    }
   }
 
   // STAGE03_EXAM_PREP_ALL_SUBJECTS_V1: presentation only, no assessment APIs.
@@ -396,6 +413,7 @@
 
   function close() {
     internal.economicsNative?.unmount?.();
+    internal.chemistryNative?.unmount?.();
     const shouldRestoreFocus = state.open && (showable() || (state.subjectKey && state.subjectKey !== MATHEMATICS_KEY));
     state.open = false;
     state.consentBusy = false;
@@ -443,8 +461,8 @@
   }
 
   async function refreshCapabilities() {
-    if (state.subjectKey === ECONOMICS_KEY) {
-      return syncSubjectHub({ subjectKey: ECONOMICS_KEY, language: state.language });
+    if (state.subjectKey === ECONOMICS_KEY || state.subjectKey === CHEMISTRY_KEY) {
+      return syncSubjectHub({ subjectKey: state.subjectKey, language: state.language });
     }
     return refreshAccess();
   }
@@ -517,6 +535,7 @@
       state.capabilities = null;
       state.invitation = null;
       state.economicsShell = null;
+      state.chemistryShell = null;
       if (state.subjectKey === ECONOMICS_KEY) {
         try {
           const response = await window.sb?.rpc?.("get_my_exam_prep_program_shell_v1", {
@@ -530,6 +549,21 @@
             state.economicsShell = shell;
           }
         } catch (_) { /* Keep the current coming-soon state when access is unavailable. */ }
+      }
+      if (state.subjectKey === CHEMISTRY_KEY) {
+        try {
+          const response = await window.sb?.rpc?.("get_my_exam_prep_chemistry_shell_v1", {
+            p_language: state.language
+          });
+          if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
+          const shell = response?.data;
+          if (!response?.error && shell?.enabled === true &&
+              shell.program_key === "chemistry_9701" && Array.isArray(shell.papers) &&
+              shell.papers.some(p => p.code === "P1" && p.assessment_kind === "mcq" && p.mcq_count === 40)) {
+            state.chemistryShell = shell;
+            if (state.open) internal.chemistryNative?.setLanguage?.(state.language);
+          }
+        } catch (_) { /* Chemistry remains in development until access is explicitly granted. */ }
       }
       renderEntryCopy();
       close();
@@ -581,7 +615,12 @@
         internal.economicsNative?.mount?.({
           root, shell: state.economicsShell, language: state.language, onBack: close
         }) === true;
-      if (!economicsReady && !renderComingSoonShell()) return false;
+      const chemistryReady = state.subjectKey === CHEMISTRY_KEY &&
+        state.chemistryShell?.enabled === true &&
+        internal.chemistryNative?.mount?.({
+          root, shell: state.chemistryShell, language: state.language, onBack: close
+        }) === true;
+      if (!economicsReady && !chemistryReady && !renderComingSoonShell()) return false;
       state.returnFocusEl = entryButtonEl();
       root.hidden = false;
       root.setAttribute('aria-hidden', 'false');
