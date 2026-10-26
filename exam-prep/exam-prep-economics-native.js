@@ -9,21 +9,39 @@
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
       confirm:"Завершить экзамен? Пропущенные вопросы получат 0 баллов.",result:"Результат",
       review:"Разбор ответов",right:"Правильный ответ",your:"Ваш ответ",empty:"Не отвечено",
-      loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить"},
+      loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить",
+      plan:"Мой учебный план",planIntro:"Начните с этих тем и проверьте себя после повторения.",
+      unit:"Раздел",correct:"Верно",mistakes:"Тем для повторения",studied:"Изучено",verified:"Подтверждено повторной проверкой",
+      study:"Объяснение темы",trap:"На что обратить внимание",check:"Проверьте себя",showCheck:"Показать ответ",
+      hideCheck:"Скрыть ответ",markStudied:"Отметить как изученное",studiedDone:"Тема изучена",
+      review:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
+      allCorrect:"Все вопросы решены правильно. Ошибок для разбора нет.",studyNote:"Отметка «изучено» не означает, что навык освоен. Это подтвердит правильный ответ в следующем экзамене."},
     uz:{title:"Cambridge Economics · Exam Prep",intro:"Imtihon ishini tanlang. Javoblar va natijalar serverda saqlanadi.",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga",
       papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javobni saqlash",
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
       confirm:"Imtihonni yakunlaysizmi? Javobsiz savollar 0 ball bo‘ladi.",result:"Natija",
       review:"Javoblarni tahlil qilish",right:"To‘g‘ri javob",your:"Sizning javobingiz",empty:"Javob berilmagan",
-      loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish"},
+      loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish",
+      plan:"Mening o‘quv rejam",planIntro:"Avval shu mavzularni o‘rganing, so‘ng qayta tekshiring.",
+      unit:"Bo‘lim",correct:"To‘g‘ri",mistakes:"Takrorlanadigan mavzular",studied:"O‘rganildi",verified:"Qayta tekshiruvda tasdiqlangan",
+      study:"Mavzu izohi",trap:"E'tibor bering",check:"O‘zingizni tekshiring",showCheck:"Javobni ko‘rsatish",
+      hideCheck:"Javobni yashirish",markStudied:"O‘rganilgan deb belgilash",studiedDone:"Mavzu o‘rganildi",
+      review:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
+      allCorrect:"Hamma savollarga to‘g‘ri javob berildi. Tahlil qilinadigan xato yo‘q.",studyNote:"«O‘rganildi» belgisi bilim o‘zlashtirilganini isbotlamaydi. Keyingi imtihondagi to‘g‘ri javob tasdiqlaydi."},
     en:{title:"Cambridge Economics · Exam Prep",intro:"Select an exam paper. Answers and results are saved on the server.",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back",
       papers:"Back to papers",question:"Question",time:"Time remaining",save:"Save answer",
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
       confirm:"Finish this exam? Unanswered questions score zero.",result:"Result",
       review:"Review answers",right:"Correct answer",your:"Your answer",empty:"Unanswered",
-      loading:"Loading…",error:"The action failed. Check your connection.",retry:"Try again"}
+      loading:"Loading…",error:"The action failed. Check your connection.",retry:"Try again",
+      plan:"My study plan",planIntro:"Review these topics first, then test your understanding again.",
+      unit:"Unit",correct:"Correct",mistakes:"Topics to review",studied:"Studied",verified:"Confirmed in a later test",
+      study:"Topic explanation",trap:"Watch out for",check:"Check your understanding",showCheck:"Show answer",
+      hideCheck:"Hide answer",markStudied:"Mark as studied",studiedDone:"Studied",
+      review:"Back to exam review",retest:"Take this paper again",day:"Day",
+      allCorrect:"You answered every question correctly. No errors to review.",studyNote:"Marking a topic as studied does not prove mastery. Only a later correct exam answer can confirm improvement."}
   };
   const t=()=>dictionary[state.lang]||dictionary.ru;
   const e=(tag,cls,value)=>{
@@ -171,7 +189,106 @@
     if(state.index>0)actions.append(btn(t().previous,()=>{state.index--;draw();},true));
     if(state.index<29)actions.append(btn(t().next,()=>{state.index++;draw();},true));
     if(!finished)actions.append(btn(t().finish,()=>finish(false),true));
+    if(finished) {
+      actions.prepend(btn(t().plan,showStudyPlan));
+      actions.append(btn(t().retest,()=>begin(state.paper),true));
+    }
     actions.append(btn(t().papers,lobby,true));view.append(actions);
+  }
+
+  async function showStudyPlan(){
+    if(state.closed||state.busy||state.data?.status!=="finalized"||!state.id)return;
+    const sessionId=state.id,token=++state.token;
+    state.busy=true;
+    shell()?.append(e("p","ep-host-note",t().loading));
+    const result=await rpc("iclub_exam_native_mcq_study_plan_v1",{
+      p_session_id:sessionId,p_language:state.lang
+    });
+    state.busy=false;
+    if(state.closed||state.token!==token||state.id!==sessionId)return;
+    if(!result.ok||!Array.isArray(result.priorities)){error(showStudyPlan);return;}
+    renderStudyPlan(result);
+  }
+  function renderStudyPlan(data){
+    const view=shell();if(!view)return;
+    view.append(e("h3","ep-native-result",t().plan));
+    view.append(e("p","ep-host-note",t().planIntro));
+    const stats=e("div","ep-native-plan-stats");
+    for(const [amount,label] of [
+      [String(data.score)+"/30",t().result],
+      [data.weak_count,t().mistakes],
+      [data.studied_count,t().studied],
+      [data.retested_correct_count,t().verified]
+    ]){
+      const stat=e("div","ep-native-plan-stat");
+      stat.append(e("strong","",amount),e("span","",label));stats.append(stat);
+    }
+    view.append(stats);
+    const unitTitle=e("h4","ep-native-section-title",t().unit);
+    view.append(unitTitle);
+    const summary=e("div","ep-native-plan-units");
+    (data.unit_results||[]).forEach(unit=>{
+      const block=e("div","ep-native-plan-unit");
+      block.append(e("span","",t().unit+" "+unit.unit),
+        e("strong","",String(unit.correct)+" / "+String(unit.total)));
+      summary.append(block);
+    });
+    view.append(summary);
+    if(data.weak_count===0)view.append(e("p","ep-host-note",t().allCorrect));
+    else if((data.priorities||[]).length===0)view.append(e("p","ep-host-note",t().verified));
+    else {
+      const tasks=e("div","ep-native-study-tasks");
+      data.priorities.forEach(task=>{
+        const card=e("section","ep-native-study-task");
+        const head=e("div","ep-native-study-head");
+        head.append(e("span","ep-native-study-day",t().day+" "+task.suggested_day));
+        head.append(e("strong","",task.title));
+        card.append(head);
+        if(task.lesson){
+          card.append(e("div","ep-native-study-label",t().study));
+          card.append(e("p","ep-native-study-text",task.lesson));
+        }
+        if(task.common_trap){
+          card.append(e("div","ep-native-study-label",t().trap));
+          card.append(e("p","ep-native-study-trap",task.common_trap));
+        }
+        if(task.check_question){
+          card.append(e("div","ep-native-study-label",t().check));
+          card.append(e("p","ep-native-study-text",task.check_question));
+          if(task.check_answer){
+            const answer=e("p","ep-native-check-answer",task.check_answer);
+            answer.hidden=true;
+            const toggle=btn(t().showCheck,()=>{
+              answer.hidden=!answer.hidden;
+              toggle.textContent=answer.hidden?t().showCheck:t().hideCheck;
+            },true);
+            card.append(toggle,answer);
+          }
+        }
+        if(task.studied)card.append(e("div","ep-native-study-done",t().studiedDone));
+        else card.append(btn(t().markStudied,()=>markStudied(task.skill_key)));
+        tasks.append(card);
+      });
+      view.append(tasks);
+    }
+    view.append(e("p","ep-host-note",t().studyNote));
+    const actions=e("div","ep-host-actions ep-native-actions");
+    actions.append(btn(t().review,draw,true));
+    actions.append(btn(t().retest,()=>begin(state.paper)));
+    actions.append(btn(t().papers,lobby,true));
+    view.append(actions);
+  }
+  async function markStudied(skillKey){
+    if(state.closed||state.busy||!state.id||!skillKey)return;
+    const sessionId=state.id,token=++state.token;
+    state.busy=true;
+    const result=await rpc("iclub_exam_native_mcq_mark_studied_v1",{
+      p_session_id:sessionId,p_skill_key:skillKey,p_studied:true
+    });
+    state.busy=false;
+    if(state.closed||state.token!==token||state.id!==sessionId)return;
+    if(!result.ok){error(showStudyPlan);return;}
+    await showStudyPlan();
   }
   async function save(){
     if(state.busy||state.closed||state.data?.status!=="active")return;
