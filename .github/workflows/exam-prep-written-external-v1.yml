@@ -1,0 +1,87 @@
+name: Exam Prep Math Written External v1 (isolated)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-host.css'
+      - 'exam-prep/exam-prep-learner-flow-ux.js'
+      - 'supabase/migrations/20261026150000_exam_prep_math_written_external_learning_v1.sql'
+      - 'scripts/math-written-external-browser.cjs'
+      - 'scripts/fixtures/math-written-external-pg-setup.sql'
+      - 'scripts/fixtures/math-written-external-pg-checks.sql'
+      - 'scripts/fixtures/math-written-external-pg-concurrency.sh'
+      - '.github/workflows/exam-prep-written-external-v1.yml'
+  push:
+    branches: [feat/math-written-external-learning-v1-20261026]
+permissions:
+  contents: read
+jobs:
+  written-learning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static safety contract (no production services)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-learner-flow-ux.js
+          node --check scripts/math-written-external-browser.cjs
+          grep -Fq 'advanced_in_plan_only' exam-prep/exam-prep-live.js
+          grep -Fq 'create table if not exists private.exam_prep_written_step_advances_v1' supabase/migrations/20261026150000_exam_prep_math_written_external_learning_v1.sql
+          grep -Fq 'enable row level security' supabase/migrations/20261026150000_exam_prep_math_written_external_learning_v1.sql
+          grep -Fq 'revoke all on function public.advance_exam_prep_written_step_safe_v1' supabase/migrations/20261026150000_exam_prep_math_written_external_learning_v1.sql
+          ! grep -Eiq 'insert into private[.]exam_prep_evidence_events|update private[.]exam_prep_responses' supabase/migrations/20261026150000_exam_prep_math_written_external_learning_v1.sql
+      - name: Install isolated browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Paper task on real DOM (RU UZ EN, P1 P5, mobile desktop, errors)
+        run: node scripts/math-written-external-browser.cjs
+
+  written-database-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+      - name: Create disposable fixture, apply new migration ONLY, verify contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f scripts/fixtures/math-written-external-pg-setup.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261026150000_exam_prep_math_written_external_learning_v1.sql
+          psql -v ON_ERROR_STOP=1 -f scripts/fixtures/math-written-external-pg-checks.sql
+          bash scripts/fixtures/math-written-external-pg-concurrency.sh

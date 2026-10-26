@@ -8,7 +8,7 @@ const path = require('path');
   await page.evaluate(() => { window.i18n = { getLang: () => 'ru' }; window.iClubExamPrepHostInternal = {}; });
   await page.addStyleTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.css') });
   await page.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
-  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish5');
+  await page.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish6');
   const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
   await page.evaluate(() => {
@@ -26,9 +26,33 @@ const path = require('path');
   assert(state.meta === 'Радианная мера и окружность', 'internal skill number must not be exposed in weekly-plan metadata');
   assert(state.hasLocalScreenAnimation === false, 'Exam Prep must not add a local fade/translate transition that the main app does not use');
 
+  // Invalid input makes no RPC and must not leave a phantom saving indicator.
+  const invalidInputs = [
+    ['MCQ without selection', '<div class="ep-live-options"><label><input type="radio" name="ep_live_answer" value="0">4</label></div>'],
+    ['empty numeric answer', '<input name="ep_live_text_answer" value="   ">'],
+    ['empty written solution', '<textarea name="ep_live_written_answer"></textarea>'],
+    ['written check not selected', '<div data-ep-written-understanding-check="1"><label><input type="radio" name="ep_written_understanding_1" value="0">Option</label></div><textarea name="ep_live_written_answer">My working on paper</textarea>']
+  ];
+  for (const [scenario, control] of invalidInputs) {
+    await page.evaluate(fragment => {
+      document.querySelector('#exam-prep-host-root').innerHTML =
+        '<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 1 / 4</strong></div><div class="ep-live-qtext">Solve</div>' +
+        fragment + '<button class="ep-live-btn" data-ep-live-submit>Отправить ответ</button></div></section>';
+    }, control);
+    await page.click('[data-ep-live-submit]');
+    await page.waitForTimeout(45);
+    const observed = await page.evaluate(() => ({
+      pending: !!document.querySelector('.ep-flow-submit-pending, .ep-flow-pending-visual'),
+      disabled: document.querySelector('[data-ep-live-submit]')?.disabled,
+      text: document.querySelector('[data-ep-live-submit]')?.textContent
+    }));
+    assert(!observed.pending && !observed.disabled && observed.text === 'Отправить ответ',
+      scenario + ': invalid answer must never trigger a stuck saving state');
+  }
+
   await page.evaluate(() => {
     const root = document.querySelector('#exam-prep-host-root');
-    root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 1 / 3</strong></div><div class="ep-live-qtext">2 + 2 = ?</div><div class="ep-live-actions"><button class="ep-live-btn" data-ep-live-submit>Отправить ответ</button></div></div></section>`;
+    root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 1 / 3</strong></div><div class="ep-live-qtext">2 + 2 = ?</div><label class="ep-live-option"><input type="radio" name="ep_live_answer" value="0" checked>4</label><div class="ep-live-actions"><button class="ep-live-btn" data-ep-live-submit>Отправить ответ</button></div></div></section>`;
     root.querySelector('[data-ep-live-submit]').addEventListener('click', () => {
       root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card" role="status" aria-live="polite">Загрузка…</div></section>`;
     });
@@ -52,7 +76,7 @@ const path = require('path');
   // Otherwise a later route such as Materials can be overwritten by that stale clone.
   await page.evaluate(() => {
     const root = document.querySelector('#exam-prep-host-root');
-    root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 3 / 3</strong></div><div class="ep-live-qtext">Последний вопрос</div><div class="ep-live-actions"><button class="ep-live-btn" data-ep-live-submit>Отправить ответ</button></div></div></section>`;
+    root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card"><div class="ep-live-head"><strong>Вопрос 3 / 3</strong></div><div class="ep-live-qtext">Последний вопрос</div><label class="ep-live-option"><input type="radio" name="ep_live_answer" value="0" checked>Да</label><div class="ep-live-actions"><button class="ep-live-btn" data-ep-live-submit>Отправить ответ</button></div></div></section>`;
     root.querySelector('[data-ep-live-submit]').addEventListener('click', () => {
       root.innerHTML = `<section class="ep-host-shell ep-live"><div class="ep-live-card" role="status" aria-live="polite">Загрузка…</div></section>`;
     });
@@ -152,7 +176,7 @@ const path = require('path');
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-learner-flow-ux.js') });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-integrity.js') });
   await fresh.addScriptTag({ path: path.resolve('exam-prep/exam-prep-interaction-polish.js') });
-  await fresh.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish5');
+  await fresh.waitForFunction(() => window.iClubExamPrepHostInternal?.interactionPolish?.version === 'polish6');
   await fresh.click('[data-ep-component-primary="diagnostic"]');
   await fresh.waitForTimeout(40);
   assert(await fresh.locator('[data-ep-transition-hold="1"]').count() === 0, 'component diagnostic CTA must not install a transition-hold clone');

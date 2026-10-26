@@ -284,6 +284,52 @@
     });
   }
 
+  // Mathematics written learning v1 is an additive API path. Server enrollment
+  // stays OFF by default; old RPC methods remain unmodified.
+  async function getSessionWritten(sessionId, language = "en") {
+    const result = await rpc("get_exam_prep_session_written_v1", {
+      p_session_id: sessionId, p_language: String(language || "en")
+    });
+    if (result.ok && result.data) emit("iclub:exam-prep-session",
+      { session: result.data, language: String(language || "en") });
+    return result;
+  }
+  async function writtenCriteria(sessionId, itemOrder, language = "en") {
+    return rpc("get_exam_prep_written_criteria_safe_v1", {
+      p_session_id: sessionId, p_item_order: Number(itemOrder),
+      p_language: String(language || "en")
+    });
+  }
+  async function writtenStepStatus(sessionId, itemOrder) {
+    return rpc("get_exam_prep_written_step_status_safe_v1", {
+      p_session_id: sessionId, p_item_order: Number(itemOrder)
+    });
+  }
+  async function advanceWrittenStep(sessionId, itemOrder, idempotencyKey) {
+    return rpc("advance_exam_prep_written_step_safe_v1", {
+      p_session_id: sessionId, p_item_order: Number(itemOrder),
+      p_idempotency_key: String(idempotencyKey || "")
+    });
+  }
+  async function finalizeSessionWritten(sessionId, idempotencyKey) {
+    const result = await rpc("finalize_exam_prep_session_written_v1", {
+      p_session_id: sessionId, p_idempotency_key: String(idempotencyKey || "")
+    });
+    if (result.ok) emit("iclub:exam-prep-session-ended", {sessionId});
+    return result;
+  }
+  async function sessionReviewWritten(sessionId, language = "en") {
+    return rpc("get_exam_prep_session_review_written_v1", {
+      p_session_id: sessionId, p_language: String(language || "en")
+    });
+  }
+  async function recentResultsWritten(componentCode, limit = 10) {
+    return rpc("get_exam_prep_recent_results_written_v1", {
+      p_component_code: componentArg(componentCode),
+      p_limit: Math.max(1, Math.min(20, Number(limit) || 10))
+    });
+  }
+
   async function integrityStatus(sessionId) {
     return rpc("get_exam_prep_integrity_status_safe_v1", { p_session_id: sessionId });
   }
@@ -359,6 +405,8 @@
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
+    getSessionWritten, writtenCriteria, writtenStepStatus, advanceWrittenStep,
+    finalizeSessionWritten, sessionReviewWritten, recentResultsWritten,
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
     weeklyPlan, generateWeeklyPlan, authorizePlanItem,
@@ -377,7 +425,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");

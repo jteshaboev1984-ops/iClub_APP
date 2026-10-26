@@ -751,18 +751,25 @@
     const nextText = next ? describePlanItem(next, skillMap, nextCorrectionRows) : "";
     const meta = skillMap.get(String(context?.skillCode || ""));
     const skillTitle = context?.skillTitle || humanSkill(meta);
-    const answered = Array.isArray(session?.items) ? session.items.filter(item => item?.answered === true).length : 0;
-    const total = Array.isArray(session?.items) ? session.items.length : Number(session?.total_items || 0);
+    const allItems=Array.isArray(session?.items)?session.items:[];
+    const answered=allItems.filter(item=>item?.answered===true).length;
+    const writtenAdvanced=allItems.filter(item=>item?.completion_status==="advanced_in_plan_only").length;
+    const total=allItems.length || Number(session?.total_items||0);
     const c = copy();
     const root = rootEl();
     if (!root) return;
+    const paperLabel=language()==="ru"?"Шаги на бумаге":language()==="uz"?"Qog‘ozdagi bosqichlar":"Paper-based steps";
+    const completionMetrics=writtenAdvanced>0
+      ? '<div class="ep-flow-completion-metric"><span>'+esc(c.answersSaved)+'</span><strong>'+answered+'</strong></div>'+
+        '<div class="ep-flow-completion-metric"><span>'+esc(paperLabel)+'</span><strong>'+writtenAdvanced+'</strong></div>'
+      : (total ? '<div class="ep-flow-completion-metric"><span>'+esc(c.answersSaved)+'</span><strong>'+answered+' / '+total+'</strong></div>' : '');
 
     root.innerHTML = `<section class="ep-host-shell ep-live ep-flow-completion-screen" data-ep-flow-completion="${esc(VERSION)}">
       <div class="ep-live-head"><div><div class="ep-host-kicker">${esc(c.result)}</div><h2 class="ep-host-title">${esc(completionTitle(context, correctionRow, Boolean(resolved)))}</h2></div></div>
       <div class="ep-flow-completion-card">
         ${skillTitle ? `<div class="ep-flow-completion-skill"><span>${esc(c.skill)}</span><strong>${esc(skillTitle)}</strong></div>` : ""}
         <p>${esc(completionMessage(context, correctionRow, Boolean(resolved)))}</p>
-        ${total ? `<div class="ep-flow-completion-metric"><span>${esc(c.answersSaved)}</span><strong>${answered} / ${total}</strong></div>` : ""}
+        ${completionMetrics}
       </div>
       <div class="ep-flow-next-card"><span>${esc(c.nextStep)}</span><strong>${esc(nextText || c.noNext)}</strong></div>
       <div class="ep-live-actions">
