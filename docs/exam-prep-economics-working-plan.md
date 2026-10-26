@@ -232,3 +232,27 @@
 - Written P2/P4, полнота source licences и authenticated learner-specific issuance/plan/marking/evidence остаются самостоятельными релизными блокерами.
 
 **Всегда: никаких внешних экспертов, дополнительных таблиц/веток, повторного общего QA, ненужных Supabase запросов, live Economics launch или риска Math/Practice/Tours.**
+
+## 13. АКТУАЛЬНЫЙ CHECKPOINT 26.10.2026 — P3 36 APPROVED, ИСТОРИЯ ПОКАЗА НЕ БЛОКЕР
+
+**НАЧИНАТЬ НОВЫЕ ЧАТЫ С РАЗДЕЛА 13. РАЗДЕЛ 12 о «защищённом unseen» теперь УСТАРЕЛ В ЧАСТИ БЛОКИРОВКИ.**
+
+### Решение архитектора
+
+**«То, что ученики могли видеть вопросы, не блокер».** Нельзя требовать генерации 18 новых оригиналов только из-за возможного старого показа. Старые `Practice` назначения без действующей активности/конфликта и без доказанного изменения ключа **разрешены для Economics Exam Prep**, включая диагностику и повтор. Не утверждать в интерфейсе, что вопрос непременно впервые показан. Избегать точных повторов в одном тесте; разумно варьировать будущие попытки. История участия в Practice — не повод задерживать выпуск контента.
+
+### Что РЕАЛЬНО сделано сейчас
+
+**Точно 36 уже полноценно QA-проверенных A Level / Paper3 вопросов** повышены в имеющихся закрытых таблицах Supabase одним атомарным fail-closed transaction:
+- 36 exact `private.iclub_exam_core_skills_v1.status: candidate → reviewed`;
+- 36 exact `private.iclub_exam_core_paper_skills_v1.status: candidate → approved` (`P3` и `direct`);
+- 36 exact `private.iclub_exam_core_question_candidates_v1.status: candidate → approved`, при уже подтверждённых четырёх `qa_*_status='pass'`.
+- Guard: программа `draft/off`, validated Theory release, current/live source MD5 = frozen initial review MD5 = candidate MD5, совпадение `skill` и `P3/direct/A`, library hash, 3 языка, 4 альтернативы, ответ A–D, live published source, отсутствие текущего активного Practice/Tours назначения и `-T-` provenance, непересечение со специально исключёнными 9044/9732. Транзакция проверила ровно 36 в каждом UPDATE и откатывала бы неполное выполнение. Уже 24+12 пройденных substantive QA **не проверялись по кругу**.
+- После записи production: **36 P3 MCQ approved, 0 P1 approved**. По P3 units 7=10,8=8,9=4,10=4,11=10. Закрытый service-only allowlist `closed_catalog_preview`, 36 безопасных метаданных и `can_issue_learner_task=false`. Native planner preflight `blocked`: `paper_not_published`, `assessment_runtime_not_verified`, `learner_diagnostic_and_plan_evidence_missing`. `status=draft, launch_enabled=false`, anon/auth доступ к закрытым записям и функциям отсутствует. Legacy Math active version по-прежнему 1. Ничего в учениках, старых questions, Practice/Tours, scores, localStorage не изменено. Никаких новых таблиц, функций, миграций или веток.
+- Эту работу и фактическую проверку хранит **`docs/exam-prep-economics-P3-academic-approval-20261026.md`**. Обновлённый рабочий, но ещё НЕ LIVE, план 30 основных +6 резерв: **`exam-prep/academic/economics-9708-mcq/P3-36-approved-academic-bank-and-30-item-blueprint-v0.1.json`**. 30 MCQ/75 минут соответствует P3 по syllabus; распределение по Units является продуктовым выбором, не официальной Cambridge квотой.
+- ID9044 (неоднозначный EN про урбанизацию) и ID9732 (неверный опубликованный ключ) остаются без Exam Core links; исходники не правились.
+
+### Главная следующая задача — P1, а НЕ повторный P3 или искусственные unseen-оригиналы
+
+**Paper1 AS: 30 MCQ /60 минут.** В существующем Exam Core уже **16** P1 candidate links, их `qa_scope_status`, `qa_academic_status`, `qa_language_status`, `qa_format_status` пока `pending`; frozen snapshot MD5 совпадает с review, но не доказывает экономическую верность ответа. Рабочие источники AS-1/AS-2/AS-3 **78 legacy+18 оригинальных private=96 review positions**. Провести одну настоящую содержательную приёмку 24–36 legacy MCQ по AS Units1–6: экономическая логика, 4 опции, точные key/explanation EN/RU/UZ, exact AS direct skill; при ошибке HOLD, не менять старое. Уже полноценно проверенные не прогонять повторно. По успешно прошедшим сделать guarded insert/update существующих `candidate` и четыре QA статуса, затем после достижения нормального охвата — безопасно `reviewed/approved` в существующих private таблицах по аналогии P3. Не делать новых таблиц и branch.
+**Economics для учеников остаётся ЗАКРЫТ**, никакого запуска без runtime/evidence/written P2/P4 и явного архитекторского GO.
