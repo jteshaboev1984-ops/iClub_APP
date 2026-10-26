@@ -294,3 +294,37 @@
 6. Главные существующие блокеры остаются: paper_not_published, assessment_runtime_not_verified, learner_diagnostic_and_plan_evidence_missing. Paper2/P4 письменные отдельно. **P1=36 и P3=36 approved, Economics draft/off, Math активен, пользовательские progress/answer/Practice/Tours records не менялись.**
 
 **Следующий технический ШАГ, НЕ новая общая ревизия:** разработать и обосновать минимальный **persisted native MCQ session/evidence** (использовать старую таблицу можно только если реальные FK позволяют и Math не затронут; иначе действительно необходимо минимальное изолированное хранение session/frozen items/answers). Сначала проверенные SQL constraints, idempotency/owner/security/expired tests в ROLLBACK или synthetic, затем только осторожный patch после доказанной изоляции. Существующий Mathematics host не переписывать, Economics для учеников не включать до полностью подтверждённого E2E и решения архитектора.
+
+
+## 16. АКТУАЛЬНЫЙ CHECKPOINT 26.10.2026 — РЕАЛЬНЫЙ BACKEND MCQ + ЭКРАН ECONOMICS В ОБЩЕМ HOST
+
+**НАЧИНАТЬ СЛЕДУЮЩИЙ ЧАТ ЗДЕСЬ, НЕ повторять 72 academic QA и не делать снова «анализ вместо реализации».**
+
+**Что реально реализовано в production Supabase и текущем GitHub main:**
+
+1. **НОВАЯ НЕОБХОДИМАЯ МИНИМАЛЬНАЯ приватная таблица** \`private.iclub_exam_native_mcq_attempts_v1\` (раньше не было никакого native MCQ session storage, старые Math session FK не годились). В одной строке per-session: \`auth.users\` owner, program/version/P1/P3, unique client idempotency, server timestamps/deadline, snapshot **всех 30** вопросных текстов/трёх языков/исходных 4 вариантов/ключа и **перемешанного для этого ученика** порядка, answers JSONB, финальный server-graded score. RLS FORCE, anon/auth \`SELECT\` запрещён, инвариант одной активной попытки на ученика+Paper.
+2. Четыре \`SECURITY DEFINER\` public RPC для **authenticated**:
+   - \`iclub_exam_native_mcq_start_v1(p_paper_code,p_client_key)\`: только enrolled Economics user и \`published/launch_enabled\` program и \`published\` MCQ P1/P3. 30 approved pinned source questions, **30 distinct skills** с unit quotas, исходный live MD5=review MD5, не включать HOLD 8751/9044/9732, freezes randomized A–D options. Retry/active resume, no Math tables.
+   - \`iclub_exam_native_mcq_get_v1(p_session_id,p_language)\`: own frozen session, RU/UZ/EN, options only in display order, response status and remaining time; **no keys, correct index, explanations until finished**.
+   - \`iclub_exam_native_mcq_answer_v1(p_session_id,p_item_order,p_choice)\`: first saved answer wins, owner check, server deadline, immutable answer, duplicate safe.
+   - \`iclub_exam_native_mcq_finish_v1(p_session_id)\`: server-only scoring against frozen answer + order, 30 points, unattempted=0, idempotent finalized score, then correct choices/explanations allowed for own review.
+   SQL migration in **\`supabase/migrations/20261026173500_iclub_exam_native_economics_mcq_sessions_v1.sql\`** was APPLIED SUCCESS in Supabase, and already GitHub committed. Existing legacy records were NOT edited.
+3. Fifth RPC **\`iclub_exam_native_mcq_history_v1(p_paper_code)\`** returns own active/finished last 20 attempts, score, date, answered count, no keys, no cross-learner access. Migration **\`supabase/migrations/20261026185000_iclub_exam_native_economics_mcq_history_v1.sql\`** applied successfully.
+4. **ФАКТИЧЕСКИЙ E2E ТЕСТ под synthetic SQL transaction with ROLLBACK**: auth.users synthetic + public.users + public.user_subjects temporary, program/paper temporary published *в этой же uncommitted транзакции*, 30 P1 distinct skill candidates, randomized answer permutation, saved 30 responses with one wrong → **29/30**, retry start idempotence, duplicate response cannot override, cross-user get/answer/finish deny, exact get before finish no answer/explanation, get after finish shows review; P3 30 distinct skills across Units7–11, session start. Test ROLLBACK; **0** test attempts/users remain, program \`draft/off\`, Math active version **1**. Дополнительно весь P1 start/get/answer/finish успешно пройден **при SET LOCAL ROLE authenticated** (тоже rollback) и history active→finalized→score under authenticated, P3 filter independent. Первая попытка synthetic test была откатана потому что \`user_subjects\` ссылается на \`public.users\` профиль, не только \`auth.users\`; учтено, повтор успешно.
+5. **РЕАЛЬНО ПОДКЛЮЧЁН FRONTEND** в том же прежнем \`#exam-prep-host-root\`:
+   - \`exam-prep/exam-prep-economics-native.js\`: Paper1/Paper3 selection, server RPC, 30 translated questions/options, progress, timing, save/next/back/finish, result + correct answers explanation, own past attempts and resume/finished result.
+   - \`exam-prep/exam-prep-economics-native.css\`: симметричные карточки и responsive mobile, визуальные токены существующего Math Host.
+   - \`exam-prep/exam-prep-host.js\`: **узкая ветка** только для \`subjectKey=economics\`; \`public.get_my_exam_prep_program_shell_v1\` проверяется server-side, только если server shell \`enabled=true\`, валидные P1/P3 mcq и enrolled user, монтируется native UI. Иначе всё ещё **coming soon**. Математическая legacy ветка не переведена и все её существующие RPC сохранены.
+   - \`index.html\` добавлены ровно один JS + CSS с cache-busting \`native-econ-3\` и \`native-econ-2\`.
+   - Navigation stale response fix: \`state.token\` on exit & checking expected session on response, чтобы позднее сохранение не перепрыгивало обратно с экрана выбора.
+6. **Проверена готовность Vercel production** для промежуточных UI-коммитов; SPA реально включила JS/CSS assets. Простой лексический check новых JS balanced braces/quotes passed, точное inclusion ровно 1 JS+1 CSS, host Economics gated, Mathematics untouched. Полный реальный браузерный logged-in E2E c открытой Economics для настоящего ученика **не проводился**, т.к. \`draft/off\`.
+7. **НЕ ИЗМЕНЕНО:** старые \`public.questions\`, Mathematics beta tables/UI logic, Practice/Tours, user results, localStorage, accounts. Economics \`draft/off\`, P1/P3 papers \`draft\`. Native RPCs предназначены authenticated, но start возвращает \`not_available\`, пока программа и Paper не опубликованы. Действующий Math active version всё ещё 1. Никакой регистрации тестового ученика после ROLLBACK не осталось.
+
+**Экзаменационный банк:** P1=36 и P3=36 academically approved MCQ, каждый план = 30 source +6 reserves. Повторного академического QA не делать без конкретной ошибки. Историческая Practice видимость не блокер по решению архитектора.
+
+**Что осталось на СЛЕДУЮЩИЙ этап (новая работа, а не новый общий аудит):**
+- Сначала **определить и подключить результат→навыки→выявленные ошибки→персональный недельный план→повторное тестирование** Economics на основе уже сохранённого полного per-question snapshot. После отдельного instructor-approved unit/skill criteria. Учебная Theory read ≠ mastery.
+- Письменные P2/P4 требуют отдельно одобренных task+mark-scheme и доказуемой проверки, НЕ подменять авто-MCQ.
+- Затем controlled beta live UI under authenticated genuine learner, end-to-end and explicit выбор открытия предмета; program пока off. Не создавать новые таблицы без технического основания, не перетаскивать Econ в Math legacy progress.
+
+**Actual code:** \`supabase/migrations/20261026173500_iclub_exam_native_economics_mcq_sessions_v1.sql\`, \`supabase/migrations/20261026185000_iclub_exam_native_economics_mcq_history_v1.sql\`, \`exam-prep/exam-prep-economics-native.js\`, \`exam-prep/exam-prep-economics-native.css\`, \`exam-prep/exam-prep-host.js\`, \`index.html\`.
