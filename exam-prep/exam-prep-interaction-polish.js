@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "polish5";
+  const VERSION = "polish6";
   let observer = null;
   let reconcileQueued = false;
   let pendingVisual = null;
@@ -205,6 +205,28 @@
     screen.querySelectorAll(".ep-live-notice[role='status']").forEach(node => node.remove());
   }
 
+  // Do not show a saving state until the actual answer passes the same basic
+  // input checks as the Exam Prep submit handler. An invalid click makes no RPC.
+  // In particular, written working is stored but never machine-marked here.
+  function answerReadyForSubmission(root) {
+    const submit = root?.querySelector("[data-ep-live-submit]");
+    if (!submit || submit.disabled || submit.hidden || root.querySelector("[data-ep-answer-recovery]")) return false;
+
+    const written = root.querySelector('textarea[name="ep_live_written_answer"]');
+    if (written) {
+      if (!written.value.trim()) return false;
+      // These are separate deterministic understanding checks, not a grade
+      // for the written method. All visible checks must be answered.
+      return Array.from(root.querySelectorAll("[data-ep-written-understanding-check]"))
+        .every(group => Boolean(group.querySelector('input[type="radio"]:checked')));
+    }
+    const choices = root.querySelectorAll('input[name="ep_live_answer"]');
+    if (choices.length) return Boolean(root.querySelector('input[name="ep_live_answer"]:checked'));
+
+    const typed = root.querySelector('input[name="ep_live_text_answer"]');
+    return Boolean(typed && typed.value.trim());
+  }
+
   function capturePendingVisual() {
     const root = rootEl();
     if (!root) return;
@@ -372,7 +394,8 @@
     const button = event.target?.closest?.("button");
     if (!root || !button || !root.contains(button)) return;
     if (button.matches("[data-ep-live-submit]")) {
-      capturePendingVisual();
+      // A rejected / empty response must never freeze the current question.
+      if (answerReadyForSubmission(root)) capturePendingVisual();
       return;
     }
     captureTransitionVisual(button);
