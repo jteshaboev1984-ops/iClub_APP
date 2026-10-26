@@ -561,11 +561,16 @@
               shell.program_key === "chemistry_9701" && Array.isArray(shell.papers) &&
               shell.papers.some(p => p.code === "P1" && p.assessment_kind === "mcq" && p.mcq_count === 40)) {
             state.chemistryShell = shell;
-            if (state.open) internal.chemistryNative?.setLanguage?.(state.language);
           }
         } catch (_) { /* Chemistry remains in development until access is explicitly granted. */ }
       }
       renderEntryCopy();
+      if (state.subjectKey === CHEMISTRY_KEY && !subjectChanged &&
+          state.open && state.chemistryShell?.enabled === true) {
+        internal.chemistryNative?.setLanguage?.(state.language);
+        setEntryVisible(true);
+        return true;
+      }
       close();
       setEntryVisible(Boolean(state.subjectKey));
       return Boolean(state.subjectKey);
