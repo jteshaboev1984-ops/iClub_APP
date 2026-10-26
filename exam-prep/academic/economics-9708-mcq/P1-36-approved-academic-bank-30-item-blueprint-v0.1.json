@@ -1,0 +1,122 @@
+{
+  "contract": "economics9708_P1_approved_36_source_bank_blueprint_v0.1",
+  "date": "2026-10-26",
+  "status": "ACADEMIC_SOURCE_APPROVED__LEARNER_LAUNCH_OFF",
+  "program_key": "economics_9708",
+  "version_key": "economics_2026_2028_v1",
+  "paper_code": "P1",
+  "official_reference": "Cambridge Economics 9708 2026–2028 v2, Paper1 AS multiple choice: 30 questions in 60 minutes, Units1–6. https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf",
+  "source_approval": "existing private Core sk.status reviewed, ps.status approved, qc.status approved and four qa_* pass with 1:1 frozen MD5 to live source",
+  "source_status": {
+    "approved_MCQs": 36,
+    "approved_distinct_AS_skill_targets": 35,
+    "required_questions_one_form": 30,
+    "reserves": 6,
+    "known_source_hold_id": 8751,
+    "exclusion_reason": "Unnatural Russian explanatory calque 'пол цены' for binding minimum price; hold until versioned correction",
+    "P3_approved_and_untouched": 36
+  },
+  "academically_approved_unit_counts": {
+    "unit1": 5,
+    "unit2": 16,
+    "unit3": 4,
+    "unit4": 3,
+    "unit5": 3,
+    "unit6": 5
+  },
+  "example_30_MCQ_distribution": {
+    "unit1": 4,
+    "unit2": 12,
+    "unit3": 3,
+    "unit4": 3,
+    "unit5": 3,
+    "unit6": 5
+  },
+  "example_30_question_ids_by_unit": {
+    "unit1": [
+      8608,
+      8609,
+      8610,
+      8633
+    ],
+    "unit2": [
+      8607,
+      8613,
+      8614,
+      8616,
+      8617,
+      8618,
+      8619,
+      8621,
+      8622,
+      8623,
+      8625,
+      8629
+    ],
+    "unit3": [
+      8715,
+      8710,
+      8719
+    ],
+    "unit4": [
+      8702,
+      8705,
+      8722
+    ],
+    "unit5": [
+      8798,
+      8805,
+      8812
+    ],
+    "unit6": [
+      8788,
+      8799,
+      8794,
+      8822,
+      8837
+    ]
+  },
+  "reserve_question_ids_by_unit": {
+    "unit1": [
+      8611
+    ],
+    "unit2": [
+      8620,
+      8624,
+      8626,
+      8628
+    ],
+    "unit3": [
+      8742
+    ],
+    "unit4": [],
+    "unit5": [],
+    "unit6": []
+  },
+  "conflicts_and_variation": [
+    "8614 and 8620 target the same canonical demand skill; only 8614 in this particular 30-item form.",
+    "Historical viewing/Practice exposure NOT a blocker per the architect, including currently active Practice uses 8616/8619/8621/8625. Reusing source MUST NOT modify Practice assignments or historical attempts.",
+    "Reserve set is limited: 6 extra questions does not guarantee an independent second full 30-item test. Vary questions as pool expands.",
+    "Internal 4/12/3/3/3/5 split is an illustrative product balance, NOT official unit quotas. Paper1 target is an AS-level 30 MCQ, not a Cambridge endorsed past-paper reproduction."
+  ],
+  "security_verified": {
+    "program_status": "draft",
+    "launch_enabled": false,
+    "source_server_allowlist_metadata_count": 36,
+    "allowlist_can_issue": false,
+    "preflight": "blocked",
+    "blockers": [
+      "paper_not_published",
+      "assessment_runtime_not_verified",
+      "learner_diagnostic_and_plan_evidence_missing"
+    ],
+    "math_active_versions": 1,
+    "private_candidate_select_for_anon_authenticated": false
+  },
+  "not_done": [
+    "No signed learner issuance, timer, scoring, retry, saved progress or diagnostic-to-planner evidence runtime integrated.",
+    "Neither P1 nor P3 available in app; two written Paper2/P4 remain additional academic and marking blocker.",
+    "Not an authorized signal to flip published/launch_enabled flags."
+  ],
+  "next": "Inspect runtime/integration architecture and written Paper2/P4 content mapping before controlled release; preserve Mathematics and live learner progress."
+}
