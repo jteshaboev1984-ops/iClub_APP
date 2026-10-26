@@ -161,8 +161,12 @@
     header.append(e("strong","",state.paper==="P1"?t().p1:t().p3));
     const remaining=e("span","ep-native-timer");
     header.append(remaining);view.append(header);
-    if(finished)view.append(e("h3","ep-native-result",t().result+": "+data.score+" / 30"));
-    else clock(remaining);
+    if(finished){
+      const resultActions=e("div","ep-native-result-actions");
+      resultActions.append(e("h3","ep-native-result",t().result+": "+data.score+" / 30"));
+      resultActions.append(btn(t().plan,showStudyPlan));
+      view.append(resultActions);
+    }else clock(remaining);
     const row=data.items[state.index];if(!row)return;
     view.append(e("div","ep-native-progress",t().question+" "+(state.index+1)+" / 30 · "+data.items.filter(x=>x.answered).length+" / 30"));
     const card=e("div","ep-live-card ep-native-question");
@@ -190,10 +194,7 @@
     if(state.index>0)actions.append(btn(t().previous,()=>{if(!state.busy){state.index--;draw();}},true));
     if(state.index<29)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
     if(!finished)actions.append(btn(t().finish,()=>finish(false),true));
-    if(finished) {
-      actions.prepend(btn(t().plan,showStudyPlan));
-      actions.append(btn(t().retest,()=>begin(state.paper),true));
-    }
+    if(finished)actions.append(btn(t().retest,()=>begin(state.paper),true));
     actions.append(btn(t().papers,lobby,true));view.append(actions);
   }
 
