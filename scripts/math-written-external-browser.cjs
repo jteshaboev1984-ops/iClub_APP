@@ -59,6 +59,7 @@ async function scenario(browser,language,component,width,mode) {
         getSession:async id=>{assert.equal(id,s.sessionId);return ok(get());},
         writtenCriteria:async(id,order)=>{
           assert.equal(id,s.sessionId);assert.equal(order,4);s.criteriaCount++;
+          if(s.mode==='criteria_pending')return ok({available:false,item_order:4,reason:'localization_pending'});
           return ok({available:true,item_order:4,requirements:['Use the power rule.','Show all terms.']});
         },
         advanceWrittenStep:async(id,order,key)=>{
@@ -135,6 +136,13 @@ async function scenario(browser,language,component,width,mode) {
       await page.waitForFunction(()=>document.querySelector('[data-ep-written-criteria-panel]')?.textContent?.includes('power rule'));
       assert.equal(await page.evaluate(()=>window.__paperTest.criteriaCount),1);
     }
+    if(mode==='criteria_pending') {
+      await page.click('[data-ep-written-criteria-toggle]');
+      const phrase=language==='ru'?'ещё не утверждён':'hali tasdiqlanmagan';
+      await page.waitForFunction(phrase=>document.querySelector('[data-ep-written-criteria-panel]')?.textContent?.includes(phrase),phrase);
+      assert.equal(await page.evaluate(()=>window.__paperTest.criteriaCount),1);
+      assert.equal(await page.locator('[data-ep-written-next]').isEnabled(),true);
+    }
     if(mode==='hung')await page.clock.install();
     await page.click('[data-ep-written-next]');
     if(mode==='hung')await page.clock.fastForward(16000);
@@ -164,7 +172,7 @@ async function scenario(browser,language,component,width,mode) {
     await page.waitForSelector('[data-ep-session-result]');
     const s=await page.evaluate(()=>window.__paperTest);
     assert.equal(s.gradeWrites,0,'paper navigation must never grade');
-    assert.equal(s.sendCount,mode==='ok'||mode==='after_commit'?1:2,'no silent replay');
+    assert.equal(s.sendCount,mode==='ok'||mode==='after_commit'||mode==='criteria_pending'?1:2,'no silent replay');
     if(s.sendCount===2)assert.equal(s.keys[0],s.keys[1],'same idempotency key');
     if(mode==='after_commit')assert(s.readCount>=1,'ACK reconciliation must read status');
     assert(!errors.length,language+'/'+component+'/'+mode+' '+JSON.stringify(errors));
@@ -176,9 +184,11 @@ async function scenario(browser,language,component,width,mode) {
   try {
     for(const language of ['ru','uz','en'])
       for(const component of ['P1','P5'])
-        for(const width of [390,1280])
+        for(const width of [390,1280]){
           for(const mode of ['ok','after_commit','before_commit','hung','off_before_commit'])
             await scenario(browser,language,component,width,mode);
-    console.log('GREEN: 60 synthetic written external DOM cases; no external network or DB.');
+          if(language!=='en')await scenario(browser,language,component,width,'criteria_pending');
+        }
+    console.log('GREEN: 68 synthetic written external DOM cases; no external network or DB.');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

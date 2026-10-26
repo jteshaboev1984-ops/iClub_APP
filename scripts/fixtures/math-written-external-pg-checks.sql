@@ -26,6 +26,29 @@ begin
   if v->>'can_advance'<>'false' then
     raise exception 'off_mode_status_must_deny_advance';end if;
 
+  -- Activation remains off until independent RU and UZ reviewers sign the rules.
+  begin
+    insert into private.exam_prep_written_learning_config_v1(component_code,enabled) values('P1',true);
+    raise exception 'premature_locale_activation_allowed';
+  exception when check_violation then null; end;
+  if exists(select 1 from private.exam_prep_written_learning_config_v1) then
+    raise exception 'rejected_activation_changed_config';end if;
+  if has_table_privilege('authenticated','private.exam_prep_written_criteria_locale_v1','select')
+     then raise exception 'locale_table_public';end if;
+  insert into private.exam_prep_written_criteria_locale_v1(
+    written_task_id,task_version,criterion_id,language,source_rule_md5,
+    translated_rule,review_state,academic_review_ref,language_review_ref,reviewed_at)
+  values
+    (91,'t1','p1-power','ru',md5('Power rule'),'Степенное правило','approved','synthetic-math-review','synthetic-ru-review',now()),
+    (91,'t1','p1-power','uz',md5('Power rule'),'Daraja qoidasi','approved','synthetic-math-review','synthetic-uz-review',now()),
+    (92,'t1','p5-stat','ru',md5('Sample statistic'),'Выборочная статистика','approved','synthetic-math-review','synthetic-ru-review',now()),
+    (92,'t1','p5-stat','uz',md5('Sample statistic'),'Tanlanma statistikasi','approved','synthetic-math-review','synthetic-uz-review',now());
+  begin
+    update private.exam_prep_written_criteria_locale_v1 set translated_rule='wrong'
+      where written_task_id=91 and language='ru';
+    raise exception 'approved_rule_was_mutable';
+  exception when insufficient_privilege then null; end;
+
   insert into private.exam_prep_written_learning_config_v1(component_code,enabled)
     values('P1',true),('P5',false);
   insert into private.exam_prep_written_learning_allowlist_v1(user_id,component_code)
@@ -43,6 +66,12 @@ begin
   v:=public.get_exam_prep_written_criteria_safe_v1('00000000-0000-4000-8000-000000000101',4,'en');
   if v->>'available'<>'true' or v->'requirements'->>0<>'Power rule'
   then raise exception 'criteria_mismatch';end if;
+  v:=public.get_exam_prep_written_criteria_safe_v1('00000000-0000-4000-8000-000000000101',4,'ru');
+  if v->>'available'<>'true' or v->'requirements'->>0<>'Степенное правило'
+    then raise exception 'P1_ru_review_missing';end if;
+  v:=public.get_exam_prep_written_criteria_safe_v1('00000000-0000-4000-8000-000000000101',4,'uz');
+  if v->>'available'<>'true' or v->'requirements'->>0<>'Daraja qoidasi'
+    then raise exception 'P1_uz_review_missing';end if;
 
   v:=public.advance_exam_prep_written_step_safe_v1('00000000-0000-4000-8000-000000000101',4,'step-request-0001');
   if v->>'status'<>'advanced' or v->>'replayed'<>'false' then
@@ -125,6 +154,12 @@ begin
   v:=public.get_exam_prep_session_written_v1('00000000-0000-4000-8000-000000000103','en');
   if v->'items'->0->>'written_external'<>'true' then
     raise exception 'P5_independent_enable_missing';end if;
+  v:=public.get_exam_prep_written_criteria_safe_v1('00000000-0000-4000-8000-000000000103',1,'ru');
+  if v->>'available'<>'true' or v->'requirements'->>0<>'Выборочная статистика'
+    then raise exception 'P5_ru_review_missing';end if;
+  v:=public.get_exam_prep_written_criteria_safe_v1('00000000-0000-4000-8000-000000000103',1,'uz');
+  if v->>'available'<>'true' or v->'requirements'->>0<>'Tanlanma statistikasi'
+    then raise exception 'P5_uz_review_missing';end if;
   v:=public.advance_exam_prep_written_step_safe_v1(
     '00000000-0000-4000-8000-000000000103',1,'P5-next-step-0001');
   if v->>'status'<>'advanced' then raise exception 'P5_advance_failed';end if;
