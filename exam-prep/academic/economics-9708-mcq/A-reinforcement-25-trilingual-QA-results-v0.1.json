@@ -14,7 +14,12 @@
     "source_snapshot_match": 25,
     "staged_candidate_target": 24,
     "approved_candidate_target": 0,
-    "learner_enabled": false
+    "learner_enabled": false,
+    "actual_staged_core_candidate_pass": 24,
+    "actual_approved_core_candidates": 0,
+    "held_from_staging": [
+      9044
+    ]
   },
   "interpretation": "Pass in this evidence document means completed internal academic and translation review of this exact source. It does not mean approved in live Exam Core, a fully balanced 30-item Paper3, copyright validation, user-specific unseen status or a ready learner runtime.",
   "items": [
@@ -405,5 +410,34 @@
     "Only stage 24 clean items as CLOSED candidate statuses in existing private Exam Core, with guarded pin to unchanged source MD5; leave 9044 out.",
     "Do not rewrite published question 9044 in place or rescore historic attempts. Prepare separate corrected source version only if needed.",
     "Continue exam-issue independence and breadth, written P2/P4 and end-to-end learner QA before any learner release."
-  ]
+  ],
+  "review_outcome_verified": {
+    "date": "2026-10-26",
+    "backend": "Supabase private.iclub_exam_core_question_candidates_v1 existing table",
+    "transaction": "Atomic preflight and insert; blocked 9044 omitted; 24 pass-check candidate rows; no upsert/overwrite.",
+    "inserted_candidate_rows": 24,
+    "question_id_9044_rows": 0,
+    "candidate_status": "candidate",
+    "per_item_four_qa_statuses": "pass",
+    "approved_rows": 0,
+    "snapshot_integrity": "24/24 existing private review MD5 matched live source at insertion; 25/25 before insertion",
+    "program_status": "draft",
+    "launch_enabled": false,
+    "post_write_verification": {
+      "native_allowlist_state": "closed_catalog_preview",
+      "native_allowlist_exposed_mcq": 0,
+      "can_issue_learner_task": false,
+      "anon_candidate_select": false,
+      "authenticated_candidate_select": false,
+      "anon_preview_function_execute": false,
+      "authenticated_preview_function_execute": false,
+      "active_math_version_count": 1
+    },
+    "affected_only": "Economics P3 closed question candidate rows; no user tables, legacy questions, Practice/Tours, or Math records changed",
+    "limitations": [
+      "QA pass reflects internal academic/language/format review, not a licensed official Cambridge answer scheme.",
+      "No prior user exposure history beyond active Practice/Tours was assessed.",
+      "No new final Exam Prep academic approvals; staged 24 are not learner-issuable."
+    ]
+  }
 }
