@@ -68,6 +68,7 @@
     }catch(_){return {ok:false};}
   }
   function showError(retry) {
+    stopTimer();
     const p=panel();if(!p)return;
     const n=el("p",t().error,"ep-host-note");n.setAttribute("role","alert");
     const actions=el("div",undefined,"ep-host-actions");
