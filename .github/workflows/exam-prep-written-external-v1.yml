@@ -8,6 +8,7 @@ on:
       - 'exam-prep/exam-prep-host.css'
       - 'exam-prep/exam-prep-learner-flow-ux.js'
       - 'supabase/migrations/20261026150000_exam_prep_math_written_external_learning_v1.sql'
+      - 'supabase/migrations/20261026234500_exam_prep_written_criteria_locale_reviewed_v1.sql'
       - 'scripts/math-written-external-browser.cjs'
       - 'scripts/fixtures/math-written-external-pg-setup.sql'
       - 'scripts/fixtures/math-written-external-pg-checks.sql'
@@ -83,5 +84,6 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f scripts/fixtures/math-written-external-pg-setup.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261026150000_exam_prep_math_written_external_learning_v1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261026234500_exam_prep_written_criteria_locale_reviewed_v1.sql
           psql -v ON_ERROR_STOP=1 -f scripts/fixtures/math-written-external-pg-checks.sql
           bash scripts/fixtures/math-written-external-pg-concurrency.sh

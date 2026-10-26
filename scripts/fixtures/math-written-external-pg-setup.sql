@@ -40,9 +40,20 @@ begin
   return v_uid;
 end $fn$;
 create function private.exam_prep_localized_written_rubric_v1(p jsonb,l text)
-returns jsonb language sql stable as $fn$
-  select p || jsonb_build_object('localization_status','complete')
-$fn$;
+returns jsonb language plpgsql stable as $fn$
+declare missing int;key text; translated jsonb;
+begin
+  if l='en' then return p||jsonb_build_object('localization_status','complete');end if;
+  key:=case when l='ru' then 'rule_ru' else 'rule_uz' end;
+  select count(*) into missing from jsonb_array_elements(p->'criteria') e(c)
+    where nullif(btrim(coalesce(c->>key,'')),'') is null;
+  if missing>0 then return jsonb_build_object('criteria','[]'::jsonb,
+    'localization_status','unavailable');end if;
+  select coalesce(jsonb_agg((c-'rule'-'rule_ru'-'rule_uz')
+    ||jsonb_build_object('rule',c->>key) order by ord),'[]'::jsonb)
+    into translated from jsonb_array_elements(p->'criteria') with ordinality e(c,ord);
+  return (p-'criteria')||jsonb_build_object('criteria',translated,'localization_status','complete');
+end $fn$;
 create function public.get_exam_prep_session_safe_v1(p_session_id uuid,p_language text default 'en')
 returns jsonb language plpgsql stable security definer set search_path='' as $fn$
 declare v_uid uuid:=private.exam_prep_require_core_access_v1();v_s private.exam_prep_sessions%rowtype;v_items jsonb;
@@ -102,9 +113,9 @@ insert into private.exam_prep_sessions(id,user_id,component_code,session_type,st
 insert into private.exam_prep_written_tasks(id,component_code,task_version,
  lifecycle_state,qa_math_status,qa_language_status,qa_technical_status,rubric_json)
 values(91,'P1','t1','published','pass','pass','pass',
- '{"criteria":[{"rule":"Power rule","rule_ru":"Степенное правило","rule_uz":"Daraja qoidasi"}]}'),
+ '{"criteria":[{"id":"p1-power","rule":"Power rule"}]}'),
  (92,'P5','t1','published','pass','pass','pass',
- '{"criteria":[{"rule":"Sample statistic"}]}');
+ '{"criteria":[{"id":"p5-stat","rule":"Sample statistic"}]}');
 insert into private.exam_prep_session_items(session_id,item_order,item_kind,written_task_id,item_version)
 values
  ('00000000-0000-4000-8000-000000000101',1,'question',null,'q1'),
