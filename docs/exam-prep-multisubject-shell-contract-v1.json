@@ -1,6 +1,6 @@
 {
   "contract_version": "exam_prep_shared_host_v1",
-  "status": "DESIGN_AND_SERVER_DTO_ONLY_NOT_A_LIVE_ECONOMICS_RUNTIME",
+  "status": "LIVE_CONTROLLED_BETA_MATHEMATICS_LEGACY_AND_ECONOMICS_NATIVE_P1_P3",
   "source_of_truth": {
     "host": "exam-prep/exam-prep-host.js",
     "live_ui": "exam-prep/exam-prep-live.js",
@@ -17,32 +17,120 @@
     "existing_subject_hub_entry": true,
     "identical_visual_tokens_spacing_typography_and_breakpoints": true,
     "same_back_navigation_and_focus_restoration": true,
-    "same_language_choices": ["ru", "uz", "en"],
+    "same_language_choices": [
+      "ru",
+      "uz",
+      "en"
+    ],
     "same_failed_load_offline_and_reconnect_patterns": true,
     "assessment_answer_keys_server_only": true,
     "no_cross_subject_score_or_mastery_migration": true,
     "subject_paper_and_skill_configuration_server_owned": true,
     "written_marking_not_fabricated": true,
-    "no_new_exam_prep_navigation_until_safe_runtime_qa": true
+    "no_new_exam_prep_navigation_until_safe_runtime_qa": false,
+    "economics_paper_2_4_written_not_live": true,
+    "math_active_legacy_adapter_not_modified": true,
+    "exam_profile_isolated_between_subjects": true
   },
   "shared_learner_path": [
-    "exam_profile", "broad_diagnostic", "targeted_diagnostic", "overview",
-    "weekly_plan", "syllabus_learning", "error_correction", "delayed_retest",
-    "mixed_practice", "timed_practice", "full_paper", "readiness"
+    "exam_profile",
+    "broad_diagnostic",
+    "targeted_diagnostic",
+    "overview",
+    "weekly_plan",
+    "syllabus_learning",
+    "error_correction",
+    "delayed_retest",
+    "mixed_practice",
+    "timed_practice",
+    "full_paper",
+    "readiness"
   ],
   "reuse_existing_visual_structure": [
-    "ep-host-shell", "ep-host-title", "ep-live", "ep-live-grid",
-    "ep-live-dashboard-intro", "ep-component-home", "ep-live-notice"
+    "ep-host-shell",
+    "ep-host-title",
+    "ep-live",
+    "ep-live-grid",
+    "ep-live-dashboard-intro",
+    "ep-component-home",
+    "ep-live-notice"
   ],
   "runtime_adapter": {
-    "mathematics": {"mode": "legacy_adapter", "program_key": "math_as_p1_p5", "papers": ["P1", "P5"], "change_existing_math_code_now": false},
-    "economics": {"mode": "native", "program_key": "economics_9708", "papers": ["P1", "P2", "P3", "P4"], "launch_enabled": false},
-    "future_subjects": {"mode": "native", "follow_same_contract": true}
+    "mathematics": {
+      "mode": "legacy_adapter",
+      "program_key": "math_as_p1_p5",
+      "papers": [
+        "P1",
+        "P5"
+      ],
+      "change_existing_math_code_now": false
+    },
+    "economics": {
+      "mode": "native",
+      "program_key": "economics_9708",
+      "papers": [
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "launch_enabled": true,
+      "published_papers": [
+        "P1",
+        "P3"
+      ],
+      "draft_papers": [
+        "P2",
+        "P4"
+      ],
+      "entry_diagnostic_items": 12,
+      "entry_diagnostic_minutes": 20,
+      "end_to_end_parity_with_mathematics": false,
+      "beta_access": "active consented and Core-entitled Mathematics cohort only, server guarded; no public release",
+      "actual_user_journey": [
+        "exam_profile",
+        "short_entry_diagnostic",
+        "diagnostic_result",
+        "seven_day_study_plan",
+        "topic_theory_and_check_question",
+        "studied_progress",
+        "repeat_diagnostic",
+        "full_paper_mcq",
+        "paper_result_and_correction",
+        "paper_retest"
+      ]
+    },
+    "future_subjects": {
+      "mode": "native",
+      "follow_same_contract": true
+    }
   },
   "economics_paper_specific_rules": {
-    "P1": {"kind":"mcq", "level":"AS", "questions":30, "total_marks":30, "time_minutes":60},
-    "P2": {"kind":"data_response_and_structured_essays", "level":"AS", "total_marks":60, "time_minutes":120},
-    "P3": {"kind":"mcq", "level":"A", "questions":30, "total_marks":30, "time_minutes":75},
-    "P4": {"kind":"data_response_and_unstructured_essays", "level":"A", "total_marks":60, "time_minutes":120}
+    "P1": {
+      "kind": "mcq",
+      "level": "AS",
+      "questions": 30,
+      "total_marks": 30,
+      "time_minutes": 60
+    },
+    "P2": {
+      "kind": "data_response_and_structured_essays",
+      "level": "AS",
+      "total_marks": 60,
+      "time_minutes": 120
+    },
+    "P3": {
+      "kind": "mcq",
+      "level": "A",
+      "questions": 30,
+      "total_marks": 30,
+      "time_minutes": 75
+    },
+    "P4": {
+      "kind": "data_response_and_unstructured_essays",
+      "level": "A",
+      "total_marks": 60,
+      "time_minutes": 120
+    }
   }
 }
