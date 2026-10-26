@@ -25,3 +25,14 @@
  .ep-native-option { padding:12px; }
  .ep-native-actions .ep-host-btn { flex:1 1 140px; }
 }
+
+.ep-native-history { margin-top: 20px; min-width:0; }
+.ep-native-section-title { margin: 0 0 12px; font-size: 1.06rem; font-weight:700; }
+.ep-native-history-list { display:grid; gap:10px; }
+.ep-native-history-item { display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--ep-border,rgba(110,126,152,.3)); border-radius:12px; padding:12px 14px; }
+.ep-native-history-info { font-size:.92rem; overflow-wrap:anywhere; min-width:0; }
+.ep-native-history-item .ep-host-btn { flex:none; }
+@media(max-width:640px) {
+ .ep-native-history-item { flex-direction:column; align-items:stretch; }
+ .ep-native-history-item .ep-host-btn { width:100%; }
+}
