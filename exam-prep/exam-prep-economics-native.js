@@ -14,7 +14,7 @@
       unit:"Раздел",correct:"Верно",mistakes:"Тем для повторения",studied:"Изучено",verified:"Подтверждено повторной проверкой",
       study:"Объяснение темы",trap:"На что обратить внимание",check:"Проверьте себя",showCheck:"Показать ответ",
       hideCheck:"Скрыть ответ",markStudied:"Отметить как изученное",studiedDone:"Тема изучена",
-      review:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
+      backReview:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
       allCorrect:"Все вопросы решены правильно. Ошибок для разбора нет.",studyNote:"Отметка «изучено» не означает, что навык освоен. Это подтвердит правильный ответ в следующем экзамене."},
     uz:{title:"Cambridge Economics · Exam Prep",intro:"Imtihon ishini tanlang. Javoblar va natijalar serverda saqlanadi.",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga",
@@ -27,7 +27,7 @@
       unit:"Bo‘lim",correct:"To‘g‘ri",mistakes:"Takrorlanadigan mavzular",studied:"O‘rganildi",verified:"Qayta tekshiruvda tasdiqlangan",
       study:"Mavzu izohi",trap:"E'tibor bering",check:"O‘zingizni tekshiring",showCheck:"Javobni ko‘rsatish",
       hideCheck:"Javobni yashirish",markStudied:"O‘rganilgan deb belgilash",studiedDone:"Mavzu o‘rganildi",
-      review:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
+      backReview:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
       allCorrect:"Hamma savollarga to‘g‘ri javob berildi. Tahlil qilinadigan xato yo‘q.",studyNote:"«O‘rganildi» belgisi bilim o‘zlashtirilganini isbotlamaydi. Keyingi imtihondagi to‘g‘ri javob tasdiqlaydi."},
     en:{title:"Cambridge Economics · Exam Prep",intro:"Select an exam paper. Answers and results are saved on the server.",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back",
@@ -40,7 +40,7 @@
       unit:"Unit",correct:"Correct",mistakes:"Topics to review",studied:"Studied",verified:"Confirmed in a later test",
       study:"Topic explanation",trap:"Watch out for",check:"Check your understanding",showCheck:"Show answer",
       hideCheck:"Hide answer",markStudied:"Mark as studied",studiedDone:"Studied",
-      review:"Back to exam review",retest:"Take this paper again",day:"Day",
+      backReview:"Back to exam review",retest:"Take this paper again",day:"Day",
       allCorrect:"You answered every question correctly. No errors to review.",studyNote:"Marking a topic as studied does not prove mastery. Only a later correct exam answer can confirm improvement."}
   };
   const t=()=>dictionary[state.lang]||dictionary.ru;
@@ -154,6 +154,7 @@
     paint();if(state.data?.status==="active")state.timer=setInterval(paint,1000);
   }
   function draw(){
+    ++state.token;
     const data=state.data,view=shell();if(!view||!data)return;
     const finished=data.status==="finalized";
     const header=e("div","ep-native-header");
@@ -186,8 +187,8 @@
     view.append(card);
     const actions=e("div","ep-host-actions ep-native-actions");
     if(!finished&&!row.answered)actions.append(btn(t().save,save));
-    if(state.index>0)actions.append(btn(t().previous,()=>{state.index--;draw();},true));
-    if(state.index<29)actions.append(btn(t().next,()=>{state.index++;draw();},true));
+    if(state.index>0)actions.append(btn(t().previous,()=>{if(!state.busy){state.index--;draw();}},true));
+    if(state.index<29)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
     if(!finished)actions.append(btn(t().finish,()=>finish(false),true));
     if(finished) {
       actions.prepend(btn(t().plan,showStudyPlan));
@@ -273,7 +274,7 @@
     }
     view.append(e("p","ep-host-note",t().studyNote));
     const actions=e("div","ep-host-actions ep-native-actions");
-    actions.append(btn(t().review,draw,true));
+    actions.append(btn(t().backReview,draw,true));
     actions.append(btn(t().retest,()=>begin(state.paper)));
     actions.append(btn(t().papers,lobby,true));
     view.append(actions);
