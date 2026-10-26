@@ -62,6 +62,7 @@
     actions.append(btn(t().retry,retry),btn(t().papers,lobby,true));view.append(actions);
   }
   function lobby(){
+    ++state.token;
     stop();state.id=null;state.paper=null;state.data=null;state.index=0;
     const view=shell();if(!view)return;
     view.append(e("p","ep-host-note",t().intro));
@@ -177,16 +178,22 @@
     const choice=state.root?.querySelector('input[name="ep-native-choice"]:checked');
     if(!choice)return;
     state.busy=true;
+    const sessionId=state.id,token=state.token;
     const r=await rpc("iclub_exam_native_mcq_answer_v1",{
-      p_session_id:state.id,p_item_order:state.index+1,p_choice:Number(choice.value)});
-    state.busy=false;if(!r.ok){error(load);return;}await load();
+      p_session_id:sessionId,p_item_order:state.index+1,p_choice:Number(choice.value)});
+    state.busy=false;
+    if(state.closed||state.id!==sessionId||state.token!==token)return;
+    if(!r.ok){error(load);return;}await load();
   }
   async function finish(auto){
     if(state.busy||state.closed||state.data?.status!=="active")return;
     if(!auto&&!window.confirm(t().confirm))return;
     stop();state.busy=true;
-    const r=await rpc("iclub_exam_native_mcq_finish_v1",{p_session_id:state.id});
-    state.busy=false;if(!r.ok){error(load);return;}await load();
+    const sessionId=state.id,token=state.token;
+    const r=await rpc("iclub_exam_native_mcq_finish_v1",{p_session_id:sessionId});
+    state.busy=false;
+    if(state.closed||state.id!==sessionId||state.token!==token)return;
+    if(!r.ok){error(load);return;}await load();
   }
   function mount({root,shell:config,language,onBack}={}){
     unmount();
