@@ -3,6 +3,7 @@
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const MATHEMATICS_KEY = "mathematics";
+  const ECONOMICS_KEY = "economics";
   const state = {
     open: false,
     subjectKey: null,
@@ -10,6 +11,7 @@
     accessToken: 0,
     capabilities: null,
     invitation: null,
+    economicsShell: null,
     consentBusy: false,
     consentError: false,
     returnFocusEl: null
@@ -262,7 +264,8 @@
   }
 
   function showable() {
-    return state.subjectKey === MATHEMATICS_KEY && (allowed(state.capabilities) || invited());
+    return (state.subjectKey === MATHEMATICS_KEY && (allowed(state.capabilities) || invited())) ||
+      (state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true);
   }
 
   function serviceModeText(mode, text) {
@@ -285,7 +288,13 @@
     const inviteOnly = Boolean(item) && !allowed(state.capabilities);
     const openOffer = inviteOnly && item.openRecruitment === true;
     const aiActive = allowed(state.capabilities) && state.capabilities?.aiAssist === true;
-    const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY);
+    const econActive = state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true;
+    const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY && !econActive);
+    const econSub = state.language === "uz"
+      ? "Paper 1 va Paper 3: imtihon, javoblar va natijalar"
+      : state.language === "en"
+        ? "Paper 1 and Paper 3: exams, answers and results"
+        : "Paper 1 и Paper 3: экзамены, ответы и результаты";
     const components = entry?.querySelector('.exam-prep-feature-components');
     if (components) components.style.display = comingSoon ? 'none' : '';
     if (entry) {
@@ -295,13 +304,13 @@
       entry.setAttribute("data-ep-entry-mode", comingSoon ? "coming-soon" : (openOffer ? "open-testing" : (inviteOnly ? "invitation" : "live")));
       entry.setAttribute("data-ep-ai-visible", aiActive ? "true" : "false");
     }
-    if (badge) badge.textContent = comingSoon ? text.comingSoonBadge : (openOffer ? text.joinBadge : (inviteOnly ? text.inviteBadge : (aiActive ? text.entryBadgeAi : text.entryBadge)));
+    if (badge) badge.textContent = econActive ? "Cambridge · Economics 9708" : (comingSoon ? text.comingSoonBadge : (openOffer ? text.joinBadge : (inviteOnly ? text.inviteBadge : (aiActive ? text.entryBadgeAi : text.entryBadge))));
     if (title) title.textContent = openOffer ? text.joinTitle : (inviteOnly ? text.inviteTitle : text.entryTitle);
-    if (sub) sub.textContent = comingSoon ? text.comingSoonDesc : (openOffer ? text.joinSub : (inviteOnly ? text.inviteSub : text.entryDesc));
-    if (p1) p1.textContent = text.entryP1;
-    if (p5) p5.textContent = text.entryP5;
-    if (note) note.textContent = comingSoon ? text.comingSoonNote : (aiActive ? text.entryAiNote : text.entryNote);
-    if (cta) cta.textContent = comingSoon ? text.comingSoonCta : (openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta));
+    if (sub) sub.textContent = econActive ? econSub : (comingSoon ? text.comingSoonDesc : (openOffer ? text.joinSub : (inviteOnly ? text.inviteSub : text.entryDesc)));
+    if (p1) p1.textContent = econActive ? "Paper 1 · AS Level · 60 min" : text.entryP1;
+    if (p5) p5.textContent = econActive ? "Paper 3 · A Level · 75 min" : text.entryP5;
+    if (note) note.textContent = econActive ? econSub : (comingSoon ? text.comingSoonNote : (aiActive ? text.entryAiNote : text.entryNote));
+    if (cta) cta.textContent = econActive ? text.entryCta : (comingSoon ? text.comingSoonCta : (openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta)));
   }
 
   // STAGE03_EXAM_PREP_ALL_SUBJECTS_V1: presentation only, no assessment APIs.
@@ -386,6 +395,7 @@
   }
 
   function close() {
+    internal.economicsNative?.unmount?.();
     const shouldRestoreFocus = state.open && (showable() || (state.subjectKey && state.subjectKey !== MATHEMATICS_KEY));
     state.open = false;
     state.consentBusy = false;
@@ -433,6 +443,9 @@
   }
 
   async function refreshCapabilities() {
+    if (state.subjectKey === ECONOMICS_KEY) {
+      return syncSubjectHub({ subjectKey: ECONOMICS_KEY, language: state.language });
+    }
     return refreshAccess();
   }
 
@@ -500,9 +513,24 @@
 
     if (subjectChanged && state.open) close();
     if (state.subjectKey !== MATHEMATICS_KEY) {
-      ++state.accessToken;
+      const token = ++state.accessToken;
       state.capabilities = null;
       state.invitation = null;
+      state.economicsShell = null;
+      if (state.subjectKey === ECONOMICS_KEY) {
+        try {
+          const response = await window.sb?.rpc?.("get_my_exam_prep_program_shell_v1", {
+            p_program_key: "economics_9708", p_language: state.language
+          });
+          if (token !== state.accessToken || state.subjectKey !== ECONOMICS_KEY) return false;
+          const shell = response?.data;
+          if (!response?.error && shell?.enabled === true &&
+              shell.program_key === "economics_9708" && Array.isArray(shell.papers) &&
+              ["P1","P3"].every(code => shell.papers.some(p => p.code === code && p.assessment_kind === "mcq"))) {
+            state.economicsShell = shell;
+          }
+        } catch (_) { /* Keep the current coming-soon state when access is unavailable. */ }
+      }
       renderEntryCopy();
       close();
       setEntryVisible(Boolean(state.subjectKey));
@@ -545,11 +573,15 @@
     renderEntryCopy();
 
     if (state.subjectKey !== MATHEMATICS_KEY) {
-      // Informational route: never request Exam Prep enrollment or question data.
-      if (!state.subjectKey || !renderComingSoonShell()) return false;
       const root = rootEl();
       const hub = hubEl();
-      if (!root || !hub) return false;
+      if (!state.subjectKey || !root || !hub) return false;
+      const economicsReady = state.subjectKey === ECONOMICS_KEY &&
+        state.economicsShell?.enabled === true &&
+        internal.economicsNative?.mount?.({
+          root, shell: state.economicsShell, language: state.language, onBack: close
+        }) === true;
+      if (!economicsReady && !renderComingSoonShell()) return false;
       state.returnFocusEl = entryButtonEl();
       root.hidden = false;
       root.setAttribute('aria-hidden', 'false');
