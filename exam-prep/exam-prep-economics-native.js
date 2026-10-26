@@ -3,21 +3,21 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0};
   const dictionary={
-    ru:{title:"Cambridge Economics · Exam Prep",intro:"Выберите экзаменационную работу. Ответы и результаты сохраняются на сервере.",
+    ru:{title:"Cambridge Economics · Exam Prep",intro:"Выберите экзаменационную работу. Ответы и результаты сохраняются на сервере.",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад",
       papers:"К экзаменам",question:"Вопрос",time:"Осталось времени",save:"Сохранить ответ",
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
       confirm:"Завершить экзамен? Пропущенные вопросы получат 0 баллов.",result:"Результат",
       review:"Разбор ответов",right:"Правильный ответ",your:"Ваш ответ",empty:"Не отвечено",
       loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить"},
-    uz:{title:"Cambridge Economics · Exam Prep",intro:"Imtihon ishini tanlang. Javoblar va natijalar serverda saqlanadi.",
+    uz:{title:"Cambridge Economics · Exam Prep",intro:"Imtihon ishini tanlang. Javoblar va natijalar serverda saqlanadi.",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga",
       papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javobni saqlash",
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
       confirm:"Imtihonni yakunlaysizmi? Javobsiz savollar 0 ball bo‘ladi.",result:"Natija",
       review:"Javoblarni tahlil qilish",right:"To‘g‘ri javob",your:"Sizning javobingiz",empty:"Javob berilmagan",
       loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish"},
-    en:{title:"Cambridge Economics · Exam Prep",intro:"Select an exam paper. Answers and results are saved on the server.",
+    en:{title:"Cambridge Economics · Exam Prep",intro:"Select an exam paper. Answers and results are saved on the server.",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back",
       papers:"Back to papers",question:"Question",time:"Time remaining",save:"Save answer",
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
@@ -73,8 +73,35 @@
       card.append(btn(t().start,()=>begin(code)));grid.append(card);
     }
     view.append(grid);
+    const historyBox=e("div","ep-native-history");
+    view.append(historyBox);
+    loadHistory(historyBox,view);
     const actions=e("div","ep-host-actions");
     actions.append(btn(t().back,()=>state.onBack?.(),true));view.append(actions);
+  }
+  async function loadHistory(target,view){
+    const response=await rpc("iclub_exam_native_mcq_history_v1",{p_paper_code:null});
+    if(state.closed||state.root?.firstElementChild!==view||!response.ok||
+       !Array.isArray(response.sessions)||response.sessions.length===0)return;
+    target.replaceChildren(e("h3","ep-native-section-title",t().history));
+    const list=e("div","ep-native-history-list");
+    response.sessions.forEach(entry=>{
+      if(!["P1","P3"].includes(entry.paper_code)||!entry.session_id)return;
+      const card=e("div","ep-native-history-item");
+      const title=entry.paper_code==="P1"?t().p1:t().p3;
+      const date=new Date(entry.started_at);
+      const dateText=Number.isNaN(date.getTime())?"":new Intl.DateTimeFormat(
+        state.lang==="uz"?"uz-UZ":state.lang==="en"?"en-GB":"ru-RU",
+        {day:"2-digit",month:"2-digit",year:"numeric"}).format(date);
+      const result=entry.status==="finalized"?
+        (String(entry.score)+" / 30"):(String(entry.answered)+" / 30");
+      card.append(e("div","ep-native-history-info",title+" · "+dateText+" · "+result));
+      card.append(btn(entry.status==="finalized"?t().viewResult:t().continueAttempt,()=>{
+        state.id=entry.session_id;state.paper=entry.paper_code;state.index=0;load();
+      },true));
+      list.append(card);
+    });
+    target.append(list);
   }
   async function begin(code){
     if(state.busy||state.closed)return;
