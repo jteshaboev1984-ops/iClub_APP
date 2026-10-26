@@ -331,7 +331,7 @@ const path = require('path');
     'revoke_my_exam_prep_beta_consent_v1'
   ]);
   assert(rpcCalls.length > 0, 'host must call server access RPCs');
-  assert(rpcCalls.every(name => allowedRpcs.has(name)), 'host called an RPC outside capability/invitation consent boundary');
+  assert(rpcCalls.every(name => allowedRpcs.has(name)), 'host called an RPC outside capability/invitation consent boundary: '+rpcCalls.filter(name=>!allowedRpcs.has(name)).join(', '));
 
   await browser.close();
   console.log('P0-14 browser matrix: PASS (live access + consent + learner-safe copy + keyboard focus continuity)');
