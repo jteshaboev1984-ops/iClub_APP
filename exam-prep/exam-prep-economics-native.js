@@ -3,7 +3,7 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0};
   const dictionary={
-    ru:{title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",startDiagnostic:"Начать диагностику",fullPaper:"Полный Paper",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
+    ru:{title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный Paper",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант: он сохранится автоматически. До завершения экзамена ответ можно изменить.",saving:"Сохраняем ответ…",
       papers:"К экзаменам",question:"Вопрос",time:"Осталось времени",save:"Сохранить ответ",
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
@@ -16,7 +16,7 @@
       hideCheck:"Скрыть ответ",markStudied:"Отметить как изученное",studiedDone:"Тема изучена",
       backReview:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
       allCorrect:"Все вопросы решены правильно. Ошибок для разбора нет.",studyNote:"Отметка «изучено» не означает, что навык освоен. Это подтвердит правильный ответ в следующем экзамене."},
-    uz:{title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq Paper",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
+    uz:{title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",profile:"Tayyorgarlik sozlamalari",editProfile:"O‘zgartirish",series:"Imtihon sessiyasi",grade:"Maqsadli baho",hours:"Haftalik umumiy o‘qish soati",econHours:"Haftalik iqtisodiyot soati",saveProfile:"Sozlamalarni saqlash",profileInvalid:"Imtihon davri va soatlarni tekshiring: iqtisodiyot soati umumiy vaqtdan oshmasin.",profileSaved:"Sozlamalar saqlandi",optional:"Tayyorgarlik maqsadi va vaqtini belgilang. Avvalgi urinishlar o‘zgarmaydi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq Paper",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga", beforePlan:"O‘quv rejangiz birinchi yakunlangan imtihondan so‘ng paydo bo‘ladi. Keyin uni urinishlar tarixidan ochishingiz mumkin.", autoAnswer:"Variantni tanlang: javob avtomatik saqlanadi. Imtihonni yakunlashdan oldin uni o‘zgartirish mumkin.",saving:"Javob saqlanmoqda…",
       papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javobni saqlash",
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
@@ -29,7 +29,7 @@
       hideCheck:"Javobni yashirish",markStudied:"O‘rganilgan deb belgilash",studiedDone:"Mavzu o‘rganildi",
       backReview:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
       allCorrect:"Hamma savollarga to‘g‘ri javob berildi. Tahlil qilinadigan xato yo‘q.",studyNote:"«O‘rganildi» belgisi bilim o‘zlashtirilganini isbotlamaydi. Keyingi imtihondagi to‘g‘ri javob tasdiqlaydi."},
-    en:{title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",startDiagnostic:"Start entry check",fullPaper:"Full paper",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
+    en:{title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",profile:"Preparation settings",editProfile:"Edit",series:"Exam series",grade:"Target grade",hours:"Total weekly study hours",econHours:"Weekly Economics hours",saveProfile:"Save settings",profileInvalid:"Check exam series and weekly hours: Economics time cannot exceed your total study time.",profileSaved:"Settings saved",optional:"Set a preparation goal and study time. Existing attempts will not change.",startDiagnostic:"Start entry check",fullPaper:"Full paper",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back", beforePlan:"Your study plan appears after your first completed paper. You can reopen it from your attempt history.", autoAnswer:"Choose an option to save automatically. You can change it until you finish the paper.",saving:"Saving answer…",
       papers:"Back to papers",question:"Question",time:"Time remaining",save:"Save answer",
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
@@ -63,7 +63,7 @@
   const stop=()=>{if(state.timer!==null){clearInterval(state.timer);state.timer=null;}};
   function unmount(){
     stop();state.token++;state.closed=true;state.root=null;state.shell=null;
-    state.id=null;state.paper=null;state.data=null;state.busy=false;state.onBack=null;
+    state.id=null;state.paper=null;state.data=null;state.profile=null;state.busy=false;state.onBack=null;
   }
   async function rpc(name,args={}){
     try {
@@ -85,6 +85,8 @@
     const view=shell();if(!view)return;
     view.append(e("p","ep-host-note",t().intro));
     view.append(e("p","ep-native-guidance",t().p1+" · "+t().p3));
+    const profileTarget=e("section","ep-native-profile");
+    view.append(profileTarget);loadProfile(profileTarget,view);
     const grid=e("div","ep-host-component-grid ep-native-guided-grid"),cards=new Map();
     for(const [code,label] of [["P1",t().p1],["P3",t().p3]]){
       if(!state.shell?.papers?.some(p=>p.code===code&&p.assessment_kind==="mcq"))continue;
@@ -144,6 +146,75 @@
       list.append(card);
     });
     target.append(list);
+  }
+  async function loadProfile(target,view){
+    const result=await rpc("iclub_exam_native_economics_profile_v1",{});
+    if(state.closed||state.root?.firstElementChild!==view||!result.ok)return;
+    state.profile=result.profile||null;
+    renderProfile(target,view);
+  }
+  function renderProfile(target,view){
+    if(state.closed||state.root?.firstElementChild!==view)return;
+    target.replaceChildren();
+    const head=e("div","ep-native-profile-head");
+    head.append(e("strong","",t().profile));
+    if(state.profile)head.append(btn(t().editProfile,()=>editProfile(target,view),true));
+    target.append(head);
+    const profile=state.profile;
+    if(!profile){
+      target.append(e("p","ep-native-guidance",t().optional));
+      target.append(btn(t().profile,()=>editProfile(target,view),true));
+    }else{
+      const summary=e("div","ep-native-profile-summary");
+      summary.append(e("span","",t().series+": "+profile.exam_series));
+      summary.append(e("span","",t().grade+": "+profile.target_grade));
+      summary.append(e("span","",t().econHours+": "+profile.economics_hours_budget));
+      target.append(summary);
+    }
+  }
+  function editProfile(target,view){
+    if(state.closed||state.root?.firstElementChild!==view)return;
+    target.replaceChildren(e("strong","",t().profile));
+    const fields={};
+    const addField=(key,label,value,type="text")=>{
+      const line=e("label","ep-native-profile-field");
+      line.append(e("span","",label));
+      let input=e("input");input.type=type;input.value=value??"";input.name=key;
+      if(type==="number"){input.min="0.5";input.max="168";input.step="0.5";}
+      if(type==="text"){input.maxLength=80;input.placeholder="Oct/Nov 2027";}
+      if(key==="target"){input=e("select");input.name=key;
+        for(const g of ["A*","A","B","C","D","E"]){const opt=e("option","",g);opt.value=g;
+          opt.selected=g===(value||"A");input.append(opt);}
+        input.value=value||"A";
+      }
+      fields[key]=input;line.append(input);target.append(line);
+    };
+    const p=state.profile||{};
+    addField("series",t().series,p.exam_series);
+    addField("target",t().grade,p.target_grade||"A");
+    addField("total",t().hours,p.total_student_hours_available||8,"number");
+    addField("economics",t().econHours,p.economics_hours_budget||3,"number");
+    const feedback=e("p","ep-native-profile-feedback");feedback.setAttribute("role","alert");target.append(feedback);
+    target.append(btn(t().saveProfile,async()=>{
+      if(state.busy||state.closed)return;
+      const exam=String(fields.series.value||"").trim();
+      const total=Number(fields.total.value),econ=Number(fields.economics.value);
+      if(exam.length<3||exam.length>80||!["A*","A","B","C","D","E"].includes(fields.target.value)||
+        !Number.isFinite(total)||!Number.isFinite(econ)||total<0.5||total>168||econ<0.5||econ>total){
+        feedback.textContent=t().profileInvalid;return;
+      }
+      state.busy=true;feedback.textContent=t().loading;
+      const result=await rpc("iclub_exam_native_economics_save_profile_v1",{
+        p_exam_series:exam,p_target_grade:fields.target.value,
+        p_total_hours:total,p_economics_hours:econ
+      });
+      state.busy=false;
+      if(state.closed||state.root?.firstElementChild!==view)return;
+      if(!result.ok){feedback.textContent=t().error;return;}
+      state.profile={exam_series:exam,target_grade:fields.target.value,
+        total_student_hours_available:total,economics_hours_budget:econ};
+      renderProfile(target,view);
+    }));
   }
   async function openHistory(entry,openPlan){
     if(state.closed||state.busy)return;
