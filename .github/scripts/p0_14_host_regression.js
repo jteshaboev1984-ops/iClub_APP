@@ -321,7 +321,7 @@ const path = require('path');
   });
   assert(result.hidden && !result.open, 'kill switch refresh without invitation must close/hide Exam Prep');
 
-  const rpcCalls = await page.evaluate(() => window.__rpcCalls.map(x => x.name));
+  const rpcCalls = await page.evaluate(() => window.__rpcCalls.map(x => ({ name: x.name, args: x.args })));
   const allowedRpcs = new Set([
     'get_exam_prep_capabilities_v1',
     'get_my_exam_prep_beta_invitation_v1',
@@ -330,8 +330,15 @@ const path = require('path');
     'claim_my_exam_prep_beta_core_seat_v1',
     'revoke_my_exam_prep_beta_consent_v1'
   ]);
+  // Existing Economics native shell reads its own configuration on a subject
+  // switch. Never treat this as Math beta access or authorize unknown RPCs.
+  const notAllowed = rpcCalls.filter(call => !allowedRpcs.has(call.name) &&
+    !(call.name === 'get_my_exam_prep_program_shell_v1' &&
+      call.args?.p_program_key === 'economics_9708' &&
+      ['en','ru','uz'].includes(call.args?.p_language)));
   assert(rpcCalls.length > 0, 'host must call server access RPCs');
-  assert(rpcCalls.every(name => allowedRpcs.has(name)), 'host called an RPC outside capability/invitation consent boundary');
+  assert(notAllowed.length === 0, 'host called an RPC outside allowed read-only Economics / Mathematics consent scope: ' +
+    notAllowed.map(call=>call.name).join(', '));
 
   await browser.close();
   console.log('P0-14 browser matrix: PASS (live access + consent + learner-safe copy + keyboard focus continuity)');

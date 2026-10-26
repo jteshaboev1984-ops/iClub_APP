@@ -16,6 +16,8 @@
     itemStartedAt: 0,
     notice: null,
     timerId: null,
+    pendingWrittenStep: null,
+    writtenCriteriaRequest: 0,
     mountToken: 0
   };
 
@@ -192,6 +194,22 @@
     };
   }
 
+  function writtenCopy() {
+    const texts={
+      ru:{instruction:"Решите задачу на бумаге. Вводить ответ в приложение не нужно.",note:"Решение не проверяется автоматически.",criteria:"Критерии",hide:"Скрыть критерии",criteriaTitle:"Требования к решению",loading:"Загружаем критерии…",unavailable:"Не удалось открыть критерии. Можно попробовать ещё раз или продолжить.",next:"Далее",moving:"Переходим к следующему заданию…",uncertain:"Не удалось подтвердить переход. Проверьте статус перед повторной попыткой.",check:"Проверить статус",retry:"Повторить переход",done:"Шаг пройден. Решение не проверялось.",steps:"Шагов на бумаге",saved:"Сохранённых решений"},
+      uz:{instruction:"Masalani qog‘ozda yeching. Javobni ilovaga kiritish shart emas.",note:"Yechim avtomatik tekshirilmaydi.",criteria:"Baholash mezonlari",hide:"Mezonlarni yashirish",criteriaTitle:"Yechimga qo‘yiladigan talablar",loading:"Mezonlar yuklanmoqda…",unavailable:"Mezonlarni ochib bo‘lmadi. Qayta urinib ko‘ring yoki davom eting.",next:"Keyingi",moving:"Keyingi topshiriqqa o‘tilmoqda…",uncertain:"O‘tish tasdiqlanmadi. Qayta urinishdan oldin holatni tekshiring.",check:"Holatni tekshirish",retry:"O‘tishni qayta yuborish",done:"Bosqichdan o‘tildi. Yechim tekshirilmadi.",steps:"Qog‘ozdagi bosqichlar",saved:"Saqlangan yechimlar"},
+      en:{instruction:"Solve the task on paper. You do not need to enter an answer in the app.",note:"The solution is not marked automatically.",criteria:"Criteria",hide:"Hide criteria",criteriaTitle:"Solution requirements",loading:"Loading criteria…",unavailable:"Criteria are unavailable. You can try again or continue.",next:"Next",moving:"Opening the next task…",uncertain:"Could not confirm the transition. Check status before retrying.",check:"Check status",retry:"Retry transition",done:"Step completed. The solution was not checked.",steps:"Paper-based steps",saved:"Submitted solutions"}
+    };
+    return texts[state.language] || texts.en;
+  }
+  function itemIsComplete(item) { return item?.is_complete===true || item?.answered===true; }
+  async function boundWrittenCall(fn,ms) {
+    let t;
+    try { return await Promise.race([Promise.resolve().then(fn).catch(()=>({ok:false})),
+      new Promise(resolve=>{t=setTimeout(()=>resolve({ok:false,reason:"timeout"}),ms);})]); }
+    finally { clearTimeout(t); }
+  }
+
   function esc(value) {
     return String(value == null ? "" : value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
   }
@@ -323,6 +341,12 @@
 
   function reviewItemMarkup(item) {
     const c = copy();
+    if (item?.item_kind === "written" && item?.completion_status === "advanced_in_plan_only") {
+      return '<article class="ep-result-item is-written"><div class="ep-result-item-head"><strong>'+
+        esc(c.question)+' '+Number(item.item_order||0)+'</strong><span class="ep-result-status">'+
+        esc(c.writtenDone)+'</span></div><div class="ep-live-qtext">'+esc(item.text||'')+
+        '</div><div class="ep-live-notice">'+esc(writtenCopy().done)+'</div></article>';
+    }
     if (item?.item_kind === "written") {
       const understanding = item?.understanding_check;
       const checks = Array.isArray(understanding?.results) ? understanding.results : [];
@@ -353,7 +377,12 @@
     const writtenTotal = Number(summary.written_total || 0), writtenDone = Number(summary.written_completed || 0);
     const accuracy = summary.machine_accuracy_pct == null ? null : Number(summary.machine_accuracy_pct);
     const machineValue = machineTotal > 0 ? `${machineCorrect} / ${machineTotal} ${esc(c.correctOf)}${Number.isFinite(accuracy) ? ` · ${accuracy.toFixed(0)}%` : ""}` : "—";
-    const writtenValue = writtenTotal > 0 ? `${writtenDone} / ${writtenTotal} ${esc(c.writtenCompleted)}` : "—";
+    const writtenAdvanced=Number(summary.written_advanced||0);
+    const writtenSaved=Number(summary.written_submitted ?? Math.max(0,writtenDone-writtenAdvanced));
+    const writtenValue=writtenAdvanced>0
+      ? String(writtenAdvanced)+' '+esc(writtenCopy().steps)+
+        (writtenSaved ? ' · '+writtenSaved+' '+esc(writtenCopy().saved) : '')
+      : (writtenTotal>0 ? writtenDone+' / '+writtenTotal+' '+esc(c.writtenCompleted) : '—');
     const visible = onlyErrors ? items.filter(item => item?.item_kind === "question" && item?.is_correct === false) : items;
     const reviewBody = visible.length
       ? visible.map(reviewItemMarkup).join("")
@@ -371,7 +400,15 @@
     if (typeof internal.api?.sessionReview !== "function") return false;
     renderLoading();
     let result=null;
-    try { result=await internal.api.sessionReview(sessionId,state.language); } catch (_) {}
+    try {
+      result=await internal.api.sessionReview(sessionId,state.language);
+      if (result?.ok && result.data?.session_type==="learning" &&
+          typeof internal.api.sessionReviewWritten==="function") {
+        const enhanced=await boundWrittenCall(
+          ()=>internal.api.sessionReviewWritten(sessionId,state.language),12000);
+        if (enhanced?.ok && enhanced.data?.session_id===sessionId) result=enhanced;
+      }
+    } catch (_) {}
     if (!result?.ok || !result.data) return false;
     renderSessionResult(result.data,component || result.data.component_code,origin,false,false);
     return true;
@@ -381,15 +418,22 @@
     if (typeof internal.api?.recentResults !== "function") { await openComponentHome(component); return; }
     renderLoading();
     let result=null;
-    try { result=await internal.api.recentResults(component,10); } catch (_) {}
+    try {
+      result=await internal.api.recentResults(component,10);
+      if (result?.ok && typeof internal.api.recentResultsWritten==="function") {
+        const enhanced=await boundWrittenCall(
+          ()=>internal.api.recentResultsWritten(component,10),12000);
+        if (enhanced?.ok && enhanced.data?.component_code===component) result=enhanced;
+      }
+    } catch (_) {}
     if (!result?.ok) { renderError(); return; }
     const root=rootEl(); if (!root) return; const c=copy();
     const rows=Array.isArray(result.data?.results) ? result.data.results : [];
     const body=rows.length ? rows.map(row => {
       const machineTotal=Number(row.machine_total || 0), machineCorrect=Number(row.machine_correct || 0);
-      const written=Number(row.written_total || 0);
+      const written=Number(row.written_total || 0), advanced=Number(row.written_advanced||0);
       const score=machineTotal>0 ? `${machineCorrect} / ${machineTotal}` : "—";
-      const writtenBit=written>0 ? ` · ${esc(c.writtenPart)}: ${written}` : "";
+      const writtenBit=advanced>0 ? " · "+esc(writtenCopy().steps)+": "+advanced : (written>0 ? " · "+esc(c.writtenPart)+": "+written : "");
       return `<button class="ep-history-row" type="button" data-ep-history-session="${esc(row.session_id)}"><span><strong>${esc(resultTypeLabel(row.session_type))}</strong><small>${esc(formatDateTime(row.finalized_at))}</small></span><span>${esc(c.autoChecked)}: ${score}${writtenBit}<b aria-hidden="true">›</b></span></button>`;
     }).join("") : `<div class="ep-live-notice">${esc(c.noHistory)}</div>`;
     root.innerHTML=shell(`<section class="ep-history-screen"><div class="ep-live-card"><div class="ep-live-head"><strong>${esc(component)} · ${esc(c.history)}</strong><button class="ep-live-btn secondary" type="button" data-ep-history-back>${esc(c.backToComponent)}</button></div><div class="ep-history-list">${body}</div></div></section>`,{compact:true});
@@ -1048,15 +1092,36 @@
   }
 
   async function loadSession(sessionId) {
-    clearTimer(); renderLoading(); const result = await internal.api.getSession(sessionId, state.language);
+    clearTimer(); renderLoading();
+    // Legacy remains the baseline for diagnostics/timed/Paper and for any
+    // beta whose new server contract has not been deployed. The additive reader
+    // is optional and may not yet exist; never strand existing learners.
+    const initial=await boundWrittenCall(
+      ()=>internal.api.getSession(sessionId,state.language),12000);
+    let result=initial;
+    if (initial?.ok && initial.data?.session_type==="learning" &&
+        Array.isArray(initial.data.items) &&
+        initial.data.items.some(item=>item?.item_kind==="written") &&
+        typeof internal.api.getSessionWritten==="function") {
+      const enhanced=await boundWrittenCall(
+        ()=>internal.api.getSessionWritten(sessionId,state.language),12000);
+      if (enhanced?.ok && enhanced.data?.session_id===initial.data.session_id &&
+          enhanced.data?.component_code===initial.data.component_code) {
+        result=enhanced;
+      }
+    }
     if (!result?.ok) { renderError(); return; }
     state.session = result.data;
-    const items = Array.isArray(state.session?.items) ? state.session.items : [], next = items.find(item => item && item.answered !== true);
+    const items = Array.isArray(state.session?.items) ? state.session.items : [], next = items.find(item => item && !itemIsComplete(item));
     const timed = ["timed","paper"].includes(state.session?.session_type);
     if (timed && state.session?.status === "active" && deadlineMs(state.session) && Date.now() >= deadlineMs(state.session)) { await finishTimed("time_expired"); return; }
     if (!next && state.session?.status === "active") {
       if (timed) { await finishTimed("submitted"); return; }
-      const finalized = await internal.api.finalizeSession(sessionId, key("ep-session-finalize"));
+      const hasPaperSteps=state.session?.session_type==="learning" &&
+        items.some(item=>item?.completion_status==="advanced_in_plan_only");
+      const finalizer=hasPaperSteps && internal.api.finalizeSessionWritten
+        ? internal.api.finalizeSessionWritten : internal.api.finalizeSession;
+      const finalized=await boundWrittenCall(()=>finalizer(sessionId,key("ep-session-finalize")),15000);
       if (!finalized?.ok) { renderError(); return; }
       const finishedType = state.session.session_type, component = state.session.component_code;
       state.session = null;
@@ -1088,20 +1153,40 @@
 
   function renderQuestion(item, items, timed = false) {
     clearTimer();
-    const root = rootEl(); if (!root) return; const c = copy(), answered = items.filter(x => x?.answered === true).length, total = items.length;
+    const root = rootEl(); if (!root) return; ++state.writtenCriteriaRequest;
+    const c = copy(), answered = items.filter(itemIsComplete).length, total = items.length;
+    const paperLearning = item?.item_kind==="written" && item?.written_external===true && !timed && state.session?.session_type==="learning";
     let answerControl = "";
-    if (item.item_kind === "written") {
+    if (paperLearning) {
+      const w=writtenCopy();
+      answerControl='<div class="ep-written-external" data-ep-written-external="true">' +
+        '<p class="ep-written-instruction">'+esc(w.instruction)+'</p>' +
+        '<div class="ep-written-criteria-panel" data-ep-written-criteria-panel hidden></div>' +
+        '<p class="ep-live-meta">'+esc(w.note)+'</p></div>';
+    } else if (item.item_kind === "written") {
       const writtenInfo = timed ? "" : `<aside class="ep-written-info"><strong>${esc(c.writtenInfoTitle)}</strong><span>${esc(c.writtenInfoText)}</span><small>${esc(writtenPolicyText())}</small></aside>`;
       answerControl = `${writtenInfo}<label class="ep-live-field"><span>${esc(c.written)}</span><textarea class="ep-live-textarea" name="ep_live_written_answer"></textarea></label>`;
     } else if (String(item.qtype || "").toLowerCase() === "mcq" && Array.isArray(item.options)) {
       answerControl = `<div class="ep-live-options">${item.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_live_answer" value="${index}"><span>${esc(localizedOptionText(option))}</span></label>`).join("")}</div>`;
     } else answerControl = `<input class="ep-live-input" name="ep_live_text_answer" autocomplete="off" aria-label="${esc(c.submit)}">`;
     const timer = timed ? `<span class="ep-live-timer" data-ep-live-timer></span>` : "";
-    const exit = timed ? `<button class="ep-live-btn secondary" type="button" data-ep-live-end>${esc(c.endAttempt)}</button>` : `<button class="ep-live-btn secondary" type="button" data-ep-live-exit>${esc(c.back)}</button>`;
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card ep-live-question-card" data-ep-live-active-assessment="true"><div class="ep-live-head"><strong>${esc(c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-submit>${esc(c.submit)}</button>${exit}</div></div>`, { compact: true });
+    const exit = timed ? '<button class="ep-live-btn secondary" type="button" data-ep-live-end>'+esc(c.endAttempt)+'</button>' :
+      '<button class="ep-live-btn secondary" type="button" data-ep-live-exit>'+esc(c.back)+'</button>';
+    const actionMarkup = paperLearning
+      ? '<div class="ep-written-actions"><button class="ep-live-btn secondary" type="button" data-ep-written-criteria-toggle>'+esc(writtenCopy().criteria)+'</button>'+
+        '<button class="ep-live-btn" type="button" data-ep-written-next>'+esc(writtenCopy().next)+'</button></div>'
+      : '<button class="ep-live-btn" type="button" data-ep-live-submit>'+esc(c.submit)+'</button>';
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card ep-live-question-card" data-ep-live-active-assessment="true"><div class="ep-live-head"><strong>${esc(paperLearning ? (state.language==="uz" ? "Topshiriq" : state.language==="en" ? "Task" : "Задание") : c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions">${actionMarkup}${exit}</div></div>`, { compact: true });
     state.notice = null;
     root.querySelector('[data-ep-live-submit]')?.addEventListener('click', () => submitAnswer(item));
+    if (paperLearning) {
+      root.querySelector('[data-ep-written-criteria-toggle]')?.addEventListener('click', () => toggleWrittenCriteria(item));
+      root.querySelector('[data-ep-written-next]')?.addEventListener('click', () => advanceWrittenStep(item));
+    }
     root.querySelector('[data-ep-live-exit]')?.addEventListener('click', async () => {
+      if (state.busy) return;
+      state.pendingWrittenStep = null;
+      ++state.writtenCriteriaRequest;
       state.session = null;
       if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component);
       else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component);
@@ -1109,6 +1194,124 @@
     });
     root.querySelector('[data-ep-live-end]')?.addEventListener('click', async () => { if (window.confirm(c.endConfirm)) await finishTimed("administrative_stop"); });
     if (timed) startTimer(state.session.session_id);
+  }
+
+  // Paper-based written learning has no answer artifact, grades, or understanding check.
+  async function toggleWrittenCriteria(item) {
+    const root=rootEl(), panel=root?.querySelector("[data-ep-written-criteria-panel]");
+    const button=root?.querySelector("[data-ep-written-criteria-toggle]");
+    if (!panel || !button || !state.session || panel.dataset.loading==="true") return;
+    const c=writtenCopy();
+    if (panel.dataset.loaded==="true") {
+      panel.hidden=!panel.hidden;
+      button.textContent=panel.hidden?c.criteria:c.hide;
+      return;
+    }
+    const token=++state.writtenCriteriaRequest, sessionId=state.session.session_id;
+    panel.hidden=false;panel.dataset.loading="true";panel.textContent=c.loading;
+    button.disabled=true;
+    const result=await boundWrittenCall(
+      () => internal.api.writtenCriteria(sessionId,Number(item.item_order),state.language),12000);
+    if (token!==state.writtenCriteriaRequest || !panel.isConnected ||
+        state.session?.session_id!==sessionId) return;
+    panel.dataset.loading="false";button.disabled=false;
+    const entries=result?.ok && result.data?.available && Array.isArray(result.data.requirements)
+      ? result.data.requirements.filter(v=>typeof v==="string" && v.trim()) : [];
+    if (!entries.length) {panel.textContent=c.unavailable;return;}
+    const head=document.createElement("strong");head.textContent=c.criteriaTitle;
+    const list=document.createElement("ol");
+    entries.forEach(value=>{const li=document.createElement("li");li.textContent=value;list.append(li);});
+    panel.replaceChildren(head,list);panel.dataset.loaded="true";button.textContent=c.hide;
+  }
+
+  function writtenStepView(pending,uncertain=false) {
+    if (state.pendingWrittenStep!==pending) return;
+    const root=rootEl(),next=root?.querySelector("[data-ep-written-next]");
+    if (next) {
+      next.disabled=true;next.setAttribute("aria-busy","true");
+      next.textContent=writtenCopy().moving;
+    }
+    root?.querySelector("[data-ep-written-recovery]")?.remove();
+    if (!uncertain) return;
+    const c=writtenCopy(),card=root?.querySelector(".ep-live-question-card");
+    if (!card) return;
+    const panel=document.createElement("aside");
+    panel.dataset.epWrittenRecovery="true";panel.className="ep-written-recovery";
+    panel.setAttribute("role","alert");
+    const p=document.createElement("p");p.textContent=c.uncertain;panel.append(p);
+    const actions=document.createElement("div");actions.className="ep-live-actions";
+    const check=document.createElement("button");
+    check.type="button";check.className="ep-live-btn secondary";check.textContent=c.check;
+    check.addEventListener("click",()=>void reconcileWrittenStep(pending));
+    actions.append(check);
+    if (pending.retryAllowed===true) {
+      const retry=document.createElement("button");
+      retry.type="button";retry.className="ep-live-btn";retry.textContent=c.retry;
+      retry.addEventListener("click",()=>void sendWrittenStep(pending));
+      actions.append(retry);
+    }
+    panel.append(actions);card.append(panel);
+  }
+
+  async function reconcileWrittenStep(pending) {
+    if (state.busy || state.pendingWrittenStep!==pending) return;
+    state.busy=true;pending.retryAllowed=false;writtenStepView(pending);
+    const read=await boundWrittenCall(
+      () => internal.api.writtenStepStatus(pending.sessionId,pending.itemOrder),12000);
+    if (state.pendingWrittenStep!==pending) {state.busy=false;return;}
+    if (read?.ok && read.data?.session_id===pending.sessionId &&
+        Number(read.data?.item_order)===pending.itemOrder &&
+        read.data?.component_code===pending.component &&
+        ["advanced","answered_legacy"].includes(read.data?.status)) {
+      state.pendingWrittenStep=null;state.busy=false;
+      await loadSession(pending.sessionId);
+      return;
+    }
+    // Emergency rollout OFF before the first committed paper step:
+    // re-read the authoritative session rather than trapping the learner
+    // behind a disabled Next button or retrying a forbidden RPC.
+    if (read?.ok && read.data?.session_id===pending.sessionId &&
+        Number(read.data?.item_order)===pending.itemOrder &&
+        read.data?.status==="open" && read.data?.can_advance===false) {
+      state.pendingWrittenStep=null;
+      state.busy=false;
+      await loadSession(pending.sessionId);
+      return;
+    }
+    pending.retryAllowed=Boolean(read?.ok &&
+      read.data?.session_id===pending.sessionId &&
+      Number(read.data?.item_order)===pending.itemOrder &&
+      read.data?.component_code===pending.component &&
+      read.data?.session_status==="active" && read.data?.status==="open");
+    state.busy=false;writtenStepView(pending,true);
+  }
+
+  async function sendWrittenStep(pending) {
+    if (state.busy || state.pendingWrittenStep!==pending) return;
+    state.busy=true;pending.retryAllowed=false;writtenStepView(pending);
+    const result=await boundWrittenCall(
+      () => internal.api.advanceWrittenStep(
+        pending.sessionId,pending.itemOrder,pending.idempotencyKey),15000);
+    if (state.pendingWrittenStep!==pending) {state.busy=false;return;}
+    if (result?.ok && result.data?.session_id===pending.sessionId &&
+        Number(result.data?.item_order)===pending.itemOrder &&
+        ["advanced","answered_legacy"].includes(result.data?.status)) {
+      state.pendingWrittenStep=null;state.busy=false;
+      await loadSession(pending.sessionId);
+      return;
+    }
+    state.busy=false;
+    // ACK might have vanished AFTER a commit. NEVER auto-resend.
+    await reconcileWrittenStep(pending);
+  }
+
+  function advanceWrittenStep(item) {
+    if (state.busy || state.pendingWrittenStep || item?.written_external!==true ||
+        state.session?.session_type!=="learning" || !state.session?.session_id) return;
+    const pending={sessionId:state.session.session_id,component:state.session.component_code,
+      itemOrder:Number(item.item_order),idempotencyKey:key("ep-written-next"),retryAllowed:false};
+    state.pendingWrittenStep=pending;
+    void sendWrittenStep(pending);
   }
 
   // The guarded weekly route never discards a learner's answer before the
@@ -1172,7 +1375,7 @@
     state.busy=true;
     showAnswerRecovery(pending);
     let read=null;
-    try { read=await internal.api.getSession(pending.sessionId,state.language); } catch (_) {}
+    try { read=await boundWrittenCall(() => internal.api.getSession(pending.sessionId,state.language),12000); } catch (_) {}
     if (state.pendingSubmission !== pending) { state.busy=false; return; }
     const same=read?.ok && read.data?.session_id===pending.sessionId &&
       read.data?.component_code===pending.component;
@@ -1198,8 +1401,8 @@
     root?.querySelectorAll('[data-ep-answer-check],[data-ep-answer-retry]').forEach(button => { button.disabled=true; });
     let result;
     try {
-      result=await internal.api.submitResponse(pending.sessionId,pending.itemOrder,
-        pending.payload,pending.idempotencyKey,pending.elapsedMs,state.language);
+      result=await boundWrittenCall(() => internal.api.submitResponse(pending.sessionId,pending.itemOrder,
+        pending.payload,pending.idempotencyKey,pending.elapsedMs,state.language),15000);
     } catch (_) { result={ok:false,reason:'unknown_response'}; }
     if (state.pendingSubmission !== pending) { state.busy=false; return; }
     if (result?.ok) {
@@ -1504,7 +1707,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; clearTimer(); state.busy = false; state.profile = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
