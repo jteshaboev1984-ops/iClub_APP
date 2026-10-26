@@ -218,7 +218,7 @@
     const stats=e("div","ep-native-plan-stats");
     for(const [amount,label] of [
       [String(data.score)+"/30",t().result],
-      [data.weak_count,t().mistakes],
+      [Math.max(0,Number(data.weak_count||0)-Number(data.retested_correct_count||0)),t().mistakes],
       [data.studied_count,t().studied],
       [data.retested_correct_count,t().verified]
     ]){
