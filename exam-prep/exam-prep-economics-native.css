@@ -71,3 +71,16 @@
  .ep-native-result-actions { flex-direction:column; align-items:stretch; }
  .ep-native-result-actions .ep-host-btn { width:100%; }
 }
+
+
+/* One-tap answers and discoverable plans, scoped to Economics only. */
+.ep-native-guidance { margin:4px 0 12px; font-size:.86rem; line-height:1.55; opacity:.8; }
+.ep-native-saved { margin:0; font-size:.85rem; font-weight:600; color:var(--ep-positive,#27825d); }
+.ep-native-saving { margin:0; font-size:.85rem; opacity:.85; }
+.ep-native-history-controls { display:flex; gap:9px; justify-content:flex-end; align-items:center; flex-wrap:wrap; }
+.ep-native-history-controls .ep-host-btn { min-height:40px; }
+.ep-native-option:focus-within { outline:2px solid var(--accent,#386dd1); outline-offset:2px; }
+@media(max-width:640px) {
+ .ep-native-history-controls { width:100%; flex-direction:column; align-items:stretch; }
+ .ep-native-history-controls .ep-host-btn { width:100%; }
+}
