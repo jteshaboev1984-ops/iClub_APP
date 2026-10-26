@@ -1,5 +1,6 @@
 -- Already applied to live Supabase 2026-10-26. Schema-only archival source.
--- Compromised historical draft questions must NEVER be assessed or reused for grading.
+-- Prior drafts were accessible in a public Git branch; actual viewing/copying is NOT established.
+-- Originals are preserved; this archival table cannot itself issue or grade them. Any future use requires separate product and academic review.
 DO $pre$ BEGIN
  IF to_regclass('private.iclub_exam_core_chemistry_p1_quarantine_v1') IS NOT NULL
  THEN RAISE EXCEPTION 'Quarantine exists: do not replace'; END IF;
