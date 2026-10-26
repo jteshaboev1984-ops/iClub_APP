@@ -1,0 +1,209 @@
+{
+  "contract": "economics_9708_A_P3_additional12_QA_and_exposure_policy_v0.1",
+  "date": "2026-10-26",
+  "status": "internal_quality_review_completed__not_learner_approved",
+  "program": "economics_9708",
+  "version": "economics_2026_2028_v1",
+  "paper": "P3",
+  "level": "A",
+  "sources": {
+    "A1": "exam-prep/academic/economics-9708-mcq/A1-P3-Units7-8-30-item-review-shortlist-v0.1.json",
+    "A2": "exam-prep/academic/economics-9708-mcq/A2-P3-Units9-11-30-item-review-shortlist-v0.1.json"
+  },
+  "scope": "12 additional legacy questions never before fully audited for RU/UZ option meaning. Prior 24 were NOT reaudited.",
+  "review": "Inspected exact production EN/RU/UZ stems, all options A-D, declared correct key, full explanations and no diagrams. Independently reasoned all 12 items; correct responses remain unambiguous across all three languages, and MRP arithmetic 4*9=36 is verified. First substantive item-level QA pass only.",
+  "history": {
+    "source_id_count_checked": 84,
+    "history_tables_checked": [
+      "practice_answers",
+      "practice_session_answers_v4",
+      "practice_drill_answers_v4",
+      "tour_answers",
+      "tour_session_answers_v4"
+    ],
+    "observed_answer_events": 0,
+    "historical_practice_pool_assignments_for_all_checked_ids": true,
+    "active_practice_pool_assignments_for_all_checked_ids": false,
+    "historical_tour_assignments_for_all_checked_ids": false,
+    "interpretation": "No recorded answers is NOT evidence of no previous question impression. Historic Practice memberships mean these are NOT guaranteed unseen for any learner. Count as reusable teaching/review candidates only, not protected initial diagnostics or retest slots."
+  },
+  "cambridge_official": "9708 2026–2028 v2 Paper3 has 30 A Level MCQs, duration 75 minutes; A Level direct, AS prerequisite only. https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf",
+  "grouping": {
+    "unit8": 8,
+    "unit10": 4,
+    "total": 12,
+    "anticipated_P3_staged_after_guarded_write": 36,
+    "unseen_eligible_claim": 0,
+    "approved_count": 0
+  },
+  "items": [
+    {
+      "legacy_question_id": 9179,
+      "syllabus_point": "8.2.4",
+      "proposed_skill_key": "ECON-9708-8.2.4-BASE",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Poverty-trap disincentive from benefit withdrawal: gradual taper removes higher marginal withdrawal",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9183,
+      "syllabus_point": "8.2.3",
+      "proposed_skill_key": "ECON-9708-8.2.3-BASE",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Absolute poverty means inability to afford essentials; relative poverty measures income position",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9162,
+      "syllabus_point": "8.2.5",
+      "proposed_skill_key": "ECON-9708-8.2.5-01",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Targeted transfers can focus resources on need; identical payments do not equalise incomes",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9173,
+      "syllabus_point": "8.1.1",
+      "proposed_skill_key": "ECON-9708-8.1.1-08",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Cap-and-trade total permitted pollution fixed by permit quantity, conditional on monitoring",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9168,
+      "syllabus_point": "8.1.1",
+      "proposed_skill_key": "ECON-9708-8.1.1-10",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Private ownership may alter cost-efficiency incentives, but without guaranteed improvement",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9155,
+      "syllabus_point": "8.1.1",
+      "proposed_skill_key": "ECON-9708-8.1.1-12",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Default pension enrollment with free opt-out is a behavioural nudge",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9150,
+      "syllabus_point": "8.3.8",
+      "proposed_skill_key": "ECON-9708-8.3.8-03",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Monopsony raising wages for all workers implies marginal labour expenditure above wage",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9176,
+      "syllabus_point": "8.3.4",
+      "proposed_skill_key": "ECON-9708-8.3.4-01",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "MRP of additional worker: four units each $9 MR = $36, not four times selling price",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 8989,
+      "syllabus_point": "10.2.1",
+      "proposed_skill_key": "ECON-9708-10.2.1-BASE",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Price inflation lowers domestic value while simultaneous nominal appreciation raises external value",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9019,
+      "syllabus_point": "10.3.3",
+      "proposed_skill_key": "ECON-9708-10.3.3-BASE",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Bad subsidy uptake forecast causes budget crowd-out and government failure",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9009,
+      "syllabus_point": "10.2.5",
+      "proposed_skill_key": "ECON-9708-10.2.5-02",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Rising expected inflation shifts SR Phillips curve upward",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    },
+    {
+      "legacy_question_id": 9231,
+      "syllabus_point": "10.2.5",
+      "proposed_skill_key": "ECON-9708-10.2.5-01",
+      "internal_scope_review": "pass",
+      "internal_academic_review": "pass",
+      "internal_language_review": "pass",
+      "internal_format_review": "pass",
+      "mathematical_reasoning_or_economic_logic": "Demand expansion moves along fixed SR Phillips curve: lower unemployment, higher inflation",
+      "source_use": "closed_teaching_rehearsal_candidate_only",
+      "protected_unseen_classification": "NOT_ESTABLISHED",
+      "independent_exam_release_approved": false
+    }
+  ],
+  "set_warnings": [
+    "9009 and 9231 each address Phillips curve but with distinct underlying mechanism (shift vs movement): do not force both into a short unseen test.",
+    "9150 monopsony marginal expenditure and A1 draft minimum wage monopsony share structural topic: balance variants.",
+    "9155 automatic enrollment nudge and other behavioural studies may be equivalent when constructing small pools.",
+    "9019 subsidy forecasting has a different key than separately quarantined wrong-key published source ID 9732; never accidentally include 9732.",
+    "No exposure event table reliably records mere question views; absence of answers never guarantees novelty."
+  ],
+  "blocking": [
+    "Do not mark these or previous 24 status=approved until a controlled teaching-versus-exam bank policy and independent learner evidence exist.",
+    "Do not flip Economics launch or publish papers; no changes to Practice/Tours, Math, scores or localStorage.",
+    "Do not put unpublished new original keys in public repository; original drafts remain in personal private Library."
+  ]
+}
