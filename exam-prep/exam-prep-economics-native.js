@@ -3,7 +3,7 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0};
   const dictionary={
-    ru:{title:"Cambridge Economics · Exam Prep",intro:"Выберите экзаменационную работу. Ответы и результаты сохраняются на сервере.",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
+    ru:{title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",startDiagnostic:"Начать диагностику",fullPaper:"Полный Paper",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант: он сохранится автоматически. До завершения экзамена ответ можно изменить.",saving:"Сохраняем ответ…",
       papers:"К экзаменам",question:"Вопрос",time:"Осталось времени",save:"Сохранить ответ",
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
@@ -16,7 +16,7 @@
       hideCheck:"Скрыть ответ",markStudied:"Отметить как изученное",studiedDone:"Тема изучена",
       backReview:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
       allCorrect:"Все вопросы решены правильно. Ошибок для разбора нет.",studyNote:"Отметка «изучено» не означает, что навык освоен. Это подтвердит правильный ответ в следующем экзамене."},
-    uz:{title:"Cambridge Economics · Exam Prep",intro:"Imtihon ishini tanlang. Javoblar va natijalar serverda saqlanadi.",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
+    uz:{title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq Paper",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga", beforePlan:"O‘quv rejangiz birinchi yakunlangan imtihondan so‘ng paydo bo‘ladi. Keyin uni urinishlar tarixidan ochishingiz mumkin.", autoAnswer:"Variantni tanlang: javob avtomatik saqlanadi. Imtihonni yakunlashdan oldin uni o‘zgartirish mumkin.",saving:"Javob saqlanmoqda…",
       papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javobni saqlash",
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
@@ -29,7 +29,7 @@
       hideCheck:"Javobni yashirish",markStudied:"O‘rganilgan deb belgilash",studiedDone:"Mavzu o‘rganildi",
       backReview:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
       allCorrect:"Hamma savollarga to‘g‘ri javob berildi. Tahlil qilinadigan xato yo‘q.",studyNote:"«O‘rganildi» belgisi bilim o‘zlashtirilganini isbotlamaydi. Keyingi imtihondagi to‘g‘ri javob tasdiqlaydi."},
-    en:{title:"Cambridge Economics · Exam Prep",intro:"Select an exam paper. Answers and results are saved on the server.",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
+    en:{title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",startDiagnostic:"Start entry check",fullPaper:"Full paper",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back", beforePlan:"Your study plan appears after your first completed paper. You can reopen it from your attempt history.", autoAnswer:"Choose an option to save automatically. You can change it until you finish the paper.",saving:"Saving answer…",
       papers:"Back to papers",question:"Question",time:"Time remaining",save:"Save answer",
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
@@ -84,37 +84,56 @@
     stop();state.id=null;state.paper=null;state.data=null;state.index=0;
     const view=shell();if(!view)return;
     view.append(e("p","ep-host-note",t().intro));
-    view.append(e("p","ep-native-guidance",t().beforePlan));
-    const grid=e("div","ep-host-component-grid");
-    for(const [code,label,mins] of [["P1",t().p1,60],["P3",t().p3,75]]){
+    view.append(e("p","ep-native-guidance",t().p1+" · "+t().p3));
+    const grid=e("div","ep-host-component-grid ep-native-guided-grid"),cards=new Map();
+    for(const [code,label] of [["P1",t().p1],["P3",t().p3]]){
       if(!state.shell?.papers?.some(p=>p.code===code&&p.assessment_kind==="mcq"))continue;
       const card=e("div","ep-host-component-card ep-native-paper");
-      card.append(e("strong","",label),e("span","","30 MCQ · "+mins+" min"));
-      card.append(btn(t().start,()=>begin(code)));grid.append(card);
+      card.append(e("strong","",label));
+      const summary=e("p","ep-native-guidance",t().entryCheck+" · 12 MCQ · 20 min");
+      const actions=e("div","ep-native-paper-actions");
+      actions.append(btn(t().startDiagnostic,()=>begin(code,"diagnostic")));
+      actions.append(btn(t().fullPaper,()=>begin(code),true));
+      card.append(summary,actions);cards.set(code,{actions,summary});grid.append(card);
     }
     view.append(grid);
     const historyBox=e("div","ep-native-history");
     view.append(historyBox);
-    loadHistory(historyBox,view);
+    loadHistory(historyBox,view,cards);
     const actions=e("div","ep-host-actions");
     actions.append(btn(t().back,()=>state.onBack?.(),true));view.append(actions);
   }
-  async function loadHistory(target,view){
+  async function loadHistory(target,view,cards){
     const response=await rpc("iclub_exam_native_mcq_history_v1",{p_paper_code:null});
     if(state.closed||state.root?.firstElementChild!==view||!response.ok||
        !Array.isArray(response.sessions)||response.sessions.length===0)return;
+    for(const [code,parts] of (cards||new Map())){
+      const latest=response.sessions.find(x=>x.paper_code===code&&x.session_kind==="diagnostic");
+      if(!latest)continue;
+      parts.actions.replaceChildren();
+      if(latest.status==="active"){
+        parts.summary.textContent=t().entryCheck+" · "+latest.answered+" / 12";
+        parts.actions.append(btn(t().continueAttempt,()=>openHistory(latest,false)));
+      }else{
+        parts.summary.textContent=t().completedCheck+" · "+latest.score+" / 12";
+        parts.actions.append(btn(t().plan,()=>openHistory(latest,true)));
+        parts.actions.append(btn(t().repeatCheck,()=>begin(code,"diagnostic"),true));
+      }
+      parts.actions.append(btn(t().fullPaper,()=>begin(code),true));
+    }
     target.replaceChildren(e("h3","ep-native-section-title",t().history));
     const list=e("div","ep-native-history-list");
     response.sessions.forEach(entry=>{
       if(!["P1","P3"].includes(entry.paper_code)||!entry.session_id)return;
       const card=e("div","ep-native-history-item");
-      const title=entry.paper_code==="P1"?t().p1:t().p3;
+      const title=(entry.paper_code==="P1"?t().p1:t().p3)+(entry.session_kind==="diagnostic"?" · "+t().entryCheck:"");
       const date=new Date(entry.started_at);
       const dateText=Number.isNaN(date.getTime())?"":new Intl.DateTimeFormat(
         state.lang==="uz"?"uz-UZ":state.lang==="en"?"en-GB":"ru-RU",
         {day:"2-digit",month:"2-digit",year:"numeric"}).format(date);
+      const total=Number(entry.total_items||30);
       const result=entry.status==="finalized"?
-        (String(entry.score)+" / 30"):(String(entry.answered)+" / 30");
+        (String(entry.score)+" / "+total):(String(entry.answered)+" / "+total);
       card.append(e("div","ep-native-history-info",title+" · "+dateText+" · "+result));
       const controls=e("div","ep-native-history-controls");
       controls.append(btn(entry.status==="finalized"?t().viewResult:t().continueAttempt,
@@ -133,12 +152,12 @@
     if(openPlan&&!state.closed&&state.id===entry.session_id&&
        state.data?.status==="finalized")await showStudyPlan();
   }
-  async function begin(code){
+  async function begin(code,kind="paper"){
     if(state.busy||state.closed)return;
     const token=++state.token;state.busy=true;
     shell()?.append(e("p","ep-host-note",t().loading));
     const nonce=(window.crypto?.randomUUID?.()||(String(Date.now())+"-"+String(Math.random())))+"-econ";
-    const v=await rpc("iclub_exam_native_mcq_start_v1",{p_paper_code:code,p_client_key:nonce});
+    const v=await rpc(kind==="diagnostic"?"iclub_exam_native_mcq_start_diagnostic_v1":"iclub_exam_native_mcq_start_v1",{p_paper_code:code,p_client_key:nonce});
     if(state.closed||token!==state.token)return;
     state.busy=false;
     if(!v.ok||!v.session_id){error(()=>begin(code));return;}
@@ -151,7 +170,7 @@
     const v=await rpc("iclub_exam_native_mcq_get_v1",{p_session_id:state.id,p_language:state.lang});
     if(state.closed||token!==state.token)return;
     state.busy=false;
-    if(!v.ok||!Array.isArray(v.items)||v.items.length!==30){error(load);return;}
+    if(!v.ok||!Array.isArray(v.items)||!((v.items.length===30&&v.session_kind==="paper")||(v.items.length===12&&v.session_kind==="diagnostic"))){error(load);return;}
     state.data=v;draw();
     return true;
   }
@@ -168,19 +187,19 @@
   function draw(){
     ++state.token;
     const data=state.data,view=shell();if(!view||!data)return;
-    const finished=data.status==="finalized";
+    const finished=data.status==="finalized",total=data.items.length;
     const header=e("div","ep-native-header");
-    header.append(e("strong","",state.paper==="P1"?t().p1:t().p3));
+    header.append(e("strong","",(state.paper==="P1"?t().p1:t().p3)+(data.session_kind==="diagnostic"?" · "+t().entryCheck:"")));
     const remaining=e("span","ep-native-timer");
     header.append(remaining);view.append(header);
     if(finished){
       const resultActions=e("div","ep-native-result-actions");
-      resultActions.append(e("h3","ep-native-result",t().result+": "+data.score+" / 30"));
+      resultActions.append(e("h3","ep-native-result",t().result+": "+data.score+" / "+total));
       resultActions.append(btn(t().plan,showStudyPlan));
       view.append(resultActions);
     }else clock(remaining);
     const row=data.items[state.index];if(!row)return;
-    view.append(e("div","ep-native-progress",t().question+" "+(state.index+1)+" / 30 · "+data.items.filter(x=>x.answered).length+" / 30"));
+    view.append(e("div","ep-native-progress",t().question+" "+(state.index+1)+" / "+total+" · "+data.items.filter(x=>x.answered).length+" / "+total));
     const card=e("div","ep-live-card ep-native-question");
     card.append(e("div","ep-native-stem",row.question));
     const options=e("div","ep-native-options");
@@ -205,9 +224,9 @@
     view.append(card);
     const actions=e("div","ep-host-actions ep-native-actions");
     if(state.index>0)actions.append(btn(t().previous,()=>{if(!state.busy){state.index--;draw();}},true));
-    if(state.index<29)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
+    if(state.index<total-1)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
     if(!finished)actions.append(btn(t().finish,()=>finish(false),true));
-    if(finished)actions.append(btn(t().retest,()=>begin(state.paper),true));
+    if(finished)actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,()=>begin(state.paper,data.session_kind),true));
     actions.append(btn(t().papers,lobby,true));view.append(actions);
   }
 
@@ -230,7 +249,7 @@
     view.append(e("p","ep-host-note",t().planIntro));
     const stats=e("div","ep-native-plan-stats");
     for(const [amount,label] of [
-      [String(data.score)+"/30",t().result],
+      [String(data.score)+"/"+String(data.out_of||30),t().result],
       [Math.max(0,Number(data.weak_count||0)-Number(data.retested_correct_count||0)),t().mistakes],
       [data.studied_count,t().studied],
       [data.retested_correct_count,t().verified]
@@ -289,7 +308,10 @@
     view.append(e("p","ep-host-note",t().studyNote));
     const actions=e("div","ep-host-actions ep-native-actions");
     actions.append(btn(t().backReview,draw,true));
-    actions.append(btn(t().retest,()=>begin(state.paper)));
+    actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,
+      ()=>begin(state.paper,data.session_kind||"paper")));
+    if(data.session_kind==="diagnostic")
+      actions.append(btn(t().fullPaper,()=>begin(state.paper),true));
     actions.append(btn(t().papers,lobby,true));
     view.append(actions);
   }
