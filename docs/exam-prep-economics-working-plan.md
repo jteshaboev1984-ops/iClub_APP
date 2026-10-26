@@ -328,3 +328,40 @@
 - Затем controlled beta live UI under authenticated genuine learner, end-to-end and explicit выбор открытия предмета; program пока off. Не создавать новые таблицы без технического основания, не перетаскивать Econ в Math legacy progress.
 
 **Actual code:** \`supabase/migrations/20261026173500_iclub_exam_native_economics_mcq_sessions_v1.sql\`, \`supabase/migrations/20261026185000_iclub_exam_native_economics_mcq_history_v1.sql\`, \`exam-prep/exam-prep-economics-native.js\`, \`exam-prep/exam-prep-economics-native.css\`, \`exam-prep/exam-prep-host.js\`, \`index.html\`.
+
+
+## 17. АКТУАЛЬНЫЙ CHECKPOINT 26.10.2026 — ПЕРСОНАЛЬНЫЙ НЕДЕЛЬНЫЙ ПЛАН И РЕТЕСТ ПО РЕАЛЬНЫМ НАВЫКАМ
+
+**НАЧИНАТЬ СЛЕДУЮЩИЙ ЧАТ С РАЗДЕЛА 17. Больше НЕ повторять QA 72 approved MCQ и не переписывать native session RPCs.**
+
+### В ЭТОМ ХОДЕ РЕАЛЬНО ДОБАВЛЕНО
+
+1. **СЕРВЕРНЫЙ результат→навыки→учебный план**:
+   - В существующем \`private.iclub_exam_native_mcq_attempts_v1\` уже хранятся 30 frozen item snapshots, canonical skill_key/unit, показанный порядок 4 вариантов, server timestamps, ответы и итоговый score. **Второй раз результаты не сохранять**.
+   - Ровно **одна новая приватная таблица** \`private.iclub_exam_native_mcq_study_progress_v1\`: \`(user_id,source_session_id,skill_key)\` и добровольная отметка \`studied/ studied_at\`. Результаты, ответы и оценка в ней НЕ меняются. RLS FORCE; anon/auth не читают и не пишут таблицу напрямую.
+   - \`public.iclub_exam_native_mcq_study_plan_v1(p_session_id,p_language)\`: SECURITY DEFINER authenticated RPC. Только собственная **завершённая** P1 или P3 попытка; для активной возвращает \`finish_exam_first\`. По каждому вопросу сервер сам сопоставляет сохранённый вариант и правильный исходный индекс, без доверия оценке браузера. Возвращает \`unit_results\` (correct/wrong/unanswered), \`mistakes\` и до пяти актуальных \`priorities\` на **7 дней** (дни 1,2,3,5,7): EN/RU/UZ \`title\`, \`explanation\`, \`common_trap\`, \`check_question\`/\`check_answer\` из **approved private subject Library Theory**, собственный \`studied\` и \`retested_correct\`.
+   - \`public.iclub_exam_native_mcq_mark_studied_v1(p_session_id,p_skill_key,p_studied)\`: SECURITY DEFINER authenticated RPC. Меняет ТОЛЬКО свой ошибочный/пропущенный skill из своей завершённой сессии. Идемпотентный upsert/undo; \`mastery_proven=false\`, потому что прочитанный урок НЕ доказательство знаний.
+   - **Критически верный retest evidence:** \`retested_correct\` появляется только когда **более поздняя завершённая серверная попытка того же Paper** содержит тот же canonical skill и ученик выбрал правильный ответ. Ни посещение урока, ни отметка \`studied\`, ни правильная буква без новой попытки не подтверждают усвоение. После подтверждения skill исключается из текущих приоритетов, но историческая ошибка не стирается.
+   - После отметки первых 5 studied skills сервер **поднимает следующие ещё не изученные ошибки**, а не оставляет всё время те же карточки; migration priority refresh меняет сортировку, не пользовательские данные. Список ошибок, scores и attempts остаётся immutable.
+2. **ТРИ apply_migration SUCCESS в GitHub+Supabase**:
+   - \`supabase/migrations/20261026193000_iclub_exam_native_economics_study_plan_v1.sql\` — новая minimal progress table + две RPC;
+   - \`supabase/migrations/20261026201000_iclub_exam_native_economics_study_plan_priority_refresh_v1.sql\` — обновление server-side приоритета неизученных ошибок (без новых таблиц).
+   Обе миграции additive в существующей Economics native ветке, ни Math, ни Practice/Tours, ни старые \`public.questions\`, ни пользовательские legacy scores не редактируют.
+3. **РЕАЛЬНО ПОДКЛЮЧЕНА В ПРОДАКШН-ВЕТКУ FRONTEND** \`exam-prep/exam-prep-economics-native.js\`: после завершения Paper крупная кнопка «Мой учебный план» прямо рядом с результатом. Отдельный экран с корректными русскими/узбекскими/английскими текстами, счетчиками правильных, оставшихся ошибок, изученных тем и повторно доказанных улучшений, разрез по Units, до 5 рекомендованных карточек; теория и ловушки из library; вопрос для самопроверки и ответ по раскрытию; «Отметить как изученное» с подтверждением сервера; повторная сдача Paper. Не использовать в UI внутреннюю терминологию разработки.
+   - \`exam-prep/exam-prep-economics-native.css\` — responsive 4 metric tiles → 2 on mobile, unit cards, study cards и симметричные действия.
+   - \`index.html\` — обновлены версии JS/CSS assets в текущем общем host, no Math route change, не отдельная Economics page.
+4. **ФАКТИЧЕСКИ ПРОГНАНЫ НЕ «АНАЛИЗ», А SQL E2E на синтетическом пользователе внутри полностью ROLLBACK транзакций**:
+   - P1 первый тест: **27/30**, 29 answered (2 wrong, 1 omitted), 3 конкретных wrong skills, индивидуальный 7-day plan, exact approved RU/EN Theory, mark studied и идемпотентный повтор; чужой user не может читать plan или отметить ошибку; следующий P1 retest **30/30** и доказанное \`retested_correct\` для навыка из Unit5; оставшиеся рекомендации пересчитаны правильно.
+   - P3 с \`SET LOCAL ROLE authenticated\`: 0/30 (только synthetic), до финализации план запрещён, после 30 missed items даёт 5 приоритетов A Level / UZ, маркер изучения save и undo, RU/EN локали; все SQL записи ROLLBACK.
+   - Priority rotation E2E на P1: 30 wrong, пять первоначальных приоритетов помечены studied, **следующие пять другие skill keys** появляются первыми, предыдущие не вытесняют работу над оставшимися.
+   - Все test auth.users, public.users, user_subjects, native exam attempts, study progress и временная активация program/papers **ROLLBACK**. Post-write: 0 synthetic users, 0 attempts, 0 study actions, Economics **draft/off**, Math current active 1.
+5. **ИНТЕРФЕЙСНЫЙ SYNTHETIC DOM E2E реально прогнан в JS isolate** на точной сохранённой версии GitHub frontend: \`economics enabled=false\` не монтируется; при mock-enabled запуск Paper, результат 29/30, кнопка «Мой учебный план», real lesson data card, отметка studied отражается в UI, повторный Paper CTA существует; в network mock реально вызваны name-matching start/get/history/study_plan/mark RPC. Новый JS и старый Math host успешно прошли JS-parser. Этот тест **не является тестом настоящего браузера на живом аккаунте**, так как Economics всё ещё выключен.
+6. **РЕЛИЗНОЕ СОСТОЯНИЕ ПРЕЖНЕЕ:** P1 approved36, P3 approved36; обе Paper draft, Economics draft/off; existing Math active1. Supabase private progress без клиентского доступа, native session answers не раскрываются до finish. Никакого открытия курса и сброса локального/серверного прогресса.
+
+### СЛЕДУЮЩАЯ НОВАЯ ЗАДАЧА
+
+- **Controlled-beta product go/no-go на действительном UI с разрешённым ТЕСТОВЫМ аккаунтом** через фактический browser/E2E: убедиться в корректности верстки RU/UZ/EN, старта/сохранения/обновления страницы/таймера/истории результатов/плана/mark и повторной проверки, не затронув реальных пользователей. Для этого заранее необходимо отдельное controlled beta allowlist / access grant: текущий native shell требует только Economics subject enrollment и глобальный publish, поэтому **простое выставление \`launch_enabled=true\` открыло бы Economics всем записанным на предмет ученикам**. Не открывать глобально без отдельной cohort gate. Math private beta не переписывать.
+- **Paper2/Paper4 written source/marking** — отдельный академический и инженерный workflow, не запускать их через MCQ оценку.
+- При следующем коде лучше исправлять наблюдаемые UX defects, не делать массовые повторные аудиты и не переписывать работающее.
+
+**Никакого automatic launch:** пока \`draft/off\` и тесты synthetic-only; подключение native frontend не означает, что Economics открыт ученикам. Написанный код уже в main; отдельный deploy не требуется при Git integration. Проверить Vercel READY + DB disabled.
