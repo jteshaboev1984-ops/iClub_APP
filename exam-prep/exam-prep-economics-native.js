@@ -322,7 +322,7 @@
     });
     state.busy=false;
     if(state.closed||state.id!==sessionId||state.token!==token)return;
-    if(!r.ok){await load();return;}
+    if(!r.ok){error(load);return;}
     // Server confirmed: update only the chosen item and navigate onward.
     // No extra 30-question GET after each saved answer is necessary.
     row.selected_index=choice;row.answered=true;
@@ -339,7 +339,12 @@
     const r=await rpc("iclub_exam_native_mcq_finish_v1",{p_session_id:sessionId});
     state.busy=false;
     if(state.closed||state.id!==sessionId||state.token!==token)return;
-    if(!r.ok){error(load);return;}await load();
+    if(!r.ok){error(load);return;}
+    await load();
+    // The diagnostic result leads directly to the personal study plan.
+    // The user can return to question-by-question review from that screen.
+    if(!state.closed&&state.id===sessionId&&state.data?.status==="finalized")
+      await showStudyPlan();
   }
   function mount({root,shell:config,language,onBack}={}){
     unmount();
