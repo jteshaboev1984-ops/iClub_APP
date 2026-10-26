@@ -1,0 +1,339 @@
+{
+  "contract_version": "economics_9708_AS2_P1_unit3_4_review_v0.1",
+  "program_key": "economics_9708",
+  "version_key": "economics_2026_2028_v1",
+  "paper_code": "P1",
+  "release_enabled": false,
+  "scope": "24 distinct existing published legacy MCQ staged for AS2 content review, NO Exam Prep approval or import",
+  "source": "read-only production public.questions, legacy Practice/Tour refs, canonical library skill titles; 2026-10-26",
+  "summary": {
+    "total": 24,
+    "unit3": 6,
+    "unit4": 18,
+    "legacy_published_active": 24,
+    "four_options_all_locales": 24,
+    "has_explanations_all_locales": 24,
+    "active_practice_overlap": 0,
+    "active_tour_overlap": 0,
+    "academic_exam_approved": 0
+  },
+  "selections": [
+    {
+      "legacy_question_id": 8702,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.1.2",
+      "skill_key": "ECON-9708-4.1.2-02",
+      "academic_topic": "GNI primary income arithmetic",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8703,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.4.3",
+      "skill_key": "ECON-9708-4.4.3-BASE",
+      "academic_topic": "nominal versus real GDP",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8704,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.3.9",
+      "skill_key": "ECON-9708-4.3.9-02",
+      "academic_topic": "productive capacity LRAS",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8705,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.3.2",
+      "skill_key": "ECON-9708-4.3.2-BASE",
+      "academic_topic": "AD components arithmetic",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8706,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.2.2",
+      "skill_key": "ECON-9708-4.2.2-BASE",
+      "academic_topic": "exports circular flow",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8710,
+      "syllabus_unit": 3,
+      "syllabus_point": "3.3.4",
+      "skill_key": "ECON-9708-3.3.4-02",
+      "academic_topic": "transfer redistribution",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8711,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.5.3",
+      "skill_key": "ECON-9708-4.5.3-02",
+      "academic_topic": "structural unemployment automation",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8713,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.3.9",
+      "skill_key": "ECON-9708-4.3.9-01",
+      "academic_topic": "SRAS adverse input price shock",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8714,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.1.3",
+      "skill_key": "ECON-9708-4.1.3-BASE",
+      "academic_topic": "GDP at basic/market prices arithmetic",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8715,
+      "syllabus_unit": 3,
+      "syllabus_point": "3.2.2",
+      "skill_key": "ECON-9708-3.2.2-01",
+      "academic_topic": "specific producer subsidy",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8718,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.5.3",
+      "skill_key": "ECON-9708-4.5.3-03",
+      "academic_topic": "cyclical unemployment",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8719,
+      "syllabus_unit": 3,
+      "syllabus_point": "3.3.1",
+      "skill_key": "ECON-9708-3.3.1-BASE",
+      "academic_topic": "income flow versus wealth stock",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8721,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.4.2",
+      "skill_key": "ECON-9708-4.4.2-BASE",
+      "academic_topic": "real GDP growth arithmetic",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8722,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.6.1",
+      "skill_key": "ECON-9708-4.6.1-BASE",
+      "academic_topic": "disinflation versus deflation",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8724,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.1.2",
+      "skill_key": "ECON-9708-4.1.2-01",
+      "academic_topic": "value added avoid double counting",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8728,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.5.2",
+      "skill_key": "ECON-9708-4.5.2-01",
+      "academic_topic": "unemployment rate arithmetic",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8732,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.3.9",
+      "skill_key": "ECON-9708-4.3.9-01",
+      "academic_topic": "SRAS lower input costs",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8737,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.3.10",
+      "skill_key": "ECON-9708-4.3.10-01",
+      "academic_topic": "move along AD",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8741,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.6.5",
+      "skill_key": "ECON-9708-4.6.5-BASE",
+      "academic_topic": "inflation fixed income distribution",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8742,
+      "syllabus_unit": 3,
+      "syllabus_point": "3.3.4",
+      "skill_key": "ECON-9708-3.3.4-04",
+      "academic_topic": "public provision equitable access",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8743,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.6.4",
+      "skill_key": "ECON-9708-4.6.4-BASE",
+      "academic_topic": "imported energy cost push",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8749,
+      "syllabus_unit": 3,
+      "syllabus_point": "3.2.5",
+      "skill_key": "ECON-9708-3.2.5-BASE",
+      "academic_topic": "buffer stock intervention",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8751,
+      "syllabus_unit": 3,
+      "syllabus_point": "3.2.4",
+      "skill_key": "ECON-9708-3.2.4-02",
+      "academic_topic": "binding minimum price",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    },
+    {
+      "legacy_question_id": 8786,
+      "syllabus_unit": 4,
+      "syllabus_point": "4.6.3",
+      "skill_key": "ECON-9708-4.6.3-BASE",
+      "academic_topic": "inflation purchasing power",
+      "exam_mapping_state": "not_created",
+      "content_review": "first_pass_economic_logic_no_detected_conflict",
+      "translations": "correct_option_and_question_read_once; other distractors_require_final_semantic_review",
+      "independent_mock_eligible": false,
+      "approved_for_exam_prep": false
+    }
+  ],
+  "excluded_near_duplicates": [
+    {
+      "id": 8709,
+      "overlap_with": 8704,
+      "reason": "Productive capacity / LRAS right shift: same tested inference"
+    },
+    {
+      "id": 8723,
+      "overlap_with": 8711,
+      "reason": "Structural unemployment skill mismatch after automation"
+    },
+    {
+      "id": 8725,
+      "overlap_with": "EC9708-AS1-ORIG-006",
+      "reason": "Merit-good underconsumption and information failure already in AS1"
+    },
+    {
+      "id": 8734,
+      "overlap_with": 8722,
+      "reason": "Disinflation with still-positive inflation"
+    }
+  ],
+  "caveats": [
+    "Some selected items exercise the same syllabus point with opposite shocks, e.g. 8713 and 8732 (SRAS); exclude from the same unseen timed mini-set pending item-equivalence audit.",
+    "Unit 3 count is only six; add targeted originals in a subsequent AS2 expansion to represent tax incidence, information policy, Gini and equity rather than overfitting the existing bank.",
+    "All of Unit 4 is not necessarily covered by 18 questions; a coverage matrix by 46 syllabus points is required before Paper 1 completion.",
+    "Not approved for Exam Prep. No answer keys or question texts stored in this PUBLIC GitHub repository."
+  ],
+  "next": "AS2 content QA decisions on existing 24 + original coverage gap only where needed. Retain separation of Practice/Tour/Exam mock pools."
+}
