@@ -1,0 +1,27 @@
+/* Economics native MCQ surface extends the existing Exam Prep host visual system. */
+.ep-native-economics { width: 100%; min-width: 0; }
+.ep-native-economics .ep-host-component-grid { margin: 14px 0; grid-template-columns: repeat(2, minmax(0,1fr)); }
+.ep-native-paper { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+.ep-native-paper .ep-host-btn { margin-top: auto; width: 100%; }
+.ep-native-header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin: 16px 0 12px; }
+.ep-native-timer { font-variant-numeric:tabular-nums; font-weight:700; }
+.ep-native-progress { font-size: .88rem; opacity: .82; margin: 12px 0; }
+.ep-native-question { display: flex; flex-direction: column; gap: 16px; min-width:0; }
+.ep-native-stem { font-size: 1.05rem; font-weight: 650; line-height: 1.62; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ep-native-options { display:grid; grid-template-columns:1fr; gap:10px; min-width:0; }
+.ep-native-option { display:flex; align-items:flex-start; gap:12px; padding:13px 14px; border:1px solid var(--ep-border,rgba(110,126,152,.3)); border-radius:12px; background:var(--ep-card,transparent); cursor:pointer; line-height:1.5; overflow-wrap:anywhere; transition:border-color .15s ease; }
+.ep-native-option input { width:17px; height:17px; flex:none; margin-top:3px; accent-color:var(--accent,#386dd1); }
+.ep-native-option:has(input:checked) { border-color:var(--accent,#386dd1); }
+.ep-native-option:has(input:disabled) { cursor:default; }
+.ep-native-option.is-right { border-color:#26865d; background:rgba(38,134,93,.08); }
+.ep-native-option.is-wrong { border-color:#bb5656; background:rgba(187,86,86,.08); }
+.ep-native-actions { display:flex; flex-wrap:wrap; justify-content:flex-start; gap:10px; margin-top:18px; }
+.ep-native-actions .ep-host-btn { min-height:42px; }
+.ep-native-result { margin:16px 0; font-size:1.4rem; font-variant-numeric:tabular-nums; }
+.ep-native-explanation { margin:0; padding:14px; background:rgba(120,132,150,.09); border-radius:12px; white-space:pre-wrap; line-height:1.6; overflow-wrap:anywhere; }
+@media(max-width:640px) {
+ .ep-native-economics .ep-host-component-grid { grid-template-columns:1fr; }
+ .ep-native-header { align-items:flex-start; flex-direction:column; }
+ .ep-native-option { padding:12px; }
+ .ep-native-actions .ep-host-btn { flex:1 1 140px; }
+}
