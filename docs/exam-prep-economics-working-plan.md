@@ -514,3 +514,36 @@ Economics program published+launch true, **только те же 3 Math beta us
 Economics P1/P3 по-прежнему published только для **трёх действующих Math controlled beta участников**, остальные не имеют доступа. P2/P4 остаются draft, Math legacy и все Practice/Tours не менялись. Это перенос визуального шаблона и порядка onboarding; **не полная образовательная parity многоэтапного Math Stage0/weekly tasks/retest**, не объявлять полным клоном. Реального визуального Cloud Browser QA на смартфоне/ученическом аккаунте ещё нет, synthetic tests и SQL tests не приравнивать к нему.
 
 **Следующая работа:** наблюдать реальный экран beta-ученика и исправлять точечные UX проблемы, исходя из Math-визуала. Не перестраивать дизайн повторно и не возвращать выбор Paper раньше диагностики.
+
+
+## 23. АКТУАЛЬНЫЙ CHECKPOINT — 27.10.2026: РЕШЕНИЯ ПО WRITTEN И PRACTICAL УЖЕ СУЩЕСТВУЮТ
+
+**Указание архитектора:** весь текущий прогресс Economics Exam Prep — его собственные beta-тестовые попытки, они не являются обязательными к сохранению при согласованном точечном тестовом сбросе; это не разрешение очищать другие предметы, реальных учеников, Mathematics, Practice, Tours или localStorage. В Exam Prep iClub приложение **самостоятельно не проверяет произвольные письменные и физические лабораторные работы**. Не предлагать разработку новой политики: готовые договорённости и документы уже есть в других чатах/репозитории/Library.
+
+### A. Единственный действующий продуктовый контракт письменной практики
+
+**SOURCE OF TRUTH:** `docs/exam-prep-written-learning-contract-v1.md` (Written Learning Contract v1.3, 22.10.2026), машинная спецификация `exam-prep/contracts/written-learning-contract-v1.json`. Дополняют:
+- `docs/exam-prep-written-stage2-closed-implementation-v1.md` — автономный controller, EN-only draft P2/P4, запрет раннего релиза;
+- `docs/exam-prep-written-stage3-private-backend-v1.md` — private written tasks/access/plans/plan_items, закрытые open/criteria/advance/status; проверить текущие миграции, RLS, без предположений о learner-facing API;
+- `docs/exam-prep-written-stage4-sequence-and-sources-v1.md` и `docs/exam-prep-written-stage4-private-ordering-v1.md` — разрешение/порядок плановых шагов, консолидированные функции и источники;
+- `docs/exam-prep-written-reasoning-rollout-closure-v1.md` — отдельный пример governance для Mathematics written reasoning, companion deterministic checks не являются оценкой письменного решения;
+- `exam-prep/academic/economics-9708-P2-written-requirements-EN-DRAFT.json` и `...-P4-written-requirements-EN-DRAFT.json` — **не опубликованные** требования к ответу; отсутствие статуса approved нельзя игнорировать.
+
+**ЗАКРЕПЛЁННАЯ ЛОГИКА:** условие → самостоятельная письменная работа вне приложения → «Критерии»/«Требования к ответу» **необязательно** → «Далее» к следующему разрешённому шагу плана. Никаких обязательных фото, текстового ввода эссе, самооценки, загрузок или отправки AI. «Далее» — только `advanced_in_plan_only`, не оценка, не mastery, не evidence correctness, без искусственного итогового score. Для timed Paper критерии, раскрывающие конкретный ответ, только после завершения. AI Tutor помогает понимать теорию/критерии, **не оценивает эссе**; Mentor Care может предоставить отдельную человеческую проверку только при реально активных праве и назначении. Нельзя навязывать ментора или создавать ложную очередь.
+
+**СТАТУС ГОТОВНОСТИ:** written server skeleton/частные операции уже есть, но наличие DRAFT P2/P4 и backend не делает полный student-facing written Exam Prep готовым. Нужны проверенные содержание, локализация, авторизованный доступ к plan flow и E2E согласно существующим Stage 2–4 документам. Никакой автоматической оценочной модели P2/P4.
+
+### B. Уже подготовленная политика практических/лабораторных заданий — предметные источники
+
+**Chemistry 9701:** персональная Library `iClub_Chemistry_9701_Рабочий_документ_для_новых_чатов_v1.6.docx` (23.10.2026), `iClub_Chemistry_Subject_Execution_Plan_v1.0_2026-10-10.docx` и `Chemistry_Tour_Map_v1.0_Audit_Report_2026-10-14.docx`. Отдельно от 7 Tours и обычных Paper/Skill находится **12 CROSS_TOUR practical records**, отнесённых к Paper 3 или Paper 5, с **DRAFT / no student access** и без подтверждённого mastery. Paper 3: настоящие эксперименты, наблюдения, измерения, таблицы, графики, риски/погрешности и выводы; Paper 5: самостоятельное планирование, анализ данных и оценка метода. Приложение помогает готовиться, но не утверждает, что ученик реально выполнил эксперимент или что лабораторная работа автоматически проверена. Не объявлять 12 draft items готовым release.
+
+**Biology 9700:** Library `iClub_Biology_Subject_Execution_Plan_v1.0_2026-10-10.docx`, `Biology_9700_Manifest_and_NO_GO_Report.md`, `Biology_9700_FULL_A_LEVEL_2027_Paper_Component_Gates.csv`. Биологический Paper 3 включает реальные practical skills (эксперимент, микроскоп, научный рисунок/наблюдение), Paper 5 — планирование, анализ и оценку. MCQ/схемы/симуляция и факт «прошёл шаг» не заменяют физической лабораторной практики. Biology в этих документах OFFLINE/NO-GO, без разрешения на автоматическую публикацию.
+
+**Раздельные evidence/status:** objective MCQ (можно оценивать по verified key) ≠ самостоятельно выполненный письменный/лабораторный шаг ≠ проверенное человеком практическое/письменное evidence. Приготовленные критерии, explanatory examples и расчёты допускаются лишь по действующим subject-specific approvals. Полная готовность ко всем компонентам Cambridge не выводится из P1/P3 MCQ. Для Biology/Chemistry следовать их предметным gate-документам, не копировать Economics 9708 MCQ-only механизм.
+
+### C. Что разрешено реализовывать дальше
+
+- Переносить из Mathematics **экранные шаблоны** и общее управление планом, но содержимое письменных/practical шагов брать из названных документов и approved versioned source, без нового дизайна и новой выдуманной grading-политики.
+- Перед любым включением written/practical режима проверить актуальные private statuses/gates академического QA и обеспечить порядок, idempotent «Далее» и авторизацию; не воспринимать старые DRAFT/NO-GO документы как разрешение публикации.
+- Все изменения делать точечно. **В этом checkpoint никакого DELETE, очистки прогресса и запуска письменных или лабораторных заданий не выполнялось.**
+
