@@ -61,7 +61,13 @@
     top.append(e("span","ep-host-kicker","CAMBRIDGE 9708"));
     if(state.view!=="home")top.append(btn("← "+t().back,goBack,true));
     root.append(top,e("h2","ep-host-title",t().title));
-    state.root.replaceChildren(root);return root;
+    const previous=state.root.firstElementChild;
+    state.root.replaceChildren(root);
+    // Like the Mathematics component screens: a new view begins at the top,
+    // not at the scroll position of a long answer or a previous lesson.
+    if(previous&&state.root.isConnected&&typeof state.root.scrollIntoView==="function")
+      state.root.scrollIntoView({block:"start",behavior:"auto"});
+    return root;
   };
   const stop=()=>{if(state.timer!==null){clearInterval(state.timer);state.timer=null;}};
   function unmount(){
