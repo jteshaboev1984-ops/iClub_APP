@@ -184,6 +184,32 @@ async function testBrowserGoTrue({edge,answer,receiptId,ownerId,providerCalls}){
     assert.equal(requests.filter(x=>x.operation==="resume").length,1);
     assert.equal(requests.filter(x=>x.operation==="resume_ack"&&x.request_id===receiptId).length,1);
     assert.equal(providerCalls(),1,"Browser recovery generated new model answer");
+    // Disposable quota window rollover (never applied to real accounts).
+    // Now ask a NEW question through the genuine signed-in browser -> Edge.
+    pg("UPDATE private.iclub_ai_v21_beta_usage "+
+      "SET started_at=clock_timestamp()-interval '6 hours' "+
+      "WHERE user_id='"+ownerId+"'; SELECT 'TEST_WINDOW_RESET'::text;");
+    await page.locator("[data-global-ai-input]").fill("Что означает мой результат 70%?");
+    await page.locator("[data-global-ai-send]").click();
+    await page.waitForFunction(expected=>{
+      const text=document.querySelector("[data-global-ai-messages]")?.textContent||"";
+      return text.split(expected).length-1===2;
+    },answer,{timeout:14000});
+    for(let tries=0;tries<45&&!requests.some(x=>x.operation==="ack");tries++)
+      await new Promise(ok=>setTimeout(ok,100));
+    const freshAsk=requests.find(x=>x.operation==="ask");
+    assert(freshAsk,"Genuine browser did not send a new Practice question");
+    assert(requests.some(x=>x.operation==="ack"&&x.request_id===freshAsk.request_id),
+      "Real browser did not ACK its newly generated answer");
+    assert.equal(providerCalls(),2,"Genuine browser request must use one provider dispatch");
+    const newReceipt=JSON.parse(pg("SELECT json_build_object("+
+      "'money',(SELECT state FROM private.iclub_ai_v21_freeform_budget_ledger "+
+        "WHERE request_id='"+freshAsk.request_id+"'),"+
+      "'quota',(SELECT state FROM private.iclub_ai_v21_freeform_quota_holds "+
+        "WHERE request_id='"+freshAsk.request_id+"'),"+
+      "'receipt',(SELECT status FROM private.iclub_ai_practice_receipts_v1 "+
+        "WHERE request_id='"+freshAsk.request_id+"'))::text;"));
+    assert.deepEqual(newReceipt,{money:"charged",quota:"completed",receipt:"acknowledged"});
     assert.equal(await page.evaluate(()=>localStorage.length),0,"AI answer stored on device");
     await page.evaluate(()=>window.sb.auth.signOut());
     const foreign=await page.evaluate(async()=>{
@@ -199,12 +225,12 @@ async function testBrowserGoTrue({edge,answer,receiptId,ownerId,providerCalls}){
       const t=document.querySelector("[data-global-ai-messages]")?.textContent||"";
       return !t.includes("Восстановлен ответ");
     },null,{timeout:9000});
-    assert.equal(providerCalls(),1,"Foreign account dispatched the provider");
+    assert.equal(providerCalls(),2,"Foreign account dispatched the provider");
     assert.deepEqual(escaped,[],"Real Auth browser contacted external site");
     assert.deepEqual(browserErrors,[],"Browser script errors");
     assert(authPaths.includes("/auth/v1/token")&&authPaths.includes("/auth/v1/user"),
       "Browser must use actual GoTrue password and /user endpoints");
-    console.log("PASS REAL Supabase JS browser sign-in / GoTrue JWT / unified Tutor PC4 recovery & ACK / foreign account isolation");
+    console.log("PASS REAL Supabase JS browser sign-in / GoTrue JWT / Tutor recovery + new typed question -> actual Edge / ACK / foreign account isolation");
     console.log("PASS real Edge + database, local-only network, zero browser answer storage, no model replay");
   }finally{
     if(browser)await browser.close();
