@@ -145,7 +145,7 @@
       if(status)status.textContent=label;
     }
   }
-  function openLevel(code){
+  function openLevel(code,shouldRefresh=true){
     if(state.closed||state.busy||!["P1","P3"].includes(code))return;
     ++state.token;stop();state.view="level";state.paper=code;
     const view=shell();if(!view)return;
@@ -174,6 +174,18 @@
     if(latestPaper)other.append(btn(t().viewResult,()=>openHistory(latestPaper,false),true));
     other.append(btn(t().viewHistory,()=>openHistoryList(code),true));
     view.append(other);
+    // The server remains authoritative after another device or a newly finished exam.
+    // An old local list must never cause the next action to ignore saved progress.
+    if(shouldRefresh)refreshLevelHistory(code,state.token);
+  }
+  async function refreshLevelHistory(code,token){
+    const result=await rpc("iclub_exam_native_mcq_history_v1",{p_paper_code:null});
+    if(state.closed||state.view!=="level"||state.paper!==code||
+       state.token!==token||!result.ok||!Array.isArray(result.sessions))return;
+    const before=JSON.stringify(state.history.filter(x=>x.paper_code===code));
+    const after=JSON.stringify(result.sessions.filter(x=>x.paper_code===code));
+    state.history=result.sessions;
+    if(before!==after)openLevel(code,false);
   }
   function openHistoryList(code=null,limit=8){
     if(state.closed||state.busy)return;
