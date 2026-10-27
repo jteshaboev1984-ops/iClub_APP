@@ -59,6 +59,13 @@ async function main(){
  let server,deno,browser,temporary;
  const errors=[];
  try{
+  // Rebind the disposable PC1 owner after the preceding genuine GoTrue test.
+  // The hard 127.0.0.1 database precondition above forbids production writes.
+  const restored=spawnSync('psql',['-X','-v','ON_ERROR_STOP=1','-q','-c',
+   "UPDATE private.iclub_ai_practice_context_v1_control "+
+   "SET owner_user_id='"+USER+"'::uuid, enabled=true WHERE singleton=1;"],
+   {encoding:'utf8',timeout:5000,env:process.env});
+  if(restored.status!==0)throw Error('Isolated owner restore failed '+String(restored.stderr).slice(0,320));
   server=http.createServer(async(req,res)=>{
    try{
     const route=new URL(req.url,'http://127.0.0.1').pathname;
