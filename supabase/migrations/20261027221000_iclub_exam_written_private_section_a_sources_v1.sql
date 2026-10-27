@@ -143,7 +143,9 @@ BEGIN
 
   -- Only Section A currently requires a data-response source.
   -- Non-Section-A practice remains backward compatible.
-  IF split_part(v_base->>'task_key','.',2) <> 'A' THEN
+  IF v_base->>'program_key'<>'economics_9708'
+    OR v_base->>'paper_code' NOT IN ('P2','P4')
+    OR split_part(v_base->>'task_key','.',2)<>'A' THEN
     RETURN v_base;
   END IF;
 
@@ -245,7 +247,10 @@ CREATE OR REPLACE FUNCTION private.iclub_exam_written_source_ready_v1(
 ) RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path=''
 AS $function$
- SELECT CASE WHEN split_part(p_task_key,'.',2)<>'A' THEN true ELSE EXISTS(
+ SELECT CASE WHEN p_program_key<>'economics_9708'
+    OR split_part(p_task_key,'.',1) NOT IN ('P2','P4')
+    OR split_part(p_task_key,'.',2)<>'A'
+  THEN true ELSE EXISTS(
    SELECT 1 FROM private.iclub_exam_written_source_bindings_v1 b
    JOIN private.iclub_exam_written_source_cards_v1 s
      ON s.program_key=b.program_key AND s.version_key=b.version_key
