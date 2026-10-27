@@ -452,3 +452,36 @@ Math: setup→staged diagnostics→placement→personal plan/weekly task→corre
 Economics program published+launch true, **только те же 3 Math beta users**; P1/P3 published, P2/P4 draft. Вновь подключённые UI assets `index.html` с версией native-econ-10-plan-checked (после коррекции). Vercel READY проверить. Избегать изменения real production learner attempts: 1 ранее завершённая Paper сохранена.
 
 **Следующие приоритеты:** (а) реальная браузерная UX-проверка у beta user с RU/UZ/EN, refresh/back/offline, сохранённые 12 и 30-item прогрессы; (б) dedicated corrections and delayed independent retest using newly academically validated alternate questions; (в) P2/P4 written marking; (г) общий native adapter для следующих предметов при неизменном Math legacy. НЕ дублировать диагностику или таблицы.
+
+## 21. АКТУАЛЬНЫЙ CHECKPOINT 27.10.2026 — ЭКРАНЫ ПО МАТЕМАТИЧЕСКОМУ ЭТАЛОНУ, НЕ «ПОЛОТНО»
+
+**НАЧИНАТЬ С РАЗДЕЛА 21, НЕ возвращаться к прошлым общим аудитам. Владелец сообщил, что Economics Exam Prep появился, но вся структура была одной длинной страницей.**
+
+### Источник сравнения и причина проблемы
+
+В действующем `exam-prep/exam-prep-live.js` Mathematics `renderDashboard()` формирует compact dashboard с двумя component cards. `openComponentHome()` загружает отдельный экран компонента и authoritative server progress; `openPlan()`/`renderPlan()` отдельный экран недельного плана; session и diagnostic отдельные одноцелевые экраны. Economics раньше подряд рендерил `lobby`: профиль/редактор, P1/P3, подробную историю, а `renderStudyPlan`: 4 метрики, 6 Units, сразу 5 полных уроков. Это неверная продуктовая композиция.
+
+### Что ИЗМЕНЕНО В GitHub main (только UI/CSS и docs)
+
+1. `exam-prep/exam-prep-economics-native.js`: экран `home` теперь компактный обзор `ep-live-dashboard-intro` с двумя равными AS/P1 и A/P3 карточками, показывающими server-history статус и действие `Открыть`. Ссылки `Настройка подготовки` и `История попыток` отдельно; отсутствие тяжёлых деталей на главной.
+2. Экран `level` (каждый P1/P3 отдельно): одно primary next action — возобновить live attempt / открыть план последней завершённой диагностики / начать диагностику (по приоритету). Отдельно secondary actions: полный Paper 30, повтор диагностики, последний результат, история компонента. Прогресс перепроверяется чтением existing history RPC при возврате/смене устройства, с token guard от stale responses.
+3. Экран `settings` отдельно, собственный Economics saved profile; сохранение возвращает на компактный home. Math `exam profile` НЕ меняется.
+4. Экран `history` отдельно, первые 8 строк + `Показать ещё`, paper-filter при входе из конкретного уровня. Историческая реальная P1 завершённая попытка сохраняется. Назад из filtered history возвращает именно в тот же уровень, иначе home.
+5. Экраны `exam`: одна задача, timer + progress, one-tap server save, previous/next and finish. После done отдельный экран `plan`. При переходе назад не удаляется незавершённая server attempt.
+6. Экран `plan`: теперь только summary metrics, 1 principal topic CTA и краткий список остальных 4, Unit breakdown в collapsed `details`. **Никаких пяти открытых уроков в ленте.** Экран `lesson`: одна конкретная тема, approved theory, trap, self-check, studied, далее/назад. При mark studied server authoritative plan refreshed, historical score untouched.
+7. `exam-prep/exam-prep-economics-native.css`: scoped визуал переиспользует Math `ep-live-dashboard-intro`, `ep-live-grid`, `ep-live-card`, `ep-host-shell`, `ep-host-btn`, ограниченная ширина, симметричные карточки, mobile 1-column, отдельные compact actions. `shell()` при навигации возвращает прокрутку к началу текущего Exam Prep; не нужно скроллить вверх вручную из старого урока.
+8. Тот же `#exam-prep-host-root`, Economics native adapter; Math `exam-prep-live.js`, `exam-prep-api.js`, Supabase таблицы и RPC в этом этапе **не редактировали**. Бета осталась прежней.
+
+### ТЕСТЫ в текущем ходе
+
+- JS source parse PASS. Synthetic DOM на настоящей версии Github source: home ровно 2 карточки, 0 истории и длинных lesson text; P3 active Paper 30 восстановлен из private server own get, one-tap save+next; back to level; filtered P3 history одна запись и назад на P3; P1 завершённая диагностика даёт primary учебный план; план скрывает все FULL THEORY; выбор темы открывает только одно объяснение; назад→план→уровень→главная; settings отдельно. PASS.
+- Три локали RU/UZ/EN: `Открыть` / `Ochish` / `Open` и соответствующие `Назад`, возвращение из уровня на 2-card home, disabled Economics shell не монтируется. PASS.
+- Производственное визуальное E2E с реальной browser шириной и личным beta login этим тестом НЕ подтверждено. Не утверждать обратное. Новые данные пользователей в этом этапе не писались.
+
+### Общий продуктовый стандарт
+
+`docs/exam-prep-multisubject-visual-functional-parity-v1.md` пополнен **экранным контрактом v2**: один host для Mathematics/Economics/будущих предметов, один фокус действия на экран, не длинная непрерывная лента, stage-specific конфигурация в зависимости от предмета, точный back, mobile/RU/UZ/EN.
+
+### Далее
+
+Не перерисовывать снова всё: проверить на реальном beta browser как открываются P1/P3/dashboard/profile/diagnostic/plan/lesson/history, особенно mobile dark/light and refresh. Исправлять только конкретные баги. Дальше предметная содержательная parity: независимые retest items, correction authorization, P2/P4 written marking; они не решаются одной перестановкой UI.
