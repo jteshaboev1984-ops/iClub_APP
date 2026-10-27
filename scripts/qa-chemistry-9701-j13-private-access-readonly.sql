@@ -15,6 +15,10 @@ SELECT
   AND tutor_owner_go_at IS NULL AND approved_source_md5 IS NULL
   FROM private.iclub_exam_chemistry_j13_learning_control_v1 WHERE id=1) AS j13_all_off,
  (SELECT count(*)=0 FROM private.iclub_exam_chemistry_j13_a_level_permissions_v1) AS a_approvals_empty,
+ (SELECT count(*)=0 FROM private.iclub_exam_chemistry_j13_tutor_permissions_v1) AS tutor_approvals_empty,
+ NOT has_table_privilege('authenticated','private.iclub_exam_chemistry_j13_tutor_permissions_v1','SELECT') AS tutor_personal_acl_private,
+ (SELECT pg_get_functiondef('public.iclub_exam_chemistry_tutor_source_v1(text,text)'::regprocedure)
+   LIKE '%FROM private.iclub_exam_chemistry_j13_tutor_permissions_v1%') AS tutor_requires_individual_approval,
  (SELECT count(*)=6 FROM private.iclub_subject_library_cross_tour_v1
   WHERE subject_key='chemistry' AND paper_code='P3' AND level_code='AS') AS p3_as_six,
  (SELECT count(*)=6 FROM private.iclub_subject_library_cross_tour_v1
