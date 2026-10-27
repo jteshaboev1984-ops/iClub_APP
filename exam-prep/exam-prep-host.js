@@ -510,6 +510,7 @@
     internal.economicsNative?.unmount?.();
     internal.chemistryNative?.unmount?.();
     internal.chemistryEntryNative?.unmount?.();
+    internal.chemistryRecheckNative?.unmount?.();
     const shouldRestoreFocus = state.open && (showable() || (state.subjectKey && state.subjectKey !== MATHEMATICS_KEY));
     state.open = false;
     state.consentBusy = false;
@@ -690,6 +691,7 @@
                          state.chemistryEntryShell?.enabled === true)) {
         internal.chemistryNative?.setLanguage?.(state.language);
         internal.chemistryEntryNative?.setLanguage?.(state.language);
+        internal.chemistryRecheckNative?.setLanguage?.(state.language);
         setEntryVisible(true);
         return true;
       }
