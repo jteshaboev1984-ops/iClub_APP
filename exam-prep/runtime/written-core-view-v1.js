@@ -93,7 +93,7 @@
    // Sources are rendered ONLY from the guarded task-open server response.
    // A Section A question without its approved locale-matched source is not shown.
    function sourcePanel(item){
-     if(String(item.task_key||"").split(".")[1]!=="A")return null;
+     if(item.program_key!=="economics_9708"||!["P2","P4"].includes(item.paper_code)||String(item.task_key||"").split(".")[1]!=="A")return null;
      const s=item.source;
      if(!s||s.language!==language||typeof s.title!=="string"||!s.title.trim()
        ||!Array.isArray(s.paragraphs)||!s.paragraphs.length
