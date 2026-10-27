@@ -13,6 +13,31 @@ const JWT="fake-token-"+"a".repeat(64),
  ANON="fake-anon-"+"b".repeat(64),
  SERVICE="fake-service-"+"c".repeat(64),MODELKEY="fake-model-"+"d".repeat(64);
 const ID="eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",PORT=18769;
+const GOTRUE=process.env.ICLUB_AUTH_GOTRUE_URI||"";
+let realOwner=null,realOther=null;
+const uuidRe=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+async function realLogin(label){
+ if(!/^http:\/\/127\.0\.0\.1:\d+$/.test(GOTRUE))
+  throw Error("Refused non-loopback isolated Auth endpoint");
+ const email="iclub-practice-ci-"+label+"@example.com";
+ const password="Temporary-Only-GoTrue-CI-"+label+"-2026!";
+ const signup=await fetch(GOTRUE+"/signup",{method:"POST",
+  headers:{"content-type":"application/json"},body:JSON.stringify({email,password})});
+ if(!signup.ok)throw Error("Isolated GoTrue signup failed "+signup.status+
+   " "+(await signup.text()).slice(0,180));
+ const signIn=await fetch(GOTRUE+"/token?grant_type=password",{
+  method:"POST",headers:{"content-type":"application/json"},
+  body:JSON.stringify({email,password})});
+ if(!signIn.ok)throw Error("Isolated GoTrue password grant failed "+signIn.status+
+  " "+(await signIn.text()).slice(0,180));
+ const {access_token:token}=await signIn.json();
+ if(typeof token!=="string"||token.length<24)throw Error("No real Auth JWT");
+ const verified=await fetch(GOTRUE+"/user",{headers:{authorization:"Bearer "+token}});
+ if(!verified.ok)throw Error("Real GoTrue rejected issued token");
+ const user=await verified.json();
+ if(!uuidRe.test(user.id)||user.role!=="authenticated")throw Error("Invalid GoTrue principal");
+ return {id:user.id,token};
+}
 const spec={
  get_iclub_ai_practice_context_v1_service:["p_user_id:uuid","p_attempt_id:bigint","p_intent:text","p_question_id:bigint","p_locale:text"],
  iclub_ai_practice_freeform_pc3_gate_service:[],
@@ -61,6 +86,10 @@ const respond=(res,status,obj)=>{res.writeHead(status,{"content-type":"applicati
 async function main(){
  let server,deno,tmp;
  try{
+  if(GOTRUE){
+   [realOwner,realOther]=await Promise.all([realLogin("owner"),realLogin("other")]);
+   assert.notEqual(realOwner.id,realOther.id);
+  }
   server=http.createServer(async(req,res)=>{
    try{
     const loc=new URL(req.url,"http://localhost").pathname;
@@ -70,6 +99,11 @@ async function main(){
       return respond(res,200,{id:USER,role:"authenticated"});
      if(req.headers.authorization==="Bearer "+OTHER_JWT)
       return respond(res,200,{id:OTHER_USER,role:"authenticated"});
+     if(GOTRUE){
+      const upstream=await fetch(GOTRUE+"/user",{
+       headers:{authorization:req.headers.authorization||""}});
+      return respond(res,upstream.status,await upstream.json());
+     }
      return respond(res,401,{error:"auth"});
     }
     if(loc==="/provider"){
@@ -314,6 +348,66 @@ async function main(){
   assert.equal(disabled.status,403);
   assert.equal(disabled.body.reason,"not_released");
   assert.equal(calls,4);
+  if(realOwner&&realOther){
+   // Real local GoTrue users, signed tokens; all source rows disposable.
+   const owner=realOwner.id;
+   pg("INSERT INTO public.user_subjects(user_id,subject_id) "+
+      "VALUES('"+owner+"'::uuid,5); "+
+      "INSERT INTO private.iclub_ai_v21_beta_members"+
+      "(user_id,enabled,consent_version,consent_at) "+
+      "VALUES('"+owner+"'::uuid,true,'global_ai_beta_v21',now()); "+
+      "INSERT INTO public.practice_attempts "+
+      "VALUES(701,'"+owner+"'::uuid,5,7,70,false,NULL); "+
+      "INSERT INTO public.practice_sessions_v4 "+
+      "VALUES(701,'"+owner+"'::uuid,5,701,2,'finalized',now(),11,"+
+      "ARRAY[1,2,3,4,5,6,7,8,9,10]::bigint[]); "+
+      "INSERT INTO public.practice_session_answers_v4 "+
+      "SELECT 701,g,now(),g NOT IN(2,6,9) FROM generate_series(1,10) AS g; "+
+      "UPDATE private.iclub_ai_practice_freeform_pc3_control SET enabled=true "+
+      "WHERE singleton=1; SELECT 'REAL_AUTH_FIXTURE'::text;");
+   const beforeRealCalls=calls;
+   const foreign=await send("ask",Q,
+      "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      {token:realOther.token,attempt:701});
+   assert.equal(foreign.status,403,JSON.stringify(foreign));
+   assert.equal(foreign.body.reason,"context_or_source_not_ready");
+   const forged=await send("ask",Q,
+      "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      {token:realOwner.token.slice(0,-6)+"xxxxxx",attempt:701});
+   assert.equal(forged.status,401,JSON.stringify(forged));
+   assert.equal(calls,beforeRealCalls);
+   const id="cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+   const owned=await send("ask",Q,id,
+      {token:realOwner.token,attempt:701});
+   assert.equal(owned.status,200,JSON.stringify(owned));
+   assert.equal(owned.body.mode,"generated");
+   assert.equal(owned.body.request_id,id);
+   assert.equal(calls,beforeRealCalls+1);
+   const foreignRecovery=await send("resume",null,
+      "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      {token:realOther.token,attempt:701});
+   assert.equal(foreignRecovery.status,409,JSON.stringify(foreignRecovery));
+   const recovery=await send("resume",null,
+      "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeef",
+      {token:realOwner.token,attempt:701});
+   assert.equal(recovery.status,200,JSON.stringify(recovery));
+   assert.equal(recovery.body.request_id,id);
+   assert.equal(calls,beforeRealCalls+1);
+   const acknowledged=await send("resume_ack",null,id,
+      {token:realOwner.token,attempt:701});
+   assert.equal(acknowledged.status,200,JSON.stringify(acknowledged));
+   const audit=JSON.parse(pg("SELECT json_build_object("+
+      "'money',(SELECT state FROM private.iclub_ai_v21_freeform_budget_ledger "+
+       "WHERE request_id='"+id+"'),"+
+      "'quota',(SELECT state FROM private.iclub_ai_v21_freeform_quota_holds "+
+       "WHERE request_id='"+id+"'),"+
+      "'receipt',(SELECT status FROM private.iclub_ai_practice_receipts_v1 "+
+       "WHERE request_id='"+id+"'))::text;"));
+   assert.deepEqual(audit,{money:"charged",quota:"completed",receipt:"acknowledged"});
+   console.log("PASS genuine isolated Supabase GoTrue: 2 password signins and signed JWTs, forged JWT blocked, foreign Practice/replay denied, owned AI answer/ACK");
+   pg("UPDATE private.iclub_ai_practice_freeform_pc3_control "+
+      "SET enabled=false WHERE singleton=1; SELECT 'OFF'::text;");
+  }
   assert.deepEqual(failures,[]);
   console.log("PASS PC3 real Deno Edge + PC1/PC3/PC4 Postgres + five canonical money/quota RPCs + synthetic provider only");
   console.log("PASS isolated verified principal separation, cross-account replay denial, bad JWT/origin/attempt; reload recovery, quota compensation, consent revocation and emergency OFF");
