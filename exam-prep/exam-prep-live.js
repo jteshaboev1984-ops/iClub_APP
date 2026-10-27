@@ -570,13 +570,29 @@
     return c.notStarted;
   }
 
+  // A delayed retest requires an actual server due time. Missing, malformed or
+  // timezone-less values are NOT permission to start. The server still owns
+  // final authorisation and independently checks academic due status.
+  function retestDueTime(item) {
+    const value = typeof item?.due_at === "string" ? item.due_at.trim() : "";
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(value)) return null;
+    const due = Date.parse(value);
+    return Number.isFinite(due) ? due : null;
+  }
+
+  function planItemCanStart(item, now = Date.now()) {
+    if (item?.item_type !== "retest") return true;
+    const due = retestDueTime(item);
+    return due !== null && due <= now;
+  }
+
   function planSelection(plan) {
     const rows = (Array.isArray(plan?.items) ? plan.items : [])
       .filter(item => item && item.status === "pending" && ["learning", "correction", "retest", "mixed_transfer"].includes(item.item_type))
       .sort((a, b) => Number(a.priority_order || 999) - Number(b.priority_order || 999));
     const now = Date.now();
-    const ready = rows.find(item => item.item_type !== "retest" || !item.due_at || !Number.isFinite(Date.parse(item.due_at)) || Date.parse(item.due_at) <= now) || null;
-    const waiting = rows.find(item => item.item_type === "retest" && item.due_at && Number.isFinite(Date.parse(item.due_at)) && Date.parse(item.due_at) > now) || null;
+    const ready = rows.find(item => planItemCanStart(item, now)) || null;
+    const waiting = rows.find(item => item.item_type === "retest" && !planItemCanStart(item, now)) || null;
     return { ready, waiting };
   }
 
@@ -617,10 +633,8 @@
     }
     bound.sort((a, b) => Number(a.item.priority_order) - Number(b.item.priority_order));
     const now = Date.now();
-    const readyPair = bound.find(({ item }) =>
-      item.item_type !== "retest" || !item.due_at || !Number.isFinite(Date.parse(item.due_at)) || Date.parse(item.due_at) <= now) || null;
-    let waiting = bound.find(({ item }) =>
-      item.item_type === "retest" && item.due_at && Number.isFinite(Date.parse(item.due_at)) && Date.parse(item.due_at) > now)?.item || null;
+    const readyPair = bound.find(({ item }) => planItemCanStart(item, now)) || null;
+    let waiting = bound.find(({ item }) => item.item_type === "retest" && !planItemCanStart(item, now))?.item || null;
     if (!waiting) {
       const waitingGoal = weeklyProgress.goals
         .filter(goal => goal?.component_code === component && goal.status === "waiting_retest" &&
@@ -931,8 +945,11 @@
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy(); const items = Array.isArray(plan.items) ? plan.items : [];
     const rows = items.length ? items.map(item => {
-      const due = item.due_at ? new Date(item.due_at) : null;
-      const future = item.item_type === "retest" && due && due.getTime() > Date.now();
+      const dueMs = retestDueTime(item);
+      const due = item.item_type === "retest"
+        ? (dueMs === null ? null : new Date(dueMs))
+        : (item.due_at && Number.isFinite(Date.parse(item.due_at)) ? new Date(item.due_at) : null);
+      const future = item.item_type === "retest" && !planItemCanStart(item);
       const actionable = ["learning","correction","retest","mixed_transfer"].includes(item.item_type) && item.status === "pending";
       const button = actionable ? `<button class="ep-live-btn" type="button" data-ep-live-plan-item="${Number(item.priority_order)}" ${future ? "disabled" : ""}>${esc(future ? c.notDue : c.startTask)}</button>` : "";
       return `<div class="ep-live-plan-item"><div><strong>${esc(itemTypeLabel(item.item_type))}</strong>${due ? `<div class="ep-live-due">${esc(formatDateTime(due))}</div>` : ""}</div>${button}</div>`;
@@ -1443,9 +1460,12 @@
       const value=rootEl()?.querySelector('input[name="ep_live_text_answer"]')?.value?.trim();
       if (!value) return; payload={answer:value};
     }
-    // Diagnostic and timed/paper sessions retain their own existing contracts.
-    if (window.iClubExamPrepWeeklyFlowEnabled===true && ['plan','component'].includes(state.returnView?.kind)
-        && !['diagnostic','timed','paper'].includes(state.session.session_type)) {
+    // Diagnose and study safely: a lost submit acknowledgment must not erase
+    // an unconfirmed answer. Keep timed/full-paper response handling separate.
+    const diagnostic = state.session.session_type === 'diagnostic';
+    const study = ['plan','component'].includes(state.returnView?.kind) &&
+      ['learning','mixed','retest'].includes(state.session.session_type);
+    if (diagnostic || study) {
       const pending={sessionId:state.session.session_id,component:state.session.component_code,
         itemOrder:Number(item.item_order),payload,idempotencyKey:key('ep-answer'),
         elapsedMs:Math.max(0,Date.now()-state.itemStartedAt),retryAllowed:false};
