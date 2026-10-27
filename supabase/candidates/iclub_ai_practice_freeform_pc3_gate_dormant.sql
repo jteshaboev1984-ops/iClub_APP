@@ -21,7 +21,9 @@ BEGIN
   JOIN private.iclub_ai_practice_context_v1_control pc1 ON pc1.singleton=pc3.singleton
   JOIN private.iclub_ai_v21_beta_control beta ON beta.singleton=pc3.singleton
   JOIN private.iclub_ai_v21_freeform_budget_control money ON money.singleton=pc3.singleton
-  WHERE pc3.singleton=1 AND pc3.enabled AND pc4.enabled AND pc1.enabled AND pc1.owner_user_id IS NOT NULL
+  WHERE pc3.singleton=1 AND pc3.enabled AND pc4.enabled AND pc1.enabled AND (pc1.owner_user_id IS NOT NULL OR EXISTS(
+    SELECT 1 FROM private.iclub_ai_practice_beta_grants_v1 g WHERE g.enabled
+   ))
     AND beta.beta_enabled AND beta.prepared_enabled
     AND NOT beta.generation_enabled AND beta.approved_release<>'none'
     AND money.enabled AND money.owner_permitted AND money.include_free_beta
