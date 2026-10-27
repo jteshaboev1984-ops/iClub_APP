@@ -168,7 +168,11 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_pc3_real_quota_rpcs_isolated.sql
-          ICLUB_AUTH_GOTRUE_URI=http://127.0.0.1:18770 node scripts/practice-ai-freeform-canonical-e2e.cjs
+          if ! ICLUB_AUTH_GOTRUE_URI=http://127.0.0.1:18770 node scripts/practice-ai-freeform-canonical-e2e.cjs; then
+            echo 'Genuine isolated Auth server diagnostics (no credentials):'
+            docker logs --tail 100 iclub-ai-gotrue-ci
+            exit 1
+          fi
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_pc4_financial_audit_isolated.sql
       - name: Chromium preview with mocked backend (no external traffic)
         shell: bash
