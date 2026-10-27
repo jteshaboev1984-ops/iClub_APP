@@ -148,7 +148,7 @@
  function draw(){
   ++state.seq;const p=screen(),d=state.data;if(!p||!d)return;
   const finalized=d.status==="finalized";const top=node("div",null,"ep-native-header");
-  top.append(node("strong","RECHECK · AS"));
+  top.append(node("strong","Cambridge AS · Chemistry"));
   const time=node("span",null,"ep-native-timer");top.append(time);p.append(top);
   if(finalized){
    clearClock();p.append(node("h3",t().result+": "+d.score+" / 22","ep-native-result"),
