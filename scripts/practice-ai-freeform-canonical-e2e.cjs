@@ -508,6 +508,9 @@ async function main(){
   if(realOwner&&realOther){
    // Real local GoTrue users, signed tokens; all source rows disposable.
    const owner=realOwner.id;
+   pg("UPDATE private.iclub_ai_practice_context_v1_control "+
+      "SET owner_user_id='"+owner+"'::uuid WHERE singleton=1; "+
+      "SELECT 'REAL_OWNER_SCOPED'::text;");
    pg("INSERT INTO public.user_subjects(user_id,subject_id) "+
       "VALUES('"+owner+"'::uuid,5); "+
       "INSERT INTO private.iclub_ai_v21_beta_members"+
