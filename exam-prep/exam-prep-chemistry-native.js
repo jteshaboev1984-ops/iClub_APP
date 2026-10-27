@@ -221,7 +221,14 @@
       {p_session_id:s,p_item_order:i+1,p_choice:choice});
     if(state.closed||n!==state.seq||state.session!==s)return;
     state.busy=false;
-    if(!r.ok){state.localeQueued=false;showError(load);return;}
+    if(!r.ok){
+      state.localeQueued=false;
+      // The server deadline is authoritative; finalise instead of leaving the
+      // learner on an expired answer-saving error screen.
+      if(r.code==="attempt_closed_or_expired"){await finish(true);return;}
+      showError(load);
+      return;
+    }
     state.data.items[i].selected_index=choice;state.data.items[i].answered=true;
     let next=state.data.items.findIndex((row,j)=>j>i&&!row.answered);
     if(next<0)next=state.data.items.findIndex(row=>!row.answered);
