@@ -3,6 +3,8 @@
 CREATE TABLE IF NOT EXISTS private.iclub_ai_practice_context_v1_control (
  singleton smallint PRIMARY KEY CHECK (singleton=1),
  enabled boolean NOT NULL DEFAULT false,
+ owner_user_id uuid DEFAULT NULL,
+ error_enabled boolean NOT NULL DEFAULT false,
  updated_at timestamptz NOT NULL DEFAULT now()
 );
 INSERT INTO private.iclub_ai_practice_context_v1_control(singleton,enabled)
@@ -44,12 +46,18 @@ BEGIN
   JOIN private.iclub_ai_v21_beta_control beta ON beta.singleton=ctl.singleton
   JOIN private.iclub_ai_v21_academic_policy pol ON pol.singleton=ctl.singleton
   JOIN private.iclub_ai_v21_beta_members m ON m.user_id=p_user_id
-  WHERE ctl.singleton=1 AND ctl.enabled AND beta.beta_enabled
+  WHERE ctl.singleton=1 AND ctl.enabled AND ctl.owner_user_id=p_user_id
+    AND beta.beta_enabled
    AND beta.prepared_enabled AND NOT beta.generation_enabled
    AND pol.enabled AND NOT pol.provider_enabled
    AND m.enabled AND m.consent_version='global_ai_beta_v21'
    AND m.consent_at IS NOT NULL
  ) THEN RETURN jsonb_build_object('ok',false,'reason','not_enabled'); END IF;
+
+ IF p_intent='practice_error' AND NOT EXISTS (
+  SELECT 1 FROM private.iclub_ai_practice_context_v1_control
+  WHERE singleton=1 AND error_enabled
+ ) THEN RETURN jsonb_build_object('ok',false,'reason','source_not_ready'); END IF;
 
  IF private.iclub_ai_has_active_protected_assessment_v1(p_user_id)
  OR EXISTS (SELECT 1 FROM public.practice_sessions_v4
