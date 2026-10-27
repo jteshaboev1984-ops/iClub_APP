@@ -165,7 +165,7 @@ EXCEPTION WHEN unique_violation THEN
   -- Concurrent retries fail closed; caller can resume through its authenticated status query.
   RETURN jsonb_build_object('ok',false,'code','concurrent_start_retry');
 END;
-$function$
+$function$;
 
 REVOKE ALL ON FUNCTION public.iclub_exam_native_mcq_start_v1(text,text)
  FROM PUBLIC,anon,authenticated;
