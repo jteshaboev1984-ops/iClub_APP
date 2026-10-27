@@ -264,5 +264,5 @@
   state.lang=locale;if(!active())return;
   if(state.session)load();else lobby();
  }
- internal.chemistryRecheckNative=Object.freeze({mount,unmount,setLanguage,isMounted:()=>active()});
+ internal.chemistryRecheckNative=Object.freeze({mount,unmount,setLanguage,getLanguage:()=>state.lang,isMounted:()=>active()});
 })();
