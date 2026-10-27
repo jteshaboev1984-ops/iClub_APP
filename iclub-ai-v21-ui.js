@@ -241,6 +241,7 @@
     resetTimer: null,
     busy: false,
     activeRequestId: null,
+    practicePending: null,
     authUserId: null,
     authEpoch: 0,
     contextEpoch: 0,
@@ -544,8 +545,124 @@
     renderHeader();
   }
 
+  // The single existing Tutor chat receives Practice context after a
+  // server-side owner/finalization/consent preflight. No separate result card.
+  let practiceGate = {key:"",allowed:false,pending:false};
+  let practiceRecoveryCheckedKey="";
+  let practiceRecoveryBusy=false;
+  const practiceScope = () => {
+    if(activeViewName()!=="courses")return null;
+    const screen=activeCoursesScreen();
+    if(screen!=="practice-result"&&screen!=="practice-review")return null;
+    const el=document.getElementById("courses-"+screen);
+    const id=Number(el?.dataset?.practiceAiAttemptId||0);
+    if(!el?.classList.contains("is-active")||!Number.isSafeInteger(id)||id<=0)
+      return null;
+    return {screen,attemptRef:id,locale:locale()};
+  };
+  const practiceScopeKey = x => x ? [x.screen,x.attemptRef,x.locale].join("|") : "";
+  async function checkPracticeChatGate(){
+    const scope=practiceScope();
+    const beta=window.iClubAiV21BetaClient;
+    if(!scope||typeof beta?.practiceContextAvailable!=="function")return;
+    const key=practiceScopeKey(scope);
+    if(practiceGate.key===key)return;
+    practiceGate={key,allowed:false,pending:true};
+    const authEpoch=state.authEpoch,contextEpoch=state.contextEpoch;
+    const allowed=await beta.practiceContextAvailable({
+      attemptRef:scope.attemptRef,locale:scope.locale
+    }).catch(()=>false);
+    if(practiceGate.key!==key||authEpoch!==state.authEpoch||
+       contextEpoch!==state.contextEpoch||
+       practiceScopeKey(practiceScope())!==key)return;
+    practiceGate={key,allowed:allowed===true,pending:false};
+    if(panel()&&!panel().hidden){
+      renderQuickPrompts();
+      if(allowed===true)void recoverSavedPracticeReply();
+    }
+  }
+  // Recovered replies live only in service-side PC4 receipts.
+  // Nothing is persisted on the device or replayed from another learner.
+  async function recoverSavedPracticeReply(retryAck=false){
+    const scope=practiceScope(),beta=window.iClubAiV21BetaClient;
+    if(!scope||!beta?.recoverPracticeFreeform||!beta?.ackRecoveredPracticeFreeform||
+       panel()?.hidden||!practiceGate.allowed||
+       practiceGate.key!==practiceScopeKey(scope)||
+       state.bootstrap?.visible!==true||state.busy||
+       practiceRecoveryBusy||currentBlocked())return;
+    const key=practiceScopeKey(scope);
+    const existing=state.practicePending;
+    if(existing && (!existing.restored||existing.scopeKey!==key))return;
+    if(!retryAck && practiceRecoveryCheckedKey===key)return;
+    practiceRecoveryCheckedKey=key;
+    practiceRecoveryBusy=true;
+    const authEpoch=state.authEpoch,contextEpoch=state.contextEpoch;
+    const threadKey=state.context?.threadKey;
+    const stillCurrent=()=>authEpoch===state.authEpoch&&
+      contextEpoch===state.contextEpoch&&
+      state.context?.threadKey===threadKey&&
+      practiceScopeKey(practiceScope())===key&&
+      practiceGate.allowed&&practiceGate.key===key&&
+      state.bootstrap?.visible===true&&!currentBlocked()&&
+      panel()&&!panel().hidden;
+    try{
+      if(existing?.restored&&retryAck){
+        const ack=await beta.ackRecoveredPracticeFreeform({
+          requestId:existing.requestId,
+          attemptRef:scope.attemptRef,locale:scope.locale
+        });
+        if(stillCurrent()&&ack?.ok===true&&
+           state.practicePending?.requestId===existing.requestId)
+          state.practicePending=null;
+        return;
+      }
+      const recovered=await beta.recoverPracticeFreeform({
+        attemptRef:scope.attemptRef,locale:scope.locale
+      });
+      if(!stillCurrent()||state.practicePending||recovered?.ok!==true||
+         recovered.recovered!==true||recovered.mode!=="generated"||
+         recovered.delivery_state!=="pending_ack"||
+         typeof recovered.message!=="string"||
+         typeof recovered.request_id!=="string")return;
+      const recoveryHeading={
+        ru:"Восстановлен ответ на предыдущий вопрос.",
+        uz:"Oldingi savolga javob tiklandi.",
+        en:"Your previous answer was recovered."
+      }[scope.locale];
+      const requestId=recovered.request_id;
+      appendMessage(threadKey,"assistant",
+        recoveryHeading+"\n"+recovered.message,"message");
+      state.practicePending={scopeKey:key,requestId,
+        question:"",messageShown:true,restored:true};
+      renderPanel();
+      const acknowledged=await beta.ackRecoveredPracticeFreeform({
+        requestId,attemptRef:scope.attemptRef,locale:scope.locale
+      });
+      if(stillCurrent()&&acknowledged?.ok===true&&
+         state.practicePending?.requestId===requestId)
+        state.practicePending=null;
+    }catch{/* Fail closed: no fallback to a new paid request. */}
+    finally{
+      practiceRecoveryBusy=false;
+      if(stillCurrent())renderPanel();
+    }
+  }
   function quickPrompts(ctx) {
     const c = copy();
+    const scope=practiceScope();
+    if(scope&&practiceGate.allowed&&practiceGate.key===practiceScopeKey(scope)){
+      const compare={
+        ru:"Сравнить с прошлой попыткой",
+        uz:"Oldingi urinish bilan solishtirish",
+        en:"Compare with a previous attempt"
+      };
+      return [
+        {key:"",label:c.practiceResult,practicePurpose:"practice_result"},
+        {key:"",label:c.practiceNext,practicePurpose:"practice_next_step"},
+        {key:"",label:compare[locale()]||compare.ru,
+          practicePurpose:"practice_history_comparison"}
+      ];
+    }
     // Prepared-only beta: practical, editorially verified product guidance,
     // never fake personalized academic answers. Keep original panel/design.
     if (window.iClubAiV21BetaClient?.askPrepared) {
@@ -812,6 +929,13 @@
     if (isSelectedDemo) return;
 
     const prompts = quickPrompts(state.context);
+    const pending=state.practicePending,scope=practiceScope();
+    if(pending&&scope&&practiceScopeKey(scope)===pending.scopeKey&&
+       practiceGate.allowed&&practiceGate.key===pending.scopeKey){
+      const retryLabel={ru:"Восстановить ответ",uz:"Javobni tiklash",
+        en:"Recover my answer"}[locale()];
+      prompts.unshift({key:"",label:retryLabel,practiceRetry:true});
+    }
     for (const prompt of prompts) {
       const button = document.createElement("button");
       button.type = "button";
@@ -821,6 +945,21 @@
       button.addEventListener("click", () => {
         if (button.disabled) return;
         button.classList.add("is-sent");
+        if(prompt.practiceRetry){
+          const pending=state.practicePending;
+          if(pending?.restored)void recoverSavedPracticeReply(true);
+          else if(pending)void sendMessage({promptKey:"",displayText:pending.question,
+            userText:pending.question,practiceRetry:true});
+          return;
+        }
+        if(prompt.practicePurpose){
+          const scope=practiceScope();
+          if(!scope||!practiceGate.allowed||
+             practiceGate.key!==practiceScopeKey(scope))return;
+          void sendMessage({promptKey:"",displayText:prompt.label,userText:"",
+            practiceContext:{purpose:prompt.practicePurpose,attemptRef:scope.attemptRef}});
+          return;
+        }
         void sendMessage({ promptKey: prompt.key, displayText: prompt.label, userText: "" });
       });
       host.appendChild(button);
@@ -1031,6 +1170,8 @@
     p.hidden = false;
     mark()?.setAttribute("aria-expanded", "true");
     renderPanel();
+    void checkPracticeChatGate();
+    if(practiceGate.allowed)void recoverSavedPracticeReply();
   }
 
   // QA-only, context-aware one-click help available across existing iClub
@@ -1136,6 +1277,25 @@
     // Only an explicitly loaded, separately authorized connected-beta adapter
     // can route this QA copy to the real prepared-only server.
     const beta = window.iClubAiV21BetaClient;
+    if(body?.intent==="practice_context"){
+      if(typeof beta?.askPracticePrepared!=="function")
+        return {data:null,error:{message:"practice_unavailable"}};
+      const answer=await beta.askPracticePrepared({
+        purpose:body.practice_purpose,attemptRef:body.attempt_ref,
+        locale:body.locale,requestId:body.request_id
+      });
+      return {data:answer,error:null};
+    }
+    if (body?.intent === "practice_freeform") {
+      if(typeof beta?.askPracticeFreeform!=="function")
+        return {data:null,error:{message:"practice_unavailable"}};
+      const answer=await beta.askPracticeFreeform({
+        requestId:body.request_id,purpose:body.practice_purpose,
+        attemptRef:body.attempt_ref,locale:body.locale,
+        userText:body.user_text
+      });
+      return {data:answer,error:null};
+    }
     if (body?.intent === "academic") {
       if (typeof beta?.askAcademic !== "function")
         return {data:null,error:{message:"academic_unavailable"}};
@@ -1177,7 +1337,10 @@
     ]);
   }
 
-  async function sendMessage({ promptKey, displayText, userText, academicContext=null }) {
+  async function sendMessage({
+    promptKey,displayText,userText,academicContext=null,practiceContext=null,
+    practiceRetry=false
+  }) {
     if (state.busy || currentBlocked() || state.usageExhausted || !state.context) return;
 
     const context = { ...state.context };
@@ -1185,10 +1348,48 @@
     const cleanDisplay = String(displayText || "").trim();
     const cleanText = String(userText || "").trim().slice(0, MAX_INPUT_CHARS);
     if (!cleanDisplay) return;
-
-    appendMessage(threadKey, "user", cleanDisplay);
+    const currentPractice = practiceScope();
+    const contextOk = !!currentPractice && practiceGate.allowed &&
+      practiceGate.key===practiceScopeKey(currentPractice);
+    // A finalized Practice with no current server grant must NEVER fall back
+    // to paid General Help, which could be charged for a stale/wrong attempt.
+    if(currentPractice && !contextOk && !academicContext && !practiceContext &&
+       promptKey==="" && cleanText.length>0){
+      const label={ru:"Проверяем доступ к результату. Попробуйте снова после появления подсказок.",
+        uz:"Natijaga kirish tekshirilmoqda. Tavsiyalar chiqqach, qayta urinib ko‘ring.",
+        en:"Checking access to this result. Please retry once the suggestions appear."}[locale()];
+      appendMessage(threadKey,"assistant",label,"notice");
+      void checkPracticeChatGate();
+      renderPanel();
+      return;
+    }
+    const typedPractice = !academicContext && !practiceContext &&
+      promptKey==="" && cleanText.length>=8 && contextOk
+      ? {purpose:"practice_result",attemptRef:currentPractice.attemptRef,
+         locale:currentPractice.locale,question:cleanText,
+         scopeKey:practiceScopeKey(currentPractice)} : null;
+    if (practiceRetry && (!typedPractice||!state.practicePending||
+        state.practicePending.scopeKey!==typedPractice.scopeKey||
+        state.practicePending.question!==typedPractice.question)) return;
+    if(typedPractice && state.practicePending &&
+       (state.practicePending.scopeKey!==typedPractice.scopeKey ||
+        state.practicePending.question!==typedPractice.question)){
+      const label={ru:"Сначала восстановите предыдущий ответ.",
+        uz:"Avval oldingi javobni tiklang.",
+        en:"Recover the previous answer first."}[locale()];
+      appendMessage(threadKey,"assistant",label,"notice");
+      renderPanel();
+      return;
+    }
+    if (!practiceRetry) appendMessage(threadKey, "user", cleanDisplay);
     state.busy = true;
-    const sentId = requestId();
+    const pending=typedPractice&&state.practicePending&&
+      state.practicePending.scopeKey===typedPractice.scopeKey&&
+      state.practicePending.question===typedPractice.question
+      ?state.practicePending:null;
+    const sentId=pending?.requestId||requestId();
+    if(typedPractice)state.practicePending={...typedPractice,requestId:sentId,
+      messageShown:pending?.messageShown===true};
     const sentAuthEpoch = state.authEpoch;
     const sentContextEpoch = state.contextEpoch;
     state.activeRequestId = sentId;
@@ -1198,7 +1399,19 @@
       state.activeRequestId === sentId &&
       state.bootstrap?.visible === true &&
       !currentBlocked() &&
-      isEligibleView()
+      isEligibleView() &&
+      (!practiceContext || (()=>{
+        const current=practiceScope();
+        return current?.attemptRef===practiceContext.attemptRef&&
+          practiceGate.key===practiceScopeKey(current)&&practiceGate.allowed===true;
+      })()) &&
+      (!typedPractice || (()=>{
+        const current=practiceScope();
+        return practiceGate.allowed===true&&
+          practiceScopeKey(current)===typedPractice.scopeKey&&
+          (!state.practicePending ||
+           state.practicePending.requestId===sentId);
+      })())
     );
 
     const p = panel();
@@ -1219,6 +1432,16 @@
           intent:"academic",surface:academicContext.surface,
           record_id:academicContext.recordId,
           question_id:academicContext.questionId
+        } : {}),
+        ...(practiceContext ? {
+          intent:"practice_context",
+          practice_purpose:practiceContext.purpose,
+          attempt_ref:practiceContext.attemptRef
+        } : {}),
+        ...(typedPractice ? {
+          intent:"practice_freeform",
+          practice_purpose:typedPractice.purpose,
+          attempt_ref:typedPractice.attemptRef
         } : {}),
         component_code: context.componentCode || "",
         skill_code: context.skillCode || "",
@@ -1253,8 +1476,25 @@
           window.__ICLUB_AI_QA_PREVIEW__?.noProductionWrites === true &&
           window.__ICLUB_AI_QA_DEMO__?.ready?.() === true &&
           window.__ICLUB_AI_QA_DEMO__.reply(locale()) === message;
-        appendMessage(threadKey, "assistant", message,
-          isApprovedQaSample ? "qa_practice_explanation" : "message");
+        if(!typedPractice || state.practicePending?.messageShown!==true)
+          appendMessage(threadKey, "assistant", message,
+            isApprovedQaSample ? "qa_practice_explanation" : "message");
+        if(typedPractice && state.practicePending?.requestId===sentId)
+          state.practicePending.messageShown=true;
+        // ACK only after insertion into the still-current existing Tutor thread.
+        // An ACK timeout does not create a new request UUID: the original
+        // in-memory receipt remains eligible for a same-ID recovery.
+        if(typedPractice && data.delivery_state==="pending_ack" &&
+           data.request_id===sentId && isStillCurrent()){
+          const acknowledged=await window.iClubAiV21BetaClient?.ackPracticeFreeform?.({
+            requestId:sentId,purpose:typedPractice.purpose,
+            attemptRef:typedPractice.attemptRef,locale:typedPractice.locale,
+            userText:typedPractice.question
+          });
+          if(acknowledged?.ok===true &&
+             state.practicePending?.requestId===sentId)
+            state.practicePending=null;
+        }
         if (data.usage_exhausted === true) {
           setUsageExhausted(data.reset_at || null);
         }
@@ -1372,6 +1612,10 @@
   }
 
   function reconcileContext() {
+    const current=practiceScope();
+    if(!current || practiceGate.key!==practiceScopeKey(current)){
+      practiceGate={key:"",allowed:false,pending:false};
+    }
     const next = resolveContext();
     const previous = contextIdentity(state.context);
     const nextKey = contextIdentity(next);
@@ -1380,7 +1624,10 @@
       closePanel();
     }
     state.context = next;
-    if (panel() && !panel().hidden) renderPanel();
+    if (panel() && !panel().hidden){
+      renderPanel();
+      void checkPracticeChatGate();
+    }
   }
 
   function scheduleContextReconcile() {
@@ -1480,6 +1727,10 @@
       if (logout || state.authUserId !== nextUserId) {
         state.authUserId = nextUserId;
         state.authEpoch += 1;
+        state.practicePending=null;
+        practiceRecoveryCheckedKey="";
+        practiceRecoveryBusy=false;
+        practiceGate={key:"",allowed:false,pending:false};
         invalidatePendingAnswer();
         state.threads.clear();
         state.context = null;
