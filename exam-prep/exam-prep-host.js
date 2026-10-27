@@ -511,6 +511,7 @@
     internal.chemistryNative?.unmount?.();
     internal.chemistryEntryNative?.unmount?.();
     internal.chemistryRecheckNative?.unmount?.();
+    internal.chemistryLabsNative?.unmount?.();
     const shouldRestoreFocus = state.open && (showable() || (state.subjectKey && state.subjectKey !== MATHEMATICS_KEY));
     state.open = false;
     state.consentBusy = false;
