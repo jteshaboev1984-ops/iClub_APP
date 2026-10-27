@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>iClub AI — isolated Practice QA</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#202b45;background:#eef2f8}
+*{box-sizing:border-box}
+body{margin:0;padding:20px 12px}
+.preview{max-width:720px;margin:auto}
+.qa-head{font-size:12px;font-weight:700;letter-spacing:.06em;color:#536988;margin-bottom:10px}
+.qa-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.qa-languages{display:flex;gap:3px;padding:3px;border:1px solid #d5deeb;border-radius:10px;background:#fff}
+.qa-languages button{font:600 12px system-ui,sans-serif;color:#536681;border:0;border-radius:7px;background:transparent;min-width:42px;min-height:34px;cursor:pointer}
+.qa-languages button[aria-pressed="true"]{background:#214a82;color:#fff}
+.qa-note{font-size:12px;color:#64748b;margin:10px 0 0;line-height:1.45}
+.main{background:white;padding:18px;border-radius:19px;box-shadow:0 4px 24px #12253a0d}
+h1{font-size:23px;margin:4px 0 12px}
+.muted{color:#536681;font-size:14px}
+.score{font-size:48px;line-height:1.14;font-weight:750;letter-spacing:-.04em;margin:12px 0}
+.cards-grid{padding:12px;border:1px solid #e4eaf1;border-radius:12px}
+button.btn{font:inherit;background:#1c447c;color:white;border:0;border-radius:11px;padding:11px 13px;cursor:pointer}
+button.btn:disabled{opacity:.55}
+</style>
+<link rel="stylesheet" href="/practice-ai-prepared-qa.css"></head><body>
+<main class="preview">
+  <div class="qa-top"><div class="qa-head">iClub APP · ДЕМО</div>
+  <div class="qa-languages" role="group" aria-label="Язык демонстрации">
+    <button type="button" data-demo-lang="ru" aria-pressed="true">RU</button>
+    <button type="button" data-demo-lang="uz" aria-pressed="false">UZ</button>
+    <button type="button" data-demo-lang="en" aria-pressed="false">EN</button>
+  </div></div>
+  <section class="main is-active" id="courses-practice-result" data-practice-ai-attempt-id="501">
+    <h1>Mathematics · Practice</h1><p class="muted" data-demo-finished>Завершённая тренировка (пример)</p>
+    <div class="score">70%</div><p data-demo-stats>7 правильных · 3 неправильных</p>
+    <div class="cards-grid"><strong data-demo-summary>Это вымышленная попытка</strong></div>
+  </section>
+</main>
+<p class="qa-note preview" data-demo-note>Демонстрация: данные и ответы вымышлены. Прогресс учеников не используется.</p>
+<script>
+  window.__ICLUB_PRACTICE_PREPARED_QA__ = new URLSearchParams(location.search).get("qa")==="1";
+  window.__locale="ru";window.__eligible=true;
+  const DEMO_COPY={
+    ru:{finished:"Завершённая тренировка (пример)",stats:"7 правильных · 3 неправильных",summary:"Это вымышленная попытка",note:"Демонстрация: данные и ответы вымышлены. Прогресс учеников не используется."},
+    uz:{finished:"Yakunlangan mashq (namuna)",stats:"7 ta to‘g‘ri · 3 ta noto‘g‘ri",summary:"Bu namunaviy natija",note:"Namuna: ma’lumotlar va javoblar sun’iy. O‘quvchilarning natijalari ishlatilmaydi."},
+    en:{finished:"Completed Practice (example)",stats:"7 correct · 3 incorrect",summary:"This is a sample attempt",note:"Demo only: sample data and responses. No learner progress is used."}
+  };
+  function demoLanguage(language){
+    if(!DEMO_COPY[language])return;
+    window.__locale=language;
+    document.documentElement.lang=language;
+    for(const button of document.querySelectorAll("[data-demo-lang]"))
+      button.setAttribute("aria-pressed",String(button.dataset.demoLang===language));
+    const t=DEMO_COPY[language];
+    document.querySelector("[data-demo-finished]").textContent=t.finished;
+    document.querySelector("[data-demo-stats]").textContent=t.stats;
+    document.querySelector("[data-demo-summary]").textContent=t.summary;
+    document.querySelector("[data-demo-note]").textContent=t.note;
+    document.dispatchEvent(new Event("iclub:practice-ai-context-changed"));
+  }
+  document.querySelectorAll("[data-demo-lang]").forEach(button=>
+    button.addEventListener("click",()=>demoLanguage(button.dataset.demoLang)));
+  window.i18n={getLang:()=>window.__locale};
+  window.__requests=[];window.__externalFetch=0;window.__defer=false;window.__resolvePending=null;
+  window.sb={
+    supabaseUrl:"https://mmmduffgpvwjdpruzikw.supabase.co",
+    supabaseKey:"qa-public-"+"b".repeat(60),
+    auth:{
+      getSession:async()=>({data:{session:{
+        access_token:"qa-token-"+"a".repeat(60),
+        user:{id:"00000000-0000-4000-8000-000000000011"}
+      }},error:null}),
+      getUser:async()=>({data:{user:{id:"00000000-0000-4000-8000-000000000011"}},error:null})
+    }
+  };
+  window.iClubAiV21BetaClient={status:async()=>{
+    const allowed=window.__eligible&&(
+      window.__ICLUB_PRACTICE_PREPARED_QA__===true||
+      window.__ICLUB_PRACTICE_E2E_ENV__==="isolated-ci");
+    return{eligible:allowed,consented:allowed};
+  }};
+  // Only the disposable localhost CI pipeline can opt out of mocked responses.
+  // Public Preview never fetches Supabase, even with URL query parameters.
+  if (window.__ICLUB_PRACTICE_E2E_ENV__ !== "isolated-ci") {
+  window.fetch=(url,options={})=>{
+    if(url!=="https://mmmduffgpvwjdpruzikw.supabase.co/functions/v1/iclub-ai-practice-prepared"){
+      window.__externalFetch++;throw Error("External network forbidden in QA");
+    }
+    const payload=JSON.parse(options.body);window.__requests.push(payload);
+    const RESPONSES={
+      ru:{
+        practice_result:"Результат: 7 из 10 (70%). Неправильных ответов: 3. В разборе доступны задания: №2, №6, №9.",
+        practice_next_step:"Начните с разбора заданий №2, №6, №9. Найдите причину каждой ошибки, повторите эти темы и затем решите похожие задачи без подсказок."
+      },
+      uz:{
+        practice_result:"Natija: 10 ta savoldan 7 tasi to‘g‘ri (70%). Noto‘g‘ri javoblar: 3. Tahlilda mavjud savollar: №2, №6, №9.",
+        practice_next_step:"Avval №2, №6, №9 topshiriqlarini tahlil qiling. Xatolar sababini aniqlang, tegishli mavzularni takrorlang va shunga o‘xshash masalalarni yordamsiz yeching."
+      },
+      en:{
+        practice_result:"Result: 7 of 10 correct (70%). Incorrect answers: 3. Questions available for review: #2, #6, #9.",
+        practice_next_step:"Start by reviewing questions #2, #6, #9. Work out why each answer was wrong, revisit the related topics, then try similar problems without hints."
+      }
+    };
+    const message=RESPONSES[payload.locale]?.[payload.purpose]||"";
+    const response={ok:true,status:200,json:async()=>({
+      ok:true,mode:"verified_summary",provider_called:false,
+      academic_state_changed:false,message})};
+    if(window.__defer)return new Promise(resolve=>{
+      window.__resolvePending=()=>resolve(response);
+    });
+    return Promise.resolve(response);
+  };
+  }
+</script>
+<script src="/practice-ai-prepared-qa.js"></script>
+</body></html>

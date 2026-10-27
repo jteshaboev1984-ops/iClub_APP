@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iClub AI Tutor · Isolated UI QA</title>
+<style>
+body{margin:0;background:#f3f6fb;color:#162b45;font-family:system-ui,sans-serif}
+.preview{max-width:820px;margin:auto;padding:40px 20px}
+.stack-screen:not(.is-active){display:none}
+.demo-score{font-size:42px;font-weight:750;margin:18px 0}
+.demo-note{color:#52677e;line-height:1.6}
+</style></head>
+<body>
+<section class="view is-active" data-view="courses" id="view-courses">
+ <main class="preview">
+  <div id="subject-hub-title">Mathematics</div>
+  <div id="courses-practice-quiz" class="stack-screen" hidden></div>
+  <div id="courses-tour-quiz" class="stack-screen" hidden></div>
+  <div id="courses-practice-result" class="stack-screen is-active" data-practice-ai-attempt-id="501">
+   <h1>Mathematics · Practice</h1>
+   <p class="demo-note">Artificially completed attempt · local-browser QA only</p>
+   <div class="demo-score">70%</div>
+   <p>7 correct · 3 incorrect</p>
+  </div>
+  <div id="courses-practice-review" class="stack-screen" data-practice-ai-attempt-id="501"></div>
+ </main>
+</section>
+<section class="view" data-view="home" id="view-home"></section>
+<section class="view" data-view="profile" id="view-profile"></section>
+<div id="exam-prep-host-root" hidden aria-hidden="true"></div>
+<!-- No app scripts are linked. Chromium test injects the exact PR candidate
+     after confirming loopback and intercepting all external network calls. -->
+</body></html>
