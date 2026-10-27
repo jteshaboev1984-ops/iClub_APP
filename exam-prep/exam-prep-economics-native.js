@@ -1,9 +1,9 @@
 (() => {
   "use strict";
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0};
+  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0};
   const dictionary={
-    ru:{title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
+    ru:{chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант: он сохранится автоматически. До завершения экзамена ответ можно изменить.",saving:"Сохраняем ответ…",
       papers:"К экзаменам",question:"Вопрос",time:"Осталось времени",save:"Сохранить ответ",
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
@@ -16,7 +16,7 @@
       hideCheck:"Скрыть ответ",markStudied:"Отметить как изученное",studiedDone:"Тема изучена",
       backReview:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
       allCorrect:"Все вопросы решены правильно. Ошибок для разбора нет.",studyNote:"Отметка «изучено» не означает, что навык освоен. Это подтвердит правильный ответ в следующем экзамене."},
-    uz:{title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",minuteShort:"daq.",profile:"Tayyorgarlik sozlamalari",editProfile:"O‘zgartirish",series:"Imtihon sessiyasi",grade:"Maqsadli baho",hours:"Haftalik umumiy o‘qish soati",econHours:"Haftalik iqtisodiyot soati",saveProfile:"Sozlamalarni saqlash",profileInvalid:"Imtihon davri va soatlarni tekshiring: iqtisodiyot soati umumiy vaqtdan oshmasin.",profileSaved:"Sozlamalar saqlandi",optional:"Tayyorgarlik maqsadi va vaqtini belgilang. Avvalgi urinishlar o‘zgarmaydi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq imtihon",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
+    uz:{chooseLevel:"Darajani tanlang",openLevel:"Ochish",overview:"Bosh sahifa",noAttempts:"Hozircha urinishlar yo‘q",afterCheck:"Diagnostika tugadi — qiyin mavzularni o‘rganing",startHere:"Avval kirish diagnostikasidan boshlang",resumeExam:"Ishni davom ettirish",levelIntro:"Diagnostika o‘rganiladigan mavzularni aniqlaydi. To‘liq imtihon alohida mavjud.",openLesson:"Mavzuni o‘rganish",viewUnits:"Bo‘limlar bo‘yicha natijalar",nextLesson:"Keyingi mavzu",showMore:"Ko‘proq ko‘rsatish",viewHistory:"Urinishlar tarixi",noHistory:"Yakunlangan imtihonlar va diagnostikalar shu yerda chiqadi",backToPlan:"O‘quv rejasiga",recommended:"Tavsiya etilgan qadam",title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",minuteShort:"daq.",profile:"Tayyorgarlik sozlamalari",editProfile:"O‘zgartirish",series:"Imtihon sessiyasi",grade:"Maqsadli baho",hours:"Haftalik umumiy o‘qish soati",econHours:"Haftalik iqtisodiyot soati",saveProfile:"Sozlamalarni saqlash",profileInvalid:"Imtihon davri va soatlarni tekshiring: iqtisodiyot soati umumiy vaqtdan oshmasin.",profileSaved:"Sozlamalar saqlandi",optional:"Tayyorgarlik maqsadi va vaqtini belgilang. Avvalgi urinishlar o‘zgarmaydi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq imtihon",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga", beforePlan:"O‘quv rejangiz birinchi yakunlangan imtihondan so‘ng paydo bo‘ladi. Keyin uni urinishlar tarixidan ochishingiz mumkin.", autoAnswer:"Variantni tanlang: javob avtomatik saqlanadi. Imtihonni yakunlashdan oldin uni o‘zgartirish mumkin.",saving:"Javob saqlanmoqda…",
       papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javobni saqlash",
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
@@ -29,7 +29,7 @@
       hideCheck:"Javobni yashirish",markStudied:"O‘rganilgan deb belgilash",studiedDone:"Mavzu o‘rganildi",
       backReview:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
       allCorrect:"Hamma savollarga to‘g‘ri javob berildi. Tahlil qilinadigan xato yo‘q.",studyNote:"«O‘rganildi» belgisi bilim o‘zlashtirilganini isbotlamaydi. Keyingi imtihondagi to‘g‘ri javob tasdiqlaydi."},
-    en:{title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",minuteShort:"min",profile:"Preparation settings",editProfile:"Edit",series:"Exam series",grade:"Target grade",hours:"Total weekly study hours",econHours:"Weekly Economics hours",saveProfile:"Save settings",profileInvalid:"Check exam series and weekly hours: Economics time cannot exceed your total study time.",profileSaved:"Settings saved",optional:"Set a preparation goal and study time. Existing attempts will not change.",startDiagnostic:"Start entry check",fullPaper:"Full exam",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
+    en:{chooseLevel:"Choose your level",openLevel:"Open",overview:"Overview",noAttempts:"No attempts yet",afterCheck:"Entry check completed — focus on weaker topics",startHere:"Begin with the entry check",resumeExam:"Resume your work",levelIntro:"The entry check identifies study topics. The full exam is available separately.",openLesson:"Study this topic",viewUnits:"Results by unit",nextLesson:"Next topic",showMore:"Show more",viewHistory:"Attempt history",noHistory:"Completed exams and entry checks will appear here",backToPlan:"Back to study plan",recommended:"Recommended next step",title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",minuteShort:"min",profile:"Preparation settings",editProfile:"Edit",series:"Exam series",grade:"Target grade",hours:"Total weekly study hours",econHours:"Weekly Economics hours",saveProfile:"Save settings",profileInvalid:"Check exam series and weekly hours: Economics time cannot exceed your total study time.",profileSaved:"Settings saved",optional:"Set a preparation goal and study time. Existing attempts will not change.",startDiagnostic:"Start entry check",fullPaper:"Full exam",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back", beforePlan:"Your study plan appears after your first completed paper. You can reopen it from your attempt history.", autoAnswer:"Choose an option to save automatically. You can change it until you finish the paper.",saving:"Saving answer…",
       papers:"Back to papers",question:"Question",time:"Time remaining",save:"Save answer",
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
@@ -57,13 +57,16 @@
   const shell=()=>{
     if(state.closed||!state.root)return null;
     const root=e("section","ep-host-shell ep-native-economics");
-    root.append(e("div","ep-host-kicker","Cambridge 9708"),e("h2","ep-host-title",t().title));
+    const top=e("div","ep-native-topbar");
+    top.append(e("span","ep-host-kicker","CAMBRIDGE 9708"));
+    if(state.view!=="home")top.append(btn("← "+t().back,goBack,true));
+    root.append(top,e("h2","ep-host-title",t().title));
     state.root.replaceChildren(root);return root;
   };
   const stop=()=>{if(state.timer!==null){clearInterval(state.timer);state.timer=null;}};
   function unmount(){
     stop();state.token++;state.closed=true;state.root=null;state.shell=null;
-    state.id=null;state.paper=null;state.data=null;state.profile=null;state.busy=false;state.onBack=null;
+    state.id=null;state.paper=null;state.data=null;state.profile=null;state.history=[];state.planData=null;state.view="home";state.busy=false;state.onBack=null;
   }
   async function rpc(name,args={}){
     try {
@@ -79,99 +82,139 @@
     const actions=e("div","ep-host-actions");
     actions.append(btn(t().retry,retry),btn(t().papers,lobby,true));view.append(actions);
   }
+
+  // Same navigation hierarchy as Mathematics: overview → paper home → focused action.
+  function goBack(){
+    if(state.busy||state.closed)return;
+    if(state.view==="lesson"){renderStudyPlan(state.planData);return;}
+    if(state.view==="plan"||state.view==="exam"){openLevel(state.paper);return;}
+    if(["level","settings","history"].includes(state.view)){lobby();return;}
+    state.onBack?.();
+  }
   function lobby(){
-    ++state.token;
-    stop();state.id=null;state.paper=null;state.data=null;state.index=0;
+    ++state.token;stop();state.view="home";state.id=null;state.paper=null;
+    state.data=null;state.planData=null;state.index=0;
     const view=shell();if(!view)return;
-    view.append(e("p","ep-host-note",t().intro));
-    view.append(e("p","ep-native-guidance",t().p1+" · "+t().p3));
-    const profileTarget=e("section","ep-native-profile");
-    view.append(profileTarget);loadProfile(profileTarget,view);
-    const grid=e("div","ep-host-component-grid ep-native-guided-grid"),cards=new Map();
-    for(const [code,label] of [["P1",t().p1],["P3",t().p3]]){
+    const hero=e("section","ep-live-dashboard-intro ep-native-dashboard-hero");
+    hero.append(e("div","ep-live-dashboard-eyebrow","Cambridge Economics 9708"),
+      e("h3","ep-live-dashboard-title",t().chooseLevel),
+      e("p","ep-live-dashboard-text",t().intro));
+    view.append(hero);
+    const grid=e("div","ep-live-grid ep-native-level-grid");
+    for(const [code,title,level] of [["P1",t().p1,"AS"],["P3",t().p3,"A"]]){
       if(!state.shell?.papers?.some(p=>p.code===code&&p.assessment_kind==="mcq"))continue;
-      const card=e("div","ep-host-component-card ep-native-paper");
-      card.append(e("strong","",label));
-      const summary=e("p","ep-native-guidance",t().entryCheck+" · 12 MCQ · 20 min");
-      const actions=e("div","ep-native-paper-actions");
-      actions.append(btn(t().startDiagnostic,()=>begin(code,"diagnostic")));
-      actions.append(btn(t().fullPaper,()=>begin(code),true));
-      card.append(summary,actions);cards.set(code,{actions,summary});grid.append(card);
+      const card=e("section","ep-live-card ep-native-level-card");
+      card.append(e("div","ep-native-level-eyebrow",level+" Level"),e("h3","",title));
+      const status=e("p","ep-native-level-status",t().startHere);
+      card.append(status,btn(t().openLevel,()=>openLevel(code)));card.datasetPaper=code;
+      grid.append(card);
     }
     view.append(grid);
-    const historyBox=e("div","ep-native-history");
-    view.append(historyBox);
-    loadHistory(historyBox,view,cards);
-    const actions=e("div","ep-host-actions");
-    actions.append(btn(t().back,()=>state.onBack?.(),true));view.append(actions);
+    const tools=e("div","ep-native-dashboard-tools");
+    tools.append(btn(t().profile,openSettings,true),
+      btn(t().viewHistory,()=>openHistoryList(),true));
+    view.append(tools);
+    const meta=e("p","ep-native-dashboard-meta",t().optional);
+    view.append(meta);
+    loadDashboard(view,grid,meta);
+    view.append(btn(t().back,()=>state.onBack?.(),true));
   }
-  async function loadHistory(target,view,cards){
-    const response=await rpc("iclub_exam_native_mcq_history_v1",{p_paper_code:null});
-    if(state.closed||state.root?.firstElementChild!==view||!response.ok||
-       !Array.isArray(response.sessions)||response.sessions.length===0)return;
-    for(const [code,parts] of (cards||new Map())){
-      const latest=response.sessions.find(x=>x.paper_code===code&&x.session_kind==="diagnostic");
-      if(!latest)continue;
-      parts.actions.replaceChildren();
-      if(latest.status==="active"){
-        parts.summary.textContent=t().entryCheck+" · "+latest.answered+" / 12";
-        parts.actions.append(btn(t().continueAttempt,()=>openHistory(latest,false)));
-      }else{
-        parts.summary.textContent=t().completedCheck+" · "+latest.score+" / 12";
-        parts.actions.append(btn(t().plan,()=>openHistory(latest,true)));
-        parts.actions.append(btn(t().repeatCheck,()=>begin(code,"diagnostic"),true));
-      }
-      parts.actions.append(btn(t().fullPaper,()=>begin(code),true));
+  async function loadDashboard(view,grid,meta){
+    const token=state.token;
+    const [history,profile]=await Promise.all([
+      rpc("iclub_exam_native_mcq_history_v1",{p_paper_code:null}),
+      rpc("iclub_exam_native_economics_profile_v1",{})
+    ]);
+    if(state.closed||state.view!=="home"||state.token!==token||
+       state.root?.firstElementChild!==view)return;
+    if(history.ok&&Array.isArray(history.sessions))state.history=history.sessions;
+    if(profile.ok){state.profile=profile.profile||null;
+      if(state.profile)meta.textContent=[
+        state.profile.exam_series,t().grade+": "+state.profile.target_grade,
+        t().econHours+": "+state.profile.economics_hours_budget
+      ].join(" · ");
     }
-    target.replaceChildren(e("h3","ep-native-section-title",t().history));
+    for(const card of grid.children){
+      const code=card.datasetPaper;
+      const recent=state.history.filter(x=>x.paper_code===code);
+      const active=recent.find(x=>x.status==="active");
+      const diag=recent.find(x=>x.session_kind==="diagnostic"&&x.status==="finalized");
+      const label=active?t().resumeExam+" · "+String(active.answered||0)+"/"+String(active.total_items||30)
+        :diag?t().completedCheck+" · "+diag.score+"/12":t().startHere;
+      const status=card.querySelector?.(".ep-native-level-status");
+      if(status)status.textContent=label;
+    }
+  }
+  function openLevel(code){
+    if(state.closed||state.busy||!["P1","P3"].includes(code))return;
+    ++state.token;stop();state.view="level";state.paper=code;
+    const view=shell();if(!view)return;
+    view.append(e("h3","ep-native-page-heading",code==="P1"?t().p1:t().p3));
+    view.append(e("p","ep-host-note",t().levelIntro));
+    const entries=state.history.filter(x=>x.paper_code===code);
+    const active=entries.find(x=>x.status==="active");
+    const completed=entries.find(x=>x.session_kind==="diagnostic"&&x.status==="finalized");
+    const latestPaper=entries.find(x=>x.session_kind==="paper"&&x.status==="finalized");
+    const block=e("section","ep-live-card ep-native-next-card");
+    block.append(e("div","ep-native-level-eyebrow",t().recommended));
+    const title=active?t().resumeExam:completed?t().afterCheck:t().startHere;
+    block.append(e("h3","",title));
+    const extra=active?(active.session_kind==="diagnostic"?t().entryCheck:t().fullPaper)+
+      " · "+active.answered+"/"+(active.total_items||30)
+      :completed?t().entryCheck+" · "+completed.score+"/12":
+      t().entryCheck+" · 12 MCQ · 20 "+t().minuteShort;
+    block.append(e("p","ep-host-note",extra));
+    if(active)block.append(btn(t().continueAttempt,()=>openHistory(active,false)));
+    else if(completed)block.append(btn(t().plan,()=>openHistory(completed,true)));
+    else block.append(btn(t().startDiagnostic,()=>begin(code,"diagnostic")));
+    view.append(block);
+    const other=e("div","ep-native-level-actions");
+    if(completed)other.append(btn(t().repeatCheck,()=>begin(code,"diagnostic"),true));
+    other.append(btn(t().fullPaper,()=>begin(code,"paper"),true));
+    if(latestPaper)other.append(btn(t().viewResult,()=>openHistory(latestPaper,false),true));
+    other.append(btn(t().viewHistory,()=>openHistoryList(code),true));
+    view.append(other);
+  }
+  function openHistoryList(code=null,limit=8){
+    if(state.closed||state.busy)return;
+    ++state.token;stop();state.view="history";
+    const view=shell();if(!view)return;
+    view.append(e("h3","ep-native-page-heading",t().viewHistory));
+    const entries=state.history.filter(x=>!code||x.paper_code===code);
+    if(!entries.length){view.append(e("p","ep-host-note",t().noHistory));return;}
     const list=e("div","ep-native-history-list");
-    response.sessions.forEach(entry=>{
-      if(!["P1","P3"].includes(entry.paper_code)||!entry.session_id)return;
-      const card=e("div","ep-native-history-item");
-      const title=(entry.paper_code==="P1"?t().p1:t().p3)+(entry.session_kind==="diagnostic"?" · "+t().entryCheck:"");
+    for(const entry of entries.slice(0,limit)){
+      if(!["P1","P3"].includes(entry.paper_code)||!entry.session_id)continue;
+      const card=e("section","ep-native-history-item");
       const date=new Date(entry.started_at);
       const dateText=Number.isNaN(date.getTime())?"":new Intl.DateTimeFormat(
         state.lang==="uz"?"uz-UZ":state.lang==="en"?"en-GB":"ru-RU",
         {day:"2-digit",month:"2-digit",year:"numeric"}).format(date);
+      const title=(entry.paper_code==="P1"?t().p1:t().p3)+" · "+
+        (entry.session_kind==="diagnostic"?t().entryCheck:t().fullPaper);
       const total=Number(entry.total_items||30);
-      const result=entry.status==="finalized"?
-        (String(entry.score)+" / "+total):(String(entry.answered)+" / "+total);
-      card.append(e("div","ep-native-history-info",title+" · "+dateText+" · "+result));
-      const controls=e("div","ep-native-history-controls");
-      controls.append(btn(entry.status==="finalized"?t().viewResult:t().continueAttempt,
+      card.append(e("div","ep-native-history-info",title+" · "+dateText+" · "+
+        (entry.status==="finalized"?entry.score:entry.answered)+"/"+total));
+      const actions=e("div","ep-native-history-controls");
+      actions.append(btn(entry.status==="finalized"?t().viewResult:t().continueAttempt,
         ()=>openHistory(entry,false),true));
-      if(entry.status==="finalized")controls.append(btn(t().plan,
+      if(entry.status==="finalized")actions.append(btn(t().plan,
         ()=>openHistory(entry,true)));
-      card.append(controls);
-      list.append(card);
-    });
-    target.append(list);
-  }
-  async function loadProfile(target,view){
-    const result=await rpc("iclub_exam_native_economics_profile_v1",{});
-    if(state.closed||state.root?.firstElementChild!==view||!result.ok)return;
-    state.profile=result.profile||null;
-    renderProfile(target,view);
-  }
-  function renderProfile(target,view){
-    if(state.closed||state.root?.firstElementChild!==view)return;
-    target.replaceChildren();
-    const head=e("div","ep-native-profile-head");
-    head.append(e("strong","",t().profile));
-    if(state.profile)head.append(btn(t().editProfile,()=>editProfile(target,view),true));
-    target.append(head);
-    const profile=state.profile;
-    if(!profile){
-      target.append(e("p","ep-native-guidance",t().optional));
-      target.append(btn(t().profile,()=>editProfile(target,view),true));
-    }else{
-      const summary=e("div","ep-native-profile-summary");
-      summary.append(e("span","",t().series+": "+profile.exam_series));
-      summary.append(e("span","",t().grade+": "+profile.target_grade));
-      summary.append(e("span","",t().econHours+": "+profile.economics_hours_budget));
-      target.append(summary);
+      card.append(actions);list.append(card);
     }
+    view.append(list);
+    if(entries.length>limit)view.append(btn(t().showMore,
+      ()=>openHistoryList(code,Math.min(limit+8,entries.length)),true));
   }
+  function openSettings(){
+    if(state.closed||state.busy)return;
+    ++state.token;stop();state.view="settings";
+    const view=shell();if(!view)return;
+    view.append(e("h3","ep-native-page-heading",t().profile));
+    const panel=e("section","ep-live-card ep-native-profile");
+    view.append(panel);editProfile(panel,view);
+  }
+
   function editProfile(target,view){
     if(state.closed||state.root?.firstElementChild!==view)return;
     target.replaceChildren(e("strong","",t().profile));
@@ -213,7 +256,7 @@
       if(!result.ok){feedback.textContent=t().error;return;}
       state.profile={exam_series:exam,target_grade:fields.target.value,
         total_student_hours_available:total,economics_hours_budget:econ};
-      renderProfile(target,view);
+      lobby();
     }));
   }
   async function openHistory(entry,openPlan){
