@@ -3,6 +3,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - supabase/migrations/20261027213000_iclub_ai_practice_math_beta_grants_default_off.sql
       - supabase/candidates/iclub_ai_practice_context_v1_dormant.sql
       - supabase/candidates/iclub_ai_practice_receipts_pc4_dormant.sql
       - supabase/candidates/iclub_ai_practice_freeform_pc3_gate_dormant.sql
@@ -205,6 +206,17 @@ jobs:
           test "$PGDATABASE" = 'postgres'
           psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261027203000_iclub_ai_practice_owner_default_off_v1.sql
           echo 'PASS actual additive migration compiled; no hosted database used'
+          # Synthetic E2E toggles controls and seeds a disposable grant.
+          # Return ONLY isolated PostgreSQL to virgin OFF state to validate
+          # the same safe defaults expected in the live migration.
+          psql -X -v ON_ERROR_STOP=1 -c "
+            UPDATE private.iclub_ai_practice_context_v1_control
+              SET enabled=false, owner_user_id=NULL, error_enabled=false WHERE singleton=1;
+            UPDATE private.iclub_ai_practice_freeform_pc3_control SET enabled=false WHERE singleton=1;
+            UPDATE private.iclub_ai_practice_receipt_v1_control SET enabled=false WHERE singleton=1;
+            DELETE FROM private.iclub_ai_practice_beta_grants_v1;"
+          psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261027213000_iclub_ai_practice_math_beta_grants_default_off.sql
+          echo 'PASS beta grant migration: all OFF, no user rows enrolled and privileges service only'
       - name: Stop disposable Supabase Auth container
         if: always()
         shell: bash
