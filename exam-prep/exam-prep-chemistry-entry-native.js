@@ -22,7 +22,7 @@
       route:"Вернитесь к учебным материалам Chemistry, чтобы повторить эти темы, затем проверьте себя на новых заданиях.",
       noErrors:"Ошибок в этой проверке нет. Это ещё не подтверждает полное освоение тем.",
       reviewError:"Не удалось загрузить учебный маршрут.",notCalibrated:"Результат ориентировочный: подготовленное задание на тему не является полноценной диагностикой.",
-      viewPaper:"Paper 1 — экзамен",backResult:"К результату",studyLesson:"Изучить тему",startRecheck:"Повторная проверка · новые задания",backTopics:"К списку тем",lessonUnavailable:"Урок пока недоступен. Он откроется после публикации материалов.",lessonNotMastery:"Изучение этой темы не начисляет освоение автоматически."},
+      viewPaper:"Paper 1 — экзамен",backResult:"К результату",studyLesson:"Изучить тему",startRecheck:"Повторная проверка · новые задания",backTopics:"К списку тем",lessonUnavailable:"Урок пока недоступен. Он откроется после публикации материалов.",lessonNotMastery:"Изучение этой темы не начисляет освоение автоматически.",practicalP3:"Практические навыки · Paper 3 (AS)",practicalP5:"Практические навыки · Paper 5 (A Level)"},
     uz:{title:"Chemistry · Kirish tekshiruvi",intro:"22 ta savol · 30 daqiqa. Bu dastlabki yo‘naltiruvchi tekshiruv, Paper 1 imtihoni emas.",
       limitation:"Har bir mavzudagi bitta savol mavzuni o‘zlashtirishni ishonchli baholay olmaydi.",
       start:"Boshlash yoki davom ettirish",history:"Tekshiruvlarim",empty:"Hali tekshiruvlar yo‘q.",
@@ -39,7 +39,7 @@
       route:"Mavzularni takrorlash uchun Chemistry o‘quv materiallariga qayting. Keyin yangi savollar bilan bilimingizni tekshiring.",
       noErrors:"Bu tekshiruvda xato yo‘q. Ammo bu barcha mavzular o‘zlashtirilganini isbotlamaydi.",
       reviewError:"O‘quv yo‘nalishini yuklab bo‘lmadi.",notCalibrated:"Natija taxminiy: har bir mavzudagi bitta savol to‘liq diagnostika hisoblanmaydi.",
-      viewPaper:"Paper 1 — imtihon",backResult:"Natijaga qaytish",studyLesson:"Mavzuni o‘rganish",startRecheck:"Qayta tekshiruv · yangi savollar",backTopics:"Mavzular ro‘yxatiga",lessonUnavailable:"Dars hali ochilmagan. Materiallar e’lon qilingach foydalanish mumkin.",lessonNotMastery:"Bu mavzuni o‘qish avtomatik o‘zlashtirish belgisini bermaydi."},
+      viewPaper:"Paper 1 — imtihon",backResult:"Natijaga qaytish",studyLesson:"Mavzuni o‘rganish",startRecheck:"Qayta tekshiruv · yangi savollar",backTopics:"Mavzular ro‘yxatiga",lessonUnavailable:"Dars hali ochilmagan. Materiallar e’lon qilingach foydalanish mumkin.",lessonNotMastery:"Bu mavzuni o‘qish avtomatik o‘zlashtirish belgisini bermaydi.",practicalP3:"Amaliy ko‘nikmalar · Paper 3 (AS)",practicalP5:"Amaliy ko‘nikmalar · Paper 5 (A Level)"},
     en:{title:"Chemistry · Entry check",intro:"22 questions · 30 minutes. This is an orientation check, not the Paper 1 exam.",
       limitation:"One question per topic cannot reliably establish mastery.",
       start:"Start or resume",history:"My checks",empty:"No checks yet.",
@@ -56,7 +56,7 @@
       route:"Return to Chemistry learning materials to review these topics, then test yourself with fresh questions.",
       noErrors:"No errors in this check. It does not establish full understanding.",
       reviewError:"Could not load the study route.",notCalibrated:"This result is only a guide: one question per topic is not a full diagnosis.",
-      viewPaper:"Paper 1 exam",backResult:"Back to result",studyLesson:"Study topic",startRecheck:"Recheck · fresh questions",backTopics:"Back to topics",lessonUnavailable:"This lesson is not yet released. It opens only when the learning material is published.",lessonNotMastery:"Reading this topic does not automatically credit mastery."}
+      viewPaper:"Paper 1 exam",backResult:"Back to result",studyLesson:"Study topic",startRecheck:"Recheck · fresh questions",backTopics:"Back to topics",lessonUnavailable:"This lesson is not yet released. It opens only when the learning material is published.",lessonNotMastery:"Reading this topic does not automatically credit mastery.",practicalP3:"Practical skills · Paper 3 (AS)",practicalP5:"Practical skills · Paper 5 (A Level)"}
   };
   const t=()=>copy[state.lang]||copy.ru;
   const el=(tag,value,cls)=>{
@@ -107,6 +107,7 @@
     const actions=el("div",undefined,"ep-host-actions");
     if(typeof state.onPaper==="function")actions.append(button(t().viewPaper,()=>state.onPaper(),true));
     actions.append(button(t().back,()=>state.onBack?.(),true));p.append(actions);
+    offerLabs(p,actions);
     const token=state.seq;
     const r=await rpc("iclub_exam_chemistry_entry_history_v1");
     if(!active()||token!==state.seq||p!==state.root?.firstElementChild)return;
@@ -131,6 +132,40 @@
       listing.append(el("p",t().completedNote,"ep-host-note"));
       offerRecheck(p,listing);
     }
+  }
+  function openLabs(paper){
+    if(!active()||!["P3","P5"].includes(paper))return;
+    const adapter=internal.chemistryLabsNative;
+    if(typeof adapter?.mount!=="function")return;
+    const ctx={root:state.root,shell:state.shell,language:state.lang,
+      onBack:state.onBack,onPaper:state.onPaper};
+    unmount();
+    const restore=()=>{
+      const language=adapter.getLanguage?.()||ctx.language;
+      adapter.unmount?.();
+      internal.chemistryEntryNative?.mount?.({...ctx,language});
+    };
+    const ok=adapter.mount({root:ctx.root,language:ctx.language,paper,onBack:restore});
+    if(ok!==true)internal.chemistryEntryNative?.mount?.(ctx);
+  }
+  async function offerLabs(p,target){
+    if(!active()||!p||!target||typeof internal.chemistryLabsNative?.mount!=="function")return;
+    const token=state.seq;
+    const get=async paper=>{
+      try{
+        const result=await window.sb?.rpc?.("iclub_exam_chemistry_lab_catalog_v1",
+          {p_paper:paper,p_language:state.lang});
+        const x=!result?.error?result?.data:null;
+        return x?.ok===true&&x.paper_code===paper&&
+          x.level_code===(paper==="P3"?"AS":"A")&&
+          x.can_credit_mastery===false&&x.count===6&&
+          Array.isArray(x.items)&&x.items.length===6;
+      }catch(_){return false;}
+    };
+    const allowed=await Promise.all([get("P3"),get("P5")]);
+    if(!active()||token!==state.seq||p!==state.root?.firstElementChild)return;
+    if(allowed[0])target.append(button(t().practicalP3,()=>openLabs("P3"),true));
+    if(allowed[1])target.append(button(t().practicalP5,()=>openLabs("P5"),true));
   }
   function openRecheck(recheckShell){
     if(!active()||recheckShell?.enabled!==true ||
@@ -336,6 +371,7 @@
       actions.append(button(t().viewPaper,()=>state.onPaper(),true));
     p.append(actions);
     offerRecheck(p,actions);
+    offerLabs(p,actions);
   }
   async function showLesson(skillKey){
     if(!active()||state.busy||state.data?.status!=="finalized"||!state.session
