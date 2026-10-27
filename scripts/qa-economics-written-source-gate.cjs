@@ -47,6 +47,7 @@ async function check(lang,mode){
  w.window=w;w.document={createElement:tag=>new Element(tag)};w.globalThis=w;
  vm.runInNewContext(ctl,w);vm.runInNewContext(view,w);
  const taskKey=mode==='B'?'P4.B1':'P4.A.a';
+ const otherSubject=mode==='chemistryA';
  const source={source_id:'P4-A-Nerava-v1',source_version:'v3',language:lang,
  title:'Nerava',paragraphs:['Source paragraph.'],
  table:{columns:['Indicator','A','B'],rows:[['Goods',30,34],['Services',12,14]],unit:'US$ billions'}};
@@ -54,7 +55,7 @@ async function check(lang,mode){
    available:async()=>({ok:true,available:true}),
    next:async()=>({status:'ready',plan_item_id:'item1'}),
    open:async()=>({task_kind:'written_external',task_token:'token1',task_key:taskKey,
-      task_version:'v3',plan_item_id:'item1',program_key:'economics_9708',
+      task_version:'v3',plan_item_id:'item1',program_key:otherSubject?'chemistry_9701':'economics_9708',
       program_version:'economics_2026_2028_v1',paper_code:'P4',
       question:'Analyse the case',runtime_enabled:true,can_advance:true,
       ...(mode==='A'?{source}:{})}),
@@ -73,10 +74,11 @@ async function check(lang,mode){
  if(mode==='A'){assert.equal(tables.length,1,'Source A table missing');assert(textVisible,'Approved question missing')}
  if(mode==='missing'){assert.equal(tables.length,0,'Unapproved source table displayed');assert(!textVisible,'Question leaked without source')}
  if(mode==='B'){assert.equal(tables.length,0,'Non-A requires no source');assert(textVisible,'Ordinary essay question missing')}
+ if(mode==='chemistryA'){assert.equal(tables.length,0,'Chemistry must remain independent');assert(textVisible,'Other subject question suppressed')}
  mounted.dispose();
 }
 (async()=>{
  let n=0;
- for(const lang of ['en','ru','uz'])for(const mode of ['A','missing','B']){await check(lang,mode);n++}
+ for(const lang of ['en','ru','uz'])for(const mode of ['A','missing','B','chemistryA']){await check(lang,mode);n++}
  console.log(JSON.stringify({economics_written_source_gate:'PASS',js_tests:n,js_syntax:true,sql_gates:true,no_student_scores:true}));
 })().catch(err=>{console.error(err);process.exit(1)});
