@@ -1,5 +1,36 @@
 # iClub Chemistry 9701 — J-02 Authenticated P1 + shared host (26.10.2026)
 
+## J-03: reuse current Mathematics beta learners (27.10.2026)
+
+**Owner instruction:** use the existing Mathematics Exam Prep beta learners, create **no new GitHub branch**, remove temporary QA residues after testing. All J-03 GitHub changes committed in the **existing** `work/chemistry-9701-j02-auth-host-20261026` branch. No production Vercel deployment or merge.
+
+### Actual cohort linkage
+
+- Live source: `private.exam_prep_beta_cohorts` row with `cohort_key=math_as_p1_p5_beta_2026_09_01` and its existing `exam_prep_beta_members` + `exam_prep_beta_consents`. **4 enrolled, 3 active and explicitly consented**, 2 of those active learners have already selected Chemistry as a subject. No user IDs or personally identifying records committed in Git.
+- `private.iclub_exam_chemistry_p1_math_beta_eligible_v1(user_id)` checks membership dynamically: exact cohort/program, `canary|active`, active member with activation timestamp, unrevoked Math controlled-beta consent, and an active Chemistry subject selection.
+- `private.iclub_exam_chemistry_p1_student_authorized_v1()` now **requires that existing Math beta eligibility**, in addition to separate Chemistry opt-in, Chemistry owner approval, programme published, manifest approved and 40-item P1 published. Pausing/removing a Math member or revoking Maths consent will fail Chemistry eligibility automatically. The beta cohort itself is **not duplicated**.
+- `private.iclub_exam_chemistry_p1_beta_members_v1` is used only as a separate, revocable **Chemistry consent and approval record for users who opt in**. It remains **empty (zero rows)**. No permission or consent was recorded on anyone's behalf.
+- Added authenticated self-service `public.grant_my_exam_prep_chemistry_consent_v1` and `public.revoke_my_exam_prep_chemistry_consent_v1`, requiring a signed-in, active, Math-beta-eligible learner to expressly acknowledge the Chemistry test. Self opt-in creates `active=false` and does not manufacture owner approval. Revocation is always available, even if the Math cohort has subsequently been paused.
+- `public.get_my_exam_prep_chemistry_beta_status_v1` returns only the requesting user's eligible/consented/can_start state, not cohort identities or answer keys. It never enables the paper.
+- Within the existing shared `exam-prep-host.js`, an eligible Math beta tester viewing Chemistry gets a RU/UZ/EN optional opt-in card in the existing Exam Prep styling; other students continue to see **«В разработке»**. Opt-in never opens the exam without later owner GO. CSS reuses existing card primitives with a small responsive scoped class.
+
+### QA carried out — no real learner progress changed
+
+- Read-only file `scripts/qa-chemistry-9701-j03-math-cohort-reuse-readonly.sql`: **21/21 PASS**. The existing J-02 preflight had **28/28 PASS**, and the beta remains OFF.
+- Tested the actual Math beta **membership identifiers** inside a single **ROLLBACK** transaction: one Chemistry-subject user may opt in only with an explicit acknowledgement; the Math beta user without Chemistry subject cannot opt in. Consent persists inside transaction only, is revocable and never grants instant exam entry. Entire transaction rolled back, so **0 actual Chemistry consent rows and 0 learner exam attempts** afterward.
+- Checked the shared host and Chemistry modules compile as JS. Mock DOM executed the eligibility offer, one explicit join, subsequent revoke, and ineligible user fallback; **no exam-start RPC was invoked**. This is a mock UI check, not a real signed-in browser/device acceptance test.
+- Supabase security advisor reports expected WARN entries for authenticated SECURITY DEFINER endpoints (self-only `auth.uid()` and cohort/ownership checks; anon revoked) and INFO for deliberately policy-less, inaccessible private tables. Recheck again before public rollout.
+- Live Mathematics still has 544 Exam Prep sessions/1,979 responses. Practice has 502 attempts/4,816 answers. Economics has 1 recorded native attempt. All **26 historical Chemistry variants** retained. User subject selection count may rise naturally while real users use the app; no subject rows were inserted by J-03.
+- Cleanup: no additional Git branch created; all synthetic SQL and user consent tests rolled back; **zero** Chemistry test sessions/real sessions/consents persisted. Keep older *unmerged* Chemistry work branches until their unique work is safely integrated; deleting them would lose unpublished source and QA history.
+
+### Remains outstanding
+
+The Chemistry full AS learner journey (diagnostic → results → plan → teaching → mistakes → retests), Paper 2/3/4/5 evaluation, genuine authenticated account positive E2E, device/browser QA, owner-approved content release and controlled beta GO are **not yet completed**. Continue on the same branch unless a branch change is strictly required, and never overwrite Mathematics/Economics code or user data.
+
+---
+
+
+
 **Status: IMPLEMENTED BEHIND OFF GATES; NOT RELEASED.**  
 **Isolated branch:** `work/chemistry-9701-j02-auth-host-20261026`, based on an actual `main` snapshot.  
 **Existing production:** Mathematics P1/P5, Economics P1/P3, Tours, Practice and user history must remain unchanged. No branch merge, PR, Vercel deployment, account enrollment or beta release in J-02.
