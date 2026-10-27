@@ -22,7 +22,7 @@
       route:"Вернитесь к учебным материалам Chemistry, чтобы повторить эти темы, затем проверьте себя на новых заданиях.",
       noErrors:"Ошибок в этой проверке нет. Это ещё не подтверждает полное освоение тем.",
       reviewError:"Не удалось загрузить учебный маршрут.",notCalibrated:"Результат ориентировочный: подготовленное задание на тему не является полноценной диагностикой.",
-      viewPaper:"Paper 1 — экзамен",backResult:"К результату"},
+      viewPaper:"Paper 1 — экзамен",backResult:"К результату",studyLesson:"Изучить тему",backTopics:"К списку тем",lessonUnavailable:"Урок пока недоступен. Он откроется после публикации материалов.",lessonNotMastery:"Изучение этой темы не начисляет освоение автоматически."},
     uz:{title:"Chemistry · Kirish tekshiruvi",intro:"22 ta savol · 30 daqiqa. Bu dastlabki yo‘naltiruvchi tekshiruv, Paper 1 imtihoni emas.",
       limitation:"Har bir mavzudagi bitta savol mavzuni o‘zlashtirishni ishonchli baholay olmaydi.",
       start:"Boshlash yoki davom ettirish",history:"Tekshiruvlarim",empty:"Hali tekshiruvlar yo‘q.",
@@ -39,7 +39,7 @@
       route:"Mavzularni takrorlash uchun Chemistry o‘quv materiallariga qayting. Keyin yangi savollar bilan bilimingizni tekshiring.",
       noErrors:"Bu tekshiruvda xato yo‘q. Ammo bu barcha mavzular o‘zlashtirilganini isbotlamaydi.",
       reviewError:"O‘quv yo‘nalishini yuklab bo‘lmadi.",notCalibrated:"Natija taxminiy: har bir mavzudagi bitta savol to‘liq diagnostika hisoblanmaydi.",
-      viewPaper:"Paper 1 — imtihon",backResult:"Natijaga qaytish"},
+      viewPaper:"Paper 1 — imtihon",backResult:"Natijaga qaytish",studyLesson:"Mavzuni o‘rganish",backTopics:"Mavzular ro‘yxatiga",lessonUnavailable:"Dars hali ochilmagan. Materiallar e’lon qilingach foydalanish mumkin.",lessonNotMastery:"Bu mavzuni o‘qish avtomatik o‘zlashtirish belgisini bermaydi."},
     en:{title:"Chemistry · Entry check",intro:"22 questions · 30 minutes. This is an orientation check, not the Paper 1 exam.",
       limitation:"One question per topic cannot reliably establish mastery.",
       start:"Start or resume",history:"My checks",empty:"No checks yet.",
@@ -56,7 +56,7 @@
       route:"Return to Chemistry learning materials to review these topics, then test yourself with fresh questions.",
       noErrors:"No errors in this check. It does not establish full understanding.",
       reviewError:"Could not load the study route.",notCalibrated:"This result is only a guide: one question per topic is not a full diagnosis.",
-      viewPaper:"Paper 1 exam",backResult:"Back to result"}
+      viewPaper:"Paper 1 exam",backResult:"Back to result",studyLesson:"Study topic",backTopics:"Back to topics",lessonUnavailable:"This lesson is not yet released. It opens only when the learning material is published.",lessonNotMastery:"Reading this topic does not automatically credit mastery."}
   };
   const t=()=>copy[state.lang]||copy.ru;
   const el=(tag,value,cls)=>{
@@ -272,6 +272,8 @@
       const card=el("div",undefined,"ep-chem-review-row");
       card.append(el("strong",item.unit+". "+item.title));
       card.append(el("span",item.answered?t().topicWrong:t().topicSkipped,"ep-chem-review-counts"));
+      if(item.lesson_available===true && item.skill_key)
+        card.append(button(t().studyLesson,()=>showLesson(item.skill_key),true));
       focus.append(card);
     });
     p.append(focus);
@@ -283,6 +285,8 @@
       block.append(el("strong",item.unit+". "+item.title));
       block.append(el("span",item.review_needed?(item.answered?t().topicWrong:t().topicSkipped):t().topicOK,
         "ep-chem-review-counts"));
+      if(item.lesson_available===true && item.skill_key)
+        block.append(button(t().studyLesson,()=>showLesson(item.skill_key),true));
       all.append(block);
     });
     other.append(all);p.append(other);
@@ -293,6 +297,37 @@
     if(typeof state.onPaper==="function")
       actions.append(button(t().viewPaper,()=>state.onPaper(),true));
     p.append(actions);
+  }
+  async function showLesson(skillKey){
+    if(!active()||state.busy||state.data?.status!=="finalized"||!state.session
+      ||typeof skillKey!=="string"||!/^CHEM9701-[0-9]{2}-[0-9]{2}$/.test(skillKey))return;
+    state.busy=true;
+    const token=++state.seq,session=state.session;
+    const p=panel();if(!p)return;
+    p.append(el("p",t().loading,"ep-host-note"));
+    const result=await rpc("iclub_exam_chemistry_entry_lesson_v1",{
+      p_session_id:session,p_skill_key:skillKey,p_language:state.lang
+    });
+    if(!active()||token!==state.seq||session!==state.session)return;
+    state.busy=false;
+    const view=panel();if(!view)return;
+    if(!result.ok||result.skill_key!==skillKey
+      ||result.ai_tutor_content_included!==false
+      ||result.can_credit_mastery!==false
+      ||typeof result.explanation!=="string"
+      ||result.explanation.length<30){
+      const note=el("p",t().lessonUnavailable,"ep-host-note");
+      note.setAttribute("role","alert");
+      view.append(note,button(t().backTopics,review,true));
+      return;
+    }
+    view.append(el("h3",result.title,"ep-native-result"),
+      el("p",result.explanation,"ep-chem-entry-theory"),
+      el("p",t().lessonNotMastery,"ep-host-note"));
+    const actions=el("div",undefined,"ep-host-actions");
+    actions.append(button(t().backTopics,review,true),
+      button(t().openSubject,()=>state.onBack?.(),true));
+    view.append(actions);
   }
   function mount({root,shell,language,onBack,onPaper}={}){
     unmount();
