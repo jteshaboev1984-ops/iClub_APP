@@ -217,8 +217,7 @@
     result.append(e("h3","",t().entryResult),
       e("div","ep-live-meta",t().result+": "+state.data.score+" / 12"));
     const actions=e("div","ep-live-actions");
-    actions.append(btn(t().selectPaper,lobby),
-      btn(t().plan,showStudyPlan,true));
+    actions.append(btn(t().selectPaper,lobby));
     result.append(actions);view.append(result);
   }
 
@@ -232,6 +231,7 @@
     const active=entries.find(x=>x.status==="active");
     const completed=entries.find(x=>x.session_kind==="diagnostic"&&x.status==="finalized");
     const latestPaper=entries.find(x=>x.session_kind==="paper"&&x.status==="finalized");
+    const learning=completed||(code==="P1"?initialCheckStatus().complete:null);
     const component=e("section","ep-component-home");
     const top=e("header","ep-component-hero");
     const head=e("div","ep-live-component-head");
@@ -243,15 +243,15 @@
     const next=e("section","ep-component-next");
     next.append(e("div","ep-component-section-label",t().recommended),
       e("strong","ep-component-next-title",
-        active?t().resumeExam:completed?t().afterCheck:t().startHere));
+        active?t().resumeExam:learning?t().afterCheck:latestPaper?t().viewResult:t().fullPaper));
     const detail=active?(active.session_kind==="diagnostic"?t().entryCheck:t().fullPaper)+
       " · "+active.answered+"/"+(active.total_items||30)
-      :completed?t().entryCheck+" · "+completed.score+"/12":
-      t().entryCheck+" · 12 MCQ · 20 "+t().minuteShort;
+      :learning?t().entryCheck+" · "+learning.score+"/12":t().availablePaper;
     next.append(e("div","ep-live-meta",detail));
     const primary=active?btn(t().continueAttempt,()=>openHistory(active,false))
-      :completed?btn(t().plan,()=>openHistory(completed,true))
-      :btn(t().startDiagnostic,()=>begin(code,"diagnostic"));
+      :learning?btn(t().plan,()=>openHistory(learning,true))
+      :latestPaper?btn(t().viewResult,()=>openHistory(latestPaper,false))
+      :btn(t().fullPaper,()=>begin(code,"paper"));
     primary.classList?.add("ep-component-primary");
     next.append(primary);component.append(next);
     const links=e("section","ep-component-links");
@@ -259,7 +259,8 @@
       const b=btn(label,fn,true);b.className="ep-component-link";links.append(b);
     };
     if(completed)link(t().repeatCheck,()=>begin(code,"diagnostic"));
-    link(t().fullPaper,()=>begin(code,"paper"));
+    if(code==="P3"&&!completed)link(t().entryCheck+" · A Level",()=>begin(code,"diagnostic"));
+    if(learning||latestPaper)link(t().fullPaper,()=>begin(code,"paper"));
     if(latestPaper)link(t().viewResult,()=>openHistory(latestPaper,false));
     link(t().viewHistory,()=>openHistoryList(code));
     component.append(links);view.append(component);
@@ -402,7 +403,11 @@
     const data=state.data,view=shell();if(!view||!data)return;
     const finished=data.status==="finalized",total=data.items.length;
     const header=e("div","ep-native-header");
-    header.append(e("strong","",(state.paper==="P1"?t().p1:t().p3)+(data.session_kind==="diagnostic"?" · "+t().entryCheck:"")));
+    const initial=data.session_kind==="diagnostic"&&state.paper==="P1"&&
+      !initialCheckStatus().complete;
+    header.append(e("strong","",initial?t().entryCheck:
+      (state.paper==="P1"?t().p1:t().p3)+
+      (data.session_kind==="diagnostic"?" · "+t().entryCheck:"")));
     const remaining=e("span","ep-live-timer");
     header.append(remaining);view.append(header);
     if(finished){
