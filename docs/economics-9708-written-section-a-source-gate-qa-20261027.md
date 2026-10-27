@@ -18,7 +18,9 @@ Status: **STAGED ON FEATURE BRANCH ONLY — NOT DEPLOYED — NO-GO for learner P
 - 9/9 controller/view synthetic tests (EN/RU/UZ × approved source, missing source, no-source B question).
 - 12/12 isolated-browser layout tests (P2/P4 × EN/RU/UZ × 375px/1280px) with no page-level horizontal overflow.
 - Private live Supabase baseline via SELECT: 14 P2 / 8 P4; 0 approved, 0 released; written plan/access/item counts all zero; anon/authenticated no direct private task SELECT.
-- SQL migration static checks passed. **Migration has NOT been applied/compiled by PostgreSQL.** Authenticated source E2E is not yet proven.
+- PostgreSQL compilation and authenticated-owner smoke E2E passed inside a single `BEGIN ... ROLLBACK` transaction (not installed). This checked unapproved-source denial, EN/RU/UZ shape validation, missing RU and malformed row denial, owner-only access, localized source payload, no early criteria in open, explicit criteria, source revocation, cross-user denial, idempotent advancement, and status recovery.
+- Post-rollback read-only checks: source tables = 0; smoke task = 0; access/plans/items = 0; Economics P2=14/P4=8, released=0. No persistent source records or migrations were created.
+- **Real persistent production server deployment, independently authenticated browser E2E and actual 22-task release are NOT performed yet.**
 
 ## Release gates
 1. Review v3 content + locales + source table column labels, values, headings.
@@ -30,3 +32,7 @@ Status: **STAGED ON FEATURE BRANCH ONLY — NOT DEPLOYED — NO-GO for learner P
 ## Preservation
 Feature branch: `feature/economics-written-source-gate-20261027`.
 Production main is unchanged by this branch. Existing learner progress remains untouched.
+
+## Concurrent GitHub main reconciliation
+
+On 27 Oct 2026 `main` advanced with an unrelated AI Practice migration numbered `20261027213000`. The Economics source migration has been renamed to `20261027221000_iclub_exam_written_private_section_a_sources_v1.sql` before integration; there is no duplicate migration version. The AI Practice files were not touched by this branch.
