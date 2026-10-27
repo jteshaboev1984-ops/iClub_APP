@@ -9,22 +9,22 @@ const PLAN='11111111-1111-4111-8111-111111111111';
 const GOAL='33333333-3333-4333-8333-333333333333';
 const AUTH='55555555-5555-4555-8555-555555555555';
 const SESSION='66666666-6666-4666-8666-666666666666';
-async function scenario(browser,language,width,kind,mode) {
+async function scenario(browser,language,width,kind,mode,weeklyMode) {
   const page=await browser.newPage({viewport:{width,height:850}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.route(/^https?:\/\//,route=>route.abort());
   try {
     await page.setContent(`<!doctype html><html lang="${language}"><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="exam-prep-host-root" aria-hidden="false"></div></body></html>`);
     await page.addStyleTag({path:file('exam-prep/exam-prep-host.css')});
-    await page.evaluate(([lang,kind,mode,planId,goalId,authId,sessionId])=>{
+    await page.evaluate(([lang,kind,mode,planId,goalId,authId,sessionId,weeklyMode])=>{
       // Browser execution has no Node assert; keep the fixture's checks explicit.
       const assert=(condition)=>{if(!condition)throw Error('Synthetic fixture assertion failed');};
       assert.strictEqual=(actual,expected)=>{if(actual!==expected)throw Error('Synthetic fixture identity mismatch');};
-      window.iClubExamPrepWeeklyFlowEnabled=true;
+      window.iClubExamPrepWeeklyFlowEnabled=weeklyMode;
       window.iClubExamPrepProgressUxEnabled=false;
       window.i18n={getLang:()=>lang};
       const s=window.__answerTest={kind,mode,planId,goalId,authId,sessionId,
-        answered:false,finalized:false,sendCount:0,readCount:0,keys:[],payloads:[],generatorCount:0};
+        answered:false,finalized:false,sendCount:0,readCount:0,keys:[],payloads:[],generatorCount:0,weeklyMode};
       const item=()=>({item_order:1,item_kind:kind==='written'?'written':'question',
         qtype:kind==='written'?null:'mcq',text:kind==='written'?null:'Convert 90° to radians.',
         written_prompt:kind==='written'?'Explain the radians conversion.':null,
@@ -53,7 +53,10 @@ async function scenario(browser,language,width,kind,mode) {
           if(s.sendCount===1&&s.mode==='before_commit') throw Error('Lost connection before commit');
           s.answered=true;return ok({is_correct:kind==='written'?null:true});
         },
-        finalizeSession:async()=>{assert(s.answered);s.finalized=true;return ok({status:'finalized'});}
+        finalizeSession:async()=>{assert(s.answered);s.finalized=true;return ok({status:'finalized'});},
+        authorizePlanItem:async(planId,priority)=>{assert.strictEqual(planId,s.planId);assert.strictEqual(priority,1);return ok({authorization_id:s.authId});},
+        startSession:async(authId)=>{assert.strictEqual(authId,s.authId);return ok({session_id:s.sessionId});},
+        generateWeeklyPlan:async()=>{s.generatorCount++;return ok({status:'generated'});}
       };
       internal.progressUxApi={progress:async()=>ok({goals:[{goal_id:s.goalId,component_code:'P1',
         item_type:'learning',skill_code:'P1-CIR-01',status:'not_started',
@@ -66,7 +69,7 @@ async function scenario(browser,language,width,kind,mode) {
         start:async()=>ok({status:'started',session_id:s.sessionId})};
       window.iClubExamPrep={open:async()=>true,isOpen:()=>true,back:()=>true,close:()=>true,
         syncSubjectHub:async()=>true,refreshCapabilities:async()=>true};
-    },[language,kind,mode,PLAN,GOAL,AUTH,SESSION]);
+    },[language,kind,mode,PLAN,GOAL,AUTH,SESSION,weeklyMode]);
     await page.addScriptTag({path:file('exam-prep/exam-prep-live.js')});
     if(kind==='written') await page.addScriptTag({path:file('exam-prep/exam-prep-written-understanding-ui.js')});
     await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
@@ -86,7 +89,7 @@ async function scenario(browser,language,width,kind,mode) {
       const s=await page.evaluate(()=>window.__answerTest);
       assert.strictEqual(s.sendCount,1,`${language}/${kind}: no second write after committed answer`);
       assert(s.readCount>=2,`${language}/${kind}: server checked saved item`);
-      assert.strictEqual(s.generatorCount,0);
+      assert.strictEqual(s.generatorCount,weeklyMode?0:1,'Regeneration is legacy-only after finalization');
     } else {
       await page.waitForSelector('[data-ep-answer-recovery] [data-ep-answer-retry]');
       assert.strictEqual(await page.locator('[data-ep-live-submit]').isHidden(),true);
@@ -106,10 +109,10 @@ async function scenario(browser,language,width,kind,mode) {
       assert.strictEqual(s.sendCount,2,'Exactly one explicit resend');
       assert.strictEqual(s.keys[0],s.keys[1],'Must preserve original idempotency key');
       assert.deepEqual(s.payloads[0],s.payloads[1],'Must preserve exact original answer');
-      assert.strictEqual(s.generatorCount,0);
+      assert.strictEqual(s.generatorCount,weeklyMode?0:1,'Regeneration is legacy-only after finalization');
     }
     assert.deepEqual(errors,[],`${language}/${width}/${kind}/${mode}: no browser errors`);
-    console.log(`PASS ${language} ${width}px ${kind} ${mode}`);
+    console.log(`PASS ${language} ${width}px ${kind} ${mode} ${weeklyMode?'governed':'legacy'}`);
   } finally {await page.close();}
 }
 (async()=>{
@@ -119,9 +122,10 @@ async function scenario(browser,language,width,kind,mode) {
       for(const width of [390,1280])
         for(const kind of ['mcq','written'])
           for(const mode of ['before_commit','after_commit'])
-            await scenario(browser,language,width,kind,mode);
+            for(const weeklyMode of [true,false])
+              await scenario(browser,language,width,kind,mode,weeklyMode);
     for(const language of ['ru','uz','en'])
-      await scenario(browser,language,390,'written','hung');
-    console.log('GREEN 24 lost-acknowledgment plus 3 hung-written-RPC real-DOM scenarios; synthetic only, no network.');
+      for(const weeklyMode of [true,false]) await scenario(browser,language,390,'written','hung',weeklyMode);
+    console.log('GREEN 48 lost-acknowledgment plus 6 hung-written-RPC real-DOM scenarios (governed/legacy; 3 languages; 2 widths); synthetic only, no network.');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
