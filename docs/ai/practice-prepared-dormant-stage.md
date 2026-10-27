@@ -4,6 +4,11 @@
 ## Product intent
 ONE existing iClub AI Tutor, not another on-screen Practice card. Only finalized, owner-authorized **main Practice V4** attempts qualify; Tour and Exam Prep are excluded. Tutor may explain verified score, offer cautious next steps and compare comparable attempts; a specific academic mistake requires an admitted source card. The limited PC3 model route cannot fabricate Mathematics solutions from 7/10 alone.
 
+### Mathematics question-specific source governance
+- Existing approved **Exam Prep** Tutor Cards have 243 skill/locale variants covering 81 P1+P5 skills, per the project's October content-approval documentation. They are **topic resources**, not permission to infer what caused a learner's main Practice error.
+- The candidate PC1 `practice_error` source check now demands an admitted **same-version EN+RU+UZ set**, individually correct body hashes, and the same current question target fingerprint. The isolated PostgreSQL fixture checks missing translation, stale version, tampered text, mismatched question fingerprint and reuse on another question. No real Mathematics Practice error card was inserted or published.
+- Binding actual history-bearing main Practice questions to P1/P5 canonical skills still requires additive, evidence-reviewed per-question mapping and downstream delivery RPC/UI audit. See `docs/ai/practice-mathematics-source-bridge-v1.md`. It is **not** a release approval.
+
 ### Prepared PC1/PC2
 - `supabase/candidates/iclub_ai_practice_context_v1_dormant.sql`: service-only read, fresh owner/finalization/active-assessment checks; independent OFF flag; no progress or score writes.
 - `supabase/functions/iclub-ai-practice-prepared/index.ts`: provider-free verified score/next-step and constrained academic source path.
