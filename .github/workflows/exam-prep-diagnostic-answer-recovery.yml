@@ -1,0 +1,31 @@
+name: Exam Prep diagnostic answer loss recovery (isolated)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'scripts/exam-prep-diagnostic-answer-loss-browser.cjs'
+      - '.github/workflows/exam-prep-diagnostic-answer-recovery.yml'
+permissions:
+  contents: read
+jobs:
+  diagnosis-answer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JS contract preflight
+        run: |
+          node --check exam-prep/exam-prep-live.js
+          node --check scripts/exam-prep-diagnostic-answer-loss-browser.cjs
+      - name: Install isolated Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Diagnostic answer recovery in RU UZ EN
+        run: node scripts/exam-prep-diagnostic-answer-loss-browser.cjs
