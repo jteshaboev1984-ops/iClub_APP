@@ -6,7 +6,7 @@ const vm=require('node:vm');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const migration='supabase/migrations/20261027221000_iclub_exam_written_private_section_a_sources_v1.sql';
+const migration='supabase/migrations/20261027163633_iclub_exam_written_private_section_a_sources_v1.sql';
 const sql=read(migration);
 const view=read('exam-prep/runtime/written-core-view-v1.js');
 const ctl=read('exam-prep/runtime/written-core-controller-v1.js');
