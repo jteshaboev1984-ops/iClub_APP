@@ -1,4 +1,4 @@
-name: Practice AI - isolated PostgreSQL and Chromium preview
+name: Practice AI - isolated PostgreSQL GoTrue and browser QA
 on:
   pull_request:
     branches: [main]
@@ -184,7 +184,7 @@ jobs:
             exit 1
           fi
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_pc4_financial_audit_isolated.sql
-      - name: Chromium preview with mocked backend (no external traffic)
+      - name: Chromium localhost-only test fixture (no hosted Preview)
         shell: bash
         run: |
           set -euo pipefail
@@ -197,6 +197,14 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           node scripts/practice-ai-prepared-real-sql-e2e.cjs
+      - name: Compile actual additive production migration in disposable DB (still OFF)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261027203000_iclub_ai_practice_owner_default_off_v1.sql
+          echo 'PASS actual additive migration compiled; no hosted database used'
       - name: Stop disposable Supabase Auth container
         if: always()
         shell: bash
