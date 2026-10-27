@@ -49,13 +49,13 @@ CREATE FUNCTION public.iclub_practice_drill_question_protected_v4(p_question_id 
 -- Synthetic-only admission stub. Production source admission is not altered.
 CREATE FUNCTION private.iclub_ai_v21_source_admitted_v1(
  src private.iclub_ai_v21_academic_sources)
- RETURNS boolean LANGUAGE sql STABLE AS $
+ RETURNS boolean LANGUAGE sql STABLE AS $admitted$
  SELECT src.source_version='qa-approved-v1'
    AND src.source_card_key LIKE 'qa-approved-%'
-   AND src.body_text LIKE 'Isolated approved synthetic %' $;
+   AND src.body_text LIKE 'Isolated approved synthetic %' $admitted$;
 CREATE FUNCTION private.iclub_ai_v21_target_fingerprint_v1(p_surface text,p_id bigint)
- RETURNS text LANGUAGE sql STABLE AS $
- SELECT encode(extensions.digest(convert_to(p_surface||':'||p_id::text,'UTF8'),'sha256'),'hex') $;
+ RETURNS text LANGUAGE sql STABLE AS $fingerprint$
+ SELECT encode(extensions.digest(convert_to(p_surface||':'||p_id::text,'UTF8'),'sha256'),'hex') $fingerprint$;
 
 -- Compile actual candidate; no placeholders in the candidate function body.
 \ir ../candidates/iclub_ai_practice_context_v1_dormant.sql
