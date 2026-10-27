@@ -526,8 +526,22 @@ async function main(){
    assert.equal(calls,beforeRealCalls+1);
    await testBrowserGoTrue({edge,answer:owned.body.message,receiptId:id,
      ownerId:realOwner.id,providerCalls:()=>calls-beforeRealCalls});
-   const acknowledged=await send("resume_ack",null,id,
+   // Browser signOut revokes the original signed GoTrue session.
+   // Prove that a revoked JWT is rejected; then repeat ACK after a fresh login.
+   const revokedOldToken=await send("resume_ack",null,id,
       {token:realOwner.token,attempt:701});
+   assert.equal(revokedOldToken.status,401,JSON.stringify(revokedOldToken));
+   const freshLogin=await fetch(GOTRUE+"/token?grant_type=password",{
+     method:"POST",headers:{"content-type":"application/json"},
+     body:JSON.stringify({
+       email:"iclub-practice-ci-owner@example.com",
+       password:"Temporary-Only-GoTrue-CI-owner-2026!"
+     })
+   });
+   assert.equal(freshLogin.status,200,"Fresh owner GoTrue sign-in after logout");
+   const renewedJwt=(await freshLogin.json()).access_token;
+   const acknowledged=await send("resume_ack",null,id,
+      {token:renewedJwt,attempt:701});
    assert.equal(acknowledged.status,200,JSON.stringify(acknowledged));
    const audit=JSON.parse(pg("SELECT json_build_object("+
       "'money',(SELECT state FROM private.iclub_ai_v21_freeform_budget_ledger "+
