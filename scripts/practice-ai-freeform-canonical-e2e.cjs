@@ -81,6 +81,137 @@ function state(){
  "'accounted',(SELECT quota_confirmed_at IS NOT NULL FROM private.iclub_ai_practice_receipts_v1 WHERE request_id='"+ID+"'))::text;";
  return JSON.parse(pg(q));
 }
+
+async function testBrowserGoTrue({edge,answer,receiptId,ownerId,providerCalls}){
+  if(!GOTRUE||!realOwner||!realOther)throw Error("Local GoTrue missing");
+  const {chromium}=require("playwright"),esbuild=require("esbuild");
+  const root=path.resolve(__dirname,"..");
+  const html=fs.readFileSync(path.join(root,"scripts/fixtures/practice-ai-unified-tutor-local-only.html"),"utf8")
+    .replaceAll('data-practice-ai-attempt-id="501"','data-practice-ai-attempt-id="701"');
+  const jsClient=fs.readFileSync(path.join(root,"iclub-ai-v21-beta-client.js"),"utf8");
+  const jsTutor=fs.readFileSync(path.join(root,"iclub-ai-v21-ui.js"),"utf8");
+  const css=fs.readFileSync(path.join(root,"iclub-ai-v21-ui.css"),"utf8");
+  const bundle=await esbuild.build({
+    stdin:{contents:'import {createClient} from "@supabase/supabase-js";window.__makeRealAuthClient=createClient;',
+      resolveDir:root,sourcefile:"real-auth-browser-entry.js"},
+    platform:"browser",format:"iife",target:"chrome110",
+    bundle:true,write:false,logLevel:"silent"
+  });
+  let site=null,browser=null;
+  const browserErrors=[],escaped=[],requests=[],authPaths=[];
+  try{
+    site=http.createServer((req,res)=>{
+      res.writeHead(req.url==="/"?200:404,{"content-type":"text/html; charset=utf-8"});
+      res.end(req.url==="/"?html:"Not found");
+    });
+    await new Promise(ok=>site.listen(0,"127.0.0.1",ok));
+    const origin="http://127.0.0.1:"+site.address().port;
+    browser=await chromium.launch({headless:true});
+    const page=await browser.newPage({viewport:{width:1024,height:768}});
+    page.on("pageerror",e=>browserErrors.push(e.message));
+    await page.route("**/*",async route=>{
+      const req=route.request(),url=req.url(),method=req.method();
+      if(url.startsWith(origin+"/"))return route.continue();
+      if(!url.startsWith(PROD+"/")){
+        escaped.push(url);return route.abort("blockedbyclient");
+      }
+      const u=new URL(url),pathName=u.pathname,bearer=req.headers().authorization||"";
+      const h={"access-control-allow-origin":origin,"access-control-allow-methods":"GET,POST,OPTIONS",
+        "access-control-allow-headers":"authorization,apikey,content-type,x-client-info",
+        "content-type":"application/json; charset=utf-8","vary":"Origin"};
+      if(method==="OPTIONS")return route.fulfill({status:204,headers:h,body:""});
+      if(pathName.startsWith("/auth/v1/")){
+        const upstream=await fetch(GOTRUE+pathName.slice(8)+u.search,{
+          method,headers:{"content-type":"application/json",authorization:bearer},
+          body:method==="GET"?undefined:req.postData()
+        });
+        authPaths.push(pathName);
+        return route.fulfill({status:upstream.status,headers:h,body:await upstream.text()});
+      }
+      if(pathName.endsWith("/iclub-ai-v21-prepared")||
+         pathName.endsWith("/iclub-ai-practice-prepared")){
+        const check=await fetch(GOTRUE+"/user",{headers:{authorization:bearer}});
+        const person=check.ok?await check.json():null;
+        const valid=person?.id===ownerId;
+        const response=pathName.endsWith("/iclub-ai-v21-prepared")
+          ?{ok:true,eligible:valid,consented:valid,candidate:false}
+          :{ok:true,available:valid,mode:"availability",provider_called:false,academic_state_changed:false};
+        // Only UI preflight is stubbed; PC3/PC4 still use real Edge/Auth/DB.
+        return route.fulfill({status:200,headers:h,body:JSON.stringify(response)});
+      }
+      if(pathName.endsWith("/iclub-ai-practice-freeform")){
+        const body=JSON.parse(req.postData()||"{}");
+        requests.push({operation:body.operation,request_id:body.request_id});
+        const upstream=await fetch(edge,{method:"POST",headers:{
+          origin,authorization:bearer,"content-type":"application/json"
+        },body:req.postData()});
+        return route.fulfill({status:upstream.status,headers:h,body:await upstream.text()});
+      }
+      escaped.push(url);return route.abort("blockedbyclient");
+    });
+    await page.goto(origin+"/",{waitUntil:"domcontentloaded"});
+    await page.addScriptTag({content:bundle.outputFiles[0].text});
+    const loggedIn=await page.evaluate(async()=>{
+      window.i18n={getLang:()=>"ru"};
+      window.sb=window.__makeRealAuthClient("https://mmmduffgpvwjdpruzikw.supabase.co",
+        "fake-anon-"+"b".repeat(64),{auth:{persistSession:false,
+          autoRefreshToken:false,detectSessionInUrl:false}});
+      const {data,error}=await window.sb.auth.signInWithPassword({
+        email:"iclub-practice-ci-owner@example.com",
+        password:"Temporary-Only-GoTrue-CI-owner-2026!"
+      });
+      if(error)throw Error("Browser GoTrue sign-in failed: "+error.message);
+      const u=await window.sb.auth.getUser();
+      if(u.error||u.data.user?.id!==data.user.id)throw Error("Browser Auth /user failed");
+      return data.user.id;
+    });
+    assert.equal(loggedIn,ownerId,"Wrong actual browser Auth principal");
+    await page.addStyleTag({content:css});
+    await page.addScriptTag({content:jsClient});
+    await page.addScriptTag({content:jsTutor});
+    await page.locator("#iclub-global-ai-mark").waitFor({timeout:10000});
+    await page.evaluate(()=>window.iClubGlobalAiShell.open());
+    await page.waitForFunction(expected=>{
+      const text=document.querySelector("[data-global-ai-messages]")?.textContent||"";
+      return text.includes("Восстановлен ответ")&&text.includes(expected);
+    },answer,{timeout:14000});
+    await page.waitForFunction(()=>{
+      const quick=document.querySelector("[data-global-ai-quick]");
+      return !!quick&&!quick.textContent.includes("Восстановить ответ");
+    },null,{timeout:10000});
+    const content=await page.locator("[data-global-ai-messages]").textContent();
+    assert.equal(content.split(answer).length-1,1,"Real browser duplicated saved answer");
+    assert.equal(requests.filter(x=>x.operation==="resume").length,1);
+    assert.equal(requests.filter(x=>x.operation==="resume_ack"&&x.request_id===receiptId).length,1);
+    assert.equal(providerCalls(),1,"Browser recovery generated new model answer");
+    assert.equal(await page.evaluate(()=>localStorage.length),0,"AI answer stored on device");
+    await page.evaluate(()=>window.sb.auth.signOut());
+    const foreign=await page.evaluate(async()=>{
+      const {data,error}=await window.sb.auth.signInWithPassword({
+        email:"iclub-practice-ci-other@example.com",
+        password:"Temporary-Only-GoTrue-CI-other-2026!"
+      });
+      if(error)throw Error("Other GoTrue browser login failed");
+      return data.user.id;
+    });
+    assert.equal(foreign,realOther.id);
+    await page.waitForFunction(()=>{
+      const t=document.querySelector("[data-global-ai-messages]")?.textContent||"";
+      return !t.includes("Восстановлен ответ");
+    },null,{timeout:9000});
+    assert.equal(providerCalls(),1,"Foreign account dispatched the provider");
+    assert.deepEqual(escaped,[],"Real Auth browser contacted external site");
+    assert.deepEqual(browserErrors,[],"Browser script errors");
+    assert(authPaths.includes("/auth/v1/token")&&authPaths.includes("/auth/v1/user"),
+      "Browser must use actual GoTrue password and /user endpoints");
+    console.log("PASS REAL Supabase JS browser sign-in / GoTrue JWT / unified Tutor PC4 recovery & ACK / foreign account isolation");
+    console.log("PASS real Edge + database, local-only network, zero browser answer storage, no model replay");
+  }finally{
+    if(browser)await browser.close();
+    if(site)await new Promise(ok=>site.close(ok));
+  }
+}
+
 let calls=0,failures=[];
 const respond=(res,status,obj)=>{res.writeHead(status,{"content-type":"application/json"});res.end(JSON.stringify(obj));};
 async function main(){
@@ -393,6 +524,8 @@ async function main(){
    assert.equal(recovery.status,200,JSON.stringify(recovery));
    assert.equal(recovery.body.request_id,id);
    assert.equal(calls,beforeRealCalls+1);
+   await testBrowserGoTrue({edge,answer:owned.body.message,receiptId:id,
+     ownerId:realOwner.id,providerCalls:()=>calls-beforeRealCalls});
    const acknowledged=await send("resume_ack",null,id,
       {token:realOwner.token,attempt:701});
    assert.equal(acknowledged.status,200,JSON.stringify(acknowledged));
