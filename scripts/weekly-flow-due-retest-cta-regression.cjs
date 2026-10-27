@@ -10,7 +10,7 @@ const GOAL_NEXT = '33333333-3333-4333-8333-333333333333';
 const AUTH = '44444444-4444-4444-8444-444444444444';
 const SESSION = '55555555-5555-4555-8555-555555555555';
 
-async function scenario(browser, lang, width, future = false) {
+async function scenario(browser, lang, width, dueState, guardedFlow) {
   const page = await browser.newPage({ viewport: { width, height: 844 }, timezoneId: 'Asia/Tashkent' });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -18,8 +18,8 @@ async function scenario(browser, lang, width, future = false) {
 
   try {
     await page.setContent('<!doctype html><html lang="'+lang+'"><body><div id="exam-prep-host-root" aria-hidden="false"></div></body></html>');
-    await page.evaluate(([planId, doneGoal, nextGoal, authId, sessionId, language, retestDueAt]) => {
-      window.iClubExamPrepWeeklyFlowEnabled = true;
+    await page.evaluate(([planId, doneGoal, nextGoal, authId, sessionId, language, retestDueAt, guardedFlow]) => {
+      window.iClubExamPrepWeeklyFlowEnabled = guardedFlow;
       window.iClubExamPrepProgressUxEnabled = true;
       window.i18n = { getLang: () => language };
       const state = window.__cta = {
@@ -34,7 +34,7 @@ async function scenario(browser, lang, width, future = false) {
         component_code: 'P1',
         active_week_no: 1,
         items: [
-          { priority_order: 1, item_type: 'learning', skill_code: 'P1-FUN-01', status: 'pending', due_at: null },
+          { priority_order: 1, item_type: 'learning', skill_code: 'P1-FUN-01', status: guardedFlow ? 'pending' : 'completed', due_at: null },
           { priority_order: 2, item_type: 'retest', skill_code: 'P1-FUN-02', status: 'pending', due_at: retestDueAt }
         ]
       };
@@ -127,7 +127,7 @@ async function scenario(browser, lang, width, future = false) {
             return reject('unexpected RPC ' + name);
         }
       }};
-    }, [PLAN, GOAL_DONE, GOAL_NEXT, AUTH, SESSION, lang, future ? '2099-01-01T00:00:00Z' : '2026-10-01T00:00:00Z']);
+    }, [PLAN, GOAL_DONE, GOAL_NEXT, AUTH, SESSION, lang, ({due:'2026-10-01T00:00:00Z',future:'2099-01-01T00:00:00Z',missing:null,invalid:'not-a-date',timezone_less:'2026-10-01T00:00:00'})[dueState],guardedFlow]);
 
     for (const js of [
       'exam-prep/exam-prep-api.js',
@@ -141,7 +141,7 @@ async function scenario(browser, lang, width, future = false) {
     await page.click('[data-ep-live-open-component="P1"]');
     await page.waitForSelector('[data-ep-component-home="P1"]');
 
-    if (future) {
+    if (dueState !== 'due') {
       const waiting = page.locator('[data-ep-component-primary="waiting"]');
       await waiting.waitFor();
       assert.equal(await waiting.isDisabled(), true, 'future delayed check must not launch');
@@ -150,7 +150,15 @@ async function scenario(browser, lang, width, future = false) {
       assert.deepEqual(state.authorizeGoals, [], 'future check must not be authorized');
       assert.equal(state.sessionStarts, 0, 'future check must not start');
       assert.deepEqual(errors, []);
-      console.log('PASS '+lang+'/'+width+': future retest correctly stays unavailable');
+      console.log('PASS '+lang+'/'+width+'/'+dueState+'/'+(guardedFlow?'guarded':'legacy')+': invalid or future retest blocked');
+      return;
+    }
+    if (!guardedFlow) {
+      const eligible = page.locator('[data-ep-component-primary="task"]');
+      await eligible.waitFor();
+      assert.equal(await eligible.isEnabled(),true,'due retest remains actionable under legacy route');
+      assert.deepEqual(errors,[]);
+      console.log('PASS '+lang+'/'+width+'/due/legacy: due retest stays available');
       return;
     }
     const label = await page.locator('[data-ep-component-primary="task"]').innerText();
@@ -173,13 +181,13 @@ async function scenario(browser, lang, width, future = false) {
     assert.equal(state.calls.filter(x => x.name === 'authorize_exam_prep_goal_once_safe_v1').length, 1);
     assert.deepEqual(errors, []);
 
-    console.log('PASS '+lang+'/'+width+': due retest CTA, completed goal skipped, no duplicate session');
+    console.log('PASS '+lang+'/'+width+'/due/guarded: retest CTA, completed goal skipped, no duplicate session');
   } finally { await page.close(); }
 }
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
-    for (const lang of ['ru','uz','en']) for (const width of [390,1280]) for (const future of [false,true]) await scenario(browser,lang,width,future);
-    console.log('PASS 12 retest scenarios (due/future; P1; 3 locales × 2 widths)');
+    for (const lang of ['ru','uz','en']) for (const width of [390,1280]) for (const dueState of ['due','future','missing','invalid','timezone_less']) for(const guardedFlow of [true,false]) await scenario(browser,lang,width,dueState,guardedFlow);
+    console.log('PASS 60 retest scenarios (5 due-date states × guarded/legacy × RU/UZ/EN × phone/desktop)');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exit(1); });

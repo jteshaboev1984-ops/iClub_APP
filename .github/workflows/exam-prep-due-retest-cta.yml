@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'scripts/weekly-flow-due-retest-cta-regression.cjs'
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-api.js'
       - '.github/workflows/exam-prep-due-retest-cta.yml'
 permissions:
   contents: read
