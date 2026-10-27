@@ -14,6 +14,7 @@
     invitation: null,
     economicsShell: null,
     chemistryShell: null,
+    chemistryEntryShell: null,
     chemistryOffer: null,
     chemistryConsentBusy: false,
     consentBusy: false,
@@ -270,7 +271,7 @@
   function showable() {
     return (state.subjectKey === MATHEMATICS_KEY && (allowed(state.capabilities) || invited())) ||
       (state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true) ||
-      (state.subjectKey === CHEMISTRY_KEY && state.chemistryShell?.enabled === true);
+      (state.subjectKey === CHEMISTRY_KEY && (state.chemistryShell?.enabled === true || state.chemistryEntryShell?.enabled === true));
   }
 
   function serviceModeText(mode, text) {
@@ -294,7 +295,8 @@
     const openOffer = inviteOnly && item.openRecruitment === true;
     const aiActive = allowed(state.capabilities) && state.capabilities?.aiAssist === true;
     const econActive = state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true;
-    const chemActive = state.subjectKey === CHEMISTRY_KEY && state.chemistryShell?.enabled === true;
+    const chemActive = state.subjectKey === CHEMISTRY_KEY &&
+      (state.chemistryShell?.enabled === true || state.chemistryEntryShell?.enabled === true);
     const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY && !econActive && !chemActive);
     const econSub = state.language === "uz"
       ? "Paper 1 va Paper 3: imtihon, javoblar va natijalar"
@@ -319,11 +321,21 @@
     if (cta) cta.textContent = econActive ? text.entryCta : (comingSoon ? text.comingSoonCta : (openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta)));
     if (p5?.parentElement) p5.parentElement.style.display = chemActive ? "none" : "";
     if (chemActive) {
+      const entryOnly = state.chemistryEntryShell?.enabled === true &&
+        state.chemistryShell?.enabled !== true;
       if (badge) badge.textContent = "Cambridge · Chemistry 9701";
-      if (sub) sub.textContent = state.language === "uz" ? "Paper 1 · 40 ta savol · 75 daqiqa"
-        : state.language === "en" ? "Paper 1 · 40 questions · 75 minutes"
-        : "Paper 1 · 40 вопросов · 75 минут";
-      if (p1) p1.textContent = "Paper 1 · AS Level · 75 min";
+      if (sub) sub.textContent = entryOnly
+        ? (state.language === "uz" ? "Kirish tekshiruvi · 22 ta savol · 30 daqiqa"
+          : state.language === "en" ? "Entry check · 22 questions · 30 minutes"
+          : "Входная проверка · 22 вопроса · 30 минут")
+        : (state.language === "uz" ? "Paper 1 · 40 ta savol · 75 daqiqa"
+          : state.language === "en" ? "Paper 1 · 40 questions · 75 minutes"
+          : "Paper 1 · 40 вопросов · 75 минут");
+      if (p1) p1.textContent = entryOnly
+        ? (state.language === "uz" ? "Kirish tekshiruvi · AS · 30 min"
+          : state.language === "en" ? "Entry check · AS · 30 min"
+          : "Входная проверка · AS · 30 мин")
+        : "Paper 1 · AS Level · 75 min";
       if (note) note.textContent = state.language === "uz"
         ? "Javoblaringiz va avvalgi natijalaringiz saqlanadi."
         : state.language === "en" ? "Your answers and previous results remain saved."
@@ -497,6 +509,7 @@
   function close() {
     internal.economicsNative?.unmount?.();
     internal.chemistryNative?.unmount?.();
+    internal.chemistryEntryNative?.unmount?.();
     const shouldRestoreFocus = state.open && (showable() || (state.subjectKey && state.subjectKey !== MATHEMATICS_KEY));
     state.open = false;
     state.consentBusy = false;
@@ -619,6 +632,7 @@
       state.invitation = null;
       state.economicsShell = null;
       state.chemistryShell = null;
+      state.chemistryEntryShell = null;
       state.chemistryOffer = null;
       if (state.subjectKey === ECONOMICS_KEY) {
         try {
@@ -648,7 +662,20 @@
           }
         } catch (_) { /* Chemistry remains in development until access is explicitly granted. */ }
         if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
-        if (!state.chemistryShell?.enabled) {
+        try {
+          const response = await window.sb?.rpc?.("get_my_exam_prep_chemistry_entry_shell_v1", {
+            p_language: state.language
+          });
+          if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
+          const shell = response?.data;
+          if (!response?.error && shell?.enabled === true &&
+              shell.program_key === "chemistry_9701" &&
+              shell.assessment_code === "ENTRY" &&
+              shell.item_count === 22 && shell.duration_seconds === 1800) {
+            state.chemistryEntryShell = shell;
+          }
+        } catch (_) { /* Entry remains unavailable unless explicitly released. */ }
+        if (!state.chemistryShell?.enabled && !state.chemistryEntryShell?.enabled) {
           try {
             const response = await window.sb?.rpc?.("get_my_exam_prep_chemistry_beta_status_v1",{});
             if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
@@ -659,8 +686,10 @@
       }
       renderEntryCopy();
       if (state.subjectKey === CHEMISTRY_KEY && !subjectChanged &&
-          state.open && state.chemistryShell?.enabled === true) {
+          state.open && (state.chemistryShell?.enabled === true ||
+                         state.chemistryEntryShell?.enabled === true)) {
         internal.chemistryNative?.setLanguage?.(state.language);
+        internal.chemistryEntryNative?.setLanguage?.(state.language);
         setEntryVisible(true);
         return true;
       }
@@ -713,12 +742,28 @@
         internal.economicsNative?.mount?.({
           root, shell: state.economicsShell, language: state.language, onBack: close
         }) === true;
-      const chemistryReady = state.subjectKey === CHEMISTRY_KEY &&
-        state.chemistryShell?.enabled === true &&
+      const mountChemistryEntry = () => internal.chemistryEntryNative?.mount?.({
+        root, shell: state.chemistryEntryShell, language: state.language, onBack: close,
+        onPaper: state.chemistryShell?.enabled === true ? () => {
+          internal.chemistryEntryNative?.unmount?.();
+          internal.chemistryNative?.mount?.({
+            root, shell: state.chemistryShell, language: state.language,
+            onBack: () => {
+              internal.chemistryNative?.unmount?.();
+              mountChemistryEntry();
+            }
+          });
+        } : null
+      }) === true;
+      const chemistryEntryReady = state.subjectKey === CHEMISTRY_KEY &&
+        state.chemistryEntryShell?.enabled === true && mountChemistryEntry();
+      const chemistryPaperReady = state.subjectKey === CHEMISTRY_KEY &&
+        !chemistryEntryReady && state.chemistryShell?.enabled === true &&
         internal.chemistryNative?.mount?.({
           root, shell: state.chemistryShell, language: state.language, onBack: close
         }) === true;
-      if (!economicsReady && !chemistryReady && !renderComingSoonShell()) return false;
+      if (!economicsReady && !chemistryEntryReady && !chemistryPaperReady &&
+          !renderComingSoonShell()) return false;
       state.returnFocusEl = entryButtonEl();
       root.hidden = false;
       root.setAttribute('aria-hidden', 'false');
