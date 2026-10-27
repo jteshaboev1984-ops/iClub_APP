@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0};
+  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null};
   const dictionary={
     ru:{topicOverview:"Темы для подготовки",chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант: он сохранится автоматически. До завершения экзамена ответ можно изменить.",saving:"Сохраняем ответ…",
@@ -66,7 +66,7 @@
   const stop=()=>{if(state.timer!==null){clearInterval(state.timer);state.timer=null;}};
   function unmount(){
     stop();state.token++;state.closed=true;state.root=null;state.shell=null;
-    state.id=null;state.paper=null;state.data=null;state.profile=null;state.history=[];state.planData=null;state.view="home";state.busy=false;state.onBack=null;
+    state.id=null;state.paper=null;state.data=null;state.profile=null;state.history=[];state.planData=null;state.view="home";state.historyReturn=null;state.busy=false;state.onBack=null;
   }
   async function rpc(name,args={}){
     try {
@@ -88,7 +88,13 @@
     if(state.busy||state.closed)return;
     if(state.view==="lesson"){renderStudyPlan(state.planData);return;}
     if(state.view==="plan"||state.view==="exam"){openLevel(state.paper);return;}
-    if(["level","settings","history"].includes(state.view)){lobby();return;}
+    if(state.view==="history"){
+      const code=state.historyReturn;
+      state.historyReturn=null;
+      if(code){openLevel(code);return;}
+      lobby();return;
+    }
+    if(state.view==="level"||state.view==="settings"){lobby();return;}
     state.onBack?.();
   }
   function lobby(){
@@ -189,7 +195,7 @@
   }
   function openHistoryList(code=null,limit=8){
     if(state.closed||state.busy)return;
-    ++state.token;stop();state.view="history";
+    ++state.token;stop();state.view="history";state.historyReturn=code;
     const view=shell();if(!view)return;
     view.append(e("h3","ep-native-page-heading",t().viewHistory));
     const entries=state.history.filter(x=>!code||x.paper_code===code);
