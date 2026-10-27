@@ -101,7 +101,7 @@ module.exports=async(entrySource,recheckSource)=>{
  assert.equal(root.find(".ep-chem-recheck-comparison").length,24);
  assert.ok(root.find(".ep-host-note").some(x=>x.textContent.includes("to‘liq o‘zlashtirish tasdig‘i emas")));
  await btn("Kirish tekshiruviga").handlers.click();await flush();
- assert.ok(btn("Повторная проверка · новые задания"));
+ assert.ok(btn("Qayta tekshiruv · yangi savollar"));
  assert.equal(closed,false);
  w.iClubExamPrepHostInternal.chemistryEntryNative.unmount();
  w.iClubExamPrepHostInternal.chemistryRecheckNative.unmount();
