@@ -104,6 +104,19 @@ BEGIN
  IF r->>'reason' IS DISTINCT FROM 'not_enabled' THEN
   RAISE EXCEPTION 'OFF gate failed %',r; END IF;
  UPDATE private.iclub_ai_practice_context_v1_control SET enabled=true WHERE singleton=1;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'not_enabled'
+ THEN RAISE EXCEPTION 'NULL owner allowed %',r; END IF;
+ UPDATE private.iclub_ai_practice_context_v1_control SET owner_user_id=uid WHERE singleton=1;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'ok' IS DISTINCT FROM 'true'
+ THEN RAISE EXCEPTION 'Explicit owner denied %',r; END IF;
+ UPDATE private.iclub_ai_practice_context_v1_control
+ SET owner_user_id='00000000-0000-4000-8000-000000000022' WHERE singleton=1;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'not_enabled'
+ THEN RAISE EXCEPTION 'Wrong owner admitted %',r; END IF;
+ UPDATE private.iclub_ai_practice_context_v1_control SET owner_user_id=uid WHERE singleton=1;
  SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_visibility',null,'ru') INTO r;
  IF r->>'ok' IS DISTINCT FROM 'true' OR r->'context'->>'intent' IS DISTINCT FROM 'practice_visibility'
  THEN RAISE EXCEPTION 'Visibility gate failed %',r; END IF;
@@ -118,6 +131,7 @@ BEGIN
    'practice_history_comparison',null,'ru') INTO r;
  IF r->'context'->'comparison'->>'previous_percentage' IS DISTINCT FROM '80.0'
  THEN RAISE EXCEPTION 'History comparison failed %',r; END IF;
+ UPDATE private.iclub_ai_practice_context_v1_control SET error_enabled=true WHERE singleton=1;
  SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',2,'ru') INTO r;
  IF r->>'source_status' IS DISTINCT FROM 'source_not_ready'
  THEN RAISE EXCEPTION 'Missing source falsely admitted %',r; END IF;
