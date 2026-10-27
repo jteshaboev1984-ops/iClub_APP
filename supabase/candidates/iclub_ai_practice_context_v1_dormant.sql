@@ -1,5 +1,14 @@
 -- DORMANT CANDIDATE ONLY. Not in supabase/migrations. No production deployment.
 -- Source of truth: owned finalized V4 Practice; no answer keys or question text exposed.
+-- Isolated opt-in enrollment for named Cambridge Mathematics beta accounts.
+-- DEFAULT OFF grants never bypass consent, cohort status or AI entitlement.
+CREATE TABLE IF NOT EXISTS private.iclub_ai_practice_beta_grants_v1(
+ user_id uuid PRIMARY KEY,
+ enabled boolean NOT NULL DEFAULT false,
+ granted_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE private.iclub_ai_practice_beta_grants_v1 ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON private.iclub_ai_practice_beta_grants_v1 FROM PUBLIC,anon,authenticated;
 CREATE TABLE IF NOT EXISTS private.iclub_ai_practice_context_v1_control (
  singleton smallint PRIMARY KEY CHECK (singleton=1),
  enabled boolean NOT NULL DEFAULT false,
@@ -46,8 +55,30 @@ BEGIN
   JOIN private.iclub_ai_v21_beta_control beta ON beta.singleton=ctl.singleton
   JOIN private.iclub_ai_v21_academic_policy pol ON pol.singleton=ctl.singleton
   JOIN private.iclub_ai_v21_beta_members m ON m.user_id=p_user_id
-  WHERE ctl.singleton=1 AND ctl.enabled AND ctl.owner_user_id=p_user_id
-    AND beta.beta_enabled
+  WHERE ctl.singleton=1 AND ctl.enabled
+     AND (ctl.owner_user_id=p_user_id OR EXISTS (
+       SELECT 1 FROM private.iclub_ai_practice_beta_grants_v1 grant_row
+       JOIN private.exam_prep_beta_members bm
+         ON bm.user_id=grant_row.user_id AND bm.member_status='active'
+            AND bm.service_mode='ai_assist'
+       JOIN private.exam_prep_beta_cohorts cohort
+         ON cohort.id=bm.cohort_id
+         AND cohort.program_key='math_as_p1_p5'
+         AND cohort.cohort_status='canary'
+       JOIN private.exam_prep_beta_consents consent
+         ON consent.user_id=grant_row.user_id
+         AND consent.cohort_id=cohort.id
+         AND consent.consent_scope='exam_prep_controlled_beta_v1'
+         AND consent.consent_status='granted' AND consent.revoked_at IS NULL
+       JOIN private.exam_prep_feature_entitlements ent
+         ON ent.user_id=grant_row.user_id
+         AND ent.entitlement_status='active'
+         AND ent.core_access AND ent.ai_assist
+         AND (ent.valid_from IS NULL OR ent.valid_from<=v_now)
+         AND (ent.valid_until IS NULL OR ent.valid_until>v_now)
+       WHERE grant_row.user_id=p_user_id AND grant_row.enabled
+     ))
+     AND beta.beta_enabled
    AND beta.prepared_enabled AND NOT beta.generation_enabled
    AND pol.enabled AND NOT pol.provider_enabled
    AND m.enabled AND m.consent_version='global_ai_beta_v21'
