@@ -120,6 +120,9 @@ jobs:
           test "$PGHOST" = 127.0.0.1
           test "$PGDATABASE" = postgres
           createdb -h 127.0.0.1 -U postgres iclub_ai_auth_ci
+          # GoTrue migrations expect auth schema to pre-exist. This is
+          # created ONLY inside the fresh disposable auth test database.
+          psql -X -v ON_ERROR_STOP=1 -d iclub_ai_auth_ci -c 'CREATE SCHEMA auth'
           docker run --detach --name iclub-ai-gotrue-ci \
             --network host \
             --env GOTRUE_API_HOST=127.0.0.1 \
