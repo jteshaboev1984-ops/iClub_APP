@@ -135,8 +135,25 @@ BEGIN
     WHERE src.surface_code='practice_error' AND src.subject_key=v_subject
      AND src.context_key='question_'||p_question_id::text AND src.locale=p_locale
      AND private.iclub_ai_v21_source_admitted_v1(src)
+     AND src.source_version IS NOT NULL AND length(btrim(src.source_version))>0
      AND src.target_hash=private.iclub_ai_v21_target_fingerprint_v1('practice_error',p_question_id)
      AND src.content_hash=encode(extensions.digest(convert_to(src.body_text,'UTF8'),'sha256'),'hex')
+     -- One language alone is insufficient. All three reviewed source versions
+     -- must belong to the same current question fingerprint. No fallback to
+     -- a stale translation or generic skill explanation.
+     AND 3=(
+       SELECT count(DISTINCT sibling.locale)
+       FROM private.iclub_ai_v21_academic_sources sibling
+       WHERE sibling.surface_code=src.surface_code
+        AND sibling.subject_key=src.subject_key
+        AND sibling.context_key=src.context_key
+        AND sibling.source_version=src.source_version
+        AND sibling.locale IN ('en','ru','uz')
+        AND private.iclub_ai_v21_source_admitted_v1(sibling)
+        AND sibling.target_hash=src.target_hash
+        AND sibling.content_hash=encode(
+          extensions.digest(convert_to(sibling.body_text,'UTF8'),'sha256'),'hex')
+     )
    ) INTO v_source_ready;
  END IF;
 
