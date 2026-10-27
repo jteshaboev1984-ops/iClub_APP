@@ -1943,3 +1943,25 @@
     padding: 12px;
   }
 }
+
+/* J09: exact licensed Chemistry theory, rendered as readable text only.
+   No AI Tutor card or HTML interpretation is allowed here. */
+.ep-native-chemistry .ep-chem-entry-theory {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+  font-size: .96rem;
+  margin: 16px 0;
+  max-width: 70ch;
+}
+.ep-native-chemistry .ep-chem-review-row .ep-host-btn {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 100%;
+  min-height: 40px;
+}
+@media (max-width: 520px) {
+  .ep-native-chemistry .ep-chem-review-row .ep-host-btn {
+    width: 100%;
+  }
+}
