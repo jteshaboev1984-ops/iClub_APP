@@ -22,7 +22,7 @@
       route:"Вернитесь к учебным материалам Chemistry, чтобы повторить эти темы, затем проверьте себя на новых заданиях.",
       noErrors:"Ошибок в этой проверке нет. Это ещё не подтверждает полное освоение тем.",
       reviewError:"Не удалось загрузить учебный маршрут.",notCalibrated:"Результат ориентировочный: подготовленное задание на тему не является полноценной диагностикой.",
-      viewPaper:"Paper 1 — экзамен",backResult:"К результату",studyLesson:"Изучить тему",backTopics:"К списку тем",lessonUnavailable:"Урок пока недоступен. Он откроется после публикации материалов.",lessonNotMastery:"Изучение этой темы не начисляет освоение автоматически."},
+      viewPaper:"Paper 1 — экзамен",backResult:"К результату",studyLesson:"Изучить тему",startRecheck:"Повторная проверка · новые задания",backTopics:"К списку тем",lessonUnavailable:"Урок пока недоступен. Он откроется после публикации материалов.",lessonNotMastery:"Изучение этой темы не начисляет освоение автоматически."},
     uz:{title:"Chemistry · Kirish tekshiruvi",intro:"22 ta savol · 30 daqiqa. Bu dastlabki yo‘naltiruvchi tekshiruv, Paper 1 imtihoni emas.",
       limitation:"Har bir mavzudagi bitta savol mavzuni o‘zlashtirishni ishonchli baholay olmaydi.",
       start:"Boshlash yoki davom ettirish",history:"Tekshiruvlarim",empty:"Hali tekshiruvlar yo‘q.",
@@ -39,7 +39,7 @@
       route:"Mavzularni takrorlash uchun Chemistry o‘quv materiallariga qayting. Keyin yangi savollar bilan bilimingizni tekshiring.",
       noErrors:"Bu tekshiruvda xato yo‘q. Ammo bu barcha mavzular o‘zlashtirilganini isbotlamaydi.",
       reviewError:"O‘quv yo‘nalishini yuklab bo‘lmadi.",notCalibrated:"Natija taxminiy: har bir mavzudagi bitta savol to‘liq diagnostika hisoblanmaydi.",
-      viewPaper:"Paper 1 — imtihon",backResult:"Natijaga qaytish",studyLesson:"Mavzuni o‘rganish",backTopics:"Mavzular ro‘yxatiga",lessonUnavailable:"Dars hali ochilmagan. Materiallar e’lon qilingach foydalanish mumkin.",lessonNotMastery:"Bu mavzuni o‘qish avtomatik o‘zlashtirish belgisini bermaydi."},
+      viewPaper:"Paper 1 — imtihon",backResult:"Natijaga qaytish",studyLesson:"Mavzuni o‘rganish",startRecheck:"Qayta tekshiruv · yangi savollar",backTopics:"Mavzular ro‘yxatiga",lessonUnavailable:"Dars hali ochilmagan. Materiallar e’lon qilingach foydalanish mumkin.",lessonNotMastery:"Bu mavzuni o‘qish avtomatik o‘zlashtirish belgisini bermaydi."},
     en:{title:"Chemistry · Entry check",intro:"22 questions · 30 minutes. This is an orientation check, not the Paper 1 exam.",
       limitation:"One question per topic cannot reliably establish mastery.",
       start:"Start or resume",history:"My checks",empty:"No checks yet.",
@@ -56,7 +56,7 @@
       route:"Return to Chemistry learning materials to review these topics, then test yourself with fresh questions.",
       noErrors:"No errors in this check. It does not establish full understanding.",
       reviewError:"Could not load the study route.",notCalibrated:"This result is only a guide: one question per topic is not a full diagnosis.",
-      viewPaper:"Paper 1 exam",backResult:"Back to result",studyLesson:"Study topic",backTopics:"Back to topics",lessonUnavailable:"This lesson is not yet released. It opens only when the learning material is published.",lessonNotMastery:"Reading this topic does not automatically credit mastery."}
+      viewPaper:"Paper 1 exam",backResult:"Back to result",studyLesson:"Study topic",startRecheck:"Recheck · fresh questions",backTopics:"Back to topics",lessonUnavailable:"This lesson is not yet released. It opens only when the learning material is published.",lessonNotMastery:"Reading this topic does not automatically credit mastery."}
   };
   const t=()=>copy[state.lang]||copy.ru;
   const el=(tag,value,cls)=>{
@@ -127,8 +127,45 @@
       list.append(row);
     });
     listing.append(list);
-    if(r.sessions.some(item=>item.status==="finalized"))
+    if(r.sessions.some(item=>item.status==="finalized")){
       listing.append(el("p",t().completedNote,"ep-host-note"));
+      offerRecheck(p,listing);
+    }
+  }
+  function openRecheck(recheckShell){
+    if(!active()||recheckShell?.enabled!==true ||
+      recheckShell?.program_key!=="chemistry_9701" ||
+      recheckShell?.assessment_code!=="RECHECK" ||
+      recheckShell?.item_count!==22||recheckShell?.duration_seconds!==1800 ||
+      recheckShell?.learning_ack_kind!=="self_report" ||
+      recheckShell?.can_credit_mastery!==false ||
+      !recheckShell?.entry_session_id ||
+      (state.session && recheckShell.entry_session_id!==state.session))return;
+    const ctx={root:state.root,shell:state.shell,language:state.lang,
+      onBack:state.onBack,onPaper:state.onPaper};
+    const adapter=internal.chemistryRecheckNative;
+    if(typeof adapter?.mount!=="function")return;
+    unmount();
+    const ok=adapter.mount({...ctx,shell:recheckShell,
+      onBack:()=>{
+        adapter.unmount?.();
+        internal.chemistryEntryNative?.mount?.(ctx);
+      }});
+    if(ok!==true)internal.chemistryEntryNative?.mount?.(ctx);
+  }
+  async function offerRecheck(p,target){
+    if(!active()||!p||!target)return;
+    const token=state.seq,session=state.session;
+    try{
+      const response=await window.sb?.rpc?.("get_my_exam_prep_chemistry_recheck_shell_v1",
+        {p_language:state.lang});
+      if(!active()||token!==state.seq||p!==state.root?.firstElementChild)return;
+      const shell=!response?.error?response?.data:null;
+      if(shell?.enabled!==true||shell?.assessment_code!=="RECHECK"||
+        shell.program_key!=="chemistry_9701"||
+        (session&&shell.entry_session_id!==session))return;
+      target.append(button(t().startRecheck,()=>openRecheck(shell),true));
+    }catch(_){/* Recheck is strictly hidden until server authorises it. */}
   }
   async function start(){
     if(!active()||state.busy)return;
@@ -297,6 +334,7 @@
     if(typeof state.onPaper==="function")
       actions.append(button(t().viewPaper,()=>state.onPaper(),true));
     p.append(actions);
+    offerRecheck(p,actions);
   }
   async function showLesson(skillKey){
     if(!active()||state.busy||state.data?.status!=="finalized"||!state.session
