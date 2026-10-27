@@ -245,8 +245,14 @@
       advance:"iclub_exam_written_advance_v1",
       status:"iclub_exam_written_status_v1"
     }))api[key]=async args=>{
-      const result=await rpc(name,args);
-      if(!result.ok)throw Error(result.code||"written_service_unavailable");
+      // Written Core v1.3 has a different validated response envelope
+      // (status/task_kind/available), not the Economics MCQ 'ok:true' envelope.
+      let response;
+      try{response=await window.sb.rpc(name,args);}
+      catch(_){throw Error("written_network_error");}
+      const result=response?.data;
+      if(response?.error||!result||typeof result!=="object"||result.ok===false)
+        throw Error("written_service_unavailable");
       return result;
     };
     state.writtenView=window.iClubWrittenCoreViewV1.mount({
