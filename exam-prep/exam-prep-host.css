@@ -1965,3 +1965,46 @@
     width: 100%;
   }
 }
+
+/* J10 Chemistry Recheck: private standalone 22-question evidence, no mastery UI. */
+.ep-native-chemistry.ep-chem-recheck .ep-chem-recheck-ready {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 0 20px;
+}
+.ep-native-chemistry.ep-chem-recheck .ep-chem-recheck-ack {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.55;
+  max-width: 65ch;
+  cursor: pointer;
+}
+.ep-native-chemistry.ep-chem-recheck .ep-chem-recheck-ack input {
+  flex: 0 0 auto;
+  margin-top: 5px;
+  accent-color: var(--ep-accent, #2576bc);
+}
+.ep-native-chemistry.ep-chem-recheck .ep-chem-recheck-comparison {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  width: 100%;
+  font-size: 0.9rem;
+  opacity: .85;
+}
+.ep-native-chemistry.ep-chem-recheck .ep-chem-review-row {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 520px) {
+  .ep-native-chemistry.ep-chem-recheck .ep-chem-recheck-ready .ep-host-btn {
+    width: 100%;
+  }
+  .ep-native-chemistry.ep-chem-recheck .ep-chem-recheck-comparison {
+    gap: 4px 12px;
+  }
+}
