@@ -485,3 +485,32 @@ Economics program published+launch true, **только те же 3 Math beta us
 ### Далее
 
 Не перерисовывать снова всё: проверить на реальном beta browser как открываются P1/P3/dashboard/profile/diagnostic/plan/lesson/history, особенно mobile dark/light and refresh. Исправлять только конкретные баги. Дальше предметная содержательная parity: независимые retest items, correction authorization, P2/P4 written marking; они не решаются одной перестановкой UI.
+
+## 22. АКТУАЛЬНЫЙ CHECKPOINT — 27.10.2026, ТОЧНО ПО РЕШЕНИЮ АРХИТЕКТОРА: СНАЧАЛА ОДНА ДИАГНОСТИКА, ПОТОМ ВЫБОР PAPER
+
+**ПОЛЬЗОВАТЕЛЬ ПРЯМО ИСПРАВИЛ МАРШРУТ:** «сделай логику такой же как в матем. сперва диагностика. после выбор пепер. только визуал не делай заново. используй экраны матем. они шаблон. меняй только тексты и названия». Этот раздел является последним действующим контрактом: **НЕ показывать P1/P3 до первой общей диагностики**.
+
+### Реальная пользовательская последовательность
+
+1. В открытом Economics Exam Prep показывается **экран одной входной диагностики** из 12 проверенных MCQ по AS основам Economics, 20 минут. До её завершения не показываются ни карточки P1/P3, ни кнопки новых полных Papers. Показывается только Start/Resume проверки, плюс история прежних записей (если они есть). P1 — строго технический код хранения стартовой проверки, на этом первом экране не подписывать его Paper 1. A Level темы не выдаваться за проверенные этим базовым AS тестом.
+2. После успешного серверного завершения диагностики из 12 вопросов — её короткий результат и ОДНО следующее действие **«Выберите Paper»**. Только после этого появляется ровно две карточки **P1 · AS Level** и **P3 · A Level**.
+3. Выбранный Paper открывает отдельный Math-style component home: primary action = продолжить активный Paper / открыть персональный план уже пройденной диагностики / открыть прошлый результат / начать полный Paper. Для P1 в качестве исходного плана годится уже пройденная общая AS диагностика; для P3 отдельная углублённая A-Level диагностика **не обязательна**, её можно начать дополнительным пунктом по желанию; никакой второй обязательной диагностики после выбора Paper.
+4. Сохранённые ПРЕЖНИЕ Paper попытки доступны в истории независимо от нового пути onboarding; никакие завершённые баллы и quiz items не менялись, активные предыдущие Paper по-прежнему доступны для resume.
+
+### Фактическая реализация
+
+- В существующем `exam-prep/exam-prep-economics-native.js` заменён root `shell()` на структуру **точь-в-точь Math** `ep-host-shell ep-live` + `ep-live-head`; все кнопки — существующие Math `ep-live-btn`/`secondary`. Начальный экран `ep-live-dashboard-intro` и `ep-component-next`, после диагностики карточки из Math `ep-live-grid`, `ep-live-component-slot`, `ep-live-card ep-live-component-card ep-live-component-entry`, `ep-live-component-head` и `ep-live-component-open`. Paper-home из `ep-component-home`, `ep-component-hero`, `ep-component-next`, `ep-component-links`. Вопросы, варианты, история, профиль, таймер, план и темы используют уже действующие Math классы (`ep-live-qtext`, `ep-live-options`, `ep-live-option`, `ep-live-plan-item`, `ep-live-stats`, `ep-live-field`, `ep-live-input` и т.д.). **Нового CSS в этом этапе не добавляли и существующий Math интерфейс НЕ переписывали.** Старый Economics CSS-файл оставлен только для элементов прежней subject-specific review поверх базового Math host.
+- `supabase/migrations/20261027170500_iclub_economics_foundation_diagnostic_before_papers_v1.sql` применена в production: новое полное Paper через `public.iclub_exam_native_mcq_start_v1` **выдаётся лишь после собственной finalized P1 12-item diagnostic** из этого version; ранее существующие idempotent или active Paper запросы проходят resume ветку без изменения legacy scores. Выдача в 30 вопросов/60-75мин и beta allowlist не менялась. Это server enforcement, а не только фронтовая кнопка.
+- `index.html`: обновлён **только** cache-buster Economics JS до `native-econ-13-diagnosis-first-math`, существующий Math stylesheet и Economics дополнительный stylesheet не редактировались.
+
+### Фактический QA
+
+- SQL E2E под настоящей `authenticated` ролью beta learner в транзакции с `ROLLBACK`: новый P3 до общей диагностике возвращает `foundation_diagnostic_required`; начальная P1 diagnostics 12 работает; P1 до её финализации также запрещён; после server finish P1 and P3 can both issue 30-item Papers. ROLLBACK тестовых сессий. Math active version1, same3 beta, previous historical Paper1 сохранён.
+- JS synthetic DOM E2E с реальными сохранёнными файлами GitHub: RU/UZ/EN — **до диагностики 0 Paper cards**; начал P1 12-question check, завершил, увидел результат + «Выберите Paper»; ровно 2 карточки Math после перехода; выбрал P3 и запустил полный экзамен 30, без второй принудительной диагностики. PASS для всех трёх языков.
+- Дополнительный JS synthetic regression: при ранее завершённой реальной P1 Paper и отсутствии новой входной диагностики всё равно показывается сначала диагностика, **история и прежний балл 19/30 доступны для просмотра**. Старые серверные записи не редактировались.
+
+### Статус и границы
+
+Economics P1/P3 по-прежнему published только для **трёх действующих Math controlled beta участников**, остальные не имеют доступа. P2/P4 остаются draft, Math legacy и все Practice/Tours не менялись. Это перенос визуального шаблона и порядка onboarding; **не полная образовательная parity многоэтапного Math Stage0/weekly tasks/retest**, не объявлять полным клоном. Реального визуального Cloud Browser QA на смартфоне/ученическом аккаунте ещё нет, synthetic tests и SQL tests не приравнивать к нему.
+
+**Следующая работа:** наблюдать реальный экран beta-ученика и исправлять точечные UX проблемы, исходя из Math-визуала. Не перестраивать дизайн повторно и не возвращать выбор Paper раньше диагностики.
