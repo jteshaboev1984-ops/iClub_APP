@@ -1,0 +1,24 @@
+name: Core Exam Prep guarded mass-release boundary
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20261027235900_exam_prep_mass_core_qa_open_boundary_guard_v1.sql'
+      - 'scripts/exam-prep-core-release-qa-open-guard.cjs'
+      - '.github/workflows/exam-prep-core-release-boundary.yml'
+permissions:
+  contents: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check scripts/exam-prep-core-release-qa-open-guard.cjs
+          node scripts/exam-prep-core-release-qa-open-guard.cjs
