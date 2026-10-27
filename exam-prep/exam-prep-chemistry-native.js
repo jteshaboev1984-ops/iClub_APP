@@ -2,7 +2,7 @@
   "use strict";
   const internal = window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {};
   const state = {root:null,lang:"ru",shell:null,session:null,data:null,index:0,closed:true,
-    busy:false,timer:null,seq:0,onBack:null,navOpen:false};
+    busy:false,timer:null,seq:0,onBack:null,navOpen:false,localeQueued:false};
   const copy = {
     ru:{title:"Cambridge AS Chemistry · Exam Prep",paper:"Paper 1 · Выбор ответа",
       intro:"40 вопросов · 75 минут. Результаты сохраняются на сервере.",
@@ -58,7 +58,7 @@
   function stopTimer() {if(state.timer!==null)clearInterval(state.timer);state.timer=null;}
   function unmount() {
     stopTimer();state.seq+=1;state.closed=true;state.root=null;state.shell=null;
-    state.session=null;state.data=null;state.busy=false;state.index=0;state.navOpen=false;state.onBack=null;
+    state.session=null;state.data=null;state.busy=false;state.index=0;state.navOpen=false;state.localeQueued=false;state.onBack=null;
   }
   function panel() {
     if(state.closed||!state.root)return null;
@@ -82,7 +82,7 @@
     p.append(n,actions);
   }
   async function lobby() {
-    state.seq+=1;stopTimer();state.session=null;state.data=null;state.index=0;state.navOpen=false;
+    state.seq+=1;stopTimer();state.session=null;state.data=null;state.index=0;state.navOpen=false;state.localeQueued=false;
     const p=panel();if(!p)return;
     p.append(el("p",t().intro,"ep-host-note"));
     const card=el("div",undefined,"ep-host-component-card ep-native-paper");
@@ -134,6 +134,11 @@
       {p_session_id:state.session,p_language:state.lang});
     if(state.closed||n!==state.seq)return;
     state.busy=false;
+    if(state.localeQueued){
+      state.localeQueued=false;
+      await load();
+      return;
+    }
     if(!r.ok||!Array.isArray(r.items)||r.items.length!==40){showError(load);return;}
     state.data=r;draw();
   }
@@ -215,11 +220,18 @@
     const r=await rpc("iclub_exam_chemistry_p1_answer_v1",
       {p_session_id:s,p_item_order:i+1,p_choice:choice});
     if(state.closed||n!==state.seq||state.session!==s)return;
-    state.busy=false;if(!r.ok){showError(load);return;}
+    state.busy=false;
+    if(!r.ok){state.localeQueued=false;showError(load);return;}
     state.data.items[i].selected_index=choice;state.data.items[i].answered=true;
     let next=state.data.items.findIndex((row,j)=>j>i&&!row.answered);
     if(next<0)next=state.data.items.findIndex(row=>!row.answered);
-    state.index=next>=0?next:i;draw();
+    state.index=next>=0?next:i;
+    if(state.localeQueued){
+      state.localeQueued=false;
+      await load();
+      return;
+    }
+    draw();
   }
   async function finish(auto) {
     if(state.closed||state.busy||state.data?.status!=="active")return;
@@ -229,7 +241,9 @@
     stopTimer();state.busy=true;const n=state.seq,s=state.session;
     const r=await rpc("iclub_exam_chemistry_p1_finish_v1",{p_session_id:s});
     if(state.closed||n!==state.seq||state.session!==s)return;
-    state.busy=false;if(!r.ok){showError(load);return;}
+    state.busy=false;
+    if(!r.ok){state.localeQueued=false;showError(load);return;}
+    state.localeQueued=false;
     await load();
   }
   function mount({root,shell,language,onBack}={}) {
@@ -243,7 +257,10 @@
   function setLanguage(lang) {
     if(!["ru","uz","en"].includes(lang)||lang===state.lang)return;
     state.lang=lang;
-    if(!state.closed){if(state.session)load();else lobby();}
+    if(!state.closed){
+      if(state.busy){state.localeQueued=true;return;}
+      if(state.session)load();else lobby();
+    }
   }
   internal.chemistryNative=Object.freeze({mount,unmount,setLanguage});
 })();
