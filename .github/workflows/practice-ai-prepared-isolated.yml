@@ -165,6 +165,12 @@ jobs:
             exit 1
           fi
           echo 'PASS: genuine isolated Supabase Auth service; no connection to any hosted project'
+      - name: Install ephemeral pinned real-browser Auth test tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.55.0 esbuild@0.25.12 @supabase/supabase-js@2.57.0
+          npx playwright install chromium
       - name: Complete PC3 + PC4 HTTP flow against canonical quota RPCs (fake provider)
         shell: bash
         run: |
@@ -182,8 +188,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-save --no-package-lock playwright@1.55.0
-          npx playwright install chromium
           node scripts/practice-ai-prepared-browser-smoke.cjs
           node scripts/practice-ai-unified-tutor-browser-e2e.cjs
       - name: Real Edge to isolated PostgreSQL browser flow
