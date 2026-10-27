@@ -16,7 +16,13 @@
       return:"К выбору экзамена",again:"Новая попытка",empty:"Пока нет попыток.",
       note:"Результат относится только к вопросам с выбором ответа.",
       navigator:"Перейти к вопросу", unanswered:"Без ответа",
-      answeredLabel:"Ответ сохранён", finishWarning:"Неотвеченные вопросы: "},
+      answeredLabel:"Ответ сохранён", finishWarning:"Неотвеченные вопросы: ",
+      reviewPlan:"Что повторить", planFirst:"Сначала повторите эти темы",
+      planComplete:"В этой работе ошибок не было. Для надёжной проверки понадобятся новые задания.",
+      planEvidence:"По одному-двум вопросам на тему нельзя определить, насколько она освоена. Этот список показывает только результаты данной работы.",
+      planAll:"Все темы AS Chemistry",planQuestions:"Вопросов",planCorrect:"Верно",
+      planErrors:"Ошибок",planSkipped:"Пропущено",planBack:"К результату",
+      planLoadError:"План повторения пока недоступен. Попробуйте снова."},
     uz:{title:"Cambridge AS Chemistry · Exam Prep",paper:"Paper 1 · Test savollari",
       intro:"40 ta savol · 75 daqiqa. Natijalar serverda saqlanadi.",
       begin:"Boshlash yoki davom ettirish",history:"Urinishlarim",resume:"Davom ettirish",
@@ -29,7 +35,13 @@
       return:"Imtihon tanlashga",again:"Yangi urinish",empty:"Hali urinishlar yo‘q.",
       note:"Natija faqat test savollariga tegishli.",
       navigator:"Savolni tanlash", unanswered:"Javobsiz",
-      answeredLabel:"Javob saqlangan", finishWarning:"Javobsiz savollar: "},
+      answeredLabel:"Javob saqlangan", finishWarning:"Javobsiz savollar: ",
+      reviewPlan:"Nimalarni takrorlash kerak",planFirst:"Avval shu mavzularni takrorlang",
+      planComplete:"Bu ishda xato yo‘q. Bilimni ishonchli tekshirish uchun yangi savollar kerak.",
+      planEvidence:"Har bir mavzudan bir-ikki savol bilimni baholash uchun yetarli emas. Bu ro‘yxat faqat shu ish natijasini ko‘rsatadi.",
+      planAll:"AS Chemistry mavzulari",planQuestions:"Savollar",planCorrect:"To‘g‘ri",
+      planErrors:"Xatolar",planSkipped:"Javobsiz",planBack:"Natijaga qaytish",
+      planLoadError:"Takrorlash rejasini yuklab bo‘lmadi. Qayta urinib ko‘ring."},
     en:{title:"Cambridge AS Chemistry · Exam Prep",paper:"Paper 1 · Multiple choice",
       intro:"40 questions · 75 minutes. Results are saved on the server.",
       begin:"Start or resume",history:"My attempts",resume:"Continue",
@@ -42,7 +54,13 @@
       return:"Back to papers",again:"New attempt",empty:"No attempts yet.",
       note:"This result covers multiple-choice questions only.",
       navigator:"Go to question", unanswered:"Unanswered",
-      answeredLabel:"Answer saved", finishWarning:"Unanswered questions: "}
+      answeredLabel:"Answer saved", finishWarning:"Unanswered questions: ",
+      reviewPlan:"What to review",planFirst:"Start by reviewing these topics",
+      planComplete:"No errors in this paper. Use fresh questions to check your understanding.",
+      planEvidence:"One or two questions per topic cannot establish mastery. This summary reflects only this paper.",
+      planAll:"All AS Chemistry topics",planQuestions:"Questions",planCorrect:"Correct",
+      planErrors:"Incorrect",planSkipped:"Unanswered",planBack:"Back to result",
+      planLoadError:"The review plan is unavailable. Please try again."}
   };
   const t = () => copy[state.lang] || copy.ru;
   const el = (tag,text,cls) => {
@@ -210,9 +228,67 @@
     if(state.index>0)actions.append(button(t().prev,()=>{state.index-=1;draw();},true));
     if(state.index<39)actions.append(button(t().next,()=>{state.index+=1;draw();},true));
     if(!done)actions.append(button(t().finish,()=>finish(false)));
-    else actions.append(button(t().again,lobby));
+    else {
+      actions.append(button(t().reviewPlan,showReviewPlan));
+      actions.append(button(t().again,lobby,true));
+    }
     actions.append(button(t().return,lobby,true));
     p.append(actions);
+  }
+  async function showReviewPlan() {
+    if(state.closed||state.busy||state.data?.status!=="finalized"||!state.session)return;
+    stopTimer();
+    state.busy=true;
+    const token=++state.seq,session=state.session;
+    const p=panel();
+    if(!p)return;
+    p.append(el("p",t().loading,"ep-host-note"));
+    const report=await rpc("iclub_exam_chemistry_p1_review_plan_v1",
+      {p_session_id:session,p_language:state.lang});
+    if(state.closed||token!==state.seq||state.session!==session)return;
+    state.busy=false;
+    if(!report.ok||report.exam_prep_diagnostic_result!==false||
+      report.can_credit_mastery!==false||!Array.isArray(report.topics)||
+      report.topics.length!==22||!Array.isArray(report.focus_first)){
+      const view=panel();
+      if(!view)return;
+      const error=el("p",t().planLoadError,"ep-host-note");
+      error.setAttribute("role","alert");view.append(error);
+      view.append(button(t().planBack,draw,true),button(t().reviewPlan,showReviewPlan));
+      return;
+    }
+    const view=panel();
+    if(!view)return;
+    view.append(el("h3",t().reviewPlan,"ep-native-result"));
+    view.append(el("p",t().planEvidence,"ep-host-note"));
+    const focus=el("section",undefined,"ep-chem-review-focus");
+    focus.append(el("h4",t().planFirst,"ep-chem-review-title"));
+    if(report.focus_first.length===0)
+      focus.append(el("p",t().planComplete,"ep-host-note"));
+    else report.focus_first.forEach(item=>{
+      const card=el("div",undefined,"ep-chem-review-row");
+      card.append(el("strong",String(item.unit)+". "+item.title));
+      card.append(el("span",t().planErrors+": "+item.incorrect+" · "+
+        t().planSkipped+": "+item.unanswered,"ep-chem-review-counts"));
+      focus.append(card);
+    });
+    view.append(focus);
+    const all=el("details",undefined,"ep-chem-review-all");
+    all.append(el("summary",t().planAll+" · "+report.topics.length));
+    const table=el("div",undefined,"ep-chem-review-list");
+    report.topics.forEach(item=>{
+      const row=el("div",undefined,"ep-chem-review-row");
+      row.append(el("strong",item.unit+". "+item.title));
+      row.append(el("span",t().planQuestions+": "+item.questions+" · "+
+        t().planCorrect+": "+item.correct+" · "+t().planErrors+": "+
+        item.incorrect+" · "+t().planSkipped+": "+item.unanswered,
+        "ep-chem-review-counts"));
+      table.append(row);
+    });
+    all.append(table);view.append(all);
+    const actions=el("div",undefined,"ep-host-actions");
+    actions.append(button(t().planBack,draw,true));
+    view.append(actions);
   }
   async function save(choice) {
     if(state.closed||state.busy||state.data?.status!=="active")return;
