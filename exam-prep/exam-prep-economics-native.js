@@ -278,13 +278,13 @@
     if(state.closed||state.busy)return;
     ++state.token;stop();state.view="history";state.historyReturn=code;
     const view=shell();if(!view)return;
-    view.append(e("h3","ep-native-page-heading",t().viewHistory));
+    view.append(e("h3","ep-live-card",t().viewHistory));
     const entries=state.history.filter(x=>!code||x.paper_code===code);
     if(!entries.length){view.append(e("p","ep-host-note",t().noHistory));return;}
     const list=e("div","ep-native-history-list");
     for(const entry of entries.slice(0,limit)){
       if(!["P1","P3"].includes(entry.paper_code)||!entry.session_id)continue;
-      const card=e("section","ep-native-history-item");
+      const card=e("section","ep-live-timed-row");
       const date=new Date(entry.started_at);
       const dateText=Number.isNaN(date.getTime())?"":new Intl.DateTimeFormat(
         state.lang==="uz"?"uz-UZ":state.lang==="en"?"en-GB":"ru-RU",
@@ -294,7 +294,7 @@
       const total=Number(entry.total_items||30);
       card.append(e("div","ep-native-history-info",title+" · "+dateText+" · "+
         (entry.status==="finalized"?entry.score:entry.answered)+"/"+total));
-      const actions=e("div","ep-native-history-controls");
+      const actions=e("div","ep-live-actions");
       actions.append(btn(entry.status==="finalized"?t().viewResult:t().continueAttempt,
         ()=>openHistory(entry,false),true));
       if(entry.status==="finalized")actions.append(btn(t().plan,
@@ -310,7 +310,7 @@
     ++state.token;stop();state.view="settings";
     const view=shell();if(!view)return;
     view.append(e("h3","ep-native-page-heading",t().profile));
-    const panel=e("section","ep-live-card ep-native-profile");
+    const panel=e("section","ep-live-card");
     view.append(panel);editProfile(panel,view);
   }
 
@@ -319,12 +319,12 @@
     target.replaceChildren(e("strong","",t().profile));
     const fields={};
     const addField=(key,label,value,type="text")=>{
-      const line=e("label","ep-native-profile-field");
+      const line=e("label","ep-live-field");
       line.append(e("span","",label));
-      let input=e("input");input.type=type;input.value=value??"";input.name=key;
+      let input=e("input","ep-live-input");input.type=type;input.value=value??"";input.name=key;
       if(type==="number"){input.min="0.5";input.max="168";input.step="0.5";}
       if(type==="text"){input.maxLength=80;input.placeholder="Oct/Nov 2027";}
-      if(key==="target"){input=e("select");input.name=key;
+      if(key==="target"){input=e("select","ep-live-input");input.name=key;
         for(const g of ["A*","A","B","C","D","E"]){const opt=e("option","",g);opt.value=g;
           opt.selected=g===(value||"A");input.append(opt);}
         input.value=value||"A";
@@ -373,7 +373,7 @@
     const v=await rpc(kind==="diagnostic"?"iclub_exam_native_mcq_start_diagnostic_v1":"iclub_exam_native_mcq_start_v1",{p_paper_code:code,p_client_key:nonce});
     if(state.closed||token!==state.token)return;
     state.busy=false;
-    if(!v.ok||!v.session_id){error(()=>begin(code));return;}
+    if(!v.ok||!v.session_id){error(()=>begin(code,kind));return;}
     state.id=v.session_id;state.paper=code;state.index=0;
     await load();
   }
@@ -403,7 +403,7 @@
     const finished=data.status==="finalized",total=data.items.length;
     const header=e("div","ep-native-header");
     header.append(e("strong","",(state.paper==="P1"?t().p1:t().p3)+(data.session_kind==="diagnostic"?" · "+t().entryCheck:"")));
-    const remaining=e("span","ep-native-timer");
+    const remaining=e("span","ep-live-timer");
     header.append(remaining);view.append(header);
     if(finished){
       const resultActions=e("div","ep-native-result-actions");
@@ -412,7 +412,7 @@
       view.append(resultActions);
     }else clock(remaining);
     const row=data.items[state.index];if(!row)return;
-    view.append(e("div","ep-native-progress",t().question+" "+(state.index+1)+" / "+total+" · "+data.items.filter(x=>x.answered).length+" / "+total));
+    view.append(e("div","ep-live-meta",t().question+" "+(state.index+1)+" / "+total+" · "+data.items.filter(x=>x.answered).length+" / "+total));
     const card=e("div","ep-live-card ep-native-question");
     card.append(e("div","ep-live-qtext",row.question));
     const options=e("div","ep-live-options");
@@ -432,7 +432,7 @@
     if(finished){
       card.append(e("p","ep-host-note",t().your+": "+(row.selected_index===null?t().empty:"ABCD"[row.selected_index])+
         " · "+t().right+": "+"ABCD"[row.correct_index]));
-      if(row.explanation)card.append(e("p","ep-native-explanation",row.explanation));
+      if(row.explanation)card.append(e("p","ep-live-answer",row.explanation));
     }
     view.append(card);
     const actions=e("div","ep-live-actions");
@@ -467,14 +467,14 @@
       header.append(e("p","ep-native-guidance",t().econHours+": "+data.weekly_economics_hours));
     view.append(header);
     // Keep the outcome visible without converting the plan into an endless report.
-    const stats=e("div","ep-native-plan-stats");
+    const stats=e("div","ep-live-stats");
     for(const [amount,label] of [
       [String(data.score)+"/"+String(data.out_of||30),t().result],
       [Math.max(0,Number(data.weak_count||0)-Number(data.retested_correct_count||0)),t().mistakes],
       [data.studied_count,t().studied],
       [data.retested_correct_count,t().verified]
     ]){
-      const box=e("div","ep-native-plan-stat");
+      const box=e("div","ep-live-stat");
       box.append(e("strong","",amount),e("span","",label));stats.append(box);
     }
     view.append(stats);
@@ -482,7 +482,7 @@
     if(Number(data.weak_count||0)===0)view.append(e("p","ep-host-note",t().allCorrect));
     else if(!topics.length)view.append(e("p","ep-host-note",t().verified));
     else {
-      const focus=e("section","ep-live-card ep-native-plan-focus");
+      const focus=e("section","ep-live-card");
       focus.append(e("div","ep-native-level-eyebrow",t().recommended),
         e("h3","",topics[0].title));
       focus.append(e("p","ep-host-note",t().day+" "+topics[0].suggested_day+
@@ -493,7 +493,7 @@
         const list=e("section","ep-native-plan-topic-list");
         list.append(e("h4","ep-native-section-title",t().topicOverview||t().plan));
         topics.slice(1).forEach((task,i)=>{
-          const item=e("div","ep-native-plan-topic");
+          const item=e("div","ep-live-plan-item");
           item.append(e("span","",task.title));
           item.append(btn(t().openLesson,()=>renderLesson(i+1),true));
           list.append(item);
@@ -532,20 +532,20 @@
       String(data.suggested_minutes_per_topic||20)+" "+t().minuteShort),
       e("h3","ep-native-page-heading",task.title));
     view.append(heading);
-    const body=e("section","ep-live-card ep-native-single-lesson");
+    const body=e("section","ep-live-card");
     if(task.lesson){
       body.append(e("h4","ep-native-study-label",t().study));
-      body.append(e("p","ep-native-study-text",task.lesson));
+      body.append(e("p","ep-live-qtext",task.lesson));
     }
     if(task.common_trap){
       body.append(e("h4","ep-native-study-label",t().trap));
-      body.append(e("p","ep-native-study-trap",task.common_trap));
+      body.append(e("p","ep-live-answer",task.common_trap));
     }
     if(task.check_question){
       body.append(e("h4","ep-native-study-label",t().check));
-      body.append(e("p","ep-native-study-text",task.check_question));
+      body.append(e("p","ep-live-qtext",task.check_question));
       if(task.check_answer){
-        const answer=e("p","ep-native-check-answer",task.check_answer);
+        const answer=e("p","ep-live-answer",task.check_answer);
         answer.hidden=true;
         const toggle=btn(t().showCheck,()=>{
           answer.hidden=!answer.hidden;
