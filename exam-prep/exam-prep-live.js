@@ -1460,9 +1460,11 @@
       const value=rootEl()?.querySelector('input[name="ep_live_text_answer"]')?.value?.trim();
       if (!value) return; payload={answer:value};
     }
-    // Diagnostic and timed/paper sessions retain their own existing contracts.
-    if (window.iClubExamPrepWeeklyFlowEnabled===true && ['plan','component'].includes(state.returnView?.kind)
-        && !['diagnostic','timed','paper'].includes(state.session.session_type)) {
+    // Protect answers for BOTH governed and legacy Core study paths. The old
+    // path previously cleared the student's input before its save was known.
+    // Preserve diagnostic and timed/paper contracts without changing scoring.
+    if (['plan','component'].includes(state.returnView?.kind) &&
+        ['learning','mixed','retest'].includes(state.session.session_type)) {
       const pending={sessionId:state.session.session_id,component:state.session.component_code,
         itemOrder:Number(item.item_order),payload,idempotencyKey:key('ep-answer'),
         elapsedMs:Math.max(0,Date.now()-state.itemStartedAt),retryAllowed:false};

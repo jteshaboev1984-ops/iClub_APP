@@ -32,12 +32,12 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
-          test "$(git hash-object exam-prep/exam-prep-live.js)" = 'c8d1cbe992562ea1e1346274bd7dd9fbf2d3ce52'
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = 'cfdee298292bf2a27eae1c5b3ef017c3bcbc33bb'
           grep -Fq 'data-ep-result-item-order=' exam-prep/exam-prep-live.js
           grep -Fq 'data-ep-result-session-type=' exam-prep/exam-prep-live.js
           grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
           grep -Fq 'pending.idempotencyKey' exam-prep/exam-prep-live.js
-          grep -Fq 'window.iClubExamPrepWeeklyFlowEnabled===true' exam-prep/exam-prep-live.js
+          grep -Fq "['learning','mixed','retest'].includes(state.session.session_type)" exam-prep/exam-prep-live.js
           grep -Fq 'localization_status === "unavailable"' exam-prep/exam-prep-live.js
           node --check exam-prep/exam-prep-live.js
           git diff --exit-code
