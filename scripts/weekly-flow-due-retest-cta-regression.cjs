@@ -34,7 +34,7 @@ async function scenario(browser, lang, width, dueState, guardedFlow) {
         component_code: 'P1',
         active_week_no: 1,
         items: [
-          { priority_order: 1, item_type: 'learning', skill_code: 'P1-FUN-01', status: 'pending', due_at: null },
+          { priority_order: 1, item_type: 'learning', skill_code: 'P1-FUN-01', status: guardedFlow ? 'pending' : 'completed', due_at: null },
           { priority_order: 2, item_type: 'retest', skill_code: 'P1-FUN-02', status: 'pending', due_at: retestDueAt }
         ]
       };
