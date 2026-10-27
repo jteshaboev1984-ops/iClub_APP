@@ -46,11 +46,16 @@ CREATE FUNCTION private.iclub_ai_has_active_protected_assessment_v1(p_user_id uu
  SELECT EXISTS(SELECT 1 FROM private.isolated_protected_users WHERE user_id=p_user_id) $$;
 CREATE FUNCTION public.iclub_practice_drill_question_protected_v4(p_question_id bigint)
  RETURNS boolean LANGUAGE sql STABLE AS $$ SELECT false $$;
+-- Synthetic-only admission stub. Production source admission is not altered.
 CREATE FUNCTION private.iclub_ai_v21_source_admitted_v1(
  src private.iclub_ai_v21_academic_sources)
- RETURNS boolean LANGUAGE sql STABLE AS $$ SELECT false $$;
+ RETURNS boolean LANGUAGE sql STABLE AS $
+ SELECT src.source_version='qa-approved-v1'
+   AND src.source_card_key LIKE 'qa-approved-%'
+   AND src.body_text LIKE 'Isolated approved synthetic %' $;
 CREATE FUNCTION private.iclub_ai_v21_target_fingerprint_v1(p_surface text,p_id bigint)
- RETURNS text LANGUAGE sql STABLE AS $$ SELECT null::text $$;
+ RETURNS text LANGUAGE sql STABLE AS $
+ SELECT encode(extensions.digest(convert_to(p_surface||':'||p_id::text,'UTF8'),'sha256'),'hex') $;
 
 -- Compile actual candidate; no placeholders in the candidate function body.
 \ir ../candidates/iclub_ai_practice_context_v1_dormant.sql
@@ -116,6 +121,58 @@ BEGIN
  SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',2,'ru') INTO r;
  IF r->>'source_status' IS DISTINCT FROM 'source_not_ready'
  THEN RAISE EXCEPTION 'Missing source falsely admitted %',r; END IF;
+ -- Two languages alone cannot unlock a question-specific explanation.
+ INSERT INTO private.iclub_ai_v21_academic_sources(
+  surface_code,subject_key,context_key,locale,source_card_key,
+  source_version,body_text,target_hash,content_hash)
+ SELECT 'practice_error','mathematics','question_2',lang,
+  'qa-approved-'||lang,'qa-approved-v1','Isolated approved synthetic '||lang,
+  private.iclub_ai_v21_target_fingerprint_v1('practice_error',2),
+  encode(extensions.digest(convert_to('Isolated approved synthetic '||lang,'UTF8'),'sha256'),'hex')
+ FROM (VALUES ('ru'::text),('en'::text)) q(lang);
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',2,'ru') INTO r;
+ IF r->>'source_status' IS DISTINCT FROM 'source_not_ready'
+ THEN RAISE EXCEPTION 'Two-language source incorrectly admitted %',r; END IF;
+ INSERT INTO private.iclub_ai_v21_academic_sources(
+  surface_code,subject_key,context_key,locale,source_card_key,
+  source_version,body_text,target_hash,content_hash)
+ SELECT 'practice_error','mathematics','question_2','uz',
+  'qa-approved-uz','qa-approved-v1','Isolated approved synthetic uz',
+  private.iclub_ai_v21_target_fingerprint_v1('practice_error',2),
+  encode(extensions.digest(convert_to('Isolated approved synthetic uz','UTF8'),'sha256'),'hex');
+ FOR r IN SELECT public.get_iclub_ai_practice_context_v1_service(
+  uid,501,'practice_error',2,l) FROM (VALUES ('ru'),('en'),('uz')) q(l)
+ LOOP
+  IF r->>'source_status' IS DISTINCT FROM 'ready'
+  THEN RAISE EXCEPTION 'Valid triple source was not admitted %',r; END IF;
+ END LOOP;
+ UPDATE private.iclub_ai_v21_academic_sources
+ SET content_hash=repeat('f',64) WHERE context_key='question_2' AND locale='uz';
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',2,'ru') INTO r;
+ IF r->>'source_status' IS DISTINCT FROM 'source_not_ready'
+ THEN RAISE EXCEPTION 'Tampered translation hash incorrectly admitted %',r; END IF;
+ UPDATE private.iclub_ai_v21_academic_sources SET
+  content_hash=encode(extensions.digest(convert_to(body_text,'UTF8'),'sha256'),'hex'),
+  source_version='qa-approved-v0'
+  WHERE context_key='question_2' AND locale='uz';
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',2,'ru') INTO r;
+ IF r->>'source_status' IS DISTINCT FROM 'source_not_ready'
+ THEN RAISE EXCEPTION 'Mixed-version translation incorrectly admitted %',r; END IF;
+ UPDATE private.iclub_ai_v21_academic_sources SET
+  source_version='qa-approved-v1',target_hash=repeat('a',64)
+  WHERE context_key='question_2' AND locale='uz';
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',2,'ru') INTO r;
+ IF r->>'source_status' IS DISTINCT FROM 'source_not_ready'
+ THEN RAISE EXCEPTION 'Stale question fingerprint incorrectly admitted %',r; END IF;
+ UPDATE private.iclub_ai_v21_academic_sources SET
+  target_hash=private.iclub_ai_v21_target_fingerprint_v1('practice_error',2)
+  WHERE context_key='question_2' AND locale='uz';
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',2,'ru') INTO r;
+ IF r->>'source_status' IS DISTINCT FROM 'ready'
+ THEN RAISE EXCEPTION 'Correct source pack not restored %',r; END IF;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',6,'ru') INTO r;
+ IF r->>'source_status' IS DISTINCT FROM 'source_not_ready'
+ THEN RAISE EXCEPTION 'Other wrong question borrowed source %',r; END IF;
  SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_error',1,'ru') INTO r;
  IF r->>'reason' IS DISTINCT FROM 'question_not_eligible'
  THEN RAISE EXCEPTION 'Correct answer falsely exposed %',r; END IF;
@@ -132,5 +189,5 @@ BEGIN
  SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
  IF r->>'reason' IS DISTINCT FROM 'not_authorized'
  THEN RAISE EXCEPTION 'JWT role bypass %',r; END IF;
- RAISE NOTICE 'PASS: compiled, off gate, 7/10, legacy NULL generation, history, ownership, sources, protection and grants';
+ RAISE NOTICE 'PASS: compiled, off gate, 7/10, owner, trilingual source version/hash/target, protection and grants';
 END $g$;
