@@ -120,7 +120,7 @@ jobs:
           test "$PGHOST" = 127.0.0.1
           test "$PGDATABASE" = postgres
           createdb -h 127.0.0.1 -U postgres iclub_ai_auth_ci
-          docker run --detach --rm --name iclub-ai-gotrue-ci \
+          docker run --detach --name iclub-ai-gotrue-ci \
             --network host \
             --env GOTRUE_API_HOST=127.0.0.1 \
             --env GOTRUE_API_PORT=18770 \
@@ -141,15 +141,20 @@ jobs:
             --env GOTRUE_EXTERNAL_PHONE_ENABLED=false \
             supabase/gotrue:v2.197.0
           auth_ready=0
-          for n in $(seq 1 90); do
+          for n in $(seq 1 35); do
             if curl --silent --fail http://127.0.0.1:18770/health >/dev/null; then
               auth_ready=1
               break
             fi
+            if [ "$(docker inspect -f '{{.State.Running}}' iclub-ai-gotrue-ci)" = "false" ]; then
+              echo 'Isolated Supabase Auth exited during startup:'
+              docker logs --tail 130 iclub-ai-gotrue-ci
+              exit 1
+            fi
             sleep 2
           done
           if [ "$auth_ready" != 1 ]; then
-            docker logs --tail 100 iclub-ai-gotrue-ci
+            docker logs --tail 130 iclub-ai-gotrue-ci
             exit 1
           fi
           echo 'PASS: genuine isolated Supabase Auth service; no connection to any hosted project'
