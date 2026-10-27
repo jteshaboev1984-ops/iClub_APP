@@ -32,6 +32,13 @@ ONE existing iClub AI Tutor, not another on-screen Practice card. Only finalized
 - On a provider response delivered after consent revoke or PC3 OFF, the canonical money ledger still records the real provider cost, generated learner quota is released via canonical RPC, and the receipt becomes `unknown` (no answer replay). The same UUID cannot dispatch again even when permission returns.
 - Verified by a localhost-only integration test that revokes beta membership and independently switches OFF PC3 inside the fake provider handler; both cases return no answer, preserve `money=charged`, `quota=released`, `receipt=unknown`, and forbid repeat model calls. No live OpenAI request.
 
+## Real isolated Supabase Auth verification (no hosted Supabase)
+- GitHub Actions starts the **official pinned** `supabase/gotrue:v2.197.0` in a disposable container, using a **separate disposable database** `iclub_ai_auth_ci` with an `auth` schema and schema search path. It never uses iClub production credentials, accounts or PostgreSQL; the container is destroyed at end of the job.
+- Two synthetic email/password accounts sign in through genuine GoTrue `/token?grant_type=password`; `/user` verifies both signed JWTs. The actual unreleased PC3 Edge forwards user verification to this local real Auth service.
+- A newly finalized, isolated Practice V4 attempt 701 is assigned only to the first real GoTrue user. The second user's signed token and a deliberately tampered token are denied. The first user can ask a numeric-result question, recover the saved answer without regenerating and ACK it; canonical local ledgers confirm `charged`, `completed` and `acknowledged`.
+- [GitHub Actions 40506514262 — SUCCESS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/40506514262): local Auth/password/JWT, PC1/PC3/PC4 PostgreSQL and Edge integration, synthetic provider, plus original isolated Chromium UI.
+- **Scope honesty:** this verifies genuine local Supabase Auth semantics for the Edge, not a deployed Supabase Auth project or full production app login/cookies. The Chromium journey remains synthetic and not yet joined to a GoTrue-backed browser session.
+
 ## Evidence / scope
 - [GitHub Actions 40495018747 — PASS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/40495018747): real unified Tutor + beta JS in isolated Chromium; full page reload recovers pending response with the same UUID; one message/ACK; no localStorage, account and attempt isolation, protected quiz, zero external network.
 - [GitHub Actions 40495487593 — PASS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/40495487593): disposable PostgreSQL 17, actual candidate RPCs, Deno candidate, five read-only snapshots of canonical shared money/quota RPCs, and synthetic OpenAI result; 1 successful provider result, saved reply, lost HTTP, reload recovery and ACK; separate simulated ambiguous provider status preserves `money=unknown`, `quota=released`, `receipt=unknown`, forbids double call.
@@ -39,6 +46,6 @@ ONE existing iClub AI Tutor, not another on-screen Practice card. Only finalized
 
 ## Release blockers (do not silently mark complete)
 1. Review crash windows for **in-flight provider dispatch**, unconfirmed settlement, lease expiry, unknown upstream bill and delayed accounting; source-authoritative reconciliation/retention job is not yet operational.
-2. Real authenticated **isolated-backend** protected Preview end-to-end and UX acceptance; the browser CI is synthetic, not a real learner session.
+2. Real GoTrue JWT → isolated Edge/PostgreSQL E2E **passed**. Still pending: browser login/authenticated UI fully integrated with GoTrue; no external Preview needed unless local browser cannot validate it.
 3. Source governance and versioned academic cards for specific Mathematics mistakes; never infer explanations from an unsupported source.
 4. Separate architect sign-off for any production Supabase migration, Edge deployment, beta entitlement or paid provider call. **Do not merge PR #366 as-is.**
