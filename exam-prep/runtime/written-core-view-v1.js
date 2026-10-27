@@ -5,17 +5,17 @@
 (function(){
  "use strict";
  const copy={
-   ru:{title:"Письменная практика",criteria:"Критерии",next:"Далее",
+   ru:{title:"Письменная практика",criteria:"Критерии",next:"Далее",source:"Источник",data:"Таблица данных",
      back:"Назад",loading:"Загружаем задание…",offline:"Не удалось подтвердить действие. Повторите попытку.",
      complete:"Письменные задания по текущему плану пройдены.",
      instruction:"Выполните задание самостоятельно. Загрузка работы и самооценка не требуются.",
      criteriaTitle:"Требования к ответу",openError:"Задание сейчас недоступно."},
-   uz:{title:"Yozma mashqlar",criteria:"Baholash mezonlari",next:"Keyingi",
+   uz:{title:"Yozma mashqlar",criteria:"Baholash mezonlari",next:"Keyingi",source:"Manba",data:"Ma’lumotlar jadvali",
      back:"Orqaga",loading:"Topshiriq yuklanmoqda…",offline:"Amal tasdiqlanmadi. Qaytadan urinib ko‘ring.",
      complete:"Joriy rejadagi yozma topshiriqlar yakunlandi.",
      instruction:"Topshiriqni mustaqil bajaring. Ishni yuklash yoki o‘zingizga baho qo‘yish shart emas.",
      criteriaTitle:"Javobga qo‘yiladigan talablar",openError:"Topshiriq hozir mavjud emas."},
-   en:{title:"Written practice",criteria:"Criteria",next:"Next",
+   en:{title:"Written practice",criteria:"Criteria",next:"Next",source:"Source",data:"Data table",
      back:"Back",loading:"Loading task…",offline:"Action not confirmed. Please retry.",
      complete:"Written tasks in this study plan have been completed.",
      instruction:"Complete the task independently. No essay upload or self-grading is required.",
@@ -90,8 +90,52 @@
          }
       }finally{if(token===sequence)working=false;}
    }
+   // Sources are rendered ONLY from the guarded task-open server response.
+   // A Section A question without its approved locale-matched source is not shown.
+   function sourcePanel(item){
+     if(String(item.task_key||"").split(".")[1]!=="A")return null;
+     const s=item.source;
+     if(!s||s.language!==language||typeof s.title!=="string"||!s.title.trim()
+       ||!Array.isArray(s.paragraphs)||!s.paragraphs.length
+       ||s.paragraphs.some(p=>typeof p!=="string"||!p.trim()))
+       throw Error("written_source_unavailable");
+     const panel=el("section","ep-live-card ep-written-source");
+     panel.setAttribute("aria-label",t.source);
+     panel.append(el("div","ep-live-meta",t.source),
+       el("h3","ep-written-source-title",s.title));
+     for(const p of s.paragraphs)panel.append(el("p","ep-written-source-paragraph",p));
+     if(s.table!==undefined&&s.table!==null){
+       const x=s.table;
+       if(!Array.isArray(x.columns)||x.columns.length<2
+         ||!x.columns.every(h=>typeof h==="string"&&h.trim())
+         ||!Array.isArray(x.rows)||!x.rows.length
+         ||x.rows.some(row=>!Array.isArray(row)||row.length!==x.columns.length
+           ||row.some(cell=>!["string","number"].includes(typeof cell))))
+         throw Error("written_source_table_invalid");
+       const scroll=el("div","ep-written-source-scroll");
+       const table=el("table","ep-written-source-table");
+       const caption=el("caption","",t.data+(typeof x.unit==="string"&&x.unit.trim()?" · "+x.unit:""));
+       const thead=el("thead"),tr=el("tr");
+       x.columns.forEach(h=>{const th=el("th","",h);th.scope="col";tr.append(th);});
+       thead.append(tr);table.append(caption,thead);
+       const tbody=el("tbody");
+       for(const row of x.rows){
+         const line=el("tr");
+         row.forEach((cell,i)=>{
+           const node=el(i===0?"th":"td","",String(cell));
+           if(i===0)node.scope="row";
+           line.append(node);
+         });
+         tbody.append(line);
+       }
+       table.append(tbody);scroll.append(table);panel.append(scroll);
+     }
+     return panel;
+   }
    function renderTask(item,token){
       const body=page();
+      const source=sourcePanel(item);
+      if(source)body.append(source);
       const card=el("section","ep-live-card");
       card.append(el("div","ep-live-meta",item.paper_code||""),
         el("p","ep-live-qtext",item.question),
