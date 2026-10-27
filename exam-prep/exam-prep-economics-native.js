@@ -3,7 +3,7 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null};
   const dictionary={
-    ru:{selectPaper:"Выберите Paper",continuePreparation:"Продолжить подготовку",entryResult:"Входная диагностика завершена",topicOverview:"Темы для подготовки",chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
+    ru:{baselineIntro:"Сначала проверьте базовые знания Cambridge Economics (AS): 12 вопросов, 20 минут. После результата выберите Paper 1 или Paper 3. Темы A Level проверяются отдельно.",selectPaper:"Выберите Paper",continuePreparation:"Продолжить подготовку",entryResult:"Входная диагностика завершена",topicOverview:"Темы для подготовки",chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант: он сохранится автоматически. До завершения экзамена ответ можно изменить.",saving:"Сохраняем ответ…",
       papers:"К экзаменам",question:"Вопрос",time:"Осталось времени",save:"Сохранить ответ",
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
@@ -16,7 +16,7 @@
       hideCheck:"Скрыть ответ",markStudied:"Отметить как изученное",studiedDone:"Тема изучена",
       backReview:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
       allCorrect:"Все вопросы решены правильно. Ошибок для разбора нет.",studyNote:"Отметка «изучено» не означает, что навык освоен. Это подтвердит правильный ответ в следующем экзамене."},
-    uz:{selectPaper:"Paperni tanlang",continuePreparation:"Tayyorgarlikni davom ettirish",entryResult:"Kirish diagnostikasi yakunlandi",topicOverview:"O‘rganiladigan mavzular",chooseLevel:"Darajani tanlang",openLevel:"Ochish",overview:"Bosh sahifa",noAttempts:"Hozircha urinishlar yo‘q",afterCheck:"Diagnostika tugadi — qiyin mavzularni o‘rganing",startHere:"Avval kirish diagnostikasidan boshlang",resumeExam:"Ishni davom ettirish",levelIntro:"Diagnostika o‘rganiladigan mavzularni aniqlaydi. To‘liq imtihon alohida mavjud.",openLesson:"Mavzuni o‘rganish",viewUnits:"Bo‘limlar bo‘yicha natijalar",nextLesson:"Keyingi mavzu",showMore:"Ko‘proq ko‘rsatish",viewHistory:"Urinishlar tarixi",noHistory:"Yakunlangan imtihonlar va diagnostikalar shu yerda chiqadi",backToPlan:"O‘quv rejasiga",recommended:"Tavsiya etilgan qadam",title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",minuteShort:"daq.",profile:"Tayyorgarlik sozlamalari",editProfile:"O‘zgartirish",series:"Imtihon sessiyasi",grade:"Maqsadli baho",hours:"Haftalik umumiy o‘qish soati",econHours:"Haftalik iqtisodiyot soati",saveProfile:"Sozlamalarni saqlash",profileInvalid:"Imtihon davri va soatlarni tekshiring: iqtisodiyot soati umumiy vaqtdan oshmasin.",profileSaved:"Sozlamalar saqlandi",optional:"Tayyorgarlik maqsadi va vaqtini belgilang. Avvalgi urinishlar o‘zgarmaydi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq imtihon",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
+    uz:{baselineIntro:"Avval Cambridge Economics (AS) bo‘yicha asosiy bilimlaringizni tekshiring: 12 savol, 20 daqiqa. Natijadan so‘ng Paper 1 yoki Paper 3 ni tanlang. A Level mavzulari alohida tekshiriladi.",selectPaper:"Paperni tanlang",continuePreparation:"Tayyorgarlikni davom ettirish",entryResult:"Kirish diagnostikasi yakunlandi",topicOverview:"O‘rganiladigan mavzular",chooseLevel:"Darajani tanlang",openLevel:"Ochish",overview:"Bosh sahifa",noAttempts:"Hozircha urinishlar yo‘q",afterCheck:"Diagnostika tugadi — qiyin mavzularni o‘rganing",startHere:"Avval kirish diagnostikasidan boshlang",resumeExam:"Ishni davom ettirish",levelIntro:"Diagnostika o‘rganiladigan mavzularni aniqlaydi. To‘liq imtihon alohida mavjud.",openLesson:"Mavzuni o‘rganish",viewUnits:"Bo‘limlar bo‘yicha natijalar",nextLesson:"Keyingi mavzu",showMore:"Ko‘proq ko‘rsatish",viewHistory:"Urinishlar tarixi",noHistory:"Yakunlangan imtihonlar va diagnostikalar shu yerda chiqadi",backToPlan:"O‘quv rejasiga",recommended:"Tavsiya etilgan qadam",title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",minuteShort:"daq.",profile:"Tayyorgarlik sozlamalari",editProfile:"O‘zgartirish",series:"Imtihon sessiyasi",grade:"Maqsadli baho",hours:"Haftalik umumiy o‘qish soati",econHours:"Haftalik iqtisodiyot soati",saveProfile:"Sozlamalarni saqlash",profileInvalid:"Imtihon davri va soatlarni tekshiring: iqtisodiyot soati umumiy vaqtdan oshmasin.",profileSaved:"Sozlamalar saqlandi",optional:"Tayyorgarlik maqsadi va vaqtini belgilang. Avvalgi urinishlar o‘zgarmaydi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq imtihon",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga", beforePlan:"O‘quv rejangiz birinchi yakunlangan imtihondan so‘ng paydo bo‘ladi. Keyin uni urinishlar tarixidan ochishingiz mumkin.", autoAnswer:"Variantni tanlang: javob avtomatik saqlanadi. Imtihonni yakunlashdan oldin uni o‘zgartirish mumkin.",saving:"Javob saqlanmoqda…",
       papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javobni saqlash",
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
@@ -29,7 +29,7 @@
       hideCheck:"Javobni yashirish",markStudied:"O‘rganilgan deb belgilash",studiedDone:"Mavzu o‘rganildi",
       backReview:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
       allCorrect:"Hamma savollarga to‘g‘ri javob berildi. Tahlil qilinadigan xato yo‘q.",studyNote:"«O‘rganildi» belgisi bilim o‘zlashtirilganini isbotlamaydi. Keyingi imtihondagi to‘g‘ri javob tasdiqlaydi."},
-    en:{selectPaper:"Choose your paper",continuePreparation:"Continue preparation",entryResult:"Entry check completed",topicOverview:"Topics to study",chooseLevel:"Choose your level",openLevel:"Open",overview:"Overview",noAttempts:"No attempts yet",afterCheck:"Entry check completed — focus on weaker topics",startHere:"Begin with the entry check",resumeExam:"Resume your work",levelIntro:"The entry check identifies study topics. The full exam is available separately.",openLesson:"Study this topic",viewUnits:"Results by unit",nextLesson:"Next topic",showMore:"Show more",viewHistory:"Attempt history",noHistory:"Completed exams and entry checks will appear here",backToPlan:"Back to study plan",recommended:"Recommended next step",title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",minuteShort:"min",profile:"Preparation settings",editProfile:"Edit",series:"Exam series",grade:"Target grade",hours:"Total weekly study hours",econHours:"Weekly Economics hours",saveProfile:"Save settings",profileInvalid:"Check exam series and weekly hours: Economics time cannot exceed your total study time.",profileSaved:"Settings saved",optional:"Set a preparation goal and study time. Existing attempts will not change.",startDiagnostic:"Start entry check",fullPaper:"Full exam",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
+    en:{baselineIntro:"First check your Cambridge Economics AS foundations: 12 questions, 20 minutes. After your result, choose Paper 1 or Paper 3. Advanced A Level topics are checked separately.",selectPaper:"Choose your paper",continuePreparation:"Continue preparation",entryResult:"Entry check completed",topicOverview:"Topics to study",chooseLevel:"Choose your level",openLevel:"Open",overview:"Overview",noAttempts:"No attempts yet",afterCheck:"Entry check completed — focus on weaker topics",startHere:"Begin with the entry check",resumeExam:"Resume your work",levelIntro:"The entry check identifies study topics. The full exam is available separately.",openLesson:"Study this topic",viewUnits:"Results by unit",nextLesson:"Next topic",showMore:"Show more",viewHistory:"Attempt history",noHistory:"Completed exams and entry checks will appear here",backToPlan:"Back to study plan",recommended:"Recommended next step",title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",minuteShort:"min",profile:"Preparation settings",editProfile:"Edit",series:"Exam series",grade:"Target grade",hours:"Total weekly study hours",econHours:"Weekly Economics hours",saveProfile:"Save settings",profileInvalid:"Check exam series and weekly hours: Economics time cannot exceed your total study time.",profileSaved:"Settings saved",optional:"Set a preparation goal and study time. Existing attempts will not change.",startDiagnostic:"Start entry check",fullPaper:"Full exam",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back", beforePlan:"Your study plan appears after your first completed paper. You can reopen it from your attempt history.", autoAnswer:"Choose an option to save automatically. You can change it until you finish the paper.",saving:"Saving answer…",
       papers:"Back to papers",question:"Question",time:"Time remaining",save:"Save answer",
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
@@ -222,37 +222,47 @@
     result.append(actions);view.append(result);
   }
 
+
   function openLevel(code,shouldRefresh=true){
-    if(state.closed||state.busy||!["P1","P3"].includes(code)||!initialCheckStatus().complete)return;
+    if(state.closed||state.busy||!["P1","P3"].includes(code)||
+       !initialCheckStatus().complete)return;
     ++state.token;stop();state.view="level";state.paper=code;
     const view=shell();if(!view)return;
-    view.append(e("h3","ep-native-page-heading",code==="P1"?t().p1:t().p3));
-    view.append(e("p","ep-host-note",t().levelIntro));
     const entries=state.history.filter(x=>x.paper_code===code);
     const active=entries.find(x=>x.status==="active");
     const completed=entries.find(x=>x.session_kind==="diagnostic"&&x.status==="finalized");
     const latestPaper=entries.find(x=>x.session_kind==="paper"&&x.status==="finalized");
-    const block=e("section","ep-live-card ep-native-next-card");
-    block.append(e("div","ep-native-level-eyebrow",t().recommended));
-    const title=active?t().resumeExam:completed?t().afterCheck:t().startHere;
-    block.append(e("h3","",title));
-    const extra=active?(active.session_kind==="diagnostic"?t().entryCheck:t().fullPaper)+
+    const component=e("section","ep-component-home");
+    const top=e("header","ep-component-hero");
+    const head=e("div","ep-live-component-head");
+    head.append(e("span","ep-live-component-code",code));
+    const label=e("div","ep-live-component-copy");
+    label.append(e("strong","",code==="P1"?t().p1:t().p3),
+      e("span","",code==="P1"?"AS Level":"A Level"));
+    head.append(label);top.append(head);component.append(top);
+    const next=e("section","ep-component-next");
+    next.append(e("div","ep-component-section-label",t().recommended),
+      e("strong","ep-component-next-title",
+        active?t().resumeExam:completed?t().afterCheck:t().startHere));
+    const detail=active?(active.session_kind==="diagnostic"?t().entryCheck:t().fullPaper)+
       " · "+active.answered+"/"+(active.total_items||30)
       :completed?t().entryCheck+" · "+completed.score+"/12":
       t().entryCheck+" · 12 MCQ · 20 "+t().minuteShort;
-    block.append(e("p","ep-host-note",extra));
-    if(active)block.append(btn(t().continueAttempt,()=>openHistory(active,false)));
-    else if(completed)block.append(btn(t().plan,()=>openHistory(completed,true)));
-    else block.append(btn(t().startDiagnostic,()=>begin(code,"diagnostic")));
-    view.append(block);
-    const other=e("div","ep-native-level-actions");
-    if(completed)other.append(btn(t().repeatCheck,()=>begin(code,"diagnostic"),true));
-    other.append(btn(t().fullPaper,()=>begin(code,"paper"),true));
-    if(latestPaper)other.append(btn(t().viewResult,()=>openHistory(latestPaper,false),true));
-    other.append(btn(t().viewHistory,()=>openHistoryList(code),true));
-    view.append(other);
-    // The server remains authoritative after another device or a newly finished exam.
-    // An old local list must never cause the next action to ignore saved progress.
+    next.append(e("div","ep-live-meta",detail));
+    const primary=active?btn(t().continueAttempt,()=>openHistory(active,false))
+      :completed?btn(t().plan,()=>openHistory(completed,true))
+      :btn(t().startDiagnostic,()=>begin(code,"diagnostic"));
+    primary.classList?.add("ep-component-primary");
+    next.append(primary);component.append(next);
+    const links=e("section","ep-component-links");
+    const link=(label,fn)=>{
+      const b=btn(label,fn,true);b.className="ep-component-link";links.append(b);
+    };
+    if(completed)link(t().repeatCheck,()=>begin(code,"diagnostic"));
+    link(t().fullPaper,()=>begin(code,"paper"));
+    if(latestPaper)link(t().viewResult,()=>openHistory(latestPaper,false));
+    link(t().viewHistory,()=>openHistoryList(code));
+    component.append(links);view.append(component);
     if(shouldRefresh)refreshLevelHistory(code,state.token);
   }
   async function refreshLevelHistory(code,token){
@@ -404,10 +414,10 @@
     const row=data.items[state.index];if(!row)return;
     view.append(e("div","ep-native-progress",t().question+" "+(state.index+1)+" / "+total+" · "+data.items.filter(x=>x.answered).length+" / "+total));
     const card=e("div","ep-live-card ep-native-question");
-    card.append(e("div","ep-native-stem",row.question));
-    const options=e("div","ep-native-options");
+    card.append(e("div","ep-live-qtext",row.question));
+    const options=e("div","ep-live-options");
     row.options.forEach((option,idx)=>{
-      const line=e("label","ep-native-option");
+      const line=e("label","ep-live-option");
       const radio=e("input");radio.type="radio";radio.name="ep-native-choice";radio.value=String(idx);
       radio.checked=row.selected_index===idx;radio.disabled=finished||state.busy;
       if(!finished)radio.addEventListener("change",()=>saveChoice(idx));
@@ -425,7 +435,7 @@
       if(row.explanation)card.append(e("p","ep-native-explanation",row.explanation));
     }
     view.append(card);
-    const actions=e("div","ep-host-actions ep-native-actions");
+    const actions=e("div","ep-live-actions");
     if(state.index>0)actions.append(btn(t().previous,()=>{if(!state.busy){state.index--;draw();}},true));
     if(state.index<total-1)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
     if(!finished)actions.append(btn(t().finish,()=>finish(false),true));
@@ -501,7 +511,7 @@
       rows.append(item);
     });
     units.append(rows);view.append(units);
-    const actions=e("div","ep-host-actions ep-native-actions");
+    const actions=e("div","ep-live-actions");
     actions.append(btn(t().backReview,draw,true));
     actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,
       ()=>begin(state.paper,data.session_kind||"paper"),true));
@@ -547,7 +557,7 @@
     if(task.studied)body.append(e("div","ep-native-study-done",t().studiedDone));
     else body.append(btn(t().markStudied,()=>markStudied(task.skill_key)));
     view.append(body);
-    const actions=e("div","ep-host-actions ep-native-actions");
+    const actions=e("div","ep-live-actions");
     if(index+1<tasks.length)actions.append(btn(t().nextLesson,()=>renderLesson(index+1),true));
     actions.append(btn(t().backToPlan,()=>renderStudyPlan(state.planData),true));
     view.append(actions);
