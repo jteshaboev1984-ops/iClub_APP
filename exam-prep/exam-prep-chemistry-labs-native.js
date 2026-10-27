@@ -119,7 +119,7 @@
     if(!active()||!["en","ru","uz"].includes(language)||language===state.lang)return;
     state.lang=language;
     const selected=state.selected;
-    if(selected){state.selected=null;catalog();}else catalog();
+    if(selected)lesson(selected);else catalog();
   }
-  internal.chemistryLabsNative=Object.freeze({mount,unmount,setLanguage,isMounted:active});
+  internal.chemistryLabsNative=Object.freeze({mount,unmount,setLanguage,getLanguage:()=>state.lang,isMounted:active});
 })();
