@@ -9,7 +9,7 @@
     ru:{title:"Chemistry · Входная проверка",intro:"22 вопроса · 30 минут. Это первая ориентировочная проверка, а не экзамен Paper 1.",
       limitation:"Один вопрос по теме не позволяет достоверно определить её освоение.",
       start:"Начать или продолжить",history:"Мои проверки",empty:"Проверок пока нет.",
-      resume:"Продолжить",see:"Посмотреть результат",paper:"Перейти к Paper 1",
+      resume:"Продолжить",see:"Посмотреть результат",completedNote:"Повторная проверка на этих же вопросах не проводится. Новый набор появится после обновления заданий.",paper:"Перейти к Paper 1",
       back:"К предмету",loading:"Загрузка…",error:"Данные недоступны. Проверьте соединение.",
       retry:"Повторить",question:"Вопрос",answered:"Ответов",time:"Осталось",
       map:"Выбрать вопрос",unanswered:"Без ответа",prev:"Назад",next:"Далее",
@@ -26,7 +26,7 @@
     uz:{title:"Chemistry · Kirish tekshiruvi",intro:"22 ta savol · 30 daqiqa. Bu dastlabki yo‘naltiruvchi tekshiruv, Paper 1 imtihoni emas.",
       limitation:"Har bir mavzudagi bitta savol mavzuni o‘zlashtirishni ishonchli baholay olmaydi.",
       start:"Boshlash yoki davom ettirish",history:"Tekshiruvlarim",empty:"Hali tekshiruvlar yo‘q.",
-      resume:"Davom ettirish",see:"Natijani ko‘rish",paper:"Paper 1 ga o‘tish",
+      resume:"Davom ettirish",see:"Natijani ko‘rish",completedNote:"Ayni savollar bilan qayta tekshiruv o‘tkazilmaydi. Yangi savollar tayyorlanganda yangi tekshiruv ochiladi.",paper:"Paper 1 ga o‘tish",
       back:"Fanga qaytish",loading:"Yuklanmoqda…",error:"Ma’lumotni yuklab bo‘lmadi. Internetni tekshiring.",
       retry:"Qayta urinish",question:"Savol",answered:"Javoblar",time:"Qolgan vaqt",
       map:"Savolni tanlash",unanswered:"Javobsiz",prev:"Oldingi",next:"Keyingi",
@@ -43,7 +43,7 @@
     en:{title:"Chemistry · Entry check",intro:"22 questions · 30 minutes. This is an orientation check, not the Paper 1 exam.",
       limitation:"One question per topic cannot reliably establish mastery.",
       start:"Start or resume",history:"My checks",empty:"No checks yet.",
-      resume:"Continue",see:"View result",paper:"Go to Paper 1",
+      resume:"Continue",see:"View result",completedNote:"This set cannot be retaken after answers are revealed. A new check will require fresh questions.",paper:"Go to Paper 1",
       back:"Back to subject",loading:"Loading…",error:"Could not load the data. Check your connection.",
       retry:"Try again",question:"Question",answered:"Answered",time:"Time remaining",
       map:"Choose a question",unanswered:"Unanswered",prev:"Previous",next:"Next",
@@ -127,6 +127,8 @@
       list.append(row);
     });
     listing.append(list);
+    if(r.sessions.some(item=>item.status==="finalized"))
+      listing.append(el("p",t().completedNote,"ep-host-note"));
   }
   async function start(){
     if(!active()||state.busy)return;
@@ -181,7 +183,7 @@
     picker.append(el("summary",t().map+" · "+(22-nAnswered)+" "+t().unanswered));
     const grid=el("div",undefined,"ep-chem-question-grid");
     data.items.forEach((item,i)=>{
-      const b=button(String(i+1),()=>{state.index=i;draw();},true);
+      const b=button(String(i+1),()=>{if(state.busy)return;state.index=i;draw();},true);
       b.classList.add("ep-chem-question-jump");
       if(item.answered)b.classList.add("is-answered");
       if(i===state.index){b.classList.add("is-current");b.setAttribute("aria-current","step");}
@@ -209,8 +211,8 @@
     }
     p.append(card);
     const actions=el("div",undefined,"ep-host-actions");
-    if(state.index>0)actions.append(button(t().prev,()=>{state.index--;draw();},true));
-    if(state.index<21)actions.append(button(t().next,()=>{state.index++;draw();},true));
+    if(state.index>0)actions.append(button(t().prev,()=>{if(state.busy)return;state.index--;draw();},true));
+    if(state.index<21)actions.append(button(t().next,()=>{if(state.busy)return;state.index++;draw();},true));
     if(!done)actions.append(button(t().finish,()=>finish(false)));
     else actions.append(button(t().review,review));
     actions.append(button(t().back,()=>state.onBack?.(),true));p.append(actions);
