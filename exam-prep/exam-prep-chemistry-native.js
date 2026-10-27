@@ -2,7 +2,7 @@
   "use strict";
   const internal = window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {};
   const state = {root:null,lang:"ru",shell:null,session:null,data:null,index:0,closed:true,
-    busy:false,timer:null,seq:0,onBack:null};
+    busy:false,timer:null,seq:0,onBack:null,navOpen:false};
   const copy = {
     ru:{title:"Cambridge AS Chemistry · Exam Prep",paper:"Paper 1 · Выбор ответа",
       intro:"40 вопросов · 75 минут. Результаты сохраняются на сервере.",
@@ -14,7 +14,9 @@
       confirm:"Завершить работу? Неотвеченные вопросы принесут 0 баллов.",
       result:"Результат",your:"Ваш ответ",right:"Правильный ответ",missing:"Без ответа",
       return:"К выбору экзамена",again:"Новая попытка",empty:"Пока нет попыток.",
-      note:"Результат относится только к вопросам с выбором ответа."},
+      note:"Результат относится только к вопросам с выбором ответа.",
+      navigator:"Перейти к вопросу", unanswered:"Без ответа",
+      answeredLabel:"Ответ сохранён", finishWarning:"Неотвеченные вопросы: "},
     uz:{title:"Cambridge AS Chemistry · Exam Prep",paper:"Paper 1 · Test savollari",
       intro:"40 ta savol · 75 daqiqa. Natijalar serverda saqlanadi.",
       begin:"Boshlash yoki davom ettirish",history:"Urinishlarim",resume:"Davom ettirish",
@@ -25,7 +27,9 @@
       confirm:"Ishni yakunlaysizmi? Javobsiz savollar uchun 0 ball beriladi.",
       result:"Natija",your:"Javobingiz",right:"To‘g‘ri javob",missing:"Javobsiz",
       return:"Imtihon tanlashga",again:"Yangi urinish",empty:"Hali urinishlar yo‘q.",
-      note:"Natija faqat test savollariga tegishli."},
+      note:"Natija faqat test savollariga tegishli.",
+      navigator:"Savolni tanlash", unanswered:"Javobsiz",
+      answeredLabel:"Javob saqlangan", finishWarning:"Javobsiz savollar: "},
     en:{title:"Cambridge AS Chemistry · Exam Prep",paper:"Paper 1 · Multiple choice",
       intro:"40 questions · 75 minutes. Results are saved on the server.",
       begin:"Start or resume",history:"My attempts",resume:"Continue",
@@ -36,7 +40,9 @@
       confirm:"Finish the paper? Unanswered questions score zero.",
       result:"Result",your:"Your answer",right:"Correct answer",missing:"Unanswered",
       return:"Back to papers",again:"New attempt",empty:"No attempts yet.",
-      note:"This result covers multiple-choice questions only."}
+      note:"This result covers multiple-choice questions only.",
+      navigator:"Go to question", unanswered:"Unanswered",
+      answeredLabel:"Answer saved", finishWarning:"Unanswered questions: "}
   };
   const t = () => copy[state.lang] || copy.ru;
   const el = (tag,text,cls) => {
@@ -52,7 +58,7 @@
   function stopTimer() {if(state.timer!==null)clearInterval(state.timer);state.timer=null;}
   function unmount() {
     stopTimer();state.seq+=1;state.closed=true;state.root=null;state.shell=null;
-    state.session=null;state.data=null;state.busy=false;state.index=0;state.onBack=null;
+    state.session=null;state.data=null;state.busy=false;state.index=0;state.navOpen=false;state.onBack=null;
   }
   function panel() {
     if(state.closed||!state.root)return null;
@@ -64,7 +70,7 @@
     try {
       if(typeof window.sb?.rpc!=="function")return {ok:false};
       const r=await window.sb.rpc(name,args);
-      return !r.error&&r.data?.ok===true?r.data:{ok:false};
+      return !r.error&&r.data?.ok===true?r.data:{ok:false,code:r.data?.code||"network_error"};
     }catch(_){return {ok:false};}
   }
   function showError(retry) {
@@ -76,7 +82,7 @@
     p.append(n,actions);
   }
   async function lobby() {
-    state.seq+=1;stopTimer();state.session=null;state.data=null;state.index=0;
+    state.seq+=1;stopTimer();state.session=null;state.data=null;state.index=0;state.navOpen=false;
     const p=panel();if(!p)return;
     p.append(el("p",t().intro,"ep-host-note"));
     const card=el("div",undefined,"ep-host-component-card ep-native-paper");
@@ -155,8 +161,27 @@
       p.append(el("p",t().note,"ep-host-note"));
     }else timer(clock);
     const row=data.items[state.index];if(!row)return;
+    const answeredCount=data.items.filter(item=>item.answered).length;
     p.append(el("div",t().question+" "+(state.index+1)+" / 40 · "+t().answered+
-      ": "+data.items.filter(item=>item.answered).length+" / 40","ep-native-progress"));
+      ": "+answeredCount+" / 40","ep-native-progress"));
+    const navigator=el("details",undefined,"ep-chem-question-map");
+    navigator.open=state.navOpen;
+    navigator.addEventListener("toggle",()=>{state.navOpen=navigator.open;});
+    navigator.append(el("summary",t().navigator+" · "+(40-answeredCount)+" "+t().unanswered));
+    const map=el("div",undefined,"ep-chem-question-grid");
+    data.items.forEach((question,j)=>{
+      const target=button(String(j+1),()=>{state.index=j;draw();},true);
+      target.classList.add("ep-chem-question-jump");
+      if(question.answered)target.classList.add("is-answered");
+      if(j===state.index){
+        target.classList.add("is-current");
+        target.setAttribute("aria-current","step");
+      }
+      target.setAttribute("aria-label",t().question+" "+(j+1)+": "+
+        (question.answered?t().answeredLabel:t().unanswered));
+      map.append(target);
+    });
+    navigator.append(map);p.append(navigator);
     const card=el("div",undefined,"ep-live-card ep-native-question");
     card.append(el("div",row.question,"ep-native-stem"));
     const options=el("div",undefined,"ep-native-options");
@@ -192,12 +217,15 @@
     if(state.closed||n!==state.seq||state.session!==s)return;
     state.busy=false;if(!r.ok){showError(load);return;}
     state.data.items[i].selected_index=choice;state.data.items[i].answered=true;
-    const next=state.data.items.findIndex((row,j)=>j>i&&!row.answered);
-    state.index=next>=0?next:Math.min(i+1,39);draw();
+    let next=state.data.items.findIndex((row,j)=>j>i&&!row.answered);
+    if(next<0)next=state.data.items.findIndex(row=>!row.answered);
+    state.index=next>=0?next:i;draw();
   }
   async function finish(auto) {
     if(state.closed||state.busy||state.data?.status!=="active")return;
-    if(!auto&&!window.confirm(t().confirm))return;
+    const remaining=state.data.items.filter(item=>!item.answered).length;
+    if(!auto&&!window.confirm(t().confirm+
+      (remaining?"\n"+t().finishWarning+remaining:"")))return;
     stopTimer();state.busy=true;const n=state.seq,s=state.session;
     const r=await rpc("iclub_exam_chemistry_p1_finish_v1",{p_session_id:s});
     if(state.closed||n!==state.seq||state.session!==s)return;
