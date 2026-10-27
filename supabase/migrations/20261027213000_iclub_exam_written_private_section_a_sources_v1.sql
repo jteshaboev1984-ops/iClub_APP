@@ -56,6 +56,65 @@ ALTER TABLE private.iclub_exam_written_source_bindings_v1 ENABLE ROW LEVEL SECUR
 REVOKE ALL ON private.iclub_exam_written_source_cards_v1 FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON private.iclub_exam_written_source_bindings_v1 FROM PUBLIC,anon,authenticated;
 
+-- Verify source *content*, not merely the presence of locale keys.
+-- Designed to reject incomplete or mismatched tables for each language.
+CREATE OR REPLACE FUNCTION private.iclub_exam_written_source_locale_valid_v1(
+  p_content jsonb,p_lang text
+) RETURNS boolean LANGUAGE plpgsql IMMUTABLE SECURITY INVOKER SET search_path=''
+AS $function$
+DECLARE v jsonb; pars jsonb; tbl jsonb; cols jsonb; rows jsonb;
+        n integer; x jsonb; cell jsonb;
+BEGIN
+ IF p_lang NOT IN ('en','ru','uz') OR jsonb_typeof(p_content)<>'object'
+ THEN RETURN false; END IF;
+ v:=p_content->p_lang;
+ IF jsonb_typeof(v)<>'object'
+    OR NULLIF(btrim(v->>'title'),'') IS NULL
+ THEN RETURN false; END IF;
+ pars:=v->'paragraphs';
+ IF jsonb_typeof(pars)<>'array' OR jsonb_array_length(pars)=0
+ THEN RETURN false; END IF;
+ FOR x IN SELECT value FROM pg_catalog.jsonb_array_elements(pars)
+ LOOP
+   IF jsonb_typeof(x)<>'string' OR NULLIF(btrim(x #>> '{}'),'') IS NULL
+   THEN RETURN false; END IF;
+ END LOOP;
+ tbl:=v->'table';
+ -- These Economics Section A sources contain numerical tables.
+ IF jsonb_typeof(tbl)<>'object' THEN RETURN false; END IF;
+ cols:=tbl->'columns';rows:=tbl->'rows';
+ IF jsonb_typeof(cols)<>'array' OR jsonb_typeof(rows)<>'array'
+ THEN RETURN false; END IF;
+ n:=jsonb_array_length(cols);
+ IF n<2 OR jsonb_array_length(rows)=0 THEN RETURN false; END IF;
+ FOR x IN SELECT value FROM pg_catalog.jsonb_array_elements(cols)
+ LOOP
+   IF jsonb_typeof(x)<>'string' OR NULLIF(btrim(x #>> '{}'),'') IS NULL
+   THEN RETURN false; END IF;
+ END LOOP;
+ FOR x IN SELECT value FROM pg_catalog.jsonb_array_elements(rows)
+ LOOP
+   IF jsonb_typeof(x)<>'array' THEN RETURN false; END IF;
+   IF jsonb_array_length(x)<>n THEN RETURN false; END IF;
+   FOR cell IN SELECT value FROM pg_catalog.jsonb_array_elements(x)
+   LOOP
+      IF jsonb_typeof(cell) NOT IN ('string','number')
+      THEN RETURN false; END IF;
+      IF jsonb_typeof(cell)='string'
+          AND NULLIF(btrim(cell #>> '{}'),'') IS NULL
+      THEN RETURN false; END IF;
+   END LOOP;
+ END LOOP;
+ IF tbl ? 'unit' AND jsonb_typeof(tbl->'unit')<>'string'
+ THEN RETURN false; END IF;
+ RETURN true;
+END;
+$function$;
+REVOKE ALL ON FUNCTION private.iclub_exam_written_source_locale_valid_v1(jsonb,text)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION private.iclub_exam_written_source_locale_valid_v1(jsonb,text)
+ TO service_role;
+
 -- A source belongs to an approved, actively assigned learner's exact question version.
 -- The existing private open operation performs authentication, ownership, plan,
 -- entitlement, item approval, and writes the idempotent opened_at event.
@@ -104,6 +163,9 @@ BEGIN
     AND s.academic_review='approved' AND s.language_review='approved'
     AND s.source_review='approved'
     AND s.content ?& ARRAY['en','ru','uz']
+    AND private.iclub_exam_written_source_locale_valid_v1(s.content,'en')
+    AND private.iclub_exam_written_source_locale_valid_v1(s.content,'ru')
+    AND private.iclub_exam_written_source_locale_valid_v1(s.content,'uz')
     AND s.content_sha256 =
       encode(pg_catalog.sha256(pg_catalog.convert_to(s.content::text,'UTF8')),'hex');
 
@@ -194,9 +256,9 @@ AS $function$
      AND s.academic_review='approved'
      AND s.language_review='approved' AND s.source_review='approved'
      AND s.content ?& ARRAY['en','ru','uz']
-     AND NULLIF(btrim(s.content->'en'->>'title'),'') IS NOT NULL
-     AND NULLIF(btrim(s.content->'ru'->>'title'),'') IS NOT NULL
-     AND NULLIF(btrim(s.content->'uz'->>'title'),'') IS NOT NULL
+     AND private.iclub_exam_written_source_locale_valid_v1(s.content,'en')
+     AND private.iclub_exam_written_source_locale_valid_v1(s.content,'ru')
+     AND private.iclub_exam_written_source_locale_valid_v1(s.content,'uz')
      AND b.content_sha256=s.content_sha256
      AND s.content_sha256=
        encode(pg_catalog.sha256(pg_catalog.convert_to(s.content::text,'UTF8')),'hex')
@@ -318,6 +380,34 @@ REVOKE ALL ON FUNCTION public.iclub_exam_written_criteria_v1(uuid,text,text,uuid
   FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.iclub_exam_written_criteria_v1(uuid,text,text,uuid,text)
   TO authenticated;
+
+-- The final transition is also source-gated: no credit or advance
+-- when an approved Section A source has been withdrawn or changed.
+CREATE OR REPLACE FUNCTION public.iclub_exam_written_advance_v1(
+ p_item_id uuid,p_task_key text,p_task_version text,p_task_token uuid,p_idempotency_key text
+) RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $function$
+BEGIN
+ IF auth.uid() IS NULL THEN
+   RETURN jsonb_build_object('ok',false,'code','not_authorized');
+ END IF;
+ IF NOT EXISTS(
+   SELECT 1 FROM private.iclub_exam_core_written_plan_items_v1 i
+   WHERE i.id=p_item_id AND i.learner_user_id=auth.uid()
+    AND i.task_key=p_task_key AND i.task_version=p_task_version
+    AND i.task_token=p_task_token
+    AND private.iclub_exam_written_source_ready_v1(
+        i.program_key,i.version_key,i.task_key,i.task_version)
+ ) THEN RETURN jsonb_build_object('ok',false,'code','written_source_unavailable');
+ END IF;
+ RETURN private.iclub_exam_core_written_advance_v1(
+  p_item_id,p_task_key,p_task_version,p_task_token,p_idempotency_key);
+END;
+$function$;
+REVOKE ALL ON FUNCTION public.iclub_exam_written_advance_v1(uuid,text,text,uuid,text)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.iclub_exam_written_advance_v1(uuid,text,text,uuid,text)
+ TO authenticated;
 
 -- Release-state preservation check; migration must not approve any draft.
 DO $gate$
