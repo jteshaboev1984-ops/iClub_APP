@@ -69,11 +69,16 @@
     });
     if(!active()||token!==state.seq)return;
     const expectedLevel=state.paper==="P3"?"AS":"A";
+    const startNumber=state.paper==="P3"?1:7;
+    const expectedKeys=new Set(Array.from({length:6},(_,i)=>
+      "CHEM9701-LAB-"+String(startNumber+i).padStart(2,"0")));
     if(r?.ok!==true||r.paper_code!==state.paper||r.level_code!==expectedLevel||
        r.locale!==state.lang||r.can_credit_mastery!==false||
        r.count!==6||!Array.isArray(r.items)||r.items.length!==6||
-       r.items.some(x=>x.paper_code!==state.paper||x.level_code!==expectedLevel||
-        !/^CHEM9701-LAB-(0[1-9]|1[0-2])$/.test(x.skill_key))){
+       new Set(r.items.map(x=>x?.skill_key)).size!==6||
+       r.items.some(x=>!x||x.paper_code!==state.paper||x.level_code!==expectedLevel||
+        !expectedKeys.has(x.skill_key)||typeof x.title!=="string"||
+        x.title.trim().length<=5)){
       error();return;
     }
     state.items=r.items;
@@ -100,7 +105,8 @@
     if(r?.ok!==true||r.skill_key!==skill||r.paper_code!==state.paper||
        r.level_code!==(state.paper==="P3"?"AS":"A")||r.locale!==state.lang||
        r.tutor_included!==false||r.can_credit_mastery!==false||
-       r.practical_exam_replacement!==false||typeof r.explanation!=="string"||
+       r.practical_exam_replacement!==false||typeof r.title!=="string"||
+       r.title.trim().length<=5||typeof r.explanation!=="string"||
        r.explanation.length<100){error();return;}
     const view=canvas();
     view.append(node("h3",r.title,"ep-native-section-title"),
