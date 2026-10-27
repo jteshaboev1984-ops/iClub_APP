@@ -57,9 +57,13 @@
          }
          if(result.status!=="ready"||!result.plan_item_id)
             throw Error("written_item_not_ready");
+         let openedTask=null;
          ctl=window.iClubWrittenCoreControllerV1.create({
             api:{
-              open:({plan_item_id})=>api.open({p_item_id:plan_item_id,p_language:language}),
+              open:async({plan_item_id})=>{
+                openedTask=await api.open({p_item_id:plan_item_id,p_language:language});
+                return openedTask;
+              },
               criteria:({plan_item_id,task_key,task_version,task_token})=>
                 api.criteria({p_item_id:plan_item_id,p_task_key:task_key,
                   p_task_version:task_version,p_task_token:task_token,p_language:language}),
@@ -73,7 +77,7 @@
          });
          await ctl.open(result.plan_item_id);
          if(closed||token!==sequence)return;
-         const answer=await api.open({p_item_id:result.plan_item_id,p_language:language});
+         const answer=openedTask;
          if(closed||token!==sequence)return;
          // Task wording is returned by the approved, learner-owned Core service only.
          if(!answer||answer.task_kind!=="written_external"||typeof answer.question!=="string")
