@@ -1,0 +1,55 @@
+/* Main Practice: optional QA-only helper. Everything scoped to its card. */
+.iclub-ai-prepared-qa{
+  margin:14px 0 16px;
+  padding:16px 18px;
+  border:1px solid var(--border,rgba(15,23,42,.10));
+  border-radius:16px;
+  background:var(--card,#fff);
+  box-shadow:none;
+}
+.iclub-ai-prepared-qa-title{
+  margin:0 0 5px;
+  font-size:1rem;
+  font-weight:700;
+  line-height:1.4;
+}
+.iclub-ai-prepared-qa .muted{
+  margin:0 0 13px;
+  font-size:.9rem;
+  line-height:1.45;
+  color:var(--muted,#64748b);
+}
+.iclub-ai-prepared-qa-actions{
+  display:flex;
+  align-items:stretch;
+  gap:9px;
+  flex-wrap:wrap;
+}
+.iclub-ai-prepared-qa-actions .btn{
+  box-sizing:border-box;
+  flex:1 1 160px;
+  min-height:44px;
+  padding:10px 12px;
+  border-radius:12px;
+  font-size:.91rem;
+  line-height:1.35;
+  font-weight:600;
+  text-align:center;
+  white-space:normal;
+}
+.iclub-ai-prepared-qa-output{
+  margin-top:12px;
+  padding:12px 14px;
+  border:1px solid var(--border,rgba(15,23,42,.10));
+  border-radius:12px;
+  background:rgba(47,111,214,.055);
+  font-size:.94rem;
+  line-height:1.55;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.iclub-ai-prepared-qa-output[hidden]{display:none}
+@media(max-width:420px){
+  .iclub-ai-prepared-qa{padding:14px}
+  .iclub-ai-prepared-qa-actions .btn{flex-basis:100%}
+}

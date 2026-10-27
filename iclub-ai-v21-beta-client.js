@@ -364,6 +364,187 @@
       provider_called:true,academic_state_changed:false};
   }
 
+  // Main Practice context: a strictly separate, provider-free candidate.
+  // One iClub AI chat handles delivery; this method never changes grades or
+  // General Help model/settings. Server must still verify every attempt.
+  const practicePurposes=new Set([
+    "practice_visibility","practice_result","practice_next_step",
+    "practice_history_comparison"
+  ]);
+  const practiceRequestUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  async function practiceContextTransport({purpose,attemptRef,locale,requestId}={}){
+    if(!practicePurposes.has(purpose)||!Number.isSafeInteger(attemptRef)||
+      attemptRef<=0||!LOCALES.has(locale)||!practiceRequestUuid.test(String(requestId||"")))
+      return closed("invalid_request");
+    if(protectedNow())return closed("active_assessment");
+    const source=document.getElementById("courses-practice-result");
+    const review=document.getElementById("courses-practice-review");
+    const activeAttempt=source?.classList.contains("is-active")?source:
+      review?.classList.contains("is-active")?review:null;
+    if(!activeAttempt||Number(activeAttempt.dataset.practiceAiAttemptId||0)!==attemptRef)
+      return closed("context_changed");
+    const current=await status();
+    if(!current.eligible||!current.consented||protectedNow())
+      return closed("beta_not_enabled");
+    const user=lastUser,epoch=authEpoch;
+    const client=window.sb;
+    const expectedOrigin="https://mmmduffgpvwjdpruzikw.supabase.co";
+    if(!client?.auth?.getSession||
+      String(client.supabaseUrl||"").replace(/\/+$/,"")!==expectedOrigin||
+      String(client.supabaseKey||"").length<24)return closed("unavailable");
+    const {data,error}=await client.auth.getSession().catch(()=>({error:true}));
+    const jwt=String(data?.session?.access_token||"");
+    if(error||jwt.length<24)return closed("authentication_required");
+    if(epoch!==authEpoch||user!==await identity()||protectedNow())
+      return closed("context_changed");
+    let answer=null;
+    try{
+      const response=await fetch(expectedOrigin+"/functions/v1/iclub-ai-practice-prepared",{
+        method:"POST",mode:"cors",credentials:"omit",cache:"no-store",
+        headers:{"Authorization":"Bearer "+jwt,"apikey":String(client.supabaseKey),
+          "Content-Type":"application/json"},
+        body:JSON.stringify({intent:"practice_prepared",request_id:requestId,
+          purpose,attempt_ref:attemptRef,question_ref:null,locale}),
+        signal:AbortSignal.timeout(12000)
+      });
+      answer=await response.json().catch(()=>null);
+      if(!response.ok||!answer?.ok)return closed(String(answer?.reason||"unavailable"));
+    }catch{return closed("unavailable");}
+    if(epoch!==authEpoch||user!==await identity()||protectedNow()||
+      !activeAttempt.isConnected||
+      !activeAttempt.classList.contains("is-active")||
+      Number(activeAttempt.dataset.practiceAiAttemptId||0)!==attemptRef)
+      return closed("context_changed");
+    if(answer.provider_called!==false||answer.academic_state_changed!==false)
+      return closed("unavailable");
+    if(purpose==="practice_visibility"){
+      if(answer.available!==true||answer.mode!=="availability")
+        return closed("not_enabled");
+      return {ok:true,available:true,mode:"availability",
+        academic_state_changed:false,provider_called:false};
+    }
+    if(answer.mode!=="verified_summary"||typeof answer.message!=="string"||
+      answer.message.length<20||answer.message.length>1200)
+      return closed("unavailable");
+    return {ok:true,mode:"verified_summary",message:answer.message,
+      academic_state_changed:false,provider_called:false};
+  }
+  async function practiceContextAvailable({attemptRef,locale}={}){
+    const requestId=window.crypto?.randomUUID?.();
+    if(!requestId)return false;
+    const result=await practiceContextTransport({
+      purpose:"practice_visibility",attemptRef,locale,requestId
+    });
+    return result?.ok===true&&result.available===true;
+  }
+  async function askPracticePrepared({purpose,attemptRef,locale,requestId}={}){
+    if(purpose==="practice_visibility")return closed("invalid_request");
+    return practiceContextTransport({purpose,attemptRef,locale,requestId});
+  }
+
+  // PC3 academic freeform. No rollout until PC1+PC3+PC4 release gates
+  // are enabled on the server. Neither result nor question is cached locally.
+  async function practiceFreeformTransport({
+    operation,requestId,purpose,attemptRef,locale,userText
+  }={}){
+    const text=String(userText||"").trim();
+    const reqId=String(requestId||"");
+    const recovering=operation==="resume"||operation==="resume_ack";
+    if(!["ask","ack","resume","resume_ack"].includes(operation)||
+       !practicePurposes.has(purpose)||
+       purpose==="practice_visibility"||!Number.isSafeInteger(attemptRef)||
+       attemptRef<=0||!LOCALES.has(locale)||
+       (recovering ? (purpose!=="practice_result"||text.length!==0)
+         : (text.length<8||text.length>2000))||
+       !practiceRequestUuid.test(reqId))return closed("invalid_request");
+    if(protectedNow())return closed("active_assessment");
+    const a=document.getElementById("courses-practice-result");
+    const b=document.getElementById("courses-practice-review");
+    const screen=a?.classList.contains("is-active")?a:
+      b?.classList.contains("is-active")?b:null;
+    if(!screen||Number(screen.dataset.practiceAiAttemptId||0)!==attemptRef)
+      return closed("context_changed");
+    const grant=await status();
+    if(!grant.eligible||!grant.consented||protectedNow())
+      return closed("beta_not_enabled");
+    const owner=lastUser,epoch=authEpoch;
+    const client=window.sb,expected="https://mmmduffgpvwjdpruzikw.supabase.co";
+    if(!client?.auth?.getSession||
+       String(client.supabaseUrl||"").replace(/\/+$/,"")!==expected||
+       String(client.supabaseKey||"").length<24)return closed("unavailable");
+    let token="";
+    try{
+      const {data,error}=await client.auth.getSession();
+      if(error)return closed("authentication_required");
+      token=String(data?.session?.access_token||"");
+    }catch{return closed("authentication_required");}
+    if(token.length<24||epoch!==authEpoch||owner!==await identity())
+      return closed("context_changed");
+    let body=null;
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),55000);
+    try{
+      const response=await fetch(expected+"/functions/v1/iclub-ai-practice-freeform",{
+        method:"POST",cache:"no-store",mode:"cors",credentials:"omit",
+        headers:{"authorization":"Bearer "+token,"apikey":String(client.supabaseKey),
+          "content-type":"application/json"},
+        body:JSON.stringify({intent:"practice_freeform",operation,
+          request_id:reqId,purpose,attempt_ref:attemptRef,
+          question_ref:null,locale,question:recovering?null:text}),
+        signal:controller.signal
+      });
+      body=await response.json().catch(()=>null);
+      if(!response.ok||!body?.ok)
+        return closed(String(body?.reason||
+          (response.status===401?"authentication_required":"unavailable")));
+    }catch(e){
+      return closed(e?.name==="AbortError"?"timeout":"unavailable");
+    }finally{clearTimeout(timer);}
+    if(epoch!==authEpoch||owner!==await identity()||protectedNow()||
+      !screen.isConnected||!screen.classList.contains("is-active")||
+      Number(screen.dataset.practiceAiAttemptId||0)!==attemptRef)
+      return closed("context_changed");
+    if(operation==="ack"||operation==="resume_ack"){
+      if(body?.mode!=="acknowledged"||body?.request_id!==reqId||
+         body?.academic_state_changed!==false)
+        return closed("ack_unavailable");
+      return {ok:true,mode:"acknowledged",academic_state_changed:false};
+    }
+    // A reload probe has a fresh nonce; the server returns the ORIGINAL
+    // durable request UUID. Only ordinary ask must echo the sent UUID.
+    if(body?.mode!=="generated"||body?.delivery_state!=="pending_ack"||
+       (operation!=="resume"&&body?.request_id!==reqId)||
+       typeof body.message!=="string"||
+       body.message.length<20||body.message.length>2400||
+       typeof body.provider_called!=="boolean"||
+       body.academic_state_changed!==false)return closed("unavailable");
+    if(operation==="resume" &&
+       (body.recovered!==true||
+        typeof body.request_id!=="string"||
+        !practiceRequestUuid.test(body.request_id)))return closed("recovery_unavailable");
+    return {ok:true,mode:"generated",message:body.message,
+      delivery_state:"pending_ack",
+      request_id:operation==="resume"?body.request_id:reqId,
+      recovered:operation==="resume",provider_called:body.provider_called,
+      academic_state_changed:false};
+  }
+  async function askPracticeFreeform(args={}){
+    return practiceFreeformTransport({...args,operation:"ask"});
+  }
+  async function ackPracticeFreeform(args={}){
+    return practiceFreeformTransport({...args,operation:"ack"});
+  }
+  async function recoverPracticeFreeform({attemptRef,locale}={}){
+    const requestId=window.crypto?.randomUUID?.();
+    if(!requestId)return closed("unavailable");
+    return practiceFreeformTransport({operation:"resume",requestId,
+      purpose:"practice_result",attemptRef,locale,userText:""});
+  }
+  async function ackRecoveredPracticeFreeform({requestId,attemptRef,locale}={}){
+    return practiceFreeformTransport({operation:"resume_ack",requestId,
+      purpose:"practice_result",attemptRef,locale,userText:""});
+  }
+
   // Unified learner-scoped source bridge. Selectors are not grants:
   // the server verifies real owner, finalization, publication and entitlement.
   const academicTypes=new Set(["practice_error","lesson_topic","tour_archive"]);
@@ -506,6 +687,8 @@
   else setupAcademicAutoAttach();
   window.iClubAiV21BetaClient=Object.freeze({
     status,consentFromExplicitUserAction,askPrepared,askGenerated,
-    availableAcademic,askAcademic,resetOnIdentityChange
+    availableAcademic,askAcademic,practiceContextAvailable,
+    askPracticePrepared,askPracticeFreeform,ackPracticeFreeform,
+    recoverPracticeFreeform,ackRecoveredPracticeFreeform,resetOnIdentityChange
   });
 })();

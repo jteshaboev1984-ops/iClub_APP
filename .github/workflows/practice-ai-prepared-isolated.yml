@@ -1,0 +1,215 @@
+name: Practice AI - isolated PostgreSQL and Chromium preview
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - supabase/candidates/iclub_ai_practice_context_v1_dormant.sql
+      - supabase/candidates/iclub_ai_practice_receipts_pc4_dormant.sql
+      - supabase/candidates/iclub_ai_practice_freeform_pc3_gate_dormant.sql
+      - supabase/tests/iclub_ai_practice_pc3_gate_isolated.sql
+      - supabase/tests/iclub_ai_practice_pc3_real_quota_rpcs_isolated.sql
+      - scripts/practice-ai-freeform-canonical-e2e.cjs
+      - scripts/practice-ai-unified-tutor-browser-e2e.cjs
+      - scripts/fixtures/practice-ai-unified-tutor-local-only.html
+      - iclub-ai-v21-ui.css
+      - supabase/functions/iclub-ai-practice-freeform/index.ts
+      - supabase/functions/iclub-ai-practice-freeform/practice_freeform_pc3_core.ts
+      - supabase/functions/iclub-ai-practice-freeform/practice_freeform_pc3_core_test.ts
+      - supabase/candidates/iclub_ai_practice_receipt_rpc_pc4_dormant.sql
+      - supabase/candidates/iclub_ai_practice_recover_pc4_dormant.sql
+      - supabase/candidates/iclub_ai_practice_pc4_financial_audit_dormant.sql
+      - supabase/tests/iclub_ai_practice_pc4_financial_audit_isolated.sql
+      - supabase/tests/iclub_ai_practice_recover_pc4_isolated.sql
+      - supabase/tests/iclub_ai_practice_receipt_pc4_isolated.sql
+      - supabase/tests/iclub_ai_practice_prepared_isolated.sql
+      - .github/workflows/practice-ai-prepared-isolated.yml
+      - iclub-ai-v21-beta-client.js
+      - iclub-ai-v21-ui.js
+      - index.html
+      - practice-ai-prepared-qa.js
+      - supabase/functions/iclub-ai-practice-prepared/index.ts
+      - practice-ai-prepared-qa.css
+      - scripts/practice-ai-prepared-browser-smoke.cjs
+      - scripts/practice-ai-prepared-real-sql-e2e.cjs
+      - scripts/fixtures/practice-ai-prepared-preview.html
+permissions:
+  contents: read
+jobs:
+  compile-synthetic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      PGOPTIONS: '-c iclub.isolated_practice_context=true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compile candidate and check 7/10 synthetic attempt
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_prepared_isolated.sql
+      - name: PC4 actual receipt SQL / duplicate + replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_receipt_pc4_isolated.sql
+
+      - name: Check prepared Edge TypeScript
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Unified Tutor integration syntax and single-panel boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check iclub-ai-v21-beta-client.js
+          node --check iclub-ai-v21-ui.js
+          node --check practice-ai-prepared-qa.js
+          node <<'NODE'
+          const fs=require('node:fs');
+          const index=fs.readFileSync('index.html','utf8');
+          const beta=fs.readFileSync('iclub-ai-v21-beta-client.js','utf8');
+          const tutor=fs.readFileSync('iclub-ai-v21-ui.js','utf8');
+          if(index.includes('practice-ai-prepared-qa.js') ||
+             index.includes('practice-ai-prepared-qa.css'))
+            throw new Error('Duplicate Practice AI panel is loaded');
+          if(!index.includes('iclub-ai-v21-ui.js?practice-context-candidate') ||
+             !index.includes('iclub-ai-v21-beta-client.js?practice-context-candidate') ||
+             !beta.includes('askPracticePrepared') ||
+             !tutor.includes('checkPracticeChatGate'))
+            throw new Error('Single Tutor Practice context bridge missing');
+          console.log('PASS: dormant Practice route belongs to existing Tutor only');
+          NODE
+      - name: Deno type-check
+        run: deno check supabase/functions/iclub-ai-practice-prepared/index.ts
+      - name: PC3 isolated release-gate and type-check
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_pc3_gate_isolated.sql
+          deno check supabase/functions/iclub-ai-practice-freeform/index.ts
+          deno test supabase/functions/iclub-ai-practice-freeform/practice_freeform_pc3_core_test.ts
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_recover_pc4_isolated.sql
+      - name: Start real isolated Supabase Auth on separate disposable PostgreSQL database
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = 127.0.0.1
+          test "$PGDATABASE" = postgres
+          createdb -h 127.0.0.1 -U postgres iclub_ai_auth_ci
+          # GoTrue migrations expect auth schema to pre-exist. This is
+          # created ONLY inside the fresh disposable auth test database.
+          psql -X -v ON_ERROR_STOP=1 -d iclub_ai_auth_ci -c 'CREATE SCHEMA auth'
+          # The real GoTrue connection expects auth.* objects via search_path;
+          # this setting is isolated to the disposable authentication DB.
+          psql -X -v ON_ERROR_STOP=1 -d postgres \
+            -c 'ALTER DATABASE iclub_ai_auth_ci SET search_path TO auth, public'
+          docker run --detach --name iclub-ai-gotrue-ci \
+            --network host \
+            --env GOTRUE_API_HOST=127.0.0.1 \
+            --env GOTRUE_API_PORT=18770 \
+            --env API_EXTERNAL_URL=http://127.0.0.1:18770 \
+            --env GOTRUE_SITE_URL=http://127.0.0.1:18770 \
+            --env GOTRUE_URI_ALLOW_LIST=http://127.0.0.1:18770 \
+            --env GOTRUE_DB_DRIVER=postgres \
+            --env GOTRUE_DB_DATABASE_URL='postgres://postgres:postgres@127.0.0.1:5432/iclub_ai_auth_ci?sslmode=disable' \
+            --env GOTRUE_JWT_SECRET='temporary-github-ci-only-no-production-key-used-2026-10-27' \
+            --env GOTRUE_JWT_AUD=authenticated \
+            --env GOTRUE_JWT_DEFAULT_GROUP_NAME=authenticated \
+            --env GOTRUE_JWT_ADMIN_ROLES=service_role \
+            --env GOTRUE_JWT_EXP=3600 \
+            --env GOTRUE_JWT_ISSUER=http://127.0.0.1:18770 \
+            --env GOTRUE_EXTERNAL_EMAIL_ENABLED=true \
+            --env GOTRUE_MAILER_AUTOCONFIRM=true \
+            --env GOTRUE_DISABLE_SIGNUP=false \
+            --env GOTRUE_EXTERNAL_PHONE_ENABLED=false \
+            supabase/gotrue:v2.197.0
+          auth_ready=0
+          for n in $(seq 1 35); do
+            if curl --silent --fail http://127.0.0.1:18770/health >/dev/null; then
+              auth_ready=1
+              break
+            fi
+            if [ "$(docker inspect -f '{{.State.Running}}' iclub-ai-gotrue-ci)" = "false" ]; then
+              echo 'Isolated Supabase Auth exited during startup:'
+              docker logs --tail 130 iclub-ai-gotrue-ci
+              exit 1
+            fi
+            sleep 2
+          done
+          if [ "$auth_ready" != 1 ]; then
+            docker logs --tail 130 iclub-ai-gotrue-ci
+            exit 1
+          fi
+          echo 'PASS: genuine isolated Supabase Auth service; no connection to any hosted project'
+      - name: Install ephemeral pinned real-browser Auth test tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.55.0 esbuild@0.25.12 @supabase/supabase-js@2.57.0
+          npx playwright install chromium
+      - name: Complete PC3 + PC4 HTTP flow against canonical quota RPCs (fake provider)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_pc3_real_quota_rpcs_isolated.sql
+          if ! ICLUB_AUTH_GOTRUE_URI=http://127.0.0.1:18770 node scripts/practice-ai-freeform-canonical-e2e.cjs; then
+            echo 'Genuine isolated Auth server diagnostics (no credentials):'
+            docker logs --tail 100 iclub-ai-gotrue-ci
+            exit 1
+          fi
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_pc4_financial_audit_isolated.sql
+      - name: Chromium preview with mocked backend (no external traffic)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/practice-ai-prepared-browser-smoke.cjs
+          node scripts/practice-ai-unified-tutor-browser-e2e.cjs
+      - name: Real Edge to isolated PostgreSQL browser flow
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          node scripts/practice-ai-prepared-real-sql-e2e.cjs
+      - name: Stop disposable Supabase Auth container
+        if: always()
+        shell: bash
+        run: |
+          docker rm -f iclub-ai-gotrue-ci 2>/dev/null || true
+      - name: Upload synthetic screen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-ai-synthetic-mobile-preview
+          path: |
+            artifacts/practice-ai-preview-ru.png
+            artifacts/practice-ai-isolated-real-sql.png
+            artifacts/practice-ai-unified-tutor-local.png
+          if-no-files-found: ignore
+          retention-days: 5
