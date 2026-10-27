@@ -53,4 +53,14 @@ NOT has_function_privilege('service_role','private.iclub_exam_chemistry_j12_admi
 (SELECT count(*)>=502 FROM public.practice_attempts) AS practice_attempts_preserved,
 (SELECT count(*)>=4816 FROM public.practice_answers) AS practice_answers_preserved,
 (SELECT count(*)>=1 FROM private.iclub_exam_native_mcq_attempts_v1) AS economics_attempts_preserved,
-(SELECT count(*)>=2098 FROM public.user_subjects) AS subject_choices_preserved;
+(SELECT count(*)>=2098 FROM public.user_subjects) AS subject_choices_preserved,
+NOT has_function_privilege('anon','private.iclub_exam_chemistry_j12_admin_emergency_stop_v1(text)','EXECUTE') AS emergency_anon_denied,
+NOT has_function_privilege('authenticated','private.iclub_exam_chemistry_j12_admin_emergency_stop_v1(text)','EXECUTE') AS emergency_auth_denied,
+NOT has_function_privilege('service_role','private.iclub_exam_chemistry_j12_admin_emergency_stop_v1(text)','EXECUTE') AS emergency_service_denied,
+(SELECT NOT p.prosecdef FROM pg_proc p WHERE p.oid='private.iclub_exam_chemistry_j12_admin_emergency_stop_v1(text)'::regprocedure) AS emergency_invoker_only,
+(SELECT owner_go_at IS NULL FROM private.iclub_exam_chemistry_entry_release_v1 WHERE id=1) AS entry_GO_null,
+(SELECT owner_go_at IS NULL FROM private.iclub_exam_chemistry_recheck_control_v1 WHERE id=1) AS recheck_GO_null,
+(SELECT owner_go_at IS NULL FROM private.iclub_exam_chemistry_p1_beta_control_v1 WHERE id=1) AS P1_GO_null,
+(SELECT state='draft' AND validated_at IS NULL FROM private.iclub_subject_library_releases WHERE subject_key='chemistry') AS library_releases_not_validated,
+(SELECT count(*)=0 FROM private.iclub_subject_library_release_events WHERE subject_key='chemistry' AND action='hide') AS no_hide_event,
+(SELECT count(*)=0 FROM private.iclub_subject_library_release_events WHERE subject_key='chemistry' AND action='publish') AS no_published_release_event;
