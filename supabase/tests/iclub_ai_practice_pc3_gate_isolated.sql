@@ -40,6 +40,18 @@ BEGIN
    r->>'model' IS DISTINCT FROM 'gpt-5.4-mini' OR
    (r->>'output_token_cap')::integer<>384
  THEN RAISE EXCEPTION 'PC3 exact baseline unexpectedly denied %',r; END IF;
+ -- Beta-only: no owner; revoked beta grant must close funded release.
+ UPDATE private.iclub_ai_practice_context_v1_control SET owner_user_id=NULL WHERE singleton=1;
+ r:=public.iclub_ai_practice_freeform_pc3_gate_service();
+ IF r->>'released' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Math beta only PC3 incorrectly closed %',r; END IF;
+ UPDATE private.iclub_ai_practice_beta_grants_v1 SET enabled=false;
+ r:=public.iclub_ai_practice_freeform_pc3_gate_service();
+ IF r->>'reason' IS DISTINCT FROM 'not_released' THEN
+  RAISE EXCEPTION 'PC3 paid release bypassed revoked beta grant %',r; END IF;
+ UPDATE private.iclub_ai_practice_beta_grants_v1 SET enabled=true;
+ UPDATE private.iclub_ai_practice_context_v1_control
+  SET owner_user_id='00000000-0000-4000-8000-000000000011' WHERE singleton=1;
  UPDATE private.iclub_ai_v21_freeform_budget_control
   SET output_token_cap=385 WHERE singleton=1;
  r:=public.iclub_ai_practice_freeform_pc3_gate_service();
