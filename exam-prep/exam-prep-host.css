@@ -1882,3 +1882,64 @@
     padding: 12px;
   }
 }
+
+
+/* Chemistry post-paper topic review: supportive guidance, not a mastery badge. */
+.ep-native-chemistry .ep-chem-review-focus,
+.ep-native-chemistry .ep-chem-review-all {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 20px;
+  min-width: 0;
+}
+.ep-native-chemistry .ep-chem-review-title {
+  margin: 0 0 2px;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  font-weight: 750;
+}
+.ep-native-chemistry .ep-chem-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--ep-border, rgba(110,126,152,.3));
+  border-radius: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.ep-native-chemistry .ep-chem-review-row strong {
+  flex: 1 1 200px;
+  min-width: 0;
+  font-size: .93rem;
+}
+.ep-native-chemistry .ep-chem-review-counts {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+  opacity: .85;
+}
+.ep-native-chemistry .ep-chem-review-all > summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 10px 0;
+}
+.ep-native-chemistry .ep-chem-review-all > summary:focus-visible {
+  outline: 3px solid var(--accent, #386dd1);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.ep-native-chemistry .ep-chem-review-list {
+  display: grid;
+  gap: 8px;
+}
+@media(max-width: 520px) {
+  .ep-native-chemistry .ep-chem-review-row {
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+  }
+}
