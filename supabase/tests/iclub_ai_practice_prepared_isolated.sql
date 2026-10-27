@@ -33,6 +33,10 @@ CREATE TABLE private.iclub_ai_v21_beta_control(singleton smallint PRIMARY KEY,
  beta_enabled boolean,prepared_enabled boolean,generation_enabled boolean);
 CREATE TABLE private.iclub_ai_v21_beta_members(user_id uuid,
  enabled boolean,consent_version text,consent_at timestamptz);
+CREATE TABLE private.exam_prep_beta_cohorts(id bigint PRIMARY KEY,program_key text,cohort_status text);
+CREATE TABLE private.exam_prep_beta_members(user_id uuid,cohort_id bigint,member_status text,service_mode text);
+CREATE TABLE private.exam_prep_beta_consents(user_id uuid,cohort_id bigint,consent_scope text,consent_status text,revoked_at timestamptz);
+CREATE TABLE private.exam_prep_feature_entitlements(user_id uuid,entitlement_status text,core_access boolean,ai_assist boolean,valid_from timestamptz,valid_until timestamptz);
 CREATE TABLE private.iclub_commercial_access_config(id smallint,lifecycle_enabled boolean);
 CREATE TABLE private.iclub_subscription_entitlements(
  user_id uuid,entitlement_status text,plan_code text,valid_from timestamptz,valid_until timestamptz);
@@ -203,5 +207,39 @@ BEGIN
  SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
  IF r->>'reason' IS DISTINCT FROM 'not_authorized'
  THEN RAISE EXCEPTION 'JWT role bypass %',r; END IF;
+ -- Exact Math beta grants are in addition to owner mode; every revocation closes access.
+ PERFORM set_config('request.jwt.claim.role','service_role',true);
+ UPDATE private.iclub_ai_practice_context_v1_control SET owner_user_id=NULL WHERE singleton=1;
+ INSERT INTO private.exam_prep_beta_cohorts VALUES(71,'math_as_p1_p5','canary');
+ INSERT INTO private.exam_prep_beta_members VALUES(uid,71,'active','ai_assist');
+ INSERT INTO private.exam_prep_beta_consents VALUES(uid,71,'exam_prep_controlled_beta_v1','granted',NULL);
+ INSERT INTO private.exam_prep_feature_entitlements VALUES(uid,'active',true,true,NULL,NULL);
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'not_enabled' THEN RAISE EXCEPTION 'No beta grant leaked %',r; END IF;
+ INSERT INTO private.iclub_ai_practice_beta_grants_v1(user_id,enabled) VALUES(uid,true);
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'ok' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'Valid beta denied %',r; END IF;
+ UPDATE private.exam_prep_beta_members SET member_status='paused' WHERE user_id=uid;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'not_enabled' THEN RAISE EXCEPTION 'Paused member leaked %',r; END IF;
+ UPDATE private.exam_prep_beta_members SET member_status='active' WHERE user_id=uid;
+ UPDATE private.exam_prep_feature_entitlements SET ai_assist=false WHERE user_id=uid;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'not_enabled' THEN RAISE EXCEPTION 'Revoked entitlement leaked %',r; END IF;
+ UPDATE private.exam_prep_feature_entitlements SET ai_assist=true WHERE user_id=uid;
+ UPDATE private.exam_prep_beta_consents SET revoked_at=now() WHERE user_id=uid;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'not_enabled' THEN RAISE EXCEPTION 'Revoked beta consent leaked %',r; END IF;
+ UPDATE private.exam_prep_beta_consents SET revoked_at=NULL WHERE user_id=uid;
+ UPDATE private.iclub_ai_v21_beta_members SET consent_at=NULL WHERE user_id=uid;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'not_enabled' THEN RAISE EXCEPTION 'Absent Global AI consent leaked %',r; END IF;
+ UPDATE private.iclub_ai_v21_beta_members SET consent_at=now() WHERE user_id=uid;
+ UPDATE private.iclub_ai_practice_beta_grants_v1 SET enabled=false WHERE user_id=uid;
+ SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'not_enabled' THEN RAISE EXCEPTION 'Disabled grant leaked %',r; END IF;
+ UPDATE private.iclub_ai_practice_beta_grants_v1 SET enabled=true WHERE user_id=uid;
+ UPDATE private.iclub_ai_practice_context_v1_control SET owner_user_id=uid WHERE singleton=1;
+ RAISE NOTICE 'PASS: Math beta grants, dynamic cohort and entitlement, consent and revocation';
  RAISE NOTICE 'PASS: compiled, off gate, 7/10, owner, trilingual source version/hash/target, protection and grants';
 END $g$;
