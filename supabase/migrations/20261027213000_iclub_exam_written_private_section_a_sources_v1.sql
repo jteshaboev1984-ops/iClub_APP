@@ -175,6 +175,150 @@ REVOKE ALL ON FUNCTION public.iclub_exam_written_open_v1(uuid,text)
 GRANT EXECUTE ON FUNCTION public.iclub_exam_written_open_v1(uuid,text)
   TO authenticated;
 
+
+-- Only a fully approved source (and all three locale variants) can unlock
+-- a Section A study step. No direct student execution privilege is granted.
+CREATE OR REPLACE FUNCTION private.iclub_exam_written_source_ready_v1(
+  p_program_key text,p_version_key text,p_task_key text,p_task_version text
+) RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path=''
+AS $function$
+ SELECT CASE WHEN split_part(p_task_key,'.',2)<>'A' THEN true ELSE EXISTS(
+   SELECT 1 FROM private.iclub_exam_written_source_bindings_v1 b
+   JOIN private.iclub_exam_written_source_cards_v1 s
+     ON s.program_key=b.program_key AND s.version_key=b.version_key
+    AND s.source_id=b.source_id AND s.source_version=b.source_version
+   WHERE b.program_key=p_program_key AND b.version_key=p_version_key
+     AND b.task_key=p_task_key AND b.task_version=p_task_version
+     AND s.release_enabled AND s.status='approved'
+     AND s.academic_review='approved'
+     AND s.language_review='approved' AND s.source_review='approved'
+     AND s.content ?& ARRAY['en','ru','uz']
+     AND NULLIF(btrim(s.content->'en'->>'title'),'') IS NOT NULL
+     AND NULLIF(btrim(s.content->'ru'->>'title'),'') IS NOT NULL
+     AND NULLIF(btrim(s.content->'uz'->>'title'),'') IS NOT NULL
+     AND b.content_sha256=s.content_sha256
+     AND s.content_sha256=
+       encode(pg_catalog.sha256(pg_catalog.convert_to(s.content::text,'UTF8')),'hex')
+ ) END;
+$function$;
+REVOKE ALL ON FUNCTION private.iclub_exam_written_source_ready_v1(text,text,text,text)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION private.iclub_exam_written_source_ready_v1(text,text,text,text)
+  TO service_role;
+
+-- The lobby must not advertise a Section A activity before its source is ready.
+CREATE OR REPLACE FUNCTION public.iclub_exam_written_available_v1(
+  p_program_key text, p_version_key text
+) RETURNS jsonb
+LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
+AS $f$
+DECLARE v_user uuid:=auth.uid(); v_plan uuid; v_item uuid;
+BEGIN
+ IF v_user IS NULL OR p_program_key IS NULL OR p_version_key IS NULL
+    OR length(p_program_key)>128 OR length(p_version_key)>128
+ THEN RETURN jsonb_build_object('ok',false,'available',false); END IF;
+
+ SELECT pl.id,i.id INTO v_plan,v_item
+ FROM private.iclub_exam_core_written_plans_v1 pl
+ JOIN private.iclub_exam_core_programs_v1 pg
+ ON pg.program_key=pl.program_key AND pg.version_key=pl.version_key
+ JOIN private.iclub_exam_core_written_access_v1 ac
+ ON ac.learner_user_id=pl.learner_user_id
+ AND ac.program_key=pl.program_key AND ac.version_key=pl.version_key
+ JOIN private.iclub_exam_core_written_plan_items_v1 i
+ ON i.plan_id=pl.id AND i.learner_user_id=pl.learner_user_id
+ AND i.program_key=pl.program_key AND i.version_key=pl.version_key
+ JOIN private.iclub_exam_core_written_tasks_v1 t
+ ON t.program_key=i.program_key AND t.version_key=i.version_key
+ AND t.task_key=i.task_key AND t.task_version=i.task_version
+ WHERE pl.learner_user_id=v_user AND pl.program_key=p_program_key
+ AND pl.version_key=p_version_key AND pl.status='active'
+ AND pg.integration_mode='native' AND pg.status='published' AND pg.launch_enabled
+ AND ac.status='active' AND ac.core_access
+ AND (ac.valid_from IS NULL OR ac.valid_from<=now())
+ AND (ac.valid_until IS NULL OR ac.valid_until>now())
+ AND i.status='pending' AND i.mode='practice'
+ AND t.status='approved' AND t.release_enabled
+ AND t.academic_review='approved' AND t.language_review='approved'
+ AND t.source_review='approved'
+ AND private.iclub_exam_written_source_ready_v1(i.program_key,i.version_key,i.task_key,i.task_version)
+ AND NOT EXISTS (
+   SELECT 1 FROM private.iclub_exam_core_written_plan_items_v1 earlier
+   WHERE earlier.plan_id=i.plan_id AND earlier.priority_order<i.priority_order
+   AND earlier.status='pending'
+ )
+ ORDER BY pl.created_at DESC,i.priority_order
+ LIMIT 1;
+
+ IF NOT FOUND THEN RETURN jsonb_build_object('ok',true,'available',false); END IF;
+ RETURN jsonb_build_object('ok',true,'available',true,'plan_id',v_plan::text);
+END;
+$f$;
+-- Keep the same original authenticated grant contract.
+REVOKE ALL ON FUNCTION public.iclub_exam_written_available_v1(text,text)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.iclub_exam_written_available_v1(text,text)
+  TO authenticated;
+
+-- Deep-link to a plan may not bypass the source approval gate.
+CREATE OR REPLACE FUNCTION public.iclub_exam_written_next_v1(p_plan_id uuid)
+RETURNS jsonb LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path=''
+AS $function$
+DECLARE v_next jsonb;
+BEGIN
+ IF auth.uid() IS NULL THEN
+   RETURN jsonb_build_object('ok',false,'code','not_authorized');
+ END IF;
+ v_next:=private.iclub_exam_core_written_plan_next_v1(p_plan_id);
+ IF v_next->>'status'='ready' AND v_next->>'plan_item_id' IS NOT NULL
+   AND NOT EXISTS (
+     SELECT 1 FROM private.iclub_exam_core_written_plan_items_v1 i
+     WHERE i.id=(v_next->>'plan_item_id')::uuid
+       AND i.learner_user_id=auth.uid()
+       AND private.iclub_exam_written_source_ready_v1(
+         i.program_key,i.version_key,i.task_key,i.task_version)
+   )
+ THEN RETURN jsonb_build_object('ok',false,'code','written_source_unavailable');
+ END IF;
+ RETURN v_next;
+END;
+$function$;
+REVOKE ALL ON FUNCTION public.iclub_exam_written_next_v1(uuid)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.iclub_exam_written_next_v1(uuid)
+  TO authenticated;
+
+-- Criteria cannot bypass a revoked or missing Section A source.
+CREATE OR REPLACE FUNCTION public.iclub_exam_written_criteria_v1(
+ p_item_id uuid,p_task_key text,p_task_version text,p_task_token uuid,
+ p_language text DEFAULT 'en'
+) RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path=''
+AS $function$
+DECLARE v_result jsonb;
+BEGIN
+ IF auth.uid() IS NULL THEN
+   RETURN jsonb_build_object('ok',false,'code','not_authorized');
+ END IF;
+ v_result:=private.iclub_exam_core_written_criteria_v1(
+   p_item_id,p_task_key,p_task_version,p_task_token,p_language);
+ IF NOT EXISTS (
+   SELECT 1 FROM private.iclub_exam_core_written_plan_items_v1 i
+   WHERE i.id=p_item_id AND i.learner_user_id=auth.uid()
+     AND i.task_key=p_task_key AND i.task_version=p_task_version
+     AND i.task_token=p_task_token
+     AND private.iclub_exam_written_source_ready_v1(
+       i.program_key,i.version_key,i.task_key,i.task_version)
+ )
+ THEN RETURN jsonb_build_object('available',false); END IF;
+ RETURN v_result;
+END;
+$function$;
+REVOKE ALL ON FUNCTION public.iclub_exam_written_criteria_v1(uuid,text,text,uuid,text)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.iclub_exam_written_criteria_v1(uuid,text,text,uuid,text)
+  TO authenticated;
+
 -- Release-state preservation check; migration must not approve any draft.
 DO $gate$
 BEGIN
