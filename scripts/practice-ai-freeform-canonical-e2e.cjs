@@ -7,7 +7,10 @@ if(process.env.PGHOST!=="127.0.0.1"||process.env.PGDATABASE!=="postgres"||
  throw Error("isolated Postgres required");
 const DIR=path.resolve(__dirname,"../supabase/functions/iclub-ai-practice-freeform");
 const PROD="https://mmmduffgpvwjdpruzikw.supabase.co",USER="00000000-0000-4000-8000-000000000011";
-const JWT="fake-token-"+"a".repeat(64),ANON="fake-anon-"+"b".repeat(64),
+const JWT="fake-token-"+"a".repeat(64),
+ OTHER_JWT="fake-token-"+"f".repeat(64),
+ OTHER_USER="00000000-0000-4000-8000-000000000022",
+ ANON="fake-anon-"+"b".repeat(64),
  SERVICE="fake-service-"+"c".repeat(64),MODELKEY="fake-model-"+"d".repeat(64);
 const ID="eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",PORT=18769;
 const spec={
@@ -62,9 +65,12 @@ async function main(){
    try{
     const loc=new URL(req.url,"http://localhost").pathname;
     if(loc==="/auth/v1/user"){
-     if(req.headers.authorization!=="Bearer "+JWT||req.headers.apikey!==ANON)
-      return respond(res,401,{error:"auth"});
-     return respond(res,200,{id:USER,role:"authenticated"});
+     if(req.headers.apikey!==ANON)return respond(res,401,{error:"auth"});
+     if(req.headers.authorization==="Bearer "+JWT)
+      return respond(res,200,{id:USER,role:"authenticated"});
+     if(req.headers.authorization==="Bearer "+OTHER_JWT)
+      return respond(res,200,{id:OTHER_USER,role:"authenticated"});
+     return respond(res,401,{error:"auth"});
     }
     if(loc==="/provider"){
      calls++;
@@ -136,17 +142,36 @@ async function main(){
   }
   if(!started)throw Error("Edge startup "+stderr.slice(-800));
   const Q="Что означает мой результат 70%?";
-  async function send(op,question=Q,id=ID){
-   const r=await fetch(edge,{method:"POST",headers:{Origin:host,
-     authorization:"Bearer "+JWT,"content-type":"application/json"},
+  async function send(op,question=Q,id=ID,opts={}){
+   const r=await fetch(edge,{method:"POST",headers:{
+     Origin:opts.origin||host,
+     authorization:"Bearer "+(opts.token||JWT),"content-type":"application/json"},
     body:JSON.stringify({intent:"practice_freeform",operation:op,request_id:id,
-     purpose:"practice_result",attempt_ref:501,question_ref:null,locale:"ru",question})});
+     purpose:"practice_result",attempt_ref:opts.attempt||501,
+     question_ref:null,locale:"ru",question})});
    return{status:r.status,body:await r.json()};
   }
   const noSource=await send("ask","Реши задачу №6 и объясни почему неверно",
     "ffffffff-ffff-4fff-8fff-ffffffffffff");
   assert.equal(noSource.status,403,JSON.stringify(noSource));
   assert.equal(calls,0);
+  // Two verified principals against the LOCAL auth imitation. Only the
+  // real owner of the finalized synthetic attempt may spend quota.
+  const badJwt=await send("ask",Q,
+    "abababab-abab-4bab-8bab-abababababab",{token:"invalid-token-"+"z".repeat(64)});
+  assert.equal(badJwt.status,401,JSON.stringify(badJwt));
+  const badOrigin=await send("ask",Q,
+    "bcbcbcbc-bcbc-4cbc-8cbc-bcbcbcbcbcbc",
+    {origin:"https://untrusted.example"});
+  assert.equal(badOrigin.status,403,JSON.stringify(badOrigin));
+  const foreignAsk=await send("ask",Q,
+    "cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd",{token:OTHER_JWT});
+  assert.equal(foreignAsk.status,403,JSON.stringify(foreignAsk));
+  assert.equal(foreignAsk.body.reason,"context_or_source_not_ready");
+  const missingAttempt=await send("ask",Q,
+    "dededede-dede-4ded-8ded-dededededede",{attempt:999});
+  assert.equal(missingAttempt.status,403,JSON.stringify(missingAttempt));
+  assert.equal(calls,0,"Unauthorized identity/origin/attempt triggered model");
   const first=await send("ask");
   assert.equal(first.status,200,JSON.stringify({first,failures,stderr:stderr.slice(-600)}));
   assert.equal(first.body.delivery_state,"pending_ack");
@@ -167,6 +192,10 @@ async function main(){
   assert.equal(recovered.body.message,first.body.message);
   assert.equal(recovered.body.provider_called,false);
   assert.equal(calls,1);
+  const foreignReplay=await send("resume",null,newSessionId,{token:OTHER_JWT});
+  assert.equal(foreignReplay.status,409,JSON.stringify(foreignReplay));
+  assert.equal(foreignReplay.body.reason,"context_or_source_not_ready");
+  assert.equal(calls,1,"Another account obtained the original AI response");
   // Existing same-UUID recovery remains idempotent for network retries.
   const saved=await send("ask");
   assert.equal(saved.status,200,JSON.stringify(saved));
@@ -287,7 +316,7 @@ async function main(){
   assert.equal(calls,4);
   assert.deepEqual(failures,[]);
   console.log("PASS PC3 real Deno Edge + PC1/PC3/PC4 Postgres + five canonical money/quota RPCs + synthetic provider only");
-  console.log("PASS full reload recovery, unknown provider nonretry, quota ACK compensation, consent revocation and mid-flight emergency OFF without answer leaks or repeat provider dispatch");
+  console.log("PASS isolated verified principal separation, cross-account replay denial, bad JWT/origin/attempt; reload recovery, quota compensation, consent revocation and emergency OFF");
   console.log("FINAL "+JSON.stringify({...final,providerCalls:calls}));
  }finally{
   if(deno){deno.kill("SIGTERM");await new Promise(ok=>{
