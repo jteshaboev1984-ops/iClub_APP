@@ -35,4 +35,8 @@ Production main is unchanged by this branch. Existing learner progress remains u
 
 ## Concurrent GitHub main reconciliation
 
-On 27 Oct 2026 `main` advanced with an unrelated AI Practice migration numbered `20261027213000`. The Economics source migration has been renamed to `20261027221000_iclub_exam_written_private_section_a_sources_v1.sql` before integration; there is no duplicate migration version. The AI Practice files were not touched by this branch.
+On 27 Oct 2026 `main` advanced with an unrelated AI Practice migration numbered `20261027213000`. The Economics source migration has been renamed to `20261027163633_iclub_exam_written_private_section_a_sources_v1.sql` before integration; there is no duplicate migration version. The AI Practice files were not touched by this branch.
+
+## Closed source-gate backend installed (2026-10-27)
+
+Supabase migration ledger reports version `20261027163633`, `iclub_exam_written_private_section_a_sources_v1`. Installed by explicit architect direction without preview. Post-install SELECT verified exactly two new source-related private tables; both empty; Economics existing written P2 14/P4 8, none released; written access/plans/items 0; source table direct anon/authenticated SELECT denied; Mathematics active version count 1. Chemistry source_ready remains unaffected. Frontend is still limited to feature branch until merge; do not claim live browser E2E passed. Candidate trilingual source cards remain unseeded.
