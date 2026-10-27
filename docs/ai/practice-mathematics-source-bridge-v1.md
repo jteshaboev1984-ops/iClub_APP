@@ -31,6 +31,16 @@ Before a candidate is allowed into `private.iclub_ai_v21_academic_sources`, a se
 
 `supabase/tests/iclub_ai_practice_prepared_isolated.sql` exercises the actual candidate SQL in disposable PostgreSQL using **synthetic** admitted/denied sources. It deliberately mutates one locale's hash, version and target fingerprint, confirms each variant fails closed, and verifies correct and unrelated wrong questions cannot inherit an approved source. This test validates the local gate **only**; it does not certify any real academic card, original source rights, or the existing deployed `deliver_iclub_ai_v21_academic_service` implementation.
 
+## Read-only live Supabase verification — 27 October 2026
+The project `mmmduffgpvwjdpruzikw` was inspected using **SELECT-only** PostgreSQL metadata and aggregate queries; no DDL, update, insert, delete or real user records were accessed or changed.
+
+- Mathematics `practice_error` source rows in `private.iclub_ai_v21_academic_sources`: **0**.
+- Mathematics question contexts represented: **0**; source rows currently admitted by `private.iclub_ai_v21_source_admitted_v1`: **0**.
+- `public.deliver_iclub_ai_v21_academic_service`, `private.iclub_ai_v21_source_admitted_v1`, and `private.iclub_ai_v21_target_fingerprint_v1` exist and are **service-role-only**, with no `anon` / `authenticated` EXECUTE grant.
+- The existing delivery RPC correctly re-checks owner, finalized incorrect answer, active assessment, rights, source admission and current target/content hashes. **However, it does not itself require a complete EN/RU/UZ version-matched source set for every admission route.** One source-admission subroute already enforces a signed three-language bank pack; the direct published and older owner-release subroutes do not globally establish that invariant.
+- The new PR #366 `get_iclub_ai_practice_context_v1_service` checks the triple *before* the existing delivery RPC. That is a meaningful additional safety gate, but it is **not atomic with the final delivery**. A changed/retired translation between the two RPC calls would not necessarily be rechecked as a set by the downstream delivery RPC. The candidate must not be promoted to a full release merely because this preflight test is green.
+- **Release decision: HOLD.** For first Maths question-specific source publication, either introduce a reviewed Practice-only transactional service wrapper that locks/revalidates the entire source pack at delivery, or add an equivalent narrowly scoped, independently tested rule to the downstream delivery contract. Avoid changing the existing `lesson_topic` / `tour_archive` paths as collateral damage.
+
 ## Still required before the first real source publication
 
 - Read-only inventory of the Mathematics main Practice question/version/answer-path population. Identify safe, original, not-yet-mapped candidate questions; do not relabel 645 historical questions in place.
