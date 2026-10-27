@@ -156,3 +156,16 @@ Economics Exam Prep сейчас `draft` и `launch_enabled=false`. Не отк�
 - Economics по-прежнему `draft/off`, 22 tasks черновые, 0 опубликованных и 0 learner access/plans/steps.
 
 История дублирования описана выше для аудита; **она больше не является открытой задачей**. Следующая реализация должна опираться только на единственный канонический closed path. Authenticated E2E и смешанный учебный план ещё не готовы. Процедуры Mathematics не изменялись в рамках этого этапа.
+
+
+## Stage 5 — guarded public learner gateway, 27.10.2026 (technical only, no draft release)
+
+**Состояние:** серверный и UI-маршрут реализован **строго при наличии индивидуального approved/released письменного плана**, текущие Economics P2/P4 DRAFT и лабораторные Chemistry/Biology не включены. Это продолжение Written Learning Contract v1.3, **не новая политика оценки**.
+
+**Применена аддитивная SQL миграция:** `supabase/migrations/20261027182000_iclub_exam_core_written_authenticated_gateway_v1.sql`. Шесть `public.iclub_exam_written_*_v1` RPC: `available` (ученический server-gated plan discovery), `next`, `open`, `criteria`, `advance`, `status`. Только `authenticated`, никакого прямого доступа к четырём private written таблицам. Существенно: `status` gateway заново проверяет принадлежность, active entitlement, program published/native/launch, task QA/release: private status самостоятельно проверял только ownership. При этом переносимого learner scoring/essay submission нет.
+
+**Только по разрешённому плану**: `exam-prep/runtime/written-core-controller-v1.js` (уже существующий проверенный контроллер) + **новый** `exam-prep/runtime/written-core-view-v1.js` (Math `ep-live` классы, никаких новых CSS) интегрированы в `exam-prep/exam-prep-economics-native.js`. Кнопка «Письменная практика» скрыта, пока `available` не вернёт `available:true` для уже собственноручно approved/assigned плана. Вид: только условие, необязательные критерии и «Далее». Сбои и потерянный ACK обрабатываются посредством `status` подтверждения, без ложного продвижения. Обе JS зависимости включены до economics-native в `index.html`, Mathematics runtime не изменялся.
+
+**QA:** SQL под действительной ролью `authenticated` с ВРЕМЕННОЙ synthetic approved P2 task/ученическим назначением в `BEGIN/ROLLBACK`: `available→next→open→criteria→advance→idempotent replay→status→completed` и cross-user BOLA-deny. После `ROLLBACK` имеем **25 исходных письменных задач, 0 approved/released, 0 письменных access, 0 plans, 0 items; Math active1**. Синтетический DOM/V8 проверил компоненты controller/view и реальное подключение из Economics, включая optional criteria и recover от ACK loss. Для обычных beta учеников кнопка полностью скрыта; mock approved plan показывает и открывает кнопку. Реальный браузерный E2E по опубликованному письменному контенту **не проходил**, потому что approved content ещё отсутствует.
+
+**Безопасный запрет:** НЕ утверждать новый доступ к P2/P4 или что студентские письменные работы/эксперименты проверяются приложением. Данные из Chemistry/Biology предметных планов и реальные лабораторные эксперименты не подменять этим письменным шагом, не открывать без отдельной предметной проверки. Следующий этап — редакторский/академический QA конкретных P2/P4 источников, трёх языков и критериев; затем governed разрешение письменного beta learner plan, browser QA и отдельное решение архитектора.
