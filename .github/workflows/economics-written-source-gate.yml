@@ -1,0 +1,24 @@
+name: Economics 9708 Written Section A Isolated Gate
+
+on:
+  pull_request:
+    paths:
+      - 'exam-prep/runtime/written-core-view-v1.js'
+      - 'exam-prep/runtime/written-core-source-v1.css'
+      - 'supabase/migrations/*iclub_exam_written_private_section_a_sources_v1.sql'
+      - 'scripts/qa-economics-written-source-gate.cjs'
+      - '.github/workflows/economics-written-source-gate.yml'
+      - 'index.html'
+  workflow_dispatch:
+
+jobs:
+  written-source-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Isolated static and UI regression
+        run: node scripts/qa-economics-written-source-gate.cjs
