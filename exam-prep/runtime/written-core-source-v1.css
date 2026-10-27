@@ -1,0 +1,63 @@
+
+/* iClub Exam Prep Section A data-response source. Scoped to the existing written view. */
+.ep-live .ep-written-source {
+  display: grid;
+  gap: 12px;
+  max-width: 100%;
+  min-width: 0;
+  text-align: start;
+}
+.ep-live .ep-written-source-title {
+  font-size: clamp(1rem, 2.5vw, 1.13rem);
+  line-height: 1.35;
+  font-weight: 700;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.ep-live .ep-written-source-paragraph {
+  margin: 0;
+  line-height: 1.62;
+  overflow-wrap: break-word;
+}
+.ep-live .ep-written-source-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border, rgba(127,143,160,.27));
+  border-radius: 12px;
+}
+.ep-live .ep-written-source-table {
+  width: 100%;
+  min-width: 320px;
+  border-collapse: collapse;
+  font-size: .93rem;
+  line-height: 1.5;
+}
+.ep-live .ep-written-source-table caption {
+  text-align: start;
+  padding: 10px 12px;
+  font-weight: 600;
+}
+.ep-live .ep-written-source-table th,
+.ep-live .ep-written-source-table td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border, rgba(127,143,160,.20));
+  vertical-align: top;
+  text-align: start;
+}
+.ep-live .ep-written-source-table thead th {
+  font-weight: 700;
+  background: var(--surface-secondary, rgba(127,143,160,.09));
+}
+.ep-live .ep-written-source-table tbody th {
+  font-weight: 600;
+}
+@media (max-width: 440px) {
+  .ep-live .ep-written-source {
+    gap: 10px;
+  }
+  .ep-live .ep-written-source-table th,
+  .ep-live .ep-written-source-table td {
+    padding: 8px 10px;
+  }
+}
