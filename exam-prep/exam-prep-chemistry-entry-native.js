@@ -148,8 +148,9 @@
     unmount();
     const ok=adapter.mount({...ctx,shell:recheckShell,
       onBack:()=>{
+        const language=adapter.getLanguage?.()||ctx.language;
         adapter.unmount?.();
-        internal.chemistryEntryNative?.mount?.(ctx);
+        internal.chemistryEntryNative?.mount?.({...ctx,language});
       }});
     if(ok!==true)internal.chemistryEntryNative?.mount?.(ctx);
   }
