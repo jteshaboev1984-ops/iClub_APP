@@ -37,7 +37,7 @@ permissions:
 jobs:
   compile-synthetic:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 18
     services:
       postgres:
         image: postgres:17
@@ -113,6 +113,46 @@ jobs:
           deno check supabase/functions/iclub-ai-practice-freeform/index.ts
           deno test supabase/functions/iclub-ai-practice-freeform/practice_freeform_pc3_core_test.ts
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_recover_pc4_isolated.sql
+      - name: Start real isolated Supabase Auth on separate disposable PostgreSQL database
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = 127.0.0.1
+          test "$PGDATABASE" = postgres
+          createdb -h 127.0.0.1 -U postgres iclub_ai_auth_ci
+          docker run --detach --rm --name iclub-ai-gotrue-ci \
+            --network host \
+            --env GOTRUE_API_HOST=127.0.0.1 \
+            --env GOTRUE_API_PORT=18770 \
+            --env API_EXTERNAL_URL=http://127.0.0.1:18770 \
+            --env GOTRUE_SITE_URL=http://127.0.0.1:18770 \
+            --env GOTRUE_URI_ALLOW_LIST=http://127.0.0.1:18770 \
+            --env GOTRUE_DB_DRIVER=postgres \
+            --env GOTRUE_DB_DATABASE_URL='postgres://postgres:postgres@127.0.0.1:5432/iclub_ai_auth_ci?sslmode=disable' \
+            --env GOTRUE_JWT_SECRET='temporary-github-ci-only-no-production-key-used-2026-10-27' \
+            --env GOTRUE_JWT_AUD=authenticated \
+            --env GOTRUE_JWT_DEFAULT_GROUP_NAME=authenticated \
+            --env GOTRUE_JWT_ADMIN_ROLES=service_role \
+            --env GOTRUE_JWT_EXP=3600 \
+            --env GOTRUE_JWT_ISSUER=http://127.0.0.1:18770 \
+            --env GOTRUE_EXTERNAL_EMAIL_ENABLED=true \
+            --env GOTRUE_MAILER_AUTOCONFIRM=true \
+            --env GOTRUE_DISABLE_SIGNUP=false \
+            --env GOTRUE_EXTERNAL_PHONE_ENABLED=false \
+            supabase/gotrue:v2.197.0
+          auth_ready=0
+          for n in $(seq 1 90); do
+            if curl --silent --fail http://127.0.0.1:18770/health >/dev/null; then
+              auth_ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$auth_ready" != 1 ]; then
+            docker logs --tail 100 iclub-ai-gotrue-ci
+            exit 1
+          fi
+          echo 'PASS: genuine isolated Supabase Auth service; no connection to any hosted project'
       - name: Complete PC3 + PC4 HTTP flow against canonical quota RPCs (fake provider)
         shell: bash
         run: |
@@ -120,7 +160,7 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_pc3_real_quota_rpcs_isolated.sql
-          node scripts/practice-ai-freeform-canonical-e2e.cjs
+          ICLUB_AUTH_GOTRUE_URI=http://127.0.0.1:18770 node scripts/practice-ai-freeform-canonical-e2e.cjs
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_pc4_financial_audit_isolated.sql
       - name: Chromium preview with mocked backend (no external traffic)
         shell: bash
@@ -137,6 +177,11 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           node scripts/practice-ai-prepared-real-sql-e2e.cjs
+      - name: Stop disposable Supabase Auth container
+        if: always()
+        shell: bash
+        run: |
+          docker rm -f iclub-ai-gotrue-ci 2>/dev/null || true
       - name: Upload synthetic screen
         if: always()
         uses: actions/upload-artifact@v4
