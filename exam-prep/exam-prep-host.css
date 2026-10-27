@@ -2008,3 +2008,27 @@
     gap: 4px 12px;
   }
 }
+
+/* Chemistry only: responsive, aligned practical-skills reading cards. */
+.ep-chem-labs .ep-chem-lab-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 12px;
+  max-width: 900px;
+}
+.ep-chem-labs .ep-chem-lab-item {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 16px;
+}
+.ep-chem-labs .ep-chem-lab-title {line-height: 1.4; overflow-wrap: anywhere;}
+.ep-chem-labs .ep-chem-lab-meta {font-size: 12px; opacity: .7;}
+.ep-chem-labs .ep-chem-lab-item button {margin-top: auto; width: 100%;}
+@media (max-width: 580px) {
+  .ep-chem-labs .ep-chem-lab-list {grid-template-columns: minmax(0, 1fr);}
+}
