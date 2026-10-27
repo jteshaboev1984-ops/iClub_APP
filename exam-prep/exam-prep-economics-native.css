@@ -106,3 +106,56 @@
 .ep-native-profile-feedback { font-size:.87rem; margin:10px 0; line-height:1.5; }
 .ep-native-profile .ep-host-btn { min-height:42px; }
 @media(max-width:640px){.ep-native-profile-head{align-items:stretch;flex-direction:column}.ep-native-profile-head .ep-host-btn,.ep-native-profile>.ep-host-btn{width:100%}}
+
+
+/* Shared Math Exam Prep screen architecture: overview → component → focused task.
+   Economics renders one view at a time; no scrolling wall of settings/history/lessons. */
+.ep-native-economics { max-width:1080px; width:100%; margin:0 auto; }
+.ep-native-topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; min-height:38px; }
+.ep-native-topbar .ep-host-btn { padding:7px 12px; min-height:34px; font-size:.84rem; }
+.ep-native-dashboard-hero { padding:16px 18px; border-radius:16px; border:1px solid var(--border,rgba(127,127,127,.22)); background:var(--card,rgba(127,127,127,.05)); }
+.ep-native-dashboard-hero .ep-live-dashboard-title { margin:4px 0 8px; font-size:clamp(1.22rem,2vw,1.6rem); line-height:1.2; }
+.ep-native-dashboard-hero .ep-live-dashboard-text { margin:0; line-height:1.55; opacity:.8; }
+.ep-native-level-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:2px 0 4px; }
+.ep-native-level-card { display:flex; flex-direction:column; gap:12px; min-height:172px; padding:18px; border:1px solid var(--border,rgba(127,127,127,.22)); border-radius:16px; background:var(--card,rgba(127,127,127,.05)); min-width:0; }
+.ep-native-level-card h3 { font-size:1.13rem; margin:0; }
+.ep-native-level-eyebrow { font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; opacity:.7; font-weight:750; }
+.ep-native-level-status { margin:0; opacity:.8; line-height:1.5; flex:1; font-size:.91rem; }
+.ep-native-economics .ep-host-btn:not(.ep-host-btn-secondary) { color:#fff; background:var(--primary,#2563eb); border-color:transparent; }
+.ep-native-economics .ep-host-btn-secondary { background:transparent; color:inherit; }
+.ep-native-level-card>.ep-host-btn { align-self:flex-start; min-width:130px; }
+.ep-native-dashboard-tools { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.ep-native-dashboard-tools .ep-host-btn { min-height:46px; }
+.ep-native-dashboard-meta { margin:0; opacity:.66; font-size:.82rem; line-height:1.45; }
+.ep-native-page-heading { margin:4px 0; font-size:clamp(1.08rem,2vw,1.35rem); line-height:1.35; font-weight:760; }
+.ep-native-next-card { display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:20px; border:1px solid var(--border,rgba(127,127,127,.22)); border-radius:16px; background:var(--card,rgba(127,127,127,.06)); }
+.ep-native-next-card h3 { margin:0; font-size:1.16rem; }
+.ep-native-next-card .ep-host-btn { margin-top:4px; }
+.ep-native-level-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.ep-native-level-actions .ep-host-btn { width:100%; min-width:0; }
+.ep-native-plan-intro { display:flex; flex-direction:column; gap:6px; }
+.ep-native-plan-focus { display:flex; flex-direction:column; align-items:flex-start; gap:12px; padding:18px; border:1px solid var(--border,rgba(127,127,127,.22)); border-radius:16px; background:var(--card,rgba(127,127,127,.06)); }
+.ep-native-plan-focus h3 { margin:0; font-size:1.12rem; line-height:1.45; overflow-wrap:anywhere; }
+.ep-native-plan-topic-list { display:grid; gap:8px; }
+.ep-native-plan-topic { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; border:1px solid var(--border,rgba(127,127,127,.18)); border-radius:12px; padding:12px 14px; min-width:0; }
+.ep-native-plan-topic>span { flex:1 1 170px; min-width:0; line-height:1.45; overflow-wrap:anywhere; }
+.ep-native-plan-topic .ep-host-btn { min-height:37px; }
+.ep-native-units-details { border:1px solid var(--border,rgba(127,127,127,.22)); border-radius:12px; padding:13px 15px; }
+.ep-native-units-details summary { cursor:pointer; font-weight:720; }
+.ep-native-units-details .ep-native-plan-units { margin:12px 0 0; }
+.ep-native-lesson-heading { display:flex; flex-direction:column; gap:8px; }
+.ep-native-single-lesson { display:flex; flex-direction:column; align-items:flex-start; gap:13px; padding:20px; border:1px solid var(--border,rgba(127,127,127,.22)); border-radius:16px; background:var(--card,rgba(127,127,127,.05)); min-width:0; }
+.ep-native-single-lesson .ep-native-study-text { margin:0; line-height:1.65; overflow-wrap:anywhere; }
+.ep-native-single-lesson .ep-host-btn { margin-top:2px; }
+.ep-native-economics .ep-native-profile { margin:0; }
+@media(max-width:640px) {
+ .ep-native-economics { padding:0 1px; }
+ .ep-native-dashboard-hero { padding:15px; }
+ .ep-native-level-grid { grid-template-columns:1fr; gap:10px; }
+ .ep-native-level-card { min-height:unset; gap:9px; padding:15px; }
+ .ep-native-level-card>.ep-host-btn { width:100%; align-self:stretch; }
+ .ep-native-dashboard-tools,.ep-native-level-actions { grid-template-columns:1fr; }
+ .ep-native-next-card,.ep-native-plan-focus,.ep-native-single-lesson { padding:15px; }
+ .ep-native-plan-topic { flex-direction:column; align-items:stretch; }
+ .ep-native-plan-topic .ep-host-btn { width:100%; }
+}
