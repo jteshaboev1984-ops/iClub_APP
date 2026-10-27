@@ -50,3 +50,17 @@ Work completed **only in the existing Chemistry work branch and additive private
 5. Only after these pass, ask for **explicit owner GO** to approve the source digest + release scope. Never infer GO from routine “continue”, never publish or enroll learners automatically.
 
 **J12 did not and must not be described as a live Chemistry beta launch or verified student acceptance test.**
+
+## 7. Independent J-12 continuation: live revalidation and Tutor permission boundary (2026-10-27)
+
+This is a follow-up verification on the existing checkpoint, not a second implementation of J-12. No publish, consent, attempt, database migration, production deploy, main merge, or new branch was performed.
+
+- Re-executed the six **production READ-ONLY** SQL suites against live Supabase: J04 32/32, J08 39/39, J09 36/36, J10 41/41, J11 42/42, J12 64/64, **254/254 PASS**.
+- Added `scripts/qa-chemistry-9701-j12-tutor-permission-boundary-readonly.sql`; executed its 12 independent access-boundary assertions, **12/12 PASS**. Total live metadata/state assertions this continuation: **266/266 PASS**. These are NOT browser E2E or source-material pedagogical sign-off.
+- Confirmed `public.iclub_subject_library_content_service_v1` builds a Tutor object, but it and the generic catalogue currently have **no EXECUTE grant to anon/authenticated**. The private Theory/Tutor/LAB tables also have no direct authenticated SELECT grant. Do **not** mistake current grant isolation for a safe *future* Chemistry Tutor release: the generic service still combines Theory+Tutor for privileged callers; a dedicated, independently entitled Chemistry Tutor delivery path and device test remain required. Do not grant the generic service to browser roles.
+- Confirmed existing `public.iclub_exam_chemistry_entry_lesson_v1` is authenticated-only, checks learner ownership, finalized Entry, exact skill membership and library visibility, and returns Theory-only with `ai_tutor_content_included=false`. No new learner API was exposed.
+- Verified five synced Math/Econ shared files are byte-identical between `main` and the Chemistry branch (`exam-prep-api.js`, `exam-prep-live.js`, Economics native JS/CSS, multisubject shell contract). `index.html` intentionally differs to add Chemistry gated assets; a full merge/rebase remains forbidden pending separate integration review.
+- Vercel production latest READY deployment was `dpl_5yn7CvHCyUnfEKRHuxY6sXgebXYU` from `main` SHA `63099eaff54ba11b79203704f6340db4ff026173`. No Vercel deployment was found for `work/chemistry-9701-j02-auth-host-20261026`; therefore no authenticated real-browser acceptance was performed or claimed.
+- Live Chemistry package stayed 154 Theory + 462 Tutor locale rows + 12 LAB (6 P3, 6 P5), `armed=false`, `can_publish=false`, hidden and Draft/OFF. Entry/Recheck/P1 attempts stayed zero. Existing Mathematics remained 544 sessions and 1,979 responses; Practice 502 attempts and 4,816 answers at the verification snapshot.
+
+**Next gate (no automatic launch):** scoped Tutor access isolation, independent 12-LAB learner delivery and real-device acceptance. Source rights, backup restore sign-off and owner GO remain unset. Chemistry release stays **NO GO**.
