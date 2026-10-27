@@ -420,9 +420,9 @@
     if (state.subjectKey === CHEMISTRY_KEY && state.chemistryOffer?.eligible === true) {
       const lex = chemistryBetaLabels();
       const group = document.createElement("div");
-      group.className = "ep-host-invitation-card";
+      group.className = "ep-host-component-card ep-host-chemistry-offer";
       const title = document.createElement("h3");
-      title.className = "ep-host-section-title";
+      title.className = "ep-host-chemistry-offer-title";
       title.textContent = lex.headline;
       const details = document.createElement("p");
       details.className = "ep-host-note";
