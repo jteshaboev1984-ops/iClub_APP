@@ -1,0 +1,62 @@
+name: Chemistry 9701 J22 synthetic backup restore (disposable PostgreSQL)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh'
+      - '.github/workflows/chemistry-9701-j22-isolated-backup-restore.yml'
+  push:
+    branches: ['integration/chemistry-9701-rebased-main-20261028']
+    paths:
+      - 'scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh'
+      - '.github/workflows/chemistry-9701-j22-isolated-backup-restore.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  j22-synthetic-backup-restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      GITHUB_ACTIONS: 'true'
+      PGHOST: '127.0.0.1'
+      PGPORT: '5432'
+      PGUSER: 'postgres'
+      PGPASSWORD: 'postgres'
+      PGDATABASE: 'postgres'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify no remote database target can be used
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh
+          ! grep -Eq 'supabase\.co|service_role|auth\.users|curl|wget' scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh
+      - name: Real PostgreSQL backup, fresh DB restore and synthetic corruption isolation
+        shell: bash
+        run: bash scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh
+      - name: Upload non-sensitive test result (never backup data)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chemistry-j22-synthetic-restore-result
+          path: /tmp/iclub-j22-restore-result.txt
+          if-no-files-found: ignore
+          retention-days: 7
