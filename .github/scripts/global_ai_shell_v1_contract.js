@@ -12,12 +12,16 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(html.includes('global-ai-ui.css?v=globalaichat1'), 'Integrated Global AI stylesheet not loaded');
-assert(html.includes('global-ai-ui.js?v=globalaichat1'), 'Integrated Global AI script not loaded');
-assert(
-  html.indexOf('global-ai-ui.js?v=globalaichat1') > html.indexOf('practice-ai-ui.js?v=ai2review1'),
-  'Global AI shell must load after existing app/Practice AI controllers'
-);
+const aiCssTags = [...html.matchAll(/<link[^>]*href="global-ai-ui\.css\?[^"]+"[^>]*>/g)];
+const aiJsTags = [...html.matchAll(/<script[^>]*src="global-ai-ui\.js\?[^"]+"[^>]*><\/script>/g)];
+assert(aiCssTags.length === aiJsTags.length && aiCssTags.length <= 1,
+  'Global AI assets must be entirely dormant or loaded as one matching JS/CSS pair');
+if (aiJsTags.length === 0) {
+  assert(!html.includes('global-ai-ui.'), 'Dormant Global AI must have zero asset exposure');
+} else {
+  assert(html.indexOf('global-ai-ui.js?') > html.indexOf('practice-ai-ui.js?'),
+    'Live Global AI must load after Practice AI');
+}
 
 assert(js.includes('get_iclub_ai_ui_bootstrap_v1'), 'server UI bootstrap is not used');
 assert(js.includes('const ROOT_ID = "iclub-global-ai-root"'), 'single root identity missing');

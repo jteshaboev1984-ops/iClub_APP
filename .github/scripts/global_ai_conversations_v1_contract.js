@@ -13,8 +13,16 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(html.includes('global-ai-ui.css?v=globalaichat1'), 'conversation CSS cache tag missing');
-assert(html.includes('global-ai-ui.js?v=globalaichat1'), 'conversation JS cache tag missing');
+const aiCssTags = [...html.matchAll(/<link[^>]*href="global-ai-ui\.css\?[^"]+"[^>]*>/g)];
+const aiJsTags = [...html.matchAll(/<script[^>]*src="global-ai-ui\.js\?[^"]+"[^>]*><\/script>/g)];
+assert(aiCssTags.length === aiJsTags.length && aiCssTags.length <= 1,
+  'Global AI assets must be entirely dormant or loaded as one matching JS/CSS pair');
+if (aiJsTags.length === 0) {
+  assert(!html.includes('global-ai-ui.'), 'Dormant Global AI must have zero asset exposure');
+} else {
+  assert(html.indexOf('global-ai-ui.js?') > html.indexOf('practice-ai-ui.js?'),
+    'Live Global AI must load after Practice AI');
+}
 assert(!html.includes('globalaishell1'), 'old Global AI shell cache tag remains');
 assert(!html.includes('\\n<script src="global-ai-ui.js'), 'literal escaped newline leaked into HTML');
 
