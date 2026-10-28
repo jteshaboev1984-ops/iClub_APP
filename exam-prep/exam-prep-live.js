@@ -1244,9 +1244,10 @@
     if (paperLearning) {
       const w=writtenCopy();
       answerControl='<div class="ep-written-external" data-ep-written-external="true">' +
-        '<p class="ep-written-instruction">'+esc(w.instruction)+'</p>' +
-        '<div class="ep-written-criteria-panel" data-ep-written-criteria-panel hidden></div>' +
-        '<p class="ep-live-meta">'+esc(w.note)+'</p></div>';
+         '<p class="ep-written-instruction">'+esc(w.instruction)+'</p>' +
+         '<button class="ep-live-btn secondary ep-written-criteria-toggle" type="button" data-ep-written-criteria-toggle aria-expanded="false">'+esc(w.criteria)+'</button>' +
+         '<div class="ep-written-criteria-panel" data-ep-written-criteria-panel hidden></div>' +
+         '<p class="ep-live-meta">'+esc(w.note)+'</p></div>';
     } else if (item.item_kind === "written") {
       const writtenInfo = timed ? "" : `<aside class="ep-written-info"><strong>${esc(c.writtenInfoTitle)}</strong><span>${esc(c.writtenInfoText)}</span><small>${esc(writtenPolicyText())}</small></aside>`;
       answerControl = `${writtenInfo}<label class="ep-live-field"><span>${esc(c.written)}</span><textarea class="ep-live-textarea" name="ep_live_written_answer"></textarea></label>`;
@@ -1254,13 +1255,19 @@
       answerControl = `<div class="ep-live-options">${item.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_live_answer" value="${index}"><span>${esc(localizedOptionText(option))}</span></label>`).join("")}</div>`;
     } else answerControl = `<input class="ep-live-input" name="ep_live_text_answer" autocomplete="off" aria-label="${esc(c.submit)}">`;
     const timer = timed ? `<span class="ep-live-timer" data-ep-live-timer></span>` : "";
-    const exit = timed ? '<button class="ep-live-btn secondary" type="button" data-ep-live-end>'+esc(c.endAttempt)+'</button>' :
-      '<button class="ep-live-btn secondary" type="button" data-ep-live-exit>'+esc(c.back)+'</button>';
+    const exit = timed ? '<button class="ep-focus-back" type="button" data-ep-live-end>'+esc(c.endAttempt)+'</button>' :
+      '<button class="ep-focus-back" type="button" data-ep-live-exit>← '+esc(c.back)+'</button>';
     const actionMarkup = paperLearning
-      ? '<div class="ep-written-actions"><button class="ep-live-btn secondary" type="button" data-ep-written-criteria-toggle>'+esc(writtenCopy().criteria)+'</button>'+
-        '<button class="ep-live-btn" type="button" data-ep-written-next>'+esc(writtenCopy().next)+'</button></div>'
+      ? '<button class="ep-live-btn" type="button" data-ep-written-next>'+esc(writtenCopy().next)+'</button>'
       : '<button class="ep-live-btn" type="button" data-ep-live-submit>'+esc(c.submit)+'</button>';
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card ep-live-question-card" data-ep-live-active-assessment="true"><div class="ep-live-head"><strong>${esc(paperLearning ? (state.language==="uz" ? "Topshiriq" : state.language==="en" ? "Task" : "Задание") : c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions">${actionMarkup}${exit}</div></div>`, { compact: true });
+    const u=uxText();
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
+      <section class="ep-focus-screen" data-ep-focus-mode="true">
+        <header class="ep-focus-head">${exit}<strong>${esc(state.session?.component_code||"")} · ${esc(u.task)} ${answered+1} ${esc(u.of)} ${total}</strong>${timer}</header>
+        <div class="ep-live-card ep-live-question-card" data-ep-live-active-assessment="true">
+          <div class="ep-live-qtext">${uxMath(item.text || item.written_prompt || "")}</div>${answerControl}</div>
+        <footer class="ep-focus-dock">${actionMarkup}</footer>
+      </section>`, { compact: true });
     state.notice = null;
     root.querySelector('[data-ep-live-submit]')?.addEventListener('click', () => submitAnswer(item));
     if (paperLearning) {
@@ -1289,10 +1296,12 @@
     if (panel.dataset.loaded==="true") {
       panel.hidden=!panel.hidden;
       button.textContent=panel.hidden?c.criteria:c.hide;
+       button.setAttribute('aria-expanded',String(!panel.hidden));
       return;
     }
     const token=++state.writtenCriteriaRequest, sessionId=state.session.session_id;
     panel.hidden=false;panel.dataset.loading="true";panel.textContent=c.loading;
+     button.setAttribute("aria-expanded","true");
     button.disabled=true;
     const result=await boundWrittenCall(
       () => internal.api.writtenCriteria(sessionId,Number(item.item_order),state.language),12000);
@@ -1304,7 +1313,7 @@
     if (!entries.length) {panel.textContent=(result?.ok && result.data?.reason==="localization_pending")?c.translationPending:c.unavailable;return;}
     const head=document.createElement("strong");head.textContent=c.criteriaTitle;
     const list=document.createElement("ol");
-    entries.forEach(value=>{const li=document.createElement("li");li.textContent=value;list.append(li);});
+    entries.forEach(value=>{const li=document.createElement("li");li.innerHTML=uxMath(value);list.append(li);});
     panel.replaceChildren(head,list);panel.dataset.loaded="true";button.textContent=c.hide;
   }
 
