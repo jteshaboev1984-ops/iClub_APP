@@ -37,7 +37,13 @@ ALTER TABLE private.iclub_ai_v21_beta_usage
 \ir ../migrations/20261028113000_iclub_math_beta_pro_ai_quota_v1.sql
 \ir ../migrations/20261028120000_iclub_math_beta_pro_quota_constraints_fix.sql
 \ir ../migrations/20261028130500_iclub_ai_practice_pro_pc4_and_void_probe_v1.sql
+\ir ../migrations/20261028185500_iclub_ai_math_beta_finalized_quota_help_gate.sql
 SET request.jwt.claim.role='service_role';
+-- The live bug is a different unfinished session, unrelated to the
+-- already-finalized attempt. Keep it open throughout these Pro tests.
+INSERT INTO public.practice_sessions_v4 VALUES
+ (603,'00000000-0000-4000-8000-000000000011',5,NULL,2,'in_progress',NULL,
+  11,ARRAY[1,2,3,4,5,6,7,8,9,10]::bigint[]);
 INSERT INTO private.iclub_ai_v21_beta_help_sources
  VALUES('practice_rules','ru','Проверьте завершённую попытку и исправьте ошибки.',
  'qa-1',encode(extensions.digest(convert_to('Проверьте завершённую попытку и исправьте ошибки.','UTF8'),'sha256'),'hex'),
