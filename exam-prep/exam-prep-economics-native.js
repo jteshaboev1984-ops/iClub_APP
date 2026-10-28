@@ -579,7 +579,14 @@
       if(state.closed||state.data?.status!=="active")return;
       const seconds=Math.max(0,Math.ceil((new Date(state.data.deadline_at).getTime()-Date.now())/1000));
       label.textContent=t().time+": "+String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");
-      if(seconds===0){stop();finish(true);}
+      if(seconds===0){
+        stop();
+        // A timed-out screen must not finalize while an earlier response
+        // still has an unknown server outcome, including after a tab reload.
+        if(state.pendingChoice||state.data?.items?.some((_,order)=>
+           readChoiceDraft(state.id,order)?.pending===true))return;
+        finish(true);
+      }
     };
     paint();if(state.data?.status==="active")state.timer=setInterval(paint,1000);
   }
@@ -904,6 +911,8 @@
   async function finish(auto){
     // Do not finalize while the server outcome of a write is unknown.
     if(state.busy||state.closed||state.pendingChoice||state.data?.status!=="active")return;
+    if(auto && state.data.items.some((_,order)=>
+       readChoiceDraft(state.id,order)?.pending===true))return;
     if(!auto){
       const unsubmitted=state.data.items.findIndex((item,order)=>{
         const draft=readChoiceDraft(state.id,order);
