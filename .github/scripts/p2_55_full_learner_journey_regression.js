@@ -200,7 +200,7 @@ const path = require('path');
   await page.click('[data-ep-live-submit]');
   await page.waitForSelector('[data-ep-session-result]');
   const learningResult=await capture();
-  assert(learningResult.includes('Task result')&&learningResult.includes('1 / 1 correct'),'learning task must show completed result without per-item interruption');
+  assert(learningResult.includes('Learning task complete')&&learningResult.includes('1 of 1'),'learning task must show completed result without per-item interruption');
   await page.click('[data-ep-result-continue]');
   await page.waitForSelector('[data-ep-component-home="P1"]');
   await capture();
