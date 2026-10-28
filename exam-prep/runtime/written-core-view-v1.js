@@ -5,21 +5,21 @@
 (function(){
  "use strict";
  const copy={
-   ru:{title:"Письменная практика",criteria:"Критерии",next:"Далее",source:"Источник",data:"Таблица данных",
+   ru:{title:"Письменная практика",criteria:"Схема оценивания",hideCriteria:"Скрыть схему",next:"Далее",source:"Источник",data:"Таблица данных",
      back:"Назад",loading:"Загружаем задание…",offline:"Не удалось подтвердить действие. Повторите попытку.",
      complete:"Письменные задания по текущему плану пройдены.",
      instruction:"Выполните задание самостоятельно. Загрузка работы и самооценка не требуются.",
-     criteriaTitle:"Требования к ответу",openError:"Задание сейчас недоступно."},
-   uz:{title:"Yozma mashqlar",criteria:"Baholash mezonlari",next:"Keyingi",source:"Manba",data:"Ma’lumotlar jadvali",
+     criteriaTitle:"Схема оценивания",marks:"баллов",ao12:"AO1 + AO2 · Знания и анализ",ao3:"AO3 · Оценка и аргументация",markContent:"Что учитывается при оценивании",levelsTitle:"Уровни оценивания",levelLabel:"Уровень",levelHigh:"Развёрнутый и точный ответ",levelMiddle:"В целом верный, но неполный анализ",levelLow:"Ограниченный, преимущественно описательный ответ",levelsInfo:"Эссе оценивается по уровням: полнота знаний, глубина анализа и обоснованность вывода. Баллы не начисляются автоматически за каждый пункт.",pointInfo:"Баллы за отдельную часть задания учитывают верные понятия, расчёты и объяснения.",notOfficial:"Учебная схема iClub по принципам Cambridge 9708. Это не официальный mark scheme для данного задания.",openError:"Задание сейчас недоступно."},
+   uz:{title:"Yozma mashqlar",criteria:"Baholash mezonlari",hideCriteria:"Mezonlarni yashirish",next:"Keyingi",source:"Manba",data:"Ma’lumotlar jadvali",
      back:"Orqaga",loading:"Topshiriq yuklanmoqda…",offline:"Amal tasdiqlanmadi. Qaytadan urinib ko‘ring.",
      complete:"Joriy rejadagi yozma topshiriqlar yakunlandi.",
      instruction:"Topshiriqni mustaqil bajaring. Ishni yuklash yoki o‘zingizga baho qo‘yish shart emas.",
-     criteriaTitle:"Javobga qo‘yiladigan talablar",openError:"Topshiriq hozir mavjud emas."},
-   en:{title:"Written practice",criteria:"Criteria",next:"Next",source:"Source",data:"Data table",
+     criteriaTitle:"Baholash mezonlari",marks:"ball",ao12:"AO1 + AO2 · Bilim va tahlil",ao3:"AO3 · Baholash va dalillar",markContent:"Baholashda nimalar hisobga olinadi",levelsTitle:"Baholash darajalari",levelLabel:"Daraja",levelHigh:"To‘liq va aniq izohlangan javob",levelMiddle:"Asosan to‘g‘ri, biroq tahlili to‘liq bo‘lmagan javob",levelLow:"Cheklangan, ko‘proq tasviriy javob",levelsInfo:"Esse bilim, tahlil chuqurligi va asoslangan xulosa bo‘yicha darajalarda baholanadi. Har bir band uchun avtomatik ball berilmaydi.",pointInfo:"Savolning ushbu qismida tushunchalar, hisob-kitoblar va izohlar uchun ball hisobga olinadi.",notOfficial:"Cambridge 9708 tamoyillariga mos iClub o‘quv mezonlari. Bu savol uchun rasmiy Cambridge mark scheme emas.",openError:"Topshiriq hozir mavjud emas."},
+   en:{title:"Written practice",criteria:"Marking scheme",hideCriteria:"Hide scheme",next:"Next",source:"Source",data:"Data table",
      back:"Back",loading:"Loading task…",offline:"Action not confirmed. Please retry.",
      complete:"Written tasks in this study plan have been completed.",
      instruction:"Complete the task independently. No essay upload or self-grading is required.",
-     criteriaTitle:"Answer requirements",openError:"Task is currently unavailable."}
+     criteriaTitle:"Marking scheme",marks:"marks",ao12:"AO1 + AO2 · Knowledge and analysis",ao3:"AO3 · Evaluation and judgement",markContent:"Creditworthy content",levelsTitle:"Marking levels",levelLabel:"Level",levelHigh:"Accurate, fully developed economic reasoning",levelMiddle:"Mostly accurate but partially developed analysis",levelLow:"Limited, mainly descriptive response",levelsInfo:"Essay marks follow levels of knowledge, developed analysis and justified evaluation. Listed points are indicative, not one mark each.",pointInfo:"This part awards marks for correct concepts, calculations and explanations.",notOfficial:"iClub practice marking guide aligned to Cambridge 9708 principles; not an official Cambridge mark scheme for this question.",openError:"Task is currently unavailable."}
  };
  const el=(tag,cls,str)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(str!=null)x.textContent=String(str);return x;};
  function mount({root,planId,language="ru",onBack,api,createActionKey}={}){
@@ -134,25 +134,84 @@
    }
    function renderTask(item,token){
       const body=page();
+      const card=el("section","ep-live-card ep-written-question");
+      const meta=el("div","ep-written-task-meta");
+      meta.append(el("span","ep-written-task-paper",item.paper_code||""));
+      card.append(meta,el("p","ep-live-qtext ep-written-task-text",item.question),
+        el("p","ep-written-instruction",t.instruction));
+      body.append(card);
       const source=sourcePanel(item);
       if(source)body.append(source);
-      const card=el("section","ep-live-card");
-      card.append(el("div","ep-live-meta",item.paper_code||""),
-        el("p","ep-live-qtext",item.question),
-        el("p","ep-live-meta",t.instruction));
-      const criteriaBox=el("div","ep-live-card");criteriaBox.hidden=true;
+      const work=el("section","ep-live-card ep-written-workflow");
+      const criteriaBox=el("div","ep-written-marking");criteriaBox.hidden=true;
       const err=el("p","ep-live-meta");err.setAttribute("role","alert");
-      const actions=el("div","ep-live-actions");
+      const actions=el("div","ep-live-actions ep-written-actions");
       const criteriaButton=btn(t.criteria,async()=>{
         if(closed||working||token!==sequence)return;
+        if(!criteriaBox.hidden){
+          criteriaBox.hidden=true;
+          criteriaButton.textContent=t.criteria;
+          return;
+        }
         working=true;criteriaButton.disabled=true;
         try{
           const details=await ctl.criteria();
           if(closed||token!==sequence)return;
-          criteriaBox.replaceChildren(el("h3","",details.title||t.criteriaTitle));
-          const list=el("ul","ep-live-list");
-          for(const requirement of details.requirements)list.append(el("li","",requirement));
-          criteriaBox.append(list);criteriaBox.hidden=false;err.textContent="";
+          const title=el("div","ep-written-marking-head");
+          const scheme=details.marking;
+          title.append(el("h3","ep-written-marking-title",t.criteriaTitle));
+          if(scheme)title.append(el("span","ep-written-mark-total",
+            scheme.max_marks+" "+t.marks));
+          criteriaBox.replaceChildren(title);
+          if(scheme){
+            const breakdown=el("div","ep-written-mark-breakdown");
+            const ao12=el("div","ep-written-mark-part");
+            ao12.append(el("span","",t.ao12),
+              el("strong","",scheme.ao12_marks+" / "+scheme.max_marks));
+            breakdown.append(ao12);
+            if(scheme.ao3_marks>0){
+              const ao3=el("div","ep-written-mark-part");
+              ao3.append(el("span","",t.ao3),
+                el("strong","",scheme.ao3_marks+" / "+scheme.max_marks));
+              breakdown.append(ao3);
+            }
+            criteriaBox.append(breakdown,el("p","ep-written-mark-help",
+              scheme.style==="levels"?t.levelsInfo:t.pointInfo));
+            if(scheme.style==="levels"){
+              const levels=el("section","ep-written-levels");
+              levels.append(el("h4","ep-written-mark-subtitle",t.levelsTitle));
+              const ranges=count=>count===14?["11–14","6–10","1–5"]:
+                count===8?["6–8","3–5","1–2"]:
+                count===6?["5–6","3–4","1–2"]:
+                count===4?["3–4","2","1"]:null;
+              for(const [label,count] of [[t.ao12,scheme.ao12_marks],
+                [t.ao3,scheme.ao3_marks]]){
+                if(count<1)continue;
+                const marks=ranges(count);
+                if(!marks)continue;
+                levels.append(el("div","ep-written-level-group",label));
+                for(let index=0;index<3;index++){
+                  const level=el("div","ep-written-level-row");
+                  level.append(el("span","",t.levelLabel+" "+(3-index)),
+                    el("strong","",marks[index]),
+                    el("span","ep-written-level-description",
+                      index===0?t.levelHigh:index===1?t.levelMiddle:t.levelLow));
+                  levels.append(level);
+                }
+              }
+              criteriaBox.append(levels);
+            }
+            criteriaBox.append(el("h4","ep-written-mark-subtitle",t.markContent));
+          }else{
+            criteriaBox.append(el("h4","ep-written-mark-subtitle",t.markContent));
+          }
+          const list=el("ul","ep-live-list ep-written-mark-points");
+          for(const requirement of (scheme?.indicative_points||details.requirements))
+            list.append(el("li","",requirement));
+          criteriaBox.append(list);
+          if(scheme)criteriaBox.append(el("p","ep-written-mark-disclaimer",t.notOfficial));
+          criteriaBox.hidden=false;criteriaButton.textContent=t.hideCriteria;
+          err.textContent="";
         }catch(_){if(!closed&&token===sequence)err.textContent=t.offline;}
         finally{working=false;criteriaButton.disabled=false;}
       },true);
@@ -169,7 +228,7 @@
         }
       });
       actions.append(criteriaButton,nextButton);
-      card.append(criteriaBox,err,actions);body.append(card);
+      work.append(actions,err,criteriaBox);body.append(work);
    }
    function dispose(){closed=true;sequence++;ctl=null;root=null;}
    loadNext();

@@ -86,11 +86,11 @@ async function run(lang,scenario) {
  assert.equal(mounts,0,'P4 card cannot skip to written plan');
  assert.equal(writes,0,'P4 card must not silently give consent');
  if(scenario==='uninvited'||scenario==='withdrawn'){
-   assert(!buttons(host).some(b=>['Согласен, начать','Roziman, boshlash','I agree, start'].includes(b.textContent)),
+   assert(!buttons(host).some(b=>['Начать письменную практику','Yozma mashqlarni boshlash','Start written practice'].includes(b.textContent)),
      'No invitation should be offered to noneligible learners');
  }
  if(scenario==='invited'){
-  const label=lang==='ru'?'Согласен, начать':lang==='uz'?'Roziman, boshlash':'I agree, start';
+  const label=lang==='ru'?'Начать письменную практику':lang==='uz'?'Yozma mashqlarni boshlash':'Start written practice';
   const consent=buttons(host).find(b=>b.textContent===label);
   assert(consent,'Invited learner needs explicit opt-in button from P4');
   consent.events.click();
@@ -117,6 +117,6 @@ async function run(lang,scenario) {
 (async()=>{
  let n=0;
  for(const lang of langs)for(const scenario of SCENARIOS){await run(lang,scenario);n++}
- assert(html.includes('exam-prep-economics-native.js?v=native-econ-four-papers-20261028'),'App must load updated paper grid, not cached P1/P3-only JS');
+ assert(html.includes('exam-prep-economics-native.js?v=econ-mark-scheme-premium-20261028'),'App must load updated paper grid, not cached P1/P3-only JS');
  console.log('ECONOMICS FOUR PAPERS UI PASS',n,'scenarios × 3 locales; no automatic joining / no P4 bypass');
 })().catch(e=>{console.error(e);process.exitCode=1});
