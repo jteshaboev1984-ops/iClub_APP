@@ -57,7 +57,7 @@ BEGIN
      OR v_c.min_operational_stage IS NULL
      OR v_c.min_operational_stage < v_stage5.min_paper03_stage
      OR v_c.min_operational_stage < v_oldc.min_operational_stage
-     OR v_c.comparability_key IS DISTINCT FROM regexp_replace(v_oldc.comparability_key,'-v[12] THEN
+     OR v_c.comparability_key IS DISTINCT FROM regexp_replace(v_oldc.comparability_key,'-v[12]$',CASE WHEN v_new.assessment_version='av3' THEN '-v3' ELSE '-v2' END) THEN
     RAISE EXCEPTION 'exam_prep_paper03_amendment_contract_mismatch';
   END IF;
 
