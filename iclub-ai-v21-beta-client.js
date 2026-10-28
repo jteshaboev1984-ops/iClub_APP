@@ -39,6 +39,9 @@
     return NAV_INPUTS[lang]?.[key]||"";
   }
   let sequence=0, authEpoch=0, lastUser="", permission=null;
+  // Concurrent Tutor bootstrap + Practice preflight must share one status
+  // read. They must not invalidate one another for the same account.
+  let statusInFlight=null;
   const closed=(reason="in_development")=>({ok:false,reason,
     academic_state_changed:false});
   const identity=async()=>{
@@ -236,24 +239,37 @@
   }
 
   async function status(){
-    const ticket=++sequence;
     const id=await identity();
+    const denied=()=>({ok:false,eligible:false,candidate:false,consented:false});
     if(!id||protectedNow()){
       lastUser=id;permission=null;
-      return{ok:false,eligible:false,candidate:false,consented:false};
+      return denied();
     }
-    const result=await invoke({intent:"status"});
-    if(ticket!==sequence||!id||await identity()!==id||protectedNow())return{
-      ok:false,eligible:false,candidate:false,consented:false};
-    lastUser=id;
-    permission=result?.ok===true?{
-      eligible:result.eligible===true,
-      candidate:result.candidate===true,
-      consented:result.consented===true
-    }:null;
-    renderInvite();
-    return{ok:!!permission,...(permission||{
-      eligible:false,candidate:false,consented:false})};
+    // A single in-flight server read for one account eliminates the race
+    // where two valid calls incremented a global ticket and made Tutor
+    // believe beta access was revoked. Account changes still fail closed.
+    const epoch=authEpoch;
+    if(statusInFlight?.user===id&&statusInFlight.epoch===epoch)
+      return statusInFlight.promise;
+    const ticket=++sequence;
+    const promise=(async()=>{
+      const result=await invoke({intent:"status"});
+      if(ticket!==sequence||epoch!==authEpoch||
+         !id||await identity()!==id||protectedNow())return denied();
+      lastUser=id;
+      permission=result?.ok===true?{
+        eligible:result.eligible===true,
+        candidate:result.candidate===true,
+        consented:result.consented===true
+      }:null;
+      renderInvite();
+      return{ok:!!permission,...(permission||denied())};
+    })();
+    statusInFlight={user:id,epoch,promise};
+    try{return await promise;}
+    finally{
+      if(statusInFlight?.promise===promise)statusInFlight=null;
+    }
   }
   async function consentFromExplicitUserAction(agreed){
     // A click-based UX must display an explanation and obtain explicit consent.
@@ -694,6 +710,7 @@
 
   function resetOnIdentityChange(){
     sequence++;authEpoch++;permission=null;lastUser="";
+    statusInFlight=null;
     removeInvite();
     document.getElementById(dialogId)?.remove();
   }

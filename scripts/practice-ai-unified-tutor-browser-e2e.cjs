@@ -154,6 +154,14 @@ async function main(){
   await page.addScriptTag({content:jsClient});
   await page.addScriptTag({content:jsTutor});
   await page.locator("#iclub-global-ai-mark").waitFor({timeout:8000});
+  // Concurrent status consumers must not invalidate each other's access.
+  const overlap=await page.evaluate(async()=>{
+    const beta=window.iClubAiV21BetaClient;
+    const [first,second]=await Promise.all([beta.status(),beta.status()]);
+    return [first,second].map(s=>s.ok===true&&s.eligible===true);
+  });
+  assert.deepEqual(overlap,[true,true],
+    "Concurrent same-account beta checks incorrectly hid Tutor");
   await page.evaluate(()=>window.iClubGlobalAiShell.open());
   await page.getByRole("button",{name:"Объяснить результат"}).waitFor({timeout:8000});
   assert.equal((await page.locator("#iclub-global-ai-panel").count()),1,
@@ -289,6 +297,23 @@ async function main(){
   });
   await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")?.hidden===true,null,{timeout:8000});
   assert.equal(activity.asks.length,before);
+  // A Telegram focus event during an active quiz must NEVER revoke the beta
+  // status or remove the existing mark; the quiz must still hide it.
+  await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
+  await page.waitForTimeout(130);
+  assert.equal(await page.locator("#iclub-global-ai-mark").count(),1,
+    "Temporary quiz access check destroyed Tutor icon");
+  assert.equal(await page.locator("#iclub-global-ai-mark").getAttribute("hidden"),"",
+    "AI mark exposed during a protected Practice question");
+  await page.evaluate(()=>{
+    document.getElementById("courses-practice-quiz").classList.remove("is-active");
+    document.getElementById("courses-practice-result").classList.add("is-active");
+  });
+  await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")
+    ?.hidden===false,null,{timeout:8000});
+  assert.equal(await page.locator("#iclub-global-ai-mark").count(),1);
+  assert.equal(activity.asks.length,before,
+    "Icon recovery must never trigger a model request");
 
   // Simulate an old response saved to canonical PC4 before a FULL reload.
   // Browser init scripts build a fresh empty user session, no localStorage.
