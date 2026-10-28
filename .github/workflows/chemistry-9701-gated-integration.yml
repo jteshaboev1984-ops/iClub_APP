@@ -61,7 +61,9 @@ jobs:
           const shell = JSON.parse(read('docs/exam-prep-multisubject-shell-contract-v1.json'));
           assert.equal(shell.policy.preserve_existing_math_runtime, true);
           assert.equal(shell.policy.no_cross_subject_score_or_mastery_migration, true);
-          assert(host.includes('const CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED = false;'));
+          assert(!host.includes('CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED'));
+          assert(!host.includes('grant_my_exam_prep_chemistry_consent_v1'));
+          assert(!host.includes('data-chemistry-beta-action'));
           assert(host.includes('state.chemistryEntryShell?.enabled === true'));
           assert(!host.includes('localStorage'));
           assert(!lab.includes('localStorage') && !lab.includes('innerHTML'));
@@ -104,8 +106,8 @@ jobs:
           assert(migrations.length >= 35, 'At least 35 baseline Chemistry migrations must remain versioned');
           assert(migrations.includes('20261028145137_chemistry_9701_j24_as_only_theory_fail_closed_v1.sql'),
             'Mandatory J24 fail-closed Chemistry migration must remain versioned');
-          assert(migrations.includes('20261028153500_chemistry_9701_j25_as_theory_voluntary_consent_v1.sql'),
-            'Mandatory J25 independent consent migration must remain versioned');
+          assert(migrations.includes('20261028153500_chemistry_9701_j25_theory_owner_rollout_without_optin_v1.sql'),
+            'Mandatory J25 no-opt-in rollout migration must remain versioned');
           const versions=migrations.map(name=>name.slice(0,14));
           assert.equal(new Set(versions).size, versions.length, 'Duplicate Chemistry migration versions');
           console.log('Chemistry shared-host and closed-gate integration: GREEN');
