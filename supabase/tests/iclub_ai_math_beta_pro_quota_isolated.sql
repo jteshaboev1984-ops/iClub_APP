@@ -27,12 +27,41 @@ ALTER TABLE private.iclub_ai_v21_beta_deliveries
 UPDATE private.iclub_ai_practice_beta_grants_v1 SET enabled=true
  WHERE user_id='00000000-0000-4000-8000-000000000011';
 UPDATE private.iclub_ai_practice_context_v1_control SET error_enabled=false WHERE singleton=1;
+-- Preserve the real legacy DDL constraints in the disposable integration test.
+-- They existed in production but were absent from the earlier synthetic fixture.
+ALTER TABLE private.iclub_ai_v21_freeform_quota_holds
+ ADD CONSTRAINT iclub_ai_v21_freeform_quota_holds_weight_check CHECK (weight = 3);
+ALTER TABLE private.iclub_ai_v21_beta_usage
+ ADD CONSTRAINT iclub_ai_v21_beta_usage_committed_count_check
+ CHECK (committed_count >= 0 AND committed_count <= 3);
 \ir ../migrations/20261028113000_iclub_math_beta_pro_ai_quota_v1.sql
+\ir ../migrations/20261028120000_iclub_math_beta_pro_quota_constraints_fix.sql
 SET request.jwt.claim.role='service_role';
 INSERT INTO private.iclub_ai_v21_beta_help_sources
  VALUES('practice_rules','ru','Проверьте завершённую попытку и исправьте ошибки.',
  'qa-1',encode(extensions.digest(convert_to('Проверьте завершённую попытку и исправьте ошибки.','UTF8'),'sha256'),'hex'),
  1,true,true,true,true,false,now());
+DO $bounds$
+DECLARE rejected boolean;
+BEGIN
+ rejected:=false;
+ BEGIN
+  INSERT INTO private.iclub_ai_v21_freeform_quota_holds
+  (request_id,user_id,request_fingerprint,period_started_at,weight,state)
+  VALUES('c0000011-0000-4000-8000-000000000001',
+         '00000000-0000-4000-8000-000000000011',repeat('f',64),now(),4,'reserved');
+ EXCEPTION WHEN check_violation THEN rejected:=true;
+ END;
+ IF NOT rejected THEN RAISE EXCEPTION 'Invalid generated weight 4 was accepted'; END IF;
+ rejected:=false;
+ BEGIN
+  UPDATE private.iclub_ai_v21_beta_usage SET committed_count=15
+  WHERE user_id='00000000-0000-4000-8000-000000000011';
+ EXCEPTION WHEN check_violation THEN rejected:=true;
+ END;
+ IF NOT rejected THEN RAISE EXCEPTION 'Invalid 15-unit counter was accepted'; END IF;
+ RAISE NOTICE 'PASS strict DB constraints: reject 4-unit holds and 15-unit usage';
+END $bounds$;
 DO $test$
 DECLARE
  u uuid:='00000000-0000-4000-8000-000000000011';

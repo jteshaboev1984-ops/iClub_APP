@@ -8,6 +8,8 @@ on:
       - 'scripts/qa-economics-consent-written-beta.cjs'
       - 'scripts/qa-economics-four-papers-navigation.cjs'
       - 'scripts/qa-economics-mark-scheme-premium.cjs'
+      - 'exam-prep/exam-prep-economics-native.css'
+      - 'scripts/qa-economics-premium-plan-navigation.cjs'
       - 'exam-prep/runtime/written-core-view-v1.js'
       - 'exam-prep/runtime/written-core-controller-v1.js'
       - 'exam-prep/runtime/written-core-source-v1.css'
@@ -32,3 +34,5 @@ jobs:
         run: node scripts/qa-economics-four-papers-navigation.cjs
       - name: Cambridge-aligned mark scheme 22 task and premium UI QA
         run: node scripts/qa-economics-mark-scheme-premium.cjs
+      - name: Compact mobile study grid and inline Back across all locales
+        run: node scripts/qa-economics-premium-plan-navigation.cjs
