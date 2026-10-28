@@ -365,8 +365,12 @@
     };
   }
 
+  // Icon visibility is determined by the CURRENT screen, not by a
+  // database session, a stale background view, or a server assessment flag.
+  // Model/academic authorization remains server-side and independently
+  // rejects an unfinished or protected assessment.
   function currentBlocked() {
-    return state.serverBlocked || state.examPrepBlocked || state.tourBlocked || state.practiceQuizBlocked;
+    return isLocalAssessmentActive();
   }
 
   function root() {
@@ -1750,14 +1754,19 @@
     if (!blocked) maybeShowIntro();
   }
 
-  // Temporary protected screens are not a loss of the learner's beta
-  // entitlement. A status read made while a quiz is active must never
-  // destroy a previously authorized Tutor shell.
+  // The study view has multiple mounted screens. Only the ACTIVE
+  // screen is allowed to hide the icon. Inactive quiz DOM and old server
+  // in_progress rows must never suppress Home or the subject catalogue.
   function isLocalAssessmentActive(){
-    return state.practiceQuizBlocked||state.tourBlocked||state.examPrepBlocked||
-      (activeViewName()==="courses"&&document.getElementById("courses-practice-quiz")
-       ?.classList.contains("is-active")===true)||
-      document.getElementById("courses-tour-quiz")?.classList.contains("is-active")===true;
+    if(activeViewName()!=="courses")return false;
+    const screen=activeCoursesScreen();
+    if(screen==="practice-quiz"||screen==="tour-quiz")return true;
+    const examHost=document.getElementById("exam-prep-host-root");
+    const examVisible=examHost&&!examHost.hidden&&
+      examHost.getAttribute("aria-hidden")!=="true";
+    return Boolean(examVisible&&
+      (state.examPrepBlocked||
+       examHost.querySelector("[data-ep-ai-active-assessment]")));
   }
   function recheckAfterAssessment(){
     const inFlight=state.bootstrapInFlight;
@@ -1839,9 +1848,8 @@
   }
 
   async function refreshBootstrap() {
-    // Do not confuse intentional quiz/exam blocking with revoked access.
-    // The quiz-exit observers initiate a fresh authenticated status read.
-    if(isLocalAssessmentActive())return state.bootstrap;
+    // Authorization is screen-independent. Fetch it even during a quiz;
+    // reconcileShell uses ONLY the current screen to hide the icon.
     if (state.bootstrapInFlight) return state.bootstrapInFlight;
     const epoch = state.authEpoch;
     const client = window.sb;
@@ -1870,10 +1878,6 @@
         // An old account's in-flight bootstrap must not show its UI in the
         // newly signed-in account, even when its request finishes last.
         if (epoch !== state.authEpoch) return null;
-        if(isLocalAssessmentActive()){
-          reconcileShell();
-          return state.bootstrap;
-        }
         if (error || !data || typeof data !== "object") {
           state.bootstrap = null;
           destroyShell();
@@ -1891,7 +1895,6 @@
         return data;
       } catch {
         if (epoch !== state.authEpoch) return null;
-        if(isLocalAssessmentActive())return state.bootstrap;
         state.bootstrap = null;
         destroyShell();
         return null;
