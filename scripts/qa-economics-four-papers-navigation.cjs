@@ -110,7 +110,7 @@ async function run(lang,scenario) {
   assert(texts(host).some(t=>t.includes('Paper 2')&&t.includes('Paper 4')),
     'Explain shared sequential practice rather than P4 direct jump');
   assert.equal(writes,0,'Existing learner must not re-join');
-  const back=buttons(host).find(b=>b.textContent.startsWith('← '));
+  const back=buttons(host).find(b=>b.className.includes('ep-native-screen-back')&&b.textContent==='‹'&&b['aria-label']===(lang==='ru'?'Назад':lang==='uz'?'Orqaga':'Back'));
   assert(back,'Written Paper 4 info back navigation required');
   back.events.click();await tick();
   const leaveLabel=lang==='ru'?'Отключить письменную практику':
@@ -131,6 +131,6 @@ async function run(lang,scenario) {
 (async()=>{
  let n=0;
  for(const lang of langs)for(const scenario of SCENARIOS){await run(lang,scenario);n++}
- assert(html.includes('exam-prep-economics-native.js?v=econ-mark-scheme-premium-safeleave-20261028'),'App must load updated paper grid, not cached P1/P3-only JS');
+ assert(html.includes('exam-prep-economics-native.js?v=econ-plan-compact-back-20261028'),'App must load updated paper grid, not cached P1/P3-only JS');
  console.log('ECONOMICS FOUR PAPERS UI PASS',n,'scenarios × 3 locales; no automatic joining / no P4 bypass');
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -37,5 +37,5 @@ need(sql.includes('status=\'withdrawn\''),'Leave must revoke consent and not era
 need(!/\bDELETE\s+FROM\b|\bTRUNCATE\b/i.test(sql),'No deletion of learner data');
 need(!/localStorage\.clear\(/.test(js),'Never clear local history');
 need(html.includes('exam-prep/exam-prep-economics-native.js?'),'Native Economics app must remain loaded');
-need(html.includes('exam-prep-economics-native.js?v=econ-mark-scheme-premium-safeleave-20261028'),'Economics beta cache pin must be refreshed');
+need(html.includes('exam-prep-economics-native.js?v=econ-plan-compact-back-20261028'),'Economics beta cache pin must be refreshed');
 console.log('ECONOMICS_WRITTEN_BETA_START_SAFE PASS — 22 static protection checks + JS parse');

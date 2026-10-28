@@ -36,9 +36,13 @@
    }
    function page(){
       const base=el("section","ep-host-shell ep-live");
-      const top=el("div","ep-live-head");
-      const title=el("h2","ep-host-title",t.title);
-      top.append(title,btn("← "+t.back,()=>{dispose();onBack?.();},true));
+      const top=el("div","ep-live-head ep-written-screen-head");
+      const title=el("h2","ep-host-title ep-written-screen-title",t.title);
+      const back=btn("‹",()=>{dispose();onBack?.();},true);
+      back.className+=" ep-written-screen-back";
+      back.setAttribute("aria-label",t.back);
+      back.setAttribute("title",t.back);
+      top.append(back,title);
       base.append(top);root.replaceChildren(base);return base;
    }
    function message(str){
