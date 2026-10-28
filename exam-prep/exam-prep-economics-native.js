@@ -562,6 +562,10 @@
     paint();if(state.data?.status==="active")state.timer=setInterval(paint,1000);
   }
   function draw(){
+    // An uncertain write is resolved on its original question before any
+    // other answer can be submitted. The server, never navigation, decides.
+    if(state.pendingChoice?.sessionId===state.id)
+      state.index=state.pendingChoice.order;
     ++state.token;state.view="exam";
     const data=state.data,view=shell();if(!view||!data)return;
     const finished=data.status==="finalized",total=data.items.length;
@@ -641,9 +645,9 @@
       submit.disabled=state.busy||choice===null||choice===undefined;
       actions.append(submit);
     }
-    if(state.index>0)actions.append(btn(t().previous,()=>{if(!state.busy){state.index--;draw();}},true));
-    if(state.index<total-1)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
-    if(!finished)actions.append(btn(t().finish,()=>finish(false),true));
+    if(state.index>0&&!pending)actions.append(btn(t().previous,()=>{if(!state.busy){state.index--;draw();}},true));
+    if(state.index<total-1&&!pending)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
+    if(!finished&&!pending)actions.append(btn(t().finish,()=>finish(false),true));
     if(finished)actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,()=>begin(state.paper,data.session_kind),true));
     actions.append(btn(t().papers,lobby,true));view.append(actions);
   }
