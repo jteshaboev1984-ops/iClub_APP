@@ -1371,6 +1371,38 @@
     if (practiceRetry && (!typedPractice||!state.practicePending||
         state.practicePending.scopeKey!==typedPractice.scopeKey||
         state.practicePending.question!==typedPractice.question)) return;
+    // A failed early server call may have left this old question pending
+    // in memory. Before blocking a new question, verify its exact server
+    // receipt. Only confirmed VOID with no dispatched/unknown money permits
+    // a fresh request ID; unknown outcomes stay locked for safe recovery.
+    if(typedPractice&&!practiceRetry&&state.practicePending?.requestId&&
+       state.practicePending.scopeKey===typedPractice.scopeKey&&
+       typeof state.practicePending.question==="string"&&
+       state.practicePending.question.length>=8){
+      const prior=state.practicePending;
+      const auth=state.authEpoch,epoch=state.contextEpoch;
+      state.busy=true;
+      renderPanel();
+      let verdict=null;
+      try{
+        verdict=await window.iClubAiV21BetaClient?.probeClosedPracticeRequest?.({
+          requestId:prior.requestId,purpose:"practice_result",
+          attemptRef:typedPractice.attemptRef,locale:typedPractice.locale,
+          userText:prior.question
+        });
+      }catch{/* Preserve an uncertain request; do not auto retry. */}
+      if(auth!==state.authEpoch||epoch!==state.contextEpoch||
+         !state.practicePending||state.practicePending.requestId!==prior.requestId||
+         practiceScopeKey(practiceScope())!==typedPractice.scopeKey){
+        state.busy=false;
+        renderPanel();
+        return;
+      }
+      if(verdict?.ok===true&&verdict.safe_new_request===true)
+        state.practicePending=null;
+      state.busy=false;
+      renderPanel();
+    }
     if(typedPractice && state.practicePending &&
        (state.practicePending.scopeKey!==typedPractice.scopeKey ||
         state.practicePending.question!==typedPractice.question)){
@@ -1506,6 +1538,19 @@
         closePanel();
         showToast(copy().assessmentStart);
         void refreshBootstrap();
+        return;
+      }
+
+      if(typedPractice&&reason==="practice_request_void_unbilled"&&
+         data.safe_new_request===true&&data.provider_called===false){
+        if(state.practicePending?.requestId===sentId)
+          state.practicePending=null;
+        const message={
+          ru:"Предыдущий запрос не дошёл до модели и не был оплачен. Отправьте вопрос ещё раз.",
+          uz:"Oldingi so‘rov modelga yetib bormagan va to‘lov qilinmagan. Savolni qayta yuboring.",
+          en:"The previous question was not sent to the model or charged. Please send it again."
+        }[locale()];
+        appendMessage(threadKey,"assistant",message,"notice");
         return;
       }
 

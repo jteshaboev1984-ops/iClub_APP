@@ -186,6 +186,8 @@ async function ask(p:Prepared,key:string){
   const state=await receipt(p,"inspect");
   if(state?.ok!==true)return fail("receipt_unavailable");
   if(["ready","acknowledged"].includes(String(state.state)))return replay(p);
+  if(state.state==="void"&&state.safe_new_request===true)
+    return {...fail("practice_request_void_unbilled"),safe_new_request:true};
   return fail("request_already_in_progress");
  }
  const quota=await reserveQuota(p);
@@ -193,13 +195,16 @@ async function ask(p:Prepared,key:string){
   // Quota may already have committed before the HTTP response was lost.
   // Compensate before closing the receipt: no new provider call occurs.
   await releaseQuota(p);
-  await receipt(p,"void");
+  const voided=await receipt(p,"void");
+  const checked=voided?.ok===true?await receipt(p,"inspect"):null;
   // Only explicit admission exhaustion returns a learner-visible reset time.
   // A network failure, revocation or unknown denial must stay generic.
   if(quota?.reason==="usage_exhausted" &&
      typeof quota.reset_at==="string" &&
      /^\d{4}-\d\d-\d\d[T ]\d\d:\d\d:/.test(quota.reset_at))
     return {...fail("practice_quota_exhausted"),reset_at:quota.reset_at};
+  if(checked?.state==="void"&&checked.safe_new_request===true)
+    return {...fail("practice_request_void_unbilled"),safe_new_request:true};
   return fail("usage_or_access_unavailable");
  }
  const money=await reserveMoney(p);
@@ -283,7 +288,7 @@ Deno.serve(async(req:Request):Promise<Response>=>{
     keys.some(k=>!["intent","operation","request_id","purpose","attempt_ref",
       "question_ref","locale","question"].includes(k))||
     data.intent!=="practice_freeform"||
-    !["ask","ack","resume","resume_ack"].includes(String(data.operation))||
+    !["ask","ack","resume","resume_ack","probe"].includes(String(data.operation))||
     typeof data.request_id!=="string"||!UUID.test(data.request_id)||
     !PURPOSES.includes(data.purpose as Purpose)||
     !["ru","uz","en"].includes(String(data.locale))||
@@ -306,6 +311,15 @@ Deno.serve(async(req:Request):Promise<Response>=>{
  // Server derives verified learner facts. A pointer or text never grants authority.
  const p=await prepare(uid,data);
  if(!p)return send(403,fail("context_or_source_not_ready"));
+ // Read-only same UUID/owner/attempt/question check. A void request is
+ // safe to retry only after the money ledger proves no provider exposure.
+ if(data.operation==="probe"){
+  const state=await receipt(p,"inspect");
+  if(state?.ok===true&&state.state==="void"&&state.safe_new_request===true)
+   return send(200,{ok:true,mode:"request_closed",safe_new_request:true,
+     provider_called:false,academic_state_changed:false});
+  return send(409,fail("request_not_confirmed_closed"));
+ }
  const out=data.operation==="ack"?await ack(p):await ask(p,PROVIDER_KEY);
  return send(out.ok===true?200:409,out);
 });
