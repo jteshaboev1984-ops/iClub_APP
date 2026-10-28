@@ -1,0 +1,45 @@
+name: Economics Exam Prep answer parity P0 — isolated browser gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-economics-native.js'
+      - 'exam-prep/exam-prep-economics-native.css'
+      - 'scripts/qa-economics-answer-parity-browser.cjs'
+      - 'supabase/migrations/*iclub_economics_native_mcq_active_access_parity_v1.sql'
+      - '.github/workflows/economics-exam-prep-answer-parity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  economics-answer-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JS syntax and server-side policy preflight
+        run: |
+          node --check exam-prep/exam-prep-economics-native.js
+          node --check scripts/qa-economics-answer-parity-browser.cjs
+          grep -Fq 'async function reconcileChoice(pending)' exam-prep/exam-prep-economics-native.js
+          grep -Fq 'data-ep-native-submit' exam-prep/exam-prep-economics-native.js
+          grep -Fq 'iclub_exam_native_economics_beta_allowed_v1' supabase/migrations/*iclub_economics_native_mcq_active_access_parity_v1.sql
+          ! grep -Fq 'change",()=>saveChoice(idx)' exam-prep/exam-prep-economics-native.js
+      - name: Install isolated Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Economics MCQ browser — RU UZ EN desktop mobile, recovery, no double submit
+        run: node scripts/qa-economics-answer-parity-browser.cjs
+      - name: Existing Economics four-Paper and written-plan regressions
+        run: |
+          node scripts/qa-economics-four-papers-navigation.cjs
+          node scripts/qa-economics-premium-plan-navigation.cjs
+          node scripts/qa-economics-consent-written-beta.cjs
+      - name: Mathematics diagnostic answer-loss source check (unchanged)
+        run: node --check exam-prep/exam-prep-live.js
