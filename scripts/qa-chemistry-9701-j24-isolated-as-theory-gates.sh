@@ -12,7 +12,24 @@ CREATE ROLE anon NOLOGIN;
 CREATE SCHEMA private;
 CREATE SCHEMA auth;
 CREATE TABLE auth.users(id uuid PRIMARY KEY);
-INSERT INTO auth.users VALUES ('10000000-0000-4000-8000-000000000001'),('20000000-0000-4000-8000-000000000002');
+INSERT INTO auth.users VALUES
+ ('10000000-0000-4000-8000-000000000001'),
+ ('20000000-0000-4000-8000-000000000002'),
+ ('30000000-0000-4000-8000-000000000003');
+CREATE TABLE public.subjects(id bigint PRIMARY KEY,subject_key text,is_active boolean);
+CREATE TABLE public.user_subjects(user_id uuid,subject_id bigint);
+INSERT INTO public.subjects VALUES (6,'chemistry',true);
+INSERT INTO public.user_subjects VALUES
+ ('10000000-0000-4000-8000-000000000001',6),
+ ('20000000-0000-4000-8000-000000000002',6);
+CREATE TABLE private.exam_prep_beta_cohorts(
+ id bigint PRIMARY KEY,cohort_key text,program_key text,cohort_status text);
+CREATE TABLE private.exam_prep_beta_members(
+ cohort_id bigint,user_id uuid,member_status text,activated_at timestamptz);
+INSERT INTO private.exam_prep_beta_cohorts VALUES
+ (1,'math_as_p1_p5_beta_2026_09_01','math_as_p1_p5','active');
+INSERT INTO private.exam_prep_beta_members VALUES
+ (1,'10000000-0000-4000-8000-000000000001','active',now());
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$
  SELECT NULLIF(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
 CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$
@@ -70,7 +87,7 @@ INSERT INTO private.iclub_subject_library_theory VALUES
 SQL
 
 psql -X -v ON_ERROR_STOP=1 -d postgres -f scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql >/dev/null
-psql -X -v ON_ERROR_STOP=1 -d postgres -f supabase/migrations/20261028153500_chemistry_9701_j25_as_theory_voluntary_consent_v1.sql >/dev/null
+psql -X -v ON_ERROR_STOP=1 -d postgres -f supabase/migrations/20261028153500_chemistry_9701_j25_theory_owner_rollout_without_optin_v1.sql >/dev/null
 psql -X -v ON_ERROR_STOP=1 -d postgres <<'SQL'
 DO $$
 BEGIN
@@ -81,12 +98,11 @@ BEGIN
  THEN RAISE EXCEPTION 'Authenticated RPC grant is missing'; END IF;
  IF EXISTS(SELECT 1 FROM private.iclub_exam_chemistry_j24_as_theory_control_v1 WHERE enabled)
  THEN RAISE EXCEPTION 'Default source gate must be OFF'; END IF;
- IF EXISTS(SELECT 1 FROM private.iclub_exam_chemistry_j25_as_theory_optins_v1)
- OR EXISTS(SELECT 1 FROM private.iclub_exam_chemistry_j25_as_theory_control_v1 WHERE release_phase<>'closed')
- THEN RAISE EXCEPTION 'J25 must have no automatic users or invitations'; END IF;
- IF has_function_privilege('anon','public.iclub_exam_chemistry_j25_grant_theory_consent_v1(text,text)','EXECUTE')
- OR has_function_privilege('anon','public.iclub_exam_chemistry_j25_revoke_theory_consent_v1()','EXECUTE')
- THEN RAISE EXCEPTION 'Anonymous J25 access must be denied'; END IF;
+ IF EXISTS(SELECT 1 FROM private.iclub_exam_chemistry_j25_theory_rollout_control_v1
+  WHERE audience_mode<>'closed' OR owner_opened_at IS NOT NULL)
+ THEN RAISE EXCEPTION 'Default J25 rollout must be CLOSED'; END IF;
+ IF to_regclass('private.iclub_exam_chemistry_j25_as_theory_optins_v1') IS NOT NULL
+ THEN RAISE EXCEPTION 'No opt-in table may exist'; END IF;
 END $$;
 -- Synthetic JWT identity and exact beta permission, but gate OFF.
 SET request.jwt.claim.sub='10000000-0000-4000-8000-000000000001';
@@ -97,33 +113,6 @@ BEGIN
  IF (public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'code')<>'not_available'
  THEN RAISE EXCEPTION 'Enabled read before owner review'; END IF;
 END $$;
-RESET ROLE;
-
--- No implicit enrollment from Mathematics: manually invite exactly one synthetic canary.
-INSERT INTO private.iclub_exam_chemistry_j25_as_theory_optins_v1
- (user_id,invited_at,is_canary)
-VALUES('10000000-0000-4000-8000-000000000001',now(),true);
-SET ROLE authenticated;
-DO $
-BEGIN
- IF public.iclub_exam_chemistry_j25_grant_theory_consent_v1(
-  'en','I_VOLUNTARILY_AGREE_TO_CHEMISTRY_AS_THEORY_BETA_V1')->>'code'<>'consent_recorded'
- THEN RAISE EXCEPTION 'Independent AS Theory consent failed'; END IF;
- IF public.iclub_exam_chemistry_j25_theory_consent_status_v1()->>'can_start'<>'false'
- THEN RAISE EXCEPTION 'Consent itself unlocked closed Theory'; END IF;
-END $;
-RESET ROLE;
-UPDATE private.iclub_exam_chemistry_j25_as_theory_optins_v1
- SET owner_approved_at=now(),active=true WHERE is_canary=true AND consented_at IS NOT NULL;
-UPDATE private.iclub_exam_chemistry_j25_as_theory_control_v1
- SET release_phase='canary',owner_go_at=now() WHERE id=1;
-SET ROLE authenticated;
-DO $
-BEGIN
- IF public.iclub_exam_chemistry_j25_grant_theory_consent_v1(
-  'en','I_VOLUNTARILY_AGREE_TO_CHEMISTRY_AS_THEORY_BETA_V1')->>'code'<>'already_recorded'
- THEN RAISE EXCEPTION 'Repeating consent must be idempotent'; END IF;
-END $;
 RESET ROLE;
 
 -- Simulate later explicit academic/rights/owner approvals IN DISPOSABLE DATABASE ONLY.
@@ -141,8 +130,11 @@ SET enabled=true,owner_go_at=now(),academic_science_review_at=now(),
  ),
  approved_skill_count=91,reviewed_evidence_ref='synthetic-ci-91-reviewed-items-j24'
 WHERE id=1;
+-- Owner activation simulated exclusively in ephemeral PostgreSQL CI.
+UPDATE private.iclub_exam_chemistry_j25_theory_rollout_control_v1
+ SET audience_mode='beta',owner_opened_at=now() WHERE id=1;
 SET ROLE authenticated;
-DO $$
+DO $
 DECLARE r jsonb; l jsonb;
 BEGIN
  r=public.iclub_exam_chemistry_j24_theory_catalog_v1('en');
@@ -169,18 +161,52 @@ BEGIN
 END $$;
 SET request.jwt.claim.active_exam='false';
 RESET ROLE;
+-- Historical Paper 1 consent must never control AS Theory access.
+UPDATE private.iclub_exam_chemistry_p1_beta_members_v1 SET revoked_at=now(),active=false;
 SET ROLE authenticated;
 DO $
 BEGIN
- IF public.iclub_exam_chemistry_j25_revoke_theory_consent_v1()->>'ok'<>'true'
- THEN RAISE EXCEPTION 'AS Theory consent revocation failed'; END IF;
- IF public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'code'<>'not_available'
- THEN RAISE EXCEPTION 'Revoked learner still authorized'; END IF;
+ IF public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'ok'<>'true'
+ THEN RAISE EXCEPTION 'Paper 1 consent unexpectedly controls Theory'; END IF;
 END $;
 RESET ROLE;
-UPDATE private.iclub_exam_chemistry_j25_as_theory_optins_v1
- SET revoked_at=NULL,consented_at=now(),owner_approved_at=now(),active=true
- WHERE is_canary=true;
+-- Another Chemistry member cannot use beta mode without beta membership.
+SET request.jwt.claim.sub='20000000-0000-4000-8000-000000000002';
+SET ROLE authenticated;
+DO $
+BEGIN
+ IF public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'code'<>'not_available'
+ THEN RAISE EXCEPTION 'Non-beta Chemistry user leaked beta content'; END IF;
+END $;
+RESET ROLE;
+UPDATE private.iclub_exam_chemistry_j25_theory_rollout_control_v1 SET audience_mode='released' WHERE id=1;
+SET ROLE authenticated;
+DO $
+BEGIN
+ IF public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'ok'<>'true'
+ THEN RAISE EXCEPTION 'Release mode failed Chemistry subject member'; END IF;
+END $;
+RESET ROLE;
+-- No Chemistry membership = no content even after release.
+SET request.jwt.claim.sub='30000000-0000-4000-8000-000000000003';
+SET ROLE authenticated;
+DO $
+BEGIN
+ IF public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'code'<>'not_available'
+ THEN RAISE EXCEPTION 'Unsubscribed user leaked released content'; END IF;
+END $;
+RESET ROLE;
+SET request.jwt.claim.sub='10000000-0000-4000-8000-000000000001';
+-- Immediate global rollback without touching student records.
+UPDATE private.iclub_exam_chemistry_j25_theory_rollout_control_v1 SET audience_mode='closed',owner_opened_at=NULL WHERE id=1;
+SET ROLE authenticated;
+DO $
+BEGIN
+ IF public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'code'<>'not_available'
+ THEN RAISE EXCEPTION 'Rollout kill switch failed'; END IF;
+END $;
+RESET ROLE;
+UPDATE private.iclub_exam_chemistry_j25_theory_rollout_control_v1 SET audience_mode='beta',owner_opened_at=now() WHERE id=1;
 UPDATE private.iclub_exam_chemistry_j24_as_theory_control_v1
 SET approved_as_manifest_md5=md5('stale') WHERE id=1;
 SET ROLE authenticated;
@@ -191,5 +217,5 @@ BEGIN
 END $$;
 RESET ROLE;
 UPDATE private.iclub_exam_chemistry_j24_as_theory_control_v1 SET enabled=false;
-SELECT 'J24/J25 isolated AS-only Theory + voluntary canary consent firewall PASS (disposable data only)' as outcome;
+SELECT 'J24/J25 consent-free beta/release AS Theory firewall PASS (disposable data only)' as outcome;
 SQL
