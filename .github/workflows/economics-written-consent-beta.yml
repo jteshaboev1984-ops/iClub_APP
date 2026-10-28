@@ -12,6 +12,7 @@ on:
       - 'exam-prep/runtime/written-core-controller-v1.js'
       - 'exam-prep/runtime/written-core-source-v1.css'
       - 'supabase/migrations/*iclub_econ_written_mark_scheme_v1.sql'
+      - 'supabase/migrations/*iclub_econ_core_criteria_without_answer_hints_v1.sql'
       - 'index.html'
       - '.github/workflows/economics-written-consent-beta.yml'
   workflow_dispatch:
