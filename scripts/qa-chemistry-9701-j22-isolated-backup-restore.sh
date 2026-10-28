@@ -111,9 +111,13 @@ SQL
 
 before="$(psql -X -At -d "$source_db" -c 'SELECT private.j22_fingerprint()')"
 [[ "$before" =~ ^[0-9a-f]{32}$ ]] || { echo "Source fingerprint is invalid"; exit 41; }
-pg_dump --no-owner --no-acl --format=custom -d "$source_db" -f "$snapshot"
+# GitHub's preinstalled pg_dump can lag the PostgreSQL 17 service. Pin client to server major 17.
+# The service is local to disposable CI; never pass external credentials to this container.
+docker run --rm --network host -v /tmp:/tmp -e PGPASSWORD=postgres postgres:17 \
+  pg_dump -h 127.0.0.1 -p 5432 -U postgres --no-owner --no-acl --format=custom -d "$source_db" -f "$snapshot"
 test -s "$snapshot"
-pg_restore --exit-on-error --no-owner --no-acl --dbname="$restored_db" "$snapshot" >/dev/null
+docker run --rm --network host -v /tmp:/tmp -e PGPASSWORD=postgres postgres:17 \
+  pg_restore -h 127.0.0.1 -p 5432 -U postgres --exit-on-error --no-owner --no-acl --dbname="$restored_db" "$snapshot" >/dev/null
 after="$(psql -X -At -d "$restored_db" -c 'SELECT private.j22_fingerprint()')"
 [[ "$before" == "$after" ]] || { echo "Restored academic fingerprint mismatch"; exit 42; }
 for q in \
