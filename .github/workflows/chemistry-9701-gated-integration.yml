@@ -101,9 +101,11 @@ jobs:
           assert(lab.includes('r.practical_exam_replacement!==false'));
           const migrations=fs.readdirSync('supabase/migrations')
             .filter(name=>/^[0-9]{14}_chemistry_(?:9701|p1)_/.test(name));
-          assert.equal(migrations.length, 34, 'All 34 installed Chemistry migration files must remain versioned');
+          assert(migrations.length >= 35, 'At least 35 baseline Chemistry migrations must remain versioned');
           assert(migrations.includes('20261028145137_chemistry_9701_j24_as_only_theory_fail_closed_v1.sql'),
             'Mandatory J24 fail-closed Chemistry migration must remain versioned');
+          assert(migrations.includes('20261028153500_chemistry_9701_j25_as_theory_voluntary_consent_v1.sql'),
+            'Mandatory J25 independent consent migration must remain versioned');
           const versions=migrations.map(name=>name.slice(0,14));
           assert.equal(new Set(versions).size, versions.length, 'Duplicate Chemistry migration versions');
           console.log('Chemistry shared-host and closed-gate integration: GREEN');
