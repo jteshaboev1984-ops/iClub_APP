@@ -12,6 +12,7 @@ on:
       - supabase/candidates/iclub_ai_practice_receipt_rpc_pc4_dormant.sql
       - supabase/candidates/iclub_ai_practice_math_beta_activation_v1.sql
       - supabase/candidates/iclub_ai_practice_context_v1_dormant.sql
+      - supabase/migrations/20261028184500_iclub_ai_finalized_practice_context_not_blocked_by_other_session.sql
       - supabase/candidates/iclub_ai_practice_receipts_pc4_dormant.sql
       - supabase/candidates/iclub_ai_practice_freeform_pc3_gate_dormant.sql
       - supabase/tests/iclub_ai_practice_pc3_gate_isolated.sql
