@@ -699,7 +699,7 @@
     return { ready: readyPair?.item || null, waiting, valid: true };
   }
 
-  function primaryAction(component, progress, summary, tracker, plan, recovery, weeklyProgress) {
+  function primaryAction(component, progress, summary, tracker, plan, recovery, weeklyProgress, hasHistory = false) {
     const c = copy(), home = componentHomeCopy(), screening = progress?.screening || {};
     if (progress?.stage0_complete !== true) {
       const started = Boolean(progress?.active_session) || Number(screening.answered_items || 0) > 0;
@@ -723,7 +723,7 @@
     }
     const stage = Number(summary?.operational_stage || 0);
     if (stage >= 4) return { kind: "timed", title: home.timed, detail: stageLabel(stage), label: home.timedTask };
-    if (stage === 1) return { kind: "prepare", title: home.foundationTitle, detail: home.foundationDetail, label: home.foundationStart };
+    if (stage === 1) return { kind: "prepare", title: hasHistory ? home.checkNext : home.foundationTitle, detail: hasHistory ? stageLabel(stage) : home.foundationDetail, label: hasHistory ? home.checkNext : home.foundationStart };
     return { kind: "prepare", title: home.checkNext, detail: stageLabel(stage), label: home.startTask };
   }
 
@@ -763,7 +763,7 @@
       row?.focus_kind === "correction" &&
       ["reopened","remediating"].includes(String(row?.status || ""))
     );
-    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery, payload.weeklyProgress);
+    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery, payload.weeklyProgress, Boolean(lastResult));
     const componentName = component === "P1" ? c.componentP1 : c.componentP5;
     const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections} ${esc(home.focusNow)}${deferredCorrections > 0 ? ` · +${deferredCorrections} ${esc(home.later)}` : ""}</small></span><span aria-hidden="true">›</span></button>` : "";
     const lastResultCard = lastResult ? `<section class="ep-component-last-result"><div><span class="ep-component-section-label">${esc(home.lastResult)}</span><strong>${esc(resultTypeLabel(lastResult.session_type))}</strong><small>${lastResult.machine_total > 0 ? `${Number(lastResult.machine_correct || 0)} / ${Number(lastResult.machine_total || 0)} ${esc(c.correctOf)}` : esc(c.writtenPart)}</small></div><button class="ep-live-btn secondary" type="button" data-ep-component-last-result="${esc(lastResult.session_id)}">${esc(c.viewResults)}</button></section>` : "";
@@ -771,7 +771,20 @@
     const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
     const readiness = stage >= 5 ? `<button class="ep-component-link" type="button" data-ep-component-link="readiness"><span><strong>${esc(home.readiness)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-component-home" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}"><button class="ep-component-back" type="button" data-ep-component-back>← ${esc(home.back)}</button><header class="ep-component-hero"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${denominator} ${esc(home.skills)}</span></div></div><span class="ep-stage-pill">${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</span></header><section class="ep-component-next"><div class="ep-component-section-label">${esc(home.next)}</div><strong class="ep-component-next-title">${esc(action.title)}</strong><div class="ep-live-meta">${esc(action.detail)}</div><button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)}</button></section><section class="ep-component-progress-card"><div class="ep-component-section-head"><strong>${esc(home.progress)}</strong><span>${covered} / ${denominator}</span></div><div class="ep-live-progress"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></section>${lastResultCard}<section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section><section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}</section></section>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
+      <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
+        <header class="ep-component-hero ep-route-header"><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span>
+          <div class="ep-route-identity"><div><h2>${esc(componentName)}</h2><span class="ep-route-phase">${esc(stageLabel(stage))} · ${esc(c.stageTitle)}</span></div><span class="ep-live-component-code">${component}</span></div></header>
+        <section class="ep-component-next"><span class="ep-component-section-label">${esc(home.next)}</span>
+          <strong class="ep-component-next-title">${esc(action.title)}</strong>
+          <div class="ep-route-next-detail">${esc(action.detail)}</div>
+          <button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)} <span aria-hidden="true">→</span></button></section>
+        <section class="ep-component-progress-card"><div class="ep-component-section-head"><strong>${esc(c.coverage)}</strong><span class="ep-route-progress-value">${covered} / ${denominator}</span></div>
+          <div class="ep-live-progress" role="progressbar" aria-valuenow="${covered}" aria-valuemin="0" aria-valuemax="${denominator}" aria-label="${esc(c.coverage)}"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div>
+          <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
+        ${lastResultCard}
+        <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
+        <section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}</section></section>`, {compact:true});
     state.notice = null;
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
