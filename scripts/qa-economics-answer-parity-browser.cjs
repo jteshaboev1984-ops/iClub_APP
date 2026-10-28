@@ -79,6 +79,13 @@ async function scenario(browser,lang,width,mode){
       assert(await page.locator('input[name="ep-native-choice"][value="1"]').isChecked(),'Draft lost on remount');
       assert.equal(await page.evaluate(()=>window.__econ.sends),0,'Draft must never auto-submit');
     }
+    if(mode==='unsubmitted_finish'){
+      await page.evaluate(()=>window.confirm=()=>{throw Error('Unsent choice must block finish');});
+      await page.locator('.ep-live-actions button').filter({hasText:/^(Finish exam|Завершить экзамен|Imtihonni yakunlash)$/}).click();
+      assert.equal(await page.evaluate(()=>window.__econ.finish),false,'Unsent draft must not finish exam');
+      assert.equal(await page.locator('.ep-native-unsubmitted[role="alert"]').count(),1,
+        'The learner must be told to submit their selected answer');
+    }
     if(mode==='slow'){
       await page.evaluate(()=>{
         const b=document.querySelector('[data-ep-native-submit]');
@@ -91,8 +98,18 @@ async function scenario(browser,lang,width,mode){
       await page.locator('.ep-native-save-recovery button').last().click();
     }
     await page.waitForFunction(()=>document.body.textContent.includes('Q2'));
+    if(mode==='revised'){
+      await page.locator('.ep-live-actions button').filter({hasText:/^(Previous|Предыдущий|Oldingi)$/}).click();
+      await page.check('input[name="ep-native-choice"][value="2"]');
+      assert.equal(await page.evaluate(()=>window.__econ.sends),1,'A revised choice must not auto-save');
+      await page.locator('.ep-live-actions button').filter({hasText:/^(Finish exam|Завершить экзамен|Imtihonni yakunlash)$/}).click();
+      assert.equal(await page.evaluate(()=>window.__econ.finish),false,'Unsent revision must block finish');
+      await page.click('[data-ep-native-submit]');
+      await page.waitForFunction(()=>document.body.textContent.includes('Q2'));
+      assert.equal(await page.evaluate(()=>window.__econ.saved[1]),2,'Server must receive revised answer');
+    }
     const {sends,reads}=await page.evaluate(()=>window.__econ);
-    assert.equal(sends,mode==='before_commit'?2:1,'unexpected duplicate writes');
+    assert.equal(sends,mode==='before_commit'||mode==='revised'?2:1,'unexpected duplicate writes');
     if(mode==='lost_ack'||mode==='before_commit')assert(reads>=2,'Missing server reconciliation');
     assert.equal(errors.length,0,errors.join('; '));
     const x=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+3}));
@@ -103,7 +120,7 @@ async function scenario(browser,lang,width,mode){
  const browser=await chromium.launch({headless:true});
  try{
    let count=0;
-   for(const lang of langs)for(const width of widths)for(const mode of ['normal','lost_ack','before_commit','slow','draft']){
+   for(const lang of langs)for(const width of widths)for(const mode of ['normal','lost_ack','before_commit','slow','draft','unsubmitted_finish','revised']){
      await scenario(browser,lang,width,mode);count++;
    }
    console.log('PASS Economics native Chromium MCQ submit/recovery',count,'RU/UZ/EN scenarios');
