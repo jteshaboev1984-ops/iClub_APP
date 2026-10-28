@@ -170,9 +170,13 @@ const path = require('path');
   await capture();
 
   await page.click('[data-ep-live-open-component="P1"]');
-  await page.waitForSelector('[data-ep-component-home="P1"]');
-  await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForSelector('input[name="ep_live_answer"]');
+  const singleTap=await page.evaluate(()=>({
+    starts:window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1'),
+    redundant:Boolean(document.querySelector('[data-ep-component-primary="diagnostic"]'))
+  }));
+  assert(singleTap.starts.length===1&&singleTap.starts[0].args.p_component_code==='P1'&&!singleTap.redundant,
+    'a single dashboard tap must open the P1 question with no duplicate start screen');
   await page.check('input[name="ep_live_answer"][value="1"]');
   await page.click('[data-ep-live-submit]');
   await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Question 2 / 2'));
@@ -200,7 +204,7 @@ const path = require('path');
   await page.click('[data-ep-live-submit]');
   await page.waitForSelector('[data-ep-session-result]');
   const learningResult=await capture();
-  assert(learningResult.includes('Task result')&&learningResult.includes('1 / 1 correct'),'learning task must show completed result without per-item interruption');
+  assert(learningResult.includes('Learning task complete')&&learningResult.includes('1 of 1'),'learning task must show completed result without per-item interruption');
   await page.click('[data-ep-result-continue]');
   await page.waitForSelector('[data-ep-component-home="P1"]');
   await capture();

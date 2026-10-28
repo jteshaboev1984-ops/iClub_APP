@@ -6,6 +6,7 @@ const path = require('path');
   const page = await browser.newPage();
   await page.route('http://iclub.test/', route => route.fulfill({status:200,contentType:'text/html',body:`<!doctype html><html><head></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>`}));
   await page.goto('http://iclub.test/');
+  await page.addStyleTag({path:path.resolve('exam-prep/exam-prep-host.css')});
 
   await page.evaluate(() => {
     window.__calls=[];
@@ -72,8 +73,38 @@ const path = require('path');
   await page.fill('textarea[name="ep_live_written_answer"]','Because two plus two equals four.'); await page.click('[data-ep-live-submit]');
   await page.waitForSelector('[data-ep-session-result]');
   let result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
-  assert(result.text.includes('Auto-checked questions')&&result.text.includes('1 / 1 correct'),'result must separate machine accuracy');
-  assert(result.text.includes('Written part')&&result.text.includes('1 / 1 completed'),'result must separate written completion');
+  assert(result.text.includes('Auto-checked answers')&&result.text.includes('1 of 1'),'result must separate machine accuracy');
+  assert(result.text.includes('Written part')&&result.text.includes('1 / 1')&&result.text.includes('not included in the correct-answer percentage'),'result must separate written completion');
+  // Full result and collapsed answer-review experience across mobile and desktop.
+  for(const width of [320,360,390,430,768,1280]){
+    await page.setViewportSize({width,height:844});
+    const resultLayout=await page.evaluate(()=>({
+      view:innerWidth,page:document.documentElement.scrollWidth,
+      primaryHeight:document.querySelector('[data-ep-result-continue]')?.getBoundingClientRect().height,
+      writtenTruth:document.querySelector('.ep-ux-result-written')?.textContent||''
+    }));
+    assert(resultLayout.page<=resultLayout.view+1 && resultLayout.primaryHeight>=44,
+      'Result layout overflow at '+width+': '+JSON.stringify(resultLayout));
+    assert(resultLayout.writtenTruth.includes('not included in the correct-answer percentage'),
+      'Written completion was incorrectly counted as accuracy');
+    await page.click('[data-ep-result-review]');
+    await page.waitForSelector('.ep-ux-review-row');
+    const reviewLayout=await page.evaluate(()=>({
+      view:innerWidth,page:document.documentElement.scrollWidth,
+      rows:document.querySelectorAll('.ep-ux-review-row').length,
+      closed:[...document.querySelectorAll('.ep-ux-review-row')].every(x=>!x.open),
+      dockHeight:document.querySelector('.ep-focus-dock [data-ep-result-continue]')?.getBoundingClientRect().height
+    }));
+    assert(reviewLayout.page<=reviewLayout.view+1 && reviewLayout.rows===2 &&
+      reviewLayout.closed && reviewLayout.dockHeight>=44,
+      'Review layout/accordion failed at '+width+': '+JSON.stringify(reviewLayout));
+    await page.click('[data-ep-result-expand-all]');
+    assert(await page.locator('.ep-ux-review-row[open]').count()===2,
+      'Expand all failed at '+width);
+    await page.click('[data-ep-review-back]');
+    await page.waitForSelector('.ep-ux-result');
+  }
+  await page.setViewportSize({width:390,height:844});
   await page.click('[data-ep-result-continue]');
   await page.waitForSelector('[data-ep-component-home="P1"]');
   result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));

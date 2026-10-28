@@ -46,7 +46,7 @@
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Imtihonga tayyorgarlik", safe: "Modulga kirish shaxsiy ruxsat bilan himoyalangan.",
       profileTitle: "Avval imtihon rejangizni kiriting", profileText: "Bu ma’lumotlar matematika uchun real haftalik yuklamani tuzishga yordam beradi.",
       series: "Imtihon seriyasi", target: "Maqsad baho", total: "Haftalik umumiy o‘qish vaqti (soat)", math: "Matematika uchun vaqt (soat)",
-      save: "Saqlash va kirish tekshiruvini boshlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
+      save: "Imtihon rejasini saqlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
       items: "savol", areas: "bo‘lim", start: "Kirish tekshiruvini boshlash", resume: "Tekshiruvni davom ettirish", complete: "Kirish tekshiruvi yakunlandi", loading: "Yuklanmoqda…",
       question: "Savol", submit: "Javobni yuborish", correct: "To‘g‘ri", incorrect: "Xatoni ko‘rib chiqing", finish: "Tekshiruv qismi yakunlandi. Natija yangilandi.",
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", back: "Orqaga", overview: "Umumiy ko‘rinish", plan: "Haftalik reja", openPlan: "Haftalik rejani ochish", priority: "Ustuvorlik", week: "Hafta",
@@ -96,7 +96,7 @@
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Exam preparation", safe: "Access to this module is protected by personal permission.",
       profileTitle: "Set your exam plan first", profileText: "This helps build a realistic weekly mathematics workload.",
       series: "Exam series", target: "Target grade", total: "Total weekly study time (hours)", math: "Mathematics time (hours)",
-      save: "Save and start entry check", saving: "Saving…", invalid: "Check the hours: mathematics time must be above 0 and cannot exceed total time.",
+      save: "Save exam plan", saving: "Saving…", invalid: "Check the hours: mathematics time must be above 0 and cannot exceed total time.",
       items: "questions", areas: "areas", start: "Start entry check", resume: "Continue the check", complete: "Entry check complete", loading: "Loading…",
       question: "Question", submit: "Submit answer", correct: "Correct", incorrect: "Review this mistake", finish: "Check section complete. Progress updated.",
       error: "The action could not be completed. Try again.", back: "Back", overview: "Overview", plan: "Weekly plan", openPlan: "Open weekly plan", priority: "Priority", week: "Week",
@@ -146,7 +146,7 @@
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Подготовка к экзамену", safe: "Доступ к модулю защищён персональным разрешением.",
       profileTitle: "Сначала задайте план экзамена", profileText: "Это поможет системе построить реалистичную недельную нагрузку по математике.",
       series: "Экзаменационная сессия", target: "Целевая оценка", total: "Общее учебное время в неделю (часы)", math: "Время на математику (часы)",
-      save: "Сохранить и начать входную проверку", saving: "Сохраняем…", invalid: "Проверьте часы: время на математику должно быть больше 0 и не превышать общее время.",
+      save: "Сохранить план экзамена", saving: "Сохраняем…", invalid: "Проверьте часы: время на математику должно быть больше 0 и не превышать общее время.",
       items: "вопросов", areas: "разделов", start: "Начать входную проверку", resume: "Продолжить проверку", complete: "Входная проверка завершена", loading: "Загрузка…",
       question: "Вопрос", submit: "Отправить ответ", correct: "Верно", incorrect: "Разберите эту ошибку", finish: "Часть проверки завершена. Прогресс обновлён.",
       error: "Не удалось выполнить действие. Попробуйте ещё раз.", back: "Назад", overview: "Обзор", plan: "Недельный план", openPlan: "Открыть недельный план", priority: "Приоритет", week: "Неделя",
@@ -339,6 +339,35 @@
     return option == null ? raw.toUpperCase() : `${raw.toUpperCase()}. ${localizedOptionText(option)}`;
   }
 
+
+  function uxText() {
+    return ({
+      ru: {route:"К маршруту",backResult:"К результату",complete:"Учебное задание завершено",checked:"Проверяемые ответы",
+        correct:"верны",written:"Письменный шаг",unmarked:"Письменное решение не проверялось.",next:"Следующий шаг",
+        nextNote:"Откройте обновлённый маршрут, чтобы выбрать следующее задание.",evidence:"Засчитываются только знания, подтверждённые проверками.",
+        review:"Разбор ответов",expand:"Показать все",collapse:"Свернуть все",unchecked:"Не проверялось",task:"Задание",of:"из"},
+      uz: {route:"O‘quv yo‘liga",backResult:"Natijaga",complete:"O‘quv topshirig‘i yakunlandi",checked:"Tekshirilgan javoblar",
+        correct:"to‘g‘ri",written:"Yozma bosqich",unmarked:"Yozma yechim tekshirilmadi.",next:"Keyingi qadam",
+        nextNote:"Keyingi topshiriqni tanlash uchun yangilangan o‘quv yo‘lini oching.",evidence:"Faqat tekshiruv bilan tasdiqlangan bilimlar hisobga olinadi.",
+        review:"Javoblar tahlili",expand:"Hammasini ochish",collapse:"Hammasini yopish",unchecked:"Tekshirilmagan",task:"Topshiriq",of:"dan"},
+      en: {route:"To learning route",backResult:"Back to result",complete:"Learning task complete",checked:"Auto-checked answers",
+        correct:"correct",written:"Written step",unmarked:"The written solution was not marked.",next:"Next step",
+        nextNote:"Open your updated learning route to choose the next task.",evidence:"Only assessment-confirmed skills count toward coverage.",
+        review:"Answer review",expand:"Expand all",collapse:"Collapse all",unchecked:"Not marked",task:"Task",of:"of"}
+    })[state.language];
+  }
+  function uxMath(value) {
+    return esc(value == null ? "" : String(value)).replace(/\bsqrt\s*\(\s*([^()<>]{1,60}?)\s*\)/gi,
+      (_,radicand) => '<span class="ep-math-root">√<span class="ep-math-radicand">'+radicand+'</span></span>');
+  }
+  function uxWrittenCount(n) {
+    n=Number(n)||0;
+    if(state.language==="ru")return n+" "+(n%10===1&&n%100!==11?"письменный шаг":
+      ([2,3,4].includes(n%10)&&!(n%100>=12&&n%100<=14)?"письменных шага":"письменных шагов"));
+    if(state.language==="en")return n+" written "+(n===1?"step":"steps");
+    return n+" yozma bosqich";
+  }
+
   function reviewItemMarkup(item) {
     const c = copy();
     if (item?.item_kind === "written" && item?.completion_status === "advanced_in_plan_only") {
@@ -363,39 +392,64 @@
 
   async function returnFromResult(component, origin) {
     if (origin === "history") { await openRecentResults(component); return; }
-    if (origin === "component") { await openComponentHome(component); return; }
-    if (state.returnView?.kind === "component") await openComponentHome(state.returnView.component || component);
-    else if (state.returnView?.kind === "plan") await openPlan(state.returnView.component || component);
-    else await renderDashboard();
+    // Re-read the server plan, tracker and recovery state; do not infer mastery from a session score.
+    await openComponentHome(component);
   }
 
+  
   function renderSessionResult(data, component, origin = "completion", expanded = false, onlyErrors = false) {
     clearTimer();
-    const root = rootEl(); if (!root) return; const c = copy();
-    const summary = data?.summary || {}, items = Array.isArray(data?.items) ? data.items : [];
-    const machineTotal = Number(summary.machine_total || 0), machineCorrect = Number(summary.machine_correct || 0);
-    const writtenTotal = Number(summary.written_total || 0), writtenDone = Number(summary.written_completed || 0);
-    const accuracy = summary.machine_accuracy_pct == null ? null : Number(summary.machine_accuracy_pct);
-    const machineValue = machineTotal > 0 ? `${machineCorrect} / ${machineTotal} ${esc(c.correctOf)}${Number.isFinite(accuracy) ? ` · ${accuracy.toFixed(0)}%` : ""}` : "—";
-    const writtenAdvanced=Number(summary.written_advanced||0);
-    const writtenSaved=Number(summary.written_submitted ?? Math.max(0,writtenDone-writtenAdvanced));
-    const writtenValue=writtenAdvanced>0
-      ? String(writtenAdvanced)+' '+esc(writtenCopy().steps)+
-        (writtenSaved ? ' · '+writtenSaved+' '+esc(writtenCopy().saved) : '')
-      : (writtenTotal>0 ? writtenDone+' / '+writtenTotal+' '+esc(c.writtenCompleted) : '—');
-    const visible = onlyErrors ? items.filter(item => item?.item_kind === "question" && item?.is_correct === false) : items;
-    const reviewBody = visible.length
-      ? visible.map(reviewItemMarkup).join("")
-      : (onlyErrors ? `<div class="ep-live-notice ep-result-empty">${esc(c.noMistakes)}</div>` : "");
-    const review = expanded ? `<section class="ep-result-review"><div class="ep-result-toolbar"><button class="ep-live-btn ${!onlyErrors ? "" : "secondary"}" type="button" data-ep-result-filter="all">${esc(c.allQuestions)}</button><button class="ep-live-btn ${onlyErrors ? "" : "secondary"}" type="button" data-ep-result-filter="wrong">${esc(c.mistakesOnly)}</button></div><div class="ep-result-list">${reviewBody}</div></section>` : "";
-    const backLabel = origin === "history" ? c.backToHistory : origin === "component" ? c.backToComponent : c.continueResult;
-    root.innerHTML = shell(`<section class="ep-result-screen" data-ep-session-result="${esc(data?.session_id || "")}" data-ep-result-component="${esc(component || data?.component_code || "")}" data-ep-result-session-type="${esc(data?.session_type || "")}"><div class="ep-live-card ep-result-summary"><div class="ep-live-head"><div><div class="ep-live-meta">${esc(component)} · ${esc(resultTypeLabel(data?.session_type))}</div><strong>${esc(c.assignmentResult)}</strong></div></div><div class="ep-result-summary-grid"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.autoChecked)}</span><strong>${machineValue}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.writtenPart)}</span><strong>${writtenValue}</strong></div></div>${writtenTotal > 0 ? `<div class="ep-live-notice">${esc(c.writtenNoAccuracy)}</div>` : ""}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-result-review>${esc(c.reviewAnswers)}</button><button class="ep-live-btn secondary" type="button" data-ep-result-continue>${esc(backLabel)}</button></div></div>${review}</section>`, { compact: true });
-    root.querySelector('[data-ep-result-review]')?.addEventListener('click', () => renderSessionResult(data,component,origin,!expanded,onlyErrors));
-    root.querySelector('[data-ep-result-filter="all"]')?.addEventListener('click', () => renderSessionResult(data,component,origin,true,false));
-    root.querySelector('[data-ep-result-filter="wrong"]')?.addEventListener('click', () => renderSessionResult(data,component,origin,true,true));
-    root.querySelector('[data-ep-result-continue]')?.addEventListener('click', () => returnFromResult(component,origin));
+    const root=rootEl(); if(!root)return;
+    const c=copy(),u=uxText(),sum=data?.summary||{},items=Array.isArray(data?.items)?data.items:[];
+    component=component||data?.component_code;
+    const total=Number(sum.machine_total||0),correct=Number(sum.machine_correct||0);
+    const advanced=Number(sum.written_advanced||0),writtenTotal=Number(sum.written_total||0);
+    const writtenDone=Number(sum.written_completed||0),writtenSaved=Number(sum.written_submitted??Math.max(0,writtenDone-advanced));
+    const pct=sum.machine_accuracy_pct==null?null:Number(sum.machine_accuracy_pct);
+    const label=data?.session_type==="learning"?u.complete:c.assignmentResult;
+    const writtenValue=advanced>0?uxWrittenCount(advanced)+(writtenSaved?" · "+uxWrittenCount(writtenSaved):""):
+      (writtenTotal>0?writtenDone+" / "+writtenTotal:"—");
+    if(!expanded) {
+      root.innerHTML=shell('<section class="ep-result-screen ep-ux-result" data-ep-session-result="'+esc(data?.session_id||"")+
+        '" data-ep-result-component="'+esc(component)+'" data-ep-result-session-type="'+esc(data?.session_type||"")+'">'+
+        '<header class="ep-ux-result-title"><span>'+esc(component)+' · '+esc(resultTypeLabel(data?.session_type))+'</span><h2>'+esc(label)+'</h2></header>'+
+        '<div class="ep-ux-result-score"><span>'+esc(data?.session_type==="learning"?u.checked:c.autoChecked)+'</span><strong>'+(total?correct+' <small>'+esc(u.of)+' '+total+'</small>':"—")+'</strong>'+
+        (total&&Number.isFinite(pct)?'<span>'+Math.round(pct)+'% · '+esc(u.correct)+'</span>':"")+'</div>'+
+        (writtenTotal?'<div class="ep-ux-result-written"><div><span>'+esc(c.writtenPart)+'</span><strong>'+esc(writtenValue)+'</strong></div><p>'+esc(c.writtenNoAccuracy)+' '+esc(u.unmarked)+'</p></div>':"")+
+        '<div class="ep-ux-result-next"><strong>'+esc(u.next)+'</strong><p>'+esc(u.nextNote)+'</p></div>'+
+        '<div class="ep-ux-result-actions"><button class="ep-live-btn" type="button" data-ep-result-continue>'+esc(origin==="history"?c.backToHistory:u.route)+'</button>'+
+        '<button class="ep-live-btn secondary" type="button" data-ep-result-review>'+esc(c.reviewAnswers)+'</button></div></section>',{compact:true});
+      root.querySelector("[data-ep-result-continue]")?.addEventListener("click",()=>returnFromResult(component,origin));
+      root.querySelector("[data-ep-result-review]")?.addEventListener("click",()=>renderSessionResult(data,component,origin,true,false));
+      return;
+    }
+    const visible=onlyErrors?items.filter(item=>item?.item_kind==="question"&&item?.is_correct===false):items;
+    const rows=visible.map(item=>{
+      const written=item?.item_kind==="written",status=written?u.unchecked:(item?.is_correct===true?c.correct:c.incorrect);
+      const answer=written?c.writtenPart:reviewAnswerText(item,item.selected_answer);
+      return '<details class="ep-ux-review-row"><summary><b>'+esc(u.task)+' '+Number(item.item_order||0)+'</b>'+
+        '<span>'+esc(answer||"")+'</span><strong>'+esc(status)+'</strong></summary>'+reviewItemMarkup(item)+'</details>';
+    }).join("");
+    root.innerHTML=shell('<section class="ep-focus-screen ep-result-screen ep-ux-review-screen" data-ep-result-session-type="'+esc(data?.session_type||"")+'" data-ep-session-result="'+esc(data?.session_id||"")+
+      '" data-ep-result-component="'+esc(component)+'"><header class="ep-focus-head"><button type="button" class="ep-focus-back" data-ep-review-back>← '+esc(u.backResult)+'</button>'+
+      '<strong>'+esc(u.review)+'</strong><small>'+visible.length+' / '+items.length+'</small></header>'+
+      '<div class="ep-ux-review-content"><div class="ep-result-toolbar"><button class="ep-live-btn '+(onlyErrors?"secondary":"")+'" type="button" data-ep-result-filter="all">'+esc(c.allQuestions)+'</button>'+
+      '<button class="ep-live-btn '+(onlyErrors?"":"secondary")+'" type="button" data-ep-result-filter="wrong">'+esc(c.mistakesOnly)+'</button>'+
+      '<button class="ep-live-btn secondary" type="button" data-ep-result-expand-all>'+esc(u.expand)+'</button></div>'+
+      '<div class="ep-ux-review-list">'+(rows||'<div class="ep-live-notice">'+esc(c.noMistakes)+'</div>')+'</div></div>'+
+      '<footer class="ep-focus-dock"><button class="ep-live-btn" type="button" data-ep-result-continue>'+esc(origin==="history"?c.backToHistory:u.route)+'</button></footer></section>',{compact:true});
+    root.querySelector("[data-ep-review-back]")?.addEventListener("click",()=>renderSessionResult(data,component,origin,false,false));
+    root.querySelector('[data-ep-result-filter="all"]')?.addEventListener("click",()=>renderSessionResult(data,component,origin,true,false));
+    root.querySelector('[data-ep-result-filter="wrong"]')?.addEventListener("click",()=>renderSessionResult(data,component,origin,true,true));
+    root.querySelector("[data-ep-result-continue]")?.addEventListener("click",()=>returnFromResult(component,origin));
+    root.querySelector("[data-ep-result-expand-all]")?.addEventListener("click",event=>{
+      const rows=[...root.querySelectorAll(".ep-ux-review-row")],expand=rows.some(row=>!row.open);
+      rows.forEach(row=>row.open=expand);
+      event.currentTarget.textContent=expand?u.collapse:u.expand;
+    });
   }
 
+  
   async function openSessionResult(sessionId, component, origin = "completion") {
     if (typeof internal.api?.sessionReview !== "function") return false;
     renderLoading();
@@ -502,7 +556,7 @@
       fixTask: "Xatoni tuzatish", retestTask: "Qayta tekshiruvdan o‘tish", mixedTask: "Aralash mashqni boshlash",
       timedTask: "Vaqtli mashqni boshlash", checkNext: "Keyingi topshiriqni tekshirish",
       waiting: "Qayta tekshiruv vaqti hali kelmagan", noAvailable: "Hozircha yangi topshiriq mavjud emas.",
-      skills: "ko‘nikma", skill: "Ko‘nikma", focusNow: "hozir diqqatda", later: "keyin", lastResult: "Oxirgi ish", history: "Mashg‘ulotlar tarixi", foundationTitle: "Birinchi o‘quv qadamini boshlash", foundationDetail: "Kirish tekshiruvi boshlang‘ich nuqtani aniqladi. Endi bilimlaringizni o‘quv topshiriqlarida tasdiqlang — shundan keyin tasdiqlangan qamrov oshadi.", foundationStart: "Birinchi mavzuni boshlash"
+      skills: "ko‘nikma", skill: "Ko‘nikma", focusNow: "hozir diqqatda", later: "keyin", lastResult: "Oxirgi ish", history: "Mashg‘ulotlar tarixi", foundationTitle: "Birinchi o‘quv qadamini boshlash", foundationDetail: "Kirish tekshiruvi boshlang‘ich nuqtani aniqladi. Endi bilimlaringizni o‘quv topshiriqlarida tasdiqlang — shundan keyin tasdiqlangan qamrov oshadi.", foundationStart: "Birinchi mavzuni boshlash", foundationContinueTitle: "Asosiy bilimlarni mustahkamlash", foundationContinueDetail: "Siz allaqachon topshiriqlar bajargansiz. Keyingi topshiriq shu bilimlarni mustahkamlaydi; dastur qamrovi esa ko‘nikma tasdiqlangandan keyingina oshadi."
     };
     if (state.language === "en") return {
       back: "Your route", next: "Next step", progress: "Progress", topics: "Topics",
@@ -513,7 +567,7 @@
       retestTask: "Take the delayed check", mixedTask: "Start mixed practice", timedTask: "Start timed practice",
       checkNext: "Check next task", waiting: "The delayed check is not available yet",
       noAvailable: "No new task is available right now.", skills: "skills", skill: "Skill",
-      focusNow: "in focus now", later: "later", lastResult: "Latest work", history: "Session history", foundationTitle: "Start your first learning step", foundationDetail: "The entry check identified your starting point. Now confirm your knowledge through learning tasks; confirmed syllabus coverage will grow from there.", foundationStart: "Start first topic"
+      focusNow: "in focus now", later: "later", lastResult: "Latest work", history: "Session history", foundationTitle: "Start your first learning step", foundationDetail: "The entry check identified your starting point. Now confirm your knowledge through learning tasks; confirmed syllabus coverage will grow from there.", foundationStart: "Start first topic", foundationContinueTitle: "Continue strengthening your foundations", foundationContinueDetail: "You have already practised. Your next task builds on that work; confirmed syllabus coverage grows only when a skill is verified."
     };
     return {
       back: "Ваш маршрут", next: "Следующий шаг", progress: "Прогресс", topics: "Темы",
@@ -524,7 +578,7 @@
       retestTask: "Пройти повторную проверку", mixedTask: "Начать смешанную практику",
       timedTask: "Начать работу на время", checkNext: "Проверить следующий шаг",
       waiting: "Повторная проверка ещё не доступна", noAvailable: "Сейчас нет нового доступного задания.",
-      skills: "навыков", skill: "Навык", focusNow: "сейчас в фокусе", later: "позже", lastResult: "Последняя работа", history: "История занятий", foundationTitle: "Начать первый учебный шаг", foundationDetail: "Входная проверка определила стартовую точку. Теперь подтвердите знания учебными заданиями — после этого начнёт расти подтверждённое покрытие программы.", foundationStart: "Начать первую тему"
+      skills: "навыков", skill: "Навык", focusNow: "сейчас в фокусе", later: "позже", lastResult: "Последняя работа", history: "История занятий", foundationTitle: "Начать первый учебный шаг", foundationDetail: "Входная проверка определила стартовую точку. Теперь подтвердите знания учебными заданиями — после этого начнёт расти подтверждённое покрытие программы.", foundationStart: "Начать первую тему", foundationContinueTitle: "Продолжить укреплять базовые знания", foundationContinueDetail: "Вы уже выполняли задания. Следующий шаг закрепит знания; подтверждённый охват программы увеличится только после проверки навыка."
     };
   }
 
@@ -645,7 +699,7 @@
     return { ready: readyPair?.item || null, waiting, valid: true };
   }
 
-  function primaryAction(component, progress, summary, tracker, plan, recovery, weeklyProgress) {
+  function primaryAction(component, progress, summary, tracker, plan, recovery, weeklyProgress, hasHistory = false) {
     const c = copy(), home = componentHomeCopy(), screening = progress?.screening || {};
     if (progress?.stage0_complete !== true) {
       const started = Boolean(progress?.active_session) || Number(screening.answered_items || 0) > 0;
@@ -669,7 +723,7 @@
     }
     const stage = Number(summary?.operational_stage || 0);
     if (stage >= 4) return { kind: "timed", title: home.timed, detail: stageLabel(stage), label: home.timedTask };
-    if (stage === 1) return { kind: "prepare", title: home.foundationTitle, detail: home.foundationDetail, label: home.foundationStart };
+    if (stage === 1) return { kind: "prepare", title: hasHistory ? home.foundationContinueTitle : home.foundationTitle, detail: hasHistory ? home.foundationContinueDetail : home.foundationDetail, label: hasHistory ? home.checkNext : home.foundationStart };
     return { kind: "prepare", title: home.checkNext, detail: stageLabel(stage), label: home.startTask };
   }
 
@@ -709,7 +763,7 @@
       row?.focus_kind === "correction" &&
       ["reopened","remediating"].includes(String(row?.status || ""))
     );
-    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery, payload.weeklyProgress);
+    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery, payload.weeklyProgress, recentRows.some(row => ["learning", "correction", "retest", "mixed", "timed"].includes(String(row?.session_type || "").toLowerCase())));
     const componentName = component === "P1" ? c.componentP1 : c.componentP5;
     const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections} ${esc(home.focusNow)}${deferredCorrections > 0 ? ` · +${deferredCorrections} ${esc(home.later)}` : ""}</small></span><span aria-hidden="true">›</span></button>` : "";
     const lastResultCard = lastResult ? `<section class="ep-component-last-result"><div><span class="ep-component-section-label">${esc(home.lastResult)}</span><strong>${esc(resultTypeLabel(lastResult.session_type))}</strong><small>${lastResult.machine_total > 0 ? `${Number(lastResult.machine_correct || 0)} / ${Number(lastResult.machine_total || 0)} ${esc(c.correctOf)}` : esc(c.writtenPart)}</small></div><button class="ep-live-btn secondary" type="button" data-ep-component-last-result="${esc(lastResult.session_id)}">${esc(c.viewResults)}</button></section>` : "";
@@ -717,7 +771,20 @@
     const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
     const readiness = stage >= 5 ? `<button class="ep-component-link" type="button" data-ep-component-link="readiness"><span><strong>${esc(home.readiness)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-component-home" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}"><button class="ep-component-back" type="button" data-ep-component-back>← ${esc(home.back)}</button><header class="ep-component-hero"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${denominator} ${esc(home.skills)}</span></div></div><span class="ep-stage-pill">${esc(c.stageTitle)}: ${esc(stageLabel(stage))}</span></header><section class="ep-component-next"><div class="ep-component-section-label">${esc(home.next)}</div><strong class="ep-component-next-title">${esc(action.title)}</strong><div class="ep-live-meta">${esc(action.detail)}</div><button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)}</button></section><section class="ep-component-progress-card"><div class="ep-component-section-head"><strong>${esc(home.progress)}</strong><span>${covered} / ${denominator}</span></div><div class="ep-live-progress"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div><div class="ep-live-meta">${esc(c.coverage)}: ${coverage.toFixed(0)}%</div></section>${lastResultCard}<section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section><section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}</section></section>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
+      <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
+        <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><button class="ep-route-back" type="button" data-ep-component-back aria-label="${esc(c.overview)}">←</button><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
+          <div class="ep-route-identity"><div><h2>${esc(componentName)}</h2><span class="ep-route-phase">${esc(stageLabel(stage))} · ${esc(c.stageTitle)}</span></div><span class="ep-live-component-code">${component}</span></div></header>
+        <section class="ep-component-next"><span class="ep-component-section-label">${esc(home.next)}</span>
+          <strong class="ep-component-next-title">${esc(action.title)}</strong>
+          <div class="ep-route-next-detail">${esc(action.detail)}</div>
+          <button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)}</button></section>
+        <section class="ep-component-progress-card"><div class="ep-component-section-head"><strong>${esc(c.coverage)}</strong><span class="ep-route-progress-value">${covered} / ${denominator}</span></div>
+          <div class="ep-live-progress" role="progressbar" aria-valuenow="${covered}" aria-valuemin="0" aria-valuemax="${denominator}" aria-label="${esc(c.coverage)}"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div>
+          <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
+        ${lastResultCard}
+        <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
+        <section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}</section></section>`, {compact:true});
     state.notice = null;
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
@@ -884,7 +951,17 @@
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
     state.notice = null;
-    root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => openComponentHome(card.dataset.epLiveOpenComponent)));
+    root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
+      const component = card.dataset.epLiveOpenComponent;
+      // The dashboard explicitly says "Start/Continue entry check".
+      // Honour that one-tap action; do not show a second identical CTA.
+      // Server-side idempotency and session recovery stay authoritative.
+      if (state.progress[component]?.stage0_complete !== true) {
+        void startDiagnostic(component, "component");
+      } else {
+        void openComponentHome(component);
+      }
+    }));
     root.querySelectorAll("[data-ep-live-start]").forEach(b => b.addEventListener("click", () => startDiagnostic(b.dataset.epLiveStart)));
     root.querySelectorAll("[data-ep-live-plan]").forEach(b => b.addEventListener("click", () => openPlan(b.dataset.epLivePlan)));
     root.querySelectorAll("[data-ep-live-timed]").forEach(b => b.addEventListener("click", () => openTimed(b.dataset.epLiveTimed)));
@@ -1177,9 +1254,10 @@
     if (paperLearning) {
       const w=writtenCopy();
       answerControl='<div class="ep-written-external" data-ep-written-external="true">' +
-        '<p class="ep-written-instruction">'+esc(w.instruction)+'</p>' +
-        '<div class="ep-written-criteria-panel" data-ep-written-criteria-panel hidden></div>' +
-        '<p class="ep-live-meta">'+esc(w.note)+'</p></div>';
+         '<p class="ep-written-instruction">'+esc(w.instruction)+'</p>' +
+         '<button class="ep-live-btn secondary ep-written-criteria-toggle" type="button" data-ep-written-criteria-toggle aria-expanded="false">'+esc(w.criteria)+'</button>' +
+         '<div class="ep-written-criteria-panel" data-ep-written-criteria-panel hidden></div>' +
+         '<p class="ep-live-meta">'+esc(w.note)+'</p></div>';
     } else if (item.item_kind === "written") {
       const writtenInfo = timed ? "" : `<aside class="ep-written-info"><strong>${esc(c.writtenInfoTitle)}</strong><span>${esc(c.writtenInfoText)}</span><small>${esc(writtenPolicyText())}</small></aside>`;
       answerControl = `${writtenInfo}<label class="ep-live-field"><span>${esc(c.written)}</span><textarea class="ep-live-textarea" name="ep_live_written_answer"></textarea></label>`;
@@ -1187,13 +1265,19 @@
       answerControl = `<div class="ep-live-options">${item.options.map((option, index) => `<label class="ep-live-option"><input type="radio" name="ep_live_answer" value="${index}"><span>${esc(localizedOptionText(option))}</span></label>`).join("")}</div>`;
     } else answerControl = `<input class="ep-live-input" name="ep_live_text_answer" autocomplete="off" aria-label="${esc(c.submit)}">`;
     const timer = timed ? `<span class="ep-live-timer" data-ep-live-timer></span>` : "";
-    const exit = timed ? '<button class="ep-live-btn secondary" type="button" data-ep-live-end>'+esc(c.endAttempt)+'</button>' :
-      '<button class="ep-live-btn secondary" type="button" data-ep-live-exit>'+esc(c.back)+'</button>';
+    const exit = timed ? '<button class="ep-focus-back" type="button" data-ep-live-end>'+esc(c.endAttempt)+'</button>' :
+      '<button class="ep-focus-back" type="button" data-ep-live-exit>← '+esc(c.back)+'</button>';
     const actionMarkup = paperLearning
-      ? '<div class="ep-written-actions"><button class="ep-live-btn secondary" type="button" data-ep-written-criteria-toggle>'+esc(writtenCopy().criteria)+'</button>'+
-        '<button class="ep-live-btn" type="button" data-ep-written-next>'+esc(writtenCopy().next)+'</button></div>'
+      ? '<button class="ep-live-btn" type="button" data-ep-written-next>'+esc(writtenCopy().next)+'</button>'
       : '<button class="ep-live-btn" type="button" data-ep-live-submit>'+esc(c.submit)+'</button>';
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card ep-live-question-card" data-ep-live-active-assessment="true"><div class="ep-live-head"><strong>${esc(paperLearning ? (state.language==="uz" ? "Topshiriq" : state.language==="en" ? "Task" : "Задание") : c.question)} ${answered + 1} / ${total}</strong>${timer}</div><div class="ep-live-qtext">${esc(item.text || item.written_prompt || "")}</div>${answerControl}<div class="ep-live-actions">${actionMarkup}${exit}</div></div>`, { compact: true });
+    const u=uxText();
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
+      <section class="ep-focus-screen" data-ep-focus-mode="true">
+        <header class="ep-focus-head ep-live-head">${exit}<strong>${esc(state.session?.component_code||"")} · ${esc(paperLearning?u.task:c.question)} ${answered+1} ${paperLearning?esc(u.of):"/"} ${total}</strong>${timer}</header>
+        <div class="ep-live-card ep-live-question-card" data-ep-live-active-assessment="true">
+          <div class="ep-live-qtext">${uxMath(item.text || item.written_prompt || "")}</div>${answerControl}</div>
+        <footer class="ep-focus-dock">${actionMarkup}</footer>
+      </section>`, { compact: true });
     state.notice = null;
     root.querySelector('[data-ep-live-submit]')?.addEventListener('click', () => submitAnswer(item));
     if (paperLearning) {
@@ -1222,10 +1306,12 @@
     if (panel.dataset.loaded==="true") {
       panel.hidden=!panel.hidden;
       button.textContent=panel.hidden?c.criteria:c.hide;
+       button.setAttribute('aria-expanded',String(!panel.hidden));
       return;
     }
     const token=++state.writtenCriteriaRequest, sessionId=state.session.session_id;
     panel.hidden=false;panel.dataset.loading="true";panel.textContent=c.loading;
+     button.setAttribute("aria-expanded","true");
     button.disabled=true;
     const result=await boundWrittenCall(
       () => internal.api.writtenCriteria(sessionId,Number(item.item_order),state.language),12000);
@@ -1237,7 +1323,7 @@
     if (!entries.length) {panel.textContent=(result?.ok && result.data?.reason==="localization_pending")?c.translationPending:c.unavailable;return;}
     const head=document.createElement("strong");head.textContent=c.criteriaTitle;
     const list=document.createElement("ol");
-    entries.forEach(value=>{const li=document.createElement("li");li.textContent=value;list.append(li);});
+    entries.forEach(value=>{const li=document.createElement("li");li.innerHTML=uxMath(value);list.append(li);});
     panel.replaceChildren(head,list);panel.dataset.loaded="true";button.textContent=c.hide;
   }
 

@@ -162,26 +162,35 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'opening Exam Prep must not start an assessment');
   assert(!r.calls.some(name=>name.startsWith('generate_exam_prep_weekly_plan')),'opening Exam Prep must not generate a weekly plan');
 
-  await page.click('[data-ep-live-open-component="P1"]');
-  await page.waitForFunction(()=>document.querySelector('[data-ep-component-home="P1"]'));
-  r=await page.evaluate(()=>({
-    primary:document.querySelector('[data-ep-component-primary]')?.textContent,
-    calls:window.__calls.map(x=>x.name),
-    hasGenericHead:Boolean(document.querySelector('#exam-prep-host-root .ep-live-head')),
-    hasComponentHero:Boolean(document.querySelector('[data-ep-component-home="P1"] .ep-component-hero')),
-    backHeight:document.querySelector('[data-ep-component-back]')?.getBoundingClientRect().height || 0,
-    horizontalOverflow:document.documentElement.scrollWidth > innerWidth + 1
-  }));
-  assert(/Start entry check/i.test(r.primary),'P1 first entry must name the entry check directly');
-  assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'viewing P1 must remain read-only before learner action');
-  assert(!r.calls.includes('get_exam_prep_state_safe_v1'),'incomplete Stage 0 component home must not rebuild derived state');
-  assert(r.hasComponentHero,'P1 component identity must remain visible on the component screen');
-  assert(!r.hasGenericHead,'component screen must not repeat the generic Exam Prep intro above the paper identity');
-  assert(r.backHeight>=44,`component back touch target must be at least 44px; got ${r.backHeight}`);
-  assert(r.horizontalOverflow===false,'P1 component home must not overflow horizontally at 390px');
+  // The dashboard's "Start entry check" is itself an explicit user action:
+  // a single tap must open the first question, not another Start button.
+  for (const width of [320, 360, 390, 430, 768, 1280]) {
+    await page.setViewportSize({width,height:844});
+    const bounds=await page.evaluate(()=>{
+      const card=document.querySelector('[data-ep-live-open-component="P1"]');
+      const rect=card?.getBoundingClientRect();
+      return {overflow:document.documentElement.scrollWidth>innerWidth+1,
+        height:rect?.height||0,right:rect?.right||0,view:innerWidth};
+    });
+    assert(!bounds.overflow && bounds.height>=44 && bounds.right<=bounds.view+1,
+      'Responsive one-tap entry card failed at '+width+'px: '+JSON.stringify(bounds));
+  }
+  await page.setViewportSize({width:390,height:844});
 
-  await page.click('[data-ep-component-primary="diagnostic"]');
+  const beforeStart=await page.evaluate(()=>window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1').length);
+  await page.click('[data-ep-live-open-component="P1"]');
   await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
+  r=await page.evaluate(()=>({
+    starts:window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1'),
+    stateReads:window.__calls.filter(x=>x.name==='get_exam_prep_state_safe_v1').length,
+    redundantStart:Boolean(document.querySelector('[data-ep-component-primary="diagnostic"]')),
+    componentPage:Boolean(document.querySelector('[data-ep-component-home]'))
+  }));
+  assert(beforeStart===0 && r.starts.length===1 && r.starts[0].args.p_component_code==='P1',
+    'one dashboard tap must invoke exactly one P1 diagnostic start');
+  assert(r.stateReads===0,'incomplete Stage 0 must not rebuild derived state');
+  assert(!r.redundantStart && !r.componentPage,'first entry must reach the question directly, without the second Start screen');
+
 
   r=await page.evaluate(()=>({
     hasGenericTitle:Boolean(document.querySelector('#exam-prep-host-root .ep-host-title')),
@@ -192,7 +201,37 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(r.hasGenericTitle===false,'mobile question must not repeat the generic module title');
   assert(r.hasQuestionCard===true,'mobile question must use the compact question surface');
   assert(r.submitHeight>=44,`mobile submit touch target must be at least 44px; got ${r.submitHeight}`);
+  if(r.horizontalOverflow) {
+    const details=await page.evaluate(()=>({
+      viewport:innerWidth,docScroll:document.documentElement.scrollWidth,
+      offenders:[...document.querySelectorAll('body *')].filter(el=>{
+        const cs=getComputedStyle(el),box=el.getBoundingClientRect();
+        return cs.display!=='none' && cs.visibility!=='hidden' && box.width>0 && (box.right>innerWidth+1 || box.left < -1);
+      }).map(el=>({tag:el.tagName,cls:String(el.className||'').slice(0,100),sel:el.getAttribute('data-ep-focus-mode')||'',left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right),scroll:el.scrollWidth,client:el.clientWidth,position:getComputedStyle(el).position,minWidth:getComputedStyle(el).minWidth})).slice(0,40)
+    }));
+    console.log('EXAM_PREP_MOBILE_OVERFLOW_TRACE',JSON.stringify(details));
+  }
   assert(r.horizontalOverflow===false,'mobile question must not overflow horizontally at 390px');
+
+  // Responsive active assessment: no horizontal clipping, accessible actions and fixed CTA.
+  for (const width of [320, 360, 390, 430, 768, 1280]) {
+    await page.setViewportSize({width,height:844});
+    const bounds=await page.evaluate(()=>{
+      const submit=document.querySelector('[data-ep-live-submit]');
+      const dock=document.querySelector('.ep-focus-dock');
+      const q=document.querySelector('.ep-live-question-card');
+      const rect=submit?.getBoundingClientRect();
+      const hit=rect?document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2):null;
+      return {overflow:document.documentElement.scrollWidth>innerWidth+1,
+        page:document.documentElement.scrollWidth,view:innerWidth,
+        submitHeight:rect?.height||0,submitHit:!!(hit && submit?.contains(hit)),
+        dockRight:dock?.getBoundingClientRect().right||0,
+        questionRight:q?.getBoundingClientRect().right||0};
+    });
+    assert(!bounds.overflow && bounds.submitHeight>=44 && bounds.submitHit && bounds.dockRight<=bounds.view+1,
+      'Responsive focused diagnostic failed at '+width+'px: '+JSON.stringify(bounds));
+  }
+  await page.setViewportSize({width:390,height:844});
 
   await page.check('input[name="ep_live_answer"][value="1"]');
   await page.click('[data-ep-live-submit]');

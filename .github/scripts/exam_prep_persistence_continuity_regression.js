@@ -147,10 +147,9 @@ const path = require('path');
   assert(snapshot.text.includes('5 / 24') && snapshot.text.includes('6 / 15'), 'close/reopen must restore saved component progress');
   assert(snapshot.text.includes('May/June 2027') && snapshot.text.includes('Total: 12 h/week'), 'close/reopen must restore saved settings');
 
+  assert((await page.locator('[data-ep-live-open-component="P1"]').innerText()).includes('Continue entry check'), 'P1 dashboard must preserve the resume action');
   await page.click('[data-ep-live-open-component="P1"]');
-  await page.waitForSelector('[data-ep-component-home="P1"]');
-  assert((await page.locator('[data-ep-component-primary]').innerText()).includes('Continue entry check'), 'P1 component home must preserve the resume action');
-  await page.click('[data-ep-component-primary="diagnostic"]');
+  assert(await page.locator('[data-ep-component-primary="diagnostic"]').count()===0, 'Resume must skip the redundant Start screen');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent?.includes('Question 2 / 2'));
   snapshot = await page.evaluate(() => ({ text: document.querySelector('#exam-prep-host-root')?.textContent || '', calls: window.__calls }));
   assert(snapshot.text.includes('Second question after reopening'), 'active diagnostic must resume at the next unanswered item');

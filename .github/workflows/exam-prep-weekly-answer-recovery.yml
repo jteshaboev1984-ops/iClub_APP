@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
-          test "$(git hash-object exam-prep/exam-prep-live.js)" = '62d48905402505fbaa9938cb41059fc7e45b5838'
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = 'c079b1dbde99a37bb4462f282746a4ef58ddef0a'
           grep -Fq 'data-ep-result-item-order=' exam-prep/exam-prep-live.js
           grep -Fq 'data-ep-result-session-type=' exam-prep/exam-prep-live.js
           grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js

@@ -148,8 +148,8 @@ const path = require('path');
 
   await page.waitForSelector('[data-ep-session-result]');
   text = await page.locator('#exam-prep-host-root').textContent();
-  assert(text.includes('Auto-checked questions') && text.includes('1 / 1 correct'), 'machine result must use only auto-checked denominator');
-  assert(text.includes('Written part') && text.includes('1 / 1 completed'), 'written completion must be reported separately');
+  assert(text.includes('Auto-checked answers') && text.includes('1 of 1'), 'machine result must use only auto-checked denominator');
+  assert(text.includes('Written part') && text.includes('1 / 1'), 'written completion must be reported separately');
   assert(text.includes('Written tasks are not included in the correct-answer percentage.'), 'written denominator boundary missing on result');
   await page.click('[data-ep-result-review]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Understanding check: 2 / 3'));
@@ -166,9 +166,9 @@ const path = require('path');
   assert(result.text.includes('The second conversion reverses the first.'), 'server rationale for missed check must remain visible only in the completed review');
   assert(result.text.includes('This is not a mark for the full written solution.'), 'understanding check must not look like a written mark');
   await page.click('[data-ep-result-continue]');
-  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Weekly plan'));
+  await page.waitForSelector('[data-ep-component-home="P1"]');
   const afterContinue = await page.locator('#exam-prep-host-root').textContent();
-  assert(afterContinue.includes('Weekly plan'), 'written completion must return to weekly plan after explicit continue');
+  assert(afterContinue.includes('Next step'), 'written completion must return to the refreshed learning route');
   assert(!result.text.includes('P1-CIR-01'), 'internal skill code must not be learner-visible');
 
   await browser.close();
