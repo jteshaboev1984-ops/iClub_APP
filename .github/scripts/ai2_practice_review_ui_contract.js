@@ -36,7 +36,7 @@ const bridgeMatch = app.match(/function syncPracticeAiDomContext\(\) \{[\s\S]*?\
 assert(bridgeMatch, 'Practice AI host bridge block missing');
 assert(!/correctAnswer|correct_answer|explanation/.test(bridgeMatch[0]), 'Practice AI host bridge leaks answer material');
 
-const appIndex = html.indexOf('app.js?v=');
+const appIndex = html.indexOf('src="app.js?');
 const uiIndex = html.indexOf('practice-ai-ui.js?v=ai2review1');
 assert(appIndex >= 0 && uiIndex > appIndex, 'Practice AI UI must load after app host');
 assert(css.includes('Practice learning assistant — AI-2 dormant learner UI'), 'centralized Practice AI UI CSS missing');

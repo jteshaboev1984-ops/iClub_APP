@@ -21,7 +21,8 @@ assert(!review.includes('const genericMistake ='),'Unmapped feedback template mu
 assert(!review.includes('const genericNextStep ='),'Unmapped next-step template must not appear in review');
 assert(review.includes('d.diagnosticStatus === "mapped"'),'Only mapped verified diagnostics may show a cause');
 assert(app.includes('handlePracticePause();'),'Back must preserve existing pause routine');
-assert(html.includes('ptopic1-reviewback1'),'Cache pin must make fix available to learners');
+assert(/<script src="practice-topic-choice\.js\?[^"]+"><\/script>/.test(html),'Versioned topic choice script must be present');
+assert(html.indexOf('practice-topic-choice.js?') < html.indexOf('src="app.js?'),'Topic choice must load before the app');
 (async()=>{
 const browser=await chromium.launch({headless:true});
 try{
