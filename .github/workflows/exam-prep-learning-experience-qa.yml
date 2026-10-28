@@ -58,6 +58,8 @@ jobs:
         run: node .github/scripts/p0_17_live_diagnostic_regression.js
       - name: Stage 1 learning, written work, results and accordion layout 320 360 390 430 768 1280
         run: node .github/scripts/p0_18_live_plan_regression.js
+      - name: Foundation continuation, confirmed coverage and syllabus tracker
+        run: node .github/scripts/p0_20_live_tracker_corrections_regression.js
       - name: Full Stage 0 to Stage 6 user journey and P1/P5 isolation
         run: node .github/scripts/p2_55_full_learner_journey_regression.js
       - name: Written learning, localized criteria and recovery
