@@ -1,0 +1,22 @@
+name: Economics Written Consent Beta Isolated Gate
+
+on:
+  pull_request:
+    paths:
+      - 'exam-prep/exam-prep-economics-native.js'
+      - 'supabase/migrations/*iclub_econ_written_consent_beta_wave1_off_v1.sql'
+      - 'scripts/qa-economics-consent-written-beta.cjs'
+      - '.github/workflows/economics-written-consent-beta.yml'
+  workflow_dispatch:
+
+jobs:
+  beta-consent-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Auth, consent, source and regression boundaries
+        run: node scripts/qa-economics-consent-written-beta.cjs
