@@ -228,14 +228,18 @@ async function main(){
   const safePrior=activity.asks.length;
   activity.oldVoidNext=true;
   activity.probeSafe=false;
+  const genericBefore=((await page.locator("[data-global-ai-messages]")
+    .textContent())||"").split("iClub AI сейчас недоступен").length-1;
   await askInput.fill("Почему я получил такие баллы?");
   // Many previous synthetic chat turns can put the bottom composer outside
   // the 768px test viewport. Assert the actual button is enabled, then
   // activate its genuine click handler without the viewport constraint.
   assert.equal(await page.locator("[data-global-ai-send]").isEnabled(),true);
   await page.locator("[data-global-ai-send]").evaluate(el=>el.click());
-  await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
-    ?.textContent?.includes("iClub AI сейчас недоступен"),null,{timeout:8000});
+  await page.waitForFunction(count=>{
+    const msg=document.querySelector("[data-global-ai-messages]")?.textContent||"";
+    return msg.split("iClub AI сейчас недоступен").length-1>count;
+  },genericBefore,{timeout:8000});
   await askInput.fill("Хочу задать следующий вопрос про математику.");
   assert.equal(await page.locator("[data-global-ai-send]").isEnabled(),true);
   await page.locator("[data-global-ai-send]").evaluate(el=>el.click());
