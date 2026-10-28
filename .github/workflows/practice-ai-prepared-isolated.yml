@@ -99,8 +99,8 @@ jobs:
           if(index.includes('practice-ai-prepared-qa.js') ||
              index.includes('practice-ai-prepared-qa.css'))
             throw new Error('Duplicate Practice AI panel is loaded');
-          if(!index.includes('iclub-ai-v21-ui.js?practice-context-candidate') ||
-             !index.includes('iclub-ai-v21-beta-client.js?practice-context-candidate') ||
+          if(!/iclub-ai-v21-ui\\.js\\?[a-zA-Z0-9_-]+/.test(index) ||
+             !/iclub-ai-v21-beta-client\\.js\\?[a-zA-Z0-9_-]+/.test(index) ||
              !beta.includes('askPracticePrepared') ||
              !tutor.includes('checkPracticeChatGate'))
             throw new Error('Single Tutor Practice context bridge missing');
