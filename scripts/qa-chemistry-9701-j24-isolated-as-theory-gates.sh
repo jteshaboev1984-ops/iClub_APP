@@ -11,6 +11,8 @@ CREATE ROLE authenticated NOLOGIN;
 CREATE ROLE anon NOLOGIN;
 CREATE SCHEMA private;
 CREATE SCHEMA auth;
+CREATE TABLE auth.users(id uuid PRIMARY KEY);
+INSERT INTO auth.users VALUES ('10000000-0000-4000-8000-000000000001'),('20000000-0000-4000-8000-000000000002');
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$
  SELECT NULLIF(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
 CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$
@@ -68,6 +70,7 @@ INSERT INTO private.iclub_subject_library_theory VALUES
 SQL
 
 psql -X -v ON_ERROR_STOP=1 -d postgres -f scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql >/dev/null
+psql -X -v ON_ERROR_STOP=1 -d postgres -f supabase/migrations/20261028153500_chemistry_9701_j25_as_theory_voluntary_consent_v1.sql >/dev/null
 psql -X -v ON_ERROR_STOP=1 -d postgres <<'SQL'
 DO $$
 BEGIN
@@ -78,6 +81,12 @@ BEGIN
  THEN RAISE EXCEPTION 'Authenticated RPC grant is missing'; END IF;
  IF EXISTS(SELECT 1 FROM private.iclub_exam_chemistry_j24_as_theory_control_v1 WHERE enabled)
  THEN RAISE EXCEPTION 'Default source gate must be OFF'; END IF;
+ IF EXISTS(SELECT 1 FROM private.iclub_exam_chemistry_j25_as_theory_optins_v1)
+ OR EXISTS(SELECT 1 FROM private.iclub_exam_chemistry_j25_as_theory_control_v1 WHERE release_phase<>'closed')
+ THEN RAISE EXCEPTION 'J25 must have no automatic users or invitations'; END IF;
+ IF has_function_privilege('anon','public.iclub_exam_chemistry_j25_grant_theory_consent_v1(text,text)','EXECUTE')
+ OR has_function_privilege('anon','public.iclub_exam_chemistry_j25_revoke_theory_consent_v1()','EXECUTE')
+ THEN RAISE EXCEPTION 'Anonymous J25 access must be denied'; END IF;
 END $$;
 -- Synthetic JWT identity and exact beta permission, but gate OFF.
 SET request.jwt.claim.sub='10000000-0000-4000-8000-000000000001';
@@ -88,6 +97,33 @@ BEGIN
  IF (public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'code')<>'not_available'
  THEN RAISE EXCEPTION 'Enabled read before owner review'; END IF;
 END $$;
+RESET ROLE;
+
+-- No implicit enrollment from Mathematics: manually invite exactly one synthetic canary.
+INSERT INTO private.iclub_exam_chemistry_j25_as_theory_optins_v1
+ (user_id,invited_at,is_canary)
+VALUES('10000000-0000-4000-8000-000000000001',now(),true);
+SET ROLE authenticated;
+DO $
+BEGIN
+ IF public.iclub_exam_chemistry_j25_grant_theory_consent_v1(
+  'en','I_VOLUNTARILY_AGREE_TO_CHEMISTRY_AS_THEORY_BETA_V1')->>'code'<>'consent_recorded'
+ THEN RAISE EXCEPTION 'Independent AS Theory consent failed'; END IF;
+ IF public.iclub_exam_chemistry_j25_theory_consent_status_v1()->>'can_start'<>'false'
+ THEN RAISE EXCEPTION 'Consent itself unlocked closed Theory'; END IF;
+END $;
+RESET ROLE;
+UPDATE private.iclub_exam_chemistry_j25_as_theory_optins_v1
+ SET owner_approved_at=now(),active=true WHERE is_canary=true AND consented_at IS NOT NULL;
+UPDATE private.iclub_exam_chemistry_j25_as_theory_control_v1
+ SET release_phase='canary',owner_go_at=now() WHERE id=1;
+SET ROLE authenticated;
+DO $
+BEGIN
+ IF public.iclub_exam_chemistry_j25_grant_theory_consent_v1(
+  'en','I_VOLUNTARILY_AGREE_TO_CHEMISTRY_AS_THEORY_BETA_V1')->>'code'<>'already_recorded'
+ THEN RAISE EXCEPTION 'Repeating consent must be idempotent'; END IF;
+END $;
 RESET ROLE;
 
 -- Simulate later explicit academic/rights/owner approvals IN DISPOSABLE DATABASE ONLY.
@@ -133,15 +169,18 @@ BEGIN
 END $$;
 SET request.jwt.claim.active_exam='false';
 RESET ROLE;
-UPDATE private.iclub_exam_chemistry_p1_beta_members_v1 SET revoked_at=now();
 SET ROLE authenticated;
-DO $$
+DO $
 BEGIN
+ IF public.iclub_exam_chemistry_j25_revoke_theory_consent_v1()->>'ok'<>'true'
+ THEN RAISE EXCEPTION 'AS Theory consent revocation failed'; END IF;
  IF public.iclub_exam_chemistry_j24_theory_catalog_v1('en')->>'code'<>'not_available'
  THEN RAISE EXCEPTION 'Revoked learner still authorized'; END IF;
-END $$;
+END $;
 RESET ROLE;
-UPDATE private.iclub_exam_chemistry_p1_beta_members_v1 SET revoked_at=null;
+UPDATE private.iclub_exam_chemistry_j25_as_theory_optins_v1
+ SET revoked_at=NULL,consented_at=now(),owner_approved_at=now(),active=true
+ WHERE is_canary=true;
 UPDATE private.iclub_exam_chemistry_j24_as_theory_control_v1
 SET approved_as_manifest_md5=md5('stale') WHERE id=1;
 SET ROLE authenticated;
@@ -152,5 +191,5 @@ BEGIN
 END $$;
 RESET ROLE;
 UPDATE private.iclub_exam_chemistry_j24_as_theory_control_v1 SET enabled=false;
-SELECT 'J24 isolated AS-only authenticated Theory firewall PASS (disposable data only)' as outcome;
+SELECT 'J24/J25 isolated AS-only Theory + voluntary canary consent firewall PASS (disposable data only)' as outcome;
 SQL
