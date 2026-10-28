@@ -49,6 +49,18 @@ jobs:
           set -euo pipefail
           bash -n scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh
           ! grep -Eq 'supabase\.co|service_role|auth\.users|curl|wget' scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh
+      - name: Runtime must reject remote hosts and production credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          if PGHOST=remote.example.invalid bash scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh > /tmp/j22-remote-rejected.log 2>&1; then
+            echo "UNSAFE: accepted remote PostgreSQL host"; exit 61
+          fi
+          grep -Fq 'Remote PostgreSQL is forbidden' /tmp/j22-remote-rejected.log
+          if DATABASE_URL=postgres://example.invalid/production bash scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh > /tmp/j22-credential-rejected.log 2>&1; then
+            echo "UNSAFE: accepted production-style database URL"; exit 62
+          fi
+          grep -Fq 'Forbidden production credentials' /tmp/j22-credential-rejected.log
       - name: Real PostgreSQL backup, fresh DB restore and synthetic corruption isolation
         shell: bash
         run: bash scripts/qa-chemistry-9701-j22-isolated-backup-restore.sh
