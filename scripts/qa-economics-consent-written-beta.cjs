@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const root=require('node:path').resolve(__dirname,'..');
+const read=p=>fs.readFileSync(require('node:path').join(root,p),'utf8');
+const js=read('exam-prep/exam-prep-economics-native.js');
+const sql=read('supabase/migrations/20261028094500_iclub_econ_written_consent_beta_wave1_off_v1.sql');
+const html=read('index.html');
+new Function(js);
+function need(condition,message){assert(condition,message)}
+need(js.includes('state.betaInvite=beta.ok&&beta.eligible===true'),'Invite requires server eligibility');
+need(js.includes('state.betaJoined=beta.ok&&beta.joined===true'),'Beta join state must derive from server');
+need(js.includes('betaJoin:"Согласен, начать"'),'Clear Russian explicit consent control');
+need(js.includes('betaJoin:"Roziman, boshlash"'),'Clear Uzbek explicit consent control');
+need(js.includes('betaJoin:"I agree, start"'),'Clear English explicit consent control');
+need(js.includes('state.betaInvite&&!state.writtenPlan&&window.iClubWrittenCoreViewV1'),'No invite for already assigned or missing viewer');
+need(js.includes('!stage.complete')&&js.includes('if(!stage.complete){'),'Entry check must precede beta invite');
+need(js.includes('rpc("iclub_econ_written_beta_join_v1",{p_confirm:true})'),'Join requires explicit click');
+need(js.includes('rpc("iclub_econ_written_beta_leave_v1",{})'),'Learner can leave beta');
+need(js.includes('if(state.betaJoined){'),'Leave control retained after practice completion');
+const joinArea=js.slice(js.indexOf('if(state.betaInvite&&!state.writtenPlan'),js.indexOf('const tools=e("div","ep-live-actions")'));
+need(joinArea.includes('btn(t().betaJoin,async()=>{'),'Direct user button must start join');
+need(!js.slice(0,js.indexOf('function renderHome(){')).includes('rpc("iclub_econ_written_beta_join_v1"'),'No automatic beta join at startup');
+need(sql.includes('VALUES(true,false,3)'),'Beta launch must be default OFF');
+need(sql.includes('p_confirm IS DISTINCT FROM true'),'False / missing consent must be rejected');
+need(sql.includes("co.consent_scope='exam_prep_controlled_beta_v1'"),'Reuse eligibility from consented cohort, not implicit consent');
+need(sql.includes("s.subject_key='economics' AND s.is_active"),'Only Economics subscribers');
+need(sql.includes("a.paper_code='P1' AND a.session_kind='diagnostic'"),'Economics diagnostic requirement');
+need(sql.includes("max_members BETWEEN 1 AND 3"),'Hard cohort limit');
+need(sql.includes('WHERE singleton FOR UPDATE'),'Join must serialize capacity checks');
+need(sql.includes("now()+INTERVAL '28 days'"),'Beta access must expire');
+need(sql.includes('private.iclub_exam_written_source_ready_v1('),'Source approval checked on joining');
+need(sql.includes('status=\'withdrawn\''),'Leave must revoke consent and not erase records');
+need(!/\bDELETE\s+FROM\b|\bTRUNCATE\b/i.test(sql),'No deletion of learner data');
+need(!/localStorage\.clear\(/.test(js),'Never clear local history');
+need(html.includes('exam-prep/exam-prep-economics-native.js?'),'Native Economics app must remain loaded');
+console.log('ECONOMICS_WRITTEN_CONSENT_BETA_SAFE PASS — 22 static protection checks + JS parse');
