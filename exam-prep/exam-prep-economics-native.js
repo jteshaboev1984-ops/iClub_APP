@@ -9,7 +9,7 @@
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
       confirm:"Завершить экзамен? Пропущенные вопросы получат 0 баллов.",result:"Результат",
       review:"Разбор ответов",right:"Правильный ответ",your:"Ваш ответ",empty:"Не отвечено",
-      loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить", uncertain:"Сохранение не подтверждено. Ответ остался на экране. Сначала проверьте сервер.", checkSaved:"Проверить сохранение", retrySame:"Отправить тот же ответ", selectionPending:"Ответ пока не отправлен.",
+      loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить", uncertain:"Сохранение не подтверждено. Ответ остался на экране. Сначала проверьте сервер.", checkSaved:"Проверить сохранение", retrySame:"Отправить тот же ответ", selectionPending:"Ответ пока не отправлен.", finishNeedSubmit:"Сначала отправьте выбранный вариант кнопкой «Ответить».",
       plan:"Мой учебный план",planIntro:"Начните с этих тем и проверьте себя после повторения.",
       unit:"Раздел",correct:"Верно",mistakes:"Тем для повторения",studied:"Изучено",verified:"Подтверждено повторной проверкой",
       study:"Объяснение темы",trap:"На что обратить внимание",check:"Проверьте себя",showCheck:"Показать ответ",
@@ -22,7 +22,7 @@
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
       confirm:"Imtihonni yakunlaysizmi? Javobsiz savollar 0 ball bo‘ladi.",result:"Natija",
       review:"Javoblarni tahlil qilish",right:"To‘g‘ri javob",your:"Sizning javobingiz",empty:"Javob berilmagan",
-      loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish", uncertain:"Saqlanganini tasdiqlab bo‘lmadi. Javob ekranda qoldi. Avval server holatini tekshiring.", checkSaved:"Saqlanganini tekshirish", retrySame:"Shu javobni qayta yuborish", selectionPending:"Javob hali yuborilmadi.",
+      loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish", uncertain:"Saqlanganini tasdiqlab bo‘lmadi. Javob ekranda qoldi. Avval server holatini tekshiring.", checkSaved:"Saqlanganini tekshirish", retrySame:"Shu javobni qayta yuborish", selectionPending:"Javob hali yuborilmadi.", finishNeedSubmit:"Avval tanlangan javobni «Javob berish» tugmasi orqali yuboring.",
       plan:"Mening o‘quv rejam",planIntro:"Avval shu mavzularni o‘rganing, so‘ng qayta tekshiring.",
       unit:"Bo‘lim",correct:"To‘g‘ri",mistakes:"Takrorlanadigan mavzular",studied:"O‘rganildi",verified:"Qayta tekshiruvda tasdiqlangan",
       study:"Mavzu izohi",trap:"E'tibor bering",check:"O‘zingizni tekshiring",showCheck:"Javobni ko‘rsatish",
@@ -35,7 +35,7 @@
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
       confirm:"Finish this exam? Unanswered questions score zero.",result:"Result",
       review:"Review answers",right:"Correct answer",your:"Your answer",empty:"Unanswered",
-      loading:"Loading…",error:"The action failed. Check your connection.",retry:"Try again", uncertain:"Saving has not been confirmed. Your choice remains here. Check the server first.", checkSaved:"Check saved answer", retrySame:"Resend the same answer", selectionPending:"This choice has not been submitted.",
+      loading:"Loading…",error:"The action failed. Check your connection.",retry:"Try again", uncertain:"Saving has not been confirmed. Your choice remains here. Check the server first.", checkSaved:"Check saved answer", retrySame:"Resend the same answer", selectionPending:"This choice has not been submitted.", finishNeedSubmit:"Submit your selected answer before finishing the exam.",
       plan:"My study plan",planIntro:"Review these topics first, then test your understanding again.",
       unit:"Unit",correct:"Correct",mistakes:"Topics to review",studied:"Studied",verified:"Confirmed in a later test",
       study:"Topic explanation",trap:"Watch out for",check:"Check your understanding",showCheck:"Show answer",
@@ -824,6 +824,12 @@
       if(item?.answered&&item.selected_index===pending.choice){
         commitChoice(pending);return;
       }
+      if(result.status==="finalized"){
+        // The attempt is closed; a draft cannot become score evidence.
+        clearChoiceDraft(pending.sessionId,pending.order);
+        state.pendingChoice=null;
+        draw();return;
+      }
       // A definite server read enables only an explicit same-choice retry.
       pending.retryAllowed=result.status==="active"&&
         new Date(result.deadline_at).getTime()>Date.now();
@@ -869,7 +875,20 @@
   }
   async function finish(auto){
     if(state.busy||state.closed||state.data?.status!=="active")return;
-    if(!auto&&!window.confirm(t().confirm))return;
+    if(!auto){
+      const unsubmitted=state.data.items.findIndex((item,order)=>{
+        const draft=readChoiceDraft(state.id,order);
+        return draft && (item.answered!==true||item.selected_index!==draft.choice);
+      });
+      if(unsubmitted>=0){
+        state.index=unsubmitted;draw();
+        const note=e("p","ep-native-unsubmitted",t().finishNeedSubmit);
+        note.setAttribute("role","alert");
+        state.root?.querySelector(".ep-native-question")?.append(note);
+        return;
+      }
+      if(!window.confirm(t().confirm))return;
+    }
     stop();state.busy=true;
     const sessionId=state.id,token=state.token;
     const r=await rpc("iclub_exam_native_mcq_finish_v1",{p_session_id:sessionId});
