@@ -1750,6 +1750,25 @@
     if (!blocked) maybeShowIntro();
   }
 
+  // Temporary protected screens are not a loss of the learner's beta
+  // entitlement. A status read made while a quiz is active must never
+  // destroy a previously authorized Tutor shell.
+  function isLocalAssessmentActive(){
+    return state.practiceQuizBlocked||state.tourBlocked||state.examPrepBlocked||
+      (activeViewName()==="courses"&&document.getElementById("courses-practice-quiz")
+       ?.classList.contains("is-active")===true)||
+      document.getElementById("courses-tour-quiz")?.classList.contains("is-active")===true;
+  }
+  function recheckAfterAssessment(){
+    const inFlight=state.bootstrapInFlight;
+    if(inFlight){
+      void inFlight.then(()=>{
+        if(!state.destroyed&&!isLocalAssessmentActive())void refreshBootstrap();
+      });
+    }else if(!state.destroyed){
+      void refreshBootstrap();
+    }
+  }
   function reconcileTourBlock({ announce = false } = {}) {
     const tourQuiz = document.getElementById("courses-tour-quiz");
     const blocked = Boolean(tourQuiz?.classList.contains("is-active"));
@@ -1757,6 +1776,7 @@
     if (blocked && changed) invalidatePendingAnswer();
     state.tourBlocked = blocked;
     reconcileShell({ announceBlock: announce && changed && blocked });
+    if(changed&&!blocked)recheckAfterAssessment();
   }
 
   // Ordinary Practice is an active assessment until the server finalizes it.
@@ -1769,6 +1789,7 @@
     if (blocked && changed) invalidatePendingAnswer();
     state.practiceQuizBlocked = blocked;
     if (changed) reconcileShell();
+    if(changed&&!blocked)recheckAfterAssessment();
   }
 
   function handleExamPrepSession(event) {
@@ -1818,6 +1839,9 @@
   }
 
   async function refreshBootstrap() {
+    // Do not confuse intentional quiz/exam blocking with revoked access.
+    // The quiz-exit observers initiate a fresh authenticated status read.
+    if(isLocalAssessmentActive())return state.bootstrap;
     if (state.bootstrapInFlight) return state.bootstrapInFlight;
     const epoch = state.authEpoch;
     const client = window.sb;
@@ -1846,6 +1870,10 @@
         // An old account's in-flight bootstrap must not show its UI in the
         // newly signed-in account, even when its request finishes last.
         if (epoch !== state.authEpoch) return null;
+        if(isLocalAssessmentActive()){
+          reconcileShell();
+          return state.bootstrap;
+        }
         if (error || !data || typeof data !== "object") {
           state.bootstrap = null;
           destroyShell();
@@ -1863,6 +1891,7 @@
         return data;
       } catch {
         if (epoch !== state.authEpoch) return null;
+        if(isLocalAssessmentActive())return state.bootstrap;
         state.bootstrap = null;
         destroyShell();
         return null;
