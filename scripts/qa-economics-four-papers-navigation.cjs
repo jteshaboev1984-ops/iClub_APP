@@ -131,6 +131,6 @@ async function run(lang,scenario) {
 (async()=>{
  let n=0;
  for(const lang of langs)for(const scenario of SCENARIOS){await run(lang,scenario);n++}
- assert(html.includes('exam-prep-economics-native.js?v=econ-plan-compact-back-20261028'),'App must load updated paper grid, not cached P1/P3-only JS');
+ assert(html.includes('exam-prep-economics-native.js?v=econ-p0-answer-parity-20261028'),'App must load updated paper grid, not cached P1/P3-only JS');
  console.log('ECONOMICS FOUR PAPERS UI PASS',n,'scenarios × 3 locales; no automatic joining / no P4 bypass');
 })().catch(e=>{console.error(e);process.exitCode=1});
