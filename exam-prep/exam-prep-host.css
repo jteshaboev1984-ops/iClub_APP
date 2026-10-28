@@ -1871,9 +1871,9 @@
 #exam-prep-host-root .ep-ux-review-row>.ep-result-item{border:0;border-radius:0;border-top:1px solid var(--border,rgba(0,0,0,.1))}
 #exam-prep-host-root .ep-focus-back:focus-visible,#exam-prep-host-root .ep-focus-dock button:focus-visible,#exam-prep-host-root .ep-ux-review-row>summary:focus-visible{outline:3px solid rgba(47,111,214,.32);outline-offset:2px}
 /* Hide generic shell controls only while an isolated task/review screen is present. */
-body:has(#exam-prep-host-root .ep-focus-screen) #tabbar,
-body:has(#exam-prep-host-root .ep-focus-screen) .topbar{display:none!important}
-body:has(#exam-prep-host-root .ep-focus-screen) .main{padding-bottom:calc(95px + env(safe-area-inset-bottom,0px))}
+body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidden]) .ep-focus-screen) #tabbar,
+body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidden]) .ep-focus-screen) .topbar{display:none!important}
+body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidden]) .ep-focus-screen) .main{padding-bottom:calc(95px + env(safe-area-inset-bottom,0px))}
 @media(max-width:520px){
  #exam-prep-host-root .ep-route-premium{gap:13px}
  #exam-prep-host-root .ep-route-premium .ep-component-next{padding:17px}
@@ -1886,9 +1886,9 @@ body:has(#exam-prep-host-root .ep-focus-screen) .main{padding-bottom:calc(95px +
 @media(prefers-reduced-motion:reduce){#exam-prep-host-root .ep-focus-head{scroll-behavior:auto}}
 
 /* Preserve the focused task CTA: no floating assistant over written criteria or review. */
-body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-mark,
-body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-panel,
-body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-intro{display:none!important}
+body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidden]) .ep-focus-screen) .iclub-global-ai-mark,
+body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidden]) .ep-focus-screen) .iclub-global-ai-panel,
+body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidden]) .ep-focus-screen) .iclub-global-ai-intro{display:none!important}
 
 /* Compact return to the P1/P5 selector; distinct from the global app exit. */
 #exam-prep-host-root .ep-route-top{display:flex;align-items:center;gap:10px;min-height:44px}
