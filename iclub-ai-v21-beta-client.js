@@ -241,7 +241,10 @@
   async function status(){
     const id=await identity();
     const denied=()=>({ok:false,eligible:false,candidate:false,consented:false});
-    if(!id||protectedNow()){
+    // Status is the *account entitlement*, independent of the active
+    // screen. Tutor UI alone decides whether to SHOW its icon. Paid/academic
+    // operations still use protectedNow() and server assessment guards.
+    if(!id){
       lastUser=id;permission=null;
       return denied();
     }
@@ -255,7 +258,7 @@
     const promise=(async()=>{
       const result=await invoke({intent:"status"});
       if(ticket!==sequence||epoch!==authEpoch||
-         !id||await identity()!==id||protectedNow())return denied();
+         !id||await identity()!==id)return denied();
       lastUser=id;
       permission=result?.ok===true?{
         eligible:result.eligible===true,
