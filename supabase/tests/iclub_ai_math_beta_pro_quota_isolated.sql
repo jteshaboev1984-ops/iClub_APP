@@ -36,6 +36,7 @@ ALTER TABLE private.iclub_ai_v21_beta_usage
  CHECK (committed_count >= 0 AND committed_count <= 3);
 \ir ../migrations/20261028113000_iclub_math_beta_pro_ai_quota_v1.sql
 \ir ../migrations/20261028120000_iclub_math_beta_pro_quota_constraints_fix.sql
+\ir ../migrations/20261028130500_iclub_ai_practice_pro_pc4_and_void_probe_v1.sql
 SET request.jwt.claim.role='service_role';
 INSERT INTO private.iclub_ai_v21_beta_help_sources
  VALUES('practice_rules','ru','Проверьте завершённую попытку и исправьте ошибки.',
@@ -62,6 +63,86 @@ BEGIN
  IF NOT rejected THEN RAISE EXCEPTION 'Invalid 15-unit counter was accepted'; END IF;
  RAISE NOTICE 'PASS strict DB constraints: reject 4-unit holds and 15-unit usage';
 END $bounds$;
+-- Reproduce the EXACT post-Pro paid dispatch path, not just a 5-unit
+-- reservation. Old PC4 rejected these as shared_hold_missing.
+DO $pc4_pro$
+DECLARE
+ u uuid:='00000000-0000-4000-8000-000000000011';
+ paid uuid:='c0000031-0000-4000-8000-000000000001';
+ safe_void uuid:='c0000031-0000-4000-8000-000000000002';
+ risky_void uuid:='c0000031-0000-4000-8000-000000000003';
+ wrong_weight uuid:='c0000031-0000-4000-8000-000000000004';
+ fp text:=repeat('a',64);
+ cp text:=repeat('b',64);
+ sp text:=repeat('c',64);
+ x jsonb;
+BEGIN
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'begin',paid,u,501,fp,cp,sp,'ru');
+ IF x->>'action' IS DISTINCT FROM 'registered' THEN
+  RAISE EXCEPTION 'PC4 beta registration refused %',x; END IF;
+ INSERT INTO private.iclub_ai_v21_freeform_quota_holds
+  (request_id,user_id,request_fingerprint,period_started_at,weight,state)
+ VALUES(paid,u,fp,now(),5,'reserved');
+ INSERT INTO private.iclub_ai_v21_freeform_budget_ledger
+  (request_id,user_id,request_fingerprint,session_fingerprint,
+   source_fingerprint,source_version,locale,held_microusd,state,dispatched_at)
+ VALUES(paid,u,fp,repeat('d',64),sp,'verified-math-beta-v1','ru',
+        50000,'dispatched',now());
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'dispatch',paid,u,501,fp,cp,sp,'ru');
+ IF x->>'action' IS DISTINCT FROM 'dispatch_once' THEN
+  RAISE EXCEPTION 'Valid funded five-unit Pro dispatch denied %',x; END IF;
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'dispatch',paid,u,501,fp,cp,sp,'ru');
+ IF x->>'reason' IS DISTINCT FROM 'dispatch_already_decided' THEN
+  RAISE EXCEPTION 'Duplicate provider dispatch accepted %',x; END IF;
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'begin',safe_void,u,501,fp,cp,sp,'ru');
+ IF x->>'action' IS DISTINCT FROM 'registered' THEN
+  RAISE EXCEPTION 'Void fixture registration failed %',x; END IF;
+ PERFORM public.iclub_ai_practice_receipt_pc4_service(
+  'void',safe_void,u,501,fp,cp,sp,'ru');
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'inspect',safe_void,u,501,fp,cp,sp,'ru');
+ IF x->>'state' IS DISTINCT FROM 'void' OR
+    x->>'safe_new_request' IS DISTINCT FROM 'true' THEN
+  RAISE EXCEPTION 'Unbilled void recovery denied %',x; END IF;
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'begin',risky_void,u,501,fp,cp,sp,'ru');
+ IF x->>'action' IS DISTINCT FROM 'registered' THEN
+  RAISE EXCEPTION 'Unknown-charge fixture registration failed %',x; END IF;
+ INSERT INTO private.iclub_ai_v21_freeform_budget_ledger
+  (request_id,user_id,request_fingerprint,session_fingerprint,
+   source_fingerprint,source_version,locale,held_microusd,state,finished_at)
+ VALUES(risky_void,u,fp,repeat('e',64),sp,'verified-math-beta-v1','ru',
+        50000,'unknown',now());
+ PERFORM public.iclub_ai_practice_receipt_pc4_service(
+  'void',risky_void,u,501,fp,cp,sp,'ru');
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'inspect',risky_void,u,501,fp,cp,sp,'ru');
+ IF x->>'safe_new_request' IS DISTINCT FROM 'false' THEN
+  RAISE EXCEPTION 'Unknown model charge incorrectly cleared %',x; END IF;
+ -- A 3-unit hold from a legacy request must not validate a new Pro
+ -- request that is required to reserve weight 5.
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'begin',wrong_weight,u,501,fp,cp,sp,'ru');
+ IF x->>'action' IS DISTINCT FROM 'registered' THEN
+  RAISE EXCEPTION 'Wrong-weight fixture registration failed %',x; END IF;
+ INSERT INTO private.iclub_ai_v21_freeform_quota_holds
+  (request_id,user_id,request_fingerprint,period_started_at,weight,state)
+ VALUES(wrong_weight,u,fp,now(),3,'reserved');
+ INSERT INTO private.iclub_ai_v21_freeform_budget_ledger
+  (request_id,user_id,request_fingerprint,session_fingerprint,
+   source_fingerprint,source_version,locale,held_microusd,state,dispatched_at)
+ VALUES(wrong_weight,u,fp,repeat('f',64),sp,'verified-math-beta-v1','ru',
+        50000,'dispatched',now());
+ x:=public.iclub_ai_practice_receipt_pc4_service(
+  'dispatch',wrong_weight,u,501,fp,cp,sp,'ru');
+ IF x->>'reason' IS DISTINCT FROM 'shared_hold_missing' THEN
+  RAISE EXCEPTION 'Wrong beta weight allowed dispatch %',x; END IF;
+ RAISE NOTICE 'PASS PC4 Pro end-to-end: five-unit dispatch, idempotency, void retry, unknown-charge denial and invalid weight';
+END $pc4_pro$;
 DO $test$
 DECLARE
  u uuid:='00000000-0000-4000-8000-000000000011';
