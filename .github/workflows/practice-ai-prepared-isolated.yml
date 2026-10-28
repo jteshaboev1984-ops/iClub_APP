@@ -7,6 +7,7 @@ on:
       - supabase/tests/iclub_ai_practice_math_beta_activation_isolated.sql
       - supabase/tests/iclub_ai_math_beta_pro_quota_isolated.sql
       - supabase/migrations/20261028113000_iclub_math_beta_pro_ai_quota_v1.sql
+      - supabase/migrations/20261028120000_iclub_math_beta_pro_quota_constraints_fix.sql
       - supabase/candidates/iclub_ai_practice_math_beta_activation_v1.sql
       - supabase/candidates/iclub_ai_practice_context_v1_dormant.sql
       - supabase/candidates/iclub_ai_practice_receipts_pc4_dormant.sql
