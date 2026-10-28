@@ -38,6 +38,15 @@ jobs:
           node scripts/qa-chemistry-9701-j10-recheck-ui.cjs
           node scripts/qa-chemistry-9701-j13-labs-ui.cjs
           node scripts/qa-chemistry-9701-j15-lab-response-boundary.cjs
+      - name: Existing Economics cross-subject navigation and written safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-economics-four-papers-navigation.cjs
+          node scripts/qa-economics-premium-plan-navigation.cjs
+          node scripts/qa-economics-consent-written-beta.cjs
+          node scripts/qa-economics-written-source-gate.cjs
+          node scripts/qa-economics-mark-scheme-premium.cjs
       - name: Fail-closed transport and shared asset boundary
         shell: bash
         run: |
