@@ -9,17 +9,17 @@
      back:"Назад",loading:"Загружаем задание…",offline:"Не удалось подтвердить действие. Повторите попытку.",
      complete:"Письменные задания по текущему плану пройдены.",
      instruction:"Выполните задание самостоятельно. Загрузка работы и самооценка не требуются.",
-     criteriaTitle:"Схема оценивания",marks:"баллов",ao12:"AO1 + AO2 · Знания и анализ",ao3:"AO3 · Оценка и аргументация",markContent:"Что учитывается при оценивании",levelsInfo:"Эссе оценивается по уровням: полнота знаний, глубина анализа и обоснованность вывода. Баллы не начисляются автоматически за каждый пункт.",pointInfo:"Баллы за отдельную часть задания учитывают верные понятия, расчёты и объяснения.",notOfficial:"Учебная схема iClub по принципам Cambridge 9708. Это не официальный mark scheme для данного задания.",openError:"Задание сейчас недоступно."},
+     criteriaTitle:"Схема оценивания",marks:"баллов",ao12:"AO1 + AO2 · Знания и анализ",ao3:"AO3 · Оценка и аргументация",markContent:"Что учитывается при оценивании",levelsTitle:"Уровни оценивания",levelLabel:"Уровень",levelHigh:"Развёрнутый и точный ответ",levelMiddle:"В целом верный, но неполный анализ",levelLow:"Ограниченный, преимущественно описательный ответ",levelsInfo:"Эссе оценивается по уровням: полнота знаний, глубина анализа и обоснованность вывода. Баллы не начисляются автоматически за каждый пункт.",pointInfo:"Баллы за отдельную часть задания учитывают верные понятия, расчёты и объяснения.",notOfficial:"Учебная схема iClub по принципам Cambridge 9708. Это не официальный mark scheme для данного задания.",openError:"Задание сейчас недоступно."},
    uz:{title:"Yozma mashqlar",criteria:"Baholash mezonlari",hideCriteria:"Mezonlarni yashirish",next:"Keyingi",source:"Manba",data:"Ma’lumotlar jadvali",
      back:"Orqaga",loading:"Topshiriq yuklanmoqda…",offline:"Amal tasdiqlanmadi. Qaytadan urinib ko‘ring.",
      complete:"Joriy rejadagi yozma topshiriqlar yakunlandi.",
      instruction:"Topshiriqni mustaqil bajaring. Ishni yuklash yoki o‘zingizga baho qo‘yish shart emas.",
-     criteriaTitle:"Baholash mezonlari",marks:"ball",ao12:"AO1 + AO2 · Bilim va tahlil",ao3:"AO3 · Baholash va dalillar",markContent:"Baholashda nimalar hisobga olinadi",levelsInfo:"Esse bilim, tahlil chuqurligi va asoslangan xulosa bo‘yicha darajalarda baholanadi. Har bir band uchun avtomatik ball berilmaydi.",pointInfo:"Savolning ushbu qismida tushunchalar, hisob-kitoblar va izohlar uchun ball hisobga olinadi.",notOfficial:"Cambridge 9708 tamoyillariga mos iClub o‘quv mezonlari. Bu savol uchun rasmiy Cambridge mark scheme emas.",openError:"Topshiriq hozir mavjud emas."},
+     criteriaTitle:"Baholash mezonlari",marks:"ball",ao12:"AO1 + AO2 · Bilim va tahlil",ao3:"AO3 · Baholash va dalillar",markContent:"Baholashda nimalar hisobga olinadi",levelsTitle:"Baholash darajalari",levelLabel:"Daraja",levelHigh:"To‘liq va aniq izohlangan javob",levelMiddle:"Asosan to‘g‘ri, biroq tahlili to‘liq bo‘lmagan javob",levelLow:"Cheklangan, ko‘proq tasviriy javob",levelsInfo:"Esse bilim, tahlil chuqurligi va asoslangan xulosa bo‘yicha darajalarda baholanadi. Har bir band uchun avtomatik ball berilmaydi.",pointInfo:"Savolning ushbu qismida tushunchalar, hisob-kitoblar va izohlar uchun ball hisobga olinadi.",notOfficial:"Cambridge 9708 tamoyillariga mos iClub o‘quv mezonlari. Bu savol uchun rasmiy Cambridge mark scheme emas.",openError:"Topshiriq hozir mavjud emas."},
    en:{title:"Written practice",criteria:"Marking scheme",hideCriteria:"Hide scheme",next:"Next",source:"Source",data:"Data table",
      back:"Back",loading:"Loading task…",offline:"Action not confirmed. Please retry.",
      complete:"Written tasks in this study plan have been completed.",
      instruction:"Complete the task independently. No essay upload or self-grading is required.",
-     criteriaTitle:"Marking scheme",marks:"marks",ao12:"AO1 + AO2 · Knowledge and analysis",ao3:"AO3 · Evaluation and judgement",markContent:"Creditworthy content",levelsInfo:"Essay marks follow levels of knowledge, developed analysis and justified evaluation. Listed points are indicative, not one mark each.",pointInfo:"This part awards marks for correct concepts, calculations and explanations.",notOfficial:"iClub practice marking guide aligned to Cambridge 9708 principles; not an official Cambridge mark scheme for this question.",openError:"Task is currently unavailable."}
+     criteriaTitle:"Marking scheme",marks:"marks",ao12:"AO1 + AO2 · Knowledge and analysis",ao3:"AO3 · Evaluation and judgement",markContent:"Creditworthy content",levelsTitle:"Marking levels",levelLabel:"Level",levelHigh:"Accurate, fully developed economic reasoning",levelMiddle:"Mostly accurate but partially developed analysis",levelLow:"Limited, mainly descriptive response",levelsInfo:"Essay marks follow levels of knowledge, developed analysis and justified evaluation. Listed points are indicative, not one mark each.",pointInfo:"This part awards marks for correct concepts, calculations and explanations.",notOfficial:"iClub practice marking guide aligned to Cambridge 9708 principles; not an official Cambridge mark scheme for this question.",openError:"Task is currently unavailable."}
  };
  const el=(tag,cls,str)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(str!=null)x.textContent=String(str);return x;};
  function mount({root,planId,language="ru",onBack,api,createActionKey}={}){
@@ -176,8 +176,32 @@
               breakdown.append(ao3);
             }
             criteriaBox.append(breakdown,el("p","ep-written-mark-help",
-              scheme.style==="levels"?t.levelsInfo:t.pointInfo),
-              el("h4","ep-written-mark-subtitle",t.markContent));
+              scheme.style==="levels"?t.levelsInfo:t.pointInfo));
+            if(scheme.style==="levels"){
+              const levels=el("section","ep-written-levels");
+              levels.append(el("h4","ep-written-mark-subtitle",t.levelsTitle));
+              const ranges=count=>count===14?["11–14","6–10","1–5"]:
+                count===8?["6–8","3–5","1–2"]:
+                count===6?["5–6","3–4","1–2"]:
+                count===4?["3–4","2","1"]:null;
+              for(const [label,count] of [[t.ao12,scheme.ao12_marks],
+                [t.ao3,scheme.ao3_marks]]){
+                if(count<1)continue;
+                const marks=ranges(count);
+                if(!marks)continue;
+                levels.append(el("div","ep-written-level-group",label));
+                for(let index=0;index<3;index++){
+                  const level=el("div","ep-written-level-row");
+                  level.append(el("span","",t.levelLabel+" "+(3-index)),
+                    el("strong","",marks[index]),
+                    el("span","ep-written-level-description",
+                      index===0?t.levelHigh:index===1?t.levelMiddle:t.levelLow));
+                  levels.append(level);
+                }
+              }
+              criteriaBox.append(levels);
+            }
+            criteriaBox.append(el("h4","ep-written-mark-subtitle",t.markContent));
           }else{
             criteriaBox.append(el("h4","ep-written-mark-subtitle",t.markContent));
           }
