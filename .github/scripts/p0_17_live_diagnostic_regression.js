@@ -162,43 +162,35 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'opening Exam Prep must not start an assessment');
   assert(!r.calls.some(name=>name.startsWith('generate_exam_prep_weekly_plan')),'opening Exam Prep must not generate a weekly plan');
 
-  await page.click('[data-ep-live-open-component="P1"]');
-  await page.waitForFunction(()=>document.querySelector('[data-ep-component-home="P1"]'));
-  r=await page.evaluate(()=>({
-    primary:document.querySelector('[data-ep-component-primary]')?.textContent,
-    calls:window.__calls.map(x=>x.name),
-    hasGenericHead:Boolean(document.querySelector('#exam-prep-host-root .ep-live-head')),
-    hasComponentHero:Boolean(document.querySelector('[data-ep-component-home="P1"] .ep-component-hero')),
-    backHeight:document.querySelector('[data-ep-component-back]')?.getBoundingClientRect().height || 0,
-    horizontalOverflow:document.documentElement.scrollWidth > innerWidth + 1
-  }));
-  assert(/Start entry check/i.test(r.primary),'P1 first entry must name the entry check directly');
-  assert(!r.calls.includes('start_exam_prep_next_diagnostic_safe_v1'),'viewing P1 must remain read-only before learner action');
-  assert(!r.calls.includes('get_exam_prep_state_safe_v1'),'incomplete Stage 0 component home must not rebuild derived state');
-  assert(r.hasComponentHero,'P1 component identity must remain visible on the component screen');
-  assert(!r.hasGenericHead,'component screen must not repeat the generic Exam Prep intro above the paper identity');
-  assert(r.backHeight>=44,`component back touch target must be at least 44px; got ${r.backHeight}`);
-  assert(r.horizontalOverflow===false,'P1 component home must not overflow horizontally at 390px');
-
-  // Responsive route: P1/P5 navigation, first action and progress never drift off-screen.
+  // The dashboard's "Start entry check" is itself an explicit user action:
+  // a single tap must open the first question, not another Start button.
   for (const width of [320, 360, 390, 430, 768, 1280]) {
     await page.setViewportSize({width,height:844});
     const bounds=await page.evaluate(()=>{
-      const back=document.querySelector('[data-ep-component-back]');
-      const primary=document.querySelector('[data-ep-component-primary]');
+      const card=document.querySelector('[data-ep-live-open-component="P1"]');
+      const rect=card?.getBoundingClientRect();
       return {overflow:document.documentElement.scrollWidth>innerWidth+1,
-        back:back?.getBoundingClientRect().height||0,
-        action:primary?.getBoundingClientRect().height||0,
-        actionRight:primary?.getBoundingClientRect().right||0,
-        view:innerWidth};
+        height:rect?.height||0,right:rect?.right||0,view:innerWidth};
     });
-    assert(!bounds.overflow && bounds.back>=44 && bounds.action>=44 && bounds.actionRight<=bounds.view+1,
-      'Responsive component route failed at '+width+'px: '+JSON.stringify(bounds));
+    assert(!bounds.overflow && bounds.height>=44 && bounds.right<=bounds.view+1,
+      'Responsive one-tap entry card failed at '+width+'px: '+JSON.stringify(bounds));
   }
   await page.setViewportSize({width:390,height:844});
 
-  await page.click('[data-ep-component-primary="diagnostic"]');
+  const beforeStart=await page.evaluate(()=>window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1').length);
+  await page.click('[data-ep-live-open-component="P1"]');
   await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
+  r=await page.evaluate(()=>({
+    starts:window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1'),
+    stateReads:window.__calls.filter(x=>x.name==='get_exam_prep_state_safe_v1').length,
+    redundantStart:Boolean(document.querySelector('[data-ep-component-primary="diagnostic"]')),
+    componentPage:Boolean(document.querySelector('[data-ep-component-home]'))
+  }));
+  assert(beforeStart===0 && r.starts.length===1 && r.starts[0].args.p_component_code==='P1',
+    'one dashboard tap must invoke exactly one P1 diagnostic start');
+  assert(r.stateReads===0,'incomplete Stage 0 must not rebuild derived state');
+  assert(!r.redundantStart && !r.componentPage,'first entry must reach the question directly, without the second Start screen');
+
 
   r=await page.evaluate(()=>({
     hasGenericTitle:Boolean(document.querySelector('#exam-prep-host-root .ep-host-title')),
