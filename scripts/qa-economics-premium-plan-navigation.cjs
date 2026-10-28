@@ -56,7 +56,7 @@ async function nativeCase(language){
  const stats=find(host,'ep-native-plan-stats-compact');
  assert(stats,language+' compact plan grid missing');
  assert.equal(stats.children.length,4,language+' needs exactly four summary cards');
- assert.deepEqual(stats.children.map(c=>c.children[0].textContent),['9/12',2,1,1]);
+ assert.deepEqual(stats.children.map(c=>c.children[0].textContent),['9/12','2','1','1']);
  const bar=find(host,'ep-native-screen-head');
  assert(bar,language+' screen header missing');
  const back=bar.children[0];
