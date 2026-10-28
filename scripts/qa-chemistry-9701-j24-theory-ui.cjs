@@ -48,7 +48,7 @@ check(topicButtons.length===91,"Exactly 91 topic buttons, no A Level");
 check(!source.includes("innerHTML")&&!source.includes("localStorage")&&!source.includes("eval("),"No unsafe HTML or browser-persistent writes");
 check(html.split("exam-prep/exam-prep-chemistry-theory-native.js?").length===2,"Exactly one cache-pinned Theory script");
 check(html.indexOf("exam-prep-chemistry-labs-native.js?")<html.indexOf("exam-prep-chemistry-theory-native.js?"),"Chemistry modules loaded in order");
-check(host.includes("const CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED = false;"),"Other Chemistry beta invitations remain OFF");
+check(!host.includes("CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED")&&!host.includes("get_my_exam_prep_chemistry_beta_status_v1"),"No Chemistry invitations or consent UI");
 check(host.includes('internal.chemistryTheoryNative?.validCatalog?.(catalog) === true'),"Host independently validates backend catalog");
 check(host.includes("chemistryTheoryNative?.unmount?.()"),"Host closes Theory context");
 check(css.includes("@media(max-width: 660px)")&&css.includes(".ep-chem-theory-grid"),"Mobile symmetric layout provided");
