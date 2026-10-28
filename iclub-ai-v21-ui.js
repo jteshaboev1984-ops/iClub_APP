@@ -552,6 +552,7 @@
   // The single existing Tutor chat receives Practice context after a
   // server-side owner/finalization/consent preflight. No separate result card.
   let practiceGate = {key:"",allowed:false,pending:false};
+  let practiceGateInFlight=null;
   let practiceAccessNoticeKey="";
   let practiceRecoveryCheckedKey="";
   let practiceRecoveryBusy=false;
@@ -573,14 +574,18 @@
     const key=practiceScopeKey(scope);
     // An earlier preflight failure is not a permanent revocation. Retry
     // only on the learner's explicit ask, not on DOM mutation/auto-render.
-    if(practiceGate.key===key &&
-       (practiceGate.pending||practiceGate.allowed||!force))
+    if(practiceGate.key===key&&practiceGate.pending)
+      return practiceGateInFlight ? await practiceGateInFlight : false;
+    if(practiceGate.key===key&&(practiceGate.allowed||!force))
       return practiceGate.allowed===true;
     practiceGate={key,allowed:false,pending:true};
     const authEpoch=state.authEpoch,contextEpoch=state.contextEpoch;
-    const allowed=await beta.practiceContextAvailable({
+    const pending=beta.practiceContextAvailable({
       attemptRef:scope.attemptRef,locale:scope.locale
     }).catch(()=>false);
+    practiceGateInFlight=pending;
+    const allowed=await pending;
+    if(practiceGateInFlight===pending)practiceGateInFlight=null;
     if(practiceGate.key!==key||authEpoch!==state.authEpoch||
        contextEpoch!==state.contextEpoch||
        practiceScopeKey(practiceScope())!==key)return;
