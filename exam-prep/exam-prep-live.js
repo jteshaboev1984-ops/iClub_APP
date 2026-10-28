@@ -430,7 +430,7 @@
       return '<details class="ep-ux-review-row"><summary><b>'+esc(u.task)+' '+Number(item.item_order||0)+'</b>'+
         '<span>'+esc(answer||"")+'</span><strong>'+esc(status)+'</strong></summary>'+reviewItemMarkup(item)+'</details>';
     }).join("");
-    root.innerHTML=shell('<section class="ep-focus-screen ep-ux-review-screen" data-ep-session-result="'+esc(data?.session_id||"")+
+    root.innerHTML=shell('<section class="ep-focus-screen ep-result-screen ep-ux-review-screen" data-ep-result-session-type="'+esc(data?.session_type||"")+'" data-ep-session-result="'+esc(data?.session_id||"")+
       '" data-ep-result-component="'+esc(component)+'"><header class="ep-focus-head"><button type="button" class="ep-focus-back" data-ep-review-back>← '+esc(u.backResult)+'</button>'+
       '<strong>'+esc(u.review)+'</strong><small>'+visible.length+' / '+items.length+'</small></header>'+
       '<div class="ep-ux-review-content"><div class="ep-result-toolbar"><button class="ep-live-btn '+(onlyErrors?"secondary":"")+'" data-ep-result-filter="all">'+esc(c.allQuestions)+'</button>'+
