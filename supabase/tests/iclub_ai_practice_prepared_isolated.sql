@@ -93,6 +93,11 @@ INSERT INTO public.practice_sessions_v4 VALUES
    ARRAY[1,2,3,4,5,6,7,8,9,10]::bigint[]),
  (600,'00000000-0000-4000-8000-000000000011',5,500,2,'finalized',
    now()-interval '1 day',11,ARRAY[1,2,3,4,5,6,7,8,9,10]::bigint[]);
+-- A separate unfinished Practice is intentionally left intact: it must
+-- never deny the result of a different, finalized attempt.
+INSERT INTO public.practice_sessions_v4 VALUES
+ (602,'00000000-0000-4000-8000-000000000011',5,NULL,2,'in_progress',NULL,
+  11,ARRAY[1,2,3,4,5,6,7,8,9,10]::bigint[]);
 INSERT INTO public.practice_session_answers_v4
  SELECT 601,g,now(),g NOT IN(2,6,9) FROM generate_series(1,10) AS g
  UNION ALL SELECT 600,g,now()-interval '1 day',g NOT IN(5,7)
@@ -115,6 +120,10 @@ BEGIN
  SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
  IF r->>'ok' IS DISTINCT FROM 'true'
  THEN RAISE EXCEPTION 'Explicit owner denied %',r; END IF;
+ SELECT public.get_iclub_ai_practice_context_v1_service(
+  uid,602,'practice_visibility',null,'ru') INTO r;
+ IF r->>'reason' IS DISTINCT FROM 'context_not_authorized'
+ THEN RAISE EXCEPTION 'AI accessed unfinished result %',r; END IF;
  UPDATE private.iclub_ai_practice_context_v1_control
  SET owner_user_id='00000000-0000-4000-8000-000000000022' WHERE singleton=1;
  SELECT public.get_iclub_ai_practice_context_v1_service(uid,501,'practice_result',null,'ru') INTO r;
