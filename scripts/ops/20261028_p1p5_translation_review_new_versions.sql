@@ -13,8 +13,8 @@ CREATE TEMP TABLE _review_20261028 (
 ) ON COMMIT DROP;
 INSERT INTO _review_20261028(old_task_id,old_assessment_id) VALUES
 (1,2),(182,378),(156,352),(199,395),(174,370),(175,371),(170,366),
-(165,361),(15604,35204),(15606,35206),(15632,35381),
-(15647,35430),(15659,35478),(158,354),(176,372),(166,362);
+(165,361),(188,384),(15606,35206),(15632,35381),
+(209,405),(15659,35478),(158,354),(176,372),(166,362);
 
 DO $pre$ BEGIN
  IF (SELECT count(*) FROM _review_20261028 m JOIN private.exam_prep_written_tasks t ON t.id=m.old_task_id WHERE t.lifecycle_state='published')<>16
@@ -24,12 +24,12 @@ DO $pre$ BEGIN
  IF EXISTS (
  SELECT 1 FROM _review_20261028 m JOIN private.exam_prep_written_tasks o ON o.id=m.old_task_id
  JOIN private.exam_prep_written_tasks n ON n.task_key=o.task_key AND n.content_version_id=o.content_version_id
- AND n.task_version=CASE o.task_version WHEN 'wtv1' THEN 'wtv2' WHEN 'wtv2' THEN 'wtv3' WHEN 'v1' THEN 'v2' ELSE 'invalid' END
+ AND n.task_version=CASE o.task_version WHEN 'wtv1' THEN 'wtv2' WHEN 'wtv2' THEN 'wtv3' WHEN 'v1' THEN 'v2' WHEN 'v2' THEN 'v3' ELSE 'invalid' END
  ) THEN RAISE EXCEPTION 'review_task_version_collision'; END IF;
  IF EXISTS (
  SELECT 1 FROM _review_20261028 m JOIN private.exam_prep_assessments o ON o.id=m.old_assessment_id
  JOIN private.exam_prep_assessments n ON n.assessment_key=o.assessment_key AND n.content_version_id=o.content_version_id
- AND n.assessment_version=CASE o.assessment_version WHEN 'av1' THEN 'av2' WHEN 'av2' THEN 'av3' WHEN 'v1' THEN 'v2' ELSE 'invalid' END
+ AND n.assessment_version=CASE o.assessment_version WHEN 'av1' THEN 'av2' WHEN 'av2' THEN 'av3' WHEN 'v1' THEN 'v2' WHEN 'v2' THEN 'v3' ELSE 'invalid' END
  ) THEN RAISE EXCEPTION 'review_assessment_version_collision'; END IF;
  IF EXISTS (
  SELECT 1 FROM _review_20261028 m JOIN private.exam_prep_assessment_items i ON i.assessment_id=m.old_assessment_id
@@ -43,7 +43,7 @@ WITH cloned AS (
 INSERT INTO private.exam_prep_written_tasks
 (content_version_id,task_key,component_code,primary_skill_code,secondary_skill_codes,task_version,prompt_en,prompt_ru,prompt_uz,rubric_json,self_review_en,self_review_ru,self_review_uz,lifecycle_state,copyright_status,qa_math_status,qa_language_status,qa_technical_status,created_at,approved_at)
 SELECT o.content_version_id,o.task_key,o.component_code,o.primary_skill_code,o.secondary_skill_codes,
-CASE o.task_version WHEN 'wtv1' THEN 'wtv2' WHEN 'wtv2' THEN 'wtv3' WHEN 'v1' THEN 'v2' END,
+CASE o.task_version WHEN 'wtv1' THEN 'wtv2' WHEN 'wtv2' THEN 'wtv3' WHEN 'v1' THEN 'v2' WHEN 'v2' THEN 'v3' END,
 o.prompt_en,
 CASE o.id WHEN 165 THEN replace(o.prompt_ru,'до 1 знака','до 1 знака после запятой') ELSE o.prompt_ru END,
 CASE o.id
@@ -86,10 +86,10 @@ INSERT INTO _review_criteria_fixes VALUES
 (175,'at_least_blue','ru','Использует дополнение 1−5/14=9/14 или эквивалентную сумму ветвей с синей фишкой.'),
 (170,'first_chain','ru','По правилу дифференцирования сложной функции получает 30(3x−1)^4.'),
 (165,'central_z','uz','Har biri 10% li dumlar uchun z=+-1.2816 dan foydalanadi.'),
-(15604,'one_one_inverse','uz','x>=0 da g ning o‘zaro bir qiymatli (inyektiv) ekanini tushuntirib, g^-1(x)=sqrt(x), x>=0 ni topadi.'),
+(188,'one_one_inverse','uz','x>=0 da g ning o‘zaro bir qiymatli (inyektiv) ekanini tushuntirib, g^-1(x)=sqrt(x), x>=0 ni topadi.'),
 (15606,'features','uz','Mediana, kvartillararo kenglik (IQR), variatsiya kengligi yoki chet qiymatlar kabi ikkita tegishli xususiyatni aniqlaydi.'),
 (15632,'median','uz','B medianasi yuqoriroq ekanini ko‘rsatadi: 26 (A da esa 24).'),
-(15647,'multiplyadd','ru','Правильно перемножает вероятности вдоль ветвей и складывает вероятности несовместных путей.'),
+(209,'multiplyadd','ru','Правильно перемножает вероятности вдоль ветвей и складывает вероятности несовместных путей.'),
 (15659,'accuracy','uz','So‘ralgan ehtimollarni 4 ta o‘nli xonagacha to‘g‘ri hisoblaydi.');
 
 UPDATE private.exam_prep_written_criteria_locale_v1 l
@@ -122,7 +122,7 @@ WITH cloned AS(
 INSERT INTO private.exam_prep_assessments
 (content_version_id,assessment_key,assessment_version,component_code,assessment_type,status,title_en,title_ru,title_uz,created_at,approved_at)
 SELECT a.content_version_id,a.assessment_key,
-CASE a.assessment_version WHEN 'av1' THEN 'av2' WHEN 'av2' THEN 'av3' WHEN 'v1' THEN 'v2' END,
+CASE a.assessment_version WHEN 'av1' THEN 'av2' WHEN 'av2' THEN 'av3' WHEN 'v1' THEN 'v2' WHEN 'v2' THEN 'v3' END,
 a.component_code,a.assessment_type,'draft',a.title_en,a.title_ru,a.title_uz,now(),null
 FROM private.exam_prep_assessments a JOIN _review_20261028 m ON m.old_assessment_id=a.id
 ORDER BY a.id
