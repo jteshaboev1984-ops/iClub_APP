@@ -14,7 +14,7 @@ The official exam has AS Paper 1 (40 MCQ, 75m), Paper 2 (structured, 60 marks, 7
 - Recheck: 22 independent MCQs, owner-approved release manifest 0.
 - Paper 1: 45 private draft MCQs, including one flagged. 44 reviewed-private; six QA checks pending, one failed, zero secure-ready questions. The 40-question exam is blocked.
 - Chemistry releases, active version, learner permissions and attempts: none; all gates OFF.
-- Existing Mathematics Beta: three active, four membership records, plan ceiling 12. Never grant Chemistry implicitly based only on Mathematics membership.
+- Existing Mathematics Beta: three active, four membership records, plan ceiling 12. Chemistry Theory beta requires the existing active Math Beta account **and** active Chemistry subject membership plus two independent server release gates; it does not require a new invitation or consent. All accounts currently used for beta testing are owner-controlled test accounts.
 - Academic content/right ownership already attested by project owner; not an independent Cambridge certification.
 - Real database export is a separate owner-accepted follow-up, NOT completed; do not falsely set backup_restore_tested=true or silently circumvent the existing J12 composite publisher gate.
 
@@ -25,40 +25,43 @@ Each item will get a versioned evidence row and six separate reviewer passes:
 3. Assessment specialist: question originality, unambiguous answer, distractor quality, progression, test independence and topic balance; written-answer rubrics for future P2/P4.
 4. EN/RU/UZ language reviewer: scientific and numerical semantic equivalence, notation, readable text and exactly equivalent answer choices.
 5. Copyright and laboratory safety reviewer: independently authored iClub items, documented provenance, no unauthorised Cambridge/book reproduction, realistic supervised-lab caveats.
-6. Product security/measurement reviewer: RLS, access/consent, key secrecy, no score/mastery from AI or from one diagnostic MCQ, source-version integrity, no progress loss.
+6. Product security/measurement reviewer: RLS, authenticated subject access, key secrecy, no score/mastery from AI or from one diagnostic MCQ, source-version integrity, no progress loss.
 Any unresolved or failed issue remains BLOCKED. These are AI-driven specialist passes and reproducible checks; never describe them as signed independent human expert or official Cambridge review.
 
 ## J23–J32 implementation sequence
 | Phase | Deliverable | Pass criterion |
 |---|---|---|
 | J23. Academic source audit | Check all 154 Theory cards, 12 LAB, 462 static Tutor locale rows, 22 Entry, 22 Recheck and 45 P1 drafts; verify official syllabus and Tour Map alignment; maintain a row-by-row QA ledger. | 100% of proposed beta items have versioned source, syllabus point, independent scientific proof, three-language and rights QA; no unresolved errors in selected subset. |
-| J24. AS Theory reader | Build/verify safe **AS-only** delivery of 91 cards on approved source hashes, no A Level 63 cards, Tutor or P5 spill. Correct 154+12 composite publisher incompatibility; preserve real 166 source count. | Only separately approved Chemistry beta accounts see AS theory; no unauthorized reads; no misleading backup signoff or generic library privilege widening. |
-| J25. Consent & onboarding | Reuse existing Math Beta eligibility, expose opt-in only to active members, learner acknowledges Chemistry separately; record owner approval and easy revocation; prevent A Level access. | First one consensual canary user, then remaining active consenting Math Beta members; no automatic enrollment of all 12 planned seats or reset of Math history. |
+| J24. AS Theory reader | Build/verify safe **AS-only** delivery of 91 cards on approved source hashes, no A Level 63 cards, Tutor or P5 spill. Correct 154+12 composite publisher incompatibility; preserve real 166 source count. | Only eligible existing beta accounts with active Chemistry subject membership see AS theory after owner release; no unauthorized reads; no misleading backup signoff or generic library privilege widening. |
+| J25. Owner rollout without learner opt-in | Two independent server switches: J24 academic/content readiness and J25 audience `closed → beta → released`. Beta checks existing active Math cohort plus Chemistry subject access; released checks active Chemistry subject access. No invitation, consent or separate enrolment record. | Exact 91-source gate, no cross-subject access, active-exam blackout, rollback by closed mode; no Math progress reset. |
 | J26. Entry | Review and approve exactly 22/22 independent EN/RU/UZ question hashes; release manifest after owner/content confirmation. | Real authenticated 30m start/save/timeout/resume/finish/review, no early keys, no second attempt on same revealed form, 0 false mastery. |
 | J27. Study/Recheck | Connect Entry mistakes to exact approved Theory skill page; review 22/22 distinct Recheck MCQs, with study acknowledgement and delayed retest option. | Entry history stable; no cross-account read; 3-language comparison by syllabus unit without grade/mastery claims; real user QA. |
 | J28. Paper 1 | Resolve flagged question and six pending QA checks; independently verify 40 unique eligible MCQs, blueprint and source hashes, 75-min timer, scoring/review rules. | secure_ready_items ≥40, 40/40 approved, no key leak, genuine beta user flow, no answer/attempt loss. |
 | J29. Paper 3 | Validate six AS P3 LAB learning cards; explain graphs, titration, qualitative analysis and safety within practical-learning scope. | 6/6 authenticated lessons, no hands-on practical exam claim, no automated laboratory competence or mastery credit. |
 | J30. Tutor | FIRST: enable audited static topic explanations as a clearly named non-generative feature, with AS-only authorization. SECOND: build real generative Tutor only via server-verified source retrieval, privacy, assessment/answer firewall, prompt injection/rate controls and separate opt-in. | No AI Tutor claim until genuine model service passes security + 3-language + active-exam block tests. AI never changes academic state. |
 | J31. Complete AS | Design and author original structured Paper 2 plus supervised-lab preparation and an honest Paper 3 learning/evidence path. | AS suite reflects P1+P2+P3; do not market earlier limited beta as a full AS exam simulator. |
-| J32. A Level | Separate 63 A Theory, six P5 LAB, authentic P4 structured and P5 planning/analysis exam tasks; independently approved A Level learner cohort. | Explicit new owner/learner consent, independent P4/P5 QA and no AS-to-A access inheritance. |
+| J32. A Level | Separate 63 A Theory, six P5 LAB, authentic P4 structured and P5 planning/analysis exam tasks; independently approved A Level learner cohort. | Separate owner-controlled release, independent P4/P5 QA and no AS-to-A access inheritance; no extra learner consent UI. |
 
 ## Release waves
-- A: AS Theory only to separately consenting/approved existing active Math Beta users; start with a single canary.
+- A: AS Theory only after owner activation, to existing active Math Beta test accounts that have Chemistry selected; use a test account for the first canary smoke test before widening the released audience.
 - B: Entry -> exact Theory lesson -> Recheck, after each bank has complete separately approved 22-item manifest and authenticated browser QA.
 - C: P1 only after 40 secure-ready source items and completed 40-question user acceptance. P3 six lessons can be independently opened with explicit practical-study-only label.
 - D: Generative Tutor, Paper 2/3 completeness and A Level P4/P5 are independent later stages. Do not auto-activate them in Waves A–C.
 
 ## Non-negotiable safety test matrix
-For each wave: read-only pre/post baseline of Math Exam Prep, Practice, Economics, Tours, Chemistry and consent; source digest/rights/version check; server grants and RLS; cross-user/anon/revocation denial; pre-final assessment answer protection; timer expiry, idempotent saving, internet interruption, mobile/desktop, RU/UZ/EN, keyboard and accessible display. Preserve all localStorage, archived sources, previous assessment evidence and history. Rollback/hide must disarm the feature without deleting records. Approval is for only the exact tested version and scope. Natural increases in live answer counts must not be mistaken for tampering.
+For each wave: read-only pre/post baseline of Math Exam Prep, Practice, Economics, Tours, Chemistry and rollout control; source digest/rights/version check; server grants and RLS; cross-user/anon/rollout-off denial; pre-final assessment answer protection; timer expiry, idempotent saving, internet interruption, mobile/desktop, RU/UZ/EN, keyboard and accessible display. Preserve all localStorage, archived sources, previous assessment evidence and history. Rollback/hide must disarm the feature without deleting records. Approval is for only the exact tested version and scope. Natural increases in live answer counts must not be mistaken for tampering.
 
 ## Definition of done
-- Theory beta READY: 91 AS source cards approved and safely available to consented Chemistry beta accounts; 63 A, P5 and Tutor OFF.
+- Theory beta READY: 91 AS source cards approved and safely available to eligible Chemistry beta accounts; 63 A, P5 and Tutor OFF.
 - Entry/Recheck READY: 22+22 distinct approved source manifests, meaningful study path, owned evidence/history and real signed-in acceptance.
 - P1 READY: 40 original, source-pinned, fully secure/approved MCQs, 75-minute valid form and safe answer lifecycle.
 - Static explanation READY: reviewed authored text, not claimed as generative.
 - AI Tutor READY: actual model integration with full safety gate; source-only records do not qualify.
 - Full AS READY: adds Paper 2 structured and appropriate Paper 3 practical support.
-- A Level READY: separately approved A Level scope and genuine Paper 4/Paper 5 workflows.
+- A Level READY: separately owner-released A Level scope and genuine Paper 4/Paper 5 workflows. Learners do not complete a second app consent step.
 
 ## First execution target
 Begin with J23 content audit and J24 AS-only publisher review. Keep all user-facing Chemistry release switches OFF until the exact subset is approved and canary tested. No destructive SQL, no copying book text to public content, no fake signoffs, no production data reset.
+
+## Owner product correction — 2026-10-28
+No Chemistry invitations or consent prompts in beta or release. This supersedes the previous J25 opt-in and any earlier learner-consent language in the J23/J24 planning documents. Existing Mathematics beta flows are outside this Chemistry-only change. The privacy/terms notice for the app remains a separate product/legal obligation; this change does not make assertions about legal validity. Chemistry access continues to require server authorization and academic release evidence; never infer access solely from visiting the app.
