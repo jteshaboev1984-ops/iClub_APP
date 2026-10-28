@@ -24,24 +24,39 @@ async function scenario(browser,lang,width,mode){
     await page.addStyleTag({path:file('exam-prep/exam-prep-host.css')});
     await page.addStyleTag({path:file('exam-prep/exam-prep-economics-native.css')});
     await page.evaluate(mode=>{
-      const s=window.__econ={mode,sends:0,reads:0,started:false,saved:{},finish:false};
+      const s=window.__econ={mode,sends:0,reads:0,started:false,saved:{},finish:false,
+        paper:mode==='paper30'?'P3':'P1'};
       const id='11111111-1111-4111-8111-111111111111';
       window.sb={rpc:async(name,args)=>{
         const ok=data=>({data:{ok:true,...data}});
-        if(name==='iclub_exam_native_mcq_history_v1')
-          return ok({sessions:s.started?[{session_id:id,paper_code:'P1',session_kind:'diagnostic',status:s.finish?'finalized':'active',answered:Object.keys(s.saved).length,total_items:12}]:[]});
+        if(name==='iclub_exam_native_mcq_history_v1'){
+          const baseline=s.mode==='paper30'?[{session_id:'22222222-2222-4222-8222-222222222222',
+            paper_code:'P1',session_kind:'diagnostic',status:'finalized',
+            answered:12,score:8,total_items:12}]:[];
+          if(s.started)baseline.push({session_id:id,paper_code:s.paper,
+            session_kind:s.mode==='paper30'?'paper':'diagnostic',
+            status:s.finish?'finalized':'active',answered:Object.keys(s.saved).length,
+            total_items:s.mode==='paper30'?30:12});
+          return ok({sessions:baseline});
+        }
         if(name==='iclub_exam_native_economics_profile_v1')return ok({profile:null});
         if(name==='iclub_exam_written_available_v1')return ok({available:false});
         if(name==='iclub_econ_written_beta_status_v1')return ok({eligible:false,joined:false});
-        if(name==='iclub_exam_native_mcq_start_diagnostic_v1'){s.started=true;return ok({session_id:id});}
+        if(name==='iclub_exam_native_mcq_start_diagnostic_v1'||
+           name==='iclub_exam_native_mcq_start_v1'){
+          if(s.mode==='paper30'&&name==='iclub_exam_native_mcq_start_v1'&&args.p_paper_code!=='P3')
+            throw Error('Wrong paper selected');
+          s.started=true;return ok({session_id:id});
+        }
         if(name==='iclub_exam_native_mcq_get_v1'){
           s.reads++;
           if(s.mode==='revoked'&&s.sends>0)return {data:{ok:false,code:'not_authorized'}};
           if(args.p_session_id!==id)return ok({status:'not_found',items:[]});
-          return ok({session_id:id,paper_code:'P1',session_kind:'diagnostic',
+          return ok({session_id:id,paper_code:s.paper,
+            session_kind:s.mode==='paper30'?'paper':'diagnostic',
             status:s.finish?'finalized':'active',score:s.finish?Object.keys(s.saved).length:null,
             deadline_at:new Date(Date.now()+(s.mode==='expired_pending'&&s.sends>0?-3000:1200000)).toISOString(),
-            items:Array.from({length:12},(_,i)=>({order:i+1,question:'Q'+(i+1),options:['A','B','C','D'],
+            items:Array.from({length:s.mode==='paper30'?30:12},(_,i)=>({order:i+1,question:'Q'+(i+1),options:['A','B','C','D'],
               selected_index:Number.isInteger(s.saved[i+1])?s.saved[i+1]:null,
               answered:Number.isInteger(s.saved[i+1]),
               correct_index:s.finish?1:null}))});
@@ -67,8 +82,15 @@ async function scenario(browser,lang,width,mode){
       if(!window.__app.mount({root,shell:{program_key:'economics_9708',enabled:true,
         papers:[{code:'P1',assessment_kind:'mcq'},{code:'P3',assessment_kind:'mcq'}]},language:lang}))throw Error('mount refused');
     },lang);
-    await page.waitForSelector('.ep-component-next button');
-    await page.locator('.ep-component-next button').first().click();
+    if(mode==='paper30'){
+      await page.waitForSelector('.ep-live-component-entry');
+      await page.locator('.ep-live-component-entry').nth(2).click();
+      await page.waitForSelector('.ep-component-primary');
+      await page.click('.ep-component-primary');
+    }else{
+      await page.waitForSelector('.ep-component-next button');
+      await page.locator('.ep-component-next button').first().click();
+    }
     await page.waitForSelector('input[name="ep-native-choice"]');
     await page.check('input[name="ep-native-choice"][value="1"]');
     assert.equal(await page.evaluate(()=>window.__econ.sends),0,'Changing radio must not submit');
@@ -133,6 +155,12 @@ async function scenario(browser,lang,width,mode){
     }
     if(!['revoked','offline_leave','expired_pending'].includes(mode))
       await page.waitForFunction(()=>document.body.textContent.includes('Q2'));
+    if(mode==='paper30'){
+      assert(await page.locator('.ep-live-meta').allTextContents().then(xs=>xs.some(t=>t.includes('/ 30'))),
+        'P3 30-question progress missing');
+      assert.equal(await page.evaluate(()=>window.__econ.saved[1]),1,
+        'P3 answer was not committed in the synthetic server');
+    }
     if(mode==='revised'){
       await page.locator('.ep-live-actions button').filter({hasText:/^(Previous|Предыдущий|Oldingi)$/}).click();
       await page.check('input[name="ep-native-choice"][value="2"]');
@@ -157,7 +185,7 @@ async function scenario(browser,lang,width,mode){
  try{
    let count=0;
    for(const lang of langs)for(const width of widths)for(const mode of ['normal','lost_ack','before_commit','slow','draft','unsubmitted_finish','revised',
-     'conflict','revoked','offline_leave','pending_resume','expired_pending']){
+     'conflict','revoked','offline_leave','pending_resume','expired_pending','paper30']){
      await scenario(browser,lang,width,mode);count++;
    }
    console.log('PASS Economics native Chromium MCQ submit/recovery',count,'RU/UZ/EN scenarios');
