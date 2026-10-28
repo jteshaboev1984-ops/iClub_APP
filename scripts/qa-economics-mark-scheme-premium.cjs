@@ -48,10 +48,10 @@ assert(!native.includes('if(state.betaInvite&&!state.writtenPlan&&window.iClubWr
 assert(native.includes('rpc("iclub_econ_written_beta_join_v1",{p_confirm:true})'),
  'Server eligibility preserved behind a direct Start action');
 assert(css.includes('ep-written-mark-breakdown')&&css.includes('ep-written-actions')&&css.includes('ep-written-marking[hidden]'),'Premium CSS must honor layout and hidden controls');
-for(const needle of ['written-core-view-v1.js?v=econ-mark-scheme-premium-20261028',
- 'written-core-controller-v1.js?v=econ-mark-scheme-premium-20261028',
- 'written-core-source-v1.css?v=econ-mark-scheme-premium-20261028',
- 'exam-prep-economics-native.js?v=econ-mark-scheme-premium-20261028'])
+for(const needle of ['written-core-view-v1.js?v=econ-mark-scheme-premium-safeleave-20261028',
+ 'written-core-controller-v1.js?v=econ-mark-scheme-premium-safeleave-20261028',
+ 'written-core-source-v1.css?v=econ-mark-scheme-premium-safeleave-20261028',
+ 'exam-prep-economics-native.js?v=econ-mark-scheme-premium-safeleave-20261028'])
  assert(html.includes(needle),'Stale asset would hide change: '+needle);
 const root={};vm.runInNewContext(controller,{globalThis:root,module:{exports:{}},console});
 const ctl=(()=>{const sandbox={module:{exports:{}},console};vm.runInNewContext(controller,sandbox);return sandbox.module.exports})();
