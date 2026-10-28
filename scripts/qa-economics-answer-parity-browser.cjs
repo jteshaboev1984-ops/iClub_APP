@@ -40,7 +40,7 @@ async function scenario(browser,lang,width,mode){
           if(args.p_session_id!==id)return ok({status:'not_found',items:[]});
           return ok({session_id:id,paper_code:'P1',session_kind:'diagnostic',
             status:s.finish?'finalized':'active',score:s.finish?Object.keys(s.saved).length:null,
-            deadline_at:new Date(Date.now()+1200000).toISOString(),
+            deadline_at:new Date(Date.now()+(s.mode==='expired_pending'&&s.sends>0?-3000:1200000)).toISOString(),
             items:Array.from({length:12},(_,i)=>({order:i+1,question:'Q'+(i+1),options:['A','B','C','D'],
               selected_index:Number.isInteger(s.saved[i+1])?s.saved[i+1]:null,
               answered:Number.isInteger(s.saved[i+1]),
@@ -48,7 +48,7 @@ async function scenario(browser,lang,width,mode){
         }
         if(name==='iclub_exam_native_mcq_answer_v1'){
           s.sends++;
-          if(['before_commit','revoked','pending_resume','offline_leave'].includes(s.mode)&&s.sends===1)
+          if(['before_commit','revoked','pending_resume','offline_leave','expired_pending'].includes(s.mode)&&s.sends===1)
             return {error:{message:'disconnected'}};
           if(s.mode==='slow'&&s.sends===1)await new Promise(r=>setTimeout(r,90));
           s.saved[args.p_item_order]=s.mode==='conflict'&&s.sends===1?2:args.p_choice;
@@ -95,10 +95,10 @@ async function scenario(browser,lang,width,mode){
         b.click();b.click();
       });
     }else await page.click('[data-ep-native-submit]');
-    if(['before_commit','pending_resume','revoked','offline_leave'].includes(mode)){
+    if(['before_commit','pending_resume','revoked','offline_leave','expired_pending'].includes(mode)){
       await page.waitForSelector('.ep-native-save-recovery button');
       assert.equal(await page.evaluate(()=>window.__econ.sends),1,'Uncertain request auto retried');
-      if(mode==='pending_resume'){
+      if(mode==='pending_resume'||mode==='expired_pending'){
         await page.evaluate(lang=>{window.__app.unmount();window.__app.mount({
           root:document.getElementById('host'),shell:{program_key:'economics_9708',enabled:true,
           papers:[{code:'P1',assessment_kind:'mcq'},{code:'P3',assessment_kind:'mcq'}]},language:lang});},lang);
@@ -107,9 +107,12 @@ async function scenario(browser,lang,width,mode){
         await page.waitForSelector('.ep-native-save-recovery button');
         assert(await page.locator('input[name="ep-native-choice"][value="1"]').isChecked(),'Pending choice lost on remount');
         assert.equal(await page.evaluate(()=>window.__econ.sends),1,'Remount must not auto-resend');
-        await page.locator('.ep-native-save-recovery button').first().click();
+        if(mode==='pending_resume')
+          await page.locator('.ep-native-save-recovery button').first().click();
+        else assert.equal(await page.evaluate(()=>window.__econ.finish),false,
+          'Expired attempt must not finalize an uncertain answer on remount');
       }
-      if(mode==='revoked'||mode==='offline_leave'){
+      if(mode==='revoked'||mode==='offline_leave'||mode==='expired_pending'){
         await page.locator('.ep-native-save-recovery button').last().click();
         await page.waitForSelector('.ep-component-next button');
         assert.equal(await page.evaluate(()=>window.__econ.sends),1,'Exit must not send an answer');
@@ -128,7 +131,7 @@ async function scenario(browser,lang,width,mode){
       await page.check('input[name="ep-native-choice"][value="1"]');
       await page.click('[data-ep-native-submit]');
     }
-    if(!['revoked','offline_leave'].includes(mode))
+    if(!['revoked','offline_leave','expired_pending'].includes(mode))
       await page.waitForFunction(()=>document.body.textContent.includes('Q2'));
     if(mode==='revised'){
       await page.locator('.ep-live-actions button').filter({hasText:/^(Previous|Предыдущий|Oldingi)$/}).click();
@@ -154,7 +157,7 @@ async function scenario(browser,lang,width,mode){
  try{
    let count=0;
    for(const lang of langs)for(const width of widths)for(const mode of ['normal','lost_ack','before_commit','slow','draft','unsubmitted_finish','revised',
-     'conflict','revoked','offline_leave','pending_resume']){
+     'conflict','revoked','offline_leave','pending_resume','expired_pending']){
      await scenario(browser,lang,width,mode);count++;
    }
    console.log('PASS Economics native Chromium MCQ submit/recovery',count,'RU/UZ/EN scenarios');
