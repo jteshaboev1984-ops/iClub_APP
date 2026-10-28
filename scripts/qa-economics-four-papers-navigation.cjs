@@ -53,10 +53,10 @@ async function run(lang,scenario) {
  }};
  const sandbox={window:{sb,crypto:{randomUUID:()=> 'safe-id'},
    iClubWrittenCoreViewV1:{mount:()=>{mounts++;return {dispose:()=>{}}}}},
-   document:{createElement:t=>new Node(t)},document:{createElement:t=>new Node(t)},
+   document:{createElement:t=>new Node(t)},
    clearInterval:()=>{},setInterval:()=>0,Date,Intl,console};
  sandbox.window.window=sandbox.window;
- sandbox.document=sandbox.window.document;
+ sandbox.window.document=sandbox.document;
  sandbox.clearInterval=()=>{};
  sandbox.setInterval=()=>0;
  vm.runInNewContext(native,sandbox);
