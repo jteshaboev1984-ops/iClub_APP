@@ -237,7 +237,7 @@
       btn(t().viewHistory,()=>openHistoryList(),true));
     if(state.writtenPlan&&window.iClubWrittenCoreViewV1)
       tools.append(btn(t().writtenPractice,openWritten,true));
-    if(state.betaJoined&&state.writtenPlan){
+    if(state.betaJoined){
       tools.append(btn(t().betaLeave,async()=>{
         if(state.closed||state.view!=="home"||state.betaBusy)return;
         state.betaBusy=true;
