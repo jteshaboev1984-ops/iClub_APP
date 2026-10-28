@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null,writtenPlan:null,writtenView:null,betaInvite:false,betaJoined:false,betaBusy:false,pendingChoice:null};
+  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null,writtenPlan:null,writtenView:null,betaInvite:false,betaJoined:false,betaBusy:false,pendingChoice:null,choiceFeedback:null};
   const dictionary={
     ru:{p2:"Paper 2 · AS Level",p4:"Paper 4 · A Level",writtenPaperInfo:"Письменная практика",writtenPaperReady:"Открыть письменный план",writtenPaperInvite:"Можно начать",writtenPaperLimited:"Пока недоступно",writtenPaperDone:"Новых заданий пока нет",writtenPaperSequence:"Задания выполняются по общему плану: сначала Paper 2, затем Paper 4. Выбор Paper 4 не пропускает предыдущие задания.",writtenPaperNoAccess:"Письменные задания пока доступны ограниченной группе учеников после входной диагностики Economics.",writtenPaperWaiting:"По вашему плану сейчас нет нового письменного задания. Уже выполненные шаги сохранены.",writtenPractice:"Письменная практика",betaTitle:"Письменные задания",betaIntro:"Задания Paper 2 и Paper 4 выполняются самостоятельно, без автоматической оценки эссе.",betaJoin:"Начать письменную практику",betaLeave:"Отключить письменную практику",betaLeaveConfirm:"Подтвердить отключение",betaLeaveWarning:"Выполненные задания сохранятся. Повторное подключение пока недоступно.",betaUnavailable:"Сейчас не удалось подключить письменную практику. Попробуйте позже.",baselineIntro:"Сначала проверьте базовые знания Cambridge Economics (AS): 12 вопросов, 20 минут. После результата выберите Paper 1 или Paper 3. Темы A Level проверяются отдельно.",selectPaper:"Выберите Paper",continuePreparation:"Продолжить подготовку",entryResult:"Входная диагностика завершена",topicOverview:"Темы для подготовки",chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант и нажмите «Ответить». Сохранение подтверждается сервером.",saving:"Сохраняем ответ…",
@@ -9,7 +9,7 @@
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
       confirm:"Завершить экзамен? Пропущенные вопросы получат 0 баллов.",result:"Результат",
       review:"Разбор ответов",right:"Правильный ответ",your:"Ваш ответ",empty:"Не отвечено",
-      loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить", uncertain:"Сохранение не подтверждено. Ответ остался на экране. Сначала проверьте сервер.", checkSaved:"Проверить сохранение", retrySame:"Отправить тот же ответ", selectionPending:"Ответ пока не отправлен.", finishNeedSubmit:"Сначала отправьте выбранный вариант кнопкой «Ответить».",
+      loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить", uncertain:"Сохранение не подтверждено. Ответ остался на экране. Сначала проверьте сервер.", checkSaved:"Проверить сохранение", retrySame:"Отправить тот же ответ", selectionPending:"Ответ пока не отправлен.", finishNeedSubmit:"Сначала отправьте выбранный вариант кнопкой «Ответить».", serverDifferent:"На сервере уже сохранён другой вариант. Здесь показан сохранённый ответ. Чтобы изменить его, выберите новый вариант и нажмите «Ответить».", leavePending:"Выйти, сохранив выбор в этой вкладке",
       plan:"Мой учебный план",planIntro:"Начните с этих тем и проверьте себя после повторения.",
       unit:"Раздел",correct:"Верно",mistakes:"Тем для повторения",studied:"Изучено",verified:"Подтверждено повторной проверкой",
       study:"Объяснение темы",trap:"На что обратить внимание",check:"Проверьте себя",showCheck:"Показать ответ",
@@ -22,7 +22,7 @@
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
       confirm:"Imtihonni yakunlaysizmi? Javobsiz savollar 0 ball bo‘ladi.",result:"Natija",
       review:"Javoblarni tahlil qilish",right:"To‘g‘ri javob",your:"Sizning javobingiz",empty:"Javob berilmagan",
-      loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish", uncertain:"Saqlanganini tasdiqlab bo‘lmadi. Javob ekranda qoldi. Avval server holatini tekshiring.", checkSaved:"Saqlanganini tekshirish", retrySame:"Shu javobni qayta yuborish", selectionPending:"Javob hali yuborilmadi.", finishNeedSubmit:"Avval tanlangan javobni «Javob berish» tugmasi orqali yuboring.",
+      loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish", uncertain:"Saqlanganini tasdiqlab bo‘lmadi. Javob ekranda qoldi. Avval server holatini tekshiring.", checkSaved:"Saqlanganini tekshirish", retrySame:"Shu javobni qayta yuborish", selectionPending:"Javob hali yuborilmadi.", finishNeedSubmit:"Avval tanlangan javobni «Javob berish» tugmasi orqali yuboring.", serverDifferent:"Serverda boshqa javob saqlangan. Hozir saqlangan javob ko‘rsatilmoqda. O‘zgartirish uchun yangi variantni tanlab, «Javob berish»ni bosing.", leavePending:"Javob tanlovini shu oynada qoldirib chiqish",
       plan:"Mening o‘quv rejam",planIntro:"Avval shu mavzularni o‘rganing, so‘ng qayta tekshiring.",
       unit:"Bo‘lim",correct:"To‘g‘ri",mistakes:"Takrorlanadigan mavzular",studied:"O‘rganildi",verified:"Qayta tekshiruvda tasdiqlangan",
       study:"Mavzu izohi",trap:"E'tibor bering",check:"O‘zingizni tekshiring",showCheck:"Javobni ko‘rsatish",
@@ -35,7 +35,7 @@
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
       confirm:"Finish this exam? Unanswered questions score zero.",result:"Result",
       review:"Review answers",right:"Correct answer",your:"Your answer",empty:"Unanswered",
-      loading:"Loading…",error:"The action failed. Check your connection.",retry:"Try again", uncertain:"Saving has not been confirmed. Your choice remains here. Check the server first.", checkSaved:"Check saved answer", retrySame:"Resend the same answer", selectionPending:"This choice has not been submitted.", finishNeedSubmit:"Submit your selected answer before finishing the exam.",
+      loading:"Loading…",error:"The action failed. Check your connection.",retry:"Try again", uncertain:"Saving has not been confirmed. Your choice remains here. Check the server first.", checkSaved:"Check saved answer", retrySame:"Resend the same answer", selectionPending:"This choice has not been submitted.", finishNeedSubmit:"Submit your selected answer before finishing the exam.", serverDifferent:"A different answer is already saved on the server. The saved choice is shown. To change it, select and submit a new answer.", leavePending:"Leave, keeping your choice in this tab",
       plan:"My study plan",planIntro:"Review these topics first, then test your understanding again.",
       unit:"Unit",correct:"Correct",mistakes:"Topics to review",studied:"Studied",verified:"Confirmed in a later test",
       study:"Topic explanation",trap:"Watch out for",check:"Check your understanding",showCheck:"Show answer",
@@ -81,7 +81,7 @@
   function unmount(){
     state.writtenView?.dispose?.();state.writtenView=null;state.writtenPlan=null;
     stop();state.token++;state.closed=true;state.root=null;state.shell=null;
-    state.id=null;state.paper=null;state.data=null;state.profile=null;state.history=[];state.planData=null;state.view="home";state.historyReturn=null;state.busy=false;state.onBack=null;state.pendingChoice=null;
+    state.id=null;state.paper=null;state.data=null;state.profile=null;state.history=[];state.planData=null;state.view="home";state.historyReturn=null;state.busy=false;state.onBack=null;state.pendingChoice=null;state.choiceFeedback=null;
   }
   async function rpc(name,args={}){
     try {
@@ -156,7 +156,7 @@
     state.writtenView?.dispose?.();state.writtenView=null;state.writtenPlan=null;
     state.betaInvite=false;state.betaJoined=false;state.betaBusy=false;
     ++state.token;stop();state.view="home";state.id=null;state.paper=null;
-    state.data=null;state.planData=null;state.index=0;state.pendingChoice=null;
+    state.data=null;state.planData=null;state.index=0;state.pendingChoice=null;state.choiceFeedback=null;
     const view=shell();if(!view)return;
     view.append(e("div","ep-live-card",t().loading));
     loadDashboard(state.token);
@@ -563,7 +563,14 @@
       clearChoiceDraft(state.id,state.pendingChoice.order);
       state.pendingChoice=null;
     }
-    state.data=v;draw();
+    state.data=v;
+    // After refresh, focus the unanswered write instead of silently
+    // returning to question 1. No automatic network resend.
+    if(v.status==="active"&&!state.pendingChoice){
+      const unansweredWrite=v.items.findIndex((_,order)=>readChoiceDraft(v.session_id,order)?.pending===true);
+      if(unansweredWrite>=0)state.index=unansweredWrite;
+    }
+    draw();
     return true;
   }
   function clock(label){
@@ -620,6 +627,8 @@
       radio.checked=choice===idx;radio.disabled=finished||state.busy||!!pending;
       if(!finished)radio.addEventListener("change",()=>{
         if(state.busy||state.pendingChoice)return;
+        state.choiceFeedback=null;
+        state.root?.querySelector(".ep-native-choice-feedback")?.remove();
         writeChoiceDraft(state.id,state.index,idx,false);
         const submit=state.root?.querySelector("[data-ep-native-submit]");
         if(submit)submit.disabled=false;
@@ -636,6 +645,10 @@
     if(row.answered&&!finished&&(!draft||draft.choice===row.selected_index))
       card.append(e("p","ep-native-saved",t().saved));
     else if(draft&&!draft.pending)card.append(e("p","ep-native-unsubmitted",t().selectionPending));
+    if(!finished&&state.choiceFeedback){
+      const feedback=e("p","ep-native-choice-feedback",state.choiceFeedback);
+      feedback.setAttribute("role","status");card.append(feedback);
+    }
     if(pending&&!finished){
       const warning=e("div","ep-live-card ep-native-save-recovery");
       warning.setAttribute("role","alert");
@@ -645,6 +658,12 @@
       if(pending.retryAllowed && data.status==="active" &&
          new Date(data.deadline_at).getTime()>Date.now())
         controls.append(btn(t().retrySame,()=>sendChoice(pending)));
+      // Leaving never deletes a server answer or the tab-local unsent choice.
+      // The learner can return and explicitly check the server again.
+      controls.append(btn(t().leavePending,()=>{
+        if(state.busy||state.pendingChoice!==pending)return;
+        state.pendingChoice=null;state.choiceFeedback=null;lobby();
+      },true));
       warning.append(controls);card.append(warning);
     }
     if(finished){
@@ -660,8 +679,8 @@
       submit.disabled=state.busy||choice===null||choice===undefined;
       actions.append(submit);
     }
-    if(state.index>0&&!pending)actions.append(btn(t().previous,()=>{if(!state.busy){state.index--;draw();}},true));
-    if(state.index<total-1&&!pending)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
+    if(state.index>0&&!pending)actions.append(btn(t().previous,()=>{if(!state.busy){state.choiceFeedback=null;state.index--;draw();}},true));
+    if(state.index<total-1&&!pending)actions.append(btn(t().next,()=>{if(!state.busy){state.choiceFeedback=null;state.index++;draw();}},true));
     if(!finished&&!pending)actions.append(btn(t().finish,()=>finish(false),true));
     if(finished)actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,()=>begin(state.paper,data.session_kind),true));
     if(!pending)actions.append(btn(t().papers,lobby,true));
@@ -824,6 +843,14 @@
       if(item?.answered&&item.selected_index===pending.choice){
         commitChoice(pending);return;
       }
+      if(item?.answered&&item.selected_index!==pending.choice){
+        // A concurrent browser may have submitted another answer. Never
+        // automatically overwrite the newer, server-confirmed choice.
+        clearChoiceDraft(pending.sessionId,pending.order);
+        state.pendingChoice=null;state.index=pending.order;
+        state.choiceFeedback=t().serverDifferent;
+        draw();return;
+      }
       if(result.status==="finalized"){
         // The attempt is closed; a draft cannot become score evidence.
         clearChoiceDraft(pending.sessionId,pending.order);
@@ -870,11 +897,13 @@
       if(next>=0){state.index=next;draw();}return;
     }
     const pending={sessionId:state.id,order,choice,retryAllowed:false};
+    state.choiceFeedback=null;
     state.pendingChoice=pending;writeChoiceDraft(state.id,order,choice,true);
     await sendChoice(pending);
   }
   async function finish(auto){
-    if(state.busy||state.closed||state.data?.status!=="active")return;
+    // Do not finalize while the server outcome of a write is unknown.
+    if(state.busy||state.closed||state.pendingChoice||state.data?.status!=="active")return;
     if(!auto){
       const unsubmitted=state.data.items.findIndex((item,order)=>{
         const draft=readChoiceDraft(state.id,order);
