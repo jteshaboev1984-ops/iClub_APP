@@ -36,6 +36,7 @@ async function scenario(browser,lang,width,mode){
         if(name==='iclub_exam_native_mcq_start_diagnostic_v1'){s.started=true;return ok({session_id:id});}
         if(name==='iclub_exam_native_mcq_get_v1'){
           s.reads++;
+          if(s.mode==='revoked'&&s.sends>0)return {data:{ok:false,code:'not_authorized'}};
           if(args.p_session_id!==id)return ok({status:'not_found',items:[]});
           return ok({session_id:id,paper_code:'P1',session_kind:'diagnostic',
             status:s.finish?'finalized':'active',score:s.finish?Object.keys(s.saved).length:null,
@@ -47,10 +48,12 @@ async function scenario(browser,lang,width,mode){
         }
         if(name==='iclub_exam_native_mcq_answer_v1'){
           s.sends++;
-          if(s.mode==='before_commit'&&s.sends===1)return {error:{message:'disconnected'}};
+          if(['before_commit','revoked','pending_resume','offline_leave'].includes(s.mode)&&s.sends===1)
+            return {error:{message:'disconnected'}};
           if(s.mode==='slow'&&s.sends===1)await new Promise(r=>setTimeout(r,90));
-          s.saved[args.p_item_order]=args.p_choice;
-          if(s.mode==='lost_ack'&&s.sends===1)return {error:{message:'lost ACK'}};
+          s.saved[args.p_item_order]=s.mode==='conflict'&&s.sends===1?2:args.p_choice;
+          if(['lost_ack','conflict'].includes(s.mode)&&s.sends===1)
+            return {error:{message:'lost ACK'}};
           return ok({saved:true,selected_index:args.p_choice});
         }
         if(name==='iclub_exam_native_mcq_finish_v1'){s.finish=true;return ok({status:'finalized'});}
@@ -92,12 +95,41 @@ async function scenario(browser,lang,width,mode){
         b.click();b.click();
       });
     }else await page.click('[data-ep-native-submit]');
-    if(mode==='before_commit'){
+    if(['before_commit','pending_resume','revoked','offline_leave'].includes(mode)){
       await page.waitForSelector('.ep-native-save-recovery button');
       assert.equal(await page.evaluate(()=>window.__econ.sends),1,'Uncertain request auto retried');
-      await page.locator('.ep-native-save-recovery button').last().click();
+      if(mode==='pending_resume'){
+        await page.evaluate(lang=>{window.__app.unmount();window.__app.mount({
+          root:document.getElementById('host'),shell:{program_key:'economics_9708',enabled:true,
+          papers:[{code:'P1',assessment_kind:'mcq'},{code:'P3',assessment_kind:'mcq'}]},language:lang});},lang);
+        await page.waitForSelector('.ep-component-next button');
+        await page.locator('.ep-component-next button').first().click();
+        await page.waitForSelector('.ep-native-save-recovery button');
+        assert(await page.locator('input[name="ep-native-choice"][value="1"]').isChecked(),'Pending choice lost on remount');
+        assert.equal(await page.evaluate(()=>window.__econ.sends),1,'Remount must not auto-resend');
+        await page.locator('.ep-native-save-recovery button').first().click();
+      }
+      if(mode==='revoked'||mode==='offline_leave'){
+        await page.locator('.ep-native-save-recovery button').last().click();
+        await page.waitForSelector('.ep-component-next button');
+        assert.equal(await page.evaluate(()=>window.__econ.sends),1,'Exit must not send an answer');
+        assert(await page.evaluate(()=>sessionStorage.getItem(
+          'iclub_ep_economics_choice_v1:11111111-1111-4111-8111-111111111111:1')),
+          'Exit lost unconfirmed tab choice');
+      }else{
+        await page.locator('.ep-native-save-recovery button').nth(1).click();
+      }
     }
-    await page.waitForFunction(()=>document.body.textContent.includes('Q2'));
+    if(mode==='conflict'){
+      await page.waitForSelector('.ep-native-choice-feedback');
+      assert(await page.locator('input[name="ep-native-choice"][value="2"]').isChecked(),
+        'Server choice must be displayed after a conflict');
+      assert.equal(await page.evaluate(()=>window.__econ.sends),1,'Conflicting answer auto overwritten');
+      await page.check('input[name="ep-native-choice"][value="1"]');
+      await page.click('[data-ep-native-submit]');
+    }
+    if(!['revoked','offline_leave'].includes(mode))
+      await page.waitForFunction(()=>document.body.textContent.includes('Q2'));
     if(mode==='revised'){
       await page.locator('.ep-live-actions button').filter({hasText:/^(Previous|Предыдущий|Oldingi)$/}).click();
       await page.check('input[name="ep-native-choice"][value="2"]');
@@ -109,7 +141,8 @@ async function scenario(browser,lang,width,mode){
       assert.equal(await page.evaluate(()=>window.__econ.saved[1]),2,'Server must receive revised answer');
     }
     const {sends,reads}=await page.evaluate(()=>window.__econ);
-    assert.equal(sends,mode==='before_commit'||mode==='revised'?2:1,'unexpected duplicate writes');
+    assert.equal(sends,['before_commit','pending_resume','revised','conflict'].includes(mode)?2:1,
+      'unexpected duplicate writes');
     if(mode==='lost_ack'||mode==='before_commit')assert(reads>=2,'Missing server reconciliation');
     assert.equal(errors.length,0,errors.join('; '));
     const x=await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+3}));
@@ -120,7 +153,8 @@ async function scenario(browser,lang,width,mode){
  const browser=await chromium.launch({headless:true});
  try{
    let count=0;
-   for(const lang of langs)for(const width of widths)for(const mode of ['normal','lost_ack','before_commit','slow','draft','unsubmitted_finish','revised']){
+   for(const lang of langs)for(const width of widths)for(const mode of ['normal','lost_ack','before_commit','slow','draft','unsubmitted_finish','revised',
+     'conflict','revoked','offline_leave','pending_resume']){
      await scenario(browser,lang,width,mode);count++;
    }
    console.log('PASS Economics native Chromium MCQ submit/recovery',count,'RU/UZ/EN scenarios');
