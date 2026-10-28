@@ -7,12 +7,22 @@ on:
       - 'scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql'
       - 'scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh'
       - '.github/workflows/chemistry-9701-j24-isolated-as-theory.yml'
+      - 'exam-prep/exam-prep-chemistry-theory-native.js'
+      - 'exam-prep/exam-prep-host.js'
+      - 'index.html'
+      - 'exam-prep/exam-prep-host.css'
+      - 'scripts/qa-chemistry-9701-j24-theory-ui.cjs'
   pull_request:
     branches: [main]
     paths:
       - 'scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql'
       - 'scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh'
       - '.github/workflows/chemistry-9701-j24-isolated-as-theory.yml'
+      - 'exam-prep/exam-prep-chemistry-theory-native.js'
+      - 'exam-prep/exam-prep-host.js'
+      - 'index.html'
+      - 'exam-prep/exam-prep-host.css'
+      - 'scripts/qa-chemistry-9701-j24-theory-ui.cjs'
 
 permissions:
   contents: read
@@ -51,6 +61,13 @@ jobs:
           set -euo pipefail
           bash -n scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
           ! grep -Eq 'supabase\.co|service_role|auth\.users|curl|wget' scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
+      - name: Verify native AS Theory UI and shared host without browser storage changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-host.js
+          node --check exam-prep/exam-prep-chemistry-theory-native.js
+          node scripts/qa-chemistry-9701-j24-theory-ui.cjs
       - name: Simulate 91 AS sources, A-level isolation and multi-user denial
         shell: bash
         run: bash scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
