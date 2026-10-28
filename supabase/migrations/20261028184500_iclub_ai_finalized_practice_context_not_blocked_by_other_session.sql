@@ -238,7 +238,11 @@ DECLARE passed_math integer;passed_econ integer;reason text;
 BEGIN
  -- Service-only proof: completed attempts for the consented pilot must be
  -- viewable even when a DIFFERENT resumable Practice row remains open.
+ -- Isolated GoTrue fixture reads the legacy role claim; real Supabase
+ -- auth.jwt() reads JSON request.jwt.claims. Keep both scoped to this
+ -- migration transaction so the production postcheck uses service_role.
  PERFORM set_config('request.jwt.claim.role','service_role',true);
+ PERFORM set_config('request.jwt.claims','{"role":"service_role"}',true);
  SELECT count(*) FILTER(WHERE subject_key='mathematics' AND answer->>'ok'='true'),
         count(*) FILTER(WHERE subject_key='economics' AND answer->>'ok'='true')
  INTO passed_math,passed_econ
