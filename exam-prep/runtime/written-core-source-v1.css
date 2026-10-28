@@ -61,3 +61,124 @@
     padding: 8px 10px;
   }
 }
+
+/* Shared iClub premium written practice: restrained, symmetric and keyboard safe.
+   Only styles the Exam Prep written component, not Courses/Practice/Tours. */
+#exam-prep-host-root .ep-written-question,
+#exam-prep-host-root .ep-written-workflow,
+#exam-prep-host-root .ep-written-source {
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  border:1px solid var(--border,rgba(127,143,160,.22));
+  border-radius:16px;
+  background:var(--card,rgba(127,127,127,.045));
+  padding:clamp(15px,2.2vw,22px);
+  box-shadow:0 4px 18px rgba(16,24,40,.035);
+}
+#exam-prep-host-root .ep-written-question { gap:12px; }
+#exam-prep-host-root .ep-written-task-meta { display:flex;align-items:center;gap:10px; }
+#exam-prep-host-root .ep-written-task-paper {
+  display:inline-flex;
+  align-items:center;
+  min-height:27px;
+  padding:4px 11px;
+  border:1px solid var(--border,rgba(127,143,160,.26));
+  border-radius:999px;
+  font-size:12px;
+  font-weight:750;
+  color:var(--primary,#2f6fd6);
+  background:var(--surface-secondary,rgba(127,143,160,.075));
+}
+#exam-prep-host-root .ep-written-task-text {
+  font-size:clamp(1.03rem,2.5vw,1.17rem);
+  line-height:1.65;
+  margin:0;
+  font-weight:650;
+  overflow-wrap:anywhere;
+}
+#exam-prep-host-root .ep-written-instruction,
+#exam-prep-host-root .ep-written-mark-help,
+#exam-prep-host-root .ep-written-mark-disclaimer {
+  font-size:.86rem;
+  line-height:1.6;
+  opacity:.78;
+  margin:0;
+}
+#exam-prep-host-root .ep-written-actions { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
+#exam-prep-host-root .ep-written-actions .ep-live-btn {
+  min-height:46px;
+  width:100%;
+  min-width:0;
+  margin:0;
+  border-radius:12px;
+  font-weight:700;
+  white-space:normal;
+  line-height:1.35;
+}
+#exam-prep-host-root .ep-written-actions .ep-live-btn:focus-visible {
+  outline:3px solid rgba(47,111,214,.27);
+  outline-offset:2px;
+}
+#exam-prep-host-root .ep-written-workflow { gap:14px; }
+#exam-prep-host-root .ep-written-marking {
+  display:grid;
+  gap:14px;
+  padding-top:16px;
+  border-top:1px solid var(--border,rgba(127,143,160,.23));
+}
+#exam-prep-host-root .ep-written-marking[hidden]{display:none!important;}
+#exam-prep-host-root .ep-written-marking-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+#exam-prep-host-root .ep-written-marking-title{
+  margin:0;
+  font-size:1.02rem;
+  line-height:1.4;
+  font-weight:760;
+}
+#exam-prep-host-root .ep-written-mark-total {
+  padding:6px 10px;
+  background:var(--surface-secondary,rgba(127,143,160,.10));
+  border:1px solid var(--border,rgba(127,143,160,.20));
+  border-radius:10px;
+  color:var(--primary,#2f6fd6);
+  font-weight:780;
+  font-size:.89rem;
+  white-space:nowrap;
+}
+#exam-prep-host-root .ep-written-mark-breakdown { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
+#exam-prep-host-root .ep-written-mark-part {
+  display:grid;
+  gap:8px;
+  border:1px solid var(--border,rgba(127,143,160,.22));
+  background:var(--surface-secondary,rgba(127,143,160,.06));
+  border-radius:13px;
+  padding:13px 14px;
+  min-width:0;
+}
+#exam-prep-host-root .ep-written-mark-part span {font-size:.82rem;line-height:1.4;opacity:.8;}
+#exam-prep-host-root .ep-written-mark-part strong {font-size:1.16rem;font-weight:780;font-variant-numeric:tabular-nums;}
+#exam-prep-host-root .ep-written-mark-subtitle {margin:0;font-size:.9rem;font-weight:750;line-height:1.4;}
+#exam-prep-host-root .ep-written-mark-points {display:grid;gap:9px;margin:0;padding-inline-start:21px;line-height:1.58;}
+#exam-prep-host-root .ep-written-mark-points li {padding-inline-start:3px;overflow-wrap:anywhere;}
+#exam-prep-host-root .ep-written-levels {display:grid;gap:8px;}
+#exam-prep-host-root .ep-written-level-group {font-size:.86rem;font-weight:750;margin-top:5px;}
+#exam-prep-host-root .ep-written-level-row {
+  display:grid;grid-template-columns:minmax(68px,.6fr) minmax(45px,.3fr) minmax(0,2.3fr);
+  gap:10px;align-items:start;border:1px solid var(--border,rgba(127,143,160,.17));
+  padding:10px 12px;border-radius:11px;
+  font-size:.82rem;line-height:1.4;
+}
+#exam-prep-host-root .ep-written-level-row strong{font-variant-numeric:tabular-nums;text-align:center;}
+#exam-prep-host-root .ep-written-level-description{overflow-wrap:anywhere;}
+#exam-prep-host-root .ep-written-source-scroll{max-width:100%;}
+@media(max-width:540px){
+  #exam-prep-host-root .ep-written-actions{grid-template-columns:1fr;}
+  #exam-prep-host-root .ep-written-mark-breakdown{grid-template-columns:1fr;}
+  #exam-prep-host-root .ep-written-level-row{grid-template-columns:62px 45px minmax(0,1fr);gap:7px;padding:9px;}
+}
