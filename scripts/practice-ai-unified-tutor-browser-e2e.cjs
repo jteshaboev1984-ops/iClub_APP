@@ -339,8 +339,32 @@ async function main(){
   await askInput.fill("Что означает мой результат 70%?");
   await page.locator("[data-global-ai-send]").click();
   await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
-     ?.textContent?.includes("Проверяем доступ к результату"),null,{timeout:8000});
+     ?.textContent?.includes("Пока не удалось подтвердить этот результат"),null,{timeout:8000});
   assert.equal(activity.asks.length,before,"An unauthorized attempt called model");
+  const oneNotice=(await page.locator("[data-global-ai-messages]").textContent()||"")
+    .split("Пока не удалось подтвердить этот результат").length-1;
+  assert.equal(oneNotice,1);
+  // A second denied attempt must not flood chat with identical notices.
+  await askInput.fill("Почему этот результат недоступен?");
+  await page.locator("[data-global-ai-send]").evaluate(el=>el.click());
+  await page.waitForTimeout(250);
+  assert.equal((await page.locator("[data-global-ai-messages]").textContent()||"")
+    .split("Пока не удалось подтвердить этот результат").length-1,1);
+  assert.equal(activity.asks.length,before);
+  // After a transient server issue clears, SAME result and SAME open Tutor
+  // must re-check on the next typed ask, then route it to a new AI request.
+  await page.evaluate(()=>{window.__isolated.visibilityAllowed=true;});
+  const beforeReturn=(await page.locator("[data-global-ai-messages]").textContent()||"")
+    .split(ANSWER).length-1;
+  await askInput.fill("Что означает результат этой завершённой попытки?");
+  await page.locator("[data-global-ai-send]").evaluate(el=>el.click());
+  await page.waitForFunction(({answer,count})=>{
+    const text=document.querySelector("[data-global-ai-messages]")?.textContent||"";
+    return text.split(answer).length-1>count;
+  },{answer:ANSWER,count:beforeReturn},{timeout:8000});
+  assert.equal(activity.asks.length,before+1,
+    "Completed attempt remained blocked after verified re-check");
+  const beforeQuiz=activity.asks.length;
   assert.equal(activity.denied.length,0,"Unexpected backend route was invoked");
   assert.equal(activity.external.length,0,"External network escaped isolated browser");
 
@@ -350,7 +374,7 @@ async function main(){
     document.getElementById("courses-practice-quiz").classList.add("is-active");
   });
   await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")?.hidden===true,null,{timeout:8000});
-  assert.equal(activity.asks.length,before);
+  assert.equal(activity.asks.length,beforeQuiz);
   // A Telegram focus event during an active quiz must NEVER revoke the beta
   // status or remove the existing mark; the quiz must still hide it.
   await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
@@ -366,7 +390,7 @@ async function main(){
   await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")
     ?.hidden===false,null,{timeout:8000});
   assert.equal(await page.locator("#iclub-global-ai-mark").count(),1);
-  assert.equal(activity.asks.length,before,
+  assert.equal(activity.asks.length,beforeQuiz,
     "Icon recovery must never trigger a model request");
 
   // Simulate an old response saved to canonical PC4 before a FULL reload.
