@@ -5,7 +5,7 @@ const fs=require('node:fs');
 const root=require('node:path').resolve(__dirname,'..');
 const read=p=>fs.readFileSync(require('node:path').join(root,p),'utf8');
 const js=read('exam-prep/exam-prep-economics-native.js');
-const sql=read('supabase/migrations/20261028094500_iclub_econ_written_consent_beta_wave1_off_v1.sql');
+const sql=read('supabase/migrations/20261028045112_iclub_econ_written_consent_beta_wave1_off_v1.sql');
 const html=read('index.html');
 new Function(js);
 function need(condition,message){assert(condition,message)}
