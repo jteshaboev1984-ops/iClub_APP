@@ -1884,3 +1884,8 @@ body:has(#exam-prep-host-root .ep-focus-screen) .main{padding-bottom:calc(95px +
  #exam-prep-host-root .ep-focus-head strong{font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){#exam-prep-host-root .ep-focus-head{scroll-behavior:auto}}
+
+/* Preserve the focused task CTA: no floating assistant over written criteria or review. */
+body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-mark,
+body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-panel,
+body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-intro{display:none!important}
