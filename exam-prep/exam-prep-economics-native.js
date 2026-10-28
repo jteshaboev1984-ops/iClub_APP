@@ -1,15 +1,15 @@
 (() => {
   "use strict";
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null,writtenPlan:null,writtenView:null,betaInvite:false,betaJoined:false,betaBusy:false};
+  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null,writtenPlan:null,writtenView:null,betaInvite:false,betaJoined:false,betaBusy:false,pendingChoice:null};
   const dictionary={
     ru:{p2:"Paper 2 · AS Level",p4:"Paper 4 · A Level",writtenPaperInfo:"Письменная практика",writtenPaperReady:"Открыть письменный план",writtenPaperInvite:"Можно начать",writtenPaperLimited:"Пока недоступно",writtenPaperDone:"Новых заданий пока нет",writtenPaperSequence:"Задания выполняются по общему плану: сначала Paper 2, затем Paper 4. Выбор Paper 4 не пропускает предыдущие задания.",writtenPaperNoAccess:"Письменные задания пока доступны ограниченной группе учеников после входной диагностики Economics.",writtenPaperWaiting:"По вашему плану сейчас нет нового письменного задания. Уже выполненные шаги сохранены.",writtenPractice:"Письменная практика",betaTitle:"Письменные задания",betaIntro:"Задания Paper 2 и Paper 4 выполняются самостоятельно, без автоматической оценки эссе.",betaJoin:"Начать письменную практику",betaLeave:"Отключить письменную практику",betaLeaveConfirm:"Подтвердить отключение",betaLeaveWarning:"Выполненные задания сохранятся. Повторное подключение пока недоступно.",betaUnavailable:"Сейчас не удалось подключить письменную практику. Попробуйте позже.",baselineIntro:"Сначала проверьте базовые знания Cambridge Economics (AS): 12 вопросов, 20 минут. После результата выберите Paper 1 или Paper 3. Темы A Level проверяются отдельно.",selectPaper:"Выберите Paper",continuePreparation:"Продолжить подготовку",entryResult:"Входная диагностика завершена",topicOverview:"Темы для подготовки",chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
-      p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант: он сохранится автоматически. До завершения экзамена ответ можно изменить.",saving:"Сохраняем ответ…",
-      papers:"К экзаменам",question:"Вопрос",time:"Осталось времени",save:"Сохранить ответ",
+      p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант и нажмите «Ответить». Сохранение подтверждается сервером.",saving:"Сохраняем ответ…",
+      papers:"К экзаменам",question:"Вопрос",time:"Осталось времени",save:"Ответить",
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
       confirm:"Завершить экзамен? Пропущенные вопросы получат 0 баллов.",result:"Результат",
       review:"Разбор ответов",right:"Правильный ответ",your:"Ваш ответ",empty:"Не отвечено",
-      loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить",
+      loading:"Загрузка…",error:"Не удалось выполнить действие. Проверьте соединение.",retry:"Повторить", uncertain:"Сохранение не подтверждено. Ответ остался на экране. Сначала проверьте сервер.", checkSaved:"Проверить сохранение", retrySame:"Отправить тот же ответ", selectionPending:"Ответ пока не отправлен.",
       plan:"Мой учебный план",planIntro:"Начните с этих тем и проверьте себя после повторения.",
       unit:"Раздел",correct:"Верно",mistakes:"Тем для повторения",studied:"Изучено",verified:"Подтверждено повторной проверкой",
       study:"Объяснение темы",trap:"На что обратить внимание",check:"Проверьте себя",showCheck:"Показать ответ",
@@ -17,12 +17,12 @@
       backReview:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
       allCorrect:"Все вопросы решены правильно. Ошибок для разбора нет.",studyNote:"Отметка «изучено» не означает, что навык освоен. Это подтвердит правильный ответ в следующем экзамене."},
     uz:{p2:"Paper 2 · AS Level",p4:"Paper 4 · A Level",writtenPaperInfo:"Yozma mashqlar",writtenPaperReady:"Yozma rejamni ochish",writtenPaperInvite:"Boshlash mumkin",writtenPaperLimited:"Hozircha mavjud emas",writtenPaperDone:"Hozircha yangi topshiriq yo‘q",writtenPaperSequence:"Yozma topshiriqlar bitta reja bo‘yicha ketma-ket bajariladi: avval Paper 2, keyin Paper 4. Paper 4 ni tanlash oldingi topshiriqlarni o‘tkazib yubormaydi.",writtenPaperNoAccess:"Yozma topshiriqlar hozir Economics kirish diagnostikasini yakunlagan cheklangan guruh o‘quvchilariga ochiq.",writtenPaperWaiting:"Hozir rejangizda yangi yozma topshiriq yo‘q. Oldingi bajarilgan ishlar saqlangan.",writtenPractice:"Yozma mashqlar",betaTitle:"Yozma topshiriqlar",betaIntro:"Paper 2 va Paper 4 yozma topshiriqlari mustaqil bajariladi; essega avtomatik baho qo‘yilmaydi.",betaJoin:"Yozma mashqlarni boshlash",betaLeave:"Yozma mashqlarni o‘chirish",betaLeaveConfirm:"O‘chirishni tasdiqlash",betaLeaveWarning:"Bajarilgan topshiriqlar saqlanadi. Qayta ulanish hozircha mumkin emas.",betaUnavailable:"Hozir yozma mashqlarga ulanishning imkoni bo‘lmadi. Keyinroq urinib ko‘ring.",baselineIntro:"Avval Cambridge Economics (AS) bo‘yicha asosiy bilimlaringizni tekshiring: 12 savol, 20 daqiqa. Natijadan so‘ng Paper 1 yoki Paper 3 ni tanlang. A Level mavzulari alohida tekshiriladi.",selectPaper:"Paperni tanlang",continuePreparation:"Tayyorgarlikni davom ettirish",entryResult:"Kirish diagnostikasi yakunlandi",topicOverview:"O‘rganiladigan mavzular",chooseLevel:"Darajani tanlang",openLevel:"Ochish",overview:"Bosh sahifa",noAttempts:"Hozircha urinishlar yo‘q",afterCheck:"Diagnostika tugadi — qiyin mavzularni o‘rganing",startHere:"Avval kirish diagnostikasidan boshlang",resumeExam:"Ishni davom ettirish",levelIntro:"Diagnostika o‘rganiladigan mavzularni aniqlaydi. To‘liq imtihon alohida mavjud.",openLesson:"Mavzuni o‘rganish",viewUnits:"Bo‘limlar bo‘yicha natijalar",nextLesson:"Keyingi mavzu",showMore:"Ko‘proq ko‘rsatish",viewHistory:"Urinishlar tarixi",noHistory:"Yakunlangan imtihonlar va diagnostikalar shu yerda chiqadi",backToPlan:"O‘quv rejasiga",recommended:"Tavsiya etilgan qadam",title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",minuteShort:"daq.",profile:"Tayyorgarlik sozlamalari",editProfile:"O‘zgartirish",series:"Imtihon sessiyasi",grade:"Maqsadli baho",hours:"Haftalik umumiy o‘qish soati",econHours:"Haftalik iqtisodiyot soati",saveProfile:"Sozlamalarni saqlash",profileInvalid:"Imtihon davri va soatlarni tekshiring: iqtisodiyot soati umumiy vaqtdan oshmasin.",profileSaved:"Sozlamalar saqlandi",optional:"Tayyorgarlik maqsadi va vaqtini belgilang. Avvalgi urinishlar o‘zgarmaydi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq imtihon",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
-      p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga", beforePlan:"O‘quv rejangiz birinchi yakunlangan imtihondan so‘ng paydo bo‘ladi. Keyin uni urinishlar tarixidan ochishingiz mumkin.", autoAnswer:"Variantni tanlang: javob avtomatik saqlanadi. Imtihonni yakunlashdan oldin uni o‘zgartirish mumkin.",saving:"Javob saqlanmoqda…",
-      papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javobni saqlash",
+      p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga", beforePlan:"O‘quv rejangiz birinchi yakunlangan imtihondan so‘ng paydo bo‘ladi. Keyin uni urinishlar tarixidan ochishingiz mumkin.", autoAnswer:"Variantni tanlang va «Javob berish» tugmasini bosing. Javob saqlangani server tomonidan tasdiqlanadi.",saving:"Javob saqlanmoqda…",
+      papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javob berish",
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
       confirm:"Imtihonni yakunlaysizmi? Javobsiz savollar 0 ball bo‘ladi.",result:"Natija",
       review:"Javoblarni tahlil qilish",right:"To‘g‘ri javob",your:"Sizning javobingiz",empty:"Javob berilmagan",
-      loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish",
+      loading:"Yuklanmoqda…",error:"Amal bajarilmadi. Internetni tekshiring.",retry:"Qayta urinish", uncertain:"Saqlanganini tasdiqlab bo‘lmadi. Javob ekranda qoldi. Avval server holatini tekshiring.", checkSaved:"Saqlanganini tekshirish", retrySame:"Shu javobni qayta yuborish", selectionPending:"Javob hali yuborilmadi.",
       plan:"Mening o‘quv rejam",planIntro:"Avval shu mavzularni o‘rganing, so‘ng qayta tekshiring.",
       unit:"Bo‘lim",correct:"To‘g‘ri",mistakes:"Takrorlanadigan mavzular",studied:"O‘rganildi",verified:"Qayta tekshiruvda tasdiqlangan",
       study:"Mavzu izohi",trap:"E'tibor bering",check:"O‘zingizni tekshiring",showCheck:"Javobni ko‘rsatish",
@@ -30,12 +30,12 @@
       backReview:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
       allCorrect:"Hamma savollarga to‘g‘ri javob berildi. Tahlil qilinadigan xato yo‘q.",studyNote:"«O‘rganildi» belgisi bilim o‘zlashtirilganini isbotlamaydi. Keyingi imtihondagi to‘g‘ri javob tasdiqlaydi."},
     en:{p2:"Paper 2 · AS Level",p4:"Paper 4 · A Level",writtenPaperInfo:"Written practice",writtenPaperReady:"Open written study plan",writtenPaperInvite:"Ready to start",writtenPaperLimited:"Not yet available",writtenPaperDone:"No new task right now",writtenPaperSequence:"Written tasks follow one plan: Paper 2 first, then Paper 4. Choosing Paper 4 does not skip earlier tasks.",writtenPaperNoAccess:"Written tasks are currently available to a limited group after the Economics entry check.",writtenPaperWaiting:"No new written task is available in your plan right now. Completed steps are preserved.",writtenPractice:"Written practice",betaTitle:"Written practice",betaIntro:"Complete Paper 2 and Paper 4 writing tasks independently; essays are not automatically marked.",betaJoin:"Start written practice",betaLeave:"Turn off written practice",betaLeaveConfirm:"Confirm turning off",betaLeaveWarning:"Completed tasks will be preserved. Rejoining is not currently available.",betaUnavailable:"Written practice could not be enabled right now. Please try again later.",baselineIntro:"First check your Cambridge Economics AS foundations: 12 questions, 20 minutes. After your result, choose Paper 1 or Paper 3. Advanced A Level topics are checked separately.",selectPaper:"Choose your paper",continuePreparation:"Continue preparation",entryResult:"Entry check completed",topicOverview:"Topics to study",chooseLevel:"Choose your level",openLevel:"Open",overview:"Overview",noAttempts:"No attempts yet",afterCheck:"Entry check completed — focus on weaker topics",startHere:"Begin with the entry check",resumeExam:"Resume your work",levelIntro:"The entry check identifies study topics. The full exam is available separately.",openLesson:"Study this topic",viewUnits:"Results by unit",nextLesson:"Next topic",showMore:"Show more",viewHistory:"Attempt history",noHistory:"Completed exams and entry checks will appear here",backToPlan:"Back to study plan",recommended:"Recommended next step",title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",minuteShort:"min",profile:"Preparation settings",editProfile:"Edit",series:"Exam series",grade:"Target grade",hours:"Total weekly study hours",econHours:"Weekly Economics hours",saveProfile:"Save settings",profileInvalid:"Check exam series and weekly hours: Economics time cannot exceed your total study time.",profileSaved:"Settings saved",optional:"Set a preparation goal and study time. Existing attempts will not change.",startDiagnostic:"Start entry check",fullPaper:"Full exam",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
-      p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back", beforePlan:"Your study plan appears after your first completed paper. You can reopen it from your attempt history.", autoAnswer:"Choose an option to save automatically. You can change it until you finish the paper.",saving:"Saving answer…",
-      papers:"Back to papers",question:"Question",time:"Time remaining",save:"Save answer",
+      p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back", beforePlan:"Your study plan appears after your first completed paper. You can reopen it from your attempt history.", autoAnswer:"Choose an option and select “Submit answer”. The server confirms when it is saved.",saving:"Saving answer…",
+      papers:"Back to papers",question:"Question",time:"Time remaining",save:"Submit answer",
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
       confirm:"Finish this exam? Unanswered questions score zero.",result:"Result",
       review:"Review answers",right:"Correct answer",your:"Your answer",empty:"Unanswered",
-      loading:"Loading…",error:"The action failed. Check your connection.",retry:"Try again",
+      loading:"Loading…",error:"The action failed. Check your connection.",retry:"Try again", uncertain:"Saving has not been confirmed. Your choice remains here. Check the server first.", checkSaved:"Check saved answer", retrySame:"Resend the same answer", selectionPending:"This choice has not been submitted.",
       plan:"My study plan",planIntro:"Review these topics first, then test your understanding again.",
       unit:"Unit",correct:"Correct",mistakes:"Topics to review",studied:"Studied",verified:"Confirmed in a later test",
       study:"Topic explanation",trap:"Watch out for",check:"Check your understanding",showCheck:"Show answer",
@@ -81,7 +81,7 @@
   function unmount(){
     state.writtenView?.dispose?.();state.writtenView=null;state.writtenPlan=null;
     stop();state.token++;state.closed=true;state.root=null;state.shell=null;
-    state.id=null;state.paper=null;state.data=null;state.profile=null;state.history=[];state.planData=null;state.view="home";state.historyReturn=null;state.busy=false;state.onBack=null;
+    state.id=null;state.paper=null;state.data=null;state.profile=null;state.history=[];state.planData=null;state.view="home";state.historyReturn=null;state.busy=false;state.onBack=null;state.pendingChoice=null;
   }
   async function rpc(name,args={}){
     try {
@@ -90,6 +90,29 @@
       if(response.error||response.data?.ok!==true)return {ok:false,code:response.data?.code||"rpc_failed"};
       return response.data;
     }catch(_){return {ok:false,code:"network_error"};}
+  }
+  // A tab-local draft is never evidence. The owned server session is always
+  // loaded first; nothing is written to legacy iClub localStorage or progress.
+  function choiceKey(sessionId,order){
+    return "iclub_ep_economics_choice_v1:"+sessionId+":"+(order+1);
+  }
+  function readChoiceDraft(sessionId,order){
+    try{
+      const v=JSON.parse(window.sessionStorage?.getItem(choiceKey(sessionId,order))||"null");
+      return v && Number.isInteger(v.choice) && v.choice>=0 && v.choice<=3
+        ? {choice:v.choice,pending:v.pending===true} : null;
+    }catch(_){return null;}
+  }
+  function writeChoiceDraft(sessionId,order,choice,pending=false){
+    try{window.sessionStorage?.setItem(choiceKey(sessionId,order),
+      JSON.stringify({choice,pending}));}catch(_){}
+  }
+  function clearChoiceDraft(sessionId,order){
+    try{window.sessionStorage?.removeItem(choiceKey(sessionId,order));}catch(_){}
+  }
+  function pendingChoiceFor(sessionId,order){
+    const v=state.pendingChoice;
+    return v?.sessionId===sessionId&&v.order===order?v:null;
   }
   function error(retry){
     const view=shell();if(!view)return;
@@ -122,7 +145,7 @@
     state.writtenView?.dispose?.();state.writtenView=null;state.writtenPlan=null;
     state.betaInvite=false;state.betaJoined=false;state.betaBusy=false;
     ++state.token;stop();state.view="home";state.id=null;state.paper=null;
-    state.data=null;state.planData=null;state.index=0;
+    state.data=null;state.planData=null;state.index=0;state.pendingChoice=null;
     const view=shell();if(!view)return;
     view.append(e("div","ep-live-card",t().loading));
     loadDashboard(state.token);
@@ -501,7 +524,7 @@
   }
   async function openHistory(entry,openPlan){
     if(state.closed||state.busy)return;
-    state.id=entry.session_id;state.paper=entry.paper_code;state.index=0;
+    state.id=entry.session_id;state.paper=entry.paper_code;state.index=0;state.pendingChoice=null;
     await load();
     if(openPlan&&!state.closed&&state.id===entry.session_id&&
        state.data?.status==="finalized")await showStudyPlan();
@@ -515,7 +538,7 @@
     if(state.closed||token!==state.token)return;
     state.busy=false;
     if(!v.ok||!v.session_id){error(()=>begin(code,kind));return;}
-    state.id=v.session_id;state.paper=code;state.index=0;
+    state.id=v.session_id;state.paper=code;state.index=0;state.pendingChoice=null;
     await load();
   }
   async function load(){
@@ -561,11 +584,29 @@
     const card=e("div","ep-live-card ep-native-question");
     card.append(e("div","ep-live-qtext",row.question));
     const options=e("div","ep-live-options");
+    let draft=finished?null:readChoiceDraft(state.id,state.index);
+    if(draft && row.answered && row.selected_index===draft.choice){
+      clearChoiceDraft(state.id,state.index);draft=null;
+      if(pendingChoiceFor(state.id,state.index))state.pendingChoice=null;
+    }
+    let pending=pendingChoiceFor(state.id,state.index);
+    if(!finished && !pending && draft?.pending){
+      pending={sessionId:state.id,order:state.index,choice:draft.choice,retryAllowed:false};
+      state.pendingChoice=pending;
+    }
+    const choice=draft?.choice??row.selected_index;
     row.options.forEach((option,idx)=>{
       const line=e("label","ep-live-option");
       const radio=e("input");radio.type="radio";radio.name="ep-native-choice";radio.value=String(idx);
-      radio.checked=row.selected_index===idx;radio.disabled=finished||state.busy;
-      if(!finished)radio.addEventListener("change",()=>saveChoice(idx));
+      radio.checked=choice===idx;radio.disabled=finished||state.busy||!!pending;
+      if(!finished)radio.addEventListener("change",()=>{
+        if(state.busy||state.pendingChoice)return;
+        writeChoiceDraft(state.id,state.index,idx,false);
+        const submit=state.root?.querySelector("[data-ep-native-submit]");
+        if(submit)submit.disabled=false;
+        state.root?.querySelector(".ep-native-unsubmitted")?.remove();
+        state.root?.querySelector(".ep-native-saved")?.remove();
+      });
       line.append(radio,e("span","","ABCD"[idx]+". "+option));
       if(finished&&row.correct_index===idx)line.classList.add("is-right");
       if(finished&&row.selected_index===idx&&idx!==row.correct_index)line.classList.add("is-wrong");
@@ -573,7 +614,20 @@
     });
     card.append(options);
     if(!finished)card.append(e("p","ep-native-guidance",t().autoAnswer));
-    if(row.answered&&!finished)card.append(e("p","ep-native-saved",t().saved));
+    if(row.answered&&!finished&&(!draft||draft.choice===row.selected_index))
+      card.append(e("p","ep-native-saved",t().saved));
+    else if(draft&&!draft.pending)card.append(e("p","ep-native-unsubmitted",t().selectionPending));
+    if(pending&&!finished){
+      const warning=e("div","ep-live-card ep-native-save-recovery");
+      warning.setAttribute("role","alert");
+      warning.append(e("p","",t().uncertain));
+      const controls=e("div","ep-live-actions");
+      controls.append(btn(t().checkSaved,()=>reconcileChoice(pending),true));
+      if(pending.retryAllowed && data.status==="active" &&
+         new Date(data.deadline_at).getTime()>Date.now())
+        controls.append(btn(t().retrySame,()=>sendChoice(pending)));
+      warning.append(controls);card.append(warning);
+    }
     if(finished){
       card.append(e("p","ep-host-note",t().your+": "+(row.selected_index===null?t().empty:"ABCD"[row.selected_index])+
         " · "+t().right+": "+"ABCD"[row.correct_index]));
@@ -581,6 +635,12 @@
     }
     view.append(card);
     const actions=e("div","ep-live-actions");
+    if(!finished&&!pending){
+      const submit=btn(t().save,()=>saveChoice());
+      submit.dataset.epNativeSubmit="true";
+      submit.disabled=state.busy||choice===null||choice===undefined;
+      actions.append(submit);
+    }
     if(state.index>0)actions.append(btn(t().previous,()=>{if(!state.busy){state.index--;draw();}},true));
     if(state.index<total-1)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
     if(!finished)actions.append(btn(t().finish,()=>finish(false),true));
@@ -720,31 +780,72 @@
     if(!result.ok){error(showStudyPlan);return;}
     await showStudyPlan();
   }
-  async function saveChoice(choice){
-    if(state.busy||state.closed||state.data?.status!=="active"||
-       !Number.isInteger(choice)||choice<0||choice>3)return;
-    const sessionId=state.id,order=state.index,token=state.token;
-    const row=state.data.items[order];
-    if(!row||row.selected_index===choice&&row.answered)return;
-    state.busy=true;
-    for(const input of state.root?.querySelectorAll('input[name="ep-native-choice"]')||[])
-      input.disabled=true;
-    const note=e("p","ep-native-saving",t().saving);
-    note.setAttribute("role","status");
-    state.root?.querySelector(".ep-native-question")?.append(note);
-    const r=await rpc("iclub_exam_native_mcq_answer_v1",{
-      p_session_id:sessionId,p_item_order:order+1,p_choice:choice
+  function commitChoice(pending){
+    const row=state.data?.items?.[pending.order];
+    if(!row||state.id!==pending.sessionId)return;
+    row.selected_index=pending.choice;row.answered=true;
+    clearChoiceDraft(pending.sessionId,pending.order);
+    if(state.pendingChoice===pending)state.pendingChoice=null;
+    const next=state.data.items.findIndex((item,i)=>i>pending.order&&!item.answered);
+    state.index=next>=0?next:(pending.order<state.data.items.length-1?pending.order+1:pending.order);
+    draw();
+  }
+  async function reconcileChoice(pending){
+    if(state.closed||state.busy||state.pendingChoice!==pending)return;
+    const token=state.token;state.busy=true;
+    const result=await rpc("iclub_exam_native_mcq_get_v1",{
+      p_session_id:pending.sessionId,p_language:state.lang
     });
     state.busy=false;
-    if(state.closed||state.id!==sessionId||state.token!==token)return;
-    if(!r.ok){error(load);return;}
-    // Server confirmed: update only the chosen item and navigate onward.
-    // No extra 30-question GET after each saved answer is necessary.
-    row.selected_index=choice;row.answered=true;
-    const nextUnanswered=state.data.items.findIndex((item,i)=>i>order&&!item.answered);
-    state.index=nextUnanswered>=0?nextUnanswered:
-      (order<state.data.items.length-1?order+1:order);
+    if(state.closed||state.token!==token||state.pendingChoice!==pending)return;
+    if(result.ok&&Array.isArray(result.items)){
+      state.data=result;
+      const item=result.items[pending.order];
+      if(item?.answered&&item.selected_index===pending.choice){
+        commitChoice(pending);return;
+      }
+      // A definite server read enables only an explicit same-choice retry.
+      pending.retryAllowed=result.status==="active"&&
+        new Date(result.deadline_at).getTime()>Date.now();
+    }else pending.retryAllowed=false;
     draw();
+  }
+  async function sendChoice(pending){
+    if(state.closed||state.busy||state.pendingChoice!==pending||
+       state.data?.status!=="active")return;
+    if(new Date(state.data.deadline_at).getTime()<=Date.now()){
+      await load();return;
+    }
+    const token=state.token;state.busy=true;pending.retryAllowed=false;
+    const submit=state.root?.querySelector("[data-ep-native-submit]");
+    if(submit){submit.disabled=true;submit.textContent=t().saving;}
+    const result=await rpc("iclub_exam_native_mcq_answer_v1",{
+      p_session_id:pending.sessionId,p_item_order:pending.order+1,p_choice:pending.choice
+    });
+    state.busy=false;
+    if(state.closed||state.token!==token||state.pendingChoice!==pending)return;
+    if(result.ok&&result.saved===true&&result.selected_index===pending.choice){
+      commitChoice(pending);return;
+    }
+    // An RPC can commit and lose its ACK. Never blindly send twice.
+    await reconcileChoice(pending);
+  }
+  async function saveChoice(){
+    if(state.busy||state.closed||state.pendingChoice||
+       state.data?.status!=="active"||!state.id)return;
+    const selected=state.root?.querySelector('input[name="ep-native-choice"]:checked');
+    const choice=selected?Number(selected.value):NaN,order=state.index;
+    if(!Number.isInteger(choice)||choice<0||choice>3)return;
+    const row=state.data.items[order];
+    if(!row)return;
+    if(row.answered&&row.selected_index===choice){
+      clearChoiceDraft(state.id,order);
+      const next=state.data.items.findIndex((item,i)=>i>order&&!item.answered);
+      if(next>=0){state.index=next;draw();}return;
+    }
+    const pending={sessionId:state.id,order,choice,retryAllowed:false};
+    state.pendingChoice=pending;writeChoiceDraft(state.id,order,choice,true);
+    await sendChoice(pending);
   }
   async function finish(auto){
     if(state.busy||state.closed||state.data?.status!=="active")return;
