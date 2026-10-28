@@ -552,6 +552,8 @@
   // The single existing Tutor chat receives Practice context after a
   // server-side owner/finalization/consent preflight. No separate result card.
   let practiceGate = {key:"",allowed:false,pending:false};
+  let practiceGateInFlight=null;
+  let practiceAccessNoticeKey="";
   let practiceRecoveryCheckedKey="";
   let practiceRecoveryBusy=false;
   const practiceScope = () => {
@@ -565,25 +567,35 @@
     return {screen,attemptRef:id,locale:locale()};
   };
   const practiceScopeKey = x => x ? [x.screen,x.attemptRef,x.locale].join("|") : "";
-  async function checkPracticeChatGate(){
+  async function checkPracticeChatGate(force=false){
     const scope=practiceScope();
     const beta=window.iClubAiV21BetaClient;
-    if(!scope||typeof beta?.practiceContextAvailable!=="function")return;
+    if(!scope||typeof beta?.practiceContextAvailable!=="function")return false;
     const key=practiceScopeKey(scope);
-    if(practiceGate.key===key)return;
+    // An earlier preflight failure is not a permanent revocation. Retry
+    // only on the learner's explicit ask, not on DOM mutation/auto-render.
+    if(practiceGate.key===key&&practiceGate.pending)
+      return practiceGateInFlight ? await practiceGateInFlight : false;
+    if(practiceGate.key===key&&(practiceGate.allowed||!force))
+      return practiceGate.allowed===true;
     practiceGate={key,allowed:false,pending:true};
     const authEpoch=state.authEpoch,contextEpoch=state.contextEpoch;
-    const allowed=await beta.practiceContextAvailable({
+    const pending=beta.practiceContextAvailable({
       attemptRef:scope.attemptRef,locale:scope.locale
     }).catch(()=>false);
+    practiceGateInFlight=pending;
+    const allowed=await pending;
+    if(practiceGateInFlight===pending)practiceGateInFlight=null;
     if(practiceGate.key!==key||authEpoch!==state.authEpoch||
        contextEpoch!==state.contextEpoch||
        practiceScopeKey(practiceScope())!==key)return;
     practiceGate={key,allowed:allowed===true,pending:false};
+    if(allowed===true)practiceAccessNoticeKey="";
     if(panel()&&!panel().hidden){
       renderQuickPrompts();
       if(allowed===true)void recoverSavedPracticeReply();
     }
+    return allowed===true;
   }
   // Recovered replies live only in service-side PC4 receipts.
   // Nothing is persisted on the device or replayed from another learner.
@@ -1353,19 +1365,32 @@
     const cleanText = String(userText || "").trim().slice(0, MAX_INPUT_CHARS);
     if (!cleanDisplay) return;
     const currentPractice = practiceScope();
-    const contextOk = !!currentPractice && practiceGate.allowed &&
+    let contextOk = !!currentPractice && practiceGate.allowed &&
       practiceGate.key===practiceScopeKey(currentPractice);
-    // A finalized Practice with no current server grant must NEVER fall back
-    // to paid General Help, which could be charged for a stale/wrong attempt.
+    // Do not charge a fallback global route for a Practice result. However,
+    // a previous transient denied preflight must not be cached forever.
     if(currentPractice && !contextOk && !academicContext && !practiceContext &&
        promptKey==="" && cleanText.length>0){
-      const label={ru:"Проверяем доступ к результату. Попробуйте снова после появления подсказок.",
-        uz:"Natijaga kirish tekshirilmoqda. Tavsiyalar chiqqach, qayta urinib ko‘ring.",
-        en:"Checking access to this result. Please retry once the suggestions appear."}[locale()];
-      appendMessage(threadKey,"assistant",label,"notice");
-      void checkPracticeChatGate();
-      renderPanel();
-      return;
+      const epoch=state.contextEpoch,accountEpoch=state.authEpoch;
+      await checkPracticeChatGate(true);
+      if(epoch!==state.contextEpoch||accountEpoch!==state.authEpoch||
+         state.context?.threadKey!==threadKey||state.busy||currentBlocked())return;
+      const live=practiceScope();
+      contextOk=!!live && practiceScopeKey(live)===practiceScopeKey(currentPractice)&&
+        practiceGate.allowed===true&&
+        practiceGate.key===practiceScopeKey(live);
+      if(!contextOk){
+        const label={ru:"Пока не удалось подтвердить этот результат. Повторите запрос позже.",
+          uz:"Hozircha bu natijani tasdiqlab bo‘lmadi. Keyinroq qayta urinib ko‘ring.",
+          en:"We couldn't verify this result yet. Please try again later."}[locale()];
+        const noticeKey=threadKey+"|"+practiceScopeKey(currentPractice)+"|"+accountEpoch;
+        if(practiceAccessNoticeKey!==noticeKey){
+          practiceAccessNoticeKey=noticeKey;
+          appendMessage(threadKey,"assistant",label,"notice");
+        }
+        renderPanel();
+        return;
+      }
     }
     const typedPractice = !academicContext && !practiceContext &&
       promptKey==="" && cleanText.length>=8 && contextOk

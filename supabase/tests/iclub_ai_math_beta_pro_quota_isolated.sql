@@ -37,7 +37,32 @@ ALTER TABLE private.iclub_ai_v21_beta_usage
 \ir ../migrations/20261028113000_iclub_math_beta_pro_ai_quota_v1.sql
 \ir ../migrations/20261028120000_iclub_math_beta_pro_quota_constraints_fix.sql
 \ir ../migrations/20261028130500_iclub_ai_practice_pro_pc4_and_void_probe_v1.sql
+-- The preceding legacy base migration overwrites PC1 with its older source.
+-- Restore the CURRENT reviewed PC1 candidate in this disposable database;
+-- production applies the exact guarded hotfix migration instead.
+\ir ../candidates/iclub_ai_practice_context_v1_dormant.sql
+-- The pre-Pro SQL fixture creates these helper RPCs with PostgreSQL's
+-- default PUBLIC privileges. Production already revoked them. Match the
+-- actual production roles before validating the new release guards.
+REVOKE ALL ON FUNCTION public.reserve_iclub_ai_v21_freeform_quota_v1(uuid,uuid,text)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.finish_iclub_ai_v21_freeform_quota_v1(uuid,uuid,text,text)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.deliver_iclub_ai_v21_beta_prepared_service(uuid,uuid,text,text)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.reserve_iclub_ai_v21_freeform_quota_v1(uuid,uuid,text)
+ TO service_role;
+GRANT EXECUTE ON FUNCTION public.finish_iclub_ai_v21_freeform_quota_v1(uuid,uuid,text,text)
+ TO service_role;
+GRANT EXECUTE ON FUNCTION public.deliver_iclub_ai_v21_beta_prepared_service(uuid,uuid,text,text)
+ TO service_role;
+\ir ../migrations/20261028185500_iclub_ai_math_beta_finalized_quota_help_gate.sql
 SET request.jwt.claim.role='service_role';
+-- The live bug is a different unfinished session, unrelated to the
+-- already-finalized attempt. Keep it open throughout these Pro tests.
+INSERT INTO public.practice_sessions_v4 VALUES
+ (603,'00000000-0000-4000-8000-000000000011',5,NULL,2,'in_progress',NULL,
+  11,ARRAY[1,2,3,4,5,6,7,8,9,10]::bigint[]);
 INSERT INTO private.iclub_ai_v21_beta_help_sources
  VALUES('practice_rules','ru','Проверьте завершённую попытку и исправьте ошибки.',
  'qa-1',encode(extensions.digest(convert_to('Проверьте завершённую попытку и исправьте ошибки.','UTF8'),'sha256'),'hex'),
@@ -97,6 +122,14 @@ BEGIN
   'dispatch',paid,u,501,fp,cp,sp,'ru');
  IF x->>'reason' IS DISTINCT FROM 'dispatch_already_decided' THEN
   RAISE EXCEPTION 'Duplicate provider dispatch accepted %',x; END IF;
+ -- A charged, otherwise authorized Pro answer MUST settle as completed
+ -- even while a different resumable Practice session exists.
+ UPDATE private.iclub_ai_v21_freeform_budget_ledger
+ SET state='charged',actual_microusd=519,finished_at=now()
+ WHERE request_id=paid;
+ x:=public.finish_iclub_ai_v21_freeform_quota_v1(paid,u,fp,'completed');
+ IF x->>'ok' IS DISTINCT FROM 'true' OR x->>'state' IS DISTINCT FROM 'completed'
+ THEN RAISE EXCEPTION 'Charged verified Pro response was discarded %',x; END IF;
  x:=public.iclub_ai_practice_receipt_pc4_service(
   'begin',safe_void,u,501,fp,cp,sp,'ru');
  IF x->>'action' IS DISTINCT FROM 'registered' THEN
