@@ -406,14 +406,14 @@
     const advanced=Number(sum.written_advanced||0),writtenTotal=Number(sum.written_total||0);
     const writtenDone=Number(sum.written_completed||0),writtenSaved=Number(sum.written_submitted??Math.max(0,writtenDone-advanced));
     const pct=sum.machine_accuracy_pct==null?null:Number(sum.machine_accuracy_pct);
-    const label=data?.session_type==="learning"?u.complete:resultTypeLabel(data?.session_type);
+    const label=data?.session_type==="learning"?u.complete:c.assignmentResult;
     const writtenValue=advanced>0?uxWrittenCount(advanced)+(writtenSaved?" · "+uxWrittenCount(writtenSaved):""):
       (writtenTotal>0?writtenDone+" / "+writtenTotal:"—");
     if(!expanded) {
       root.innerHTML=shell('<section class="ep-result-screen ep-ux-result" data-ep-session-result="'+esc(data?.session_id||"")+
         '" data-ep-result-component="'+esc(component)+'" data-ep-result-session-type="'+esc(data?.session_type||"")+'">'+
         '<header class="ep-ux-result-title"><span>'+esc(component)+' · '+esc(resultTypeLabel(data?.session_type))+'</span><h2>'+esc(label)+'</h2></header>'+
-        '<div class="ep-ux-result-score"><span>'+esc(u.checked)+'</span><strong>'+(total?correct+' <small>'+esc(u.of)+' '+total+'</small>':"—")+'</strong>'+
+        '<div class="ep-ux-result-score"><span>'+esc(data?.session_type==="learning"?u.checked:c.autoChecked)+'</span><strong>'+(total?correct+' <small>'+esc(u.of)+' '+total+'</small>':"—")+'</strong>'+
         (total&&Number.isFinite(pct)?'<span>'+Math.round(pct)+'% · '+esc(u.correct)+'</span>':"")+'</div>'+
         (writtenTotal?'<div class="ep-ux-result-written"><div><span>'+esc(c.writtenPart)+'</span><strong>'+esc(writtenValue)+'</strong></div><p>'+esc(u.unmarked)+'</p></div>':"")+
         '<div class="ep-ux-result-next"><strong>'+esc(u.next)+'</strong><p>'+esc(u.nextNote)+'</p></div>'+
@@ -1263,7 +1263,7 @@
     const u=uxText();
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
       <section class="ep-focus-screen" data-ep-focus-mode="true">
-        <header class="ep-focus-head ep-live-head">${exit}<strong>${esc(state.session?.component_code||"")} · ${esc(u.task)} ${answered+1} ${esc(u.of)} ${total}</strong>${timer}</header>
+        <header class="ep-focus-head ep-live-head">${exit}<strong>${esc(state.session?.component_code||"")} · ${esc(paperLearning?u.task:c.question)} ${answered+1} ${paperLearning?esc(u.of):"/"} ${total}</strong>${timer}</header>
         <div class="ep-live-card ep-live-question-card" data-ep-live-active-assessment="true">
           <div class="ep-live-qtext">${uxMath(item.text || item.written_prompt || "")}</div>${answerControl}</div>
         <footer class="ep-focus-dock">${actionMarkup}</footer>
