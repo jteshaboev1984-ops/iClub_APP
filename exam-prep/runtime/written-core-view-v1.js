@@ -5,21 +5,21 @@
 (function(){
  "use strict";
  const copy={
-   ru:{title:"Письменная практика",criteria:"Схема оценивания",hideCriteria:"Скрыть схему",next:"Далее",source:"Источник",data:"Таблица данных",
+   ru:{title:"Письменная практика",criteria:"Критерии оценивания",hideCriteria:"Скрыть критерии",next:"Далее",source:"Источник",data:"Таблица данных",
      back:"Назад",loading:"Загружаем задание…",offline:"Не удалось подтвердить действие. Повторите попытку.",
      complete:"Письменные задания по текущему плану пройдены.",
      instruction:"Выполните задание самостоятельно. Загрузка работы и самооценка не требуются.",
-     criteriaTitle:"Схема оценивания",marks:"баллов",ao12:"AO1 + AO2 · Знания и анализ",ao3:"AO3 · Оценка и аргументация",markContent:"Что учитывается при оценивании",levelsTitle:"Уровни оценивания",levelLabel:"Уровень",levelHigh:"Развёрнутый и точный ответ",levelMiddle:"В целом верный, но неполный анализ",levelLow:"Ограниченный, преимущественно описательный ответ",levelsInfo:"Эссе оценивается по уровням: полнота знаний, глубина анализа и обоснованность вывода. Баллы не начисляются автоматически за каждый пункт.",pointInfo:"Баллы за отдельную часть задания учитывают верные понятия, расчёты и объяснения.",notOfficial:"Учебная схема iClub по принципам Cambridge 9708. Это не официальный mark scheme для данного задания.",openError:"Задание сейчас недоступно."},
+     criteriaTitle:"Критерии оценивания",marks:"баллов",ao12:"AO1 + AO2 · Знания и анализ",ao3:"AO3 · Оценка и аргументация",markContent:"Что оценивает экзаменатор",levelsTitle:"Уровни оценивания",levelLabel:"Уровень",levelHigh:"Развёрнутый и точный ответ",levelMiddle:"В целом верный, но неполный анализ",levelLow:"Ограниченный, преимущественно описательный ответ",levelsInfo:"Эссе оценивается по уровням качества анализа и аргументации. Перечисленные критерии не являются готовым ответом.",pointInfo:"Баллы выставляются за качество ответа в рамках указанных критериев, а не за количество перечисленных пунктов.",notOfficial:"Учебная схема iClub по принципам Cambridge 9708. Это не официальный mark scheme для данного задания.",openError:"Задание сейчас недоступно."},
    uz:{title:"Yozma mashqlar",criteria:"Baholash mezonlari",hideCriteria:"Mezonlarni yashirish",next:"Keyingi",source:"Manba",data:"Ma’lumotlar jadvali",
      back:"Orqaga",loading:"Topshiriq yuklanmoqda…",offline:"Amal tasdiqlanmadi. Qaytadan urinib ko‘ring.",
      complete:"Joriy rejadagi yozma topshiriqlar yakunlandi.",
      instruction:"Topshiriqni mustaqil bajaring. Ishni yuklash yoki o‘zingizga baho qo‘yish shart emas.",
-     criteriaTitle:"Baholash mezonlari",marks:"ball",ao12:"AO1 + AO2 · Bilim va tahlil",ao3:"AO3 · Baholash va dalillar",markContent:"Baholashda nimalar hisobga olinadi",levelsTitle:"Baholash darajalari",levelLabel:"Daraja",levelHigh:"To‘liq va aniq izohlangan javob",levelMiddle:"Asosan to‘g‘ri, biroq tahlili to‘liq bo‘lmagan javob",levelLow:"Cheklangan, ko‘proq tasviriy javob",levelsInfo:"Esse bilim, tahlil chuqurligi va asoslangan xulosa bo‘yicha darajalarda baholanadi. Har bir band uchun avtomatik ball berilmaydi.",pointInfo:"Savolning ushbu qismida tushunchalar, hisob-kitoblar va izohlar uchun ball hisobga olinadi.",notOfficial:"Cambridge 9708 tamoyillariga mos iClub o‘quv mezonlari. Bu savol uchun rasmiy Cambridge mark scheme emas.",openError:"Topshiriq hozir mavjud emas."},
-   en:{title:"Written practice",criteria:"Marking scheme",hideCriteria:"Hide scheme",next:"Next",source:"Source",data:"Data table",
+     criteriaTitle:"Baholash mezonlari",marks:"ball",ao12:"AO1 + AO2 · Bilim va tahlil",ao3:"AO3 · Baholash va dalillar",markContent:"Imtihonchi nimani baholaydi",levelsTitle:"Baholash darajalari",levelLabel:"Daraja",levelHigh:"To‘liq va aniq izohlangan javob",levelMiddle:"Asosan to‘g‘ri, biroq tahlili to‘liq bo‘lmagan javob",levelLow:"Cheklangan, ko‘proq tasviriy javob",levelsInfo:"Esse tahlil va dalillarning sifati bo‘yicha darajalarda baholanadi. Mezonlarda tayyor javob berilmaydi.",pointInfo:"Ball mezonlar bo‘yicha javob sifati uchun beriladi, sanab o‘tilgan bandlar soni uchun emas.",notOfficial:"Cambridge 9708 tamoyillariga mos iClub o‘quv mezonlari. Bu savol uchun rasmiy Cambridge mark scheme emas.",openError:"Topshiriq hozir mavjud emas."},
+   en:{title:"Written practice",criteria:"Assessment criteria",hideCriteria:"Hide criteria",next:"Next",source:"Source",data:"Data table",
      back:"Back",loading:"Loading task…",offline:"Action not confirmed. Please retry.",
      complete:"Written tasks in this study plan have been completed.",
      instruction:"Complete the task independently. No essay upload or self-grading is required.",
-     criteriaTitle:"Marking scheme",marks:"marks",ao12:"AO1 + AO2 · Knowledge and analysis",ao3:"AO3 · Evaluation and judgement",markContent:"Creditworthy content",levelsTitle:"Marking levels",levelLabel:"Level",levelHigh:"Accurate, fully developed economic reasoning",levelMiddle:"Mostly accurate but partially developed analysis",levelLow:"Limited, mainly descriptive response",levelsInfo:"Essay marks follow levels of knowledge, developed analysis and justified evaluation. Listed points are indicative, not one mark each.",pointInfo:"This part awards marks for correct concepts, calculations and explanations.",notOfficial:"iClub practice marking guide aligned to Cambridge 9708 principles; not an official Cambridge mark scheme for this question.",openError:"Task is currently unavailable."}
+     criteriaTitle:"Assessment criteria",marks:"marks",ao12:"AO1 + AO2 · Knowledge and analysis",ao3:"AO3 · Evaluation and judgement",markContent:"What the examiner assesses",levelsTitle:"Marking levels",levelLabel:"Level",levelHigh:"Accurate, fully developed economic reasoning",levelMiddle:"Mostly accurate but partially developed analysis",levelLow:"Limited, mainly descriptive response",levelsInfo:"Essay marks reflect levels of analysis and reasoned evaluation. These criteria do not give away a model answer.",pointInfo:"Marks reflect the quality of the answer against these criteria, not the number of listed points.",notOfficial:"iClub practice marking guide aligned to Cambridge 9708 principles; not an official Cambridge mark scheme for this question.",openError:"Task is currently unavailable."}
  };
  const el=(tag,cls,str)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(str!=null)x.textContent=String(str);return x;};
  function mount({root,planId,language="ru",onBack,api,createActionKey}={}){
@@ -164,15 +164,16 @@
             scheme.max_marks+" "+t.marks));
           criteriaBox.replaceChildren(title);
           if(scheme){
-            const breakdown=el("div","ep-written-mark-breakdown");
+            const breakdown=el("div","ep-written-mark-breakdown"+
+              (scheme.ao3_marks===0?" ep-written-mark-single":""));
             const ao12=el("div","ep-written-mark-part");
             ao12.append(el("span","",t.ao12),
-              el("strong","",scheme.ao12_marks+" / "+scheme.max_marks));
+              el("strong","",scheme.ao12_marks+" "+t.marks));
             breakdown.append(ao12);
             if(scheme.ao3_marks>0){
               const ao3=el("div","ep-written-mark-part");
               ao3.append(el("span","",t.ao3),
-                el("strong","",scheme.ao3_marks+" / "+scheme.max_marks));
+                el("strong","",scheme.ao3_marks+" "+t.marks));
               breakdown.append(ao3);
             }
             criteriaBox.append(breakdown,el("p","ep-written-mark-help",
@@ -206,7 +207,9 @@
             criteriaBox.append(el("h4","ep-written-mark-subtitle",t.markContent));
           }
           const list=el("ul","ep-live-list ep-written-mark-points");
-          for(const requirement of (scheme?.indicative_points||details.requirements))
+          // The Economics learner sees assessment standards, never expected
+          // calculations, market effects or illustrative model answers.
+          for(const requirement of (scheme?.assessment_criteria||details.requirements))
             list.append(el("li","",requirement));
           criteriaBox.append(list);
           if(scheme)criteriaBox.append(el("p","ep-written-mark-disclaimer",t.notOfficial));
