@@ -196,3 +196,8 @@
   line-height:1.55;
   color:inherit;
 }
+
+/* A single AO budget uses the full card width, never a half-empty column. */
+#exam-prep-host-root .ep-written-mark-breakdown.ep-written-mark-single {
+ grid-template-columns:minmax(0,1fr);
+}

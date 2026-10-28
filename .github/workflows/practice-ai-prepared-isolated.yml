@@ -5,6 +5,8 @@ on:
     paths:
       - supabase/migrations/20261027213000_iclub_ai_practice_math_beta_grants_default_off.sql
       - supabase/tests/iclub_ai_practice_math_beta_activation_isolated.sql
+      - supabase/tests/iclub_ai_math_beta_pro_quota_isolated.sql
+      - supabase/migrations/20261028113000_iclub_math_beta_pro_ai_quota_v1.sql
       - supabase/candidates/iclub_ai_practice_math_beta_activation_v1.sql
       - supabase/candidates/iclub_ai_practice_context_v1_dormant.sql
       - supabase/candidates/iclub_ai_practice_receipts_pc4_dormant.sql
@@ -221,6 +223,8 @@ jobs:
           echo 'PASS beta grant migration: all OFF, no user rows enrolled and privileges service only'
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_math_beta_activation_isolated.sql
           echo 'PASS actual three-account activation transaction on localhost-only DB'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_math_beta_pro_quota_isolated.sql
+          echo 'PASS Pro beta 14 units per 5h, 5 per generated, 1 per prepared, refund5, non-beta unchanged'
       - name: Stop disposable Supabase Auth container
         if: always()
         shell: bash

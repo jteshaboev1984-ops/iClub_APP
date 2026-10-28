@@ -33,7 +33,12 @@ for(const t of ['ru','uz','en']) {
  assert(native.includes(t+':{'),'All native home copy required: '+t);
 }
 assert(view.includes('scheme.ao12_marks')&&view.includes('scheme.ao3_marks'),'Numeric marks and AO split displayed');
-assert(view.includes('scheme?.indicative_points||details.requirements'),'Response-specific creditable content required');
+assert(view.includes('scheme?.assessment_criteria||details.requirements'),'Core shows criteria, not worked content');
+const guarded=file('supabase/migrations/20261028061253_iclub_econ_core_criteria_without_answer_hints_v1.sql');
+assert(guarded.includes("'assessment_criteria',to_jsonb(v_descriptors)"),'Only scoring criteria may leave Core');
+assert(!guarded.includes("'indicative_points',t.answer_requirements"),'Model answers never reach Core');
+assert(!guarded.includes("RETURN v_result||jsonb_build_object('mark_scheme',v_scheme)"),'Private raw requirements must not be copied to clients');
+assert(controller.includes("result.requirements!==undefined || scheme.indicative_points!==undefined"),'Reject response hints in client contract');
 assert(view.includes('scheme.max_marks+" "+t.marks'),'Max marks visible');
 assert(controller.includes('scheme.marking_style'),'Controller must validate grading style');
 assert(view.includes('ep-written-level-row'),'Level bands displayed for essays');
@@ -48,9 +53,9 @@ assert(!native.includes('if(state.betaInvite&&!state.writtenPlan&&window.iClubWr
 assert(native.includes('rpc("iclub_econ_written_beta_join_v1",{p_confirm:true})'),
  'Server eligibility preserved behind a direct Start action');
 assert(css.includes('ep-written-mark-breakdown')&&css.includes('ep-written-actions')&&css.includes('ep-written-marking[hidden]'),'Premium CSS must honor layout and hidden controls');
-for(const needle of ['written-core-view-v1.js?v=econ-mark-scheme-premium-safeleave-20261028',
- 'written-core-controller-v1.js?v=econ-mark-scheme-premium-safeleave-20261028',
- 'written-core-source-v1.css?v=econ-mark-scheme-premium-safeleave-20261028',
+for(const needle of ['written-core-view-v1.js?v=econ-assessment-criteria-nohints-20261028',
+ 'written-core-controller-v1.js?v=econ-assessment-criteria-nohints-20261028',
+ 'written-core-source-v1.css?v=econ-assessment-criteria-nohints-20261028',
  'exam-prep-economics-native.js?v=econ-mark-scheme-premium-safeleave-20261028'])
  assert(html.includes(needle),'Stale asset would hide change: '+needle);
 const root={};vm.runInNewContext(controller,{globalThis:root,module:{exports:{}},console});
@@ -65,20 +70,21 @@ const ctl=(()=>{const sandbox={module:{exports:{}},console};vm.runInNewContext(c
  open:async()=>baseTask,
  criteria:async()=>{calls++;return {
  available:true,task_key:'P2.B1.b',task_version:'candidate-v3',title:'Marking scheme',
- requirements:['Relevant content'],
- mark_scheme:{max_marks:12,ao12_marks:8,ao3_marks:4,marking_style:'levels',
- official_cambridge:false,indicative_points:['Relevant analysis','Justified evaluation']}}},
+  mark_scheme:{max_marks:12,ao12_marks:8,ao3_marks:4,marking_style:'levels',
+ official_cambridge:false,assessment_criteria:['Accurate economic terms','Developed analysis','Reasoned evaluation']}}},
  advance:async()=>({status:'advanced',plan_item_id:'item',task_key:'P2.B1.b',task_version:'candidate-v3'}),
  status:async()=>({status:'advanced',plan_item_id:'item',task_key:'P2.B1.b',task_version:'candidate-v3',program_version:'economics_2026_2028_v1'})
  },createActionKey:()=> 'fixed'});
  await a.open('item');const one=await a.criteria();const two=await a.criteria();
  assert.strictEqual(one,two);assert.equal(calls,1,'Scheme should be fetched on request once');
  assert.equal(one.marking.ao12_marks,8);assert.equal(one.marking.ao3_marks,4);
+ assert.equal(one.marking.assessment_criteria.length,3,'Generic scoring standards needed');
+ assert.equal(Object.hasOwn(one.marking,'indicative_points'),false,'No answer content fields');
  const corrupted=ctl.create({api:{
  open:async()=>baseTask,
  criteria:async()=>({available:true,task_key:'P2.B1.b',task_version:'candidate-v3',
- requirements:['Relevant content'],mark_scheme:{max_marks:12,ao12_marks:4,ao3_marks:3,
- official_cambridge:false,marking_style:'levels',indicative_points:['Relevant point']}}),
+ mark_scheme:{max_marks:12,ao12_marks:4,ao3_marks:3,
+ official_cambridge:false,marking_style:'levels',assessment_criteria:['Accurate economic terms','Developed analysis']}}),
  advance:async()=>({}),status:async()=>({})
  },createActionKey:()=> 'fixed'});
  await corrupted.open('item');
@@ -110,9 +116,9 @@ const ctl=(()=>{const sandbox={module:{exports:{}},console};vm.runInNewContext(c
       open:async()=>({...baseTask}),
       criteria:async()=>({
        available:true,task_key:'P2.B1.b',task_version:'candidate-v3',
-       title:'Marking scheme',requirements:['Relevant analysis'],
+       title:'Assessment criteria',
        mark_scheme:{max_marks:12,ao12_marks:8,ao3_marks:4,marking_style:'levels',
-        official_cambridge:false,indicative_points:['Relevant analysis','Justified judgement']}}),
+        official_cambridge:false,assessment_criteria:['Accurate economic terms','Developed analysis','Reasoned evaluation']}}),
       advance:async()=>({status:'advanced',plan_item_id:'item',task_key:'P2.B1.b',task_version:'candidate-v3'}),
       status:async()=>({status:'advanced',plan_item_id:'item',task_key:'P2.B1.b',
        task_version:'candidate-v3',program_version:'economics_2026_2028_v1'})
@@ -121,7 +127,7 @@ const ctl=(()=>{const sandbox={module:{exports:{}},console};vm.runInNewContext(c
    for(let j=0;j<25;j++)await Promise.resolve();
    const texts=()=>all(wrapper).map(x=>x.textContent);
    const btns=()=>all(wrapper).filter(x=>x.tagName==='button');
-   const localized=lang==='ru'?'Схема оценивания':lang==='uz'?'Baholash mezonlari':'Marking scheme';
+   const localized=lang==='ru'?'Критерии оценивания':lang==='uz'?'Baholash mezonlari':'Assessment criteria';
    const button=btns().find(x=>x.textContent===localized);
    assert(button,lang+' marking button missing');
    const hidden=all(wrapper).find(x=>x.className==='ep-written-marking');
@@ -130,8 +136,8 @@ const ctl=(()=>{const sandbox={module:{exports:{}},console};vm.runInNewContext(c
    for(let j=0;j<25;j++)await Promise.resolve();
    assert(!hidden.hidden,lang+' marking scheme did not open');
    assert(texts().some(x=>x.includes('12')),'Maximum 12 marks invisible');
-   assert(texts().some(x=>x.includes('8 / 12')),'AO1/AO2 budget invisible');
-   assert(texts().some(x=>x.includes('4 / 12')),'AO3 budget invisible');
+   assert(texts().some(x=>x.includes('8 marks')||x.includes('8 баллов')||x.includes('8 ball')),'AO1/AO2 budget invisible');
+   assert(texts().some(x=>x.includes('4 marks')||x.includes('4 баллов')||x.includes('4 ball')),'AO3 budget invisible');
    assert(texts().some(x=>x==='11–14'||x==='6–8'),'Expected mark levels not rendered');
    await button.events.click();
    assert(hidden.hidden,lang+' marking panel did not close');
