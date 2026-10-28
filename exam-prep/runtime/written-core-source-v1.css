@@ -201,3 +201,55 @@
 #exam-prep-host-root .ep-written-mark-breakdown.ep-written-mark-single {
  grid-template-columns:minmax(0,1fr);
 }
+
+/* Shared governed Written Core: Back is a compact header control, never a full-row action. */
+#exam-prep-host-root .ep-written-screen-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+#exam-prep-host-root .ep-written-screen-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+#exam-prep-host-root .ep-written-screen-head .ep-written-screen-back {
+  display: inline-flex;
+  flex: 0 0 42px;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--border,rgba(127,127,127,.22));
+  border-radius: 12px;
+  background: var(--card,rgba(127,127,127,.045));
+  box-shadow: 0 2px 7px rgba(16,24,40,.035);
+  font-size: 29px;
+  line-height: 1;
+  font-weight: 500;
+  color: inherit;
+}
+#exam-prep-host-root .ep-written-screen-head .ep-written-screen-back:focus-visible {
+  outline: 3px solid rgba(36,87,214,.28);
+  outline-offset: 2px;
+}
+@media (max-width: 680px) {
+  #exam-prep-host-root .ep-written-screen-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  #exam-prep-host-root .ep-written-screen-title {
+    font-size: clamp(18px,4.7vw,23px);
+  }
+}
