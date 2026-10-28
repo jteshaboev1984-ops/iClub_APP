@@ -1,4 +1,4 @@
--- Paper-03 av3 amendment guard, checks against av2 while retaining original av1/av2 guards.
+-- Preserve first release and av2 guards; av3 is checked against published av2, including timing, marks and contents.
 BEGIN;
 CREATE OR REPLACE FUNCTION private.exam_prep_assert_stage5_paper03_versioned_release_v2(p_new_assessment bigint)
  RETURNS void
@@ -95,45 +95,7 @@ BEGIN
   END IF;
 END;
 $function$
-,CASE WHEN v_new.assessment_version='av3' THEN '-v3' ELSE '-v2' END) THEN
-    RAISE EXCEPTION 'exam_prep_paper03_amendment_contract_mismatch';
-  END IF;
 
-  IF (SELECT count(*) FROM private.exam_prep_assessment_items WHERE assessment_id=v_new.id)
-   <> (SELECT count(*) FROM private.exam_prep_assessment_items WHERE assessment_id=v_old.id)
-  OR EXISTS (
-    SELECT 1 FROM private.exam_prep_assessment_items oi
-    LEFT JOIN private.exam_prep_assessment_items ni
-      ON ni.assessment_id=v_new.id AND ni.item_order=oi.item_order
-    WHERE oi.assessment_id=v_old.id AND (
-      ni.assessment_id IS NULL
-      OR ni.question_id IS DISTINCT FROM oi.question_id
-      OR ni.primary_skill_code IS DISTINCT FROM oi.primary_skill_code
-      OR ni.reserve_role IS DISTINCT FROM oi.reserve_role
-      OR ni.is_holdout IS DISTINCT FROM oi.is_holdout
-      OR (SELECT task_key FROM private.exam_prep_written_tasks WHERE id=ni.written_task_id)
-         IS DISTINCT FROM
-         (SELECT task_key FROM private.exam_prep_written_tasks WHERE id=oi.written_task_id)
-    )
-  ) THEN
-    RAISE EXCEPTION 'exam_prep_paper03_amendment_items_mismatch';
-  END IF;
-
-  IF (SELECT count(*) FROM private.exam_prep_timed_assessment_items WHERE assessment_id=v_new.id)
-   <> (SELECT count(*) FROM private.exam_prep_timed_assessment_items WHERE assessment_id=v_old.id)
-  OR EXISTS (
-    SELECT 1 FROM private.exam_prep_timed_assessment_items oi
-    LEFT JOIN private.exam_prep_timed_assessment_items ni
-      ON ni.assessment_id=v_new.id AND ni.item_order=oi.item_order
-    WHERE oi.assessment_id=v_old.id AND (
-      ni.assessment_id IS NULL OR ni.max_marks IS DISTINCT FROM oi.max_marks
-    )
-  ) THEN
-    RAISE EXCEPTION 'exam_prep_paper03_amendment_marks_mismatch';
-  END IF;
-END;
-$function$
-;
 CREATE OR REPLACE FUNCTION private.exam_prep_guard_stage5_paper03_assessment_release_v1()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -152,7 +114,7 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
+
 CREATE OR REPLACE FUNCTION private.exam_prep_guard_stage5_paper03_contract_release_v1()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -189,5 +151,5 @@ BEGIN
   RETURN NEW;
 END;
 $function$
-;
+
 COMMIT;
