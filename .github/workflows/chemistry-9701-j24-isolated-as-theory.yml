@@ -1,10 +1,11 @@
-name: Chemistry 9701 J24 AS-only Theory security (synthetic)
+name: Chemistry 9701 J24/J25 AS Theory and consent security (synthetic)
 
 on:
   push:
     branches: ['planning/chemistry-9701-beta-components-j23-20261028']
     paths:
       - 'scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql'
+      - 'supabase/migrations/20261028153500_chemistry_9701_j25_as_theory_voluntary_consent_v1.sql'
       - 'scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh'
       - '.github/workflows/chemistry-9701-j24-isolated-as-theory.yml'
       - 'exam-prep/exam-prep-chemistry-theory-native.js'
@@ -16,6 +17,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql'
+      - 'supabase/migrations/20261028153500_chemistry_9701_j25_as_theory_voluntary_consent_v1.sql'
       - 'scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh'
       - '.github/workflows/chemistry-9701-j24-isolated-as-theory.yml'
       - 'exam-prep/exam-prep-chemistry-theory-native.js'
