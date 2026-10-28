@@ -207,9 +207,9 @@
         const status=state.writtenPlan?t().writtenPaperReady:
           state.betaInvite?t().writtenPaperInvite:
           state.betaJoined?t().writtenPaperDone:t().writtenPaperLimited;
-        card.append(e("div","ep-live-component-status",
-          ""),e("div","ep-live-meta ep-written-paper-status",status),
-          e("div","ep-live-component-open",t().openLevel+" →"));
+        const statusBox=e("div","ep-live-component-status");
+        statusBox.append(e("div","ep-live-meta ep-written-paper-status",status));
+        card.append(statusBox,e("div","ep-live-component-open",t().openLevel+" →"));
         slot.append(card);grid.append(slot);
         continue;
       }
