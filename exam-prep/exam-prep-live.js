@@ -1263,7 +1263,7 @@
     const u=uxText();
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
       <section class="ep-focus-screen" data-ep-focus-mode="true">
-        <header class="ep-focus-head">${exit}<strong>${esc(state.session?.component_code||"")} · ${esc(u.task)} ${answered+1} ${esc(u.of)} ${total}</strong>${timer}</header>
+        <header class="ep-focus-head ep-live-head">${exit}<strong>${esc(state.session?.component_code||"")} · ${esc(u.task)} ${answered+1} ${esc(u.of)} ${total}</strong>${timer}</header>
         <div class="ep-live-card ep-live-question-card" data-ep-live-active-assessment="true">
           <div class="ep-live-qtext">${uxMath(item.text || item.written_prompt || "")}</div>${answerControl}</div>
         <footer class="ep-focus-dock">${actionMarkup}</footer>
