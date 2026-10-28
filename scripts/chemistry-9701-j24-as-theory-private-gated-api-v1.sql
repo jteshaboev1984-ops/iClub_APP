@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS private.iclub_exam_chemistry_j24_as_theory_control_v1
  owner_backup_deferral_at timestamptz,
  approved_version text,
  approved_source_md5 text,
+ approved_as_manifest_md5 text,
  approved_skill_count integer CHECK (approved_skill_count=91),
  reviewed_evidence_ref text,
  created_at timestamptz NOT NULL DEFAULT now(),
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS private.iclub_exam_chemistry_j24_as_theory_control_v1
    AND owner_backup_deferral_at IS NOT NULL
    AND approved_version='chemistry9701_20261022_stageb_draft'
    AND approved_source_md5 ~ '^[a-f0-9]{32}$'
+   AND approved_as_manifest_md5 ~ '^[a-f0-9]{32}$'
    AND approved_skill_count=91
    AND length(btrim(reviewed_evidence_ref))>=16)
  )
@@ -41,6 +43,7 @@ AS $$
  SELECT auth.role()='authenticated' AND auth.uid() IS NOT NULL
  AND coalesce(auth.jwt()->>'is_anonymous','false')<>'true'
  AND private.iclub_exam_chemistry_p1_math_beta_eligible_v1(auth.uid())
+ AND NOT private.iclub_ai_has_active_protected_assessment_v1(auth.uid())
  AND EXISTS(SELECT 1 FROM private.iclub_exam_chemistry_p1_beta_members_v1 m
   WHERE m.user_id=auth.uid() AND m.active=true AND m.consented_at IS NOT NULL
    AND m.owner_approved_at IS NOT NULL AND m.revoked_at IS NULL)
@@ -51,7 +54,16 @@ AS $$
    AND c.rights_owner_attestation_at IS NOT NULL AND c.owner_backup_deferral_at IS NOT NULL
    AND c.approved_version='chemistry9701_20261022_stageb_draft'
    AND c.approved_source_md5=g.source_snapshot_md5
-   AND c.approved_skill_count=91 AND length(btrim(c.reviewed_evidence_ref))>=16);
+   AND c.approved_skill_count=91 AND length(btrim(c.reviewed_evidence_ref))>=16
+   AND EXISTS (SELECT 1 FROM private.iclub_exam_core_skills_v1 s
+    JOIN private.iclub_subject_library_theory t
+     ON t.subject_key=s.library_subject_key AND t.version_key=s.library_version_key
+      AND t.skill_key=s.skill_key
+    WHERE s.program_key='chemistry_9701' AND s.version_key='chemistry_2025_2027_v1'
+      AND s.library_version_key=c.approved_version AND s.level_code='AS'
+      AND t.tour_no BETWEEN 1 AND 5 AND t.content_hash=s.content_hash
+    HAVING count(*)=91 AND md5(string_agg(s.skill_key||':'||t.content_hash,'|' ORDER BY s.skill_key))=c.approved_as_manifest_md5)
+ );
 $$;
 REVOKE ALL ON FUNCTION private.iclub_exam_chemistry_j24_theory_authorized_v1() FROM PUBLIC, anon, authenticated;
 
