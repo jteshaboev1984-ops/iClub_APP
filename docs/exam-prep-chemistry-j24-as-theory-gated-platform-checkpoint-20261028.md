@@ -29,3 +29,7 @@ Date: 2026-10-28. **This is NOT Chemistry learner publication.**
 
 ## Release decision
 **J24 backend infrastructure READY but feature OFF.** The PR remains DRAFT and must pass all relevant CI and protected Preview QA before client code reaches production. Releasing AS Theory requires 91/91 semantic science/language reviews, an exact 91-source manifest, one eligible/consenting canary learner and separate owner go. Papers 1/3/5, Tutor, Chemistry Entry/Recheck remain OFF. No production learner progress or browser data reset.
+
+
+## J25 architecture update — replaces consent policy, 2026-10-28
+Owner rejected all learner invites, Chemistry-specific consent screens and opt-in tables for beta and release. J24's **installed** authorization function remains fail-closed until a separately versioned J25 server rollout migration is tested/applied. The new J25 candidate makes `closed` the default; `beta` permits only authenticated active Chemistry subject members of the existing active Mathematics beta cohort (owner-controlled test accounts); `released` permits authenticated active Chemistry subject members. Both require J24 enabled, signed 91/91 reviewed content, source manifest match, and no active protected examination. No student account, attempt, grade, localStorage, Practice or Tours rows are changed. References earlier in this document to separate consent and canary consent are historical and not release requirements.
