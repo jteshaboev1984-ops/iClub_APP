@@ -1827,6 +1827,12 @@
 #exam-prep-host-root .ep-route-premium .ep-component-last-result .ep-live-btn{font-size:12px;min-height:44px}
 #exam-prep-host-root .ep-route-premium .ep-component-topics{border:0;border-radius:0;background:transparent;padding:2px}
 #exam-prep-host-root .ep-route-premium .ep-component-links{background:transparent}
+#exam-prep-host-root .ep-focus-screen,
+#exam-prep-host-root .ep-focus-screen .ep-live-question-card,
+#exam-prep-host-root .ep-focus-dock,
+#exam-prep-host-root .ep-ux-review-row,
+#exam-prep-host-root .ep-ux-result,
+#exam-prep-host-root .ep-ux-result-score{box-sizing:border-box;min-width:0}
 #exam-prep-host-root .ep-focus-screen{display:grid;gap:14px;max-width:760px;width:100%;margin:0 auto;padding-bottom:calc(110px + env(safe-area-inset-bottom,0px));min-height:60vh}
 #exam-prep-host-root .ep-focus-head{position:sticky;top:0;z-index:34;display:flex;align-items:center;justify-content:space-between;gap:9px;min-height:54px;padding:6px 4px;border-bottom:1px solid var(--border,rgba(0,0,0,.1));background:var(--bg,#f6f8fc)}
 #exam-prep-host-root .ep-focus-head strong{font-size:13px;font-weight:800;line-height:1.35;text-align:center}
