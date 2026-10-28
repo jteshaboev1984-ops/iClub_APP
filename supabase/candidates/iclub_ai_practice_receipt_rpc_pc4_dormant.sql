@@ -77,9 +77,16 @@ BEGIN
  END IF;
  IF p_action='inspect' THEN
   -- Internal accounting metadata only; no learner answer or keys returned.
+  -- "void" alone does NOT prove no model dispatch: an unknown-charge
+  -- receipt may be void if the dispatch acknowledgement was lost.
   RETURN jsonb_build_object('ok',true,'action','inspection',
     'state',r.status,'actual_microusd',r.provider_reported_microusd,
-    'quota_accounted',r.quota_confirmed_at IS NOT NULL);
+    'quota_accounted',r.quota_confirmed_at IS NOT NULL,
+    'safe_new_request',(r.status='void'
+      AND NOT EXISTS(SELECT 1 FROM private.iclub_ai_v21_freeform_budget_ledger b
+        WHERE b.request_id=p_request_id AND b.state<>'no_charge')
+      AND NOT EXISTS(SELECT 1 FROM private.iclub_ai_v21_freeform_quota_holds h
+        WHERE h.request_id=p_request_id AND h.state='reserved')));
  END IF;
  IF p_action='replay' THEN
   IF r.status NOT IN('ready','acknowledged') OR now()>=r.expires_at THEN
@@ -107,7 +114,9 @@ BEGIN
     AND held_microusd=50000;
   SELECT state INTO quota_state FROM private.iclub_ai_v21_freeform_quota_holds
    WHERE request_id=p_request_id AND user_id=p_user_id
-    AND request_fingerprint=p_request_fingerprint AND weight=3;
+    AND request_fingerprint=p_request_fingerprint
+    AND weight=CASE WHEN private.iclub_ai_math_beta_pro_quota_eligible_v1(p_user_id)
+      THEN 5 ELSE 3 END;
   IF coalesce(money_state,'')<>'dispatched'
      OR coalesce(quota_state,'')<>'reserved' THEN
    RETURN jsonb_build_object('ok',false,'reason','shared_hold_missing');

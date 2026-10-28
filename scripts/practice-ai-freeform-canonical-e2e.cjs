@@ -449,6 +449,10 @@ async function main(){
   const repeatedUnknown=await send("ask",unknownQuestion,unknownId);
   assert.equal(repeatedUnknown.status,409);
   assert.equal(repeatedUnknown.body.reason,"request_already_in_progress");
+  const uncertainProbe=await send("probe",unknownQuestion,unknownId);
+  assert.equal(uncertainProbe.status,409,JSON.stringify(uncertainProbe));
+  assert.equal(uncertainProbe.body.reason,"request_not_confirmed_closed");
+  assert.equal(calls,2,"Unknown charge probe tried provider again");
   assert.equal(calls,2,"Unknown provider charge must never retrigger generation");
   const recoverUnknown=await send("resume",null,newSessionId);
   assert.equal(recoverUnknown.status,409);
@@ -456,7 +460,13 @@ async function main(){
   const lostQuotaId="77777777-7777-4777-8777-777777777777";
   const quotaLost=await send("ask","Что означает мой результат 70% при потере связи?",lostQuotaId);
   assert.equal(quotaLost.status,409,JSON.stringify(quotaLost));
-  assert.equal(quotaLost.body.reason,"usage_or_access_unavailable");
+  assert.equal(quotaLost.body.reason,"practice_request_void_unbilled");
+  assert.equal(quotaLost.body.safe_new_request,true);
+  assert.equal(quotaLost.body.provider_called,false);
+  const safeProbe=await send("probe","Что означает мой результат 70% при потере связи?",lostQuotaId);
+  assert.equal(safeProbe.status,200,JSON.stringify(safeProbe));
+  assert.equal(safeProbe.body.mode,"request_closed");
+  assert.equal(safeProbe.body.safe_new_request,true);
   const quotaLedger=JSON.parse(pg("SELECT json_build_object("+
    "'quota',(SELECT state FROM private.iclub_ai_v21_freeform_quota_holds WHERE request_id='"+lostQuotaId+"'),"+
    "'money',(SELECT state FROM private.iclub_ai_v21_freeform_budget_ledger WHERE request_id='"+lostQuotaId+"'),"+

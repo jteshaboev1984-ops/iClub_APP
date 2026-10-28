@@ -450,7 +450,7 @@
     const text=String(userText||"").trim();
     const reqId=String(requestId||"");
     const recovering=operation==="resume"||operation==="resume_ack";
-    if(!["ask","ack","resume","resume_ack"].includes(operation)||
+    if(!["ask","ack","resume","resume_ack","probe"].includes(operation)||
        !practicePurposes.has(purpose)||
        purpose==="practice_visibility"||!Number.isSafeInteger(attemptRef)||
        attemptRef<=0||!LOCALES.has(locale)||
@@ -504,6 +504,11 @@
            typeof body?.reset_at==="string")
           return {...closed(reason),provider_called:false,
             reset_at:body.reset_at};
+        if(operation==="ask"&&response.status===409&&
+           reason==="practice_request_void_unbilled"&&
+           body?.safe_new_request===true)
+          return {...closed(reason),safe_new_request:true,
+            provider_called:false};
         return closed(reason);
       }
     }catch(e){
@@ -513,6 +518,13 @@
       !screen.isConnected||!screen.classList.contains("is-active")||
       Number(screen.dataset.practiceAiAttemptId||0)!==attemptRef)
       return closed("context_changed");
+    if(operation==="probe"){
+      return body.mode==="request_closed"&&body.safe_new_request===true&&
+        body.provider_called===false&&body.academic_state_changed===false
+        ?{ok:true,safe_new_request:true,mode:"request_closed",
+          academic_state_changed:false,provider_called:false}
+        :closed("request_not_confirmed_closed");
+    }
     if(operation==="ack"||operation==="resume_ack"){
       if(body?.mode!=="acknowledged"||body?.request_id!==reqId||
          body?.academic_state_changed!==false)
@@ -539,6 +551,9 @@
   }
   async function askPracticeFreeform(args={}){
     return practiceFreeformTransport({...args,operation:"ask"});
+  }
+  async function probeClosedPracticeRequest(args={}){
+    return practiceFreeformTransport({...args,operation:"probe"});
   }
   async function ackPracticeFreeform(args={}){
     return practiceFreeformTransport({...args,operation:"ack"});
@@ -697,7 +712,7 @@
   window.iClubAiV21BetaClient=Object.freeze({
     status,consentFromExplicitUserAction,askPrepared,askGenerated,
     availableAcademic,askAcademic,practiceContextAvailable,
-    askPracticePrepared,askPracticeFreeform,ackPracticeFreeform,
-    recoverPracticeFreeform,ackRecoveredPracticeFreeform,resetOnIdentityChange
+    askPracticePrepared,askPracticeFreeform,probeClosedPracticeRequest,
+    ackPracticeFreeform,recoverPracticeFreeform,ackRecoveredPracticeFreeform,resetOnIdentityChange
   });
 })();
