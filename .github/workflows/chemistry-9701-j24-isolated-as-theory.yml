@@ -62,7 +62,8 @@ jobs:
         run: |
           set -euo pipefail
           bash -n scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
-          ! grep -Eq 'supabase\.co|service_role|auth\.users|curl|wget' scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
+          ! grep -Eq 'supabase\.co|service_role|curl|wget|postgresql://' scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
+          grep -Fq 'CREATE TABLE auth.users(id uuid PRIMARY KEY);' scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
       - name: Verify native AS Theory UI and shared host without browser storage changes
         shell: bash
         run: |
