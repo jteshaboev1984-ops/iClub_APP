@@ -415,7 +415,7 @@
         '<header class="ep-ux-result-title"><span>'+esc(component)+' · '+esc(resultTypeLabel(data?.session_type))+'</span><h2>'+esc(label)+'</h2></header>'+
         '<div class="ep-ux-result-score"><span>'+esc(data?.session_type==="learning"?u.checked:c.autoChecked)+'</span><strong>'+(total?correct+' <small>'+esc(u.of)+' '+total+'</small>':"—")+'</strong>'+
         (total&&Number.isFinite(pct)?'<span>'+Math.round(pct)+'% · '+esc(u.correct)+'</span>':"")+'</div>'+
-        (writtenTotal?'<div class="ep-ux-result-written"><div><span>'+esc(c.writtenPart)+'</span><strong>'+esc(writtenValue)+'</strong></div><p>'+esc(u.unmarked)+'</p></div>':"")+
+        (writtenTotal?'<div class="ep-ux-result-written"><div><span>'+esc(c.writtenPart)+'</span><strong>'+esc(writtenValue)+'</strong></div><p>'+esc(c.writtenNoAccuracy)+' '+esc(u.unmarked)+'</p></div>':"")+
         '<div class="ep-ux-result-next"><strong>'+esc(u.next)+'</strong><p>'+esc(u.nextNote)+'</p></div>'+
         '<div class="ep-ux-result-actions"><button class="ep-live-btn" type="button" data-ep-result-continue>'+esc(origin==="history"?c.backToHistory:u.route)+'</button>'+
         '<button class="ep-live-btn secondary" type="button" data-ep-result-review>'+esc(c.reviewAnswers)+'</button></div></section>',{compact:true});
@@ -433,11 +433,11 @@
     root.innerHTML=shell('<section class="ep-focus-screen ep-result-screen ep-ux-review-screen" data-ep-result-session-type="'+esc(data?.session_type||"")+'" data-ep-session-result="'+esc(data?.session_id||"")+
       '" data-ep-result-component="'+esc(component)+'"><header class="ep-focus-head"><button type="button" class="ep-focus-back" data-ep-review-back>← '+esc(u.backResult)+'</button>'+
       '<strong>'+esc(u.review)+'</strong><small>'+visible.length+' / '+items.length+'</small></header>'+
-      '<div class="ep-ux-review-content"><div class="ep-result-toolbar"><button class="ep-live-btn '+(onlyErrors?"secondary":"")+'" data-ep-result-filter="all">'+esc(c.allQuestions)+'</button>'+
-      '<button class="ep-live-btn '+(onlyErrors?"":"secondary")+'" data-ep-result-filter="wrong">'+esc(c.mistakesOnly)+'</button>'+
-      '<button class="ep-live-btn secondary" data-ep-result-expand-all>'+esc(u.expand)+'</button></div>'+
+      '<div class="ep-ux-review-content"><div class="ep-result-toolbar"><button class="ep-live-btn '+(onlyErrors?"secondary":"")+'" type="button" data-ep-result-filter="all">'+esc(c.allQuestions)+'</button>'+
+      '<button class="ep-live-btn '+(onlyErrors?"":"secondary")+'" type="button" data-ep-result-filter="wrong">'+esc(c.mistakesOnly)+'</button>'+
+      '<button class="ep-live-btn secondary" type="button" data-ep-result-expand-all>'+esc(u.expand)+'</button></div>'+
       '<div class="ep-ux-review-list">'+(rows||'<div class="ep-live-notice">'+esc(c.noMistakes)+'</div>')+'</div></div>'+
-      '<footer class="ep-focus-dock"><button class="ep-live-btn" data-ep-result-continue>'+esc(origin==="history"?c.backToHistory:u.route)+'</button></footer></section>',{compact:true});
+      '<footer class="ep-focus-dock"><button class="ep-live-btn" type="button" data-ep-result-continue>'+esc(origin==="history"?c.backToHistory:u.route)+'</button></footer></section>',{compact:true});
     root.querySelector("[data-ep-review-back]")?.addEventListener("click",()=>renderSessionResult(data,component,origin,false,false));
     root.querySelector('[data-ep-result-filter="all"]')?.addEventListener("click",()=>renderSessionResult(data,component,origin,true,false));
     root.querySelector('[data-ep-result-filter="wrong"]')?.addEventListener("click",()=>renderSessionResult(data,component,origin,true,true));
@@ -773,7 +773,7 @@
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
       <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
-        <header class="ep-component-hero ep-route-header"><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span>
+        <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><button class="ep-route-back" type="button" data-ep-component-back aria-label="${esc(c.overview)}">←</button><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
           <div class="ep-route-identity"><div><h2>${esc(componentName)}</h2><span class="ep-route-phase">${esc(stageLabel(stage))} · ${esc(c.stageTitle)}</span></div><span class="ep-live-component-code">${component}</span></div></header>
         <section class="ep-component-next"><span class="ep-component-section-label">${esc(home.next)}</span>
           <strong class="ep-component-next-title">${esc(action.title)}</strong>
