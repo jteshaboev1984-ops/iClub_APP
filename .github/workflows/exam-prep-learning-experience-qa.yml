@@ -1,0 +1,68 @@
+name: Exam Prep Learning Experience — isolated QA
+
+on:
+  push:
+    branches:
+      - ux/exam-prep-learning-experience-20261028
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-host.css'
+      - 'exam-prep/exam-prep-api.js'
+      - '.github/scripts/p0_17_live_diagnostic_regression.js'
+      - '.github/scripts/p0_18_live_plan_regression.js'
+      - '.github/workflows/exam-prep-learning-experience-qa.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-host.css'
+      - 'exam-prep/exam-prep-api.js'
+      - '.github/scripts/p0_17_live_diagnostic_regression.js'
+      - '.github/scripts/p0_18_live_plan_regression.js'
+      - '.github/workflows/exam-prep-learning-experience-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  exam-prep-learner-ux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static source, scope and safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-api.js
+          node --check .github/scripts/p0_17_live_diagnostic_regression.js
+          node --check .github/scripts/p0_18_live_plan_regression.js
+          grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
+          grep -Fq 'data-ep-component-home=' exam-prep/exam-prep-live.js
+          grep -Fq 'data-ep-focus-mode="true"' exam-prep/exam-prep-live.js
+          grep -Fq 'data-ep-result-continue' exam-prep/exam-prep-live.js
+          grep -Fq 'box-sizing:border-box;min-width:0' exam-prep/exam-prep-host.css
+          ! grep -Fq 'localStorage' exam-prep/exam-prep-live.js
+          ! grep -Fq '.from(' exam-prep/exam-prep-live.js
+      - name: Install isolated Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Stage 0 diagnostic and mobile layout 320 360 390 430 768 1280
+        run: node .github/scripts/p0_17_live_diagnostic_regression.js
+      - name: Stage 1 learning, written work, results and accordion layout 320 360 390 430 768 1280
+        run: node .github/scripts/p0_18_live_plan_regression.js
+      - name: Full Stage 0 to Stage 6 user journey and P1/P5 isolation
+        run: node .github/scripts/p2_55_full_learner_journey_regression.js
+      - name: Written learning, localized criteria and recovery
+        run: node scripts/math-written-external-browser.cjs
+      - name: Answer recovery and explicit same-key retry
+        run: node scripts/weekly-flow-answer-loss-browser.cjs
+      - name: Due/future retest eligibility and CTA
+        run: node scripts/weekly-flow-due-retest-cta-regression.cjs
