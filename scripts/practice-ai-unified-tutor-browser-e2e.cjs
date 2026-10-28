@@ -210,10 +210,14 @@ async function main(){
   const staleAsk=activity.asks.at(-1);
   const priorAsks=activity.asks.length;
   const nextQuestion="Какие шаги мне доступны после этой попытки?";
+  const seenAnswersBefore=((await page.locator("[data-global-ai-messages]")
+    .textContent())||"").split(ANSWER).length-1;
   await askInput.fill(nextQuestion);
   await page.locator("[data-global-ai-send]").click();
-  await page.waitForFunction((answer)=>document.querySelector("[data-global-ai-messages]")
-    ?.textContent?.includes(answer),ANSWER,{timeout:8000});
+  await page.waitForFunction(({answer,count})=>{
+    const msg=document.querySelector("[data-global-ai-messages]")?.textContent||"";
+    return msg.split(answer).length-1>count;
+  },{answer:ANSWER,count:seenAnswersBefore},{timeout:8000});
   assert.equal(activity.probes.length,1,"Stale void was not checked server-side");
   assert.equal(activity.probes[0].request_id,staleAsk.request_id);
   assert.equal(activity.probes[0].question,staleQuestion);
