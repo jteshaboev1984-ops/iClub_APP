@@ -8,7 +8,7 @@ Secondary project structure: Tour Map v1.0 Chemistry (7 tours); Chemistry J08–
 The official exam has AS Paper 1 (40 MCQ, 75m), Paper 2 (structured, 60 marks, 75m), Paper 3 (real practical, 40 marks, 120m), A Level Paper 4 (structured, 100 marks, 120m), Paper 5 (planning/analysis/evaluation, 30 marks, 75m). Do not call current beta complete AS Chemistry without P2 and real P3 competency.
 
 ## Actual 2026-10-28 production baseline (read-only)
-- Theory: 154 cards = 91 AS skills and 63 A Level skills. 462 static Tutor locale records = 154 skills × EN/RU/UZ.
+- Theory: 154 cards = 91 AS skills and 63 A Level skills. The 91 AS Theory cards include **90 mapped core topics and 1 optional, unscored enrichment card** (`CHEM9701-10-04` flame colours). Do not treat that card as an independent Cambridge 10.1 mastery outcome. 462 static Tutor locale records = 154 skills × EN/RU/UZ.
 - Practical study material: 12 LAB cards, 6 Paper 3 AS + 6 Paper 5 A. These are NOT executable practical examinations.
 - Entry: 22 original MCQs, owner-approved release manifest 0.
 - Recheck: 22 independent MCQs, owner-approved release manifest 0.
