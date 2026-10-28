@@ -94,7 +94,7 @@ BEGIN
     RAISE EXCEPTION 'exam_prep_paper03_amendment_marks_mismatch';
   END IF;
 END;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION private.exam_prep_guard_stage5_paper03_assessment_release_v1()
  RETURNS trigger
@@ -113,7 +113,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION private.exam_prep_guard_stage5_paper03_contract_release_v1()
  RETURNS trigger
@@ -150,6 +150,6 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$function$
+$function$;
 
 COMMIT;
