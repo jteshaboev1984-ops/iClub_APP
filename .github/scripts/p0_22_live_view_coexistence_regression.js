@@ -77,13 +77,11 @@ const path = require('path');
   assert(counts.routes===2,'component-first dashboard must expose exactly two route cards');
   assert(counts.trackerButtons===0&&counts.placementButtons===0&&counts.strips===0,'removed dashboard injectors must stay removed when learner-view modules coexist');
 
-  await page.click('[data-ep-live-open-component="P1"]');
-  await page.waitForSelector('[data-ep-component-home="P1"]');
-  let text=await page.locator('#exam-prep-host-root').textContent();
-  assert(text.includes('Quadratics'),'P1 component home must retain compact syllabus access with both modules loaded');
-  assert(!/pending_evidence|objective_state_v1|P1-QUA-01/.test(text),'component home must not leak internal terminology');
-
+  // Entry-check cards now start in one tap; the read-only tracker still
+  // coexists with the placement view without launching an assessment.
   await page.evaluate(async()=>window.iClubExamPrepHostInternal.learnerViews.openTracker('P1'));
+  let text=await page.locator('#exam-prep-host-root').textContent();
+  assert(!/pending_evidence|objective_state_v1|P1-QUA-01/.test(text),'tracker must not leak internal terminology');
   await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Syllabus progress'));
   assert((await page.locator('#exam-prep-host-root').textContent()).includes('0 / 45'),'tracker remains usable with placement module loaded');
   await page.click('[data-ep-views-back]');
