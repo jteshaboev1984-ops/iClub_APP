@@ -56,3 +56,12 @@ The attached seven-tour map includes chapter-based teaching examples and per-tou
 1. Continue J23 per-card science and EN/RU/UZ review, prioritizing all 91 AS Theory and the 44 Entry/Recheck questions (answer-key review restricted to private channels; no keys in Git).
 2. Preserve bad P1 original, prepare corrected authoring version for `CH-J23-001` with explicit mapping to `CHEM9701-12-04`, re-run seven independent evaluations; no release approvals until all pass.
 3. J24 design AS-only reader/entitlement in a separate code branch; do NOT publish the 166 component package or enable LAB/Tutor in bulk.
+
+## J23 continuation: AS locale numeric triage (91/91, no source changes)
+Second read-only script: `scripts/qa-chemistry-9701-j23-as-locale-numeric-triage-readonly.sql`.
+- Scans all **91 AS Theory records** in EN/RU/UZ, normalizes decimal comma vs point and Unicode super-/subscript digits, compares the *sets* of numeric tokens. No actual explanation text or answer keys are returned by the reproducible SQL; only skill keys and differences.
+- **84/91** cards showed exactly equal unique numeric-token sets.
+- **7/91** cards were flagged for human-style semantic triage: `CHEM9701-01-02`, `05-01`, `07-03`, `07-04`, `08-04`, `11-01`, `13-01`.
+- Assistant reviewed EN/RU/UZ of **all seven flagged cards**. The discrepancies reflect harmless notation/wording, e.g. Uzbek `1/12` instead of spelling out one-twelfth, an English "one-step" explanation, explicit algebraic `0.60²` in one locale, and differently formatted chemical group labels. There is no identified **numeric value or equation inconsistency** in this flagged sample.
+- Method limitation: token parity ignores sentence meaning, reagents, translation omissions without numbers, and false positives from chemical formulas. **Do not equate 84 matching token sets with 84 fully academically approved lessons**; 91-card scientific semantic review remains pending.
+- Numeric triage does **not** change the 33-point release QA verdict (**25 PASS / 7 HOLD / 1 FAIL**), or the unreleased status of every Chemistry learner component.
