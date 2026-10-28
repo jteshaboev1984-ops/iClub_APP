@@ -10,9 +10,15 @@ const langs=['ru','uz','en'], widths=[390,1280];
 async function scenario(browser,lang,width,mode){
   const page=await browser.newPage({viewport:{width,height:820}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
+  // Use an intercepted same-origin URL: about:blank has opaque storage and
+  // would falsely report that tab-local recovery failed.
+  await page.route('http://localhost:13741/',route=>route.fulfill({
+    contentType:'text/html',
+    body:'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><main id="host"></main></body></html>'
+  }));
   await page.route(/^https?:\/\//,route=>route.abort());
   try {
-    await page.setContent('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><main id="host"></main></body></html>');
+    await page.goto('http://localhost:13741/');
     await page.addStyleTag({path:file('exam-prep/exam-prep-host.css')});
     await page.addStyleTag({path:file('exam-prep/exam-prep-economics-native.css')});
     await page.evaluate(mode=>{
