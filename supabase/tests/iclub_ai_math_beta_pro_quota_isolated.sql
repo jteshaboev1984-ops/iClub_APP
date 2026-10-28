@@ -37,6 +37,21 @@ ALTER TABLE private.iclub_ai_v21_beta_usage
 \ir ../migrations/20261028113000_iclub_math_beta_pro_ai_quota_v1.sql
 \ir ../migrations/20261028120000_iclub_math_beta_pro_quota_constraints_fix.sql
 \ir ../migrations/20261028130500_iclub_ai_practice_pro_pc4_and_void_probe_v1.sql
+-- The pre-Pro SQL fixture creates these helper RPCs with PostgreSQL's
+-- default PUBLIC privileges. Production already revoked them. Match the
+-- actual production roles before validating the new release guards.
+REVOKE ALL ON FUNCTION public.reserve_iclub_ai_v21_freeform_quota_v1(uuid,uuid,text)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.finish_iclub_ai_v21_freeform_quota_v1(uuid,uuid,text,text)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.deliver_iclub_ai_v21_beta_prepared_service(uuid,uuid,text,text)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.reserve_iclub_ai_v21_freeform_quota_v1(uuid,uuid,text)
+ TO service_role;
+GRANT EXECUTE ON FUNCTION public.finish_iclub_ai_v21_freeform_quota_v1(uuid,uuid,text,text)
+ TO service_role;
+GRANT EXECUTE ON FUNCTION public.deliver_iclub_ai_v21_beta_prepared_service(uuid,uuid,text,text)
+ TO service_role;
 \ir ../migrations/20261028185500_iclub_ai_math_beta_finalized_quota_help_gate.sql
 SET request.jwt.claim.role='service_role';
 -- The live bug is a different unfinished session, unrelated to the
