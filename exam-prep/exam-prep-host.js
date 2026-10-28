@@ -5,6 +5,7 @@
   const MATHEMATICS_KEY = "mathematics";
   const ECONOMICS_KEY = "economics";
   const CHEMISTRY_KEY = "chemistry";
+  const CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED = false;
   const state = {
     open: false,
     subjectKey: null,
@@ -429,7 +430,7 @@
     closeBtn.textContent = text.comingSoonClose;
     closeBtn.addEventListener('click', close);
     shell.append(badge, heading, description, note);
-    if (state.subjectKey === CHEMISTRY_KEY && state.chemistryOffer?.eligible === true) {
+    if (CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED && state.subjectKey === CHEMISTRY_KEY && state.chemistryOffer?.eligible === true) {
       const lex = chemistryBetaLabels();
       const group = document.createElement("div");
       group.className = "ep-host-component-card ep-host-chemistry-offer";
@@ -677,7 +678,7 @@
             state.chemistryEntryShell = shell;
           }
         } catch (_) { /* Entry remains unavailable unless explicitly released. */ }
-        if (!state.chemistryShell?.enabled && !state.chemistryEntryShell?.enabled) {
+        if (CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED && !state.chemistryShell?.enabled && !state.chemistryEntryShell?.enabled) {
           try {
             const response = await window.sb?.rpc?.("get_my_exam_prep_chemistry_beta_status_v1",{});
             if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
