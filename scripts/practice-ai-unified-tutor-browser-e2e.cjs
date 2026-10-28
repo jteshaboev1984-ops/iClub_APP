@@ -15,7 +15,8 @@ const ANSWER="Результат 70% означает 7 верных ответ�
 let server,browser;
 async function main(){
  const activity={visibility:[],asks:[],acks:[],denied:[],external:[],authInvokes:[],
-   resumes:[],recoveryAcks:[],recoverable:null,quotaNext:false};
+   resumes:[],recoveryAcks:[],recoverable:null,quotaNext:false,
+    oldVoidNext:false,probes:[],probeSafe:true};
  const jsErrors=[];
  try{
   server=http.createServer((req,res)=>{
@@ -101,8 +102,24 @@ async function main(){
             ok:true,mode:"acknowledged",request_id:b.request_id,
             provider_called:false,academic_state_changed:false})});
         }
+        if(b.operation==="probe"){
+          activity.probes.push(b);
+          if(activity.probeSafe)
+            return route.fulfill({status:200,headers,body:JSON.stringify({
+              ok:true,mode:"request_closed",safe_new_request:true,
+              academic_state_changed:false,provider_called:false})});
+          return route.fulfill({status:409,headers,body:JSON.stringify({
+            ok:false,reason:"request_not_confirmed_closed",
+            academic_state_changed:false,provider_called:false})});
+        }
         if(b.operation==="ask"){
           activity.asks.push(b);
+          if(activity.oldVoidNext){
+            activity.oldVoidNext=false;
+            return route.fulfill({status:409,headers,body:JSON.stringify({
+              ok:false,reason:"usage_or_access_unavailable",
+              academic_state_changed:false,provider_called:false})});
+          }
           if(activity.quotaNext){
             activity.quotaNext=false;
             return route.fulfill({status:409,headers,body:JSON.stringify({
@@ -180,6 +197,45 @@ async function main(){
   assert.equal(activity.asks.length,3,"Wrong quota request count");
   assert.equal(activity.acks.length,2,"Exhausted request incorrectly ACKed");
   assert.equal(activity.external.length,0,"Quota UI escaped into outside network");
+
+  // Real production failure: an earlier pre-provider DB error returned
+  // generic "unavailable" and left an in-memory request stuck. New typing
+  // MUST perform an exact UUID receipt probe before allowing a new paid ask.
+  activity.oldVoidNext=true;
+  const staleQuestion="Подскажи, что означает мой результат 30%?";
+  await askInput.fill(staleQuestion);
+  await page.locator("[data-global-ai-send]").click();
+  await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
+    ?.textContent?.includes("iClub AI сейчас недоступен"),null,{timeout:8000});
+  const staleAsk=activity.asks.at(-1);
+  const priorAsks=activity.asks.length;
+  const nextQuestion="Какие шаги мне доступны после этой попытки?";
+  await askInput.fill(nextQuestion);
+  await page.locator("[data-global-ai-send]").click();
+  await page.waitForFunction((answer)=>document.querySelector("[data-global-ai-messages]")
+    ?.textContent?.includes(answer),ANSWER,{timeout:8000});
+  assert.equal(activity.probes.length,1,"Stale void was not checked server-side");
+  assert.equal(activity.probes[0].request_id,staleAsk.request_id);
+  assert.equal(activity.probes[0].question,staleQuestion);
+  assert.equal(activity.asks.length,priorAsks+1,"New ask not sent after verified void");
+  assert.notEqual(activity.asks.at(-1).request_id,staleAsk.request_id,
+    "The voided UUID must not be reused for a second question");
+  assert.equal(activity.asks.at(-1).question,nextQuestion);
+  const safePrior=activity.asks.length;
+  activity.oldVoidNext=true;
+  activity.probeSafe=false;
+  await askInput.fill("Почему я получил такие баллы?");
+  await page.locator("[data-global-ai-send]").click();
+  await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
+    ?.textContent?.includes("iClub AI сейчас недоступен"),null,{timeout:8000});
+  await askInput.fill("Хочу задать следующий вопрос про математику.");
+  await page.locator("[data-global-ai-send]").click();
+  await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
+    ?.textContent?.includes("Сначала восстановите предыдущий ответ"),null,{timeout:8000});
+  assert.equal(activity.asks.length,safePrior+1,
+    "Unverified/possibly billed receipt must not permit a new model call");
+  assert.equal(activity.probes.length,2);
+  assert.equal(activity.external.length,0);
 
   // The REAL Tutor auth handler must clear its in-memory conversations when
   // a different synthetic learner signs in, without leaking old responses.
