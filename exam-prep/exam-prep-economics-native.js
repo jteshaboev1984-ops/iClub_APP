@@ -58,12 +58,18 @@
   const shell=()=>{
     if(state.closed||!state.root)return null;
     const root=e("section","ep-host-shell ep-live");
-    const header=e("div","ep-live-head");
-    const title=e("div");
+    const header=e("div","ep-live-head ep-native-screen-head");
+    const title=e("div","ep-native-screen-title");
     title.append(e("div","ep-host-kicker","Cambridge 9708"),
       e("h2","ep-host-title",t().title));
+    if(state.view!=="home"){
+      const back=btn("‹",goBack,true);
+      back.className+=" ep-native-screen-back";
+      back.setAttribute("aria-label",t().back);
+      back.setAttribute("title",t().back);
+      header.append(back);
+    }
     header.append(title);
-    if(state.view!=="home")header.append(btn("← "+t().back,goBack,true));
     root.append(header);
     const previous=state.root.firstElementChild;
     state.root.replaceChildren(root);
@@ -606,7 +612,7 @@
       header.append(e("p","ep-native-guidance",t().econHours+": "+data.weekly_economics_hours));
     view.append(header);
     // Keep the outcome visible without converting the plan into an endless report.
-    const stats=e("div","ep-live-stats");
+    const stats=e("div","ep-live-stats ep-native-plan-stats-compact");
     for(const [amount,label] of [
       [String(data.score)+"/"+String(data.out_of||30),t().result],
       [Math.max(0,Number(data.weak_count||0)-Number(data.retested_correct_count||0)),t().mistakes],
