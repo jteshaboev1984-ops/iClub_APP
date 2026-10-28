@@ -11,6 +11,10 @@ CREATE TABLE private.iclub_ai_v21_freeform_quota_holds(
  request_id uuid PRIMARY KEY,user_id uuid,request_fingerprint text,
  weight smallint,state text);
 \ir ../candidates/iclub_ai_practice_receipts_pc4_dormant.sql
+-- Before the Pro feature migration, all beta users are legacy weight 3.
+-- The production helper is installed later in this same isolated workflow.
+CREATE OR REPLACE FUNCTION private.iclub_ai_math_beta_pro_quota_eligible_v1(p_user_id uuid)
+RETURNS boolean LANGUAGE sql STABLE AS $stub$ SELECT false $stub$;
 \ir ../candidates/iclub_ai_practice_receipt_rpc_pc4_dormant.sql
 SET request.jwt.claim.role='service_role';
 DO $test$
