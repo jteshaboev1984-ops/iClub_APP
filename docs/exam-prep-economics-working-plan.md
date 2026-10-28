@@ -600,3 +600,8 @@ Economics P1/P3 по-прежнему published только для **трёх �
 **Boundaries:** This establishes **private staging + database-level authenticated integration QA**, not a released paper, official Cambridge approval or learner UI browser E2E. Actual UI cannot display the DRAFT cards because gates work. No activation, assignment, marks, mastery, AI or Mentor Care. Existing Economics P1/P3, Mathematics, Chemistry, Practice, Tours and users' localStorage untouched.
 
 **Next controlled gate:** complete source/curriculum and language editorial acceptance, review P2/P4 exam structure, then explicitly authorize a disposable learner-bound beta pilot and browser validation, followed only separately by content release decision. Do not activate all 22 tasks at once without measured human-like path and rollback evidence.
+
+
+## 27. ECONOMICS P2/P4 FINAL QA — 28.10.2026
+
+The v3 candidate academic, RU/UZ/EN language, and source editorial review stage is **CLOSED**. All 22 new tasks and the 2 fictional source cards are internally approved; the 22 original EN-only drafts remain unmodified. Supabase migration 20261028043511 records these exact version-scoped changes, with all release_enabled switches OFF, no written plans or learner access. Source/technical protection was verified using owner-authenticated rollback-only SQL E2E. The v3 bank is a limited initial practice set, not an official Cambridge paper or complete syllabus coverage. No learner browser E2E or release is claimed. Full acceptance record: docs/economics-9708-P2-P4-academic-language-source-closure-v3-20261028.md. Do not repeat approval cycles for this immutable version. Separate controlled-beta activation requires its own release decision and test assignment.
