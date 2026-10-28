@@ -49,31 +49,37 @@
       // Server enforces study/timed access and task/version QA status.
       const result=await api.criteria(payload());
       if (!result || result.available!==true || result.task_key!==task.task_key
-        || result.task_version!==task.task_version
-        || !Array.isArray(result.requirements) || !result.requirements.length
-        || !result.requirements.every(text)) throw new Error('criteria_unavailable');
+        || result.task_version!==task.task_version) throw new Error('criteria_unavailable');
       const scheme=result.mark_scheme;
-      let marking=null;
+      let marking=null,requirements=[];
       if(scheme!==undefined&&scheme!==null){
+        // Economics Core receives assessment objectives ONLY, never the
+        // private indicative correct-answer content / requirements.
         if(!Number.isInteger(scheme.max_marks)||scheme.max_marks<1||scheme.max_marks>20
           ||!Number.isInteger(scheme.ao12_marks)||scheme.ao12_marks<0
           ||!Number.isInteger(scheme.ao3_marks)||scheme.ao3_marks<0
           ||scheme.ao12_marks+scheme.ao3_marks!==scheme.max_marks
           ||!['point','levels'].includes(scheme.marking_style)
           ||scheme.official_cambridge!==false
-          ||!Array.isArray(scheme.indicative_points)||!scheme.indicative_points.length
-          ||!scheme.indicative_points.every(text))
+          ||!Array.isArray(scheme.assessment_criteria)||scheme.assessment_criteria.length<2
+          ||!scheme.assessment_criteria.every(text)
+          ||result.requirements!==undefined || scheme.indicative_points!==undefined)
           throw new Error('invalid_mark_scheme');
         marking=Object.freeze({
           max_marks:scheme.max_marks,ao12_marks:scheme.ao12_marks,
           ao3_marks:scheme.ao3_marks,style:scheme.marking_style,
-          indicative_points:Object.freeze([...scheme.indicative_points]),
+          assessment_criteria:Object.freeze([...scheme.assessment_criteria]),
           official_cambridge:false
         });
+      }else{
+        // Existing non-Economics Written Core services are unchanged.
+        if(task.program_key==='economics_9708'
+          ||!Array.isArray(result.requirements)||!result.requirements.length
+          ||!result.requirements.every(text)) throw new Error('criteria_unavailable');
+        requirements=[...result.requirements];
       }
       criteriaCache=Object.freeze({
-        title:text(result.title),requirements:Object.freeze([...result.requirements]),
-        marking
+        title:text(result.title),requirements:Object.freeze(requirements),marking
       });
       return criteriaCache;
     }
