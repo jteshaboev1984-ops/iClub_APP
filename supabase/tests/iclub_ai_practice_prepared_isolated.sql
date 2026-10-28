@@ -249,6 +249,11 @@ BEGIN
  IF r->>'reason' IS DISTINCT FROM 'not_enabled' THEN RAISE EXCEPTION 'Disabled grant leaked %',r; END IF;
  UPDATE private.iclub_ai_practice_beta_grants_v1 SET enabled=true WHERE user_id=uid;
  UPDATE private.iclub_ai_practice_context_v1_control SET owner_user_id=uid WHERE singleton=1;
+ -- The next integration test intentionally runs BEFORE the production Pro
+ -- beta quota migration, so clear this synthetic-only orphan fixture here.
+ -- Never remove any real learner's unfinished Practice in production.
+ DELETE FROM public.practice_sessions_v4 WHERE id=602 AND status='in_progress';
+ RAISE NOTICE 'PASS: finalized Practice permitted despite unrelated synthetic unfinished session';
  RAISE NOTICE 'PASS: Math beta grants, dynamic cohort and entitlement, consent and revocation';
  RAISE NOTICE 'PASS: compiled, off gate, 7/10, owner, trilingual source version/hash/target, protection and grants';
 END $g$;
