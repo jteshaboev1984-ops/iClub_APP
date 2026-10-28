@@ -190,11 +190,16 @@ async function ask(p:Prepared,key:string){
  }
  const quota=await reserveQuota(p);
  if(quota?.allowed!==true){
-  // The quota reservation may already have committed when its HTTP response
-  // was lost. Attempt a canonical release before closing this receipt.
-  // No new quota is created by this compensation call.
+  // Quota may already have committed before the HTTP response was lost.
+  // Compensate before closing the receipt: no new provider call occurs.
   await releaseQuota(p);
   await receipt(p,"void");
+  // Only explicit admission exhaustion returns a learner-visible reset time.
+  // A network failure, revocation or unknown denial must stay generic.
+  if(quota?.reason==="usage_exhausted" &&
+     typeof quota.reset_at==="string" &&
+     /^\\d{4}-\\d\\d-\\d\\d[T ]\\d\\d:\\d\\d:/.test(quota.reset_at))
+    return {...fail("practice_quota_exhausted"),reset_at:quota.reset_at};
   return fail("usage_or_access_unavailable");
  }
  const money=await reserveMoney(p);
