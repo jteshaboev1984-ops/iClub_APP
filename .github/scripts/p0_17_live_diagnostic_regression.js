@@ -180,6 +180,23 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(r.backHeight>=44,`component back touch target must be at least 44px; got ${r.backHeight}`);
   assert(r.horizontalOverflow===false,'P1 component home must not overflow horizontally at 390px');
 
+  // Responsive route: P1/P5 navigation, first action and progress never drift off-screen.
+  for (const width of [320, 360, 390, 430, 768, 1280]) {
+    await page.setViewportSize({width,height:844});
+    const bounds=await page.evaluate(()=>{
+      const back=document.querySelector('[data-ep-component-back]');
+      const primary=document.querySelector('[data-ep-component-primary]');
+      return {overflow:document.documentElement.scrollWidth>innerWidth+1,
+        back:back?.getBoundingClientRect().height||0,
+        action:primary?.getBoundingClientRect().height||0,
+        actionRight:primary?.getBoundingClientRect().right||0,
+        view:innerWidth};
+    });
+    assert(!bounds.overflow && bounds.back>=44 && bounds.action>=44 && bounds.actionRight<=bounds.view+1,
+      'Responsive component route failed at '+width+'px: '+JSON.stringify(bounds));
+  }
+  await page.setViewportSize({width:390,height:844});
+
   await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
 
@@ -203,6 +220,26 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
     console.log('EXAM_PREP_MOBILE_OVERFLOW_TRACE',JSON.stringify(details));
   }
   assert(r.horizontalOverflow===false,'mobile question must not overflow horizontally at 390px');
+
+  // Responsive active assessment: no horizontal clipping, accessible actions and fixed CTA.
+  for (const width of [320, 360, 390, 430, 768, 1280]) {
+    await page.setViewportSize({width,height:844});
+    const bounds=await page.evaluate(()=>{
+      const submit=document.querySelector('[data-ep-live-submit]');
+      const dock=document.querySelector('.ep-focus-dock');
+      const q=document.querySelector('.ep-live-question-card');
+      const rect=submit?.getBoundingClientRect();
+      const hit=rect?document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2):null;
+      return {overflow:document.documentElement.scrollWidth>innerWidth+1,
+        page:document.documentElement.scrollWidth,view:innerWidth,
+        submitHeight:rect?.height||0,submitHit:!!(hit && submit?.contains(hit)),
+        dockRight:dock?.getBoundingClientRect().right||0,
+        questionRight:q?.getBoundingClientRect().right||0};
+    });
+    assert(!bounds.overflow && bounds.submitHeight>=44 && bounds.submitHit && bounds.dockRight<=bounds.view+1,
+      'Responsive focused diagnostic failed at '+width+'px: '+JSON.stringify(bounds));
+  }
+  await page.setViewportSize({width:390,height:844});
 
   await page.check('input[name="ep_live_answer"][value="1"]');
   await page.click('[data-ep-live-submit]');
