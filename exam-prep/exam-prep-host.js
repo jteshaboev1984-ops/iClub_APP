@@ -16,6 +16,7 @@
     economicsShell: null,
     chemistryShell: null,
     chemistryEntryShell: null,
+    chemistryTheoryCatalog: null,
     chemistryOffer: null,
     chemistryConsentBusy: false,
     consentBusy: false,
@@ -296,8 +297,9 @@
     const openOffer = inviteOnly && item.openRecruitment === true;
     const aiActive = allowed(state.capabilities) && state.capabilities?.aiAssist === true;
     const econActive = state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true;
+    const chemTheory = state.subjectKey === CHEMISTRY_KEY && state.chemistryTheoryCatalog?.ok === true;
     const chemActive = state.subjectKey === CHEMISTRY_KEY &&
-      (state.chemistryShell?.enabled === true || state.chemistryEntryShell?.enabled === true);
+      (state.chemistryShell?.enabled === true || state.chemistryEntryShell?.enabled === true || chemTheory);
     const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY && !econActive && !chemActive);
     const econSub = state.language === "uz"
       ? "Paper 1 va Paper 3: imtihon, javoblar va natijalar"
@@ -322,6 +324,20 @@
     if (cta) cta.textContent = econActive ? text.entryCta : (comingSoon ? text.comingSoonCta : (openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta)));
     if (p5?.parentElement) p5.parentElement.style.display = chemActive ? "none" : "";
     if (chemActive) {
+      const theoryOnly = chemTheory && state.chemistryShell?.enabled !== true &&
+        state.chemistryEntryShell?.enabled !== true;
+      if (theoryOnly) {
+        if (badge) badge.textContent = "Cambridge · Chemistry 9701";
+        if (sub) sub.textContent = state.language === "uz" ? "AS Level nazariyasi · 91 ta mavzu"
+          : state.language === "en" ? "AS Level theory · 91 topics" : "Теория AS Level · 91 тема";
+        if (p1) p1.textContent = state.language === "uz" ? "AS Level nazariyasi"
+          : state.language === "en" ? "AS Level theory" : "Теория AS Level";
+        if (note) note.textContent = state.language === "uz" ? "Imtihonlar va Tutor hali mavjud emas."
+          : state.language === "en" ? "Exams and Tutor are not yet available."
+          : "Экзамены и Tutor пока закрыты.";
+        if (cta) cta.textContent = text.entryCta;
+        return;
+      }
       const entryOnly = state.chemistryEntryShell?.enabled === true &&
         state.chemistryShell?.enabled !== true;
       if (badge) badge.textContent = "Cambridge · Chemistry 9701";
@@ -513,6 +529,7 @@
     internal.chemistryEntryNative?.unmount?.();
     internal.chemistryRecheckNative?.unmount?.();
     internal.chemistryLabsNative?.unmount?.();
+    internal.chemistryTheoryNative?.unmount?.();
     const shouldRestoreFocus = state.open && (showable() || (state.subjectKey && state.subjectKey !== MATHEMATICS_KEY));
     state.open = false;
     state.consentBusy = false;
@@ -636,6 +653,7 @@
       state.economicsShell = null;
       state.chemistryShell = null;
       state.chemistryEntryShell = null;
+      state.chemistryTheoryCatalog = null;
       state.chemistryOffer = null;
       if (state.subjectKey === ECONOMICS_KEY) {
         try {
@@ -678,6 +696,16 @@
             state.chemistryEntryShell = shell;
           }
         } catch (_) { /* Entry remains unavailable unless explicitly released. */ }
+        try {
+          const response = await window.sb?.rpc?.("iclub_exam_chemistry_j24_theory_catalog_v1", {p_language:state.language});
+          if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
+          const catalog = response?.data;
+          if (!response?.error && catalog?.ok === true && catalog?.scope === "AS_theory_only" &&
+              catalog.count === 91 && catalog.locale === state.language &&
+              internal.chemistryTheoryNative?.validCatalog?.(catalog) === true) {
+            state.chemistryTheoryCatalog = catalog;
+          }
+        } catch (_) { /* AS Theory remains unavailable without independent owner approval. */ }
         if (CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED && !state.chemistryShell?.enabled && !state.chemistryEntryShell?.enabled) {
           try {
             const response = await window.sb?.rpc?.("get_my_exam_prep_chemistry_beta_status_v1",{});
@@ -688,6 +716,14 @@
         }
       }
       renderEntryCopy();
+      if (state.subjectKey === CHEMISTRY_KEY && !subjectChanged && state.open &&
+          state.chemistryTheoryCatalog?.ok === true &&
+          state.chemistryShell?.enabled !== true && state.chemistryEntryShell?.enabled !== true &&
+          internal.chemistryTheoryNative?.mount?.({root:rootEl(),catalog:state.chemistryTheoryCatalog,
+            language:state.language,onBack:close}) === true) {
+        setEntryVisible(true);
+        return true;
+      }
       if (state.subjectKey === CHEMISTRY_KEY && !subjectChanged &&
           state.open && (state.chemistryShell?.enabled === true ||
                          state.chemistryEntryShell?.enabled === true)) {
@@ -766,8 +802,12 @@
         internal.chemistryNative?.mount?.({
           root, shell: state.chemistryShell, language: state.language, onBack: close
         }) === true;
+      const chemistryTheoryReady = state.subjectKey === CHEMISTRY_KEY &&
+        !chemistryEntryReady && !chemistryPaperReady && state.chemistryTheoryCatalog?.ok === true &&
+        internal.chemistryTheoryNative?.mount?.({root,catalog:state.chemistryTheoryCatalog,
+          language:state.language,onBack:close}) === true;
       if (!economicsReady && !chemistryEntryReady && !chemistryPaperReady &&
-          !renderComingSoonShell()) return false;
+          !chemistryTheoryReady && !renderComingSoonShell()) return false;
       state.returnFocusEl = entryButtonEl();
       root.hidden = false;
       root.setAttribute('aria-hidden', 'false');
