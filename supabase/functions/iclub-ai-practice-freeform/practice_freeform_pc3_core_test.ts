@@ -52,3 +52,46 @@ Deno.test("provider charge is bounded and refusal is handled as a deliverable",(
    type:"output_text",text:"Вопрос №6 неверен из-за деления на ноль."}]
  }]})===null,"Unverified per-question claim accepted");
 });
+
+Deno.test("trilingual prompts expose only localized study steps, never machine action IDs",()=>{
+ const contexts={
+  ru:"Открыть разбор завершённой попытки",
+  uz:"Yakunlangan urinishni tahlil qilish",
+  en:"Review the completed attempt"
+ } as const;
+ for(const locale of ["ru","uz","en"] as const){
+  const verified=verifiedSummary({ok:true,context:{
+   intent:"practice_result",locale,attempt_ref:1157,subject_key:"mathematics",
+   completed:true,total:10,correct:1,incorrect:9,unattempted:0,
+   percentage:10,reviewable_error_ordinals:[2,3,4,5,6,7,8,9,10],
+   available_actions:["review_attempt","correct_mistakes"]
+  }},"practice_result",locale);
+  eq(!!verified,"No verified 1/10 facts for "+locale);
+  const request=makeProviderBody("Что означают мои результаты 10%?",verified!,locale);
+  eq(!!request,"No model instructions for "+locale);
+  const instructions=String(request!.instructions);
+  eq(instructions.includes(contexts[locale]),"Missing localized review action in "+locale);
+  eq(!instructions.includes("review_attempt")&&!instructions.includes("correct_mistakes"),
+    "Internal action code leaked into "+locale+" prompt");
+  eq(!instructions.includes("reviewable_error_ordinals"),
+    "Question/answer metadata leaked to provider");
+  eq(!instructions.includes('"attempt_ref"'),
+    "Live Practice attempt id leaked to provider");
+ }
+});
+Deno.test("model outputs containing internal snake_case commands never reach the learner",()=>{
+ const output=(answer:string)=>({status:"completed",model:"gpt-5.4-mini",
+  usage:{input_tokens:300,output_tokens:60},
+  output:[{type:"message",role:"assistant",status:"completed",
+   content:[{type:"output_text",text:answer}]}]});
+ eq(verifiedProviderResponse(output(
+  "Ваш результат: 1 из 10 верно. Начните с review_attempt, затем correct_mistakes."))===null,
+  "Internal Practice action identifiers were delivered");
+ eq(verifiedProviderResponse(output(
+  "Для объяснения использован source_card_key из внутренних данных."))===null,
+  "Unreviewed server metadata identifier was delivered");
+ eq(verifiedProviderResponse(output(
+  "Из 10 заданий вы ответили правильно на одно. Откройте разбор попытки и затем исправьте ошибки."
+ ))?.answer!==undefined,
+ "Legitimate learner-facing Russian study guidance was rejected");
+});
