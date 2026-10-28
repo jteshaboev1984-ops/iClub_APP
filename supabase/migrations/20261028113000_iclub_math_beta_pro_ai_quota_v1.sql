@@ -121,7 +121,7 @@ BEGIN
  UPDATE private.iclub_ai_v21_beta_usage
  SET committed_count=committed_count+v_weight,updated_at=v_now WHERE user_id=p_user_id;
  RETURN jsonb_build_object('allowed',true,'weight',v_weight);
-END $function$
+END $function$;
 
 CREATE OR REPLACE FUNCTION public.finish_iclub_ai_v21_freeform_quota_v1(p_request_id uuid, p_user_id uuid, p_request_fingerprint text, p_outcome text)
  RETURNS jsonb
@@ -178,7 +178,7 @@ BEGIN
    'reason','generation_no_longer_authorized');
  END IF;
  RETURN jsonb_build_object('ok',true,'state',final_state);
-END $function$
+END $function$;
 
 CREATE OR REPLACE FUNCTION public.deliver_iclub_ai_v21_beta_prepared_service(p_user_id uuid, p_request_id uuid, p_help_key text, p_locale text)
  RETURNS jsonb
@@ -279,7 +279,7 @@ BEGIN
  RETURN jsonb_build_object('ok',true,'message',s.message,
   'mode','prepared','academic_state_changed',false,
   'provider_called',false,'replayed',false);
-END $function$
+END $function$;
 
 DO $post$ BEGIN
  IF has_function_privilege('authenticated','private.iclub_ai_math_beta_pro_quota_eligible_v1(uuid)','EXECUTE')
