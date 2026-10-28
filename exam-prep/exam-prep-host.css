@@ -1889,3 +1889,8 @@ body:has(#exam-prep-host-root .ep-focus-screen) .main{padding-bottom:calc(95px +
 body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-mark,
 body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-panel,
 body:has(#exam-prep-host-root .ep-focus-screen) .iclub-global-ai-intro{display:none!important}
+
+/* Compact return to the P1/P5 selector; distinct from the global app exit. */
+#exam-prep-host-root .ep-route-top{display:flex;align-items:center;gap:10px;min-height:44px}
+#exam-prep-host-root .ep-route-back{flex:0 0 44px;width:44px;height:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--border,rgba(0,0,0,.1));border-radius:13px;background:var(--card,#fff);color:var(--primary,#2f6fd6);font-size:23px;font-weight:650;cursor:pointer}
+#exam-prep-host-root .ep-route-back:focus-visible{outline:3px solid rgba(47,111,214,.32);outline-offset:2px}
