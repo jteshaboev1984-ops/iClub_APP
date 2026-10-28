@@ -778,7 +778,7 @@
         <section class="ep-component-next"><span class="ep-component-section-label">${esc(home.next)}</span>
           <strong class="ep-component-next-title">${esc(action.title)}</strong>
           <div class="ep-route-next-detail">${esc(action.detail)}</div>
-          <button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)} <span aria-hidden="true">→</span></button></section>
+          <button class="ep-live-btn ep-component-primary" type="button" data-ep-component-primary="${esc(action.kind)}" ${action.kind === "waiting" ? "disabled" : ""}>${esc(action.label)}</button></section>
         <section class="ep-component-progress-card"><div class="ep-component-section-head"><strong>${esc(c.coverage)}</strong><span class="ep-route-progress-value">${covered} / ${denominator}</span></div>
           <div class="ep-live-progress" role="progressbar" aria-valuenow="${covered}" aria-valuemin="0" aria-valuemax="${denominator}" aria-label="${esc(c.coverage)}"><span style="width:${Math.max(0, Math.min(100, coverage))}%"></span></div>
           <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
