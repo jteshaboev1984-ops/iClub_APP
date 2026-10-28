@@ -7,6 +7,8 @@ on:
       - 'exam-prep/exam-prep-economics-native.css'
       - 'scripts/qa-economics-answer-parity-browser.cjs'
       - 'supabase/migrations/*iclub_economics_native_mcq_active_access_parity_v1.sql'
+      - 'supabase/rollback/*iclub_economics_native_mcq_active_access_parity_v1_rollback.sql'
+      - 'scripts/qa-economics-p0-release-safety.cjs'
       - '.github/workflows/economics-exam-prep-answer-parity.yml'
   workflow_dispatch:
 permissions:
@@ -26,6 +28,8 @@ jobs:
         run: |
           node --check exam-prep/exam-prep-economics-native.js
           node --check scripts/qa-economics-answer-parity-browser.cjs
+          node --check scripts/qa-economics-p0-release-safety.cjs
+          node scripts/qa-economics-p0-release-safety.cjs
           grep -Fq 'async function reconcileChoice(pending)' exam-prep/exam-prep-economics-native.js
           grep -Fq 'data-ep-native-submit' exam-prep/exam-prep-economics-native.js
           grep -Fq 'iclub_exam_native_economics_beta_allowed_v1' supabase/migrations/*iclub_economics_native_mcq_active_access_parity_v1.sql
