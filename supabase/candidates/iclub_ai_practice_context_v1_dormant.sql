@@ -90,9 +90,11 @@ BEGIN
   WHERE singleton=1 AND error_enabled
  ) THEN RETURN jsonb_build_object('ok',false,'reason','source_not_ready'); END IF;
 
+ -- A separate unfinished/resumable Practice session must NEVER
+ -- block an independently verified finalized attempt. Active quiz UI
+ -- hides the Tutor; this service still blocks protected Tour/Exam Prep
+ -- and independently verifies owned finalized attempts below.
  IF private.iclub_ai_has_active_protected_assessment_v1(p_user_id)
- OR EXISTS (SELECT 1 FROM public.practice_sessions_v4
-            WHERE user_id=p_user_id AND status='in_progress')
  THEN RETURN jsonb_build_object('ok',false,'reason','active_assessment'); END IF;
 
  IF EXISTS (SELECT 1 FROM private.iclub_commercial_access_config WHERE id=1 AND lifecycle_enabled)
