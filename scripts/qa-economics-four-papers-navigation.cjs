@@ -110,6 +110,20 @@ async function run(lang,scenario) {
   assert(texts(host).some(t=>t.includes('Paper 2')&&t.includes('Paper 4')),
     'Explain shared sequential practice rather than P4 direct jump');
   assert.equal(writes,0,'Existing learner must not re-join');
+  const back=buttons(host).find(b=>b.textContent.startsWith('← '));
+  assert(back,'Written Paper 4 info back navigation required');
+  back.events.click();await tick();
+  const leaveLabel=lang==='ru'?'Отключить письменную практику':
+   lang==='uz'?'Yozma mashqlarni o‘chirish':'Turn off written practice';
+  const leave=buttons(host).find(b=>b.textContent===leaveLabel);
+  assert(leave,'Joined learner needs a leave option');
+  leave.events.click();
+  assert.equal(leaves,0,'First leave click must not revoke access');
+  assert(texts(host).some(x=>x.includes(lang==='ru'?'Повторное подключение':
+    lang==='uz'?'Qayta ulanish':'Rejoining')),
+    'In-app confirmation must explain rejoining limitation');
+  leave.events.click();await tick();
+  assert.equal(leaves,1,'Second intentional leave click revokes access once');
  }
  if(scenario==='withdrawn')assert.equal(mounts,0,'Withdrawn learner has no practice access');
  api.unmount();
