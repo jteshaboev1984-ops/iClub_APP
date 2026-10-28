@@ -75,7 +75,7 @@ async function scenario(browser,language,width,kind,mode) {
     if(kind==='written') await page.addScriptTag({path:file('exam-prep/exam-prep-written-understanding-ui.js')});
     await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
     await page.click('[data-ep-live-open-component="P1"]');
-    await page.click('[data-ep-component-primary="diagnostic"]');
+    // The dashboard action itself starts the diagnostic; no second tap.
     await page.waitForSelector('[data-ep-live-submit]');
     if(mode==='hung') await page.clock.install();
     if(kind==='written') {
