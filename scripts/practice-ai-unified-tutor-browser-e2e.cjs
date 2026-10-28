@@ -15,7 +15,7 @@ const ANSWER="Результат 70% означает 7 верных ответ�
 let server,browser;
 async function main(){
  const activity={visibility:[],asks:[],acks:[],denied:[],external:[],authInvokes:[],
-   resumes:[],recoveryAcks:[],recoverable:null};
+   resumes:[],recoveryAcks:[],recoverable:null,quotaNext:false};
  const jsErrors=[];
  try{
   server=http.createServer((req,res)=>{
@@ -103,6 +103,13 @@ async function main(){
         }
         if(b.operation==="ask"){
           activity.asks.push(b);
+          if(activity.quotaNext){
+            activity.quotaNext=false;
+            return route.fulfill({status:409,headers,body:JSON.stringify({
+              ok:false,reason:"practice_quota_exhausted",
+              reset_at:new Date(Date.now()+2*3600000).toISOString(),
+              provider_called:false,academic_state_changed:false})});
+          }
           return route.fulfill({status:200,headers,body:JSON.stringify({
             ok:true,mode:"generated",delivery_state:"pending_ack",
             request_id:b.request_id,message:ANSWER,provider_called:activity.asks.length===1,
@@ -156,6 +163,23 @@ async function main(){
   assert.equal(rendered.split(ANSWER).length-1,1,"Recovered reply duplicated in Tutor");
   assert.equal(rendered.split("Что означает мой результат 70%?").length-1,1,
     "Recovered request duplicated a learner message");
+
+  // Reproduce live Economics after a first Math model request consumed the
+  // canonical 3/3 five-hour allotment: no fake "Recover answer" prompt.
+  activity.quotaNext=true;
+  await askInput.fill("Что означает мой новый результат 60%?");
+  await page.locator("[data-global-ai-send]").click();
+  await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
+    ?.textContent?.includes("Временный лимит вопросов к AI достигнут"),null,
+    {timeout:8000});
+  await page.waitForFunction(()=>!document.querySelector("[data-global-ai-quick]")
+    ?.textContent?.includes("Восстановить ответ"),null,{timeout:8000});
+  const quotaNotice=await page.locator("[data-global-ai-messages]").textContent();
+  assert(quotaNotice.includes("Объяснить результат"),
+    "No free verified-result guidance after model quota exhaustion");
+  assert.equal(activity.asks.length,3,"Wrong quota request count");
+  assert.equal(activity.acks.length,2,"Exhausted request incorrectly ACKed");
+  assert.equal(activity.external.length,0,"Quota UI escaped into outside network");
 
   // The REAL Tutor auth handler must clear its in-memory conversations when
   // a different synthetic learner signs in, without leaking old responses.

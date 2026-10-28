@@ -494,9 +494,18 @@
         signal:controller.signal
       });
       body=await response.json().catch(()=>null);
-      if(!response.ok||!body?.ok)
-        return closed(String(body?.reason||
-          (response.status===401?"authentication_required":"unavailable")));
+      if(!response.ok||!body?.ok){
+        const reason=String(body?.reason||
+          (response.status===401?"authentication_required":"unavailable"));
+        // This is a definitive pre-provider quota refusal, not an unknown
+        // charge. The UI can display the verified reset deadline.
+        if(operation==="ask"&&response.status===409&&
+           reason==="practice_quota_exhausted"&&
+           typeof body?.reset_at==="string")
+          return {...closed(reason),provider_called:false,
+            reset_at:body.reset_at};
+        return closed(reason);
+      }
     }catch(e){
       return closed(e?.name==="AbortError"?"timeout":"unavailable");
     }finally{clearTimeout(timer);}

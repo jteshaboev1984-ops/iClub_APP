@@ -400,6 +400,26 @@ async function main(){
   assert.deepEqual([final.money,final.cost,final.quota,final.receipt,final.accounted],
     ["charged",501,"completed","acknowledged",true]);
   assert.equal(final.usage,3);
+  // Second subject in the same 5-hour window: one generated answer uses
+  // all 3 units. This is NOT an Edge outage or a recoverable provider call.
+  const exhaustedId="12121212-1212-4212-8212-121212121212";
+  const exhausted=await send("ask","Какой результат и что делать дальше?",exhaustedId);
+  assert.equal(exhausted.status,409,JSON.stringify(exhausted));
+  assert.equal(exhausted.body.reason,"practice_quota_exhausted",
+    "Canonical real quota exhaustion must be explicit");
+  assert.equal(exhausted.body.provider_called,false);
+  assert(Number.isFinite(Date.parse(exhausted.body.reset_at))&&
+    Date.parse(exhausted.body.reset_at)>Date.now(),
+    "No verified five-hour reset deadline");
+  const exhaustedReceipt=JSON.parse(pg("SELECT json_build_object("+
+   "'receipt',(SELECT status FROM private.iclub_ai_practice_receipts_v1 "+
+   "WHERE request_id='"+exhaustedId+"'),"+
+   "'quota',(SELECT state FROM private.iclub_ai_v21_freeform_quota_holds "+
+   "WHERE request_id='"+exhaustedId+"'),"+
+   "'money',(SELECT state FROM private.iclub_ai_v21_freeform_budget_ledger "+
+   "WHERE request_id='"+exhaustedId+"'))::text;"));
+  assert.deepEqual(exhaustedReceipt,{receipt:"void",quota:null,money:null});
+  assert.equal(calls,1,"Exhaustion sent an unnecessary billable provider call");
   const again=await send("ack");
   assert.equal(again.status,200,JSON.stringify(again));
   const alreadyRecovered=await send("resume",null,newSessionId);
