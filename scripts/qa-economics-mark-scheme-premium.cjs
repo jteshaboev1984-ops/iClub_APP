@@ -3,7 +3,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
 const path=require('node:path'),base=path.resolve(__dirname,'..');
 const file=p=>fs.readFileSync(path.join(base,p),'utf8');
-const migration=file('supabase/migrations/20261028103000_iclub_econ_written_mark_scheme_v1.sql');
+const migration=file('supabase/migrations/20261028052330_iclub_econ_written_mark_scheme_v1.sql');
 const view=file('exam-prep/runtime/written-core-view-v1.js');
 const controller=file('exam-prep/runtime/written-core-controller-v1.js');
 const native=file('exam-prep/exam-prep-economics-native.js');
