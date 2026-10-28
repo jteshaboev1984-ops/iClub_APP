@@ -37,6 +37,10 @@ ALTER TABLE private.iclub_ai_v21_beta_usage
 \ir ../migrations/20261028113000_iclub_math_beta_pro_ai_quota_v1.sql
 \ir ../migrations/20261028120000_iclub_math_beta_pro_quota_constraints_fix.sql
 \ir ../migrations/20261028130500_iclub_ai_practice_pro_pc4_and_void_probe_v1.sql
+-- The preceding legacy base migration overwrites PC1 with its older source.
+-- Restore the CURRENT reviewed PC1 candidate in this disposable database;
+-- production applies the exact guarded hotfix migration instead.
+\ir ../candidates/iclub_ai_practice_context_v1_dormant.sql
 -- The pre-Pro SQL fixture creates these helper RPCs with PostgreSQL's
 -- default PUBLIC privileges. Production already revoked them. Match the
 -- actual production roles before validating the new release guards.
