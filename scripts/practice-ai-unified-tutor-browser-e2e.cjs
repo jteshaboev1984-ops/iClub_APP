@@ -162,6 +162,60 @@ async function main(){
   });
   assert.deepEqual(overlap,[true,true],
     "Concurrent same-account beta checks incorrectly hid Tutor");
+  // Production regression: a previously unfinished Practice database row
+  // MUST NOT decide whether the icon is shown on the current screen.
+  // Only actual active view/screen can suppress the icon.
+  await page.evaluate(()=>{
+    document.getElementById("view-courses").classList.remove("is-active");
+    document.getElementById("view-home").classList.add("is-active");
+    document.getElementById("courses-practice-quiz").classList.add("is-active");
+    window.dispatchEvent(new Event("focus"));
+  });
+  await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")
+    ?.hidden===false,null,{timeout:8000});
+  const homeStatus=await page.evaluate(()=>window.iClubAiV21BetaClient.status());
+  assert.equal(homeStatus.eligible,true,
+    "An inactive Practice screen must not revoke beta account eligibility");
+  assert.equal(await page.locator("#iclub-global-ai-mark").count(),1);
+  await page.evaluate(()=>{
+    document.getElementById("courses-practice-quiz").classList.remove("is-active");
+    document.getElementById("view-home").classList.remove("is-active");
+    document.getElementById("view-courses").classList.add("is-active");
+  });
+  await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")
+    ?.hidden===false,null,{timeout:8000});
+  await page.evaluate(()=>{
+    document.getElementById("courses-practice-result").classList.remove("is-active");
+    document.getElementById("courses-tour-quiz").classList.add("is-active");
+  });
+  await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")
+    ?.hidden===true,null,{timeout:8000});
+  const tourStatus=await page.evaluate(()=>window.iClubAiV21BetaClient.status());
+  assert.equal(tourStatus.eligible,true,
+    "Tour screen restriction must not alter server beta entitlement");
+  await page.evaluate(()=>{
+    document.getElementById("courses-tour-quiz").classList.remove("is-active");
+    document.getElementById("courses-practice-result").classList.add("is-active");
+  });
+  await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")
+    ?.hidden===false,null,{timeout:8000});
+  await page.evaluate(()=>{
+    const host=document.getElementById("exam-prep-host-root");
+    host.hidden=false;host.setAttribute("aria-hidden","false");
+    const assessment=document.createElement("div");
+    assessment.setAttribute("data-ep-ai-active-assessment","");
+    host.append(assessment);
+  });
+  await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")
+    ?.hidden===true,null,{timeout:8000});
+  await page.evaluate(()=>{
+    const host=document.getElementById("exam-prep-host-root");
+    host.replaceChildren();host.hidden=true;host.setAttribute("aria-hidden","true");
+  });
+  await page.waitForFunction(()=>document.getElementById("iclub-global-ai-mark")
+    ?.hidden===false,null,{timeout:8000});
+  assert.equal(activity.asks.length,0,
+    "Screen visibility changes must never make a funded model call");
   await page.evaluate(()=>window.iClubGlobalAiShell.open());
   await page.getByRole("button",{name:"Объяснить результат"}).waitFor({timeout:8000});
   assert.equal((await page.locator("#iclub-global-ai-panel").count()),1,
