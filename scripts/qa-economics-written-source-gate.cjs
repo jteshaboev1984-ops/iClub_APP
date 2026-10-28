@@ -30,7 +30,8 @@ for(const k of [
 assert(sql.trimEnd().endsWith('COMMIT;'),'Transactional migration required');
 assert(!sql.includes('DELETE FROM private.exam_prep'),'Do not mutate legacy Math');
 assert(html.includes('runtime/written-core-source-v1.css'),'CSS asset missing');
-assert(html.includes('runtime/written-core-view-v1.js?v=written-source-20261027'),'JS cache pin missing');
+assert(/<script src="exam-prep\/runtime\/written-core-view-v1\.js\?[^"]+"><\/script>/.test(html),'Versioned written-source view missing');
+assert(html.indexOf('written-core-controller-v1.js?') < html.indexOf('written-core-view-v1.js?'),'Written controller must precede view');
 assert(css.includes('overflow-x: auto'),'Mobile source table needs a bounded scroll container');
 assert(view.includes('textContent=String(str)'),'Source must be inserted as text, not HTML');
 

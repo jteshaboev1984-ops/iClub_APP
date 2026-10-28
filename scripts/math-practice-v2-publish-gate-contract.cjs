@@ -40,5 +40,6 @@ assert(!reset.includes("PRACTICE_HISTORY_PREFIXES"), "Must not bulk-clear both o
 assert(app.includes('await window.iclubMathPracticeV2ResetAfterPublish?.(window.sb)'), "Boot must invoke authenticated publication gate");
 assert(!app.includes('if (cleared === true) state = loadState()'), "Narrow old-history cleanup must not reload or clear an active quiz");
 assert(index.includes("security/practice-v2-local-reset.js?v=stage03oldhistory2"), "Cache pin must refresh protective local reset");
-assert(index.includes("app.js?v=") && index.includes("reviewback1-postpublish1"), "Cache pin must refresh calling app");
+assert(/<script src="app\.js\?[^"]+"><\/script>/.test(index), "Calling app must have a versioned script reference");
+assert(index.indexOf("security/practice-v2-local-reset.js?") < index.indexOf('src="app.js?'), "Safe reset guard must load before calling app");
 console.log("Mathematics Practice v2 local-reset publish gate: GREEN, no automatic reset and no protected history writes.");

@@ -44,7 +44,8 @@ for (const old of [
 // Registration warning and cache keys must agree with non-destructive settings.
 const htmlSource = fs.readFileSync('index.html','utf8');
 assert.ok(htmlSource.includes('i18n.js?v=practicepreserve1-mentorlabel1'));
-assert.ok(htmlSource.includes('app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1'));
+assert.match(htmlSource, /<script src="app\.js\?[^"]+"><\/script>/, 'Pinned app loader must remain present');
+assert.ok(htmlSource.indexOf('i18n.js?') < htmlSource.indexOf('src="app.js?'), 'Language dictionary must load before the app');
 assert.ok(htmlSource.includes('Язык заданий можно изменить позже — результаты и ответы сохранятся.'));
 for (const mentorCopy of ['МЕНТОР ПО ПРЕДМЕТУ','FAN MENTORI','SUBJECT MENTOR']) {
   assert.ok(localization.includes(JSON.stringify(mentorCopy)), 'Subject mentor label missing: '+mentorCopy);

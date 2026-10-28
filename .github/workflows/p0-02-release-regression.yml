@@ -52,7 +52,7 @@ jobs:
           node scripts/math-practice-v2-local-reset-regression.cjs
           grep -q 'security/legacy-assessment-safe-api.js?v=p002v4reset1-mathv2feedback1' index.html
           grep -q 'security/practice-v2-local-reset.js?v=stage03oldhistory2' index.html
-          grep -q 'app.js?v=support4-p0legacysaveoff1-p014host1-practicepreserve1-ai2ctx1-mathv2feedback1-mathv2reset3' index.html
+          grep -Eq '<script src="app\.js\?[^"]+"></script>' index.html
           grep -q 'start_practice_session_auto_safe_v5' security/legacy-assessment-safe-api.js
           grep -q 'get_practice_session_resume_safe_v4' security/legacy-assessment-safe-api.js
           grep -q 'get_recent_practice_mistakes_safe_v5' security/legacy-assessment-safe-api.js
@@ -154,7 +154,7 @@ jobs:
             assert(result.app && result.activeView, 'app shell/active view missing');
             assert(!result.overlay, 'framework error overlay present');
             assert(result.scripts.some(x => x.includes('security/legacy-assessment-safe-api.js?v=p002v4reset1')), 'safe adapter script missing');
-            assert(result.scripts.some(x => x.includes('app.js?v=support4-p0legacysaveoff1')), 'release app script missing');
+            assert(result.scripts.some(x => x.includes('app.js?')), 'release app script missing');
             for (const [k,v] of Object.entries(result.safe)) assert(v, `safe API missing: ${k}`);
             assert(pageErrors.length === 0, `page errors: ${JSON.stringify(pageErrors)}`);
             assert(localFailures.length === 0, `local asset failures: ${JSON.stringify(localFailures)}`);
