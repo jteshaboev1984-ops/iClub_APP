@@ -3,7 +3,7 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null,writtenPlan:null,writtenView:null,betaInvite:false,betaJoined:false,betaBusy:false};
   const dictionary={
-    ru:{writtenPractice:"Письменная практика",betaTitle:"Попробуйте письменные задания",betaIntro:"Приглашаем вас испытать задания Paper 2 и Paper 4. Участие добровольное. Вы будете выполнять работы самостоятельно; приложение не выставляет оценки за письменные ответы. Можно отказаться в любой момент без потери уже выполненной работы.",betaJoin:"Согласен, начать",betaLeave:"Завершить участие",betaUnavailable:"Сейчас не удалось подключить письменную практику. Попробуйте позже.",baselineIntro:"Сначала проверьте базовые знания Cambridge Economics (AS): 12 вопросов, 20 минут. После результата выберите Paper 1 или Paper 3. Темы A Level проверяются отдельно.",selectPaper:"Выберите Paper",continuePreparation:"Продолжить подготовку",entryResult:"Входная диагностика завершена",topicOverview:"Темы для подготовки",chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
+    ru:{p2:"Paper 2 · AS Level",p4:"Paper 4 · A Level",writtenPaperInfo:"Письменная практика",writtenPaperReady:"Открыть письменный план",writtenPaperInvite:"Можно присоединиться к beta",writtenPaperLimited:"Доступ по приглашению",writtenPaperDone:"Новых заданий пока нет",writtenPaperSequence:"Задания выполняются по общему плану: сначала Paper 2, затем Paper 4. Выбор Paper 4 не пропускает предыдущие задания.",writtenPaperNoAccess:"Письменные задания сейчас доступны участникам ограниченного тестирования. Для участия нужны завершённая входная диагностика Economics и приглашение.",writtenPaperWaiting:"По вашему плану сейчас нет нового письменного задания. Уже выполненные шаги сохранены.",writtenPractice:"Письменная практика",betaTitle:"Попробуйте письменные задания",betaIntro:"Приглашаем вас испытать задания Paper 2 и Paper 4. Участие добровольное. Вы будете выполнять работы самостоятельно; приложение не выставляет оценки за письменные ответы. Можно отказаться в любой момент без потери уже выполненной работы.",betaJoin:"Согласен, начать",betaLeave:"Завершить участие",betaUnavailable:"Сейчас не удалось подключить письменную практику. Попробуйте позже.",baselineIntro:"Сначала проверьте базовые знания Cambridge Economics (AS): 12 вопросов, 20 минут. После результата выберите Paper 1 или Paper 3. Темы A Level проверяются отдельно.",selectPaper:"Выберите Paper",continuePreparation:"Продолжить подготовку",entryResult:"Входная диагностика завершена",topicOverview:"Темы для подготовки",chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант: он сохранится автоматически. До завершения экзамена ответ можно изменить.",saving:"Сохраняем ответ…",
       papers:"К экзаменам",question:"Вопрос",time:"Осталось времени",save:"Сохранить ответ",
       saved:"Ответ сохранён",next:"Следующий",previous:"Предыдущий",finish:"Завершить экзамен",
@@ -16,7 +16,7 @@
       hideCheck:"Скрыть ответ",markStudied:"Отметить как изученное",studiedDone:"Тема изучена",
       backReview:"К разбору экзамена",retest:"Пройти Paper ещё раз",day:"День",
       allCorrect:"Все вопросы решены правильно. Ошибок для разбора нет.",studyNote:"Отметка «изучено» не означает, что навык освоен. Это подтвердит правильный ответ в следующем экзамене."},
-    uz:{writtenPractice:"Yozma mashqlar",betaTitle:"Yozma topshiriqlarni sinab ko‘ring",betaIntro:"Sizni Paper 2 va Paper 4 yozma mashqlarini sinab ko‘rishga taklif qilamiz. Ishtirok ixtiyoriy. Javoblarni mustaqil bajarasiz; ilova yozma ishlaringizga baho qo‘ymaydi. Istalgan vaqtda qatnashishni to‘xtatishingiz mumkin, bajarilgan ishlar saqlanadi.",betaJoin:"Roziman, boshlash",betaLeave:"Ishtirokni to‘xtatish",betaUnavailable:"Hozir yozma mashqlarga ulanishning imkoni bo‘lmadi. Keyinroq urinib ko‘ring.",baselineIntro:"Avval Cambridge Economics (AS) bo‘yicha asosiy bilimlaringizni tekshiring: 12 savol, 20 daqiqa. Natijadan so‘ng Paper 1 yoki Paper 3 ni tanlang. A Level mavzulari alohida tekshiriladi.",selectPaper:"Paperni tanlang",continuePreparation:"Tayyorgarlikni davom ettirish",entryResult:"Kirish diagnostikasi yakunlandi",topicOverview:"O‘rganiladigan mavzular",chooseLevel:"Darajani tanlang",openLevel:"Ochish",overview:"Bosh sahifa",noAttempts:"Hozircha urinishlar yo‘q",afterCheck:"Diagnostika tugadi — qiyin mavzularni o‘rganing",startHere:"Avval kirish diagnostikasidan boshlang",resumeExam:"Ishni davom ettirish",levelIntro:"Diagnostika o‘rganiladigan mavzularni aniqlaydi. To‘liq imtihon alohida mavjud.",openLesson:"Mavzuni o‘rganish",viewUnits:"Bo‘limlar bo‘yicha natijalar",nextLesson:"Keyingi mavzu",showMore:"Ko‘proq ko‘rsatish",viewHistory:"Urinishlar tarixi",noHistory:"Yakunlangan imtihonlar va diagnostikalar shu yerda chiqadi",backToPlan:"O‘quv rejasiga",recommended:"Tavsiya etilgan qadam",title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",minuteShort:"daq.",profile:"Tayyorgarlik sozlamalari",editProfile:"O‘zgartirish",series:"Imtihon sessiyasi",grade:"Maqsadli baho",hours:"Haftalik umumiy o‘qish soati",econHours:"Haftalik iqtisodiyot soati",saveProfile:"Sozlamalarni saqlash",profileInvalid:"Imtihon davri va soatlarni tekshiring: iqtisodiyot soati umumiy vaqtdan oshmasin.",profileSaved:"Sozlamalar saqlandi",optional:"Tayyorgarlik maqsadi va vaqtini belgilang. Avvalgi urinishlar o‘zgarmaydi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq imtihon",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
+    uz:{p2:"Paper 2 · AS Level",p4:"Paper 4 · A Level",writtenPaperInfo:"Yozma mashqlar",writtenPaperReady:"Yozma rejamni ochish",writtenPaperInvite:"Beta sinoviga qo‘shilish mumkin",writtenPaperLimited:"Taklif asosida kirish",writtenPaperDone:"Hozircha yangi topshiriq yo‘q",writtenPaperSequence:"Yozma topshiriqlar bitta reja bo‘yicha ketma-ket bajariladi: avval Paper 2, keyin Paper 4. Paper 4 ni tanlash oldingi topshiriqlarni o‘tkazib yubormaydi.",writtenPaperNoAccess:"Yozma topshiriqlar hozir cheklangan sinov ishtirokchilariga ochiq. Qatnashish uchun Economics kirish diagnostikasini yakunlash va taklif olish kerak.",writtenPaperWaiting:"Hozir rejangizda yangi yozma topshiriq yo‘q. Oldingi bajarilgan ishlar saqlangan.",writtenPractice:"Yozma mashqlar",betaTitle:"Yozma topshiriqlarni sinab ko‘ring",betaIntro:"Sizni Paper 2 va Paper 4 yozma mashqlarini sinab ko‘rishga taklif qilamiz. Ishtirok ixtiyoriy. Javoblarni mustaqil bajarasiz; ilova yozma ishlaringizga baho qo‘ymaydi. Istalgan vaqtda qatnashishni to‘xtatishingiz mumkin, bajarilgan ishlar saqlanadi.",betaJoin:"Roziman, boshlash",betaLeave:"Ishtirokni to‘xtatish",betaUnavailable:"Hozir yozma mashqlarga ulanishning imkoni bo‘lmadi. Keyinroq urinib ko‘ring.",baselineIntro:"Avval Cambridge Economics (AS) bo‘yicha asosiy bilimlaringizni tekshiring: 12 savol, 20 daqiqa. Natijadan so‘ng Paper 1 yoki Paper 3 ni tanlang. A Level mavzulari alohida tekshiriladi.",selectPaper:"Paperni tanlang",continuePreparation:"Tayyorgarlikni davom ettirish",entryResult:"Kirish diagnostikasi yakunlandi",topicOverview:"O‘rganiladigan mavzular",chooseLevel:"Darajani tanlang",openLevel:"Ochish",overview:"Bosh sahifa",noAttempts:"Hozircha urinishlar yo‘q",afterCheck:"Diagnostika tugadi — qiyin mavzularni o‘rganing",startHere:"Avval kirish diagnostikasidan boshlang",resumeExam:"Ishni davom ettirish",levelIntro:"Diagnostika o‘rganiladigan mavzularni aniqlaydi. To‘liq imtihon alohida mavjud.",openLesson:"Mavzuni o‘rganish",viewUnits:"Bo‘limlar bo‘yicha natijalar",nextLesson:"Keyingi mavzu",showMore:"Ko‘proq ko‘rsatish",viewHistory:"Urinishlar tarixi",noHistory:"Yakunlangan imtihonlar va diagnostikalar shu yerda chiqadi",backToPlan:"O‘quv rejasiga",recommended:"Tavsiya etilgan qadam",title:"Cambridge Economics · Exam Prep",intro:"Darajani tanlang va qisqa diagnostikadan boshlang. Natijadan keyin o‘quv reja ochiladi.",minuteShort:"daq.",profile:"Tayyorgarlik sozlamalari",editProfile:"O‘zgartirish",series:"Imtihon sessiyasi",grade:"Maqsadli baho",hours:"Haftalik umumiy o‘qish soati",econHours:"Haftalik iqtisodiyot soati",saveProfile:"Sozlamalarni saqlash",profileInvalid:"Imtihon davri va soatlarni tekshiring: iqtisodiyot soati umumiy vaqtdan oshmasin.",profileSaved:"Sozlamalar saqlandi",optional:"Tayyorgarlik maqsadi va vaqtini belgilang. Avvalgi urinishlar o‘zgarmaydi.",startDiagnostic:"Diagnostikani boshlash",fullPaper:"To‘liq imtihon",entryCheck:"Kirish diagnostikasi",completedCheck:"Diagnostika yakunlandi",repeatCheck:"Diagnostikani takrorlash",history:"Mening urinishlarim",viewResult:"Natijani ko‘rish",continueAttempt:"Davom ettirish",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Boshlash yoki davom ettirish",back:"Orqaga", beforePlan:"O‘quv rejangiz birinchi yakunlangan imtihondan so‘ng paydo bo‘ladi. Keyin uni urinishlar tarixidan ochishingiz mumkin.", autoAnswer:"Variantni tanlang: javob avtomatik saqlanadi. Imtihonni yakunlashdan oldin uni o‘zgartirish mumkin.",saving:"Javob saqlanmoqda…",
       papers:"Imtihonlarga qaytish",question:"Savol",time:"Qolgan vaqt",save:"Javobni saqlash",
       saved:"Javob saqlandi",next:"Keyingi",previous:"Oldingi",finish:"Imtihonni yakunlash",
@@ -29,7 +29,7 @@
       hideCheck:"Javobni yashirish",markStudied:"O‘rganilgan deb belgilash",studiedDone:"Mavzu o‘rganildi",
       backReview:"Imtihon tahliliga",retest:"Paperni qayta ishlash",day:"Kun",
       allCorrect:"Hamma savollarga to‘g‘ri javob berildi. Tahlil qilinadigan xato yo‘q.",studyNote:"«O‘rganildi» belgisi bilim o‘zlashtirilganini isbotlamaydi. Keyingi imtihondagi to‘g‘ri javob tasdiqlaydi."},
-    en:{writtenPractice:"Written practice",betaTitle:"Try written practice",betaIntro:"You are invited to try Paper 2 and Paper 4 written tasks. Participation is voluntary. You work independently; the app does not grade unreviewed written answers. You can stop participating at any time without losing completed work.",betaJoin:"I agree, start",betaLeave:"Stop participating",betaUnavailable:"Written practice could not be enabled right now. Please try again later.",baselineIntro:"First check your Cambridge Economics AS foundations: 12 questions, 20 minutes. After your result, choose Paper 1 or Paper 3. Advanced A Level topics are checked separately.",selectPaper:"Choose your paper",continuePreparation:"Continue preparation",entryResult:"Entry check completed",topicOverview:"Topics to study",chooseLevel:"Choose your level",openLevel:"Open",overview:"Overview",noAttempts:"No attempts yet",afterCheck:"Entry check completed — focus on weaker topics",startHere:"Begin with the entry check",resumeExam:"Resume your work",levelIntro:"The entry check identifies study topics. The full exam is available separately.",openLesson:"Study this topic",viewUnits:"Results by unit",nextLesson:"Next topic",showMore:"Show more",viewHistory:"Attempt history",noHistory:"Completed exams and entry checks will appear here",backToPlan:"Back to study plan",recommended:"Recommended next step",title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",minuteShort:"min",profile:"Preparation settings",editProfile:"Edit",series:"Exam series",grade:"Target grade",hours:"Total weekly study hours",econHours:"Weekly Economics hours",saveProfile:"Save settings",profileInvalid:"Check exam series and weekly hours: Economics time cannot exceed your total study time.",profileSaved:"Settings saved",optional:"Set a preparation goal and study time. Existing attempts will not change.",startDiagnostic:"Start entry check",fullPaper:"Full exam",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
+    en:{p2:"Paper 2 · AS Level",p4:"Paper 4 · A Level",writtenPaperInfo:"Written practice",writtenPaperReady:"Open written study plan",writtenPaperInvite:"Beta invitation available",writtenPaperLimited:"Invitation-only access",writtenPaperDone:"No new task right now",writtenPaperSequence:"Written tasks follow one plan: Paper 2 first, then Paper 4. Choosing Paper 4 does not skip earlier tasks.",writtenPaperNoAccess:"Written tasks are currently available to a small test group. To join, complete the Economics entry check and receive an invitation.",writtenPaperWaiting:"No new written task is available in your plan right now. Completed steps are preserved.",writtenPractice:"Written practice",betaTitle:"Try written practice",betaIntro:"You are invited to try Paper 2 and Paper 4 written tasks. Participation is voluntary. You work independently; the app does not grade unreviewed written answers. You can stop participating at any time without losing completed work.",betaJoin:"I agree, start",betaLeave:"Stop participating",betaUnavailable:"Written practice could not be enabled right now. Please try again later.",baselineIntro:"First check your Cambridge Economics AS foundations: 12 questions, 20 minutes. After your result, choose Paper 1 or Paper 3. Advanced A Level topics are checked separately.",selectPaper:"Choose your paper",continuePreparation:"Continue preparation",entryResult:"Entry check completed",topicOverview:"Topics to study",chooseLevel:"Choose your level",openLevel:"Open",overview:"Overview",noAttempts:"No attempts yet",afterCheck:"Entry check completed — focus on weaker topics",startHere:"Begin with the entry check",resumeExam:"Resume your work",levelIntro:"The entry check identifies study topics. The full exam is available separately.",openLesson:"Study this topic",viewUnits:"Results by unit",nextLesson:"Next topic",showMore:"Show more",viewHistory:"Attempt history",noHistory:"Completed exams and entry checks will appear here",backToPlan:"Back to study plan",recommended:"Recommended next step",title:"Cambridge Economics · Exam Prep",intro:"Select a level and begin with a short entry check. Your study plan follows the result.",minuteShort:"min",profile:"Preparation settings",editProfile:"Edit",series:"Exam series",grade:"Target grade",hours:"Total weekly study hours",econHours:"Weekly Economics hours",saveProfile:"Save settings",profileInvalid:"Check exam series and weekly hours: Economics time cannot exceed your total study time.",profileSaved:"Settings saved",optional:"Set a preparation goal and study time. Existing attempts will not change.",startDiagnostic:"Start entry check",fullPaper:"Full exam",entryCheck:"Entry check",completedCheck:"Entry check completed",repeatCheck:"Repeat entry check",history:"My attempts",viewResult:"View result",continueAttempt:"Continue",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Start or resume",back:"Back", beforePlan:"Your study plan appears after your first completed paper. You can reopen it from your attempt history.", autoAnswer:"Choose an option to save automatically. You can change it until you finish the paper.",saving:"Saving answer…",
       papers:"Back to papers",question:"Question",time:"Time remaining",save:"Save answer",
       saved:"Answer saved",next:"Next",previous:"Previous",finish:"Finish exam",
@@ -108,7 +108,7 @@
       if(code){openLevel(code);return;}
       lobby();return;
     }
-    if(state.view==="level"||state.view==="settings"){lobby();return;}
+    if(state.view==="level"||state.view==="settings"||state.view==="written_info"){lobby();return;}
     state.onBack?.();
   }
 
@@ -189,8 +189,32 @@
       return;
     }
     const grid=e("div","ep-live-grid");
-    for(const [code,title] of [["P1",t().p1],["P3",t().p3]]){
+    for(const code of ["P1","P2","P3","P4"]){
+      if(code==="P2"||code==="P4"){
+        // Discoverability is not an entitlement. Every learner sees the Paper;
+        // only an owned, server-approved plan can expose its written questions.
+        const slot=e("div","ep-live-component-slot");
+        const card=btn("",()=>openWrittenPaperInfo(code));
+        card.className="ep-live-card ep-live-component-card ep-live-component-entry ep-live-written-entry";
+        card.replaceChildren();
+        const head=e("div","ep-live-component-head");
+        head.append(e("span","ep-live-component-code",code));
+        const copy=e("div","ep-live-component-copy");
+        copy.append(e("strong","",code==="P2"?t().p2:t().p4),
+          e("span","",t().writtenPaperInfo));
+        head.append(copy,e("span","ep-live-component-arrow","›"));
+        card.append(head);
+        const status=state.writtenPlan?t().writtenPaperReady:
+          state.betaInvite?t().writtenPaperInvite:
+          state.betaJoined?t().writtenPaperDone:t().writtenPaperLimited;
+        const statusBox=e("div","ep-live-component-status");
+        statusBox.append(e("div","ep-live-meta ep-written-paper-status",status));
+        card.append(statusBox,e("div","ep-live-component-open",t().openLevel+" →"));
+        slot.append(card);grid.append(slot);
+        continue;
+      }
       if(!state.shell?.papers?.some(p=>p.code===code&&p.assessment_kind==="mcq"))continue;
+      const title=code==="P1"?t().p1:t().p3;
       const recent=state.history.filter(x=>x.paper_code===code);
       const active=recent.find(x=>x.status==="active");
       const completed=recent.find(x=>x.session_kind==="diagnostic"&&x.status==="finalized");
@@ -220,15 +244,7 @@
       invite.append(e("h3","",t().betaTitle),
         e("p","ep-host-note",t().betaIntro));
       const actions=e("div","ep-live-actions");
-      const join=btn(t().betaJoin,async()=>{
-        if(state.closed||state.view!=="home"||state.betaBusy)return;
-        state.betaBusy=true;join.disabled=true;
-        const result=await rpc("iclub_econ_written_beta_join_v1",{p_confirm:true});
-        if(state.closed||state.view!=="home")return;
-        if(result.ok&&result.joined===true){lobby();return;}
-        note.textContent=t().betaUnavailable;
-        state.betaBusy=false;join.disabled=false;
-      });
+      const join=btn(t().betaJoin,()=>joinWrittenBeta(join,note));
       const note=e("p","ep-host-note","");
       actions.append(join);invite.append(actions,note);view.append(invite);
     }
@@ -250,6 +266,50 @@
     }
     view.append(tools);
   }
+  // P2/P4 are visible like P1/P3, but do not pretend that a single Paper
+  // can bypass the server's ordered written study plan.
+  function openWrittenPaperInfo(code){
+    if(state.closed||state.busy||!initialCheckStatus().complete||
+       !["P2","P4"].includes(code))return;
+    ++state.token;stop();state.view="written_info";state.paper=code;
+    const view=shell();if(!view)return;
+    const detail=e("section","ep-component-home");
+    const head=e("header","ep-component-hero");
+    const title=e("div","ep-live-component-head");
+    title.append(e("span","ep-live-component-code",code),
+      e("strong","ep-live-component-copy",code==="P2"?t().p2:t().p4));
+    head.append(title);detail.append(head);
+    const description=e("section","ep-component-next");
+    description.append(e("div","ep-component-section-label",t().writtenPaperInfo),
+      e("p","ep-live-meta",t().writtenPaperSequence));
+    const actions=e("div","ep-live-actions");
+    if(state.writtenPlan&&window.iClubWrittenCoreViewV1){
+      actions.append(btn(t().writtenPaperReady,openWritten));
+    }else if(state.betaInvite&&window.iClubWrittenCoreViewV1){
+      description.append(e("p","ep-host-note",t().betaIntro));
+      const note=e("p","ep-host-note","");
+      const join=btn(t().betaJoin,()=>joinWrittenBeta(join,note));
+      actions.append(join);description.append(note);
+    }else{
+      description.append(e("p","ep-host-note",
+        state.betaJoined?t().writtenPaperWaiting:t().writtenPaperNoAccess));
+    }
+    if(actions.children.length)description.append(actions);
+    detail.append(description);view.append(detail);
+  }
+  async function joinWrittenBeta(button,note){
+    if(state.closed||state.betaBusy||!state.betaInvite||
+       !["home","written_info"].includes(state.view))return;
+    const viewName=state.view,requestToken=state.token;
+    state.betaBusy=true;button.disabled=true;
+    const result=await rpc("iclub_econ_written_beta_join_v1",{p_confirm:true});
+    if(state.closed||state.view!==viewName||state.token!==requestToken)return;
+    state.betaBusy=false;
+    if(result.ok&&result.joined===true){lobby();return;}
+    note.textContent=t().betaUnavailable;
+    button.disabled=false;
+  }
+
   function renderEntryResult(){
     if(state.closed||state.data?.status!=="finalized"||
        state.data?.session_kind!=="diagnostic"||state.paper!=="P1")return;

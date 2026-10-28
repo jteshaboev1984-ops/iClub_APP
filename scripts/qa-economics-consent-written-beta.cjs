@@ -20,8 +20,10 @@ need(js.includes('rpc("iclub_econ_written_beta_join_v1",{p_confirm:true})'),'Joi
 need(js.includes('rpc("iclub_econ_written_beta_leave_v1",{})'),'Learner can leave beta');
 need(js.includes('if(state.betaJoined){'),'Leave control retained after practice completion');
 const joinArea=js.slice(js.indexOf('if(state.betaInvite&&!state.writtenPlan'),js.indexOf('const tools=e("div","ep-live-actions")'));
-need(joinArea.includes('btn(t().betaJoin,async()=>{'),'Direct user button must start join');
-need(!js.slice(0,js.indexOf('function renderHome(){')).includes('rpc("iclub_econ_written_beta_join_v1"'),'No automatic beta join at startup');
+need(joinArea.includes('btn(t().betaJoin,()=>joinWrittenBeta(join,note))'),'Direct user button must start join');
+need(js.includes('const join=btn(t().betaJoin,()=>joinWrittenBeta(join,note));'),'Paper info must use the same explicit action');
+need(js.includes('async function joinWrittenBeta(button,note){'),'Join occurs only after deliberate click');
+need(js.includes('const result=await rpc("iclub_econ_written_beta_join_v1",{p_confirm:true});'),'The consent action must call the approved join RPC');
 need(sql.includes('VALUES(true,false,3)'),'Beta launch must be default OFF');
 need(sql.includes('p_confirm IS DISTINCT FROM true'),'False / missing consent must be rejected');
 need(sql.includes("co.consent_scope='exam_prep_controlled_beta_v1'"),'Reuse eligibility from consented cohort, not implicit consent');
@@ -35,5 +37,5 @@ need(sql.includes('status=\'withdrawn\''),'Leave must revoke consent and not era
 need(!/\bDELETE\s+FROM\b|\bTRUNCATE\b/i.test(sql),'No deletion of learner data');
 need(!/localStorage\.clear\(/.test(js),'Never clear local history');
 need(html.includes('exam-prep/exam-prep-economics-native.js?'),'Native Economics app must remain loaded');
-need(html.includes('exam-prep-economics-native.js?v=native-econ-written-beta-wave1-20261028'),'Economics beta cache pin must be refreshed');
+need(html.includes('exam-prep-economics-native.js?v=native-econ-four-papers-20261028'),'Economics beta cache pin must be refreshed');
 console.log('ECONOMICS_WRITTEN_CONSENT_BETA_SAFE PASS — 22 static protection checks + JS parse');
