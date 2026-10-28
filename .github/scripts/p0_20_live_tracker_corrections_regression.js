@@ -149,8 +149,8 @@ const path = require('path');
   let visible = await page.locator('#exam-prep-host-root').textContent();
   assert(visible.includes('1 / 45'), 'P1 component home must preserve the 45-skill denominator');
   assert(visible.includes('Quadratics') && visible.includes('Functions'), 'P1 component home must group by learner-facing syllabus areas');
-  assert(visible.includes('Start your first learning step'), 'Foundation must explain the learner next step instead of exposing a generic check-next action');
-  assert(visible.includes('confirmed syllabus coverage will grow from there'), 'Foundation must explain why confirmed coverage is still low after the entry check');
+  assert(visible.includes('Continue strengthening your foundations'), 'Stage 1 with prior learning must show learner-specific continuing guidance rather than a generic check-next title');
+  assert(visible.includes('confirmed syllabus coverage grows only when a skill is verified'), 'Stage 1 must explain why a finished task is not automatic verified skill coverage');
   assert(!visible.includes('P1-QUA-01') && !visible.includes('objective_state_v1'), 'component home must not expose internal codes/engine terminology');
 
   await page.locator('[data-ep-component-home="P1"] .ep-component-area summary').first().click();
