@@ -25,6 +25,32 @@ const a=extract(forward),b=extract(rollback);
 assert.deepEqual(a.map(x=>x.name),intended,'Forward migration must alter exactly five Economics RPCs');
 assert.deepEqual(b.map(x=>x.name),intended,'Rollback must restore exactly those same five RPCs');
 assert.deepEqual(a,b,'Rollback identities/argument types must match forward SQL');
+
+function blocks(sql){
+  return Object.fromEntries(
+    [...sql.matchAll(/CREATE OR REPLACE FUNCTION public\.(iclub_exam_native_mcq_[a-z_]+_v1)\s*\(([^)]*)\)([\s\S]*?)(?=\nCREATE OR REPLACE FUNCTION|\nCOMMIT;|$)/g)]
+      .map(m=>[m[1],m[0]])
+  );
+}
+const before=blocks(rollback),after=blocks(forward);
+const betaGuard=/IF\s+NOT\s+private\.iclub_exam_native_economics_beta_allowed_v1\(v_user\)\s+THEN\s+RETURN\s+jsonb_build_object\('ok',false,'code','not_authorized'\);\s+END\s+IF;/g;
+function normalize(sql){
+  return sql.replace(/--[^\n]*/g,'').replace(/\s+/g,'').toLowerCase().replace(/;+$/,'');
+}
+function removeGuard(sql,name){
+  let stripped=sql.replace(/--[^\n]*/g,'').replace(betaGuard,'');
+  if(name==='iclub_exam_native_mcq_get_v1')
+    stripped=stripped.replace(/IF\s+v\.status='active'\s+THEN\s*END\s+IF;/g,'');
+  if(name==='iclub_exam_native_mcq_finish_v1')
+    stripped=stripped.replace(/IF\s+v\.status<>'finalized'\s+THEN\s*END\s+IF;/g,'');
+  return normalize(stripped);
+}
+for(const name of intended){
+  assert.equal((after[name].match(betaGuard)||[]).length,1,'Exactly one access guard in '+name);
+  assert.equal(removeGuard(after[name],name),normalize(before[name]),
+    'Unexpected function body changes beyond Economics beta authorization in '+name);
+}
+
 assert.equal((forward.match(/private\.iclub_exam_native_economics_beta_allowed_v1\(/g)||[]).length,5,
   'Every altered Economics RPC must check current access');
 assert(!rollback.includes('iclub_exam_native_economics_beta_allowed_v1'),
