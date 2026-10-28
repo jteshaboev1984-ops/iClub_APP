@@ -35,7 +35,7 @@ for(const t of ['ru','uz','en']) {
 assert(view.includes('scheme.ao12_marks')&&view.includes('scheme.ao3_marks'),'Numeric marks and AO split displayed');
 assert(view.includes('scheme?.indicative_points||details.requirements'),'Response-specific creditable content required');
 assert(view.includes('scheme.max_marks+" "+t.marks'),'Max marks visible');
-assert(view.includes('marking_style'),'Controller must validate grading style');
+assert(controller.includes('scheme.marking_style'),'Controller must validate grading style');
 assert(view.includes('ep-written-level-row'),'Level bands displayed for essays');
 assert(view.includes('scheme.style==="levels"'),'Levels-based essays only');
 assert(view.includes('criteriaBox.hidden=true'),'Marking criteria hidden before deliberate click');
