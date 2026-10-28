@@ -114,6 +114,17 @@
     const v=state.pendingChoice;
     return v?.sessionId===sessionId&&v.order===order?v:null;
   }
+  async function boundedRpc(name,args,timeoutMs=15000){
+    let timer;
+    try {
+      return await Promise.race([
+        rpc(name,args),
+        new Promise(resolve=>{
+          timer=setTimeout(()=>resolve({ok:false,code:"unknown_response"}),timeoutMs);
+        })
+      ]);
+    } finally { if(timer!==undefined)clearTimeout(timer); }
+  }
   function error(retry){
     const view=shell();if(!view)return;
     view.append(e("p","ep-host-note",t().error));
@@ -123,7 +134,7 @@
 
   // Same navigation hierarchy as Mathematics: overview → paper home → focused action.
   function goBack(){
-    if(state.busy||state.closed)return;
+    if(state.busy||state.pendingChoice||state.closed)return;
     if(state.view==="lesson"){renderStudyPlan(state.planData);return;}
     if(state.view==="written"){state.writtenView?.dispose?.();state.writtenView=null;lobby();return;}
     if(state.view==="entry_result"){lobby();return;}
@@ -548,6 +559,10 @@
     if(state.closed||token!==state.token)return;
     state.busy=false;
     if(!v.ok||!Array.isArray(v.items)||!((v.items.length===30&&v.session_kind==="paper")||(v.items.length===12&&v.session_kind==="diagnostic"))){error(load);return;}
+    if(v.status==="finalized" && state.pendingChoice?.sessionId===state.id){
+      clearChoiceDraft(state.id,state.pendingChoice.order);
+      state.pendingChoice=null;
+    }
     state.data=v;draw();
     return true;
   }
@@ -649,7 +664,8 @@
     if(state.index<total-1&&!pending)actions.append(btn(t().next,()=>{if(!state.busy){state.index++;draw();}},true));
     if(!finished&&!pending)actions.append(btn(t().finish,()=>finish(false),true));
     if(finished)actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,()=>begin(state.paper,data.session_kind),true));
-    actions.append(btn(t().papers,lobby,true));view.append(actions);
+    if(!pending)actions.append(btn(t().papers,lobby,true));
+    view.append(actions);
   }
 
   async function showStudyPlan(){
@@ -797,9 +813,9 @@
   async function reconcileChoice(pending){
     if(state.closed||state.busy||state.pendingChoice!==pending)return;
     const token=state.token;state.busy=true;
-    const result=await rpc("iclub_exam_native_mcq_get_v1",{
+    const result=await boundedRpc("iclub_exam_native_mcq_get_v1",{
       p_session_id:pending.sessionId,p_language:state.lang
-    });
+    },12000);
     state.busy=false;
     if(state.closed||state.token!==token||state.pendingChoice!==pending)return;
     if(result.ok&&Array.isArray(result.items)){
@@ -823,9 +839,9 @@
     const token=state.token;state.busy=true;pending.retryAllowed=false;
     const submit=state.root?.querySelector("[data-ep-native-submit]");
     if(submit){submit.disabled=true;submit.textContent=t().saving;}
-    const result=await rpc("iclub_exam_native_mcq_answer_v1",{
+    const result=await boundedRpc("iclub_exam_native_mcq_answer_v1",{
       p_session_id:pending.sessionId,p_item_order:pending.order+1,p_choice:pending.choice
-    });
+    },15000);
     state.busy=false;
     if(state.closed||state.token!==token||state.pendingChoice!==pending)return;
     if(result.ok&&result.saved===true&&result.selected_index===pending.choice){
