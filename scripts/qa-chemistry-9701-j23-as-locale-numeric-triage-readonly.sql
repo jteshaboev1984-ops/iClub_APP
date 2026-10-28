@@ -22,7 +22,7 @@ numeric_tokens AS (
    translate(coalesce(src.explanation,''),
      '₀₁₂₃₄₅₆₇₈₉⁰¹²³⁴⁵⁶⁷⁸⁹',
      '01234567890123456789'),
-   '[0-9]+([.,][0-9]+)?','g'
+   '[0-9]+(?:[.,][0-9]+)?','g'
  ) AS m(val) ON true
  GROUP BY src.skill_key,src.locale
 ),
