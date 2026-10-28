@@ -192,6 +192,16 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
   assert(r.hasGenericTitle===false,'mobile question must not repeat the generic module title');
   assert(r.hasQuestionCard===true,'mobile question must use the compact question surface');
   assert(r.submitHeight>=44,`mobile submit touch target must be at least 44px; got ${r.submitHeight}`);
+  if(r.horizontalOverflow) {
+    const details=await page.evaluate(()=>({
+      viewport:innerWidth,docScroll:document.documentElement.scrollWidth,
+      offenders:[...document.querySelectorAll('body *')].filter(el=>{
+        const cs=getComputedStyle(el),box=el.getBoundingClientRect();
+        return cs.display!=='none' && cs.visibility!=='hidden' && box.width>0 && (box.right>innerWidth+1 || box.left < -1);
+      }).map(el=>({tag:el.tagName,cls:String(el.className||'').slice(0,100),sel:el.getAttribute('data-ep-focus-mode')||'',left:Math.round(el.getBoundingClientRect().left),right:Math.round(el.getBoundingClientRect().right),scroll:el.scrollWidth,client:el.clientWidth,position:getComputedStyle(el).position,minWidth:getComputedStyle(el).minWidth})).slice(0,40)
+    }));
+    console.log('EXAM_PREP_MOBILE_OVERFLOW_TRACE',JSON.stringify(details));
+  }
   assert(r.horizontalOverflow===false,'mobile question must not overflow horizontally at 390px');
 
   await page.check('input[name="ep_live_answer"][value="1"]');
