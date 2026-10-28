@@ -1,0 +1,99 @@
+name: Chemistry 9701 gated integration regression
+
+on:
+  pull_request:
+    paths:
+      - 'exam-prep/**'
+      - 'index.html'
+      - 'scripts/qa-chemistry-9701-**'
+      - 'supabase/migrations/*chemistry*'
+      - '.github/workflows/chemistry-9701-gated-integration.yml'
+  push:
+    branches:
+      - 'integration/chemistry-9701-rebased-main-20261028'
+
+permissions:
+  contents: read
+
+jobs:
+  chemistry-gated-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and isolated Chemistry UI regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-host.js
+          node --check exam-prep/exam-prep-chemistry-native.js
+          node --check exam-prep/exam-prep-chemistry-entry-native.js
+          node --check exam-prep/exam-prep-chemistry-recheck-native.js
+          node --check exam-prep/exam-prep-chemistry-labs-native.js
+          node scripts/qa-chemistry-9701-j08-entry-ui.cjs
+          node scripts/qa-chemistry-9701-j09-lesson-ui.cjs
+          node scripts/qa-chemistry-9701-j10-recheck-ui.cjs
+          node scripts/qa-chemistry-9701-j13-labs-ui.cjs
+          node scripts/qa-chemistry-9701-j15-lab-response-boundary.cjs
+      - name: Fail-closed transport and shared asset boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const assert = require('node:assert/strict');
+          const read = p => fs.readFileSync(p, 'utf8');
+          const html = read('index.html');
+          const host = read('exam-prep/exam-prep-host.js');
+          const lab = read('exam-prep/exam-prep-chemistry-labs-native.js');
+          const shell = JSON.parse(read('docs/exam-prep-multisubject-shell-contract-v1.json'));
+          assert.equal(shell.policy.preserve_existing_math_runtime, true);
+          assert.equal(shell.policy.no_cross_subject_score_or_mastery_migration, true);
+          assert(host.includes('const CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED = false;'));
+          assert(host.includes('state.chemistryEntryShell?.enabled === true'));
+          assert(!host.includes('localStorage'));
+          assert(!lab.includes('localStorage') && !lab.includes('innerHTML'));
+          for (const source of [
+            'exam-prep/exam-prep-chemistry-native.js',
+            'exam-prep/exam-prep-chemistry-entry-native.js',
+            'exam-prep/exam-prep-chemistry-recheck-native.js',
+            'exam-prep/exam-prep-chemistry-labs-native.js'
+          ]) {
+            assert(fs.existsSync(source), 'Missing Chemistry source: '+source);
+            assert.equal((html.match(new RegExp(source.replaceAll('.', '\\.')+'\\?','g'))||[]).length, 1,
+              'Chemistry script must load exactly once: '+source);
+          }
+          const assets = [
+            'exam-prep/exam-prep-api.js',
+            'exam-prep/exam-prep-host.js',
+            'exam-prep/runtime/written-core-controller-v1.js',
+            'exam-prep/runtime/written-core-view-v1.js',
+            'exam-prep/exam-prep-economics-native.js',
+            'exam-prep/exam-prep-chemistry-native.js',
+            'exam-prep/exam-prep-chemistry-entry-native.js',
+            'exam-prep/exam-prep-chemistry-recheck-native.js',
+            'exam-prep/exam-prep-chemistry-labs-native.js',
+            'practice-ai-ui.js'
+          ];
+          let previous = -1;
+          for (const asset of assets) {
+            const index = html.indexOf('src="'+asset+'?');
+            assert(index > previous, 'Existing shared JS order must be preserved: '+asset);
+            previous = index;
+          }
+          assert(html.includes('exam-prep/runtime/written-core-source-v1.css?'));
+          assert(html.includes('iclub-ai-v21-beta-client.js?'));
+          assert(html.includes('iclub-ai-v21-ui.js?'));
+          assert(lab.includes('r.tutor_included!==false'));
+          assert(lab.includes('r.can_credit_mastery!==false'));
+          assert(lab.includes('r.practical_exam_replacement!==false'));
+          const migrations=fs.readdirSync('supabase/migrations')
+            .filter(name=>/^\\d+_chemistry_(?:9701|p1)_/.test(name));
+          assert.equal(migrations.length, 33, 'All 33 installed Chemistry migration files must remain versioned');
+          const versions=migrations.map(name=>name.slice(0,14));
+          assert.equal(new Set(versions).size, versions.length, 'Duplicate Chemistry migration versions');
+          console.log('Chemistry shared-host and closed-gate integration: GREEN');
+          NODE
