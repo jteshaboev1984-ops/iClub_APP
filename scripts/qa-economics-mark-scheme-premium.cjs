@@ -34,7 +34,7 @@ for(const t of ['ru','uz','en']) {
 }
 assert(view.includes('scheme.ao12_marks')&&view.includes('scheme.ao3_marks'),'Numeric marks and AO split displayed');
 assert(view.includes('scheme?.assessment_criteria||details.requirements'),'Core shows criteria, not worked content');
-const guarded=file('supabase/migrations/20261028110500_iclub_econ_core_criteria_without_answer_hints_v1.sql');
+const guarded=file('supabase/migrations/20261028061253_iclub_econ_core_criteria_without_answer_hints_v1.sql');
 assert(guarded.includes("'assessment_criteria',to_jsonb(v_descriptors)"),'Only scoring criteria may leave Core');
 assert(!guarded.includes("'indicative_points',t.answer_requirements"),'Model answers never reach Core');
 assert(!guarded.includes("RETURN v_result||jsonb_build_object('mark_scheme',v_scheme)"),'Private raw requirements must not be copied to clients');
