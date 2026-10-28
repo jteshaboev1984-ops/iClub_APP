@@ -72,3 +72,15 @@ Second read-only script: `scripts/qa-chemistry-9701-j23-as-locale-numeric-triage
 - **Execution status: NOT APPLIED.** A live Supabase write attempt hit a connector security block, and an earlier attempt revealed `item_md5` is generated; the prepared script correctly does **not** set that generated column. A subsequent live read-only check confirmed the original failed version = 1, corrected version = 0, P1 issuable = 0 and Chemistry publishing = OFF. Do not mark the issue resolved in the database or claim a new private candidate exists.
 - A separate read-only scope check is staged at `scripts/qa-chemistry-9701-j23-as-scope-firewall-readonly.sql`; it must verify 90 core AS items, one unscored enrichment item, A Level separation, and the retained failure. Its whole-query live execution was blocked by the connector safety system in this run, so its status is **PREPARED / NOT EXECUTED**. The underlying counts were previously confirmed in smaller read-only queries.
 - Neither script is auto-deployed or run as a GitHub migration. No protected item text, answer key, user identity, scoring state, public permissions or localStorage record was exposed or changed.
+
+
+## J23 correction execution update — 2026-10-28 (supersedes earlier NOT APPLIED status)
+The previous sections above preserve the **historical** initial audit and preparation checkpoint. The operator subsequently executed the guarded private SQL `scripts/chemistry-9701-j23-private-p1-syllabus-map-correction.sql` in Supabase project `mmmduffgpvwjdpruzikw` and independently verified its postconditions with live read-only queries.
+
+- **APPLIED**: new private P1 draft `CHEM9701-P1-SECURE4-20261026-T12-02`, authoring version `iclub_original_private_j23_20261028_v5`, primary skill `CHEM9701-12-04`.
+- Original `iclub_original_private_20261026_v4` remains immutable with `CHEM9701-12-03` and permanent `syllabus_scope=fail` review; its original seven QA records remain intact and source-hash-valid.
+- New v5 has **exactly seven PENDING reviews**, including syllabus scope, correct answer and distractors, three languages, exam format and content rights. All seven source snapshots are hash-valid. No approval, student issuance, assessment eligibility or mastery credit.
+- `private.iclub_exam_core_chemistry_p1_item_preflight_v1` returned `checked=1, all_preflight_pass=true` including direct skill, language structure, deduplication, seven pending slots and draft-only issuance denial.
+- Separate live verification: J24 AS Theory gate `enabled=false`, zero active Chemistry beta members, and J12 `can_publish=false`.
+
+**Status:** technical source→skill mapping mismatch corrected in an unpublished new version; the seven academic reviews have **not** passed. Therefore this does not change the initial aggregate 25 PASS / 7 HOLD / 1 FAIL historical audit or unblock Paper 1 release. Do not re-run this non-idempotent clone script; it correctly refuses duplicate v5.
