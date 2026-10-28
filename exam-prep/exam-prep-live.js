@@ -556,7 +556,7 @@
       fixTask: "Xatoni tuzatish", retestTask: "Qayta tekshiruvdan o‘tish", mixedTask: "Aralash mashqni boshlash",
       timedTask: "Vaqtli mashqni boshlash", checkNext: "Keyingi topshiriqni tekshirish",
       waiting: "Qayta tekshiruv vaqti hali kelmagan", noAvailable: "Hozircha yangi topshiriq mavjud emas.",
-      skills: "ko‘nikma", skill: "Ko‘nikma", focusNow: "hozir diqqatda", later: "keyin", lastResult: "Oxirgi ish", history: "Mashg‘ulotlar tarixi", foundationTitle: "Birinchi o‘quv qadamini boshlash", foundationDetail: "Kirish tekshiruvi boshlang‘ich nuqtani aniqladi. Endi bilimlaringizni o‘quv topshiriqlarida tasdiqlang — shundan keyin tasdiqlangan qamrov oshadi.", foundationStart: "Birinchi mavzuni boshlash"
+      skills: "ko‘nikma", skill: "Ko‘nikma", focusNow: "hozir diqqatda", later: "keyin", lastResult: "Oxirgi ish", history: "Mashg‘ulotlar tarixi", foundationTitle: "Birinchi o‘quv qadamini boshlash", foundationDetail: "Kirish tekshiruvi boshlang‘ich nuqtani aniqladi. Endi bilimlaringizni o‘quv topshiriqlarida tasdiqlang — shundan keyin tasdiqlangan qamrov oshadi.", foundationStart: "Birinchi mavzuni boshlash", foundationContinueTitle: "Asosiy bilimlarni mustahkamlash", foundationContinueDetail: "Siz allaqachon topshiriqlar bajargansiz. Keyingi topshiriq shu bilimlarni mustahkamlaydi; dastur qamrovi esa ko‘nikma tasdiqlangandan keyingina oshadi."
     };
     if (state.language === "en") return {
       back: "Your route", next: "Next step", progress: "Progress", topics: "Topics",
@@ -567,7 +567,7 @@
       retestTask: "Take the delayed check", mixedTask: "Start mixed practice", timedTask: "Start timed practice",
       checkNext: "Check next task", waiting: "The delayed check is not available yet",
       noAvailable: "No new task is available right now.", skills: "skills", skill: "Skill",
-      focusNow: "in focus now", later: "later", lastResult: "Latest work", history: "Session history", foundationTitle: "Start your first learning step", foundationDetail: "The entry check identified your starting point. Now confirm your knowledge through learning tasks; confirmed syllabus coverage will grow from there.", foundationStart: "Start first topic"
+      focusNow: "in focus now", later: "later", lastResult: "Latest work", history: "Session history", foundationTitle: "Start your first learning step", foundationDetail: "The entry check identified your starting point. Now confirm your knowledge through learning tasks; confirmed syllabus coverage will grow from there.", foundationStart: "Start first topic", foundationContinueTitle: "Continue strengthening your foundations", foundationContinueDetail: "You have already practised. Your next task builds on that work; confirmed syllabus coverage grows only when a skill is verified."
     };
     return {
       back: "Ваш маршрут", next: "Следующий шаг", progress: "Прогресс", topics: "Темы",
@@ -578,7 +578,7 @@
       retestTask: "Пройти повторную проверку", mixedTask: "Начать смешанную практику",
       timedTask: "Начать работу на время", checkNext: "Проверить следующий шаг",
       waiting: "Повторная проверка ещё не доступна", noAvailable: "Сейчас нет нового доступного задания.",
-      skills: "навыков", skill: "Навык", focusNow: "сейчас в фокусе", later: "позже", lastResult: "Последняя работа", history: "История занятий", foundationTitle: "Начать первый учебный шаг", foundationDetail: "Входная проверка определила стартовую точку. Теперь подтвердите знания учебными заданиями — после этого начнёт расти подтверждённое покрытие программы.", foundationStart: "Начать первую тему"
+      skills: "навыков", skill: "Навык", focusNow: "сейчас в фокусе", later: "позже", lastResult: "Последняя работа", history: "История занятий", foundationTitle: "Начать первый учебный шаг", foundationDetail: "Входная проверка определила стартовую точку. Теперь подтвердите знания учебными заданиями — после этого начнёт расти подтверждённое покрытие программы.", foundationStart: "Начать первую тему", foundationContinueTitle: "Продолжить укреплять базовые знания", foundationContinueDetail: "Вы уже выполняли задания. Следующий шаг закрепит знания; подтверждённый охват программы увеличится только после проверки навыка."
     };
   }
 
@@ -723,7 +723,7 @@
     }
     const stage = Number(summary?.operational_stage || 0);
     if (stage >= 4) return { kind: "timed", title: home.timed, detail: stageLabel(stage), label: home.timedTask };
-    if (stage === 1) return { kind: "prepare", title: hasHistory ? home.checkNext : home.foundationTitle, detail: hasHistory ? stageLabel(stage) : home.foundationDetail, label: hasHistory ? home.checkNext : home.foundationStart };
+    if (stage === 1) return { kind: "prepare", title: hasHistory ? home.foundationContinueTitle : home.foundationTitle, detail: hasHistory ? home.foundationContinueDetail : home.foundationDetail, label: hasHistory ? home.checkNext : home.foundationStart };
     return { kind: "prepare", title: home.checkNext, detail: stageLabel(stage), label: home.startTask };
   }
 
@@ -763,7 +763,7 @@
       row?.focus_kind === "correction" &&
       ["reopened","remediating"].includes(String(row?.status || ""))
     );
-    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery, payload.weeklyProgress, Boolean(lastResult));
+    const action = primaryAction(component, payload.progress, summary, tracker, payload.plan, payload.recovery, payload.weeklyProgress, recentRows.some(row => ["learning", "correction", "retest", "mixed", "timed"].includes(String(row?.session_type || "").toLowerCase())));
     const componentName = component === "P1" ? c.componentP1 : c.componentP5;
     const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections} ${esc(home.focusNow)}${deferredCorrections > 0 ? ` · +${deferredCorrections} ${esc(home.later)}` : ""}</small></span><span aria-hidden="true">›</span></button>` : "";
     const lastResultCard = lastResult ? `<section class="ep-component-last-result"><div><span class="ep-component-section-label">${esc(home.lastResult)}</span><strong>${esc(resultTypeLabel(lastResult.session_type))}</strong><small>${lastResult.machine_total > 0 ? `${Number(lastResult.machine_correct || 0)} / ${Number(lastResult.machine_total || 0)} ${esc(c.correctOf)}` : esc(c.writtenPart)}</small></div><button class="ep-live-btn secondary" type="button" data-ep-component-last-result="${esc(lastResult.session_id)}">${esc(c.viewResults)}</button></section>` : "";
