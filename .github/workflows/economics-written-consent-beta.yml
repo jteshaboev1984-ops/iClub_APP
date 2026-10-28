@@ -6,6 +6,7 @@ on:
       - 'exam-prep/exam-prep-economics-native.js'
       - 'supabase/migrations/*iclub_econ_written_consent_beta_wave1_off_v1.sql'
       - 'scripts/qa-economics-consent-written-beta.cjs'
+      - 'scripts/qa-economics-four-papers-navigation.cjs'
       - '.github/workflows/economics-written-consent-beta.yml'
   workflow_dispatch:
 
@@ -20,3 +21,5 @@ jobs:
           node-version: '22'
       - name: Auth, consent, source and regression boundaries
         run: node scripts/qa-economics-consent-written-beta.cjs
+      - name: Four Paper cards, click-path and written consent navigation
+        run: node scripts/qa-economics-four-papers-navigation.cjs
