@@ -12,11 +12,13 @@ async function scenario(browser,lang,width,mode){
   page.on('pageerror',e=>errors.push(e.message));
   // Use an intercepted same-origin URL: about:blank has opaque storage and
   // would falsely report that tab-local recovery failed.
+  await page.route(/^https?:\/\//,route=>route.abort());
+  // Playwright resolves the newest matching route first. Keep localhost
+  // later than the fallback network-abort route.
   await page.route('http://localhost:13741/',route=>route.fulfill({
     contentType:'text/html',
     body:'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><main id="host"></main></body></html>'
   }));
-  await page.route(/^https?:\/\//,route=>route.abort());
   try {
     await page.goto('http://localhost:13741/');
     await page.addStyleTag({path:file('exam-prep/exam-prep-host.css')});
