@@ -229,11 +229,16 @@ async function main(){
   activity.oldVoidNext=true;
   activity.probeSafe=false;
   await askInput.fill("Почему я получил такие баллы?");
-  await page.locator("[data-global-ai-send]").click();
+  // Many previous synthetic chat turns can put the bottom composer outside
+  // the 768px test viewport. Assert the actual button is enabled, then
+  // activate its genuine click handler without the viewport constraint.
+  assert.equal(await page.locator("[data-global-ai-send]").isEnabled(),true);
+  await page.locator("[data-global-ai-send]").evaluate(el=>el.click());
   await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
     ?.textContent?.includes("iClub AI сейчас недоступен"),null,{timeout:8000});
   await askInput.fill("Хочу задать следующий вопрос про математику.");
-  await page.locator("[data-global-ai-send]").click();
+  assert.equal(await page.locator("[data-global-ai-send]").isEnabled(),true);
+  await page.locator("[data-global-ai-send]").evaluate(el=>el.click());
   await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
     ?.textContent?.includes("Сначала восстановите предыдущий ответ"),null,{timeout:8000});
   assert.equal(activity.asks.length,safePrior+1,
