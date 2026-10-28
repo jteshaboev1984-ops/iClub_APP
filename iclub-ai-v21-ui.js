@@ -1509,6 +1509,32 @@
         return;
       }
 
+      // Definitive pre-provider Practice quota denial: no answer exists
+      // to recover. Never clear pending requests for unknown provider charges.
+      if(typedPractice&&reason==="practice_quota_exhausted"&&
+         data.provider_called===false){
+        if(state.practicePending?.requestId===sentId)
+          state.practicePending=null;
+        const reset=new Date(String(data.reset_at||""));
+        const valid=Number.isFinite(reset.getTime())&&reset.getTime()>Date.now();
+        const time=valid?new Intl.DateTimeFormat(
+          {ru:"ru-RU",uz:"uz-UZ",en:"en-GB"}[locale()],
+          {hour:"2-digit",minute:"2-digit"}).format(reset):"";
+        const message={
+          ru:"Временный лимит вопросов к AI достигнут. "+
+            (valid?"Новый вопрос можно задать после "+time+". ":"")+
+            "Нажмите «Объяснить результат», чтобы увидеть проверенные данные без платного AI-запроса.",
+          uz:"AI savollari uchun vaqtinchalik limit tugadi. "+
+            (valid?time+" dan keyin yana savol berishingiz mumkin. ":"")+
+            "Tekshirilgan ma’lumotlarni ko‘rish uchun «Natijani tushuntir» tugmasini bosing.",
+          en:"Your AI question limit has been reached. "+
+            (valid?"You can ask another question after "+time+". ":"")+
+            "Choose “Explain the result” to view verified information without a paid AI request."
+        }[locale()];
+        appendMessage(threadKey,"assistant",message,"notice");
+        return;
+      }
+
       // New route-specific shortfall never closes the remaining inexpensive routes.
       // Legacy usage_exhausted remains separate until backend parity is complete.
       if (reason === "route_insufficient") {
