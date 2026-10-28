@@ -83,5 +83,60 @@ const ctl=(()=>{const sandbox={module:{exports:{}},console};vm.runInNewContext(c
  },createActionKey:()=> 'fixed'});
  await corrupted.open('item');
  await assert.rejects(corrupted.criteria(),/invalid_mark_scheme/);
- console.log('ECONOMICS MARK SCHEME PREMIUM QA PASS — 22 mark splits, 2 live controller cases, privacy, copy, CSS, cache');
+
+ // Native written view must actually reveal/hide the marking scheme on click,
+ // with its numeric max mark, AO budgets and levels. No browser login required.
+ class Element{
+   constructor(tag){this.tagName=tag;this.className='';this.textContent='';this.children=[];
+     this.events={};this.hidden=false;this.disabled=false;this.attributes={};}
+   append(...items){this.children.push(...items);return this;}
+   replaceChildren(...items){this.children=items;}
+   addEventListener(type,fn){this.events[type]=fn;}
+   setAttribute(k,v){this.attributes[k]=v;}
+ }
+ const all=x=>[x,...x.children.flatMap(all)];
+ for(const lang of ['ru','uz','en']){
+   const wrapper=new Element('main');
+   const win={iClubWrittenCoreControllerV1:ctl,crypto:{randomUUID:()=> 'source-safe-action-key'}};
+   const dom={window:win,document:{createElement:tag=>new Element(tag)},console};
+   vm.runInNewContext(view,dom);
+   let n=0;
+   const write=win.iClubWrittenCoreViewV1.mount({root:wrapper,planId:'owned-plan',
+    language:lang,onBack:()=>{},
+    api:{
+      available:async()=>({ok:true,available:true,plan_id:'owned-plan'}),
+      next:async()=> n++===0?({ok:true,status:'ready',plan_item_id:'item'}):
+       ({ok:true,status:'completed'}),
+      open:async()=>({...baseTask}),
+      criteria:async()=>({
+       available:true,task_key:'P2.B1.b',task_version:'candidate-v3',
+       title:'Marking scheme',requirements:['Relevant analysis'],
+       mark_scheme:{max_marks:12,ao12_marks:8,ao3_marks:4,marking_style:'levels',
+        official_cambridge:false,indicative_points:['Relevant analysis','Justified judgement']}}),
+      advance:async()=>({status:'advanced',plan_item_id:'item',task_key:'P2.B1.b',task_version:'candidate-v3'}),
+      status:async()=>({status:'advanced',plan_item_id:'item',task_key:'P2.B1.b',
+       task_version:'candidate-v3',program_version:'economics_2026_2028_v1'})
+    }});
+   assert(write&&typeof write.dispose==='function');
+   for(let j=0;j<25;j++)await Promise.resolve();
+   const texts=()=>all(wrapper).map(x=>x.textContent);
+   const btns=()=>all(wrapper).filter(x=>x.tagName==='button');
+   const localized=lang==='ru'?'Схема оценивания':lang==='uz'?'Baholash mezonlari':'Marking scheme';
+   const button=btns().find(x=>x.textContent===localized);
+   assert(button,lang+' marking button missing');
+   const hidden=all(wrapper).find(x=>x.className==='ep-written-marking');
+   assert(hidden&&hidden.hidden,lang+' scheme leaked before click');
+   await button.events.click();
+   for(let j=0;j<25;j++)await Promise.resolve();
+   assert(!hidden.hidden,lang+' marking scheme did not open');
+   assert(texts().some(x=>x.includes('12')),'Maximum 12 marks invisible');
+   assert(texts().some(x=>x.includes('8 / 12')),'AO1/AO2 budget invisible');
+   assert(texts().some(x=>x.includes('4 / 12')),'AO3 budget invisible');
+   assert(texts().some(x=>x==='11–14'||x==='6–8'),'Expected mark levels not rendered');
+   await button.events.click();
+   assert(hidden.hidden,lang+' marking panel did not close');
+   write.dispose();
+ }
+
+ console.log('ECONOMICS MARK SCHEME PREMIUM QA PASS — 22 mark splits, 2 controller cases and 3 interactive written UI locales, privacy, copy, CSS, cache');
 })().catch(e=>{console.error(e);process.exitCode=1});
