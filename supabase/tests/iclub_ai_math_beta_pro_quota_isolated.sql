@@ -103,6 +103,14 @@ BEGIN
   'dispatch',paid,u,501,fp,cp,sp,'ru');
  IF x->>'reason' IS DISTINCT FROM 'dispatch_already_decided' THEN
   RAISE EXCEPTION 'Duplicate provider dispatch accepted %',x; END IF;
+ -- A charged, otherwise authorized Pro answer MUST settle as completed
+ -- even while a different resumable Practice session exists.
+ UPDATE private.iclub_ai_v21_freeform_budget_ledger
+ SET state='charged',actual_microusd=519,finished_at=now()
+ WHERE request_id=paid;
+ x:=public.finish_iclub_ai_v21_freeform_quota_v1(paid,u,fp,'completed');
+ IF x->>'ok' IS DISTINCT FROM 'true' OR x->>'state' IS DISTINCT FROM 'completed'
+ THEN RAISE EXCEPTION 'Charged verified Pro response was discarded %',x; END IF;
  x:=public.iclub_ai_practice_receipt_pc4_service(
   'begin',safe_void,u,501,fp,cp,sp,'ru');
  IF x->>'action' IS DISTINCT FROM 'registered' THEN
