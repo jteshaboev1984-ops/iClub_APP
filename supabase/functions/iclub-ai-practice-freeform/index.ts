@@ -198,7 +198,7 @@ async function ask(p:Prepared,key:string){
   // A network failure, revocation or unknown denial must stay generic.
   if(quota?.reason==="usage_exhausted" &&
      typeof quota.reset_at==="string" &&
-     /^\\d{4}-\\d\\d-\\d\\d[T ]\\d\\d:\\d\\d:/.test(quota.reset_at))
+     /^\d{4}-\d\d-\d\d[T ]\d\d:\d\d:/.test(quota.reset_at))
     return {...fail("practice_quota_exhausted"),reset_at:quota.reset_at};
   return fail("usage_or_access_unavailable");
  }
