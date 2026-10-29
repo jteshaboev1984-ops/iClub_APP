@@ -77,8 +77,9 @@ test('reject tampered new source bytes',()=>withCase(x=>{
   fs.appendFileSync(x.paths[2],'\\n');fails(x,/source bytes changed/);
 }));
 test('reject duplicated skill across candidate papers',()=>withCase(x=>{
-  x.all.items[70].skill_key=x.all.items[0].skill_key;
-  x.batch.items[34]=x.all.items[70];x.pin();fails(x,/duplicate live skill/);
+  x.all.items[70].skill_key=x.all.items[65].skill_key;
+  x.all.items[70].syllabus_point=x.all.items[65].syllabus_point;
+  x.pin();fails(x,/duplicate live skill/);
 }));
 test('reject invalid unit in Paper 3',()=>withCase(x=>{
   x.all.items[70].syllabus_point='2.1.1';
