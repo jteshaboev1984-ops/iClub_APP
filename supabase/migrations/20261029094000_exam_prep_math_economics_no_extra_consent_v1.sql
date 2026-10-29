@@ -143,7 +143,7 @@ begin
     'mentor_activation_gate','unchanged'
   );
 end;
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION private.iclub_exam_native_economics_beta_allowed_v1(p_user uuid)
  RETURNS boolean
@@ -183,7 +183,7 @@ AS $function$
          AND subj.is_active=true
      )
  );
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION private.iclub_econ_written_beta_eligible_v1(p_user uuid)
  RETURNS boolean
@@ -223,7 +223,7 @@ AS $function$
     AND a.paper_code='P1' AND a.session_kind='diagnostic'
     AND a.status='finalized'
  );
-$function$
+$function$;
 
 CREATE OR REPLACE FUNCTION private.iclub_exam_chemistry_p1_math_beta_eligible_v1(p_user_id uuid)
  RETURNS boolean
@@ -245,7 +245,7 @@ AS $function$
    WHERE us.user_id=p_user_id AND s.subject_key='chemistry'
    AND s.is_active=true
  );
-$function$
+$function$;
 
 CREATE FUNCTION public.iclub_econ_written_start_v2()
  RETURNS jsonb
@@ -318,7 +318,7 @@ BEGIN
  FROM unnest(v_keys) WITH ORDINALITY AS v(k,i);
  RETURN jsonb_build_object('ok',true,'joined',true,'replayed',false);
 END;
-$function$
+$function$;
 
 REVOKE ALL ON FUNCTION public.iclub_econ_written_start_v2() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.iclub_econ_written_start_v2() TO authenticated;
@@ -357,7 +357,7 @@ BEGIN
        WHERE a.program_key='economics_9708' AND a.version_key='economics_2026_2028_v1') <
          COALESCE(v_row.max_members,0));
 END;
-$function$
+$function$;
 
 -- Math Beta approval no longer depends on historical cohort opt-in; model-specific AI
 -- eligibility remains controlled by its independent provider/AI policy.
@@ -396,7 +396,7 @@ AS $function$
     AND EXISTS(SELECT 1 FROM private.iclub_ai_practice_receipt_v1_control
        WHERE singleton=1 AND enabled)
  )
-$function$
+$function$;
 
 -- Phase 1 only: leave legacy RPC grants temporarily unchanged to avoid breaking
 -- already-open browser tabs with pre-cutover cached frontend code. Phase 2
