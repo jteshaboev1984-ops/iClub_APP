@@ -20,11 +20,13 @@ BEGIN
  OR has_function_privilege('authenticated','public.mark_practice_ai_provider_dispatched_service_v1(uuid)','EXECUTE')
  OR has_function_privilege('authenticated','private.iclub_ai_all_route_budget_allowed_v1(bigint)','EXECUTE') THEN
   RAISE EXCEPTION 'Financial settlement/guard exposed to learner roles';END IF;
- -- Definitely NOT dispatched: zero-charge release remains supported.
+ -- Even an old Edge version must not clear its liability by claiming zero charge.
  v:=public.reserve_exam_prep_ai_provider_call_service_v1(r_release,u,0.005);
  IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'Initial legacy reservation denied: %',v;END IF;
  v:=public.finalize_exam_prep_ai_provider_call_service_v1(r_release,'released',0);
- IF v->>'ok'<>'true' THEN RAISE EXCEPTION 'Pre-dispatch release failed: %',v;END IF;
+ IF v->>'ok'<>'false' THEN RAISE EXCEPTION 'Unverified pre-dispatch release wiped liability: %',v;END IF;
+ v:=public.finalize_exam_prep_ai_provider_call_service_v1(r_release,'unknown',0);
+ IF v->>'ok'<>'true' THEN RAISE EXCEPTION 'Unverified pre-dispatch reserve not retained: %',v;END IF;
  -- Dispatched: release must fail and UNKNOWN retains full hold, not zero cost.
  v:=public.reserve_exam_prep_ai_provider_call_service_v1(r_unknown,u,0.006);
  IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'Exam reserve failed: %',v;END IF;
@@ -43,7 +45,7 @@ BEGIN
  IF v->>'allowed'<>'false' THEN RAISE EXCEPTION 'Repeated UUID can trigger provider again: %',v;END IF;
  -- The architect's amounts are not configured in production. Synthetic ONLY.
  UPDATE private.iclub_ai_all_route_spend_control_v1
- SET enabled=true,max_day_microusd=70000,max_lifetime_microusd=70000 WHERE singleton=1;
+ SET enabled=true,max_day_microusd=75000,max_lifetime_microusd=75000 WHERE singleton=1;
  INSERT INTO private.iclub_ai_v21_beta_members
  VALUES(u,true,now(),'global_ai_beta_v21');
  v:=public.reserve_iclub_ai_v21_freeform_budget_v1(
@@ -51,13 +53,13 @@ BEGIN
  IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'Freeform shared cap unexpectedly blocked: %',v;END IF;
  v:=public.reserve_iclub_ai_paid_canary_v1(r_canary);
  IF v->>'allowed'<>'true' THEN RAISE EXCEPTION 'Canary shared cap unexpectedly blocked: %',v;END IF;
- -- 6,000 + 50,000 + 10,000 = 66,000 microUSD, next 5,000 must fail.
+ -- 5,000 + 6,000 + 50,000 + 10,000 = 71,000 microUSD, next 5,000 must fail.
  v:=public.reserve_practice_ai_provider_call_service_v1(r_denied,u,0.005);
  IF v->>'allowed'<>'false' OR v->>'reason'<>'shared_provider_budget_exhausted' THEN
   RAISE EXCEPTION 'Cross-route cap failed to block fourth ledger: %',v;END IF;
  IF EXISTS(SELECT 1 FROM private.practice_ai_provider_leases WHERE request_id=r_denied) THEN
   RAISE EXCEPTION 'Global cap rejected but local reservation inserted';END IF;
- -- Expired legacy in-flight requests must not be reset to zero.
+ -- Expired legacy in-flight requests must not be reset to zero (74k exposure).
  INSERT INTO private.practice_ai_provider_leases(
  request_id,user_id,reserved_cost_usd,status,created_at,expires_at)
  VALUES(r_expired,u,0.003,'active',now()-interval '2 minutes',now()-interval '1 minute');
