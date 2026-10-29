@@ -8,6 +8,7 @@ const host=read("exam-prep/exam-prep-host.js");
 const api=read("exam-prep/exam-prep-api.js");
 const economics=read("exam-prep/exam-prep-economics-native.js");
 const sql=read("supabase/migrations/20261029094000_exam_prep_math_economics_no_extra_consent_v1.sql");
+const shutdown=read("supabase/migrations/20261029095000_exam_prep_legacy_self_enrollment_revoke_v1.sql");
 const html=read("index.html");
 for(const js of [host,api,economics])new Function(js);
 for(const word of ["renderInvitationShell","handleGrantConsent","handleRevokeConsent","refreshInvitationOnly","betaInvitation()","grantBetaConsent","revokeBetaConsent","claimBetaCoreSeat","data-ep-beta-action"])
@@ -24,9 +25,10 @@ assert(sql.includes("private.iclub_exam_native_economics_beta_allowed_v1"),"Econ
 assert(sql.includes("private.iclub_exam_chemistry_p1_math_beta_eligible_v1"),"Future Chemistry beta no cohort consent");
 assert(sql.includes("private.iclub_ai_math_beta_pro_quota_eligible_v1"),"Math AI quota no cohort consent dependency");
 assert(sql.includes("global_ai.consent_at IS NOT NULL"),"Independent AI provider policy not silently weakened");
-assert(sql.includes("REVOKE ALL ON FUNCTION public.claim_my_exam_prep_beta_core_seat_v1"),"Self-claim endpoint disabled");
-assert(sql.includes("REVOKE ALL ON FUNCTION public.grant_my_exam_prep_beta_consent_v1"),"Legacy self-optin endpoint disabled");
+assert(shutdown.includes("REVOKE ALL ON FUNCTION public.claim_my_exam_prep_beta_core_seat_v1"),"Self-claim endpoint disabled");
+assert(shutdown.includes("REVOKE ALL ON FUNCTION public.grant_my_exam_prep_beta_consent_v1"),"Legacy self-optin endpoint disabled");
 assert(!sql.includes("INSERT INTO private.exam_prep_beta_consents"),"No fake beta consent rows");
+assert(!sql.includes("REVOKE ALL ON FUNCTION public.claim_my_exam_prep_beta_core_seat_v1"),"Phase 1 must preserve old cached-tab compatibility");
 assert(!sql.includes("VALUES(v_user,'joined',v_ctl.consent_copy_version,v_plan)"),"No fake Economics consent rows");
 for(const word of ["DELETE FROM","TRUNCATE ","DROP TABLE","localStorage.clear(","UPDATE private.exam_prep_feature_entitlements"])
  assert(!sql.includes(word),"No progress destruction: "+word);
