@@ -188,7 +188,7 @@ Full EN/RU/UZ source explanations for all **20** lessons CHEM9701-12-01 through 
 - **14-01**: UV Cl₂ homolysis and methane substitution chain, cracked C₁₀H₂₂→C₈H₁₈+C₂H₄ conservation, catalytic 2NO+2CO→N₂+2CO₂ balanced.
 - **14-02**: electrophilic HBr addition to propene, stable secondary carbocation, bromine addition to ethene without UV; three translations agree.
 - **14-03**: bromine-water unsaturation, dilute/cold manganate diol versus hot/concentrated cleavage and but-2-ene→2 CH₃COOH under oxidative conditions consistent; conditions are mandatory.
-- **14-04**: poly(propene) and PVC repeat units correctly show saturated backbone and substituents. **Scope note:** metadata `14.2;20.1` references a later A-level topic; do not claim `20.1` is AS mastery/assessment content before formal syllabus review.
+- **14-04**: poly(propene) and PVC repeat units correctly show saturated backbone and substituents. **Verified against the official Cambridge 9701 2025–27 syllabus (p. 37): section 20.1 addition polymerisation is explicitly AS content.** The prior assertion that it was an A Level-only topic was incorrect and is superseded. Syllabus also requires disposal/non-biodegradability awareness, to be checked for content coverage separately.
 - **15-01**: C–X bond strength and comparable substrate hydrolysis, AgNO₃ precipitation after X⁻ release (not detection of covalent C–X) align.
 - **15-02**: aqueous nucleophilic substitution, SN1 carbocation vs SN2 concerted step and rate laws `k[RX]`, `k[RX][Nu⁻]` scientifically coherent across locales.
 - **15-03**: hot ethanolic versus aqueous OH⁻ elimination/substitution; β-H counting, bromoethane→ethene balance correct.
