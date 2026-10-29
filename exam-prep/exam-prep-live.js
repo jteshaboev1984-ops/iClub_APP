@@ -1441,6 +1441,8 @@
     if (submit) { submit.disabled=true; submit.hidden=true; submit.removeAttribute('aria-busy'); }
     const exit=root.querySelector('[data-ep-live-exit]');
     if (exit) exit.disabled=true;
+    const end=root.querySelector('[data-ep-live-end]');
+    if (end) end.disabled=true;
     root.querySelector('[data-ep-answer-recovery]')?.remove();
     const content=answerRecoveryCopy();
     const panel=document.createElement('aside');
@@ -1526,6 +1528,7 @@
       const button=screen?.querySelector('[data-ep-live-submit]');
       if (button) {button.hidden=false;button.disabled=false;button.removeAttribute('aria-busy');button.textContent=copy().submit;}
       const exit=screen?.querySelector('[data-ep-live-exit]'); if (exit) exit.disabled=false;
+      const end=screen?.querySelector('[data-ep-live-end]'); if (end) end.disabled=false;
       return;
     }
     state.busy=false;
@@ -1546,12 +1549,13 @@
       const value=rootEl()?.querySelector('input[name="ep_live_text_answer"]')?.value?.trim();
       if (!value) return; payload={answer:value};
     }
-    // Diagnose and study safely: a lost submit acknowledgment must not erase
-    // an unconfirmed answer. Keep timed/full-paper response handling separate.
+    // Preserve uncertain responses in timed/full-paper too, without changing
+    // server-owned deadline or marks. Never auto-retry an unanswered item.
     const diagnostic = state.session.session_type === 'diagnostic';
     const study = ['plan','component'].includes(state.returnView?.kind) &&
       ['learning','mixed','retest'].includes(state.session.session_type);
-    if (diagnostic || study) {
+    const timed = ['timed','paper'].includes(state.session.session_type);
+    if (diagnostic || study || timed) {
       const pending={sessionId:state.session.session_id,component:state.session.component_code,
         itemOrder:Number(item.item_order),payload,idempotencyKey:key('ep-answer'),
         elapsedMs:Math.max(0,Date.now()-state.itemStartedAt),retryAllowed:false};
@@ -1567,7 +1571,9 @@
   }
 
   async function finishTimed(reason) {
-    if (state.busy || !state.session) return; const sessionId = state.session.session_id, component = state.session.component_code;
+    // A timed attempt must not finalize while an answer's server ACK is unknown.
+    // On reconciliation, loadSession rechecks the original absolute deadline.
+    if (state.busy || !state.session || state.pendingSubmission) return; const sessionId = state.session.session_id, component = state.session.component_code;
     state.busy = true; clearTimer(); renderLoading();
     const finalized = await internal.api.finalizeTimed(sessionId, key("ep-timed-finalize"), reason); state.busy = false;
     if (!finalized?.ok) { renderError(); return; }
