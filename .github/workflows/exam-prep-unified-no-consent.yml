@@ -1,0 +1,46 @@
+name: Exam Prep Unified Subject Access (no extra consent)
+on:
+  pull_request:
+    paths:
+      - 'exam-prep/exam-prep-host.js'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-economics-native.js'
+      - 'supabase/migrations/*exam_prep_math_economics_no_extra_consent*.sql'
+      - 'scripts/ops/*exam_prep_legacy_self_enrollment_revoke*.sql'
+      - 'scripts/qa-exam-prep-unified-no-consent.cjs'
+      - 'scripts/qa-economics-*.cjs'
+      - '.github/workflows/exam-prep-unified-no-consent.yml'
+      - 'index.html'
+  push:
+    branches:
+      - 'feature/exam-prep-no-extra-consent-all-subjects-20261029'
+permissions:
+  contents: read
+jobs:
+  subject-access-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static no-consent and syntax contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-host.js
+          node --check exam-prep/exam-prep-economics-native.js
+          node scripts/qa-exam-prep-unified-no-consent.cjs
+      - name: Existing Economics learner journey and written practice
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/qa-economics-four-papers-navigation.cjs
+          node scripts/qa-economics-premium-plan-navigation.cjs
+          node scripts/qa-economics-consent-written-beta.cjs
+          node scripts/qa-economics-written-source-gate.cjs
+          node scripts/qa-economics-mark-scheme-premium.cjs
