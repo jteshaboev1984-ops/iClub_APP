@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify exact PRIVATE Chemistry J23 v7 files, without publication or persistently writing SQL.
+"""Verify exact PRIVATE Chemistry J23 v9 files, without publication or persistently writing SQL.
 
 No network/DB calls; no lesson, answer or tutor plaintext appears in standard output.
 Input source files MUST be supplied from protected storage outside this public repo.
@@ -7,8 +7,8 @@ Never commit their contents or generated SQL to GitHub.
 
 Usage (only after authorised private source export):
     python scripts/chemistry-j23-private-verify.py \
-        --theory /secure/path/v7_theory.json \
-        --tutor /secure/path/v7_tutor.json
+        --theory /secure/path/v9_theory.json \
+        --tutor /secure/path/v9_tutor.json
 
 This script does not establish the origin of the files or constitute a backup/restore test.
 """
@@ -22,11 +22,11 @@ import tempfile
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 PACKAGER = pathlib.Path(__file__).resolve().with_name("subject-release-packager.py")
-EXPECTED_VERSION = "chemistry9701_j23_20261029_as_91_sixfield_candidate_v7"
+EXPECTED_VERSION = "chemistry9701_j23_20261029_as_91_sixfield_candidate_v9"
 EXPECTED = {
-    "theory_sha256": "0fcba21ee2f6c6d1c25dcde29c11b6d7afc837033d422927d663615e52b7b2f3",
-    "tutor_sha256": "5014e71ed1d99ef0131c6d17092d7caf8ec9204fb2926220dd987176672fbf29",
-    "package_sha256": "197400f1701b424d541bb55c001bfe62eb27a45a1204b3730512a618e7179e27",
+    "theory_sha256": "3389e6a77d0347ab34fcfb9ad01b50bfceaa916552f8da197dad7c856954d302",
+    "tutor_sha256": "28e7dfe84e36136daed48635f44c32cb7a670d9243c9425785032f1ea9c2ed93",
+    "package_sha256": "c17a1b193d4f713d44e77b9b1a1ce3e42427c2fdce7a99599b56dcb6da1f64eb",
 }
 
 def fail(message):
@@ -90,7 +90,7 @@ def main():
             fail("Python packager timed out")
         if result.returncode != 0:
             # Don't expose arbitrary private source excerpts from traceback/error output.
-            fail("Actual Python packager rejected protected v7 source inputs")
+            fail("Actual Python packager rejected protected v9 source inputs")
         try:
             manifest = json.loads((dest / "manifest.json").read_text(encoding="utf-8"))
         except (OSError, ValueError):
