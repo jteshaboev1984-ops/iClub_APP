@@ -715,3 +715,17 @@ No question text, options, explanations or answer keys are written to **public**
 **Hold for actual private issuance:** The current native MCQ issuance selects `private.iclub_exam_core_question_candidates_v1` joined to `public.questions` — those public source records include existing Practice questions. A **new secure server-only original content version and exam authorization path** is needed to avoid exposing unreleased authored question/answer plaintext or rewriting old Practice questions. Do not insert original answers in `public.questions`, public GitHub, a Vercel static file, or a user localStorage score. Do not simply replace live paper sources or change historical MCQ attempt items. Review source integrity, live skill eligibility, exact and conceptual overlap and an independent second retest bank; run authenticated negative/positive E2E before any owner release decision.
 
 **Verified production boundary:** no user/assessment SQL mutation, no beta access changes, no learner attempts or scores created by this QA checkpoint. The separate Economics P2/P4 governed non-grading written path and other subjects are unaffected.
+
+
+### 29.10.2026 — Live skill-match audit after private original QA (read-only; NO GO)
+
+A fresh read-only Supabase join compared the exact **42 original candidate skill keys** to published Economics MCQ candidate skills without disclosing any learner identity, responses or item answers:
+
+| Protected authoring draft | Draft count | Exact skill already represented in live approved MCQ | Syllabus point represented in live approved MCQ | Missing draft skill rows | Candidate draft skills | Reviewed draft skills |
+|---|---:|---:|---:|---:|---:|---:|
+| P1 AS original | 30 | **0** | 7 | 12 | 18 | 0 |
+| P3 A original | 12 | **1** | 4 | 0 | 11 | 1 |
+
+**Significant correction to rollout interpretation:** passing source structural QA does NOT mean these original drafts can currently measure whether a learner fixed an *earlier specific mistake*. Same-syllabus-unit is not the same as same-skill evidence. No broad auto-linking by unit/topic, no old skill ID overwrite, no independent mastery claim from arbitrary or historically seen sources.
+
+**Required next content unit:** enumerate the 36 existing P1 and 36 P3 approved live MCQ skills (without exposing the answer bank), map each eligible baseline error skill to at least one newly authored, separately reviewed, independently distinct retest source at the **same assessed skill and correct syllabus level**, then calculate explicit uncovered-skill counts. All new skills must be versioned/approved before any issuance; existing `public.questions` and historical sessions are immutable. Authenticated server-only provenance and isolated rollback/E2E are later gates; retain the current owner-controlled beta hold.
