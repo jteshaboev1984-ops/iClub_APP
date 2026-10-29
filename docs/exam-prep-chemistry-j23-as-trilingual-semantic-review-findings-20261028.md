@@ -75,3 +75,15 @@ Sources checked: live immutable Chemistry `chemistry9701_20261022_stageb_draft` 
 - **J23-SCI-012 | CHEM9701-02-05 | §2.4 | BOUNDED PASS.** Mg/O₂ limiting reagent: maximum 0.200 mol MgO, realised 0.150 mol → 75%; Al/Cl₂ limiting reagent: reaction extents 0.200 vs 0.150, theoretical AlCl₃ 0.300 mol, obtained 0.255 → 85%. All numbers, species, coefficient logic and language meanings align.
 
 **Cumulative substantive review: 10/91 AS lessons; 8 provisional no-defect findings, 2 translation HOLDs (01-02, 01-03).** Remaining 81 unreviewed; all 91 held from release. No public write, no source-hash change, no launch approval.
+
+## J23 batch: Chemistry bonding CHEM9701-03-01 to 03-06 — 2026-10-29
+References: exact original live `chemistry9701_20261022_stageb_draft` lesson EN/RU/UZ full text; Lawrie Ryan & Roger Norris, *Chemistry for Cambridge International AS & A Level* (3e), Chemical Bonding chapter; official Cambridge 9701 **2025–2027** syllabus pp. 19–21, §§3.1–3.6 (https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf). No publication or science-signoff record issued.
+
+- **J23-SCI-013 | CHEM9701-03-01 | §§3.1–3.2 | BOUNDED PASS**: NaCl ionic lattice versus isolated molecules; immobile solid ions and mobile molten charge carriers; Cl/Br electronegativity trend and nonabsolute Pauling character distinction retained in EN/RU/UZ.
+- **J23-SCI-014 | CHEM9701-03-02 | §§3.3;4.2 | BOUNDED PASS**: metallic delocalised-electron model, directional giant covalent diamond/SiO₂, graphite exception, molecular C₆₀ and I₂, ionic NaCl/MgO melt conduction consistent across languages; no false claim that C₆₀ molecules form a continuous covalent lattice.
+- **J23-SCI-015 | CHEM9701-03-03 | §§3.4;3.7 | BOUNDED PASS**: NH₄⁺ coordinate bond origin but equivalent final N–H bonds; Al₂Cl₆ bridging chlorine donation; propadiene CH₂=C=CH₂ has **6 σ + 2 π**, ethene one σ + one π and ethyne one σ + two π C–C bonds; NO has 11 valence electrons and one unpaired electron; PCl₅ formal ten-electron diagram. All retained semantically in RU/UZ.
+- **J23-SCI-016 | CHEM9701-03-04 | §3.5 | BOUNDED PASS**: VSEPR reference angles agree in all three versions: BF₃ 120°, CO₂ 180°, CH₄ 109.5°, NH₃ ~107°, H₂O ~104.5°, PF₅ 90°/120°, SF₆ 90°. Lone-pair versus molecule geometry correctly distinguished.
+- **J23-SCI-017 | CHEM9701-03-05 | §3.6 | BOUNDED PASS**: CO₂ versus H₂O dipole cancellation, London dispersion and hydrogen-bond interactions, high boiling point and ice density; no incorrect implication that boiling breaks covalent O–H bonds. Restriction to N–H/O–H examples matches Cambridge 3.6.
+- **J23-SCI-018 | CHEM9701-03-06 | §§3.4;3.6 | BOUNDED PASS**: BF₃/NH₃, linear CO₂/bent SO₂, and CCl₄/CHCl₃ vector dipoles chemically consistent; shape-determined polarity present in all languages.
+
+**Cumulative editorial substantive reading: 16/91; 14 provisional no-defect findings, 2 translation HOLDs.** The general source version, 91-card exact hash manifest, rights attestations, and owner academic signoff remain incomplete. No release or backend source mutation.
