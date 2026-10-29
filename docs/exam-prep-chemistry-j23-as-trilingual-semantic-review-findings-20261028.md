@@ -109,3 +109,13 @@ Evidence: complete immutable EN/RU/UZ library explanations; original Cambridge A
 - **J23-SCI-028 | CHEM9701-05-05 | §5.1 | BOUNDED PASS**: `H₂(g)+Br₂(g)→2HBr(g)` mean gas-phase bond-energy estimate `436+193−2×366=−103 kJ mol⁻¹`; analogous HCl estimate `436+243−2×431=−183 kJ mol⁻¹`. EN/RU/UZ distinguish liquid standard Br₂ requiring its vaporisation enthalpy, not falsely claiming the gaseous reaction estimate is the standard value.
 
 **Cumulative full text editorial review: 26/91; 24 provisional no-defect, 2 locale HOLD. Remaining 65 require independent full three-language review.** Source versions, content hashes, and closed J24/J25 gates preserved.
+
+## J23 batch: Electrochemistry/redox CHEM9701-06-01–06-04 (2026-10-29)
+Grounding: original live EN/RU/UZ descriptions, immutable source version `chemistry9701_20261022_stageb_draft`, supplied Chemistry coursebook, Cambridge Chemistry 9701 2025–2027 syllabus §6.1, p. 23, https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf . No writes to learner records or library source.
+
+- **J23-SCI-029 | CHEM9701-06-01 | §6.1 | BOUNDED PASS**: Mn in MnO₄⁻ = +7; Cr in Cr₂O₇²⁻ = +6; S in SO₄²⁻ = +6; N in NH₄⁺ = −3; peroxide O = −1 and OF₂ oxygen = +2. Fe(II)/Fe(III) Roman numeral means oxidation state. EN/RU/UZ meanings equivalent.
+- **J23-SCI-030 | CHEM9701-06-02 | §6.1 | BOUNDED PASS**: Zn loses 2e⁻, Cu²⁺ gains 2e⁻; reducing agent Zn, oxidising agent Cu²⁺; correct consistent half-equations in all languages.
+- **J23-LANG-006 | CHEM9701-06-03 | §6.1 | HOLD FOR PRECISE RU TRANSLATION**: Acidic MnO₄⁻+8H⁺+5Fe²⁺→Mn²⁺+4H₂O+5Fe³⁺ has charge +17 on both sides; alkaline MnO₄⁻+2H₂O+3e⁻→MnO₂(s)+4OH⁻ balances O=6, H=4 and charge −4. EN and UZ explicitly warn *not to transplant the Mn²⁺ product from acidic conditions into the alkaline equation*. RU wording `Не используйте продукт Mn²⁺ для кислой среды без проверки условий.` is ambiguous and may incorrectly imply Mn²⁺ is inappropriate **for acidic conditions**. Repair in a new version to: `Не переносите продукт Mn²⁺, характерный для кислой среды, в уравнение для щелочной среды без учёта условий реакции.` No underlying chemistry equation error identified; release HOLD for clarity.
+- **J23-SCI-031 | CHEM9701-06-04 | §6.1 | BOUNDED PASS**: Cold dilute base gives Cl⁻ + ClO⁻ (Cl 0 → −1,+1), hot concentrated base gives 5Cl⁻ + ClO₃⁻ (0 → −1,+5); equations atom- and charge-balanced, EN/RU/UZ consistent.
+
+**Cumulative reviewed 30/91; 27 provisional no-defect, 3 locale HOLDs (01-02, 01-03, 06-03).** Existing hashes unchanged; approval of all 91 and release remain blocked.
