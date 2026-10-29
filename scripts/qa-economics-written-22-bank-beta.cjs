@@ -24,7 +24,7 @@ const expected=(arr)=>arr.map(x=>"'"+x+"'").join(',');
 assert(migration.includes(expected(all)),'Future Start must assign all 22 canonical tasks in P2 then P4 order');
 assert(migration.includes(expected(held)),'Existing learner must receive exactly ten follow-on tasks');
 assert(migration.includes('v_last+h.ordinal::integer'),'Keep historic order and add only at the end');
-assert(migration.includes('priority_order<=12 AND status'),'Existing task progress never rewritten');
+assert(migration.includes('IF n<>12 OR v_last<>12'),'Existing task shape must be verified before append');
 assert(migration.includes('FOR UPDATE'),'Protect against competing plan writes');
 assert(migration.includes("WHERE program_key='economics_9708'"),'Only Economics content scoped');
 assert(migration.includes("task_version='economics_9708_written_editorial_candidate_v3_20261027'"),'Immutable approved version required');
