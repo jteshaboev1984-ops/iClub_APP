@@ -161,3 +161,14 @@ Grounding: complete immutable EN/RU/UZ explanations and Cambridge Chemistry 9701
 - **10-03 | bounded science and tri-locale check:** Group 2 carbonates to oxides+CO₂, nitrates to oxide+NO₂+O₂, correctly balanced `2M(NO₃)₂→2MO+4NO₂+O₂`, increasing thermal stability and aqueous CaCO₃/HCl reaction condition consistent.
 - **10-04 | bounded enrichment-only check:** Ca/Sr/Ba flame colours and barium sulfate precipitate distinction technically plausible; **syllabus_point=NO_EXPLICIT_9701_OUTCOME**, so this card is supplementary learning ONLY, not an exam outcome or grade/mastery input. Do not misrepresent formation of BaSO₄ using added BaCl₂ as proof that the unknown solution initially contained barium.
 **Cumulative substantive AS review 47/91: 40 provisional no-defect, 7 inspected lesson correction candidates (including 10-02). 44 remain.** No learner opening or source overwrite.
+
+
+## J23 batch: Halogens CHEM9701-11-01–11-04 (2026-10-29)
+Reference: supplied Cambridge Chemistry 3e coursebook Group 17 chapter; original protected three-locale explanation text; official Cambridge 9701 2025–2027 §11.
+
+- **11-01 | CORRECTED CLOSED CANDIDATE:** halogen colour/boiling trend and F–F/Cl–Cl/Br–Br/I–I mean bond energy comparison scientifically consistent; boiling relates to London forces, not X–X bond strength. EN explicitly states hydrogen–iodine formation is **reversible** and Group 17 colour generally darkens; RU/UZ omitted the reversibility, and UZ omitted the colour trend. Both translations corrected immediately in private closed revision `20261029095956`. Source still immutable.
+- **11-02 | BOUNDED PASS:** Cl₂+2Br⁻→2Cl⁻+Br₂; Br₂+2I⁻→2Br⁻+I₂, halogen oxidising power and halide reducing power opposite trends, orange Br₂/violet I₂ organic-layer distinctions consistent in EN/RU/UZ.
+- **11-03 | BOUNDED PASS:** AgCl white/dilute NH₃ soluble, AgBr cream/concentrated NH₃ soluble, AgI yellow/NH₃ insoluble; nitric-acid pre-treatment (not HCl), 2HBr+H₂SO₄→Br₂+SO₂+2H₂O, 8HI+H₂SO₄→4I₂+H₂S+4H₂O all atom/charge consistent across languages. No misleading claim that all hydrogen halides merely protonate.
+- **11-04 | BOUNDED PASS:** Cl₂+2OH⁻→Cl⁻+ClO⁻+H₂O in cold dilute alkali; 3Cl₂+6OH⁻→5Cl⁻+ClO₃⁻+3H₂O in hot concentrated alkali, chlorine 0→−1/+1 or −1/+5, HOCl/ClO⁻ aqueous disinfection and pH dependence present in EN/RU/UZ.
+
+**Cumulative reviewed 51/91; 43 provisional no-defect, 8 corrected CLOSED candidate lessons among the 51. 40 remain unreviewed, zero approved for learner release.**
