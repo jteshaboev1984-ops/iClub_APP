@@ -45,11 +45,12 @@ function fixture(){
   const saveSource=()=>{fs.writeFileSync(paths[1],JSON.stringify(old));fs.writeFileSync(paths[2],JSON.stringify(batch));};
   const saveFull=()=>fs.writeFileSync(paths[0],JSON.stringify(all));
   const pin=()=>{
-    all.source_files=[{name:'old.json',sha256:digest(fs.readFileSync(paths[1]))},
-      {name:'new.json',sha256:digest(fs.readFileSync(paths[2]))}];
     all.items_canonical_sha256=canonical(all.items);
     batch.items_canonical_sha256=canonical(batch.items);
-    saveSource();saveFull();
+    saveSource();
+    all.source_files=[{name:'old.json',sha256:digest(fs.readFileSync(paths[1]))},
+      {name:'new.json',sha256:digest(fs.readFileSync(paths[2]))}];
+    saveFull();
   };
   pin();
   return {dir,paths,all,old,batch,pin,saveFull,saveSource};
@@ -88,12 +89,15 @@ test('reject wrong answer key',()=>withCase(x=>{
   fails(x,/wrong A-D key/);
 }));
 test('reject missing RU stem',()=>withCase(x=>{
-  x.all.items[70].ru.question='';x.batch.items[34]=x.all.items[70];x.pin();
+  x.all.items[70].ru.question='';
+  x.all.items[70].content_sha256=canonical(Object.fromEntries(Object.entries(x.all.items[70]).filter(([k])=>k!=='content_sha256')));
+  x.pin();
   fails(x,/missing localized stem/);
 }));
 test('reject repeated UZ options',()=>withCase(x=>{
   x.all.items[70].uz.options[1]=x.all.items[70].uz.options[0];
-  x.batch.items[34]=x.all.items[70];x.pin();fails(x,/duplicate options/);
+  x.all.items[70].content_sha256=canonical(Object.fromEntries(Object.entries(x.all.items[70]).filter(([k])=>k!=='content_sha256')));
+  x.pin();fails(x,/duplicate options/);
 }));
 test('reject content tampering without individual SHA renewal',()=>withCase(x=>{
   x.all.items[70].en.question+=' adversarial edit';x.batch.items[34]=x.all.items[70];x.pin();
