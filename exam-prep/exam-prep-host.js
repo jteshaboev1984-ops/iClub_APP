@@ -5,19 +5,19 @@
   const MATHEMATICS_KEY = "mathematics";
   const ECONOMICS_KEY = "economics";
   const CHEMISTRY_KEY = "chemistry";
+  const CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED = false;
   const state = {
     open: false,
     subjectKey: null,
     language: "ru",
     accessToken: 0,
     capabilities: null,
-    invitation: null,
     economicsShell: null,
     chemistryShell: null,
     chemistryEntryShell: null,
     chemistryTheoryCatalog: null,
-    consentBusy: false,
-    consentError: false,
+    chemistryOffer: null,
+    chemistryConsentBusy: false,
     returnFocusEl: null
   };
 
@@ -42,6 +42,9 @@
         entryBadgeAi: "Cambridge AS · Mathematics · AI",
         entryTitle: "Exam Prep",
         comingSoonBadge: "Ishlab chiqilmoqda",
+        economicsLimitedBadge: "Kirish cheklangan",
+        economicsLimitedDesc: "Economics Exam Prep hozircha faqat sinov ishtirokchilari uchun ochiq.",
+        economicsLimitedNote: "Practice orqali o‘rganishni davom ettirishingiz va Toursda jadval bo‘yicha qatnashishingiz mumkin.",
         comingSoonDesc: "Bu fan bo‘yicha imtihonga tayyorgarlik ishlab chiqilmoqda.",
         comingSoonNote: "Hozircha Practice va Tours orqali mashq qilishingiz mumkin.",
         comingSoonCta: "Batafsil",
@@ -52,34 +55,6 @@
         entryNote: "Tours tarixi saqlanadi. Mathematics Practice yangidan boshlanadi.",
         entryAiNote: "AI yordamchisi Exam Prep’da mavjud: natijalar, reja, mavzular va qayd etilgan xatolarni tushuntiradi.",
         entryCta: "Exam Prepni ochish",
-        inviteBadge: "Yangi imkoniyat",
-        inviteCta: "Taklifni ko‘rish",
-        inviteTitle: "Exam Prep sinoviga taklif",
-        inviteSub: "Ishtirokingizni tasdiqlang",
-        inviteKicker: "Yangi imkoniyat sinovi",
-        inviteBody: "Siz Cambridge AS Mathematics Exam Prep modulini sinab ko‘rishga taklif qilindingiz. Sinov davomida javoblaringiz, bajarish vaqtingiz va o‘quv progressi modulni yaxshilash uchun ishlatiladi. Ishtirok ixtiyoriy, ayrim xatolar uchrashi mumkin. Tours tarixi saqlanadi. Mathematics Practice yangilangan savollar bilan yangidan boshlanadi.",
-        joinBadge: "Sinov uchun joylar ochiq",
-        joinCta: "Ishtirok etish",
-        joinTitle: "Exam Prepni sinab ko‘ring",
-        joinSub: "Joylar cheklangan",
-        joinKicker: "Cambridge AS Mathematics",
-        joinBody: "Exam Prep yangi tayyorgarlik yo‘lini sinab ko‘rish uchun cheklangan miqdorda joy ochildi. Ishtirok ixtiyoriy. Javoblaringiz, bajarish vaqtingiz va o‘quv progressi modulni yaxshilash uchun ishlatiladi. Tours tarixi saqlanadi. Mathematics Practice yangilangan savollar bilan yangidan boshlanadi.",
-        joinConsent: "Ishtirok etish va boshlash",
-        slotsLeft: "Qolgan joylar",
-        mode: "O‘qish formati",
-        components: "Komponentlar",
-        history: "Tours",
-        historyKept: "Saqlanadi",
-        consent: "Ishtirok etishga roziman",
-        consented: "Rozilik qayd etildi",
-        consentedBody: "Roziligingiz saqlandi. Exam Prep kirishi sinov boshlanganda alohida faollashtiriladi.",
-        revoke: "Rozilikni bekor qilish",
-        revokeConfirm: "Exam Prep sinovida ishtirok etishdan voz kechmoqchimisiz?",
-        busy: "Saqlanmoqda…",
-        error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.",
-        core: "Mustaqil tayyorgarlik",
-        ai: "AI yordamida tayyorgarlik",
-        mentor: "Mentor ko‘magida tayyorgarlik"
       };
     }
     if (lang === "en") {
@@ -95,6 +70,9 @@
         entryBadgeAi: "Cambridge AS · Mathematics · AI",
         entryTitle: "Exam Prep",
         comingSoonBadge: "In development",
+        economicsLimitedBadge: "Limited access",
+        economicsLimitedDesc: "Economics Exam Prep is currently available only to testing participants.",
+        economicsLimitedNote: "You can keep learning in Practice and join Tours when they open.",
         comingSoonDesc: "Exam preparation for this subject is in development.",
         comingSoonNote: "You can continue learning through Practice and Tours in the meantime.",
         comingSoonCta: "Learn more",
@@ -105,34 +83,6 @@
         entryNote: "Tours history stays unchanged. Mathematics Practice starts fresh.",
         entryAiNote: "AI Tutor is available in Exam Prep for progress, plans, topics and recorded mistakes.",
         entryCta: "Open Exam Prep",
-        inviteBadge: "New feature",
-        inviteCta: "View invitation",
-        inviteTitle: "Invitation to test Exam Prep",
-        inviteSub: "Confirm your participation",
-        inviteKicker: "New feature test",
-        inviteBody: "You have been invited to test the Cambridge AS Mathematics Exam Prep module. During the test, your answers, completion time and learning progress will be used to improve the module. Participation is voluntary, and you may encounter errors. Your Tours history stays unchanged. Mathematics Practice starts fresh with the updated question set.",
-        joinBadge: "Testing places are open",
-        joinCta: "Join testing",
-        joinTitle: "Try Exam Prep",
-        joinSub: "Limited places available",
-        joinKicker: "Cambridge AS Mathematics",
-        joinBody: "A limited number of places are open to test the new Exam Prep route. Participation is voluntary. Your answers, completion time and learning progress will be used to improve the module. Your Tours history stays unchanged. Mathematics Practice starts fresh with the updated question set.",
-        joinConsent: "Join and start",
-        slotsLeft: "Places remaining",
-        mode: "Study format",
-        components: "Components",
-        history: "Tours",
-        historyKept: "Preserved",
-        consent: "I agree to participate",
-        consented: "Consent recorded",
-        consentedBody: "Your consent has been saved. Exam Prep access will be activated separately when testing begins.",
-        revoke: "Withdraw consent",
-        revokeConfirm: "Do you want to stop participating in the Exam Prep test?",
-        busy: "Saving…",
-        error: "The action could not be completed. Please try again.",
-        core: "Independent preparation",
-        ai: "Preparation with AI support",
-        mentor: "Preparation with mentor support"
       };
     }
     return {
@@ -147,6 +97,9 @@
       entryBadgeAi: "Cambridge AS · Mathematics · ИИ",
       entryTitle: "Exam Prep",
       comingSoonBadge: "В разработке",
+        economicsLimitedBadge: "Доступ ограничен",
+        economicsLimitedDesc: "Economics Exam Prep сейчас доступен только участникам тестирования.",
+        economicsLimitedNote: "Вы можете продолжать заниматься в Практике и участвовать в Турах по расписанию.",
       comingSoonDesc: "Экзаменационная подготовка по этому предмету находится в разработке.",
       comingSoonNote: "Пока вы можете продолжать обучение через Practice и Tours.",
       comingSoonCta: "Подробнее",
@@ -157,34 +110,6 @@
       entryNote: "История Tours сохраняется. Mathematics Practice начинается заново.",
       entryAiNote: "ИИ-помощник доступен в Exam Prep: объясняет прогресс, план, темы и зафиксированные ошибки.",
       entryCta: "Открыть Exam Prep",
-      inviteBadge: "Новая функция",
-      inviteCta: "Посмотреть приглашение",
-      inviteTitle: "Приглашение протестировать Exam Prep",
-      inviteSub: "Подтвердите участие",
-      inviteKicker: "Тестирование новой функции",
-      inviteBody: "Вы приглашены протестировать модуль Cambridge AS Mathematics Exam Prep. Во время тестирования ваши ответы, время выполнения и учебный прогресс будут использоваться для улучшения модуля. Участие добровольное, возможны ошибки. История Tours сохраняется. Mathematics Practice начинается заново с обновлёнными вопросами.",
-      joinBadge: "Открыт набор на тестирование",
-      joinCta: "Принять участие",
-      joinTitle: "Попробуйте Exam Prep",
-      joinSub: "Количество мест ограничено",
-      joinKicker: "Cambridge AS Mathematics",
-      joinBody: "Мы открыли ограниченное количество мест для тестирования нового маршрута Exam Prep. Участие добровольное. Ваши ответы, время выполнения и учебный прогресс будут использоваться для улучшения модуля. История Tours сохраняется. Mathematics Practice начинается заново с обновлёнными вопросами.",
-      joinConsent: "Принять участие и начать",
-      slotsLeft: "Осталось мест",
-      mode: "Формат подготовки",
-      components: "Компоненты",
-      history: "Tours",
-      historyKept: "Сохраняется",
-      consent: "Я согласен участвовать",
-      consented: "Согласие сохранено",
-      consentedBody: "Согласие сохранено. Доступ к Exam Prep будет включён отдельно, когда начнётся тестирование.",
-      revoke: "Отозвать согласие",
-      revokeConfirm: "Вы хотите отказаться от участия в тестировании Exam Prep?",
-      busy: "Сохраняем…",
-      error: "Не удалось выполнить действие. Попробуйте ещё раз.",
-      core: "Самостоятельная подготовка",
-      ai: "Подготовка с поддержкой ИИ",
-      mentor: "Подготовка с поддержкой ментора"
     };
   }
 
@@ -257,26 +182,10 @@
     );
   }
 
-  function invitationItem() {
-    const items = state.invitation?.invitations;
-    if (!state.invitation?.invited || !Array.isArray(items) || items.length === 0) return null;
-    return items.find(item => item && item.memberStatus !== "removed") || null;
-  }
-
-  function invited() {
-    return Boolean(invitationItem());
-  }
-
   function showable() {
-    return (state.subjectKey === MATHEMATICS_KEY && (allowed(state.capabilities) || invited())) ||
+    return (state.subjectKey === MATHEMATICS_KEY && allowed(state.capabilities)) ||
       (state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true) ||
-      (state.subjectKey === CHEMISTRY_KEY && (state.chemistryShell?.enabled === true || state.chemistryEntryShell?.enabled === true));
-  }
-
-  function serviceModeText(mode, text) {
-    if (mode === "ai_assist") return text.ai;
-    if (mode === "mentor_care") return text.mentor;
-    return text.core;
+      (state.subjectKey === CHEMISTRY_KEY && (state.chemistryShell?.enabled === true || state.chemistryEntryShell?.enabled === true || state.chemistryTheoryCatalog?.ok === true));
   }
 
   function renderEntryCopy() {
@@ -289,15 +198,13 @@
     const p5 = $("#subject-hub-exam-prep-p5");
     const note = $("#subject-hub-exam-prep-note");
     const cta = $("#subject-hub-exam-prep-cta");
-    const item = invitationItem();
-    const inviteOnly = Boolean(item) && !allowed(state.capabilities);
-    const openOffer = inviteOnly && item.openRecruitment === true;
     const aiActive = allowed(state.capabilities) && state.capabilities?.aiAssist === true;
     const econActive = state.subjectKey === ECONOMICS_KEY && state.economicsShell?.enabled === true;
     const chemTheory = state.subjectKey === CHEMISTRY_KEY && state.chemistryTheoryCatalog?.ok === true;
     const chemActive = state.subjectKey === CHEMISTRY_KEY &&
       (state.chemistryShell?.enabled === true || state.chemistryEntryShell?.enabled === true || chemTheory);
     const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY && !econActive && !chemActive);
+    const economicsLimited = state.subjectKey === ECONOMICS_KEY && !econActive;
     const econSub = state.language === "uz"
       ? "Paper 1 va Paper 3: imtihon, javoblar va natijalar"
       : state.language === "en"
@@ -307,18 +214,17 @@
     if (components) components.style.display = comingSoon ? 'none' : '';
     if (entry) {
       entry.classList.toggle('is-coming-soon', comingSoon);
-      entry.classList.toggle("is-invitation", inviteOnly);
       entry.classList.toggle("has-ai-assist", aiActive);
-      entry.setAttribute("data-ep-entry-mode", comingSoon ? "coming-soon" : (openOffer ? "open-testing" : (inviteOnly ? "invitation" : "live")));
+      entry.setAttribute("data-ep-entry-mode", comingSoon ? "coming-soon" : "live");
       entry.setAttribute("data-ep-ai-visible", aiActive ? "true" : "false");
     }
-    if (badge) badge.textContent = econActive ? "Cambridge · Economics 9708" : (comingSoon ? text.comingSoonBadge : (openOffer ? text.joinBadge : (inviteOnly ? text.inviteBadge : (aiActive ? text.entryBadgeAi : text.entryBadge))));
-    if (title) title.textContent = openOffer ? text.joinTitle : (inviteOnly ? text.inviteTitle : text.entryTitle);
-    if (sub) sub.textContent = econActive ? econSub : (comingSoon ? text.comingSoonDesc : (openOffer ? text.joinSub : (inviteOnly ? text.inviteSub : text.entryDesc)));
+    if (badge) badge.textContent = econActive ? "Cambridge · Economics 9708" : (comingSoon ? (economicsLimited ? text.economicsLimitedBadge : text.comingSoonBadge) : (aiActive ? text.entryBadgeAi : text.entryBadge));
+    if (title) title.textContent = text.entryTitle;
+    if (sub) sub.textContent = econActive ? econSub : (comingSoon ? (economicsLimited ? text.economicsLimitedDesc : text.comingSoonDesc) : text.entryDesc);
     if (p1) p1.textContent = econActive ? "Paper 1 · AS Level · 60 min" : text.entryP1;
     if (p5) p5.textContent = econActive ? "Paper 3 · A Level · 75 min" : text.entryP5;
-    if (note) note.textContent = econActive ? econSub : (comingSoon ? text.comingSoonNote : (aiActive ? text.entryAiNote : text.entryNote));
-    if (cta) cta.textContent = econActive ? text.entryCta : (comingSoon ? text.comingSoonCta : (openOffer ? text.joinCta : (inviteOnly ? text.inviteCta : text.entryCta)));
+    if (note) note.textContent = econActive ? econSub : (comingSoon ? (economicsLimited ? text.economicsLimitedNote : text.comingSoonNote) : (aiActive ? text.entryAiNote : text.entryNote));
+    if (cta) cta.textContent = comingSoon ? text.comingSoonCta : text.entryCta;
     if (p5?.parentElement) p5.parentElement.style.display = chemActive ? "none" : "";
     if (chemActive) {
       const theoryOnly = chemTheory && state.chemistryShell?.enabled !== true &&
@@ -358,6 +264,59 @@
     }
   }
 
+  function chemistryBetaLabels() {
+    if (state.language === "uz") return {
+      headline: "Chemistry sinovida qatnashish",
+      invitation: "Siz Mathematics Exam Prep sinovida qatnashyapsiz. Chemistry Paper 1 sinovida ham qatnashishga alohida rozilik bildirishingiz mumkin. Hozircha imtihon ochilmaydi va avvalgi natijalaringiz o‘zgarmaydi.",
+      join: "Chemistry sinoviga roziman",pending:"Roziligingiz saqlandi. Chemistry ochilganda alohida xabar beriladi.",
+    };
+    if (state.language === "en") return {
+      headline: "Chemistry beta participation",
+      invitation: "You are participating in Mathematics Exam Prep testing. You may separately opt in to Chemistry Paper 1 testing. The paper is not available yet, and your existing results will not change.",
+      join:"I agree to Chemistry testing",pending:"Your consent is saved. Chemistry access will be announced separately.",
+    };
+    return {
+      headline:"Участие в тестировании Chemistry",
+      invitation:"Вы участвуете в тестировании Mathematics Exam Prep. Вы можете отдельно согласиться попробовать Chemistry Paper 1. Сам экзамен пока закрыт, а прежние результаты останутся без изменений.",
+      join:"Согласен участвовать в тестировании Chemistry",
+      pending:"Ваше согласие сохранено. Открытие Chemistry будет объявлено отдельно.",
+    };
+  }
+
+  async function updateChemistryConsent(revoke) {
+    if (state.chemistryConsentBusy || state.subjectKey !== CHEMISTRY_KEY) return;
+    const lex = chemistryBetaLabels();
+    if (revoke && typeof window.confirm === "function" && !window.confirm(lex.confirmation)) return;
+    state.chemistryConsentBusy = true;
+    const token = state.accessToken;
+    const root = rootEl();
+    const buttons = root?.querySelectorAll?.('[data-chemistry-beta-action]');
+    buttons?.forEach(button => { button.disabled = true; });
+    try {
+      const name = revoke ? "revoke_my_exam_prep_chemistry_consent_v1"
+        : "grant_my_exam_prep_chemistry_consent_v1";
+      const args = revoke ? {} : { p_acknowledgement: "I_CONSENT_TO_CHEMISTRY_P1_CONTROLLED_BETA_V1" };
+      const response = await window.sb?.rpc?.(name,args);
+      if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return;
+      if (response?.error || response?.data?.ok !== true) throw new Error("not_saved");
+      const status = await window.sb?.rpc?.("get_my_exam_prep_chemistry_beta_status_v1",{});
+      if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return;
+      state.chemistryOffer = status?.error ? null : status?.data;
+      if (state.open && !state.chemistryShell?.enabled) renderComingSoonShell();
+    } catch (_) {
+      if (token === state.accessToken && state.open) {
+        const note = document.createElement("p");
+        note.className = "ep-host-note";
+        note.setAttribute("role","alert");
+        note.textContent = lex.error;
+        root?.querySelector(".ep-host-coming-soon")?.append(note);
+      }
+    } finally {
+      state.chemistryConsentBusy = false;
+      buttons?.forEach(button => { button.disabled = false; });
+    }
+  }
+
   // STAGE03_EXAM_PREP_ALL_SUBJECTS_V1: presentation only, no assessment APIs.
   function renderComingSoonShell() {
     const root = rootEl();
@@ -368,22 +327,43 @@
     shell.setAttribute('aria-label', text.entryTitle);
     const badge = document.createElement('div');
     badge.className = 'ep-host-kicker';
-    badge.textContent = text.comingSoonBadge;
+    badge.textContent = state.subjectKey === ECONOMICS_KEY ? text.economicsLimitedBadge : text.comingSoonBadge;
     const heading = document.createElement('h2');
     heading.className = 'ep-host-title';
     heading.textContent = text.entryTitle;
     const description = document.createElement('p');
     description.className = 'ep-host-note';
-    description.textContent = text.comingSoonDesc;
+    description.textContent = state.subjectKey === ECONOMICS_KEY ? text.economicsLimitedDesc : text.comingSoonDesc;
     const note = document.createElement('p');
     note.className = 'ep-host-note';
-    note.textContent = text.comingSoonNote;
+    note.textContent = state.subjectKey === ECONOMICS_KEY ? text.economicsLimitedNote : text.comingSoonNote;
     const closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.className = 'ep-host-btn ep-host-btn-secondary';
     closeBtn.textContent = text.comingSoonClose;
     closeBtn.addEventListener('click', close);
     shell.append(badge, heading, description, note);
+    if (CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED && state.subjectKey === CHEMISTRY_KEY && state.chemistryOffer?.eligible === true) {
+      const lex = chemistryBetaLabels();
+      const group = document.createElement("div");
+      group.className = "ep-host-component-card ep-host-chemistry-offer";
+      const title = document.createElement("h3");
+      title.className = "ep-host-chemistry-offer-title";
+      title.textContent = lex.headline;
+      const details = document.createElement("p");
+      details.className = "ep-host-note";
+      details.textContent = state.chemistryOffer.consented === true ? lex.pending : lex.invitation;
+      group.append(title,details);
+      const action = document.createElement("button");
+      action.type = "button";
+      action.className = state.chemistryOffer.consented === true
+        ? "ep-host-btn ep-host-btn-secondary" : "ep-host-btn ep-host-btn-primary";
+      action.setAttribute("data-chemistry-beta-action", "");
+      action.textContent = state.chemistryOffer.consented === true ? lex.revoke : lex.join;
+      action.addEventListener("click", () => updateChemistryConsent(state.chemistryOffer?.consented === true));
+      group.append(action);
+      shell.append(group);
+    }
     shell.append(closeBtn);
     root.replaceChildren(shell);
     return true;
@@ -407,39 +387,6 @@
     return true;
   }
 
-  function renderInvitationShell() {
-    const root = rootEl();
-    const item = invitationItem();
-    if (!root || !item) return false;
-    const text = labels(state.language);
-    const openOffer = item.openRecruitment === true;
-    const granted = item.consentStatus === "granted" && !item.revokedAt;
-    const disabled = state.consentBusy ? " disabled" : "";
-    const action = granted
-      ? `<div class="ep-host-consent-state" role="status"><strong>${text.consented}</strong><span>${text.consentedBody}</span></div>
-         <button class="ep-host-btn ep-host-btn-secondary" type="button" data-ep-beta-action="revoke"${disabled}>${state.consentBusy ? text.busy : text.revoke}</button>`
-      : `<button class="ep-host-btn ep-host-btn-primary" type="button" data-ep-beta-action="grant"${disabled}>${state.consentBusy ? text.busy : (openOffer ? text.joinConsent : text.consent)}</button>`;
-    const error = state.consentError ? `<div class="ep-host-error" role="alert">${text.error}</div>` : "";
-
-    root.innerHTML = `
-      <section class="ep-host-shell ep-host-invite-shell" aria-label="${openOffer ? text.joinTitle : text.inviteTitle}">
-        <div class="ep-host-kicker">${openOffer ? text.joinKicker : text.inviteKicker}</div>
-        <h2 class="ep-host-title">${openOffer ? text.joinTitle : text.inviteTitle}</h2>
-        <p class="ep-host-note">${openOffer ? text.joinBody : text.inviteBody}</p>
-        <div class="ep-host-invite-facts">
-          <div><span>${text.mode}</span><strong>${serviceModeText(item.serviceMode, text)}</strong></div>
-          <div><span>${text.components}</span><strong>P1 + P5</strong></div>
-          ${openOffer ? `<div><span>${text.slotsLeft}</span><strong>${Math.max(0, item.remainingSlots || 0)}</strong></div>` : `<div><span>${text.history}</span><strong>${text.historyKept}</strong></div>`}
-        </div>
-        ${error}
-        <div class="ep-host-actions">${action}</div>
-      </section>`;
-
-    root.querySelector('[data-ep-beta-action="grant"]')?.addEventListener("click", handleGrantConsent);
-    root.querySelector('[data-ep-beta-action="revoke"]')?.addEventListener("click", handleRevokeConsent);
-    return true;
-  }
-
   function close() {
     internal.economicsNative?.unmount?.();
     internal.chemistryNative?.unmount?.();
@@ -449,8 +396,6 @@
     internal.chemistryTheoryNative?.unmount?.();
     const shouldRestoreFocus = state.open && (showable() || (state.subjectKey && state.subjectKey !== MATHEMATICS_KEY));
     state.open = false;
-    state.consentBusy = false;
-    state.consentError = false;
     const root = rootEl();
     const hub = hubEl();
     if (hub) hub.classList.remove("exam-prep-host-open");
@@ -469,25 +414,17 @@
     const api = internal.api;
     if (!api || typeof api.capabilities !== "function") {
       state.capabilities = null;
-      state.invitation = null;
       setExamPrepPeerStatus("unavailable");
       setEntryVisible(false);
       close();
       return null;
     }
-
-    const [capResult, inviteResult] = await Promise.all([
-      api.capabilities(),
-      typeof api.betaInvitation === "function" ? api.betaInvitation() : Promise.resolve(null)
-    ]);
+    const capResult = await api.capabilities();
     if (token !== state.accessToken) return state.capabilities;
-
     state.capabilities = capResult?.ok ? capResult.data : null;
-    state.invitation = inviteResult?.ok ? inviteResult.data : null;
     renderEntryCopy();
-
     const visible = showable();
-    if (!visible) setExamPrepPeerStatus(capResult?.ok || inviteResult?.ok ? "restricted" : "unavailable");
+    if (!visible) setExamPrepPeerStatus(capResult?.ok ? "restricted" : "unavailable");
     setEntryVisible(visible);
     if (!visible) close();
     return state.capabilities;
@@ -498,59 +435,6 @@
       return syncSubjectHub({ subjectKey: state.subjectKey, language: state.language });
     }
     return refreshAccess();
-  }
-
-  async function refreshInvitationOnly() {
-    const api = internal.api;
-    if (!api || typeof api.betaInvitation !== "function") {
-      state.invitation = null;
-      return null;
-    }
-    const result = await api.betaInvitation();
-    state.invitation = result?.ok ? result.data : null;
-    renderEntryCopy();
-    setEntryVisible(showable());
-    return state.invitation;
-  }
-
-  async function handleGrantConsent() {
-    if (state.consentBusy) return;
-    const item = invitationItem();
-    const api = internal.api;
-    if (!item || !api || typeof api.grantBetaConsent !== "function") return;
-    state.consentBusy = true;
-    state.consentError = false;
-    renderInvitationShell();
-    const result = item.openRecruitment === true && typeof api.claimBetaCoreSeat === "function"
-      ? await api.claimBetaCoreSeat(item.cohortKey)
-      : await api.grantBetaConsent(item.cohortKey);
-    state.consentBusy = false;
-    state.consentError = !result?.ok;
-    if (result?.ok) await refreshAccess();
-    if (state.open && allowed(state.capabilities)) renderLiveShell();
-    else if (state.open && invited()) renderInvitationShell();
-  }
-
-  async function handleRevokeConsent() {
-    if (state.consentBusy) return;
-    const item = invitationItem();
-    const api = internal.api;
-    const text = labels(state.language);
-    if (!item || !api || typeof api.revokeBetaConsent !== "function") return;
-    if (typeof window.confirm === "function" && !window.confirm(text.revokeConfirm)) return;
-    state.consentBusy = true;
-    state.consentError = false;
-    renderInvitationShell();
-    const result = await api.revokeBetaConsent(item.cohortKey);
-    state.consentBusy = false;
-    state.consentError = !result?.ok;
-    if (result?.ok) await refreshInvitationOnly();
-    if (!showable()) {
-      close();
-      setEntryVisible(false);
-      return;
-    }
-    if (state.open && invited() && !allowed(state.capabilities)) renderInvitationShell();
   }
 
   async function syncSubjectHub(hostContext = {}) {
@@ -566,11 +450,11 @@
     if (state.subjectKey !== MATHEMATICS_KEY) {
       const token = ++state.accessToken;
       state.capabilities = null;
-      state.invitation = null;
       state.economicsShell = null;
       state.chemistryShell = null;
       state.chemistryEntryShell = null;
       state.chemistryTheoryCatalog = null;
+      state.chemistryOffer = null;
       if (state.subjectKey === ECONOMICS_KEY) {
         try {
           const response = await window.sb?.rpc?.("get_my_exam_prep_program_shell_v1", {
@@ -612,6 +496,16 @@
             state.chemistryEntryShell = shell;
           }
         } catch (_) { /* Entry remains unavailable unless explicitly released. */ }
+        if (CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED && !state.chemistryShell?.enabled && !state.chemistryEntryShell?.enabled) {
+          try {
+            const response = await window.sb?.rpc?.("get_my_exam_prep_chemistry_beta_status_v1",{});
+            if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
+            if (!response?.error && response?.data?.eligible === true)
+              state.chemistryOffer = response.data;
+          } catch (_) { /* Non-eligible users still see normal in-development message. */ }
+        }
+      }
+      if (state.subjectKey === CHEMISTRY_KEY) {
         try {
           const response = await window.sb?.rpc?.("iclub_exam_chemistry_j24_theory_catalog_v1", {p_language:state.language});
           if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
@@ -730,7 +624,7 @@
 
     const root = rootEl();
     const hub = hubEl();
-    const rendered = allowed(state.capabilities) ? renderLiveShell() : renderInvitationShell();
+    const rendered = allowed(state.capabilities) && renderLiveShell();
     if (!root || !hub || !rendered) {
       close();
       return false;

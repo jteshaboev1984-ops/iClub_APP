@@ -620,3 +620,32 @@ The v3 candidate academic, RU/UZ/EN language, and source editorial review stage 
 **Технический выпуск:** PR #385 merged as `d6293f53b52a201a0e08d46b17ac3bc3f1174fdb`; isolated workflow #40642395257 PASS; Vercel production READY; новая Supabase миграция `20261028061253_iclub_econ_core_criteria_without_answer_hints_v1` применена. Canary-сценарий с настоящим активным user-owned task проверен только в транзакции ROLLBACK на EN/RU/UZ: нет answer_requirements/indicative_points, присутствуют безопасные assessment criteria и marks, другой пользователь отклонён, прогресс не изменён. На последней проверке 22 новые задания, 22 исторических и 22 private mark schemes на месте, один участник beta и **два** уже выполненных шага сохранены. Browser UI под логином ученика после конкретно этой поставки не тестировался; CI был эмуляцией.
 
 Ссылка на формальный академический источник: официальный Cambridge 9708 syllabus (2026–2028); методический подход iClub оригинальный, **не** официальная Cambridge отметка или работа с оригинальным past paper mark scheme.
+
+
+---
+
+## 28.10.2026 — Economics Exam Prep functional parity: P0 implementation branch (not released)
+
+**Current inspected baseline:** `main` = `a11599609d3e3f8fa153efd267e16110e186b4d6`, Vercel production deployment `dpl_AnZMuEvmcixL46ncoUdv8mR9GoYc` READY. This is a live October baseline; do not replace it with August/September audits.
+
+**Architect's approved scope:** Economics P1/P3 MCQ must follow Mathematics-style explicit submission, server ACK, recovery of uncertain writes, and active beta access checks. Do not change the bank, Mathematics, Tours/Practice, learner history, written P2/P4 Core, AI Assist or Mentor Care.
+
+**Verified pre-fix behavior:** Mathematics `exam-prep-live.js` submits through `submitAnswer` → `exam-prep-api.js::submitResponse`; diagnostic/guarded learning writes retain pending submission and reconcile against `getSession` before any manual same-answer retry. Economics `exam-prep-economics-native.js` instead invoked `saveChoice(idx)` immediately from radio `change`, using `iclub_exam_native_mcq_answer_v1`. Existing Economics RPC supports a same-choice idempotent update, but `get`, `answer`, `finish`, `mark_studied`, `study_plan` did not revalidate current beta access. `start` and `start_diagnostic` already perform current beta checks; history remains owner-scoped. Actual native MCQ attempts: 3, active 0 (SELECT-only as inspected). No deletion is required.
+
+**What was staged in `fix/economics-exam-prep-answer-parity-p0-20261028`:**
+1. `exam-prep/exam-prep-economics-native.js`: distinct radio choice + explicit RU/UZ/EN submit button; one in-flight send; verified ACK only; after RPC failure read the owned session; if stored response matches, continue without resubmission; else offer manual same-choice retry after a successful server read. Tab-scoped selection/pending draft survives remount/refresh, without writing to legacy `iclub_state_v1` or any assessment history. Pending uncertain answer stays on original question.
+2. `supabase/migrations/20261028194500_iclub_economics_native_mcq_active_access_parity_v1.sql`: additive `CREATE OR REPLACE` of only five native Economics RPCs; current beta entitlement checked server-side before active answers, unfinished attempt delivery/finish and learning actions. An owned finalized attempt remains readable as history through `get` and `history`. Existing authorization helper, attempt tables, raw responses, and written plan unchanged.
+3. `scripts/qa-economics-answer-parity-browser.cjs`: isolated genuine Chromium, **synthetic RPC only**, RU/UZ/EN desktop/mobile; direct radio must not save; test normal ACK, lost ACK after commit, error before commit + manual retry, double-tap, and tab-local draft recovery.
+4. `.github/workflows/economics-exam-prep-answer-parity.yml`: PR gate for the new browser test and existing Economics written/four-Paper navigation regressions.
+
+**Test evidence, as of this note:** JavaScript source syntax checked. The candidate migration compiled on the live schema inside `BEGIN ... ROLLBACK` and five guards were checked inside that transaction; post-rollback SELECT confirms active production definitions were not replaced (five false flags), and Economics attempt count remains 3. This is **not** an applied database migration, browser E2E pass, or a production release. Await fresh GitHub Actions run results and real authenticated browser checks.
+
+**Explicit holds before release:**
+- Confirm actual Chromium results, including network errors, double-click and mobile/locales; remediate failures on the isolated branch.
+- Run authenticated-role positive/negative tests for active, revoked, different-owner and QA-only access; validate history remains owner-only. `ROLLBACK` before production schema commit.
+- Confirm timed expiry and late server response cannot overwrite completed attempts; re-check 12-item diagnostic vs 30-item Papers.
+- Complete production E2E under controlled eligible learner access and assess the existing P2/P4 assignments. Do not force written tasks back to draft.
+- P1 parity (reusable rendering/weekly skill cycle) remains a separate later phase; no claim of completion or independent retest validity from already seen questions.
+- Only after these gates, coordinate reversible SQL+frontend release with exact deployment SHA and smoke test; preserve old attempts and other users' progress.
+
+**Release state:** code and SQL staged only. `main`, production Vercel and production Supabase remain unchanged by this branch. Do not merge automatically.

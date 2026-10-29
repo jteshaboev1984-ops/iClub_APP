@@ -49,37 +49,6 @@ const path = require('path');
         if (name === 'get_exam_prep_capabilities_v1') return { data: [window.__caps], error: null };
         if (name === 'get_my_exam_prep_beta_invitation_v1') return { data: window.__invite, error: null };
         if (name === 'get_my_exam_prep_weekly_flow_status_v1') return { data: { contract_version: 'weekly_flow_status_v1', enabled: false }, error: null };
-        if (name === 'grant_my_exam_prep_beta_consent_v1') {
-          window.__invite = {
-            ...window.__invite,
-            invited: true,
-            invitations: window.__invite.invitations.map(item => ({
-              ...item, consent_status: 'granted', consented_at: '2026-09-04T13:00:00Z', revoked_at: null
-            }))
-          };
-          return { data: { consent_status: 'granted' }, error: null };
-        }
-        if (name === 'claim_my_exam_prep_beta_core_seat_v1') {
-          window.__caps = {
-            program_key: 'math_as_p1_p5', rollout_state: 'controlled_beta', core_access: true,
-            ai_assist: false, mentor_care_entitled: false, mentor_assignment_active: false,
-            mentor_authority: false, kill_switch: false
-          };
-          window.__invite = {
-            ...window.__invite,
-            invited: true,
-            invitations: window.__invite.invitations.map(item => ({
-              ...item, member_status: 'active', consent_status: 'granted',
-              consented_at: '2026-09-28T13:00:00Z', open_recruitment: true,
-              remaining_slots: Math.max(0, Number(item.remaining_slots || 1) - 1)
-            }))
-          };
-          return { data: { status: 'activated', access_activated: true }, error: null };
-        }
-        if (name === 'revoke_my_exam_prep_beta_consent_v1') {
-          window.__invite = { ...window.__invite, invited: false, invitations: [] };
-          return { data: { consent_status: 'revoked' }, error: null };
-        }
         return { data: null, error: { message: `unexpected rpc ${name}` } };
       }
     };
@@ -106,133 +75,29 @@ const path = require('path');
   assert(result.opened === false, 'OFF direct open without invite must fail closed');
   assert(result.hidden === true && result.isOpen === false, 'OFF entry/root must stay closed');
 
-  // A real allowlisted candidate must be able to see and explicitly accept the
-  // invitation before Core entitlement exists. Merely viewing/opening must not consent.
+  // No invitation or opt-in may open Mathematics while the server Core gate is OFF.
+  // Even a legacy invitation payload is not an entitlement.
   await page.evaluate(() => {
     window.__invite = {
       invited: true,
-      consent_scope: 'exam_prep_controlled_beta_v1',
-      consent_copy_version: 'controlled_beta_v1_2026_09_04',
-      invitations: [{
-        cohort_key: 'math_as_p1_p5_beta_2026_09_01',
-        cohort_status: 'draft', capacity: 12, monitoring_hours: 72,
-        service_mode: 'core', activation_wave: 1, member_status: 'candidate',
-        consent_status: 'missing', consented_at: null, revoked_at: null,
-        consent_scope: 'exam_prep_controlled_beta_v1',
-        consent_copy_version: 'controlled_beta_v1_2026_09_04'
-      }]
+      invitations: [{ cohort_key: 'math_as_p1_p5_beta_2026_09_01',
+        member_status: 'candidate', consent_status: 'missing', open_recruitment: true }]
     };
   });
-
   result = await page.evaluate(async () => {
-    const beforeGrant = window.__rpcCalls.filter(x => x.name === 'grant_my_exam_prep_beta_consent_v1').length;
-    const synced = await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'en' });
-    const entryText = document.querySelector('#subject-hub-exam-prep-entry').textContent;
-    const opened = await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
-    const shellText = document.querySelector('#exam-prep-host-root').textContent;
-    const afterOpenGrant = window.__rpcCalls.filter(x => x.name === 'grant_my_exam_prep_beta_consent_v1').length;
-    return {
-      synced, opened, entryText, shellText, beforeGrant, afterOpenGrant,
-      hidden: document.querySelector('#subject-hub-exam-prep-entry').hidden
-    };
+    const synced = await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});
+    const opened = await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});
+    return {synced,opened,hidden:document.querySelector('#subject-hub-exam-prep-entry').hidden,
+      actionButtons:document.querySelectorAll('[data-ep-beta-action]').length};
   });
-  assert(result.synced === true && result.opened === true && result.hidden === false, 'invited candidate must see/open consent shell while Core is OFF');
-  assert(result.entryText.includes('Invitation to test Exam Prep'), 'entry must clearly identify the Exam Prep test invitation');
-  assert(result.shellText.includes('Participation is voluntary'), 'consent shell must disclose voluntary participation');
-  assert(result.shellText.includes('Independent preparation'), 'candidate must see a learner-facing study format, not an internal service label');
-  for (const internalTerm of ['Internal alpha', 'host bridge', 'synthetic learner data', 'Controlled beta', 'Beta capacity', 'Planned wave', 'AI Assist', 'Mentor Care']) {
-    assert(!result.shellText.includes(internalTerm), `learner-facing invitation leaked internal term: ${internalTerm}`);
-  }
-  assert(result.beforeGrant === 0 && result.afterOpenGrant === 0, 'viewing invitation must never auto-consent');
+  assert(!result.synced && !result.opened && result.hidden && result.actionButtons===0,
+    'Legacy invitations must never bypass Core entitlement or show consent buttons');
+  assert((await page.evaluate(()=>window.__rpcCalls)).every(x=>
+    !['get_my_exam_prep_beta_invitation_v1','grant_my_exam_prep_beta_consent_v1',
+      'claim_my_exam_prep_beta_core_seat_v1','revoke_my_exam_prep_beta_consent_v1'].includes(x.name)),
+    'No legacy invitation, join, consent or revoke calls are allowed from host');
 
-  await page.click('[data-ep-beta-action="grant"]');
-  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('Consent recorded'));
-
-  result = await page.evaluate(() => {
-    const grants = window.__rpcCalls.filter(x => x.name === 'grant_my_exam_prep_beta_consent_v1');
-    return {
-      count: grants.length,
-      args: grants[0]?.args,
-      shellText: document.querySelector('#exam-prep-host-root').textContent,
-      caps: window.__caps
-    };
-  });
-  assert(result.count === 1, 'explicit consent button must issue exactly one grant RPC');
-  assert(result.args?.p_cohort_key === 'math_as_p1_p5_beta_2026_09_01', 'consent must target invited cohort only');
-  assert(result.args?.p_acknowledgement === 'I_CONSENT_TO_EXAM_PREP_CONTROLLED_BETA_V1', 'consent acknowledgement token mismatch');
-  assert(result.shellText.includes('access will be activated separately when testing begins'), 'consent success must clearly state that access is still activated separately');
-  assert(result.caps.core_access === false && result.caps.kill_switch === true, 'consent UI must not mutate capability state');
-
-  await page.click('[data-ep-beta-action="revoke"]');
-  await page.waitForFunction(() => document.querySelector('#subject-hub-exam-prep-entry')?.hidden === true);
-  result = await page.evaluate(() => ({
-    revokeCalls: window.__rpcCalls.filter(x => x.name === 'revoke_my_exam_prep_beta_consent_v1'),
-    open: window.iClubExamPrep.isOpen(),
-    rootHidden: document.querySelector('#exam-prep-host-root').hidden
-  }));
-  assert(result.revokeCalls.length === 1, 'explicit revoke must issue exactly one revoke RPC');
-  assert(result.revokeCalls[0].args?.p_acknowledgement === 'I_REVOKE_EXAM_PREP_CONTROLLED_BETA_V1', 'revoke acknowledgement token mismatch');
-  assert(result.open === false && result.rootHidden === true, 'withdrawn candidate must lose invitation shell without gaining access');
-
-  // While recruitment is open, any authenticated Mathematics learner may opt in
-  // through the same learner-safe shell. Access is granted only after the explicit
-  // button action, and the server remains the seat-cap authority.
-  await page.evaluate(() => {
-    window.__caps = {
-      program_key: 'math_as_p1_p5', rollout_state: 'controlled_beta', core_access: false,
-      ai_assist: false, mentor_care_entitled: false, mentor_assignment_active: false,
-      mentor_authority: false, kill_switch: false
-    };
-    window.__invite = {
-      invited: true,
-      consent_scope: 'exam_prep_controlled_beta_v1',
-      consent_copy_version: 'controlled_beta_v1_2026_09_04',
-      invitations: [{
-        cohort_key: 'math_as_p1_p5_beta_2026_09_01',
-        cohort_status: 'canary', capacity: 12, monitoring_hours: 72,
-        service_mode: 'core', activation_wave: 2, member_status: 'open',
-        consent_status: 'missing', consented_at: null, revoked_at: null,
-        consent_scope: 'exam_prep_controlled_beta_v1',
-        consent_copy_version: 'controlled_beta_v1_2026_09_04',
-        open_recruitment: true, remaining_slots: 9
-      }]
-    };
-  });
-
-  result = await page.evaluate(async () => {
-    const beforeClaim = window.__rpcCalls.filter(x => x.name === 'claim_my_exam_prep_beta_core_seat_v1').length;
-    const synced = await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'en' });
-    const entryText = document.querySelector('#subject-hub-exam-prep-entry').textContent;
-    const opened = await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
-    const shellText = document.querySelector('#exam-prep-host-root').textContent;
-    const afterOpenClaim = window.__rpcCalls.filter(x => x.name === 'claim_my_exam_prep_beta_core_seat_v1').length;
-    return { synced, opened, entryText, shellText, beforeClaim, afterOpenClaim };
-  });
-  assert(result.synced && result.opened, 'open testing offer must be visible to an authenticated Mathematics learner');
-  assert(result.entryText.includes('Try Exam Prep'), 'open testing entry must use learner-facing recruitment copy');
-  assert(result.shellText.includes('Participation is voluntary'), 'open testing shell must explain voluntary participation');
-  assert(result.shellText.includes('Places remaining') && result.shellText.includes('9'), 'open testing shell must show remaining capacity');
-  assert(result.beforeClaim === 0 && result.afterOpenClaim === 0, 'viewing open testing offer must not grant access');
-
-  await page.click('[data-ep-beta-action="grant"]');
-  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent.includes('P1 and P5 results are tracked separately'));
-
-  result = await page.evaluate(() => {
-    const claims = window.__rpcCalls.filter(x => x.name === 'claim_my_exam_prep_beta_core_seat_v1');
-    return {
-      count: claims.length,
-      args: claims[0]?.args,
-      caps: window.__caps,
-      shellText: document.querySelector('#exam-prep-host-root').textContent
-    };
-  });
-  assert(result.count === 1, 'open testing join button must issue exactly one seat-claim RPC');
-  assert(result.args?.p_cohort_key === 'math_as_p1_p5_beta_2026_09_01', 'open testing claim must target the governed cohort');
-  assert(result.args?.p_acknowledgement === 'I_CONSENT_TO_EXAM_PREP_CONTROLLED_BETA_V1', 'open testing acknowledgement token mismatch');
-  assert(result.caps.core_access === true && result.caps.ai_assist === false && result.caps.mentor_care_entitled === false, 'open testing must activate Core only');
-  assert(result.shellText.includes('P1 and P5 results are tracked separately'), 'successful open testing join must transition directly to the live Core shell');
-
-  // Existing live Core behavior remains unchanged after consent UI addition.
+  // Existing Core access requires only server entitlement, not a consent shell.
   await page.evaluate(() => {
     window.__invite = { ...window.__invite, invited: false, invitations: [] };
     window.__caps = {
@@ -306,7 +171,7 @@ const path = require('path');
     };
   });
   assert(!result.hidden && result.mode === 'coming-soon' &&
-    result.badge.includes('In development') && !result.open && result.rootHidden,
+    result.badge.includes('Limited access') && !result.open && result.rootHidden,
     'subject switch must unmount Mathematics and show informational Exam Prep for Economics');
 
   result = await page.evaluate(async () => {
@@ -324,11 +189,7 @@ const path = require('path');
   const rpcCalls = await page.evaluate(() => window.__rpcCalls.map(x => ({ name: x.name, args: x.args })));
   const allowedRpcs = new Set([
     'get_exam_prep_capabilities_v1',
-    'get_my_exam_prep_beta_invitation_v1',
     'get_my_exam_prep_weekly_flow_status_v1',
-    'grant_my_exam_prep_beta_consent_v1',
-    'claim_my_exam_prep_beta_core_seat_v1',
-    'revoke_my_exam_prep_beta_consent_v1'
   ]);
   // Existing Economics native shell reads its own configuration on a subject
   // switch. Never treat this as Math beta access or authorize unknown RPCs.
@@ -337,11 +198,11 @@ const path = require('path');
       call.args?.p_program_key === 'economics_9708' &&
       ['en','ru','uz'].includes(call.args?.p_language)));
   assert(rpcCalls.length > 0, 'host must call server access RPCs');
-  assert(notAllowed.length === 0, 'host called an RPC outside allowed read-only Economics / Mathematics consent scope: ' +
+  assert(notAllowed.length === 0, 'host called an unauthorized RPC: ' +
     notAllowed.map(call=>call.name).join(', '));
 
   await browser.close();
-  console.log('P0-14 browser matrix: PASS (live access + consent + learner-safe copy + keyboard focus continuity)');
+  console.log('P0-14 browser matrix: PASS (server entitlement, no consent, cross-subject focus and storage continuity)');
 })().catch(error => {
   console.error(error);
   process.exit(1);

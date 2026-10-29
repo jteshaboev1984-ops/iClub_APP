@@ -49,14 +49,14 @@ assert(!native.includes('Согласен, начать')&&!native.includes('I a
  &&!native.includes('Roziman, boshlash'),'No unnecessary consent prompt in UI');
 assert(native.includes('Начать письменную практику')&&native.includes('Yozma mashqlarni boshlash')
  &&native.includes('Start written practice'),'Single Start action translated');
-assert(!native.includes('if(state.betaInvite&&!state.writtenPlan&&window.iClubWrittenCoreViewV1)'),'No duplicate consent banner');
-assert(native.includes('rpc("iclub_econ_written_beta_join_v1",{p_confirm:true})'),
+assert(!native.includes('if(state.writtenStartEligible&&!state.writtenPlan&&window.iClubWrittenCoreViewV1)'),'No duplicate consent banner');
+assert(native.includes('rpc("iclub_econ_written_start_v2",{})'),
  'Server eligibility preserved behind a direct Start action');
 assert(css.includes('ep-written-mark-breakdown')&&css.includes('ep-written-actions')&&css.includes('ep-written-marking[hidden]'),'Premium CSS must honor layout and hidden controls');
 for(const needle of ['written-core-view-v1.js?v=econ-plan-compact-back-20261028',
  'written-core-controller-v1.js?v=econ-assessment-criteria-nohints-20261028',
  'written-core-source-v1.css?v=econ-plan-compact-back-20261028',
- 'exam-prep-economics-native.js?v=econ-plan-compact-back-20261028'])
+ 'exam-prep-economics-native.js?v=econ-p0-answer-parity-no-consent-20261029'])
  assert(html.includes(needle),'Stale asset would hide change: '+needle);
 const root={};vm.runInNewContext(controller,{globalThis:root,module:{exports:{}},console});
 const ctl=(()=>{const sandbox={module:{exports:{}},console};vm.runInNewContext(controller,sandbox);return sandbox.module.exports})();

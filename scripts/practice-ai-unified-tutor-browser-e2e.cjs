@@ -35,7 +35,7 @@ async function main(){
   await page.addInitScript(({user})=>{
     window.__isolated={
       user,permitted:true,visibilityAllowed:true,
-      firstAckFails:true,authListeners:[]
+      firstAckFails:true,authListeners:[],preparedCalls:[]
     };
     window.i18n={getLang:()=>"ru"};
     window.sb={
@@ -54,6 +54,12 @@ async function main(){
       functions:{invoke:async(_name,{body})=>{
         if(body.intent==="status")return{data:{ok:true,eligible:window.__isolated.permitted,
           consented:window.__isolated.permitted,candidate:false},error:null};
+        if(body.intent==="ask"&&body.prompt_key==="catalog_help"){
+          window.__isolated.preparedCalls.push(body);
+          return{data:{ok:true,mode:"prepared",
+            message:"Откройте Учёбу, выберите предмет и начните Practice.",
+            provider_called:false,academic_state_changed:false},error:null};
+        }
         return{data:{ok:false,reason:"isolated_no_other_routes"},error:null};
       }}
     };
@@ -177,6 +183,93 @@ async function main(){
   assert.equal(homeStatus.eligible,true,
     "An inactive Practice screen must not revoke beta account eligibility");
   assert.equal(await page.locator("#iclub-global-ai-mark").count(),1);
+  // Reuse the SAME Tutor panel for product help, verified by screen.
+  // No model is contacted merely by opening or navigating the app.
+  // Await the real view transition before opening the global Tutor panel.
+  await page.waitForFunction(()=>window.iClubGlobalAiShell.context()
+    .screenCode==="home",null,{timeout:8000});
+  await page.evaluate(()=>window.iClubGlobalAiShell.open());
+  await page.locator("#iclub-global-ai-panel").waitFor({state:"visible",timeout:8000});
+  const promptTexts=()=>page.locator("[data-global-ai-quick] button").allTextContents();
+  await page.waitForFunction(()=>document.querySelector("[data-global-ai-quick]")
+    ?.textContent?.includes("С чего начать обучение?"),null,{timeout:8000});
+  assert.deepEqual(await promptTexts(),[
+    "С чего начать обучение?","Как эффективно проходить Practice?",
+    "Как подготовиться к туру?"
+  ],"Home may show only published, reviewed server-help routes");
+  const quickLayout=await page.locator("[data-global-ai-quick]").evaluate(host=>{
+    const container=host.getBoundingClientRect();
+    const buttons=[...host.querySelectorAll("button")].map(button=>
+      button.getBoundingClientRect());
+    return{
+      count:buttons.length,
+      noHorizontalScroll:host.scrollWidth<=host.clientWidth+2,
+      allVisible:buttons.every(b=>b.width>25 &&
+        b.left>=container.left-1 && b.right<=container.right+1)
+    };
+  });
+  assert.equal(quickLayout.count,3);
+  assert.equal(quickLayout.noHorizontalScroll,true,
+    "Quick prompts require hidden horizontal scrolling");
+  assert.equal(quickLayout.allVisible,true,
+    "Not every quick prompt fits in the existing Tutor panel");
+  await page.getByRole("button",{name:"С чего начать обучение?"}).click({timeout:8000});
+  await page.waitForFunction(()=>window.__isolated.preparedCalls.length===1,null,{timeout:8000});
+  const prepared=await page.evaluate(()=>window.__isolated.preparedCalls[0]);
+  assert.equal(prepared.prompt_key,"catalog_help");
+  assert.equal(activity.asks.length,0,"Prepared answer triggered paid generation");
+  await page.evaluate(()=>{
+    window.i18n.getLang=()=>"uz";window.iClubGlobalAiShell.open();
+  });
+  await page.waitForFunction(()=>document.querySelector("[data-global-ai-quick]")
+    ?.textContent?.includes("O‘qishni nimadan boshlash kerak?"),null,{timeout:8000});
+  assert.equal((await promptTexts()).length,3);
+  await page.evaluate(()=>{
+    window.i18n.getLang=()=>"en";window.iClubGlobalAiShell.open();
+  });
+  await page.waitForFunction(()=>document.querySelector("[data-global-ai-quick]")
+    ?.textContent?.includes("Where should I begin studying?"),null,{timeout:8000});
+  assert.equal((await promptTexts()).length,3);
+  await page.evaluate(()=>{
+    window.iClubGlobalAiShell.close();
+    window.i18n.getLang=()=>"ru";
+    document.getElementById("courses-practice-quiz").classList.remove("is-active");
+    document.getElementById("view-home").classList.remove("is-active");
+    document.getElementById("view-courses").classList.add("is-active");
+    document.getElementById("courses-practice-result").classList.remove("is-active");
+    const subject=document.createElement("section");
+    subject.id="courses-subject-hub";subject.className="stack-screen is-active";
+    document.querySelector("#view-courses main").append(subject);
+  });
+  await page.waitForFunction(()=>window.iClubGlobalAiShell.context()
+    .screenCode==="subject-hub",null,{timeout:8000});
+  await page.evaluate(()=>window.iClubGlobalAiShell.open());
+  assert.deepEqual(await promptTexts(),[
+    "С чего начать обучение?","Как эффективно проходить Practice?",
+    "Где найти материал для повторения?"
+  ],"Subject screen promised an unapproved academic explanation");
+  // Profile has no published profile-indicators card yet. One honest,
+  // approved support button is safer than dead "explain my profile" actions.
+  await page.evaluate(()=>{
+    window.iClubGlobalAiShell.close();
+    document.getElementById("view-courses").classList.remove("is-active");
+    document.getElementById("view-profile").classList.add("is-active");
+  });
+  await page.waitForFunction(()=>window.iClubGlobalAiShell.context()
+    .screenCode==="profile",null,{timeout:8000});
+  await page.evaluate(()=>window.iClubGlobalAiShell.open());
+  assert.deepEqual(await promptTexts(),["Как получить помощь?"],
+    "An unpublished profile help route was offered");
+  await page.evaluate(()=>{
+    window.iClubGlobalAiShell.close();
+    document.getElementById("view-profile").classList.remove("is-active");
+    document.getElementById("view-courses").classList.add("is-active");
+    document.getElementById("courses-subject-hub").remove();
+    document.getElementById("courses-practice-result").classList.add("is-active");
+  });
+  await page.waitForFunction(()=>window.iClubGlobalAiShell.context()
+    .screenCode==="practice-result",null,{timeout:8000});
+  assert.equal(activity.asks.length,0);
   await page.evaluate(()=>{
     document.getElementById("courses-practice-quiz").classList.remove("is-active");
     document.getElementById("view-home").classList.remove("is-active");

@@ -29,7 +29,7 @@ const paperCards=n=>tree(n).filter(x=>x.tagName==='button'&&x.className.includes
 const cardCode=c=>tree(c).find(x=>x.className==='ep-live-component-code')?.textContent;
 const tick=async()=>{for(let i=0;i<20;i++)await Promise.resolve()};
 const langs=['ru','uz','en'];
-const SCENARIOS=['uninvited','invited','joined','withdrawn','no-check'];
+const SCENARIOS=['noteligible','eligible','joined','withdrawn','no-check'];
 
 async function run(lang,scenario) {
  let joined=scenario==='joined',writes=0,leaves=0,mounts=0,opens=0;
@@ -43,12 +43,11 @@ async function run(lang,scenario) {
   if(name==='iclub_exam_written_available_v1')return {data:{
     ok:true,available:joined,plan_id:joined?'owned-plan':null}};
   if(name==='iclub_econ_written_beta_status_v1')return {data:{
-    ok:true,eligible:scenario==='invited'&&!joined,joined}};
-  if(name==='iclub_econ_written_beta_join_v1'){
-   assert.equal(args.p_confirm,true,'An explicit affirmative action is required');
+    ok:true,eligible:scenario==='eligible'&&!joined,joined}};
+  if(name==='iclub_econ_written_start_v2'){
+   assert.deepEqual(Object.keys(args||{}),[],'Starting a learning plan must not submit consent');
    writes++;joined=true;return {data:{ok:true,joined:true}};
   }
-  if(name==='iclub_econ_written_beta_leave_v1'){leaves++;joined=false;return {data:{ok:true,left:true}};}
   throw Error('Unexpected RPC '+name);
  }};
  const sandbox={window:{sb,crypto:{randomUUID:()=> 'safe-id'},
@@ -67,7 +66,7 @@ async function run(lang,scenario) {
  await tick();
  if(!hasEntry){
   assert.equal(paperCards(host).length,0,'Preserve entry-check prerequisite');
-  assert.equal(writes,0,'No background consent');
+  assert.equal(writes,0,'No background enrollment');
   api.unmount();return;
  }
  const codes=paperCards(host).map(cardCode);
@@ -84,18 +83,18 @@ async function run(lang,scenario) {
  let ts=texts(host);
  assert(ts.some(x=>x.includes('Paper 4')),'P4 info missing');
  assert.equal(mounts,0,'P4 card cannot skip to written plan');
- assert.equal(writes,0,'P4 card must not silently give consent');
- if(scenario==='uninvited'||scenario==='withdrawn'){
+ assert.equal(writes,0,'P4 card must not silently start a plan');
+ if(scenario==='noteligible'||scenario==='withdrawn'){
    assert(!buttons(host).some(b=>['Начать письменную практику','Yozma mashqlarni boshlash','Start written practice'].includes(b.textContent)),
-     'No invitation should be offered to noneligible learners');
+     'No Start action for noneligible learners');
  }
- if(scenario==='invited'){
+ if(scenario==='eligible'){
   const label=lang==='ru'?'Начать письменную практику':lang==='uz'?'Yozma mashqlarni boshlash':'Start written practice';
-  const consent=buttons(host).find(b=>b.textContent===label);
-  assert(consent,'Invited learner needs explicit opt-in button from P4');
-  consent.events.click();
+  const start=buttons(host).find(b=>b.textContent===label);
+  assert(start,'Eligible learner needs an ordinary Start practice action from P4');
+  start.events.click();
   await tick();
-  assert.equal(writes,1,'Exactly one confirmed opt-in');
+  assert.equal(writes,1,'Exactly one learner-initiated plan start');
   assert.deepEqual(paperCards(host).map(cardCode),['P1','P2','P3','P4'],
    'Four papers remain after joining');
   paperCards(host)[1].events.click();
@@ -113,17 +112,9 @@ async function run(lang,scenario) {
   const back=buttons(host).find(b=>b.className.includes('ep-native-screen-back')&&b.textContent==='‹'&&b['aria-label']===(lang==='ru'?'Назад':lang==='uz'?'Orqaga':'Back'));
   assert(back,'Written Paper 4 info back navigation required');
   back.events.click();await tick();
-  const leaveLabel=lang==='ru'?'Отключить письменную практику':
-   lang==='uz'?'Yozma mashqlarni o‘chirish':'Turn off written practice';
-  const leave=buttons(host).find(b=>b.textContent===leaveLabel);
-  assert(leave,'Joined learner needs a leave option');
-  leave.events.click();
-  assert.equal(leaves,0,'First leave click must not revoke access');
-  assert(texts(host).some(x=>x.includes(lang==='ru'?'Повторное подключение':
-    lang==='uz'?'Qayta ulanish':'Rejoining')),
-    'In-app confirmation must explain rejoining limitation');
-  leave.events.click();await tick();
-  assert.equal(leaves,1,'Second intentional leave click revokes access once');
+  assert.equal(leaves,0,'No consent withdrawal or access revoke action on the study home');
+  assert(!buttons(host).some(b=>/Withdraw consent|Отозвать согласие|Rozilikni/.test(b.textContent)),
+    'No learner consent controls appear');
  }
  if(scenario==='withdrawn')assert.equal(mounts,0,'Withdrawn learner has no practice access');
  api.unmount();
@@ -131,6 +122,6 @@ async function run(lang,scenario) {
 (async()=>{
  let n=0;
  for(const lang of langs)for(const scenario of SCENARIOS){await run(lang,scenario);n++}
- assert(html.includes('exam-prep-economics-native.js?v=econ-plan-compact-back-20261028'),'App must load updated paper grid, not cached P1/P3-only JS');
- console.log('ECONOMICS FOUR PAPERS UI PASS',n,'scenarios × 3 locales; no automatic joining / no P4 bypass');
+ assert(html.includes('exam-prep-economics-native.js?v=econ-p0-answer-parity-no-consent-20261029'),'App must load updated paper grid, not cached P1/P3-only JS');
+ console.log('ECONOMICS FOUR PAPERS UI PASS',n,'scenarios × 3 locales; no invitations / no consent / no P4 bypass');
 })().catch(e=>{console.error(e);process.exitCode=1});

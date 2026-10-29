@@ -13,6 +13,7 @@ on:
       - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
       - supabase/tests/p0_16_learner_open_recruitment_consent_matrix.sql
       - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - supabase/tests/exam_prep_subject_no_extra_consent_runtime_matrix_v1.sql
       - supabase/tests/p2_38_cleanup_gate_matrix.sql
       - supabase/tests/p2_43_protected_assessment_integrity_matrix.sql
       - supabase/tests/p2_44_browser_private_boundary_matrix.sql
@@ -89,6 +90,7 @@ on:
       - supabase/tests/p1_06_expanded_beta_readiness_matrix.sql
       - supabase/tests/p0_16_learner_open_recruitment_consent_matrix.sql
       - supabase/tests/p2_36_current_schema_replay_compat.sql
+      - supabase/tests/exam_prep_subject_no_extra_consent_runtime_matrix_v1.sql
       - supabase/tests/p2_38_cleanup_gate_matrix.sql
       - supabase/tests/p2_43_protected_assessment_integrity_matrix.sql
       - supabase/tests/p2_44_browser_private_boundary_matrix.sql
@@ -234,6 +236,12 @@ jobs:
 
           echo '=== Resetting isolated harness to fail-closed baseline after schema replay ===' | tee -a p236-current-schema.log
           psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p236-current-schema.log 2>&1
+
+      - name: Verify consent-free Economics RPC runtime and anonymous denial
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/exam_prep_subject_no_extra_consent_runtime_matrix_v1.sql 2>&1 | tee -a p236-current-schema.log
 
       - name: Verify P2-36 current-schema contract exists and is fail-closed
         shell: bash
