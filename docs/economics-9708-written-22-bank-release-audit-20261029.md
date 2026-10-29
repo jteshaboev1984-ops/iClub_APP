@@ -30,3 +30,14 @@ Live PostgreSQL `BEGIN … ROLLBACK` trial compiled the migration, preserved thr
 The architect's acceptance of current Economics UI stands. This only expands the **question bank** within that UI; it does not turn Economics into a public/full-syllabus Cambridge examination product. The 3-seat controlled beta limit remains, and older 22 English-only drafts remain unavailable. Further full-syllabus coverage or timed Paper 2/Paper 4 authentic option-choice mocks require separately approved work and qualified academic review.
 
 **The migration must be applied only after CI passes.** Once actually applied, append final migration ledger, production counts and test result in the working plan. Never rewrite completed learner steps or reopen archived users automatically.
+
+
+## Applied release verification — 29 October 2026
+
+**Production Supabase migration applied successfully:** `20261029121518_iclub_economics_written_complete_22_beta_v1`; GitHub source path canonicalised to `supabase/migrations/20261029121518_iclub_economics_written_complete_22_beta_v1.sql`.
+
+**Production after migration:** 14 released candidate P2 parts, 8 released candidate P4 parts (22 total); *zero* released earlier drafts. All 22 editorial tasks satisfy the versioned source gate; 22 private marking schemes remain. Only one existing beta written plan; it now contains 22 distinct steps: **3 advanced unchanged, 19 pending**, current user next unchanged at `P2.A.d` (original priority 4). Ten newly appended tasks occupy original plan positions 13–22 with status pending, and the original 12 item IDs, tokens, task versions and historical statuses are preserved. No additional learners, access entitlements or consent rows created. Controlled beta remains ON with capacity 3; Mathematics remains active.
+
+**Production authenticated rollback-only smoke:** existing owner `iclub_econ_written_start_v2()` replays without creating new records, existing `next` still returns priority 4, EN/RU/UZ criteria reveal no expected answers, another owner cannot read the plan, three advanced records remain. Before the production change, full 22-step end-to-end dry run opened each originally held task in order, reviewed no-answer criteria on 3 locales, advanced in one rollback transaction, and verified the plan's completed result; **none of those simulated advances persisted**.
+
+CI: isolated GitHub workflow `Economics Written 22 Practice Bank Gate` PASS (run 40871625992). No app JavaScript/CSS changes; existing premium UI, no-essay-marking boundary and 3-seat access remain unchanged. This expands **practice coverage only**, not a real 60-mark timed Cambridge exam with option-choice controls, and does not constitute independent learner acceptance.
