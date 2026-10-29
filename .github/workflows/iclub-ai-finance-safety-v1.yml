@@ -1,0 +1,82 @@
+name: iClub AI Cross-Route Finance Safety
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/20261029180000_iclub_ai_finance_all_routes_unknown_holds_v1.sql'
+      - 'supabase/tests/iclub_ai_finance_safety_v1_fixture.sql'
+      - 'supabase/tests/iclub_ai_finance_safety_v1_matrix.sql'
+      - 'supabase/tests/iclub_ai_finance_safety_v1_concurrent.sh'
+      - 'supabase/functions/exam-prep-ai/index.ts'
+      - 'supabase/functions/practice-ai/index.ts'
+      - '.github/scripts/iclub_ai_finance_safety_v1_contract.cjs'
+      - '.github/workflows/iclub-ai-finance-safety-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-sql-money:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Isolated baseline and production-shaped financial contracts
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_finance_safety_v1_fixture.sql
+      - name: Apply candidate migration only to ephemeral PostgreSQL
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261029180000_iclub_ai_finance_all_routes_unknown_holds_v1.sql 2>&1 | tee finance-migration.log
+          test "$(psql -Atqc 'SELECT enabled FROM private.iclub_ai_all_route_spend_control_v1 WHERE singleton=1')" = 'f'
+      - name: Validate four-route budget and unknown-charge SQL matrix
+        run: |
+          set -o pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_finance_safety_v1_matrix.sql 2>&1 | tee finance-matrix.log
+          ! grep -Eiq '\b(delete[[:space:]]+from|truncate|update)[[:space:]]+public\.(users|user_subjects|practice_attempts|tour_attempts|certificates)\b' supabase/migrations/20261029180000_iclub_ai_finance_all_routes_unknown_holds_v1.sql
+      - name: Verify competing AI routes cannot overspend same cap
+        run: bash supabase/tests/iclub_ai_finance_safety_v1_concurrent.sh
+      - name: Provider dispatch and settlement TypeScript contract
+        run: node .github/scripts/iclub_ai_finance_safety_v1_contract.cjs
+      - name: Typecheck existing Edge functions (no provider calls)
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Deno typecheck
+        run: |
+          deno check supabase/functions/exam-prep-ai/index.ts
+          deno check supabase/functions/practice-ai/index.ts
+      - name: Upload finance isolation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iClub-ai-finance-isolated
+          path: |
+            finance-migration.log
+            finance-matrix.log
+          if-no-files-found: warn
+          retention-days: 7

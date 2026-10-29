@@ -277,13 +277,21 @@ async function reserveProviderCall(requestId: string, userId: string, estimatedC
 
 async function finalizeProviderCall(
   requestId: string,
-  status: "completed" | "released",
+  status: "completed" | "released" | "unknown",
   actualCost: number,
 ): Promise<any> {
   return await rpc("finalize_practice_ai_provider_call_service_v1", {
     p_request_id: requestId,
     p_status: status,
     p_actual_cost_usd: Math.max(0, actualCost),
+  }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
+}
+
+// Mark the potential charge BEFORE any provider network call.
+// A lost mark acknowledgement is treated conservatively as unknown cost.
+async function markProviderDispatched(requestId: string): Promise<any> {
+  return await rpc("mark_practice_ai_provider_dispatched_service_v1", {
+    p_request_id: requestId,
   }, `Bearer ${SERVICE_ROLE_KEY}`, SERVICE_ROLE_KEY);
 }
 
@@ -583,6 +591,7 @@ Deno.serve(async (req: Request) => {
   }
 
   let providerLeaseActive = false;
+  let providerDispatchAttempted = false;
 
   try {
     const reservedCostUsd = conservativeProviderReservationCost({
@@ -609,6 +618,9 @@ Deno.serve(async (req: Request) => {
       });
     }
     providerLeaseActive = true;
+    providerDispatchAttempted = true;
+    const dispatchMark = await markProviderDispatched(requestId);
+    if (dispatchMark?.ok !== true) throw new Error("provider_dispatch_not_confirmed");
 
     const provider = await callOpenAIProvider({
       interaction,
@@ -666,7 +678,7 @@ Deno.serve(async (req: Request) => {
     });
   } catch (error) {
     if (providerLeaseActive) {
-      await finalizeProviderCall(requestId, "released", 0).catch(() => {});
+      await finalizeProviderCall(requestId, providerDispatchAttempted ? "unknown" : "released", 0).catch(() => {});
       providerLeaseActive = false;
     }
 
