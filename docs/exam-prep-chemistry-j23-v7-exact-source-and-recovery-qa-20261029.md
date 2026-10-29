@@ -53,3 +53,16 @@ Official references:
 4. Explicit architect approval for a controlled test-account gate, then the planned version-aware J24 catalogue/reader integration with historical sources preserved.
 
 **Do not:** merge PR #397, open Chemistry to students, enable J24/J25, or treat test-packaging, same-database reconstruction or in-session rights research as a complete production release.
+
+## 7. Protected file packager runner — verified on 91/273 synthetic fixture
+
+Added `scripts/chemistry-j23-private-verify.py` in the draft branch. This script requires the exact private Theory and Tutor UTF-8 exports as separate local files **outside the public GitHub working directory**, checks all three recorded v7 hashes, runs the existing real Python packager in an automatically deleted private temporary directory, verifies the generated manifest/counts/STAGED_NOT_PUBLISHED mode and does not retain the generated SQL or print question/answer content.
+
+Local Python verification:
+- The script parsed and showed its help message successfully.
+- Supplying two invalid private-format JSON files produced the expected **fail-closed SHA-256 rejection**, before packaging.
+- A **full-size synthetic fixture of 91 fictional Theory records and 273 fictional Tutor locale records** was run through the wrapper's success path with fixture SHA values injected only into the local test module. The real packager executed, the wrapper checked the generated manifest, printed only safe metadata, and removed the SQL directory. **PASS**.
+- The committed script retains hard-coded v7 SHA-256 values and has no synthetic override in its public CLI.
+- **Not yet executed on actual v7 private files**, because no approved secure filesystem export route or independently restorable external seed was available in this chat. Do not mark exact private-file Python verification or external backup as complete.
+
+The wrapper is offline, staging-only and does not invoke GitHub publish, Supabase admin or application APIs.
