@@ -12,14 +12,14 @@
 - Targeted follow-up reviewed specific flagged tasks outside this stratified sample (below), including scoring rubrics. A formally independent specialist review remains unverified (see prior provenance audit).
 - No private source/translation text is stored in this public repository file. Identifiers and summaries below are for an authorized reviewer to locate in the private DB.
 
-## Confirmed substantive translation omissions (OPEN)
+## Confirmed historical translation omissions, existing later fixes (version-routing check OPEN)
 
-| Priority | Published task ID / key / version | Locales | Verified issue | Why it matters | Non-destructive remediation |
-|---|---|---|---|---|---|
-| **HIGH** | **58**, `P1DIF04-W01`, `wtv1` | RU and UZ prompt | EN explicitly requests verification that **both lines pass through the same point AND tangent/normal gradients multiply to −1**. Both translated prompts shorten this to a generic “verify”. The `verification` criterion is worth **1 mark** and expects those exact checks. | A student receiving only RU/UZ is not explicitly told the full 1-mark checking requirement. | Draft a **new task version** carrying explicit equivalent requirements, verify mathematically/linguistically, then stage safely with active-session version pinning. Do not mutate the existing published `wtv1`. |
-| **HIGH** | **60**, `P5BIN03-W01`, `wtv1` | RU and UZ prompt | EN explicitly asks the student to **explain why variance divided by mean gives 1−p**. The translated prompts omit this subtask. English rubric `explanation` is worth **1 mark** (proof: np(1−p)/(np)=1−p). | Missing mathematical explanation requirement in two languages, while the scoring rubric still expects it. | New task version with equivalent explicit explanation requirement, plus academic/locale signoff and separate closed test. Preserve old version for active attempts. |
+| Old published task | Corrected later published task | Finding on old version | New-version finding | Exposure status |
+|---|---|---|---|---|
+| **58**, `P1DIF04-W01`, `wtv1` | **163**, same key, `wtv2` | RU/UZ prompt omits the explicit two-part verification: both lines through the common point **and** gradient product −1, despite a 1-mark criterion. | **Both RU/UZ prompts explicitly include the two checks in wtv2.** No duplicate wording fix is needed for wtv2. | Both versions are `published`, each attached to a published assessment (`154` vs `359`); neither task appears in any current `exam_prep_session_items`. The source-selection route was not proven here. |
+| **60**, `P5BIN03-W01`, `wtv1` | **164**, same key, `wtv2` | RU/UZ prompt omits the explanation that `variance/mean = 1−p`, although the explanation receives 1 mark. | **Both RU/UZ prompts restore the explanation in wtv2.** | Both versions are `published`, attached to assessments (`161` vs `360`); neither appears in current `exam_prep_session_items`. Source-selection route unverified. |
 
-**These two findings are directly confirmed by juxtaposition of EN/RU/UZ prompts and the corresponding live published task's rubric.** Do not infer that the published task can be safely overwritten.
+**Correction to initial review classification:** these are two **confirmed older-version content defects**, **not yet confirmed learner-facing defects in the current route**. They must not be described as uncorrected in the current latest version. The remaining question is whether older published assessments can still be selected for NEW sessions. Do not turn off/delete earlier assessments without a route-level and session-compatibility review. No existing sessions were changed.
 
 ## Academic/rubric completeness review (OPEN, needs scoring decision)
 
@@ -46,4 +46,4 @@
 4. **Fixes:** prepare each candidate corrected question as a *new* draft task version under controlled migration, never retroactively changing published task versions, user evidence, session pins, marks or learning mastery.
 5. **Owner-authorized validation** of genuine external mathematics/language specialist attestation remains a separate governance requirement. Academic edits must not trigger the deferred real-learner E2E, weekly beta review, or mass-launch switches.
 
-**Decision after pass 1:** source-checksum and language coverage = technically complete; detailed semantic bank approval = **NOT YET ESTABLISHED**; first two translated-prompt omissions = **CONFIRMED OPEN**. Production remains unchanged.
+**Decision after pass 1:** source-checksum and language coverage = technically complete; detailed semantic bank approval = **NOT YET ESTABLISHED**. Two **historical published** translation omissions are confirmed, and their `wtv2` counterparts already correct the omissions. Live routing of old vs new assessments must be verified before any remediation. Task 17/184 rubric completeness remains OPEN. Production remains unchanged.
