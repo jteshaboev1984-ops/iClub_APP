@@ -1,0 +1,756 @@
+{
+  "format": "iclub-chemistry-j23-closed-editorial-candidate-v1",
+  "project": "iClub APP",
+  "syllabus": "Cambridge International Chemistry 9701 2025-2027",
+  "subject": "chemistry",
+  "component": "AS_THEORY",
+  "source_version": "chemistry9701_20261022_stageb_draft",
+  "revision_key": "chemistry9701_j23_20261029_revision_v1",
+  "status": "CLOSED_EDITORIAL_CANDIDATE_UNAPPROVED",
+  "source_rows": 91,
+  "trilingual_editorial_reviewed_rows": 91,
+  "base_library_immutable_rows": 154,
+  "revision_rows": 12,
+  "no_defect_assessed_rows": 78,
+  "enrichment_only_rows": 1,
+  "canonical_six_field_source_version": null,
+  "canonical_six_field_package_sha256": null,
+  "package_hold_reason": "Stored private Theory locale records have title and explanation, but the repository subject-release-packager.py requires title, explanation, original_example, common_trap, check_question and check_answer. Per-row revision_sha256 is NOT a canonical six-field source hash. Rebuild and independently verify authoring fields before any release.",
+  "release_gates": {
+    "academic_owner_approved": false,
+    "trilingual_approved": false,
+    "rights_approved": false,
+    "backup_approved": false,
+    "chemistry_available_to_learners": false
+  },
+  "cards": [
+    {
+      "skill_key": "CHEM9701-01-01",
+      "tour_no": 1,
+      "syllabus_point": "1.1",
+      "base_content_hash": "sha256:786a4d8a19a915fca2e2476af36ebae6f817c38a1c17965c2da64da70db45ba8",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-01-02",
+      "tour_no": 1,
+      "syllabus_point": "1.2;2.1",
+      "base_content_hash": "sha256:2827061a23601af06b7ef23397b246be3812513a59acdeda5ce859e238553d67",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:3f786a082669414bdb935810cefa88eebca67af7a99a982124811f74199d10cc"
+    },
+    {
+      "skill_key": "CHEM9701-01-03",
+      "tour_no": 1,
+      "syllabus_point": "1.3",
+      "base_content_hash": "sha256:dde744fca6ad75dc097671c13d83cdac77be2e5abf6b0899271af6936d9cd78c",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:e7297ae2d92ab392bd8c54a43c9bdae38762232eb302028c4a4ecde39045a317"
+    },
+    {
+      "skill_key": "CHEM9701-01-04",
+      "tour_no": 1,
+      "syllabus_point": "1.4",
+      "base_content_hash": "sha256:45c89c0cc9d15c5f45528237179d09f6662fb4123d77c0585635cde31b65431f",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-01-05",
+      "tour_no": 1,
+      "syllabus_point": "1.4",
+      "base_content_hash": "sha256:e4be7bc3421e7be5d5d8d3cf6f612dbac7a8dfb4f69449cf337f30e0fabfcda4",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-02-01",
+      "tour_no": 1,
+      "syllabus_point": "2.2",
+      "base_content_hash": "sha256:1afbb84fb37961aa470e9abb38e214365148bb717f89463d7e9d16f8c615edcc",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-02-02",
+      "tour_no": 1,
+      "syllabus_point": "2.3",
+      "base_content_hash": "sha256:47bd0f50118e7af3b73b2259038c65384f1060f48c6ff839951fcfb7edbfec51",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-02-03",
+      "tour_no": 1,
+      "syllabus_point": "2.3",
+      "base_content_hash": "sha256:100a9acb3767df69be5cf396f654b4afd83194b21987a82e324c53d35f9caa3b",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-02-04",
+      "tour_no": 1,
+      "syllabus_point": "2.4",
+      "base_content_hash": "sha256:cdc038e698bd4fd3e4444b112915b7e08a34204e0275a704b8ac7bd23b1da45b",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-02-05",
+      "tour_no": 1,
+      "syllabus_point": "2.4",
+      "base_content_hash": "sha256:b8a275e16607086501a787d8c0f0a462ac00ab7d76e374a2a0aa24a9fa1652dc",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-03-01",
+      "tour_no": 2,
+      "syllabus_point": "3.1;3.2",
+      "base_content_hash": "sha256:b3bc64645960dd219b853fcd595b47eacb37a545529615ab329fe5d886d4c60e",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-03-02",
+      "tour_no": 2,
+      "syllabus_point": "3.3;4.2",
+      "base_content_hash": "sha256:a578933fc7fbaf038f77978dd0ccef0a6757a078debe86adace77e8890015700",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-03-03",
+      "tour_no": 2,
+      "syllabus_point": "3.4;3.7",
+      "base_content_hash": "sha256:b9f6c4ba45ab5420e9e0b2b9afbc14786c6d49a3b0adaf34f1023fda7082b697",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-03-04",
+      "tour_no": 2,
+      "syllabus_point": "3.5",
+      "base_content_hash": "sha256:ebb8554d17b0e53f4e1c3436482e1905eb8db78f543831184e2d9d95b8b98f48",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-03-05",
+      "tour_no": 2,
+      "syllabus_point": "3.6",
+      "base_content_hash": "sha256:a01e965d4958f3e01e3b8b09056280a0cc0ac90d0aad635eb34edb90750c10bf",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-03-06",
+      "tour_no": 2,
+      "syllabus_point": "3.4;3.6",
+      "base_content_hash": "sha256:e0276636e7c2497619615ea371d75ee7a20354356dba602039d19039611404fb",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-04-01",
+      "tour_no": 2,
+      "syllabus_point": "4.1",
+      "base_content_hash": "sha256:e679552102d9db00aa79a1b27cd50f410f5051a8ff4c6f21616befbaada434df",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-04-02",
+      "tour_no": 2,
+      "syllabus_point": "4.1",
+      "base_content_hash": "sha256:279e2baa6c1f33fbbc36aa44b49954432f5d258e2f7ebec72b0c27a38cc7f216",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-04-03",
+      "tour_no": 2,
+      "syllabus_point": "4.1",
+      "base_content_hash": "sha256:4e6c57854508e0662acd6e9980c11f42d3f05dcf7e1c5c41fab4374726247d22",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-04-04",
+      "tour_no": 2,
+      "syllabus_point": "3.6;4.2",
+      "base_content_hash": "sha256:2012f523a406f86854616fa88eeee10fcdff3cf8c02a972863c28c6819e6a7f1",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-04-05",
+      "tour_no": 2,
+      "syllabus_point": "4.2",
+      "base_content_hash": "sha256:6fc3882df358d8b30df707879b99d4bf022a818a90072907cf175e66a422841e",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-05-01",
+      "tour_no": 2,
+      "syllabus_point": "5.1",
+      "base_content_hash": "sha256:d1b94592b037a793e6116908d89354bb405042bb4a979f5cda233e75dfb0f93f",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-05-02",
+      "tour_no": 2,
+      "syllabus_point": "5.1",
+      "base_content_hash": "sha256:a308940c0df86d90688cbd77dfd7ddffe9cef1528b065ef933b41142831cb813",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-05-03",
+      "tour_no": 2,
+      "syllabus_point": "5.1",
+      "base_content_hash": "sha256:7656cc1b3aa1e436779fc643cf3121e0808136a2f9aff83bbb5404fc4e9c7681",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-05-04",
+      "tour_no": 2,
+      "syllabus_point": "5.2",
+      "base_content_hash": "sha256:555cc29b471681ec2d2579478fda6720704d3017ecf91d2680b67efb3ade56fc",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-05-05",
+      "tour_no": 2,
+      "syllabus_point": "5.1",
+      "base_content_hash": "sha256:9f0da440ce8ecab3673482c14863907498c51d8e60fc2868d7ea166413db8500",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-06-01",
+      "tour_no": 3,
+      "syllabus_point": "6.1",
+      "base_content_hash": "sha256:dae8c426d4a381e0a2682a9590e9d65648f6a1bfede2824644368f1159973113",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-06-02",
+      "tour_no": 3,
+      "syllabus_point": "6.1",
+      "base_content_hash": "sha256:ab8cc2fb8351a82d2583ad4e45eaaf5b2f232dfc72caa6dc0dde283186b6bcfa",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-06-03",
+      "tour_no": 3,
+      "syllabus_point": "6.1",
+      "base_content_hash": "sha256:98fcaa424c002f0c22ea0fd8bcd8687190959ffa64d1d20dc644c910cb6464ea",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:bbe0c6987f119587497206e62ddf4b886c6f04c23bbc6c8c8565756a78fd14c6"
+    },
+    {
+      "skill_key": "CHEM9701-06-04",
+      "tour_no": 3,
+      "syllabus_point": "6.1",
+      "base_content_hash": "sha256:e5431f7bd61cdd75cd6169fcde2bc8b2d64a1bf86d55b6ab8324bad45abf6079",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-07-01",
+      "tour_no": 3,
+      "syllabus_point": "7.1",
+      "base_content_hash": "sha256:f82cfdb8f2d37dfc6151c4591bed83408549d93fd824016d0fe81501951889a8",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-07-02",
+      "tour_no": 3,
+      "syllabus_point": "7.1",
+      "base_content_hash": "sha256:168194001c1e5f6889c5d87b7eb26e81dee598bf295c93916299614830254f3c",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-07-03",
+      "tour_no": 3,
+      "syllabus_point": "7.1",
+      "base_content_hash": "sha256:0f2081cdf03e1f683923c0c947c9ec503f2c7abd25053b5429b0db4e712bdf7a",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-07-04",
+      "tour_no": 3,
+      "syllabus_point": "7.1",
+      "base_content_hash": "sha256:5632f32434a10cfa5f2020c7b6c3acb9c83104a4c7d376237f0ee1a38fe9fd88",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-07-05",
+      "tour_no": 3,
+      "syllabus_point": "7.2",
+      "base_content_hash": "sha256:066dc9a914b356ed3044e021551940dca1e7456262c5f5cc1942e1255ee735e0",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-08-01",
+      "tour_no": 3,
+      "syllabus_point": "8.1",
+      "base_content_hash": "sha256:f807b19a4b2d8593b46ce23a7a13517af0ed7714916102709dd2dbe2ea3af073",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-08-02",
+      "tour_no": 3,
+      "syllabus_point": "8.1;8.2",
+      "base_content_hash": "sha256:d9b97336b118e7ac435812caf85da8c2bad7725c15a5a0cc443b0caee00cac0b",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-08-03",
+      "tour_no": 3,
+      "syllabus_point": "8.3",
+      "base_content_hash": "sha256:944fce1f5defb58b58f0ec409e1dbb8249b007f0e6d3c68e16e0e7bd5963dd02",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:f451d42df3aeba5900e5c8ebf2a50dffe1f1e84d26aecc4c3c3f038579ac7347"
+    },
+    {
+      "skill_key": "CHEM9701-08-04",
+      "tour_no": 3,
+      "syllabus_point": "8.1",
+      "base_content_hash": "sha256:910d3baee02670bf3a5349304701f274a276dfb899b50bd495effd4698d09d0f",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-09-01",
+      "tour_no": 4,
+      "syllabus_point": "9.1;9.3",
+      "base_content_hash": "sha256:4c13f31317f3fcc00735421549eab9878bbf545c28ed7328c8bd96ddf61b0eb3",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:a0c8b1d7c615492ad1d2dc6e97ced821bf44d77f2b604cbfc882552b46bdf412"
+    },
+    {
+      "skill_key": "CHEM9701-09-02",
+      "tour_no": 4,
+      "syllabus_point": "9.1",
+      "base_content_hash": "sha256:9021231a19d3787464e3612f9d1de87bc2000eca0a6e1164291c6deaadede6ea",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-09-03",
+      "tour_no": 4,
+      "syllabus_point": "9.2",
+      "base_content_hash": "sha256:a405f5b7ed4130ab4866477146d6b71b0f76d819b91a6d4aa174f206082bd822",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-09-04",
+      "tour_no": 4,
+      "syllabus_point": "9.2",
+      "base_content_hash": "sha256:aec4fb31962d3a1e515e30053bbeabb1f5bca7106e38930409da8b585aeacf31",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:5b79a361a6d8a901d194df9ec119ed215e5f282a4cdf1c1ef33fc1a5bacce213"
+    },
+    {
+      "skill_key": "CHEM9701-10-01",
+      "tour_no": 4,
+      "syllabus_point": "10.1",
+      "base_content_hash": "sha256:38c7b7c524c7b19487b06a4b3428455e74a48d1b906863e678daf7c2479b2176",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-10-02",
+      "tour_no": 4,
+      "syllabus_point": "10.1",
+      "base_content_hash": "sha256:11a05fa3b6a9e5f02e6b0b4c85858e77d396d134c26671259aeabe6ae975d07b",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:499c6726196dd02092ddba50b7eabcf5523ddc933b2d5fcdd85e17fc2e052198"
+    },
+    {
+      "skill_key": "CHEM9701-10-03",
+      "tour_no": 4,
+      "syllabus_point": "10.1",
+      "base_content_hash": "sha256:29e784eed092fa72772db546e106fa0b5a1c74cb76806891ec5b819eec0312a8",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-10-04",
+      "tour_no": 4,
+      "syllabus_point": "NO_EXPLICIT_9701_OUTCOME",
+      "base_content_hash": "sha256:8667333dcddf2caf6e1c7b607e5288ad52ece6ad23ef8ca0c654bd3841286368",
+      "editorial_disposition": "ENRICHMENT_ONLY_NOT_INDEPENDENT_EXAM_OUTCOME",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-11-01",
+      "tour_no": 4,
+      "syllabus_point": "11.1",
+      "base_content_hash": "sha256:4946d4686274f9254aab6f0eba9e1704966a9a999d1ba6bb1a0cf37e4ca5d494",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:bd53cbf61469f5aec6e9a06f029eda49ed008d98e23b04cdcc6ef4364326f2d9"
+    },
+    {
+      "skill_key": "CHEM9701-11-02",
+      "tour_no": 4,
+      "syllabus_point": "11.2",
+      "base_content_hash": "sha256:46446c7672a4f1597ff1bebb94764995a4ad6c509106035b175686393857ccc7",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-11-03",
+      "tour_no": 4,
+      "syllabus_point": "11.3",
+      "base_content_hash": "sha256:bdd6f4cb7d9c62f31bf103f817e3462407300b5f683580c813af88c31b23137c",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-11-04",
+      "tour_no": 4,
+      "syllabus_point": "11.4",
+      "base_content_hash": "sha256:3d5a3ed45c762792cdc3d4f571a4a439fc9b3ce8f9664221e0cf49094ecd55a8",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-12-01",
+      "tour_no": 4,
+      "syllabus_point": "12.1",
+      "base_content_hash": "sha256:b9ee2677d0f58b98b9dbebf88d15e346ddd15637ab816bd613cc4361004311ff",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-12-02",
+      "tour_no": 4,
+      "syllabus_point": "7.1(10); 12.1 context only",
+      "base_content_hash": "sha256:48c12ac0bbb75251be191b1d7907d42ef9fba207a2c344390b0d5bf6622e4ab2",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-12-03",
+      "tour_no": 4,
+      "syllabus_point": "12.1",
+      "base_content_hash": "sha256:fcf9b2c21aff1b6cee4319d22d4875aa2768037b46240b8d4ec6641ecfac9a88",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-12-04",
+      "tour_no": 4,
+      "syllabus_point": "12.1",
+      "base_content_hash": "sha256:01a82fde41e2667bbf52ddc26a89c23486ed7b5ded100eac12ae4a775084788b",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-13-01",
+      "tour_no": 5,
+      "syllabus_point": "13.1",
+      "base_content_hash": "sha256:187966fbb60c9a5865b073ef3d6ba151dbac6ffcc692d400d64e184e75841eeb",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-13-02",
+      "tour_no": 5,
+      "syllabus_point": "13.1",
+      "base_content_hash": "sha256:dbf53d5b4199e15be1a2277dd0b24a9381ab91a30bf1e38b151a685984e3f8b4",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-13-03",
+      "tour_no": 5,
+      "syllabus_point": "13.4;13.3",
+      "base_content_hash": "sha256:4b9f95ef02566ee66713faf7c3f41f63d4c12f5ad4876ba377111ec73159e3ce",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-13-04",
+      "tour_no": 5,
+      "syllabus_point": "13.2",
+      "base_content_hash": "sha256:b539c8de698479b8fe7ecff791f288637e6b4d09f58f976a67938b12a79dfaf2",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-14-01",
+      "tour_no": 5,
+      "syllabus_point": "14.1",
+      "base_content_hash": "sha256:8321f9eeab034866f26a3017a2c0800349a3543558688528ff330da024a41de3",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-14-02",
+      "tour_no": 5,
+      "syllabus_point": "14.2",
+      "base_content_hash": "sha256:2a0ed051bc90d1e390c4b8eee265c6e1c9b01a42befb8cb877580784fc3fa881",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-14-03",
+      "tour_no": 5,
+      "syllabus_point": "14.2",
+      "base_content_hash": "sha256:8d13731fcc4e24cb28fb1cb99e3e1a2c7662481137d0c5268e7cabf8c7985b38",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-14-04",
+      "tour_no": 5,
+      "syllabus_point": "14.2;20.1",
+      "base_content_hash": "sha256:72c6397ebb5e94f190c464e1ce440c72d74e41600c9c0abc15aad320b1af88b1",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-15-01",
+      "tour_no": 5,
+      "syllabus_point": "15.1",
+      "base_content_hash": "sha256:0f859303ffe41c7a042a369bd0bee5c17d953db500edd786f78a512dc409d596",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-15-02",
+      "tour_no": 5,
+      "syllabus_point": "15.1",
+      "base_content_hash": "sha256:6afd710010337f68c6c0c084a10c275b59a7a510b19aa724534390f1b1af1b16",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-15-03",
+      "tour_no": 5,
+      "syllabus_point": "15.1",
+      "base_content_hash": "sha256:8023adc6e432997244ee77bd3c1f399014103028ff7eb295e32d2990bb7b1a8d",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-15-04",
+      "tour_no": 5,
+      "syllabus_point": "15.1",
+      "base_content_hash": "sha256:4e3e679e365e915e8f3bbc99a4ccdffb3e3f7a3fde412c571b1e9e9874a0ea2c",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-16-01",
+      "tour_no": 5,
+      "syllabus_point": "16.1",
+      "base_content_hash": "sha256:6e98d33c8d58bb0253a588050f9db0358895e0af4a8a77190518c0064ba16153",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-16-02",
+      "tour_no": 5,
+      "syllabus_point": "16.1",
+      "base_content_hash": "sha256:b19f03ade1bc07b707b19a7d5f773c9436d9a67a237005d14806659d95802ba6",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-16-03",
+      "tour_no": 5,
+      "syllabus_point": "16.1",
+      "base_content_hash": "sha256:97a2e0664388bd58c1844f8a73599b887220c2a2973b50cf8739df65510fcd65",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-16-04",
+      "tour_no": 5,
+      "syllabus_point": "16.1",
+      "base_content_hash": "sha256:b02666ccbe3db7be49a9585ee5614d8e3207e2f90130db99c0817d71b4d38e6c",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-17-01",
+      "tour_no": 5,
+      "syllabus_point": "17.1",
+      "base_content_hash": "sha256:8a8343ee52695923c808078509e8972008613c9e4212c6cf42a17c9a8ee3a377",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:c9dc3d6de58071e7eb8c5469676d72aefc80764135aa127e5d8293639012755e"
+    },
+    {
+      "skill_key": "CHEM9701-17-02",
+      "tour_no": 5,
+      "syllabus_point": "17.1",
+      "base_content_hash": "sha256:60fbf85f9e5f2dd9e4c38ccb3b8b61ddd9757ad3a0d6ffaed28435496cb361b1",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-17-03",
+      "tour_no": 5,
+      "syllabus_point": "17.1",
+      "base_content_hash": "sha256:0d5649fc8d6b25e5df23b03c3cab635d0991c3c5d121c5602586950ef57e45a1",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-17-04",
+      "tour_no": 5,
+      "syllabus_point": "17.1",
+      "base_content_hash": "sha256:50ed7e8c340bc7305574ccbecf75acbb58f5655e5e7dee3d32b090c693c53598",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-17-05",
+      "tour_no": 5,
+      "syllabus_point": "17.1",
+      "base_content_hash": "sha256:fa40b646184148e1f57c12c8e190b8705837470d294d69f20d76b46bd7601e55",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-18-01",
+      "tour_no": 5,
+      "syllabus_point": "18.1",
+      "base_content_hash": "sha256:a918278688257dd2256f0e69570cd69f15918de40226573019bd9e65ceb5a590",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-18-02",
+      "tour_no": 5,
+      "syllabus_point": "18.2",
+      "base_content_hash": "sha256:4f84907f1a0bcf76e3399b2c054a8c7f3698e47f4e90e67d95fefb658d7ec038",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-18-03",
+      "tour_no": 5,
+      "syllabus_point": "18.1;18.2;21.1",
+      "base_content_hash": "sha256:f800eb95c3973aeafca92ddcc8f7b4564c08a491610df60abc0308a91b44769a",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:83000a39bc3f0a1288b669a5055ec658eca2b2aadd076b1c490ddb959398f736"
+    },
+    {
+      "skill_key": "CHEM9701-19-01",
+      "tour_no": 5,
+      "syllabus_point": "19.1;15.1",
+      "base_content_hash": "sha256:c34886613f71f698d35b6c9a49df01a2fdad537ef26aca88f3a429564e38d185",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-19-02",
+      "tour_no": 5,
+      "syllabus_point": "19.2;15.1",
+      "base_content_hash": "sha256:b17f1c85af577a904b89db76f832f17b7aed6da4dc4a6057020c126c84a5d1af",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-19-03",
+      "tour_no": 5,
+      "syllabus_point": "19.2;17.1",
+      "base_content_hash": "sha256:14d84fd7fb787da0f6f3cff8a9df0c1f0fce85d556189a113dca06a7ff4c3002",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-20-01",
+      "tour_no": 5,
+      "syllabus_point": "20.1",
+      "base_content_hash": "sha256:820464a2d1cfd96aa5e7f6a1ba07ab49f53f22b43fcfda65e9074201a5fc628b",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-20-02",
+      "tour_no": 5,
+      "syllabus_point": "20.1",
+      "base_content_hash": "sha256:c1a8e6a3a82dbc34c92204532edfd0dccea693774f3d0a545687c6a6201264dc",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-20-03",
+      "tour_no": 5,
+      "syllabus_point": "20.1",
+      "base_content_hash": "sha256:54a3b5dabb4b9007b1c159571d1cbc0e0cb62c3d9c0a5efb02360901e4b017e4",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:5255b0d852f025298d7b2098100a7cabb330fcae345a3038f5071a2be1dffc21"
+    },
+    {
+      "skill_key": "CHEM9701-21-01",
+      "tour_no": 5,
+      "syllabus_point": "21.1",
+      "base_content_hash": "sha256:50fb1e73a48b4e99ff683f7866e22a702c5eb5f2384fd2fca9839aaa4aeb66a0",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-21-02",
+      "tour_no": 5,
+      "syllabus_point": "21.1",
+      "base_content_hash": "sha256:affcea1afdbf222f89ab51ec799e9fa07c64d3f5f6318b32498c8eba98b55251",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-21-03",
+      "tour_no": 5,
+      "syllabus_point": "21.1",
+      "base_content_hash": "sha256:bce2144890636fa9dea14aa0c9e93466511bd442c54526ed60513f950c4c947f",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-22-01",
+      "tour_no": 5,
+      "syllabus_point": "22.1",
+      "base_content_hash": "sha256:7aa0f50988d82571cc8a35f8f55dc6f76bbc471105c25676f41ae5661bd94966",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    },
+    {
+      "skill_key": "CHEM9701-22-02",
+      "tour_no": 5,
+      "syllabus_point": "22.2",
+      "base_content_hash": "sha256:3d9c9b3bea621c412f7a2b6ca741af8e67d5bcbe14f66eac17dd1a05897edfd6",
+      "editorial_disposition": "CORRECTED_CLOSED_CANDIDATE_PENDING_SIGNOFF",
+      "candidate_revision_sha256": "sha256:8157cdc7f631b7f309f82020ca7c881a7578d74ec4d3f5612e46d9897e406c24"
+    },
+    {
+      "skill_key": "CHEM9701-22-03",
+      "tour_no": 5,
+      "syllabus_point": "22.2",
+      "base_content_hash": "sha256:06947dec1ea6b60c925872eb4d197ad7dbf08f74eedb9dee7d0ff12b8455fada",
+      "editorial_disposition": "BOUNDED_TRILINGUAL_NO_DEFECT_FOUND",
+      "candidate_revision_sha256": null
+    }
+  ]
+}
