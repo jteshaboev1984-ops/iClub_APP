@@ -675,3 +675,26 @@ The v3 candidate academic, RU/UZ/EN language, and source editorial review stage 
 **Execution:** PR #417 expansion migration `20261029121518_iclub_economics_written_complete_22_beta_v1` in Supabase is applied. All 14 P2 + 8 P4 v3 tasks now `release_enabled=true`; historical 22 drafts remain OFF. Old beta student's 12 original steps were **not reordered**; ten additional pending parts were **appended at 13–22**, preserving three existing advances and current position 4. All future eligible controlled beta plans begin with 22 tasks ordered P2 then P4. No new learner accounts or consents, no extra UI actions, no AI grading or mentor queue. Beta cap 3 unchanged, Maths, Tours, Practice and local user state untouched.
 
 **Tests:** CI `Economics Written 22 Practice Bank Gate` PASS, run 40871625992. Rollback-only full auth E2E traversed 19 remaining steps with source/criteria/Next in all locales and verified owner-only access and completion at 22; separate production post-apply replay and criteria smoke also passed, without changing real student history. Full release report: `docs/economics-9708-written-22-bank-release-audit-20261029.md`. Browser under a learner account and independent examiner audit remain **separate** from this server-and-bank expansion.
+
+
+---
+
+## 29.10.2026 — Economics MCQ independent-original authoring checkpoint (PRIVATE DRAFT; NOT A RELEASE)
+
+**Scope:** fix the substantive source-exposure weakness; do not start additional learner attempts, rewrite old grades, change Math / Practice / Tours, or publish answer keys.
+
+**Read-only production evidence:** 36 approved source MCQs for P1 and 36 for P3; all 72 have live Practice pool membership, zero active Tour overlap. Existing P1 owner attempts demonstrate substantial exact-item reuse between examinations, so correct answers on reissued items **cannot be presented as independent mastery evidence**. None of this is proof of any specific learner's memory or prior screen viewing.
+
+**Protected authoring outcomes:** three existing private AS source batches contain 18 original P1 drafts. A new **12-original P1 Unit 2 and Unit 4** batch was authored on 29 Oct in English/Russian/Uzbek with one checked answer and explanatory feedback per language. Combined P1 private draft now has **30 distinct source items with section spread 1:6, 2:6, 3:6, 4:6, 5:3, 6:3**. This is an *internal authoring spread*, not a Cambridge-prescribed item weighting. Separate existing 12 P3 original candidates cover A Level units 7:3, 8:3, 9:2, 10:2, 11:2. Paper 3's **real** examination contract remains 30 MCQs in 75 min; the 12-item form is only an iClub diagnostic draft.
+
+**Private files only — personal Library** `/iClub APP/Exam Prep/`:
+- `iClub_Economics_P1_Units2_4_12_original_CLOSED_DRAFT_20261029.json` (complete SHA-256 `777ff99f6a0791630dcadba5b1af09a092738c609de21617ca4d079f220e2df3`).
+- `iClub_Economics_P1_30_original_CLOSED_CANDIDATE_20261029.json` (complete SHA-256 `78e624bb8a6c45f5dc79f14d527ae3903a2fd8981fec64a247c6a859023e1a91`, canonical ordered-items SHA-256 `b8c73b942a007ed99bf3ae6801d109c5133c484e08377fc65992d4817fad120d`).
+- `iclub_Economics_P3_12_Independent_Diagnostic_Candidate_PRIVATE_20261029.json` (existing closed original P3 draft).
+No question text, options, explanations or answer keys are written to **public** GitHub, `public.questions`, Practice or Tours by this checkpoint.
+
+**QA:** 30/30 original P1 items structurally complete, RU/UZ/EN 90/90 locales and 360/360 options present, unique item keys, new per-item SHA256 and full file fingerprints; first 12 AS1/AS2 historical per-item review digests use a **different, unspecified old method**, so they were preserved byte-for-byte and independently fingerprinted using new `audit_canonical_item_sha256` metadata without claiming matching historic hashes. One read-only live question-stem exact-MD5 check for the newly authored 12 gave zero matches. No automatic semantic-near-duplicate or real-learner exposure clearance is claimed. Bounded academic review of formulae, options, multilingual content is authoring QA, **not** a release signoff. Official reference: Cambridge 9708, 2026–2028 **version 2**: https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf.
+
+**Next blocking work (in order):** complete academic/translation and equivalent-item review for the private 30+12; reconcile/create versioned protected skill and source mapping, ensure all candidate statuses/authority approved; keep immutable answer keys behind server-only private issuance; create **separate** correction/retest sources, not reuse Practice or the first diagnostic; validate correct evidence is based on distinct, genuinely unseen tasks rather than repeated same items; authenticated positive/negative E2E and owner-controlled release decision. Note: one 30-item draft form is **not** enough for a second independent 30-item mock or durable delayed retest cycle.
+
+**Production:** unchanged by this private authoring and GitHub documentation. No migration, SQL writes, access grants, account, app JS or localStorage changes. Existing Economics P2/P4 non-grading Core boundary untouched.
