@@ -37,3 +37,10 @@ An internal QA result may be documented as `AI_SELF_REVIEW_PASS` only for the pa
 - Documented rights/source-originality screening and an explicit **architect-controlled** release decision. Assistant quality review is neither a legal licence nor an official Cambridge endorsement.
 
 **Release policy:** no Chemistry beta invitations/consent. Continue safely in Draft PR #397, OFF/CLOSED, without touching pupils, scores, Tours, Practice, Mathematics, Economics, AI or local progress.
+
+## Latest automated Tutor/number second-pass evidence
+- V5 91-skill trilingual numerical scan: the only RU question digit mismatch is the equivalent written-out Russian ordinal “third Period”; answer-number differences concern equivalent written-out numerals (05-03), Russian written-out Period 3 and Group 2 (09-04, 10-02), or an optional propan-2-ol example present only in EN (16-02). **No confirmed numeric science contradiction**. The remaining EN-only example is a minor explanation-parity difference, not a calculation defect. This check is numeric, not a claim of complete translation certification.
+- 273 Tutor locale records × five required text fields = **1,365 Tutor fields** checked; 0 blank fields, 0 common-word cross-language leakage flags (untranslated Uzbek words in RU, Russian instructions in UZ/EN).
+- The exact GitHub read-only SQL verifier `supabase/tests/chemistry_j23_v5_bundle_readonly.sql` was run against closed Supabase v5: Theory=91, Tutor=273 and exact Theory/Tutor/combined SHA-256 booleans all true.
+- The **actual Python packager** still has not been run against the 1.4MB protected source bytes. The Python test file in GitHub is synthetic-only and has not yielded a verified CI job run; do not conflate those two checks.
+- All original source, previous candidate versions and learner progress remain untouched; RLS private tables retain no anon/authenticated read grants.
