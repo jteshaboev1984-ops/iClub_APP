@@ -29,3 +29,28 @@ Read actual `private.iclub_subject_library_theory` EN/RU/UZ texts and syllabus l
 The affected cards stay unpublished. Any future semantic change is versioned and hash-tracked with original retained; the current J24 manifest is unchanged. No statements such as `all 91 academic-reviewed`, `Cambridge certified`, or `production fixed` follow from this partial review.
 
 Source: Cambridge International AS & A Level Chemistry 9701 syllabus 2025–2027, official §10.1, §11.3 and §12.1; iClub protected Theory records; Ryan & Norris Chemistry coursebook as secondary teaching cross-check. No copyrighted excerpts or question keys reproduced.
+
+
+## J23 first 3/91 AS lessons — substantive three-locale audit (2026-10-29)
+Live source: `private.iclub_subject_library_theory`, immutable `chemistry9701_20261022_stageb_draft`. Checked full EN, RU and UZ explanation text against official syllabus 9701 2025–2027 §§1.1–1.3 and the supplied Chemistry coursebook. This is a bounded assistant editorial review, NOT independent human certification.
+
+### J23-SCI-004 — CHEM9701-01-01, §1.1 — bounded PASS, release remains HOLD
+- Full three-language text reviewed: proton / neutron / electron charge, Al-27 notation, Al³⁺ electron count, electric-field deflection, O²⁻/F⁻/Na⁺/Mg²⁺ isoelectronic ion radii and periodic/group radius trends.
+- Independent checks: Al has 13p / 14n / 13e and Al³⁺ has 10e; O²⁻, F⁻, Na⁺, Mg²⁺ have 10e and decreasing radius with increasing proton number; electron direction opposite proton in an electric field. These are consistent.
+- No identified substantive EN/RU/UZ mismatch in inspected text. Still not released: global source version and owner approval absent.
+
+### J23-LANG-004 — CHEM9701-01-02, §§1.2;2.1 — HOLD translation completeness
+- English source explicitly explains that mass spectra provide isotopic masses and relative abundances; Russian and Uzbek full explanations omit this mass-spectrum link. Other quantitative example and relative mass definitions are consistent.
+- 75%×35 + 25%×37 gives Aᵣ=35.5 in all three. NaCl relative formula mass 23.0+35.5=58.5; relative masses dimensionless. No numerical issue.
+- Add to new *versioned* RU source after the first explanation: `Масс-спектр позволяет определить массы изотопов и их относительные содержания; по этим данным вычисляют относительную атомную массу.`
+- Add to new *versioned* UZ source: `Mass-spektr izotoplarning massalari va nisbiy ulushlarini aniqlash imkonini beradi; bu ma’lumotlardan nisbiy atom massa hisoblanadi.`
+- Do not update existing hash-bearing source in place. Cross-check exact syllabus requirement and science/language review before signing off.
+
+### J23-LANG-005 — CHEM9701-01-03, §1.3 — HOLD Uzbek shape equivalence
+- Electron filling, sulfur 3p⁴, nitrogen Hund boxes, s/p/d capacities, Fe²⁺/Fe³⁺ loss from 4s then 3d, and stated increasing subshell filling sequence appear scientifically consistent across all three texts.
+- EN describes a p-orbital nodal plane through the nucleus; RU describes the nodal plane between lobes, but UZ omits the plane entirely, giving a reduced conceptual explanation.
+- Proposed UZ correction for a newly versioned source: `p-orbital yadro orqali o‘tuvchi tugun tekisligi bilan ajralgan, yadrodan qarama-qarshi tomonga yo‘nalgan ikki bo‘lakdan iborat; pₓ, pᵧ va p_z o‘zaro perpendikulyar o‘qlar bo‘ylab joylashadi.`
+- Retain the statement that electron orbitals indicate probability distributions, not literal trajectories.
+- Do not overwrite existing source digest; no learner mastery or exams enabled by this finding.
+
+**Batch status: 3/91 inspected substantively; 1 provisional no-defect item and 2 translation HOLDs. No general 91/91 approval.**
