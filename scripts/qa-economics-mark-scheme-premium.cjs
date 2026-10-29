@@ -53,9 +53,9 @@ assert(!native.includes('if(state.writtenStartEligible&&!state.writtenPlan&&wind
 assert(native.includes('rpc("iclub_econ_written_start_v2",{})'),
  'Server eligibility preserved behind a direct Start action');
 assert(css.includes('ep-written-mark-breakdown')&&css.includes('ep-written-actions')&&css.includes('ep-written-marking[hidden]'),'Premium CSS must honor layout and hidden controls');
-for(const needle of ['written-core-view-v1.js?v=econ-plan-no-consent-20261029',
+for(const needle of ['written-core-view-v1.js?v=econ-plan-compact-back-20261028',
  'written-core-controller-v1.js?v=econ-assessment-criteria-nohints-20261028',
- 'written-core-source-v1.css?v=econ-plan-no-consent-20261029',
+ 'written-core-source-v1.css?v=econ-plan-compact-back-20261028',
  'exam-prep-economics-native.js?v=econ-plan-no-consent-20261029'])
  assert(html.includes(needle),'Stale asset would hide change: '+needle);
 const root={};vm.runInNewContext(controller,{globalThis:root,module:{exports:{}},console});
