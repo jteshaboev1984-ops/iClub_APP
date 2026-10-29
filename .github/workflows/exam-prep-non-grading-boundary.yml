@@ -9,6 +9,7 @@ on:
       - 'exam-prep/exam-prep-chemistry-entry-native.js'
       - 'exam-prep/exam-prep-live.js'
       - 'scripts/qa-exam-prep-written-lab-no-grading-*'
+      - 'scripts/qa-written-core-controller-v1.cjs'
       - '.github/workflows/exam-prep-non-grading-boundary.yml'
   push:
     branches: [main]
@@ -20,6 +21,7 @@ on:
       - 'exam-prep/exam-prep-chemistry-entry-native.js'
       - 'exam-prep/exam-prep-live.js'
       - 'scripts/qa-exam-prep-written-lab-no-grading-*'
+      - 'scripts/qa-written-core-controller-v1.cjs'
       - '.github/workflows/exam-prep-non-grading-boundary.yml'
   workflow_dispatch:
 
