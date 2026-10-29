@@ -51,7 +51,14 @@
       return String(data?.user?.id||"");
     }catch{return "";}
   };
+  // Product visibility and the client request guard must agree on the
+  // CURRENT screen. A hidden Courses tab can retain an old active quiz
+  // class; it must not disable Home, Profile or other allowed screens.
+  // Server-side academic/paid endpoints independently enforce protected
+  // Tour, Practice and Exam Prep sessions irrespective of this UI check.
   const protectedNow=()=>{
+    if(document.getElementById("view-courses")?.classList.contains("is-active")!==true)
+      return false;
     const visible=id=>document.getElementById(id)?.classList.contains("is-active")===true;
     const exam=document.getElementById("exam-prep-host-root");
     return visible("courses-practice-quiz")||visible("courses-tour-quiz")||
