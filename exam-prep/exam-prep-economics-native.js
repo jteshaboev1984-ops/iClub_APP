@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null,writtenPlan:null,writtenView:null,betaInvite:false,betaJoined:false,betaBusy:false,pendingChoice:null,choiceFeedback:null};
+  const state = {root:null,shell:null,lang:"ru",id:null,paper:null,data:null,index:0,timer:null,busy:false,closed:true,onBack:null,token:0,view:"home",history:[],planData:null,selectedLesson:0,historyReturn:null,writtenPlan:null,writtenView:null,writtenStartEligible:false,writtenStarted:false,writtenStartBusy:false,pendingChoice:null,choiceFeedback:null};
   const dictionary={
     ru:{p2:"Paper 2 · AS Level",p4:"Paper 4 · A Level",writtenPaperInfo:"Письменная практика",writtenPaperReady:"Открыть письменный план",writtenPaperInvite:"Можно начать",writtenPaperLimited:"Пока недоступно",writtenPaperDone:"Новых заданий пока нет",writtenPaperSequence:"Задания выполняются по общему плану: сначала Paper 2, затем Paper 4. Выбор Paper 4 не пропускает предыдущие задания.",writtenPaperNoAccess:"Письменные задания пока доступны ограниченной группе учеников после входной диагностики Economics.",writtenPaperWaiting:"По вашему плану сейчас нет нового письменного задания. Уже выполненные шаги сохранены.",writtenPractice:"Письменная практика",betaTitle:"Письменные задания",betaIntro:"Задания Paper 2 и Paper 4 выполняются самостоятельно, без автоматической оценки эссе.",betaJoin:"Начать письменную практику",betaLeave:"Отключить письменную практику",betaLeaveConfirm:"Подтвердить отключение",betaLeaveWarning:"Выполненные задания сохранятся. Повторное подключение пока недоступно.",betaUnavailable:"Сейчас не удалось подключить письменную практику. Попробуйте позже.",baselineIntro:"Сначала проверьте базовые знания Cambridge Economics (AS): 12 вопросов, 20 минут. После результата выберите Paper 1 или Paper 3. Темы A Level проверяются отдельно.",selectPaper:"Выберите Paper",continuePreparation:"Продолжить подготовку",entryResult:"Входная диагностика завершена",topicOverview:"Темы для подготовки",chooseLevel:"Выберите уровень",openLevel:"Открыть",overview:"Главная",noAttempts:"Пока нет попыток",afterCheck:"Диагностика завершена — изучите слабые темы",startHere:"Начните с входной диагностики",resumeExam:"Продолжить работу",levelIntro:"Диагностика определит темы для подготовки. Полный экзамен доступен отдельно.",openLesson:"Изучить тему",viewUnits:"Результаты по разделам",nextLesson:"Следующая тема",showMore:"Показать ещё",viewHistory:"История попыток",noHistory:"Завершённые экзамены и диагностики появятся здесь",backToPlan:"К учебному плану",recommended:"Рекомендуемое действие",title:"Cambridge Economics · Exam Prep",intro:"Выберите уровень и начните с короткой диагностики. После результата откроется учебный план.",minuteShort:"мин",profile:"Настройка подготовки",editProfile:"Изменить",series:"Экзаменационная сессия",grade:"Целевая оценка",hours:"Всего часов на учёбу в неделю",econHours:"Часов на экономику в неделю",saveProfile:"Сохранить настройки",profileInvalid:"Проверьте экзаменационную сессию и количество часов: время на экономику не должно превышать общее время.",profileSaved:"Настройки сохранены",optional:"Настройте цель и время подготовки. Уже сохранённые попытки не изменятся.",startDiagnostic:"Начать диагностику",fullPaper:"Полный экзамен",entryCheck:"Входная диагностика",completedCheck:"Диагностика завершена",repeatCheck:"Повторить диагностику",history:"Мои попытки",viewResult:"Посмотреть результат",continueAttempt:"Продолжить",
       p1:"Paper 1 · AS Level",p3:"Paper 3 · A Level",start:"Начать или продолжить",back:"Назад", beforePlan:"Учебный план появится после первого завершённого экзамена. Позже его можно открыть из истории попыток.", autoAnswer:"Выберите вариант и нажмите «Ответить». Сохранение подтверждается сервером.",saving:"Сохраняем ответ…",
@@ -154,7 +154,7 @@
 
   function lobby(){
     state.writtenView?.dispose?.();state.writtenView=null;state.writtenPlan=null;
-    state.betaInvite=false;state.betaJoined=false;state.betaBusy=false;
+    state.writtenStartEligible=false;state.writtenStarted=false;state.writtenStartBusy=false;
     ++state.token;stop();state.view="home";state.id=null;state.paper=null;
     state.data=null;state.planData=null;state.index=0;state.pendingChoice=null;state.choiceFeedback=null;
     const view=shell();if(!view)return;
@@ -176,8 +176,8 @@
     if(profile.ok)state.profile=profile.profile||null;
     // Fail-closed: no released and assigned written plan => no learner UI.
     state.writtenPlan=written.ok&&written.available===true?written.plan_id:null;
-    state.betaInvite=beta.ok&&beta.eligible===true;
-    state.betaJoined=beta.ok&&beta.joined===true;
+    state.writtenStartEligible=beta.ok&&beta.eligible===true;
+    state.writtenStarted=beta.ok&&beta.joined===true;
     renderHome();
   }
   function initialCheckStatus(){
@@ -245,8 +245,8 @@
         head.append(copy,e("span","ep-live-component-arrow","›"));
         card.append(head);
         const status=state.writtenPlan?t().writtenPaperReady:
-          state.betaInvite?t().writtenPaperInvite:
-          state.betaJoined?t().writtenPaperDone:t().writtenPaperLimited;
+          state.writtenStartEligible?t().writtenPaperInvite:
+          state.writtenStarted?t().writtenPaperDone:t().writtenPaperLimited;
         const statusBox=e("div","ep-live-component-status");
         statusBox.append(e("div","ep-live-meta ep-written-paper-status",status));
         card.append(statusBox,e("div","ep-live-component-open",t().openLevel+" →"));
@@ -284,30 +284,7 @@
       btn(t().viewHistory,()=>openHistoryList(),true));
     if(state.writtenPlan&&window.iClubWrittenCoreViewV1)
       tools.append(btn(t().writtenPractice,openWritten,true));
-    let leaveNote=null;
-    if(state.betaJoined){
-      let leaveArmed=false;
-      leaveNote=e("p","ep-host-note ep-written-leave-note","");
-      const leave=btn(t().betaLeave,async()=>{
-        if(state.closed||state.view!=="home"||state.betaBusy)return;
-        if(!leaveArmed){
-          leaveArmed=true;
-          leave.textContent=t().betaLeaveConfirm;
-          leaveNote.textContent=t().betaLeaveWarning;
-          return;
-        }
-        state.betaBusy=true;
-        leave.disabled=true;
-        const result=await rpc("iclub_econ_written_beta_leave_v1",{});
-        state.betaBusy=false;
-        if(state.closed||state.view!=="home")return;
-        if(result.ok&&result.left===true)lobby();
-        else error(lobby);
-      },true);
-      tools.append(leave);
-    }
     view.append(tools);
-    if(leaveNote)view.append(leaveNote);
   }
   // P2/P4 are visible like P1/P3, but do not pretend that a single Paper
   // can bypass the server's ordered written study plan.
@@ -328,26 +305,26 @@
     const actions=e("div","ep-live-actions");
     if(state.writtenPlan&&window.iClubWrittenCoreViewV1){
       actions.append(btn(t().writtenPaperReady,openWritten));
-    }else if(state.betaInvite&&window.iClubWrittenCoreViewV1){
+    }else if(state.writtenStartEligible&&window.iClubWrittenCoreViewV1){
       // A single Start action grants access; no separate consent screen.
       const note=e("p","ep-host-note","");
-      const join=btn(t().betaJoin,()=>joinWrittenBeta(join,note));
+      const join=btn(t().betaJoin,()=>startWrittenPractice(join,note));
       actions.append(join);description.append(note);
     }else{
       description.append(e("p","ep-host-note",
-        state.betaJoined?t().writtenPaperWaiting:t().writtenPaperNoAccess));
+        state.writtenStarted?t().writtenPaperWaiting:t().writtenPaperNoAccess));
     }
     if(actions.children.length)description.append(actions);
     detail.append(description);view.append(detail);
   }
-  async function joinWrittenBeta(button,note){
-    if(state.closed||state.betaBusy||!state.betaInvite||
+  async function startWrittenPractice(button,note){
+    if(state.closed||state.writtenStartBusy||!state.writtenStartEligible||
        !["home","written_info"].includes(state.view))return;
     const viewName=state.view,requestToken=state.token;
-    state.betaBusy=true;button.disabled=true;
-    const result=await rpc("iclub_econ_written_beta_join_v1",{p_confirm:true});
+    state.writtenStartBusy=true;button.disabled=true;
+    const result=await rpc("iclub_econ_written_start_v2",{});
     if(state.closed||state.view!==viewName||state.token!==requestToken)return;
-    state.betaBusy=false;
+    state.writtenStartBusy=false;
     if(result.ok&&result.joined===true){lobby();return;}
     note.textContent=t().betaUnavailable;
     button.disabled=false;
