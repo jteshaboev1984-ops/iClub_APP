@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS private.iclub_exam_chemistry_j23_theory_revisions_v1 
  review_status text NOT NULL DEFAULT 'needs_academic_signoff'
    CHECK (review_status IN ('needs_academic_signoff','approved_for_packaging','rejected')),
  created_at timestamptz NOT NULL DEFAULT now(),
- PRIMARY KEY (revision_key,skill_key),
+ PRIMARY KEY (revision_key,skill_key)
  -- This candidate table deliberately has no learner access or FK to user data.
 );
 ALTER TABLE private.iclub_exam_chemistry_j23_theory_revisions_v1 ENABLE ROW LEVEL SECURITY;
