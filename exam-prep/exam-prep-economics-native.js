@@ -737,6 +737,22 @@
         view.append(list);
       }
     }
+    // All displayed priorities have been marked studied, not mastered.
+    // Offer the existing server-controlled recheck without changing evidence.
+    const plannedTopicsStudied=topics.length>0&&topics.every(task=>task.studied===true);
+    if(plannedTopicsStudied){
+      const copy={
+        ru:"Приоритетные темы отмечены как изученные. Проверьте знания в новой попытке: отметка об изучении сама по себе не подтверждает результат.",
+        uz:"Rejadagi ustuvor mavzular o‘rganilgan deb belgilandi. Bilimingizni yangi urinishda tekshiring: «o‘rganildi» belgisi natijani tasdiqlamaydi.",
+        en:"You marked the priority topics as studied. Check your knowledge in a new attempt: a study mark alone does not confirm improvement."
+      };
+      const followup=e("section","ep-live-card ep-native-plan-followup");
+      followup.append(e("div","ep-native-level-eyebrow",t().recommended),
+        e("p","ep-native-guidance",copy[state.lang]||copy.ru),
+        btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,
+          ()=>begin(state.paper,data.session_kind||"paper")));
+      view.append(followup);
+    }
     const units=e("details","ep-native-units-details");
     units.append(e("summary","",t().viewUnits));
     const rows=e("div","ep-native-plan-units");
@@ -749,8 +765,9 @@
     units.append(rows);view.append(units);
     const actions=e("div","ep-live-actions");
     actions.append(btn(t().backReview,draw,true));
-    actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,
-      ()=>begin(state.paper,data.session_kind||"paper"),true));
+    if(!plannedTopicsStudied)
+      actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,
+        ()=>begin(state.paper,data.session_kind||"paper"),true));
     if(data.session_kind==="diagnostic")
       actions.append(btn(t().fullPaper,()=>begin(state.paper),true));
     view.append(actions);
