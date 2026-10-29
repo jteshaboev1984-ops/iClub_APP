@@ -87,7 +87,7 @@ INSERT INTO private.iclub_subject_library_theory VALUES
 SQL
 
 psql -X -v ON_ERROR_STOP=1 -d postgres -f scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql >/dev/null
-psql -X -v ON_ERROR_STOP=1 -d postgres -f supabase/migrations/20261028153500_chemistry_9701_j25_theory_owner_rollout_without_optin_v1.sql >/dev/null
+psql -X -v ON_ERROR_STOP=1 -d postgres -f supabase/migrations/20261029080305_chemistry_9701_j25_theory_owner_rollout_without_optin_v1.sql >/dev/null
 psql -X -v ON_ERROR_STOP=1 -d postgres <<'SQL'
 DO $$
 BEGIN
