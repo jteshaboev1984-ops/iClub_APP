@@ -1,0 +1,49 @@
+{
+  "id": "chemistry_9701_j23_solo_qa_closed_candidate_v5",
+  "source_version": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v5",
+  "qa_type": "AI_internal_two_pass_NOT_INDEPENDENT_HUMAN",
+  "science_question_answer_english_reviewed": 91,
+  "language_numeric_crosscheck_skills": 91,
+  "prior_trilingual_review_new_skills": 29,
+  "prior_trilingual_review_rephrased_skills": 8,
+  "additional_selfqa_rephrased_skills": [
+    "CHEM9701-07-02",
+    "CHEM9701-07-05",
+    "CHEM9701-08-02",
+    "CHEM9701-11-02",
+    "CHEM9701-19-02",
+    "CHEM9701-19-03"
+  ],
+  "additional_selfqa_rephrased_locale_questions": 18,
+  "unchanged_answers_since_v4": 273,
+  "counts": {
+    "theory": 91,
+    "tutor_locales": 273,
+    "editorial_corrections": 12,
+    "noncredit_enrichment": 1,
+    "historical_theory_rows": 154,
+    "invalid_card_hashes": 0,
+    "tutor_pointer_mismatches": 0
+  },
+  "sha256": {
+    "theory": "c66929cc62696c14a2dce4975b4cd4631600d18ffd2595a2d2156261879f9afe",
+    "tutor": "7d4b4f07da89c3c9df81d30bc1cd884fd6ea4fd4727a543d577c3e244e5bc238",
+    "package": "be3e9c84398984f4f0812ae97f29ffe35a8c5a86a28542a7c027eefc64b45c2f"
+  },
+  "safety": {
+    "j24_enabled": false,
+    "j25_mode": "closed",
+    "pull_request_draft": true,
+    "all_private_content_remains_in_supabase": true,
+    "external_expert_available": false,
+    "python_exact_private_bundle_run_proven": false,
+    "private_backup_restore_proven": false,
+    "legal_rights_confirmation_proven": false
+  },
+  "notes": [
+    "All results are assistant-operated, not an independent expert certification.",
+    "No student data or original source version mutated.",
+    "Metadata only in PUBLIC GitHub; no student question, answer or Tutor text included."
+  ],
+  "protocol": "docs/exam-prep-chemistry-j23-solo-qa-protocol-20261029.md"
+}
