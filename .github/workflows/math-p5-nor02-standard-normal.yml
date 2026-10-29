@@ -1,0 +1,17 @@
+name: Mathematics P5 normal-method correction guard
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/20261029_p5_nor02_standard_normal_v3_publish.sql"
+      - "scripts/math-p5-nor02-standard-normal-regression.cjs"
+      - ".github/workflows/math-p5-nor02-standard-normal.yml"
+  workflow_dispatch:
+jobs:
+  p5-nor02-localized-method:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check mathematics, immutable version and localized standard-normal method
+        run: node scripts/math-p5-nor02-standard-normal-regression.cjs
