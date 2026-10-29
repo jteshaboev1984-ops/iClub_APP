@@ -494,7 +494,10 @@ begin
   if v_row.status NOT IN ('active','unknown') then
     return jsonb_build_object('ok',false,'reason','reservation_not_active','status',v_row.status);
   end if;
-  IF v_status='released' AND (v_row.dispatched_at IS NOT NULL OR v_row.status='unknown') THEN
+  -- The previous Edge version can falsely claim a free pre-dispatch release.
+  -- Refuse all zero-cost release claims until separately proven by a versioned
+  -- service-only no-dispatch protocol; never silently erase a possible bill.
+  IF v_status='released' THEN
     RETURN jsonb_build_object('ok',false,'reason','provider_cost_unresolved');
   END IF;
 
@@ -546,7 +549,10 @@ begin
   if v_row.status NOT IN ('active','unknown') then
     return jsonb_build_object('ok',false,'reason','reservation_not_active','status',v_row.status);
   end if;
-  IF v_status='released' AND (v_row.dispatched_at IS NOT NULL OR v_row.status='unknown') THEN
+  -- The previous Edge version can falsely claim a free pre-dispatch release.
+  -- Refuse all zero-cost release claims until separately proven by a versioned
+  -- service-only no-dispatch protocol; never silently erase a possible bill.
+  IF v_status='released' THEN
     RETURN jsonb_build_object('ok',false,'reason','provider_cost_unresolved');
   END IF;
 
