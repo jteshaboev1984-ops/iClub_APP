@@ -339,7 +339,10 @@
     result.append(e("h3","",t().entryResult),
       e("div","ep-live-meta",t().result+": "+state.data.score+" / 12"));
     const actions=e("div","ep-live-actions");
-    actions.append(btn(t().selectPaper,lobby));
+    // A completed entry check should lead straight to the owned study plan.
+    // The existing Paper-selection route stays available as a secondary action.
+    actions.append(btn(t().plan,showStudyPlan),
+      btn(t().selectPaper,lobby,true));
     result.append(actions);view.append(result);
   }
 
