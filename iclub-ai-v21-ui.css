@@ -83,11 +83,13 @@ html.iclub-global-ai-active:has(#iclub-global-ai-mark:not([hidden]))
   user-select: none;
 }
 
-/* Fail-closed visual guard for the active quiz's first animation frame. */
-body:has(#courses-practice-quiz.is-active) .iclub-global-ai-mark,
-body:has(#courses-practice-quiz.is-active) .iclub-global-ai-panel,
-body:has(#courses-tour-quiz.is-active) .iclub-global-ai-mark,
-body:has(#courses-tour-quiz.is-active) .iclub-global-ai-panel {
+/* Fail-closed guard for the ACTUALLY VISIBLE quiz only. Background
+   Practice/Tour DOM is mounted while Home and other tabs are active;
+   it must never hide the global Tutor on those unrelated screens. */
+body:has(#view-courses.is-active #courses-practice-quiz.is-active) .iclub-global-ai-mark,
+body:has(#view-courses.is-active #courses-practice-quiz.is-active) .iclub-global-ai-panel,
+body:has(#view-courses.is-active #courses-tour-quiz.is-active) .iclub-global-ai-mark,
+body:has(#view-courses.is-active #courses-tour-quiz.is-active) .iclub-global-ai-panel {
   display: none !important;
 }
 
@@ -294,40 +296,43 @@ body:has(#courses-tour-quiz.is-active) .iclub-global-ai-panel {
   animation-delay: 240ms;
 }
 
+/* All two/three quick actions should be readable without horizontal
+   swiping. One action fills the row; three use two equal cells and one
+   full-width final cell. Also supports a fourth temporary recovery action. */
 .iclub-global-ai-quick {
   flex: 0 0 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
   padding: 8px 12px 9px;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-  scrollbar-width: none;
+  overflow-x: hidden;
   border-top: 1px solid rgba(15, 23, 42, 0.055);
   background: rgba(255, 255, 255, 0.99);
 }
 
-.iclub-global-ai-quick::-webkit-scrollbar {
-  display: none;
-}
-
 .iclub-global-ai-quick-btn {
-  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
   min-height: 36px;
-  max-width: 230px;
   padding: 8px 11px;
   border: 1px solid rgba(47, 111, 214, 0.16);
-  border-radius: 999px;
+  border-radius: 14px;
   background: rgba(47, 111, 214, 0.055);
   color: #245fb8;
   font: inherit;
   font-size: 12.5px;
   line-height: 1.2;
   font-weight: 750;
-  text-align: left;
+  overflow-wrap: anywhere;
+  text-align: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
+}
+
+.iclub-global-ai-quick-btn:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .iclub-global-ai-quick-btn:active:not(:disabled) {
