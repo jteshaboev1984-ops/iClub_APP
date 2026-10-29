@@ -1,0 +1,44 @@
+{
+  "type": "chemistry_9701_j23_private_selfqa_v6",
+  "visibility": "metadata_only_public_repository",
+  "status": "CLOSED_AI_SELF_QA_NOT_INDEPENDENT",
+  "candidate_version": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v6",
+  "supersedes": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v5",
+  "change": {
+    "issue": "RU question formal learning tone",
+    "adjusted_ru_check_questions": 16,
+    "changed_skills": 16,
+    "unaltered_english_questions": 91,
+    "unaltered_uzbek_questions": 91,
+    "unaltered_check_answers": 273,
+    "unchanged_theory_cards": 75,
+    "tutor_source_sha_pointers_reconciled": 48
+  },
+  "counts": {
+    "theory": 91,
+    "tutor_locales": 273,
+    "original_theory_rows_preserved": 154,
+    "final_legacy_imperative_regex_hits": 0,
+    "canonical_sha_mismatches": 0,
+    "tutor_hash_or_title_mismatches": 0
+  },
+  "digest": {
+    "theory_sha256": "bc254165506e08af191eed2a5b05ab108db850899c104f41edfe204adab3b9f7",
+    "tutor_sha256": "a677d5048d3bb4c362af2a7b56d115a1710606f37de0f24dab8e8b57e92285e0",
+    "combined_sha256": "86b6884da700f69c143451776eee77de6e7662aaf018597b539f3a7bf604246d"
+  },
+  "guard": {
+    "j24_enabled": false,
+    "j25_audience_mode": "closed",
+    "source_immutable": true,
+    "learner_data_untouched": true,
+    "academic_review_type": "assistant_internal_no_external_human_certification",
+    "full_packager_python_run": false,
+    "offsite_private_restore_verified": false,
+    "rights_release_approval": false
+  },
+  "references": [
+    "docs/exam-prep-chemistry-j23-solo-qa-protocol-20261029.md",
+    "docs/exam-prep-chemistry-j23-v5-selfqa-private-source-manifest-20261029.json"
+  ]
+}
