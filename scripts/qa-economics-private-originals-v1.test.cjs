@@ -33,7 +33,7 @@ function setup(){
         target_item_count:12,session_kind_target:'diagnostic'}:{})};
   });
   const paths=banks.map((bank,i)=>path.join(dir,parts[i].paper+'.json'));
-  const write=()=>banks.forEach((bank,i)=>fs.writeFileSync(paths[i],JSON.stringify(bank)));
+  const write=()=>{banks[1].content_sha256=canonical(Object.fromEntries(Object.entries(banks[1]).filter(([key])=>key!=='content_sha256')));banks.forEach((bank,i)=>fs.writeFileSync(paths[i],JSON.stringify(bank)));};
   write();return {dir,banks,paths,write};
 }
 function check(fn){
