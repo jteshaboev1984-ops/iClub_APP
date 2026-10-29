@@ -663,46 +663,41 @@
       if(stillCurrent())renderPanel();
     }
   }
-  // One map for existing, approved PRODUCT help buttons (never a model
-  // prompt). The backend verifies membership, consent and current sources.
-  // Academic explanation buttons are separate, source-gated capabilities.
+  // Only these 7 PRODUCT keys have published, reviewed EN/RU/UZ
+  // response cards in production (verified 2026-10-29). Do not display
+  // buttons for other backend-enumerated, unpublished help keys.
+  const PUBLISHED_PREPARED_ACTIONS = new Set([
+    "books_help","catalog_help","practice_after","practice_rules",
+    "recs_help","support_help","tour_rules"
+  ]);
+  // ONE existing Tutor, at most three approved actions per current screen.
+  // Inactive tabs or a stale Practice DB session never choose the actions.
   const PREPARED_SCREEN_ACTIONS = Object.freeze({
-    home:["home_next","catalog_help","practice_rules"],
+    home:["catalog_help","practice_rules","tour_rules"],
     "all-subjects":["catalog_help","practice_rules","books_help"],
     "subject-hub":["catalog_help","practice_rules","books_help"],
     "practice-start":["practice_rules","practice_after","recs_help"],
     "practice-result":["practice_after","recs_help","practice_rules"],
     "practice-review":["practice_after","recs_help","books_help"],
     "practice-recs":["recs_help","practice_rules","books_help"],
-    tours:["tour_rules","archive_help","practice_rules"],
-    "tour-rules":["tour_rules","archive_help"],
-    "tour-result":["archive_help","tour_rules","certificates_help"],
-    "tour-review":["archive_help","recs_help","tour_rules"],
+    tours:["tour_rules","practice_rules"],
+    "tour-rules":["tour_rules","practice_rules"],
+    "tour-result":["tour_rules","support_help"],
+    "tour-review":["tour_rules","support_help"],
     lessons:["books_help","catalog_help"],
-    video:["books_help","video_help"],
-    books:["books_help","catalog_help"],
-    "my-recs":["recs_help","practice_after","books_help"],
+    video:["books_help"],
+    books:["books_help"],
+    "my-recs":["recs_help","practice_after"],
     "my-rec-detail":["recs_help","practice_after"],
-    ratings:["ratings_help","tour_rules","support_help"],
-    profile:["profile_meaning","certificates_help","support_help"],
-    notifications:["notifications_help","support_help"],
-    community:["community_help","support_help"],
-    certificates:["certificates_help","archive_help"],
-    archive:["archive_help","tour_rules"],
-    support:["support_help","catalog_help"],
+    ratings:["tour_rules","support_help"],
+    profile:["support_help"],
+    notifications:["support_help"],
+    community:["support_help"],
+    certificates:["tour_rules","support_help"],
+    archive:["tour_rules","support_help"],
+    support:["support_help"],
     "support-topic":["support_help"],
-    about:["about_help","support_help"]
-  });
-  // Keys correspond to the existing reviewed prepared routes. They are
-  // deliberately NOT inferred from labels or arbitrary user-provided text.
-  const PREPARED_ACTION_COPY_KEYS = Object.freeze({
-    home_next:"homeNext",catalog_help:"catalogHelp",
-    practice_rules:"practiceRules",practice_after:"practiceAfter",
-    recs_help:"recs",tour_rules:"tourRules",archive_help:"archive",
-    books_help:"books",video_help:"video",support_help:"support",
-    profile_meaning:"profileMeaning",certificates_help:"certificates",
-    ratings_help:"ratings",notifications_help:"notifications",
-    community_help:"community",about_help:"about"
+    about:["catalog_help","support_help"]
   });
   const PREPARED_ACTION_LABELS = Object.freeze({
     ru:{
@@ -733,7 +728,6 @@
       support_help:"How do I get support?"
     }
   });
-  const VERIFIED_PREPARED_ACTIONS = new Set(Object.keys(PREPARED_ACTION_COPY_KEYS));
   function quickPrompts(ctx) {
     const c = copy();
     const scope=practiceScope();
@@ -762,10 +756,9 @@
             ?["catalog_help","books_help"]
             :["catalog_help","support_help"]);
       const custom=PREPARED_ACTION_LABELS[locale()]||PREPARED_ACTION_LABELS.ru;
-      return selected.filter(key=>VERIFIED_PREPARED_ACTIONS.has(key))
-        .slice(0,3).map(key=>({
-          key,label:custom[key]||c[PREPARED_ACTION_COPY_KEYS[key]]
-        }));
+      return selected.filter(key=>PUBLISHED_PREPARED_ACTIONS.has(key)
+          &&typeof custom[key]==="string")
+        .slice(0,3).map(key=>({key,label:custom[key]}));
     }
     if (ctx?.subjectKey === "mathematics"
         && ctx?.scopeCode === "exam_prep"
