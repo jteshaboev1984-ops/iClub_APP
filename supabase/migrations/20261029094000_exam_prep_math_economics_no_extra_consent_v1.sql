@@ -147,11 +147,16 @@ $function$;
 
 CREATE OR REPLACE FUNCTION private.iclub_exam_native_economics_beta_allowed_v1(p_user uuid)
  RETURNS boolean
- LANGUAGE sql
+ LANGUAGE plpgsql
  STABLE SECURITY DEFINER
  SET search_path TO ''
 AS $function$
- SELECT p_user IS NOT NULL AND EXISTS (
+BEGIN
+  IF to_regclass('public.users') IS NULL THEN RETURN false; END IF;
+  IF to_regclass('public.user_subjects') IS NULL THEN RETURN false; END IF;
+  IF to_regclass('public.subjects') IS NULL THEN RETURN false; END IF;
+  IF to_regclass('private.exam_prep_feature_entitlements') IS NULL THEN RETURN false; END IF;
+  RETURN (SELECT p_user IS NOT NULL AND EXISTS (
    SELECT 1
    FROM private.exam_prep_beta_cohorts c
    JOIN private.exam_prep_beta_members m
@@ -182,16 +187,22 @@ AS $function$
        WHERE us.user_id=p_user AND subj.subject_key='economics'
          AND subj.is_active=true
      )
- );
+ ));
+END;
 $function$;
 
 CREATE OR REPLACE FUNCTION private.iclub_econ_written_beta_eligible_v1(p_user uuid)
  RETURNS boolean
- LANGUAGE sql
+ LANGUAGE plpgsql
  STABLE SECURITY DEFINER
  SET search_path TO ''
 AS $function$
- SELECT p_user IS NOT NULL
+BEGIN
+  IF to_regclass('public.user_subjects') IS NULL THEN RETURN false; END IF;
+  IF to_regclass('public.subjects') IS NULL THEN RETURN false; END IF;
+  IF to_regclass('private.iclub_exam_native_mcq_attempts_v1') IS NULL THEN RETURN false; END IF;
+  IF to_regclass('private.exam_prep_feature_entitlements') IS NULL THEN RETURN false; END IF;
+  RETURN (SELECT p_user IS NOT NULL
  AND EXISTS (
   SELECT 1 FROM private.exam_prep_beta_cohorts c
   JOIN private.exam_prep_beta_members m ON m.cohort_id=c.id
@@ -222,16 +233,20 @@ AS $function$
     AND a.version_key='economics_2026_2028_v1'
     AND a.paper_code='P1' AND a.session_kind='diagnostic'
     AND a.status='finalized'
- );
+ ));
+END;
 $function$;
 
 CREATE OR REPLACE FUNCTION private.iclub_exam_chemistry_p1_math_beta_eligible_v1(p_user_id uuid)
  RETURNS boolean
- LANGUAGE sql
+ LANGUAGE plpgsql
  STABLE SECURITY DEFINER
  SET search_path TO ''
 AS $function$
- SELECT p_user_id IS NOT NULL AND EXISTS (
+BEGIN
+  IF to_regclass('public.user_subjects') IS NULL THEN RETURN false; END IF;
+  IF to_regclass('public.subjects') IS NULL THEN RETURN false; END IF;
+  RETURN (SELECT p_user_id IS NOT NULL AND EXISTS (
    SELECT 1 FROM private.exam_prep_beta_cohorts c
    JOIN private.exam_prep_beta_members m ON m.cohort_id=c.id
    WHERE c.cohort_key='math_as_p1_p5_beta_2026_09_01'
@@ -244,7 +259,8 @@ AS $function$
    JOIN public.subjects s ON s.id=us.subject_id
    WHERE us.user_id=p_user_id AND s.subject_key='chemistry'
    AND s.is_active=true
- );
+ ));
+END;
 $function$;
 
 CREATE FUNCTION public.iclub_econ_written_start_v2()
