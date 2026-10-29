@@ -223,6 +223,11 @@
       next.append(btn(stage.active?t().continueAttempt:t().startDiagnostic,
         stage.active?()=>openHistory(stage.active,false):()=>begin("P1","diagnostic")));
       block.append(next);
+      // Preparation settings are optional but accessible before the first check.
+      // Opening them does not start or change any owned exam attempt.
+      const setupActions=e("div","ep-live-actions");
+      setupActions.append(btn(t().profile,openSettings,true));
+      block.append(setupActions);
       view.append(block);
       // Existing pre-release Paper attempts remain accessible independently.
       if(state.history.length)view.append(btn(t().viewHistory,()=>openHistoryList(),true));
