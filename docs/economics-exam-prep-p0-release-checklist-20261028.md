@@ -15,7 +15,7 @@
 ## Mandatory release blockers (do NOT skip)
 
 1. Have a dedicated **authorized test learner** with permitted Economics 9708 access and Vercel Preview/SSO access. No real learner identity, tokens, account or stored learning data may be repurposed for QA.
-2. Confirm whether preview uses production or isolated Supabase. Prefer isolated test backend; if a test account is deliberately used on production backend, get explicit permission for that specific account and scope beforehand.
+2. **Confirmed 29 Oct:** Preview uses the LIVE production Supabase project, because `app.js` hardcodes `https://mmmduffgpvwjdpruzikw.supabase.co` and this branch does not change it. Do not register, create attempts, or submit answers on Preview using an existing learner account. Authenticate visually only if safe. A true write-based preview smoke needs either an explicitly authorized dedicated test user in production (with clearly scoped effects and cleanup plan) or a separate test Supabase environment. A Supabase development branch may incur extra billing and must not be created without approval.
 3. In an authenticated browser, verify `login → Economics setup → P1 12-item check → choose and explicitly submit → refresh → previous/next → finish → results → study plan → mark studied → recheck`. Also test P3 30-item paper and an internet-interruption scenario, RU/UZ/EN with mobile and desktop views.
 4. Verify a second account **cannot** see, modify or finish the first account's attempt, and losing Economics eligibility blocks active access while keeping owned finalized history readable.
 5. Confirm the written P2/P4 limited beta, enrollment consent, written plan and completed records remain unchanged. Test the Math flow and the app entry route.
