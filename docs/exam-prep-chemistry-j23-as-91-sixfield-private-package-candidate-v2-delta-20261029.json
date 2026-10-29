@@ -1,0 +1,86 @@
+{
+  "format": "iclub_chemistry_9701_j23_private_source_package_candidate_v2_delta",
+  "basis_manifest": "docs/exam-prep-chemistry-j23-as-91-sixfield-private-package-candidate-manifest-20261029.json",
+  "supersedes_candidate_version": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v1",
+  "candidate_version": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v2",
+  "status": "CLOSED_UNAPPROVED_PENDING_INDEPENDENT_ACADEMIC_RIGHTS_BACKUP_TUTOR_REVIEW",
+  "content_counts": {
+    "theory_cards": 91,
+    "tutor_locale_rows": 273,
+    "editorial_revisions": 12,
+    "enrichment_only_nonexam_card": 1,
+    "corrected_tutor_titles": 7
+  },
+  "sha256": {
+    "theory_source_utf8": "36cb6a088971a1c4b740684153dfe9964cf0ba8068b64f43eed0ce19919e9eac",
+    "tutor_source_utf8": "517378c0d894e3f2d2d96fbaaf9bc8224afbda84607a3ed61e954944c3d34064",
+    "theory_null_tutor_package_utf8": "b09996b5f6611221beb8230712926393d6fd8308c825bc0887e9fde1b0715d1d"
+  },
+  "versioning": "Full v2 exact source bytes and unchanged canonical 91 per-card Theory hashes are held privately in Supabase; this delta records only seven Tutor title fixes and revised fingerprints.",
+  "corrected_tutor_metadata": [
+    {
+      "skill_key": "CHEM9701-09-04",
+      "locale": "ru",
+      "original_digest": "sha256:b88c566c60d8190d06a4fc6b50823729f888cf3b54296e606046efdb14361360",
+      "revised_digest": "sha256:0408efe91e86d8795a92e3a20d395a8d2aa22b16e560404980aafe13dcac592a",
+      "source_card_hash": "sha256:2440d3b99b6e4d181d2472b9b7b77f35a5a16607f9af41745c9c558047e5120f"
+    },
+    {
+      "skill_key": "CHEM9701-10-02",
+      "locale": "ru",
+      "original_digest": "sha256:4b5e3f874f275e54666f75ce0fc895d0dac02fc23c17a639d82ba65b30196358",
+      "revised_digest": "sha256:abbc8fceea77caface406270aaee010c5c270f5c009a197ae22a696386902647",
+      "source_card_hash": "sha256:bae0842f956885262ed24cbcb86e29df0f4b8be720fd29ecf8fc26d6f7ad1518"
+    },
+    {
+      "skill_key": "CHEM9701-10-02",
+      "locale": "uz",
+      "original_digest": "sha256:a9423476c7a24fc7ab5384ffc57ca83554aea494c5886c0b96d8483c553b531c",
+      "revised_digest": "sha256:0d4f5e270a25d8c438191767afadef86c9b08b6fbacb9ed5239989f5117baa94",
+      "source_card_hash": "sha256:bae0842f956885262ed24cbcb86e29df0f4b8be720fd29ecf8fc26d6f7ad1518"
+    },
+    {
+      "skill_key": "CHEM9701-18-03",
+      "locale": "ru",
+      "original_digest": "sha256:cbbe0966350f055608df11204cb7b4248bb21a671f66f2442f8012a7eb10b585",
+      "revised_digest": "sha256:f29c777386a50b4dcad19e34babe6b70673e062702cd535d33f25d76f04de45f",
+      "source_card_hash": "sha256:12833962952b4f59358ab7c4304f4712618a9f3971aab9f519547b1364b357ca"
+    },
+    {
+      "skill_key": "CHEM9701-18-03",
+      "locale": "uz",
+      "original_digest": "sha256:c6fd11705e946bdf8b15b9010152c96a95c880fc619b2b38ba8bc5ea5bcb97c8",
+      "revised_digest": "sha256:0b9b98943f2541aab0d2fac96b04eaf5f1db951fe846ba90e2ef1d8c542c55cc",
+      "source_card_hash": "sha256:12833962952b4f59358ab7c4304f4712618a9f3971aab9f519547b1364b357ca"
+    },
+    {
+      "skill_key": "CHEM9701-20-03",
+      "locale": "ru",
+      "original_digest": "sha256:375747429772d9dc912fb47ee59b432694853381579aed39c34227ea28ec935f",
+      "revised_digest": "sha256:ad4eff75a3766ac7ad6992c94c56725cdf3773a476047e22e12429f7ea12e440",
+      "source_card_hash": "sha256:4362d1f6150ec6d0639a5f7378d9d2d7b9718a7c145ed45145b599a128c57984"
+    },
+    {
+      "skill_key": "CHEM9701-20-03",
+      "locale": "uz",
+      "original_digest": "sha256:474dd48ed2ab184d246655dad22440286d3ee5d45b652d99c1db14c974b496e3",
+      "revised_digest": "sha256:e89f2de59fcf42b68115d14917412181d60a8896a080fd0542393bf77c531e21",
+      "source_card_hash": "sha256:4362d1f6150ec6d0639a5f7378d9d2d7b9718a7c145ed45145b599a128c57984"
+    }
+  ],
+  "release_gates": {
+    "independent_science_signoff": false,
+    "trilingual_signoff": false,
+    "tutor_explanation_alignment_signoff": false,
+    "rights_signoff": false,
+    "backup_signoff": false,
+    "student_release": false,
+    "python_packager_local_validation": false
+  },
+  "non_destructive_guards": {
+    "original_154_unchanged": true,
+    "old_v1_source_bundle_retained": true,
+    "j24_enabled": false,
+    "j25_audience_mode": "closed"
+  }
+}

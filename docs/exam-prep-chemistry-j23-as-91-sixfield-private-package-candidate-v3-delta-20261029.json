@@ -1,0 +1,37 @@
+{
+  "format": "iclub-chemistry-j23-private-candidate-v3-delta",
+  "prior_candidate": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v2",
+  "candidate_version": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v3",
+  "state": "CLOSED_PENDING_INDEPENDENT_ACADEMIC_RIGHTS_TUTOR_BACKUP_SIGNOFF",
+  "theory_card_count": 91,
+  "tutor_locale_count": 273,
+  "theory_sha256": "36cb6a088971a1c4b740684153dfe9964cf0ba8068b64f43eed0ce19919e9eac",
+  "tutor_sha256": "33b0408793ebffb1813e28a596d2c3f314d3ce45cfabec89c7d8905b4c9779ef",
+  "package_sha256": "59d0c02d00de9d36128b23b625f4550263c2b468cf32ae91dc600aa43467a73f",
+  "tutor_semantic_corrections": [
+    "CHEM9701-01-02/ru",
+    "CHEM9701-01-02/uz",
+    "CHEM9701-08-03/uz",
+    "CHEM9701-11-01/ru",
+    "CHEM9701-11-01/uz",
+    "CHEM9701-17-01/ru",
+    "CHEM9701-22-02/uz"
+  ],
+  "migration_ids": [
+    "20261029120238",
+    "20261029120313"
+  ],
+  "metadata_only": true,
+  "original_sources_preserved": true,
+  "student_release": false,
+  "j24_enabled": false,
+  "j25_audience_mode": "closed",
+  "signoffs": {
+    "independent_science": false,
+    "trilingual": false,
+    "tutor_semantics": false,
+    "rights": false,
+    "backup": false,
+    "python_packager_exact_byte_test": false
+  }
+}

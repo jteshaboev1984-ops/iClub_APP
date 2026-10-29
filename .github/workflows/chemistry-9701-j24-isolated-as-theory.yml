@@ -1,0 +1,76 @@
+name: Chemistry 9701 J24/J25 AS Theory owner rollout security (synthetic)
+
+on:
+  push:
+    branches: ['planning/chemistry-9701-beta-components-j23-20261028']
+    paths:
+      - 'scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql'
+      - 'supabase/migrations/20261029080305_chemistry_9701_j25_theory_owner_rollout_without_optin_v1.sql'
+      - 'scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh'
+      - '.github/workflows/chemistry-9701-j24-isolated-as-theory.yml'
+      - 'exam-prep/exam-prep-chemistry-theory-native.js'
+      - 'exam-prep/exam-prep-host.js'
+      - 'index.html'
+      - 'exam-prep/exam-prep-host.css'
+      - 'scripts/qa-chemistry-9701-j24-theory-ui.cjs'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/chemistry-9701-j24-as-theory-private-gated-api-v1.sql'
+      - 'supabase/migrations/20261029080305_chemistry_9701_j25_theory_owner_rollout_without_optin_v1.sql'
+      - 'scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh'
+      - '.github/workflows/chemistry-9701-j24-isolated-as-theory.yml'
+      - 'exam-prep/exam-prep-chemistry-theory-native.js'
+      - 'exam-prep/exam-prep-host.js'
+      - 'index.html'
+      - 'exam-prep/exam-prep-host.css'
+      - 'scripts/qa-chemistry-9701-j24-theory-ui.cjs'
+
+permissions:
+  contents: read
+
+jobs:
+  j24-as-only-firewall:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      GITHUB_ACTIONS: 'true'
+      PGHOST: '127.0.0.1'
+      PGPORT: '5432'
+      PGUSER: 'postgres'
+      PGPASSWORD: 'postgres'
+      PGDATABASE: 'postgres'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify disposable-only test inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
+          ! grep -Eq 'supabase\.co|service_role|curl|wget|postgresql://' scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
+          grep -Fq 'CREATE TABLE auth.users(id uuid PRIMARY KEY);' scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh
+      - name: Verify native AS Theory UI and shared host without browser storage changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-host.js
+          node --check exam-prep/exam-prep-chemistry-theory-native.js
+          node scripts/qa-chemistry-9701-j24-theory-ui.cjs
+      - name: Simulate 91 AS sources, A-level isolation and multi-user denial
+        shell: bash
+        run: bash scripts/qa-chemistry-9701-j24-isolated-as-theory-gates.sh

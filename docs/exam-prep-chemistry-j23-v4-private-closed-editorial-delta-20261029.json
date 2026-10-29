@@ -1,0 +1,51 @@
+{
+  "artifact": "J23_chemistry_9701_as_private_six_field_candidate_v4_delta",
+  "candidate_version": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v4",
+  "supersedes": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v3",
+  "status": "CLOSED_DRAFT_NOT_APPROVED",
+  "theory_cards": 91,
+  "tutor_locale_links": 273,
+  "unchanged_theory_cards": 88,
+  "updated_questions": [
+    {
+      "skill": "CHEM9701-02-05",
+      "locales": [
+        "en",
+        "uz"
+      ],
+      "change": "Initial mixture wording, avoids implying both reagents fully consumed"
+    },
+    {
+      "skill": "CHEM9701-15-01",
+      "locales": [
+        "en"
+      ],
+      "change": "Directly compare chloroethane and iodoethane"
+    },
+    {
+      "skill": "CHEM9701-19-01",
+      "locales": [
+        "uz"
+      ],
+      "change": "Clarify excess ammonia in ethanol"
+    }
+  ],
+  "modified_locale_questions": 4,
+  "modified_tutor_source_hash_pointers": 9,
+  "theory_sha256": "0d473eff29881c0d300fb9cba7d3597f8f7ad03f0311608f6bea35fb1b9e82c2",
+  "tutor_sha256": "11242383b12d656db361d5ffdc1c812368cd1bc2bffc2791f5dceed675a612eb",
+  "package_sha256": "6d28261c661c5e7d8036eb0089c0e0f3bfdfe0f1f77c0a0a8560712f60cadb78",
+  "privacy": "All question/answer plaintext remains exclusively in private Supabase. Public GitHub stores metadata only.",
+  "remaining": {
+    "independent_chemistry_review": true,
+    "translation_signoff": true,
+    "tutor_signoff": true,
+    "rights_and_restore_provenance": true,
+    "exact_byte_python_packager_run": true
+  },
+  "release_guard": {
+    "j24_enabled": false,
+    "j25_audience_mode": "closed",
+    "pull_request_draft": true
+  }
+}
