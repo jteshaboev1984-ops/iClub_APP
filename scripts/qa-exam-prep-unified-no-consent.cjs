@@ -33,5 +33,5 @@ assert(!sql.includes("VALUES(v_user,'joined',v_ctl.consent_copy_version,v_plan)"
 for(const word of ["DELETE FROM","TRUNCATE ","DROP TABLE","localStorage.clear(","UPDATE private.exam_prep_feature_entitlements"])
  assert(!sql.includes(word),"No progress destruction: "+word);
 assert(html.includes("exam-prep-host.js?v=")&&html.includes("noinvite-20261029"),"Host asset recached");
-assert(html.includes("exam-prep-economics-native.js?v=econ-plan-no-consent-20261029"),"Economics asset recached");
+assert(html.includes("exam-prep-economics-native.js?v=econ-p0-answer-parity-no-consent-20261029"),"Economics asset recached");
 console.log("UNIFIED SUBJECT ACCESS NO EXTRA CONSENT STATIC QA PASS: Math/Econ/Chemistry future contract");
