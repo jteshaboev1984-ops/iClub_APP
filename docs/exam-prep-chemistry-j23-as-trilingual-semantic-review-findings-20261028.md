@@ -54,3 +54,13 @@ Live source: `private.iclub_subject_library_theory`, immutable `chemistry9701_20
 - Do not overwrite existing source digest; no learner mastery or exams enabled by this finding.
 
 **Batch status: 3/91 inspected substantively; 1 provisional no-defect item and 2 translation HOLDs. No general 91/91 approval.**
+
+### J23-SCI-006 — CHEM9701-01-04, §1.4 — bounded PASS
+- All EN/RU/UZ source texts reviewed. First-ionisation gaseous-atom equation and energy definition, general Period 3 trend, Mg→Al 3p-vs-3s exception, P→S spin-pair repulsion exception and electron configuration are chemically consistent.
+- No substantive source or translation error found. Minor English copyediting in a future version: after full stops capitalise `The electron...` and `One sulfur...`. This does not justify publication or modification of the current source hash.
+
+### J23-SCI-007 — CHEM9701-01-05, §1.4 — bounded PASS
+- All three locales checked. Sharp IE₂→IE₃ boundary signals two outer electrons for a main-group atom; by itself it does not fix the period. Mg(g)→Mg⁺(g)→Mg²⁺(g)→Mg³⁺(g) equations each release one electron, and third ionisation accesses an inner shell. Gaseous states and charges remain correct in EN/RU/UZ.
+- No substantive discrepancy found. No release approval until full source/version review and owner-controlled manifest signoff.
+
+**Updated bounded batch status: 5/91 full three-locale explanations read, 3 provisional no-defect outcomes, 2 translation HOLDs. All 91 remain unreleased.**
