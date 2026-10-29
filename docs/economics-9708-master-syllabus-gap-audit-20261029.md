@@ -2,6 +2,11 @@
 
 **Date:** 2026-10-29 (Asia/Tashkent). **Status:** READ-ONLY academic inventory and implementation planning. **Source SHA:** `ad048f9b008243169a4d4cb7ec8a4a576dc40674` (GitHub main = Vercel production READY when inspected). **Database:** Supabase `mmmduffgpvwjdpruzikw`, read-only SQL. **Product:** `economics_9708` / `economics_2026_2028_v1`. **No production/DB/user-data modifications** in this audit. This report is NOT a Cambridge endorsement, academic certification, or release authorization.
 
+## UPDATE — Subsequent official-source review, same day (source-controlled)
+
+This baseline is followed by a **more detailed academic verification pass**: [`economics-9708-20261029-validated-written-AO3-and-AS4-source-audit.md`](economics-9708-20261029-validated-written-AO3-and-AS4-source-audit.md), the **corrected (not approved)** 22-written-task crosswalk v0.2, and the 24-item **unapproved** AS Unit 4 legacy reuse feasibility inventory. Findings include P2 AO3 practice allocation 10/60 versus Cambridge approximate 30%, P4 16/60 versus 30%; source mapping corrections for P4.A.a and P2.C2.b; and four MCQ unit quotas with **zero eligible question buffer** (P1 Units 4/5/6, P3 Unit 9). The initial thematic crosswalk is historical; v0.2 supersedes it on source mapping. Neither document changes production or grants new content approval.
+
+
 ## 1. Source hierarchy and evidence boundaries
 
 1. Primary norm: Cambridge International AS & A Level Economics 9708 syllabus **2026–2028, version 2**: https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf . Check its 2026–2028 candidate applicability, 11 content units, assessment objectives, command words and component rules. Independent point-by-point semantic revalidation of the 498-node decomposition against every original syllabus bullet remains a sign-off task.
