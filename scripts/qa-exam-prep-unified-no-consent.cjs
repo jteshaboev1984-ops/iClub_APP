@@ -8,7 +8,7 @@ const host=read("exam-prep/exam-prep-host.js");
 const api=read("exam-prep/exam-prep-api.js");
 const economics=read("exam-prep/exam-prep-economics-native.js");
 const sql=read("supabase/migrations/20261029094000_exam_prep_math_economics_no_extra_consent_v1.sql");
-const shutdown=read("supabase/migrations/20261029095000_exam_prep_legacy_self_enrollment_revoke_v1.sql");
+const shutdown=read("scripts/ops/20261029_exam_prep_legacy_self_enrollment_revoke_after_client_qa.sql");
 const html=read("index.html");
 for(const js of [host,api,economics])new Function(js);
 for(const word of ["renderInvitationShell","handleGrantConsent","handleRevokeConsent","refreshInvitationOnly","betaInvitation()","grantBetaConsent","revokeBetaConsent","claimBetaCoreSeat","data-ep-beta-action"])
