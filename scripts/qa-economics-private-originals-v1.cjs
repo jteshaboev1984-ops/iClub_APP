@@ -64,7 +64,7 @@ function validate(p1Path,p3Path,privateSourcesDir){
     assert.deepEqual(units,Object.fromEntries(Object.entries(s.units).map(([k,v])=>[k,v])),'wrong syllabus quotas');
     const contentHash=canonical(bank.items);
     if(i===0)assert.equal(bank.content_sha256,contentHash,'P1 items digest drift');
-    else assert(/^[a-f0-9]{64}$/.test(bank.content_sha256),'P3 historical digest invalid');
+    else assert.equal(bank.content_sha256,canonical(Object.fromEntries(Object.entries(bank).filter(([k])=>k!=='content_sha256'))),'P3 metadata+items digest drift');
     papers.push({paper:s.paper,items:s.n,locales:s.n*3,options:s.n*12,
       units,canonical_items_sha256:contentHash,source_bytes_sha256:sha(fs.readFileSync(paths[i]))});
   }
