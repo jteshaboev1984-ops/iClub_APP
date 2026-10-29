@@ -379,11 +379,22 @@ $function$;
 -- eligibility remains controlled by its independent provider/AI policy.
 CREATE OR REPLACE FUNCTION private.iclub_ai_math_beta_pro_quota_eligible_v1(p_user_id uuid)
  RETURNS boolean
- LANGUAGE sql
+ LANGUAGE plpgsql
  STABLE SECURITY DEFINER
  SET search_path TO ''
 AS $function$
- SELECT p_user_id IS NOT NULL AND EXISTS(
+BEGIN
+ IF to_regclass('private.iclub_ai_practice_beta_grants_v1') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.exam_prep_beta_members') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.exam_prep_beta_cohorts') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.exam_prep_feature_entitlements') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.iclub_ai_v21_beta_members') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.iclub_plan_policies') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.iclub_ai_usage_policies') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.iclub_ai_practice_context_v1_control') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.iclub_ai_practice_freeform_pc3_control') IS NULL THEN RETURN false; END IF;
+ IF to_regclass('private.iclub_ai_practice_receipt_v1_control') IS NULL THEN RETURN false; END IF;
+ RETURN (SELECT p_user_id IS NOT NULL AND EXISTS(
   SELECT 1 FROM private.iclub_ai_practice_beta_grants_v1 g
   JOIN private.exam_prep_beta_members bm ON bm.user_id=g.user_id
     AND bm.member_status='active' AND bm.service_mode='ai_assist'
@@ -411,7 +422,8 @@ AS $function$
        WHERE singleton=1 AND enabled)
     AND EXISTS(SELECT 1 FROM private.iclub_ai_practice_receipt_v1_control
        WHERE singleton=1 AND enabled)
- )
+ ));
+END;
 $function$;
 
 -- Phase 1 only: leave legacy RPC grants temporarily unchanged to avoid breaking
