@@ -1,0 +1,26 @@
+name: Economics Private Originals Offline QA
+on:
+  pull_request:
+    paths:
+      - 'scripts/qa-economics-private-originals-v1.cjs'
+      - 'scripts/qa-economics-private-originals-v1.test.cjs'
+      - '.github/workflows/economics-private-originals-offline-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-offline-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Twelve synthetic source and fail-closed cases
+        run: node --test scripts/qa-economics-private-originals-v1.test.cjs
+      - name: Verify no private academic bank in public checkout
+        shell: bash
+        run: |
+          test ! -f iClub_Economics_P1_30_original_CLOSED_CANDIDATE_20261029.json
+          test ! -f iclub_Economics_P3_12_Independent_Diagnostic_Candidate_PRIVATE_20261029.json
