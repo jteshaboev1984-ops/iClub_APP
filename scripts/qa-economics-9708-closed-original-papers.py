@@ -89,18 +89,44 @@ def check(root,paper,expected=None):
     return {'paper':paper_code,'count':len(obj['items']),'sources_verified':len(cache),'sources_selected':len(sources_used),'canonical_primary_skills_unique':30,'unit_quotas_pass':True,'AO_metadata_quota_pass':True,'key_isolation_flag_pass':True,'content_integrity_pass':True,'academic_examiner_signoff':False}
 
 
+def check_private_answer_manifest(root, paper_file, manifest, label):
+    """Optional private independent-answer-lock check. Never print correct letters or questions."""
+    assert manifest.get('contract')=='iclub_econ_9708_private_firstpass_answer_key_challenge_v1'
+    assert manifest.get('release_enabled') is False
+    assert manifest.get('status')=='FIRST_PASS_ASSISTANT_REVIEW_NOT_EXAMINER_APPROVED'
+    record=manifest['reviewed_papers'][label]
+    assert record['source_basename']==paper_file.name, 'review manifest paper mismatch'
+    assert record['source_sha256']==hashlib.sha256(paper_file.read_bytes()).hexdigest(), 'review manifest source integrity mismatch'
+    obj=load(paper_file)
+    assert len(record['entries'])==30 and set(record['entries'])=={x['item_key'] for x in obj['items']}
+    for it in obj['items']:
+        rec=record['entries'][it['item_key']]
+        assert rec['expected_correct_answer']==it['correct_answer'], 'independently reviewed key mismatch'
+        assert rec['syllabus_point']==it['syllabus_point'], 'reviewed syllabus point mismatch'
+        idx='ABCD'.index(rec['expected_correct_answer'])
+        for lg in LANGS:
+            test=sha({'question':it[lg]['question'],'correct_option':it[lg]['options'][idx]})
+            assert test==rec['expected_correct_option_fingerprint_by_locale'][lg], 'reviewed option meaning drift'
+    return True
+
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument('p1',type=Path)
     p.add_argument('p3',type=Path)
+    p.add_argument('--private-answer-review',type=Path,default=None,help='optional PRIVATE local first-pass answer manifest; never commit the manifest')
     args=p.parse_args()
     assert args.p1.parent.resolve()==args.p3.parent.resolve(),'both files must be in same private source folder'
     root=args.p1.parent
     a=check(root,args.p1,'P1');b=check(root,args.p3,'P3')
     k1=load(args.p1);k3=load(args.p3)
+    if args.private_answer_review:
+        m=load(args.private_answer_review)
+        assert check_private_answer_manifest(root,args.p1,m,'P1')
+        assert check_private_answer_manifest(root,args.p3,m,'P3')
     assert not set(i['item_key'] for i in k1['items']).intersection(i['item_key'] for i in k3['items']),'cross paper item-key overlap'
     assert not set(i['skill_key'] for i in k1['items']).intersection(i['skill_key'] for i in k3['items']),'cross paper skill collision'
-    print('PASS closed-candidate technical integrity; no release approval or examiner certification.')
+    print('PASS closed-candidate technical integrity;'+(' first-pass key manifest consistent;' if args.private_answer_review else '')+' no release approval or examiner certification.')
     for out in [a,b]:print(json.dumps(out,ensure_ascii=False,sort_keys=True))
 
 if __name__=='__main__':main()
