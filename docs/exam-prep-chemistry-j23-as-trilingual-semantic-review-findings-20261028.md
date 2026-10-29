@@ -130,3 +130,27 @@ Sources: complete EN/RU/UZ immutable library texts; Lawrie Ryan/Roger Norris Che
 - **J23-SCI-036 | CHEM9701-07-05 | §7.2 | BOUNDED PASS**: strong versus weak acid degree of dissociation, equivalence versus indicator end point, weak acid+strong alkali equivalence >7, strong acid+weak alkali <7, weak acid+weak alkali lacks a sharp indicator transition. The specified **volume of alkali added** graph axis is retained in all locales; no unsupported exact equivalence pH claimed.
 
 **Cumulative: 35/91 read in all three languages; 32 provisional no-defect, 3 translation HOLD.** No approved 91-card manifest, Chemistry AS Theory remains locked.
+
+
+## J23 correction implementation — CLOSED CANDIDATE, 2026-10-29
+Previously found corrections are **implemented in protected Supabase** as full three-locale candidate payload rows in `private.iclub_exam_chemistry_j23_theory_revisions_v1` with `revision_key=chemistry9701_j23_20261029_revision_v1`. Each row retains its exact base source version/hash and receives a new `revision_sha256`. The first four rows were installed by migration `20261029095317`; later 09-01/09-04 by `20261029095542`, and 08-03 by `20261029095654`. The separate revision hash audits the candidate's JSONB payload and **is not interchangeable with the six-field canonical source-packager hash**. Original source and existing `exam_core_skills` references remain unchanged; these candidates are not automatically accessible to users.
+
+- **FIXED IN CANDIDATE, pending academic signoff:** CHEM9701-01-02 RU/UZ mass-spectrum relation; CHEM9701-01-03 UZ p-orbital nodal plane; CHEM9701-06-03 RU acidic-versus-alkaline manganese product; CHEM9701-10-02 RU/UZ Group 2 hydroxide/sulfate titles and matching topic lines.
+- **FIXED IN CANDIDATE, pending academic signoff:** CHEM9701-08-03 UZ homogeneous-versus-heterogeneous catalysis definition; CHEM9701-09-01 RU 3p-subshell grammatical case; CHEM9701-09-04 RU title/topic adjusted from exclusively 'hydrolysis' to broader 'chlorides reacting with water' (NaCl also dissolves).
+- **Release prerequisite still missing:** full canonical six-field authoring source version and matching tutor/source hashes, exact 91-card manifest, independent academic owner and trilingual signoff, rights and backup release approval. No published content mutation, mastery credit, or gate opening.
+
+## J23 scientific and trilingual source review: kinetics 08-01–08-04
+Grounding: complete immutable EN/RU/UZ explanation texts and supplied Cambridge Chemistry 3e textbook chapter 'Reaction rates'; 9701 2025–2027 §8.1–8.3. 
+- **J23-SCI-037 | 08-01 | BOUNDED PASS:** Reactant 0.80→0.50 mol dm⁻³ over 60s gives 0.0050 mol dm⁻³ s⁻¹; NO₂ 0.120/20.0=0.00600, O₂ formation half that =0.00300. Tangent/instantaneous and secant/average distinction consistent across EN/RU/UZ.
+- **J23-SCI-038 | 08-02 | BOUNDED PASS:** Collision theory, temperature vs concentration, effective Eₐ threshold, Maxwell–Boltzmann curve shape and constant total area for fixed molecule count all agree. Gas compression vs argon at fixed V/T correctly distinguishes reactant partial pressure from total pressure.
+- **J23-LANG-007 | 08-03 | CORRECTED CANDIDATE:** All three explain unchanged ΔH and equilibrium constant under catalysis. UZ core omitted the EN/RU distinction between homogeneous and heterogeneous catalysis. Corrected UZ definition: `Gomogen katalizda katalizator va reagentlar bir xil fazada, geterogen katalizda esa turli fazalarda bo‘ladi.` Stored in protected candidate, with original source unchanged.
+- **J23-SCI-039 | 08-04 | BOUNDED PASS:** Product concentration 0.10→0.34 over 30s =0.0080 mol dm⁻³ s⁻¹; gas syringe, escaping gas mass loss, colorimetry applicability, quenching sampled aliquots all match.
+
+## J23 scientific and trilingual source review: Period 3 09-01–09-04
+Grounding: complete immutable EN/RU/UZ explanations and Cambridge Chemistry 9701 2025–2027 §9.1–9.3 / supplied coursebook Periodicity chapter.
+- **J23-LANG-008 | 09-01 | CORRECTED CANDIDATE:** Na⁺ > Mg²⁺ > Al³⁺ (10e each); P³⁻ > S²⁻ > Cl⁻ (18e each) and Mg→Al IE exception consistent. RU sentence `из более высокоэнергетической подуровни 3p` ungrammatical; corrected to `с более высокоэнергетического подуровня 3p`.
+- **J23-SCI-040 | 09-02 | BOUNDED PASS:** Na/Mg/Al metallic, Si giant covalent, P₄/S₈/Cl₂ simple molecules, Ar monatomic; sulfur versus phosphorus London forces and Si electrical properties aligned.
+- **J23-SCI-041 | 09-03 | BOUNDED PASS:** Na₂O, MgO basic; Al₂O₃ and Al(OH)₃ amphoteric; SiO₂/P/S oxides acidic with relevant water reactions. P₄+5O₂→P₄O₁₀ and Al(OH)₃+OH⁻→[Al(OH)₄]⁻ atom/charge balanced. Appropriate sodium oxide/peroxide caveat retained.
+- **J23-LANG-009 | 09-04 | CORRECTED CANDIDATE:** Correct PCl₅+4H₂O→H₃PO₄+5HCl and SiCl₄+2H₂O→SiO₂+4HCl in all languages. RU title/topic incorrectly framed *all* Period 3 chloride water reactions as hydrolysis although NaCl chiefly dissolves. Corrected RU title + intro to `Взаимодействие хлоридов элементов третьего периода с водой` in protected candidate.
+
+**Cumulative reviewed 43/91, 37 provisional no-defect, 6 inspected lessons with corrected source candidates (01-02,01-03,06-03,08-03,09-01,09-04).** One additional correction candidate for 10-02 title was identified earlier and staged pending that card's full substantive review. **No source approved for release.**
