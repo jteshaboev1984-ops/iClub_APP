@@ -83,11 +83,13 @@ html.iclub-global-ai-active:has(#iclub-global-ai-mark:not([hidden]))
   user-select: none;
 }
 
-/* Fail-closed visual guard for the active quiz's first animation frame. */
-body:has(#courses-practice-quiz.is-active) .iclub-global-ai-mark,
-body:has(#courses-practice-quiz.is-active) .iclub-global-ai-panel,
-body:has(#courses-tour-quiz.is-active) .iclub-global-ai-mark,
-body:has(#courses-tour-quiz.is-active) .iclub-global-ai-panel {
+/* Fail-closed guard for the ACTUALLY VISIBLE quiz only. Background
+   Practice/Tour DOM is mounted while Home and other tabs are active;
+   it must never hide the global Tutor on those unrelated screens. */
+body:has(#view-courses.is-active #courses-practice-quiz.is-active) .iclub-global-ai-mark,
+body:has(#view-courses.is-active #courses-practice-quiz.is-active) .iclub-global-ai-panel,
+body:has(#view-courses.is-active #courses-tour-quiz.is-active) .iclub-global-ai-mark,
+body:has(#view-courses.is-active #courses-tour-quiz.is-active) .iclub-global-ai-panel {
   display: none !important;
 }
 
