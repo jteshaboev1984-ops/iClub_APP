@@ -5,7 +5,6 @@
   const MATHEMATICS_KEY = "mathematics";
   const ECONOMICS_KEY = "economics";
   const CHEMISTRY_KEY = "chemistry";
-  const CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED = false;
   const state = {
     open: false,
     subjectKey: null,
@@ -16,8 +15,6 @@
     chemistryShell: null,
     chemistryEntryShell: null,
     chemistryTheoryCatalog: null,
-    chemistryOffer: null,
-    chemistryConsentBusy: false,
     returnFocusEl: null
   };
 
@@ -264,59 +261,6 @@
     }
   }
 
-  function chemistryBetaLabels() {
-    if (state.language === "uz") return {
-      headline: "Chemistry sinovida qatnashish",
-      invitation: "Siz Mathematics Exam Prep sinovida qatnashyapsiz. Chemistry Paper 1 sinovida ham qatnashishga alohida rozilik bildirishingiz mumkin. Hozircha imtihon ochilmaydi va avvalgi natijalaringiz o‘zgarmaydi.",
-      join: "Chemistry sinoviga roziman",pending:"Roziligingiz saqlandi. Chemistry ochilganda alohida xabar beriladi.",
-    };
-    if (state.language === "en") return {
-      headline: "Chemistry beta participation",
-      invitation: "You are participating in Mathematics Exam Prep testing. You may separately opt in to Chemistry Paper 1 testing. The paper is not available yet, and your existing results will not change.",
-      join:"I agree to Chemistry testing",pending:"Your consent is saved. Chemistry access will be announced separately.",
-    };
-    return {
-      headline:"Участие в тестировании Chemistry",
-      invitation:"Вы участвуете в тестировании Mathematics Exam Prep. Вы можете отдельно согласиться попробовать Chemistry Paper 1. Сам экзамен пока закрыт, а прежние результаты останутся без изменений.",
-      join:"Согласен участвовать в тестировании Chemistry",
-      pending:"Ваше согласие сохранено. Открытие Chemistry будет объявлено отдельно.",
-    };
-  }
-
-  async function updateChemistryConsent(revoke) {
-    if (state.chemistryConsentBusy || state.subjectKey !== CHEMISTRY_KEY) return;
-    const lex = chemistryBetaLabels();
-    if (revoke && typeof window.confirm === "function" && !window.confirm(lex.confirmation)) return;
-    state.chemistryConsentBusy = true;
-    const token = state.accessToken;
-    const root = rootEl();
-    const buttons = root?.querySelectorAll?.('[data-chemistry-beta-action]');
-    buttons?.forEach(button => { button.disabled = true; });
-    try {
-      const name = revoke ? "revoke_my_exam_prep_chemistry_consent_v1"
-        : "grant_my_exam_prep_chemistry_consent_v1";
-      const args = revoke ? {} : { p_acknowledgement: "I_CONSENT_TO_CHEMISTRY_P1_CONTROLLED_BETA_V1" };
-      const response = await window.sb?.rpc?.(name,args);
-      if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return;
-      if (response?.error || response?.data?.ok !== true) throw new Error("not_saved");
-      const status = await window.sb?.rpc?.("get_my_exam_prep_chemistry_beta_status_v1",{});
-      if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return;
-      state.chemistryOffer = status?.error ? null : status?.data;
-      if (state.open && !state.chemistryShell?.enabled) renderComingSoonShell();
-    } catch (_) {
-      if (token === state.accessToken && state.open) {
-        const note = document.createElement("p");
-        note.className = "ep-host-note";
-        note.setAttribute("role","alert");
-        note.textContent = lex.error;
-        root?.querySelector(".ep-host-coming-soon")?.append(note);
-      }
-    } finally {
-      state.chemistryConsentBusy = false;
-      buttons?.forEach(button => { button.disabled = false; });
-    }
-  }
-
   // STAGE03_EXAM_PREP_ALL_SUBJECTS_V1: presentation only, no assessment APIs.
   function renderComingSoonShell() {
     const root = rootEl();
@@ -343,27 +287,6 @@
     closeBtn.textContent = text.comingSoonClose;
     closeBtn.addEventListener('click', close);
     shell.append(badge, heading, description, note);
-    if (CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED && state.subjectKey === CHEMISTRY_KEY && state.chemistryOffer?.eligible === true) {
-      const lex = chemistryBetaLabels();
-      const group = document.createElement("div");
-      group.className = "ep-host-component-card ep-host-chemistry-offer";
-      const title = document.createElement("h3");
-      title.className = "ep-host-chemistry-offer-title";
-      title.textContent = lex.headline;
-      const details = document.createElement("p");
-      details.className = "ep-host-note";
-      details.textContent = state.chemistryOffer.consented === true ? lex.pending : lex.invitation;
-      group.append(title,details);
-      const action = document.createElement("button");
-      action.type = "button";
-      action.className = state.chemistryOffer.consented === true
-        ? "ep-host-btn ep-host-btn-secondary" : "ep-host-btn ep-host-btn-primary";
-      action.setAttribute("data-chemistry-beta-action", "");
-      action.textContent = state.chemistryOffer.consented === true ? lex.revoke : lex.join;
-      action.addEventListener("click", () => updateChemistryConsent(state.chemistryOffer?.consented === true));
-      group.append(action);
-      shell.append(group);
-    }
     shell.append(closeBtn);
     root.replaceChildren(shell);
     return true;
@@ -454,7 +377,6 @@
       state.chemistryShell = null;
       state.chemistryEntryShell = null;
       state.chemistryTheoryCatalog = null;
-      state.chemistryOffer = null;
       if (state.subjectKey === ECONOMICS_KEY) {
         try {
           const response = await window.sb?.rpc?.("get_my_exam_prep_program_shell_v1", {
@@ -496,14 +418,7 @@
             state.chemistryEntryShell = shell;
           }
         } catch (_) { /* Entry remains unavailable unless explicitly released. */ }
-        if (CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED && !state.chemistryShell?.enabled && !state.chemistryEntryShell?.enabled) {
-          try {
-            const response = await window.sb?.rpc?.("get_my_exam_prep_chemistry_beta_status_v1",{});
-            if (token !== state.accessToken || state.subjectKey !== CHEMISTRY_KEY) return false;
-            if (!response?.error && response?.data?.eligible === true)
-              state.chemistryOffer = response.data;
-          } catch (_) { /* Non-eligible users still see normal in-development message. */ }
-        }
+
       }
       if (state.subjectKey === CHEMISTRY_KEY) {
         try {
