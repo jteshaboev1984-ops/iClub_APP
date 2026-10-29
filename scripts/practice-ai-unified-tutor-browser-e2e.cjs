@@ -197,6 +197,22 @@ async function main(){
     "С чего начать обучение?","Как эффективно проходить Practice?",
     "Как подготовиться к туру?"
   ],"Home may show only published, reviewed server-help routes");
+  const quickLayout=await page.locator("[data-global-ai-quick]").evaluate(host=>{
+    const container=host.getBoundingClientRect();
+    const buttons=[...host.querySelectorAll("button")].map(button=>
+      button.getBoundingClientRect());
+    return{
+      count:buttons.length,
+      noHorizontalScroll:host.scrollWidth<=host.clientWidth+2,
+      allVisible:buttons.every(b=>b.width>25 &&
+        b.left>=container.left-1 && b.right<=container.right+1)
+    };
+  });
+  assert.equal(quickLayout.count,3);
+  assert.equal(quickLayout.noHorizontalScroll,true,
+    "Quick prompts require hidden horizontal scrolling");
+  assert.equal(quickLayout.allVisible,true,
+    "Not every quick prompt fits in the existing Tutor panel");
   await page.getByRole("button",{name:"С чего начать обучение?"}).click({timeout:8000});
   await page.waitForFunction(()=>window.__isolated.preparedCalls.length===1,null,{timeout:8000});
   const prepared=await page.evaluate(()=>window.__isolated.preparedCalls[0]);
