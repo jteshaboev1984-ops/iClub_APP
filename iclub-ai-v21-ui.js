@@ -663,6 +663,77 @@
       if(stillCurrent())renderPanel();
     }
   }
+  // One map for existing, approved PRODUCT help buttons (never a model
+  // prompt). The backend verifies membership, consent and current sources.
+  // Academic explanation buttons are separate, source-gated capabilities.
+  const PREPARED_SCREEN_ACTIONS = Object.freeze({
+    home:["home_next","catalog_help","practice_rules"],
+    "all-subjects":["catalog_help","practice_rules","books_help"],
+    "subject-hub":["catalog_help","practice_rules","books_help"],
+    "practice-start":["practice_rules","practice_after","recs_help"],
+    "practice-result":["practice_after","recs_help","practice_rules"],
+    "practice-review":["practice_after","recs_help","books_help"],
+    "practice-recs":["recs_help","practice_rules","books_help"],
+    tours:["tour_rules","archive_help","practice_rules"],
+    "tour-rules":["tour_rules","archive_help"],
+    "tour-result":["archive_help","tour_rules","certificates_help"],
+    "tour-review":["archive_help","recs_help","tour_rules"],
+    lessons:["books_help","catalog_help"],
+    video:["books_help","video_help"],
+    books:["books_help","catalog_help"],
+    "my-recs":["recs_help","practice_after","books_help"],
+    "my-rec-detail":["recs_help","practice_after"],
+    ratings:["ratings_help","tour_rules","support_help"],
+    profile:["profile_meaning","certificates_help","support_help"],
+    notifications:["notifications_help","support_help"],
+    community:["community_help","support_help"],
+    certificates:["certificates_help","archive_help"],
+    archive:["archive_help","tour_rules"],
+    support:["support_help","catalog_help"],
+    "support-topic":["support_help"],
+    about:["about_help","support_help"]
+  });
+  // Keys correspond to the existing reviewed prepared routes. They are
+  // deliberately NOT inferred from labels or arbitrary user-provided text.
+  const PREPARED_ACTION_COPY_KEYS = Object.freeze({
+    home_next:"homeNext",catalog_help:"catalogHelp",
+    practice_rules:"practiceRules",practice_after:"practiceAfter",
+    recs_help:"recs",tour_rules:"tourRules",archive_help:"archive",
+    books_help:"books",video_help:"video",support_help:"support",
+    profile_meaning:"profileMeaning",certificates_help:"certificates",
+    ratings_help:"ratings",notifications_help:"notifications",
+    community_help:"community",about_help:"about"
+  });
+  const PREPARED_ACTION_LABELS = Object.freeze({
+    ru:{
+      catalog_help:"С чего начать обучение?",
+      practice_rules:"Как эффективно проходить Practice?",
+      practice_after:"Как разобрать и исправить ошибки?",
+      recs_help:"Что повторять после Practice?",
+      tour_rules:"Как подготовиться к туру?",
+      books_help:"Где найти материал для повторения?",
+      support_help:"Как получить помощь?"
+    },
+    uz:{
+      catalog_help:"O‘qishni nimadan boshlash kerak?",
+      practice_rules:"Practice’dan qanday samarali foydalanaman?",
+      practice_after:"Xatolarni qanday tahlil va tuzataman?",
+      recs_help:"Practice’dan keyin nimani takrorlayman?",
+      tour_rules:"Turga qanday tayyorlanaman?",
+      books_help:"Takrorlash uchun materiallar qayerda?",
+      support_help:"Qanday yordam olish mumkin?"
+    },
+    en:{
+      catalog_help:"Where should I begin studying?",
+      practice_rules:"How can I use Practice effectively?",
+      practice_after:"How do I review and fix mistakes?",
+      recs_help:"What should I review after Practice?",
+      tour_rules:"How should I prepare for a Tour?",
+      books_help:"Where can I find materials to review?",
+      support_help:"How do I get support?"
+    }
+  });
+  const VERIFIED_PREPARED_ACTIONS = new Set(Object.keys(PREPARED_ACTION_COPY_KEYS));
   function quickPrompts(ctx) {
     const c = copy();
     const scope=practiceScope();
@@ -679,69 +750,22 @@
           practicePurpose:"practice_history_comparison"}
       ];
     }
-    // Prepared-only beta: practical, editorially verified product guidance,
-    // never fake personalized academic answers. Keep original panel/design.
     if (window.iClubAiV21BetaClient?.askPrepared) {
-      const labels = {
-        ru:{
-          catalog_help:"С чего начать обучение?",
-          practice_rules:"Как эффективнее проходить Practice?",
-          practice_after:"Как разобрать и исправить ошибки?",
-          recs_help:"Что повторять после тренировки?",
-          tour_rules:"Как подготовиться к туру?",
-          books_help:"Где найти материал для повторения?",
-          support_help:"Как получить помощь?"
-        },
-        uz:{
-          catalog_help:"O‘qishni nimadan boshlash kerak?",
-          practice_rules:"Practice’dan samarali foydalanish yo‘li?",
-          practice_after:"Xatolarni qanday tahlil qilaman?",
-          recs_help:"Mashqdan keyin nimani takrorlash kerak?",
-          tour_rules:"Turga qanday tayyorlanaman?",
-          books_help:"Takrorlash uchun materiallar qayerda?",
-          support_help:"Qanday yordam olish mumkin?"
-        },
-        en:{
-          catalog_help:"Where should I begin studying?",
-          practice_rules:"How can I use Practice effectively?",
-          practice_after:"How do I review and fix mistakes?",
-          recs_help:"What should I revisit after Practice?",
-          tour_rules:"How should I prepare for a Tour?",
-          books_help:"Where can I find review materials?",
-          support_help:"How can I get support?"
-        }
-      };
-      const context=ctx?.screenCode||activeViewName();
-      const screens={
-        home:["catalog_help","practice_after","tour_rules"],
-        "all-subjects":["catalog_help","practice_rules","books_help"],
-        "subject-hub":["catalog_help","practice_rules","books_help"],
-        "practice-start":["practice_rules","practice_after","recs_help"],
-        "practice-result":["practice_after","recs_help","practice_rules"],
-        "practice-review":["practice_after","recs_help","books_help"],
-        "practice-recs":["recs_help","practice_rules","books_help"],
-        tours:["tour_rules","practice_rules","books_help"],
-        "tour-rules":["tour_rules","practice_rules"],
-        "tour-result":["tour_rules","support_help"],
-        "tour-review":["tour_rules","support_help"],
-        lessons:["catalog_help","books_help","practice_rules"],
-        video:["books_help","catalog_help"],
-        books:["books_help","practice_rules"],
-        "my-recs":["recs_help","practice_after","books_help"],
-        "my-rec-detail":["recs_help","practice_after"],
-        profile:["recs_help","support_help","catalog_help"],
-        ratings:["practice_rules","tour_rules","support_help"],
-        support:["support_help","catalog_help"],
-        "support-topic":["support_help"],
-        about:["catalog_help","support_help"],
-        community:["support_help","catalog_help"],
-        certificates:["tour_rules","support_help"],
-        archive:["tour_rules","support_help"],
-        notifications:["support_help","catalog_help"]
-      };
-      const keys=screens[context]||["catalog_help","practice_after","tour_rules"];
-      const t=labels[locale()]||labels.ru;
-      return keys.map(key=>({key,label:t[key]}));
+      // A P1/P5 skill is NOT a vetted lesson or question explanation.
+      // Show only general, reviewed navigation help until a precise
+      // academic-source capability has been separately approved.
+      const screen=ctx?.scopeCode==="exam_prep" ? "exam_prep" :
+        (ctx?.screenCode||activeViewName());
+      const selected=screen==="exam_prep" ? ["books_help","practice_rules"] :
+        PREPARED_SCREEN_ACTIONS[screen]||
+          (ctx?.subjectKey&&ctx.subjectKey!=="general"
+            ?["catalog_help","books_help"]
+            :["catalog_help","support_help"]);
+      const custom=PREPARED_ACTION_LABELS[locale()]||PREPARED_ACTION_LABELS.ru;
+      return selected.filter(key=>VERIFIED_PREPARED_ACTIONS.has(key))
+        .slice(0,3).map(key=>({
+          key,label:custom[key]||c[PREPARED_ACTION_COPY_KEYS[key]]
+        }));
     }
     if (ctx?.subjectKey === "mathematics"
         && ctx?.scopeCode === "exam_prep"
