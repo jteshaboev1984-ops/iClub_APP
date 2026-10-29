@@ -63,5 +63,11 @@ SELECT
  AND locales->'ru'->>'check_question' NOT ILIKE '%ПЭТ%'
  AND locales->'uz'->>'check_question' NOT ILIKE '%PET%') disposal_scope_all_languages_expected_1,
 (SELECT count(*) FROM c WHERE skill_key='CHEM9701-20-03' AND (locales->'ru'->>'explanation' ILIKE '%ester linkages that%' OR locales->'uz'->>'explanation' ILIKE '%ester linkages that%')) ru_uz_untranslated_tail_expected_0,
+(SELECT count(*) FROM private.iclub_exam_chemistry_j23_authored_checks_v1 a
+ WHERE edition_key='chemistry9701_j23_20261029_academic_13_4_20_1_v9') authored_qa_rows_expected_6,
+(SELECT count(*) FROM private.iclub_exam_chemistry_j23_authored_checks_v1 a
+ JOIN c ON c.skill_key=a.skill_key WHERE a.edition_key='chemistry9701_j23_20261029_academic_13_4_20_1_v9'
+ AND (a.question_text IS DISTINCT FROM c.locales->a.locale->>'check_question'
+ OR a.answer_text IS DISTINCT FROM c.locales->a.locale->>'check_answer')) authored_qa_mismatches_expected_0,
 (SELECT enabled FROM private.iclub_exam_chemistry_j24_as_theory_control_v1 WHERE id=1) j24_must_stay_false,
 (SELECT audience_mode FROM private.iclub_exam_chemistry_j25_theory_rollout_control_v1 WHERE id=1) j25_must_stay_closed;
