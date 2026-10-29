@@ -649,3 +649,16 @@ The v3 candidate academic, RU/UZ/EN language, and source editorial review stage 
 - Only after these gates, coordinate reversible SQL+frontend release with exact deployment SHA and smoke test; preserve old attempts and other users' progress.
 
 **Release state:** code and SQL staged only. `main`, production Vercel and production Supabase remain unchanged by this branch. Do not merge automatically.
+
+
+---
+
+## 29.10.2026 — Owner acceptance checkpoint: текущий рабочий этап Economics P1–P4
+
+**Решение архитектора:** собственноручно открыл и просмотрел production-приложение, сообщил «вроде всё работает». Все beta-аккаунты принадлежат архитектору; завершение каждого аккаунта **не является требованием** закрытия текущей внутренней фазы. Не выдавать это за независимый ученический beta-test.
+
+**Закрываем только текущий функциональный этап:** четыре Paper, мобильную навигацию, компактную сводку учебного плана, защищённое самостоятельное P2/P4 и критерии без готовых решений. Работа не получает отметок, баллов, подтверждённого mastery или проверки внутри iClub. Правило для лабораторных карточек аналогичное: обучение навыкам, не оценка работы. Действующий production не менять ради этой записи.
+
+**Сохранённые ограничения:** 10 резервных письменных заданий не публиковать автоматически; ограниченную beta не переводить в общий публичный выпуск; не заявлять полного закрытия syllabus; сохранение исторических пользовательских данных и Mathematics/Tours/Practice обязательно. Отдельные, ранее документированные задачи hardening P0 и академической публикации **не считаются автоматически решёнными**.
+
+**Полный, версионированный акт:** `docs/exam-prep-economics-p1-p4-owner-acceptance-20261029.md`. Следующий основной поток — действующая Chemistry Exam Prep, без расширения Chemistry LAB/Tutor или изменения доступов без отдельного решения.
