@@ -1,0 +1,17 @@
+name: Mathematics P5 GEO/CNT locale fix guard
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/20261029_p5_geo_cnt_prompt_fixes_publish.sql"
+      - "scripts/math-p5-geo-cnt-locales-regression.cjs"
+      - ".github/workflows/math-p5-geo-cnt-locales.yml"
+  workflow_dispatch:
+jobs:
+  p5-geo-cnt-correction:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check independent trials, repeated letters, and guarded publication
+        run: node scripts/math-p5-geo-cnt-locales-regression.cjs
