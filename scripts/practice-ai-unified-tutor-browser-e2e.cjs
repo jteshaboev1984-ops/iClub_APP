@@ -194,9 +194,9 @@ async function main(){
   await page.waitForFunction(()=>document.querySelector("[data-global-ai-quick]")
     ?.textContent?.includes("С чего начать обучение?"),null,{timeout:8000});
   assert.deepEqual(await promptTexts(),[
-    "Что делать дальше?","С чего начать обучение?",
-    "Как эффективно проходить Practice?"
-  ]);
+    "С чего начать обучение?","Как эффективно проходить Practice?",
+    "Как подготовиться к туру?"
+  ],"Home may show only published, reviewed server-help routes");
   await page.getByRole("button",{name:"С чего начать обучение?"}).click({timeout:8000});
   await page.waitForFunction(()=>window.__isolated.preparedCalls.length===1,null,{timeout:8000});
   const prepared=await page.evaluate(()=>window.__isolated.preparedCalls[0]);
@@ -232,8 +232,22 @@ async function main(){
     "С чего начать обучение?","Как эффективно проходить Practice?",
     "Где найти материал для повторения?"
   ],"Subject screen promised an unapproved academic explanation");
+  // Profile has no published profile-indicators card yet. One honest,
+  // approved support button is safer than dead "explain my profile" actions.
   await page.evaluate(()=>{
     window.iClubGlobalAiShell.close();
+    document.getElementById("view-courses").classList.remove("is-active");
+    document.getElementById("view-profile").classList.add("is-active");
+  });
+  await page.waitForFunction(()=>window.iClubGlobalAiShell.context()
+    .screenCode==="profile",null,{timeout:8000});
+  await page.evaluate(()=>window.iClubGlobalAiShell.open());
+  assert.deepEqual(await promptTexts(),["Как получить помощь?"],
+    "An unpublished profile help route was offered");
+  await page.evaluate(()=>{
+    window.iClubGlobalAiShell.close();
+    document.getElementById("view-profile").classList.remove("is-active");
+    document.getElementById("view-courses").classList.add("is-active");
     document.getElementById("courses-subject-hub").remove();
     document.getElementById("courses-practice-result").classList.add("is-active");
   });
