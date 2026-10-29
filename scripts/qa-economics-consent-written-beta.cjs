@@ -23,6 +23,6 @@ assert(!sql.includes("VALUES(v_user,'joined',v_ctl.consent_copy_version,v_plan)"
 assert(sql.includes("SELECT 1 FROM private.iclub_exam_core_written_plans_v1"),"Existing plans must be preserved");
 assert(sql.includes("private.iclub_econ_written_beta_eligible_v1"),"Entry, subject and cohort gate retained");
 assert(sql.includes("cohort_status IN ('canary','active')"),"Active beta scope preserved");
-assert(sql.includes("MAX")===false || true,"No uncontrolled access");
+assert(sql.includes("v_ctl.max_members")&&sql.includes("count(*) FROM private.iclub_exam_core_written_access_v1"),"Written practice stays capacity-bound to existing protected access");
 assert(original.includes("VALUES(true,false,3)") || original.includes("VALUES(true,false,3,"),"Original rollout schema is retained for history");
 console.log("ECONOMICS WRITTEN NO EXTRA CONSENT QA PASS: gated start, 3 locales, no history reset");
