@@ -5,7 +5,7 @@ const path=require("node:path");
 const root=path.resolve(__dirname,"..");
 const read=p=>fs.readFileSync(path.join(root,p),"utf8");
 const js=read("exam-prep/exam-prep-economics-native.js");
-const sql=read("supabase/migrations/20261029094000_exam_prep_math_economics_no_extra_consent_v1.sql");
+const sql=read("supabase/migrations/20261029072111_exam_prep_math_economics_no_extra_consent_v1.sql");
 const original=read("supabase/migrations/20261028045112_iclub_econ_written_consent_beta_wave1_off_v1.sql");
 new Function(js);
 assert(js.includes('rpc("iclub_econ_written_start_v2",{})'),"Ordinary plan start must use consent-free RPC");
