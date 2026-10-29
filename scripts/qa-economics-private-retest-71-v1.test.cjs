@@ -74,7 +74,7 @@ test('reject tampered frozen original 36',()=>withCase(x=>{
   x.all.items[0].en.question+=' tampered';x.saveFull();fails(x,/historic content changed/);
 }));
 test('reject tampered new source bytes',()=>withCase(x=>{
-  fs.appendFileSync(x.paths[2],'\\n');fails(x,/source bytes changed/);
+  fs.appendFileSync(x.paths[2],' ');fails(x,/source bytes changed/);
 }));
 test('reject duplicated skill across candidate papers',()=>withCase(x=>{
   x.all.items[70].skill_key=x.all.items[65].skill_key;
