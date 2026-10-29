@@ -40,6 +40,35 @@ A route being deployed does **not** imply it is accessible to learners or approv
 6. **QA and release.** Compare current `main` and production SHA at the moment of release; run route-level isolated tests, dedicated browser/RU-UZ-EN tests, budget and replay tests, and existing Core regression. Investigate CI failures before merge. Release is per capability/route, not a blanket enable.
 7. **Security hold.** A separate protected-content access investigation remains **unresolved**. Its private reproduction and remediation details must not be placed in public issues, docs or pull requests. No speculative broad privilege changes, reset, or new learner capability rollout while the relevant release gate is unresolved.
 
+
+## Verified release-control and content snapshot (2026-10-29)
+
+This is **live-state observation**, not authorization to switch on a new route:
+
+| Capability / content collection | Evidence | Release position |
+| --- | --- | --- |
+| General prepared help | 13 reviewed keys × 3 locales = **39** rows. All have nonempty text, content/rights/locale-review flags, approval timestamp, source hash and current published/not-revoked state. | **Existing approved help only.** Reuse without provider calls. This checks publication *metadata* and language completeness; not independent semantic translation validation. |
+| Chemistry post-Practice error explanations | 68 contexts × RU/UZ/EN = **204** rows. No content, rights, locale or academic QA flags; no approvals; no published rows. | **DRAFT / DO NOT PUBLISH.** |
+| Economics post-Practice error explanations | 39 contexts × RU/UZ/EN = **117** rows with the same missing review/publication gates. | **DRAFT / DO NOT PUBLISH.** |
+| Mathematics Exam Prep prepared Tutor | 45 P1 + 36 P5 skill keys, RU/UZ/EN = **243** approved, runtime-allowed rows. All have content hashes, approval timestamps and four explanation variants. | **Content attribution gate remains open:** reviewer ID absent in all these records. The missing field does **not** prove no human review happened; recover external signed audit evidence before extending visibility. |
+| Mathematics Tutor historical versions | Retired, runtime-disallowed records coexist with the 243 active cards; never count all historical rows as learner-available content. | **Keep retired rows untouched.** |
+
+### Financial authorization evidence (non-invasive)
+
+- Checked public provider reservation/settlement/dispatch functions for the current AI routes: the relevant cost-sensitive service RPCs are not executable by `anon` or `authenticated`; `service_role` can invoke them as required for server-side admission. This **does not establish that budgets are globally shared**.
+- Provider-free general prepared help and subject-specific provider-backed calls have different authorization, budgets and switches. A route's deployment state, a published card, and an "enabled" budget control are separate conditions; never infer learner entitlement from one flag.
+- The existing general Tutor generation switch was OFF at this snapshot; prepared help was ON. Other sub-route controls are independent and require their own authorization and replay audits. Do not flip any switches while these checks are pending.
+- Paid canary remains disabled by its database control. Do not switch it on merely to test a student-facing feature.
+- No direct user or anonymous right to invoke the reviewed budget-reservation/settlement RPCs was found in the production permission query. This does **not** replace testing the external HTTP entrypoints and service-account isolation.
+
+### Required next nonpaid checks
+
+1. Confirm the *effective combined daily/lifetime limit* across Exam Prep AI, Practice AI, general Freeform and QA/canary services. Distinguish total-provider spend accounting from independent route quotas; avoid duplicating ledgers with a destructive migration.
+2. Verify each server route denies unauthorized users and subjects, expired/locked assessments, missing consent **where actually legally required**, and repeated/replayed requests. Use disposable offline PostgreSQL/browser/HTTP tests, not actual learner accounts.
+3. Recover four deployed-only source versions into a controlled source registry with reviewed access policy; compare **all** source files and hashes, not only `index.ts`.
+4. Collect independently attributable academic content sign-off for the 243 Mathematics Tutor cards, and complete rights/content/locale/academic QA for any future Chemistry/Economics draft cards before publishing.
+5. Keep legacy security-release hold separate from a safe documentation/UI rollout. No production mutation or developer-environment expenditure was undertaken to produce this evidence.
+
 ## Current decisions / non-decisions
 
 - **DONE:** Four existing repo-backed deployed Edge entrypoints (and the auxiliary module) matched the production source exactly.
