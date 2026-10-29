@@ -1,0 +1,27 @@
+name: Economics Private 71 Retest Gate
+on:
+  pull_request:
+    paths:
+      - 'scripts/qa-economics-private-retest-71-v1.cjs'
+      - 'scripts/qa-economics-private-retest-71-v1.test.cjs'
+      - 'scripts/qa-economics-private-originals-v1.cjs'
+      - '.github/workflows/economics-private-retest-71-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run private source integrity tests on fictional data only
+        run: node --test scripts/qa-economics-private-retest-71-v1.test.cjs
+      - name: Reject protected bank files in public checkout
+        shell: bash
+        run: |
+          test ! -e Economics_9708_P1_P3_71_Same_Skill_Retest_Combined_PRIVATE_DRAFT_20261029.json
+          test ! -e Economics_9708_P1_P3_35_Same_Skill_Retest_Originals_PRIVATE_DRAFT_20261029.json
