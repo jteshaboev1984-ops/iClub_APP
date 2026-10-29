@@ -63,7 +63,7 @@ for(const sql of [forward,rollback]){
   assert(!/\blocalStorage\.clear\s*\(/.test(sql),'No local-data erasure');
   assert.equal((sql.match(/SECURITY DEFINER/g)||[]).length,5,'RPC security mode must be preserved');
 }
-assert(html.includes('exam-prep-economics-native.js?v=econ-p0-answer-parity-20261028'),
+assert(html.includes('exam-prep-economics-native.js?v=econ-p0-answer-parity-no-consent-20261029'),
   'Deployed page must use the reviewed native answer-parity asset pin');
 assert(!forward.includes('math_as_p1_p5_sessions'),'Mathematics attempts must not be modified');
 console.log('ECONOMICS P0 ROLLBACK + ACCESS GUARD SAFETY PASS — five exact RPCs, no learner-data removal');
