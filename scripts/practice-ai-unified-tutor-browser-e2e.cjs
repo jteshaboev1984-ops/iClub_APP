@@ -185,7 +185,11 @@ async function main(){
   assert.equal(await page.locator("#iclub-global-ai-mark").count(),1);
   // Reuse the SAME Tutor panel for product help, verified by screen.
   // No model is contacted merely by opening or navigating the app.
+  // Await the real view transition before opening the global Tutor panel.
+  await page.waitForFunction(()=>window.iClubGlobalAiShell.context()
+    .screenCode==="home",null,{timeout:8000});
   await page.evaluate(()=>window.iClubGlobalAiShell.open());
+  await page.locator("#iclub-global-ai-panel").waitFor({state:"visible",timeout:8000});
   const promptTexts=()=>page.locator("[data-global-ai-quick] button").allTextContents();
   await page.waitForFunction(()=>document.querySelector("[data-global-ai-quick]")
     ?.textContent?.includes("С чего начать обучение?"),null,{timeout:8000});
@@ -193,7 +197,7 @@ async function main(){
     "Что делать дальше?","С чего начать обучение?",
     "Как эффективно проходить Practice?"
   ]);
-  await page.getByRole("button",{name:"С чего начать обучение?"}).click();
+  await page.getByRole("button",{name:"С чего начать обучение?"}).click({timeout:8000});
   await page.waitForFunction(()=>window.__isolated.preparedCalls.length===1,null,{timeout:8000});
   const prepared=await page.evaluate(()=>window.__isolated.preparedCalls[0]);
   assert.equal(prepared.prompt_key,"catalog_help");
