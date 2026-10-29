@@ -98,3 +98,14 @@ Cross-checked complete immutable EN/RU/UZ texts against Cambridge Chemistry 9701
 - **J23-SCI-023 | CHEM9701-04-05 | §4.2 | BOUNDED PASS, scope note**: C₆₀ correctly classified simple molecular rather than giant covalent; carbon cage `60 vertices × 3 / 2 = 90 edges`; `12 pentagons + 20 hexagons` independently checks `(12×5+20×6)/2=90`. All RU/UZ match EN. Numbered cage-face geometry is **explanatory enrichment**, not a separate mandatory §4.2 learning outcome or a justification for standalone mastery score; the C₆₀ example itself IS explicitly in Cambridge 4.2.
   
 **Cumulative substantive EN/RU/UZ review: 21/91 cards; 19 provisional no-defect, 2 translation HOLD.** No academic approval of complete AS Theory or learner release.
+
+## J23 batch: Chemical energetics CHEM9701-05-01–05-05 — 2026-10-29
+Evidence: complete immutable EN/RU/UZ library explanations; original Cambridge AS & A Level Chemistry coursebook section on chemical energetics; Cambridge Chemistry 9701 2025–2027 syllabus, §5.1–5.2, p. 23, https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf . No source write, no academic signoff inferred.
+
+- **J23-SCI-024 | CHEM9701-05-01 | §5.1 | BOUNDED PASS**: Exothermic ΔH negative/endothermic positive, reverse reaction sign and forward/reverse activation-energy conventions agree in all three languages. For energy profile R=40, P=10, barrier=150 kJ/mol: forward Eₐ=110, reverse Eₐ=140, ΔH=−30, all verified. Distinguishes reaction rate from heat effect.
+- **J23-SCI-025 | CHEM9701-05-02 | §5.1 | BOUNDED PASS**: `q=50.0×4.18×4.00=836 J; ΔH=−0.836/0.0200=−41.8 kJ mol⁻¹`; `q=100.0×4.18×3.50=1463 J; ΔH≈−1.463/0.0250≈−58.5 kJ mol⁻¹`. Unit conversion, limiting reagent, heat-loss direction and sign present in EN/RU/UZ.
+- **J23-SCI-026 | CHEM9701-05-03 | §5.1 | BOUNDED PASS**: Formation of 1 mol CaO, gaseous oxygen half coefficient, methane combustion water (l), standard conditions 298 K and 101 kPa, neutralisation per mole H₂O; 2 mol H₂O gives approximately −114 kJ when ΔHneut≈−57 per mole, as stated in all locales.
+- **J23-SCI-027 | CHEM9701-05-04 | §5.2 | BOUNDED PASS**: Hess law state function and reversing/scaling equations retained in all locales: `−394+283=−111 kJ mol⁻¹` for C(s)+½O₂(g)→CO(g), consistent states and signs.
+- **J23-SCI-028 | CHEM9701-05-05 | §5.1 | BOUNDED PASS**: `H₂(g)+Br₂(g)→2HBr(g)` mean gas-phase bond-energy estimate `436+193−2×366=−103 kJ mol⁻¹`; analogous HCl estimate `436+243−2×431=−183 kJ mol⁻¹`. EN/RU/UZ distinguish liquid standard Br₂ requiring its vaporisation enthalpy, not falsely claiming the gaseous reaction estimate is the standard value.
+
+**Cumulative full text editorial review: 26/91; 24 provisional no-defect, 2 locale HOLD. Remaining 65 require independent full three-language review.** Source versions, content hashes, and closed J24/J25 gates preserved.
