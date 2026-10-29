@@ -1,0 +1,27 @@
+name: Economics Written 22 Practice Bank Gate
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/*iclub_economics_written_complete_22_beta_v1.sql'
+      - 'scripts/qa-economics-written-22-bank-beta.cjs'
+      - '.github/workflows/economics-written-22-bank-beta.yml'
+      - 'exam-prep/contracts/written-learning-contract-v1.json'
+      - 'exam-prep/runtime/written-core-*.js'
+      - 'exam-prep/exam-prep-economics-native.js'
+  workflow_dispatch:
+
+jobs:
+  release-reviewed-written-questions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: All 22 editorial questions and existing 12-task progress preserved
+        run: node scripts/qa-economics-written-22-bank-beta.cjs
+      - name: Criteria, marking totals and UI remain guarded
+        run: node scripts/qa-economics-mark-scheme-premium.cjs
+      - name: No app-based marking of writing or laboratory work
+        run: node scripts/qa-exam-prep-written-lab-no-grading-v1.cjs
