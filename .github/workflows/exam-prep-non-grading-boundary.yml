@@ -1,0 +1,42 @@
+name: Exam Prep Non-Grading Boundary
+on:
+  pull_request:
+    paths:
+      - 'exam-prep/contracts/written-learning-contract-v1.json'
+      - 'exam-prep/runtime/written-core-*.js'
+      - 'exam-prep/exam-prep-economics-native.js'
+      - 'exam-prep/exam-prep-chemistry-labs-native.js'
+      - 'exam-prep/exam-prep-chemistry-entry-native.js'
+      - 'exam-prep/exam-prep-live.js'
+      - 'scripts/qa-exam-prep-written-lab-no-grading-*'
+      - '.github/workflows/exam-prep-non-grading-boundary.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'exam-prep/contracts/written-learning-contract-v1.json'
+      - 'exam-prep/runtime/written-core-*.js'
+      - 'exam-prep/exam-prep-economics-native.js'
+      - 'exam-prep/exam-prep-chemistry-labs-native.js'
+      - 'exam-prep/exam-prep-chemistry-entry-native.js'
+      - 'exam-prep/exam-prep-live.js'
+      - 'scripts/qa-exam-prep-written-lab-no-grading-*'
+      - '.github/workflows/exam-prep-non-grading-boundary.yml'
+  workflow_dispatch:
+
+jobs:
+  written-labs-are-not-app-graded:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Cross-subject source and policy non-grading guard
+        run: node scripts/qa-exam-prep-written-lab-no-grading-v1.cjs
+      - name: Existing written-learning contract regression
+        run: node scripts/qa-written-learning-contract-v1.cjs
+      - name: Existing written step idempotence regression
+        run: node scripts/qa-written-core-controller-v1.cjs
+      - name: Existing Chemistry lab response firewall
+        run: node scripts/qa-chemistry-9701-j15-lab-response-boundary.cjs
