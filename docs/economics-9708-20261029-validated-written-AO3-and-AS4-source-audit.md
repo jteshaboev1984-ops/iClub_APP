@@ -88,3 +88,7 @@ Source inspect also confirmed `public.iclub_exam_native_mcq_get_v1` reveals `cor
 - Written mapping source: `docs/economics-9708-written-22-bank-release-audit-20261029.md`
 - Runtime: `public.iclub_exam_native_mcq_start_v1`, `..._start_diagnostic_v1`, `..._get_v1`, `..._answer_v1` and private candidate/skill tables
 - **This addendum supersedes the original rough 22-task topic-only crosswalk wherever its primary official point differs**, notably P4.A.a and P2.C2.b. The rough CSV is retained as historical audit evidence rather than silently rewritten.
+
+## 8. Production advanced during this read-only audit — current SHA reconciliation
+
+Later on 2026-10-29, GitHub `main` and the latest Vercel READY production deployment advanced by one commit to **`e1347233376519f1193d0e39fc9c012361bc8ecc`** (deployment `dpl_8aYA7id2wChXL4k9YpyVvVZ3ZrnW`). Compared to the source baseline `ad048f9...`, the new commit changes the shared Exam Prep answer-ACK recovery flow (`exam-prep/exam-prep-live.js`, `exam-prep/exam-prep-api.js`, `index.html`) and adds regression workflows/tests; it does **not** change `exam-prep-economics-native.js` or a Supabase Economics migration in that Git commit. The current coverage counts and server-function checks were performed read-only against live Supabase, not inferred from an older report. Because shared runtime code changed, **new browser regression testing is necessary before any later Economics content release**; none is claimed here. This branch is still docs-only/draft and was not merged or deployed by this audit.
