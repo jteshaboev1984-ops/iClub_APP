@@ -4,7 +4,7 @@ Keep only until the full agreed Chemistry J23–J32 plan is finished, then delet
 - [x] J23 version-preserving P1 SO2/SO3 correction created (v5; 7 reviews PENDING)
 - [ ] J23 all 91 AS Theory: scientific, syllabus, and EN/RU/UZ semantic signoff with source hash manifest
 - [x] J24 91-card AS-only gated server + isolated reader implemented
-- [ ] J25 closed consent-free owner rollout migration installed safely; flags remain OFF
+- [x] J25 consent-free rollout installed as migration 20261029080305; audience_mode=closed, owner_opened_at=NULL, J24.enabled=false, no learners enrolled
 - [ ] Wave A one authorized test account, then existing beta cohort Chemistry Theory
 - [ ] J26 Entry 22 approved original questions and safe learning path
 - [ ] J27 Recheck 22 independent questions, source-linked mistakes and lifecycle
