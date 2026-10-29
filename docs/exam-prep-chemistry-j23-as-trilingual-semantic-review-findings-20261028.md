@@ -199,3 +199,46 @@ Full EN/RU/UZ source explanations for all **20** lessons CHEM9701-12-01 through 
 - **16-04**: iodoform CHI₃ positive for ethanol or CH₃CH(OH)– and negative for propan-1-ol; distinction of original alcohol vs oxidised carbonyl correct.
 
 **Cumulative inspected: 71/91 AS Theory.** The eight previously corrected closed candidate records still await owner academic signoff. **20** remaining (chapters 17–22); source hashes remain unchanged and the AS release stays closed.
+
+
+## J23 final bounded editorial review: 91/91 AS Theory cards (2026-10-29)
+All 91 source-linked Theory entries in the current Chemistry AS mapping have had their complete EN/RU/UZ explanation texts read for scientific meaning, equations, numeric checks, syllabus alignment and obvious translation defects. **This is an AI editorial evidence pass, not independent science teacher certification, rights clearance, or a release-ready version.** External primary reference: official Cambridge International Chemistry 9701 2025–2027 syllabus, pp. 10, 37–38 (https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf).
+
+### 17 Carbonyl compounds (17-01–17-05)
+- 17-01 **CLOSED CANDIDATE FIX**: the Russian self-check began with Uzbek `Nega`; rewritten into grammatical Russian, exact source anchored, migration **20261029104853**. The 2,4-DNPH / Tollens comparison and propanal vs propanone examples remain scientifically correct.
+- 17-02 carbonyl CN⁻ attack, HCN/KCN/heat, eth-anal hydroxynitrile chirality vs propanone non-chirality consistent in EN/RU/UZ. The HCN example is academic only.
+- 17-03 NaBH₄ reduction to primary/secondary alcohols, aldehyde oxidation and ketone mild-oxidation distinction sound.
+- 17-04 2,4-DNPH, Tollens and Fehling identification together with IR and exceptions consistent.
+- 17-05 iodoform from methyl ketones and ethanal, negative propanal example; `CH₃COCH₃+3I₂+4OH⁻→CH₃COO⁻+CHI₃+3I⁻+3H₂O` balances charge and atoms across EN/RU/UZ.
+
+### 18 Carboxylic acids and derivatives (18-01–18-03)
+- 18-01 carboxylates, carbonates, primary-alcohol/aldehyde oxidation and nitrile-to-acid conversion; LiAlH₄ vs NaBH₄ distinguished.
+- 18-02 reversible acid-catalysed esterification and acid/alkali hydrolysis (carboxylate is the immediate base-hydrolysis product) consistent.
+- 18-03 **CLOSED CANDIDATE FIX**: RU and UZ titles and opening topic lines said only "esterification and hydrolysis" whereas EN lesson is a **multi-step synthesis and transformation** source. Updated RU/UZ headings in protected migration **20261029105108**. The full texts describe `21.1 Organic synthesis`, which is indeed an **AS** syllabus outcome.
+
+### 19 Nitrogen compounds (19-01–19-03)
+- 19-01 `C₂H₅Br + 2NH₃ → C₂H₅NH₂ + NH₄Br`, NH₃ in ethanol under pressure, subsequent alkylation caution, correctly translated. Official AS §19.1 expressly says **amine classification will not be tested**; this lesson teaches preparation rather than graded amine taxonomy.
+- 19-02 CN⁻ substitution adds a carbon, nitrate/nitrile nomenclature, acidic vs alkaline hydrolysis with acidification correct, safe academic framing.
+- 19-03 cyanohydrin formation from aldehyde/ketone, carbon chain extension, HCN/KCN and chiral centre discussion correct; do not operationalise toxic HCN instruction in learner labs.
+
+### 20 Polymerisation (20-01–20-03)
+- 20-01 `nCH₂=CH₂→[–CH₂–CH₂–]ₙ`, PVC `[–CH₂–CHCl–]ₙ`, conservation and no small-molecule by-product correct.
+- 20-02 reverse repeat-unit to monomer and preserve substituents; condensed polyester example is optional enrichment. **§20.1 is definitively AS-level**, correcting the earlier erroneous scope flag.
+- 20-03 **CLOSED CANDIDATE FIX**: RU/UZ title and topic line previously translated English *disposal* as merely recycling; corrected to broader **RU "Свойства и утилизация полимеров"** and **UZ "Polimer xossalari va chiqindilarini boshqarish"** in protected migration **20261029105239**. Text covers non-biodegradability and hazardous uncontrolled combustion, required under §20.1.4; PET ester hydrolysis is an illustrative comparison, not standalone mastery.
+
+### 21 Organic synthesis (21-01–21-03)
+- 21-01 haloalkane→alcohol→acid, dual –OH and –COOH groups, correct choice of reagent and conditions.
+- 21-02 2→3-carbon bromoethane→propanenitrile→propanoic acid multistep route, competing elimination, correct in three locales.
+- 21-03 C=O versus O–H interpretation from IR and 2,4-DNPH/Tollens/carbonate evidence, no false unique identification. **§21.1 is AS**, not A-only.
+
+### 22 Analytical techniques (22-01–22-03)
+- 22-01 IR C=O ~1700 cm⁻¹, alcohol O–H ~3200–3600 cm⁻¹, acid broad ~2500–3300 cm⁻¹ correctly differentiated across languages.
+- 22-02 **CLOSED CANDIDATE FIX**: UZ source previously said molecular-ion peak can be *weak*, omitting English/Russian statement that it can sometimes be **absent**; corrected in protected migration **20261029105239**. `²⁴Mg²⁺` at m/z 12 and `²⁴Mg⁺` at m/z 24 are coherent cross-topic illustrations.
+- 22-03 bromine bromoethane `C₂H₅Br` molecular ions m/z 108/110 with ~1:1 intensities, chlorine ~3:1, isotope-dependent M+2 and carbon count by M+1 formula verified. Difference between formula clues and unique structural proof retained.
+
+### Authoring and safety totals after editorial pass
+- **91/91 AS lesson texts inspected** (including one enrichment-only 10-04; assessment should exclude its independent mastery flag).
+- **12/91 corrected locale/wording candidates** preserved in `private.iclub_exam_chemistry_j23_theory_revisions_v1`: original source hashes remain intact and candidate revisions are private and unapproved.
+- **79/91 no confirmed defect requiring a candidate revision** within this editorial pass. This is NOT a claim of teacher-verifiable release quality.
+- **154 original Chemistry library cards** remain unchanged; Chemistry J25 `closed`, J24 `enabled=false`.
+- **Outstanding gate:** build consistent versioned 91-card source package with canonical authoring-schema 6-field per-card hashes; reconcile tutor locale source hashes and core-skills mapping; re-evaluate official scope against source mapping; obtain independent academic/rights/backup approval; then release AS Theory to a controlled test account. No substitute manual consent or invitation.
