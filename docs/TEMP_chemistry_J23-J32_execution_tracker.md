@@ -6,6 +6,7 @@ Keep only until the full agreed Chemistry J23–J32 plan is finished, then delet
     - [x] Substantive editorial review **91/91** (Chemistry 9701 AS source §1–22); 78 no confirmed defect, 12 corrected CLOSED candidates, 1 enrichment-only no-defect. **All 91 remain unapproved for learner release.**
     - [x] Immediate corrections are stored in private protected candidate table: **12 revised rows**, original **154 theory library** rows and hashes preserved.
     - [ ] Rebuild full versioned 91-card canonical six-field authoring package and matching Tutor references; never assign the JSONB candidate digest as source-packager hash.
+    - [ ] At approved-version cutover, change J24 catalogue and authorization from hardcoded `chemistry9701_20261022_stageb_draft` to the independently signed, version-pinned 91-card source and compatible `iclub_exam_core_skills_v1` links; do not alter current J24 grants or open access during staging.
     - [ ] Review corrected 12 lessons and source manifest with independent Chemistry academic owner; approve syllabus scope, EN/RU/UZ, rights and backups.
     - [ ] J23 academic signoff after canonical package generation; never overwrite the immutable historical library source.
 - [x] J24 91-card AS-only gated server + isolated reader implemented
