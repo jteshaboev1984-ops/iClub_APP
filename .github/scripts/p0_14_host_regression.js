@@ -306,7 +306,7 @@ const path = require('path');
     };
   });
   assert(!result.hidden && result.mode === 'coming-soon' &&
-    result.badge.includes('In development') && !result.open && result.rootHidden,
+    result.badge.includes('Limited access') && !result.open && result.rootHidden,
     'subject switch must unmount Mathematics and show informational Exam Prep for Economics');
 
   result = await page.evaluate(async () => {
