@@ -6,6 +6,7 @@ on:
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-economics-native.js'
       - 'supabase/migrations/*exam_prep_math_economics_no_extra_consent*.sql'
+      - 'supabase/migrations/*exam_prep_legacy_self_enrollment_revoke*.sql'
       - 'scripts/qa-exam-prep-unified-no-consent.cjs'
       - 'scripts/qa-economics-*.cjs'
       - '.github/workflows/exam-prep-unified-no-consent.yml'
