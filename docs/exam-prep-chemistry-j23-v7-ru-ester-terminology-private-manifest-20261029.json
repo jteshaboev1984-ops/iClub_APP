@@ -1,0 +1,41 @@
+{
+  "artifact": "Chemistry J23 AS closed v7 Russian scientific terminology delta",
+  "version": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v7",
+  "previous": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v6",
+  "status": "CLOSED_AI_INTERNAL_SELF_QA_NOT_INDEPENDENT",
+  "corrected_topics": [
+    "CHEM9701-20-02/ru",
+    "CHEM9701-20-03/ru"
+  ],
+  "summary": "Replace ambiguous generic Russian 'ether' wording with precise 'ester linkage' terminology when describing condensation polymers and PET, including Theory explanations and Tutor main explanations.",
+  "effects": {
+    "changed_theory_cards": 2,
+    "changed_russian_answers": 1,
+    "changed_tutor_main_texts": 2,
+    "relinked_tutor_source_hashes": 6,
+    "unchanged_theory_cards": 89,
+    "total_theory": 91,
+    "total_tutor_locale": 273
+  },
+  "sha256": {
+    "theory": "0fcba21ee2f6c6d1c25dcde29c11b6d7afc837033d422927d663615e52b7b2f3",
+    "tutor": "5014e71ed1d99ef0131c6d17092d7caf8ec9204fb2926220dd987176672fbf29",
+    "package": "197400f1701b424d541bb55c001bfe62eb27a45a1204b3730512a618e7179e27"
+  },
+  "control": {
+    "invalid_source_sha": 0,
+    "incorrect_tutor_pointers": 0,
+    "remaining_ambiguous_ru_ester_references_in_two_theory_lessons": 0,
+    "original_historical_cards": 154,
+    "j24_enabled": false,
+    "j25_audience_mode": "closed",
+    "external_human_qa": false
+  },
+  "outstanding": [
+    "finish formal AI second-pass review of all RU/UZ and Tutor body semantics",
+    "exact private-byte local Python packaging",
+    "private protected offsite seed plus restore drill",
+    "rights and architect release authorization"
+  ],
+  "data_policy": "No private student material, no lesson prose, no answer key in public GitHub."
+}
