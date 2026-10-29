@@ -172,3 +172,30 @@ Reference: supplied Cambridge Chemistry 3e coursebook Group 17 chapter; original
 - **11-04 | BOUNDED PASS:** Cl₂+2OH⁻→Cl⁻+ClO⁻+H₂O in cold dilute alkali; 3Cl₂+6OH⁻→5Cl⁻+ClO₃⁻+3H₂O in hot concentrated alkali, chlorine 0→−1/+1 or −1/+5, HOCl/ClO⁻ aqueous disinfection and pH dependence present in EN/RU/UZ.
 
 **Cumulative reviewed 51/91; 43 provisional no-defect, 8 corrected CLOSED candidate lessons among the 51. 40 remain unreviewed, zero approved for learner release.**
+
+
+## J23 substantive chapter batch 12–16 — 2026-10-29
+Full EN/RU/UZ source explanations for all **20** lessons CHEM9701-12-01 through 16-04 inspected against Cambridge 9701 subject scope. Scientific review remains *bounded editorial* and requires owner science approval before release. No learner access or source data changed.
+
+- **12-01**: NH₃ lone-pair Brønsted basicity, NH₄⁺+OH⁻→NH₃+H₂O and damp red litmus, weak-base equilibrium: consistent.
+- **12-02**: Haber N₂+3H₂⇌2NH₃, Δn=−2, pressure/temperature compromise, Fe catalyst and recycle correct in three languages. Explicit metadata **7.1(10); 12.1 context only**: do not imply an independent 12.1 tested outcome.
+- **12-03**: N₂+O₂→2NO, 2NO+O₂→2NO₂ and 4NO₂+O₂+2H₂O→4HNO₃ balanced; the PAN/smog process is explicitly multistep, and catalytic NO reduction 2NO+2CO→N₂+2CO₂ valid.
+- **12-04**: NO₂/NO oxidation of SO₂, Contact process 2SO₂+O₂⇌2SO₃, V₂O₅, oleum H₂S₂O₇ and dilution equations all balanced; **industrial context** must be differentiated from the syllabus's assessed nitrogen/sulfur oxides and pollution outcomes, not a new separate tested module.
+- **13-01**: 2-methylbutane and butan-2-ol locants and structure reading align across EN/RU/UZ.
+- **13-02**: –OH versus –COOH distinction, aldehyde, ester, amide identification and HOCH₂COOH dual groups correct; amide example is illustrative, not automatic AS examinable extension.
+- **13-03**: but-2-ene E/Z versus propene, chiral 2-bromobutane versus achiral 2-bromopropane, carbon σ/π bonds, 109.5°/120°/180° examples correct in all languages.
+- **13-04**: curly full arrow from lone pair/bond versus one-electron fishhook, OH⁻ substitution and C–Br electron movement correct.
+- **14-01**: UV Cl₂ homolysis and methane substitution chain, cracked C₁₀H₂₂→C₈H₁₈+C₂H₄ conservation, catalytic 2NO+2CO→N₂+2CO₂ balanced.
+- **14-02**: electrophilic HBr addition to propene, stable secondary carbocation, bromine addition to ethene without UV; three translations agree.
+- **14-03**: bromine-water unsaturation, dilute/cold manganate diol versus hot/concentrated cleavage and but-2-ene→2 CH₃COOH under oxidative conditions consistent; conditions are mandatory.
+- **14-04**: poly(propene) and PVC repeat units correctly show saturated backbone and substituents. **Scope note:** metadata `14.2;20.1` references a later A-level topic; do not claim `20.1` is AS mastery/assessment content before formal syllabus review.
+- **15-01**: C–X bond strength and comparable substrate hydrolysis, AgNO₃ precipitation after X⁻ release (not detection of covalent C–X) align.
+- **15-02**: aqueous nucleophilic substitution, SN1 carbocation vs SN2 concerted step and rate laws `k[RX]`, `k[RX][Nu⁻]` scientifically coherent across locales.
+- **15-03**: hot ethanolic versus aqueous OH⁻ elimination/substitution; β-H counting, bromoethane→ethene balance correct.
+- **15-04**: cyanide substitution adds one carbon and nitrile hydrolysis yields acid/carboxylate with work-up; educational source warns cyanide laboratory-only. No in-app experimental instructions beyond syllabus theory.
+- **16-01**: primary/secondary/tertiary alcohol classification, alkene hydration and aldehyde/ketone NaBH₄ reduction vs carboxylic acid LiAlH₄ correct; stronger-reductant example may be enrichment and needs syllabus scope signoff.
+- **16-02**: primary alcohol distillation vs reflux oxidation to aldehyde/acid, secondary to ketone, dichromate orange→green and tertiary resistance consistent.
+- **16-03**: concentrated H₂SO₄/Al₂O₃ dehydration vs SOCl₂ or HX substitution, ethanol+Na producing sodium ethoxide and H₂ balanced in all three.
+- **16-04**: iodoform CHI₃ positive for ethanol or CH₃CH(OH)– and negative for propan-1-ol; distinction of original alcohol vs oxidised carbonyl correct.
+
+**Cumulative inspected: 71/91 AS Theory.** The eight previously corrected closed candidate records still await owner academic signoff. **20** remaining (chapters 17–22); source hashes remain unchanged and the AS release stays closed.
