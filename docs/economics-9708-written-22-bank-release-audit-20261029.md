@@ -17,7 +17,7 @@ Production verification before release:
 - Safe `public.iclub_exam_written_criteria_v1` exposes only the rubric/AO exam criteria, **never** private example answers, calculations or solution points. No automatic essay grading, score or mastery and no lab work grading.
 
 ## Data migration and user protection
-`supabase/migrations/20261029130000_iclub_economics_written_complete_22_beta_v1.sql` is narrow:
+`supabase/migrations/20261029121518_iclub_economics_written_complete_22_beta_v1.sql` is narrow:
 1. Assert release approval for exactly the 10 held tasks and 22 total, locale/source/security gates and original 12-task release state. Flip the **ten exact** `release_enabled` booleans.
 2. For an existing active written plan, **append ten additional pending tasks** after the existing 12, preserving original order, tokens, statuses, nonces, timestamps and all advance history. A prior learner never loses the current next task or repeats one merely because an expansion was installed. Historical withdrawn/archived plans remain unchanged.
 3. Replace `iclub_econ_written_start_v2()` with the same checked auth/eligibility/current 3-seat beta/validity controls, now inserting a complete **22-step P2→P4** plan for new eligible learners. No extra consent button/row and no public enrolment.
