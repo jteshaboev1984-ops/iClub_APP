@@ -4,8 +4,10 @@ on:
     branches: [main]
     paths:
       - 'exam-prep/exam-prep-economics-native.js'
+      - 'exam-prep/exam-prep-host.js'
       - 'exam-prep/exam-prep-economics-native.css'
       - 'scripts/qa-economics-answer-parity-browser.cjs'
+      - 'scripts/qa-economics-restricted-access-browser.cjs'
       - 'supabase/migrations/*iclub_economics_native_mcq_active_access_parity_v1.sql'
       - 'supabase/rollback/*iclub_economics_native_mcq_active_access_parity_v1_rollback.sql'
       - 'scripts/qa-economics-p0-release-safety.cjs'
@@ -28,6 +30,8 @@ jobs:
         run: |
           node --check exam-prep/exam-prep-economics-native.js
           node --check scripts/qa-economics-answer-parity-browser.cjs
+          node --check scripts/qa-economics-restricted-access-browser.cjs
+          node --check exam-prep/exam-prep-host.js
           node --check scripts/qa-economics-p0-release-safety.cjs
           node scripts/qa-economics-p0-release-safety.cjs
           grep -Fq 'async function reconcileChoice(pending)' exam-prep/exam-prep-economics-native.js
@@ -40,6 +44,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Economics MCQ browser — RU UZ EN desktop mobile, recovery, no double submit
         run: node scripts/qa-economics-answer-parity-browser.cjs
+      - name: Economics limited beta access copy — browser RU UZ EN, no student writes
+        run: node scripts/qa-economics-restricted-access-browser.cjs
       - name: Existing Economics four-Paper and written-plan regressions
         run: |
           node scripts/qa-economics-four-papers-navigation.cjs
