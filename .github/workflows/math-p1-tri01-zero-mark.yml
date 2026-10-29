@@ -1,0 +1,17 @@
+name: Mathematics P1 zero-mark correction guard
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/20261029_p1_tri01_zeros_version3_publish.sql"
+      - "scripts/math-p1-tri01-zero-mark-regression.cjs"
+      - ".github/workflows/math-p1-tri01-zero-mark.yml"
+  workflow_dispatch:
+jobs:
+  p1-tri01-zero-mark:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test mathematical roots, mark sum and restricted SQL surface
+        run: node scripts/math-p1-tri01-zero-mark-regression.cjs
