@@ -87,3 +87,14 @@ References: exact original live `chemistry9701_20261022_stageb_draft` lesson EN/
 - **J23-SCI-018 | CHEM9701-03-06 | §§3.4;3.6 | BOUNDED PASS**: BF₃/NH₃, linear CO₂/bent SO₂, and CCl₄/CHCl₃ vector dipoles chemically consistent; shape-determined polarity present in all languages.
 
 **Cumulative editorial substantive reading: 16/91; 14 provisional no-defect findings, 2 translation HOLDs.** The general source version, 91-card exact hash manifest, rights attestations, and owner academic signoff remain incomplete. No release or backend source mutation.
+
+## J23 batch: States of matter CHEM9701-04-01–04-05 (2026-10-29)
+Cross-checked complete immutable EN/RU/UZ texts against Cambridge Chemistry 9701 2025–2027 syllabus p. 22, §§4.1–4.2 (https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf) and user-provided Cambridge Chemistry coursebook (States of matter). No live contents or hash mutated.
+
+- **J23-SCI-019 | CHEM9701-04-01 | §4.1 | BOUNDED PASS**: Gas particle randomness, collisions and pressure; conserved H₂O during boiling; constant pure-substance boiling temperature at fixed pressure and no inappropriate claim that O–H covalent bonds break. The three explanation texts align.
+- **J23-SCI-020 | CHEM9701-04-02 | §4.1 | BOUNDED PASS**: pV=nRT, consistent kPa/dm³ mol⁻¹ K⁻¹ units and temperature in kelvins; `V=(0.100×8.31×300)/100=2.493≈2.49 dm³` verified in EN/RU/UZ. New comprehension question at 0.200 mol, 200 kPa, 300 K also gives 2.493 dm³.
+- **J23-SCI-021 | CHEM9701-04-03 | §4.1 | BOUNDED PASS**: Ideal gas assumptions about zero particle volume and absent attractions, non-ideal deviations at high p/low T, and competing effects expressed consistently in three languages.
+- **J23-SCI-022 | CHEM9701-04-04 | §§3.6;4.2 | BOUNDED PASS**: Water hydrogen bonding and boiling point, liquid surface tension, lower density of ordinary ice, and London/permanent-dipole interactions match across three languages. Chemistry explanation stays within syllabus examples.
+- **J23-SCI-023 | CHEM9701-04-05 | §4.2 | BOUNDED PASS, scope note**: C₆₀ correctly classified simple molecular rather than giant covalent; carbon cage `60 vertices × 3 / 2 = 90 edges`; `12 pentagons + 20 hexagons` independently checks `(12×5+20×6)/2=90`. All RU/UZ match EN. Numbered cage-face geometry is **explanatory enrichment**, not a separate mandatory §4.2 learning outcome or a justification for standalone mastery score; the C₆₀ example itself IS explicitly in Cambridge 4.2.
+  
+**Cumulative substantive EN/RU/UZ review: 21/91 cards; 19 provisional no-defect, 2 translation HOLD.** No academic approval of complete AS Theory or learner release.
