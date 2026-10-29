@@ -17,7 +17,7 @@ Production verification before release:
 - Safe `public.iclub_exam_written_criteria_v1` exposes only the rubric/AO exam criteria, **never** private example answers, calculations or solution points. No automatic essay grading, score or mastery and no lab work grading.
 
 ## Data migration and user protection
-`supabase/migrations/20261029130000_iclub_economics_written_complete_22_beta_v1.sql` is narrow:
+`supabase/migrations/20261029121518_iclub_economics_written_complete_22_beta_v1.sql` is narrow:
 1. Assert release approval for exactly the 10 held tasks and 22 total, locale/source/security gates and original 12-task release state. Flip the **ten exact** `release_enabled` booleans.
 2. For an existing active written plan, **append ten additional pending tasks** after the existing 12, preserving original order, tokens, statuses, nonces, timestamps and all advance history. A prior learner never loses the current next task or repeats one merely because an expansion was installed. Historical withdrawn/archived plans remain unchanged.
 3. Replace `iclub_econ_written_start_v2()` with the same checked auth/eligibility/current 3-seat beta/validity controls, now inserting a complete **22-step P2→P4** plan for new eligible learners. No extra consent button/row and no public enrolment.
@@ -30,3 +30,14 @@ Live PostgreSQL `BEGIN … ROLLBACK` trial compiled the migration, preserved thr
 The architect's acceptance of current Economics UI stands. This only expands the **question bank** within that UI; it does not turn Economics into a public/full-syllabus Cambridge examination product. The 3-seat controlled beta limit remains, and older 22 English-only drafts remain unavailable. Further full-syllabus coverage or timed Paper 2/Paper 4 authentic option-choice mocks require separately approved work and qualified academic review.
 
 **The migration must be applied only after CI passes.** Once actually applied, append final migration ledger, production counts and test result in the working plan. Never rewrite completed learner steps or reopen archived users automatically.
+
+
+## Applied release verification — 29 October 2026
+
+**Production Supabase migration applied successfully:** `20261029121518_iclub_economics_written_complete_22_beta_v1`; GitHub source path canonicalised to `supabase/migrations/20261029121518_iclub_economics_written_complete_22_beta_v1.sql`.
+
+**Production after migration:** 14 released candidate P2 parts, 8 released candidate P4 parts (22 total); *zero* released earlier drafts. All 22 editorial tasks satisfy the versioned source gate; 22 private marking schemes remain. Only one existing beta written plan; it now contains 22 distinct steps: **3 advanced unchanged, 19 pending**, current user next unchanged at `P2.A.d` (original priority 4). Ten newly appended tasks occupy original plan positions 13–22 with status pending, and the original 12 item IDs, tokens, task versions and historical statuses are preserved. No additional learners, access entitlements or consent rows created. Controlled beta remains ON with capacity 3; Mathematics remains active.
+
+**Production authenticated rollback-only smoke:** existing owner `iclub_econ_written_start_v2()` replays without creating new records, existing `next` still returns priority 4, EN/RU/UZ criteria reveal no expected answers, another owner cannot read the plan, three advanced records remain. Before the production change, full 22-step end-to-end dry run opened each originally held task in order, reviewed no-answer criteria on 3 locales, advanced in one rollback transaction, and verified the plan's completed result; **none of those simulated advances persisted**.
+
+CI: isolated GitHub workflow `Economics Written 22 Practice Bank Gate` PASS (run 40871625992). No app JavaScript/CSS changes; existing premium UI, no-essay-marking boundary and 3-seat access remain unchanged. This expands **practice coverage only**, not a real 60-mark timed Cambridge exam with option-choice controls, and does not constitute independent learner acceptance.

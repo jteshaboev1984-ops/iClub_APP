@@ -662,3 +662,16 @@ The v3 candidate academic, RU/UZ/EN language, and source editorial review stage 
 **Сохранённые ограничения:** 10 резервных письменных заданий не публиковать автоматически; ограниченную beta не переводить в общий публичный выпуск; не заявлять полного закрытия syllabus; сохранение исторических пользовательских данных и Mathematics/Tours/Practice обязательно. Отдельные, ранее документированные задачи hardening P0 и академической публикации **не считаются автоматически решёнными**.
 
 **Полный, версионированный акт:** `docs/exam-prep-economics-p1-p4-owner-acceptance-20261029.md`. Следующий основной поток — действующая Chemistry Exam Prep, без расширения Chemistry LAB/Tutor или изменения доступов без отдельного решения.
+
+
+---
+
+## 29.10.2026 — Controlled Economics P2/P4 written bank: released full reviewed 22-task practice set
+
+**Decision:** User explicitly authorised academic QA and opening the remaining 10 parts *if needed*. They were found necessary to complete both P2 structured essay alternatives and P4 B/C alternative essays plus missing data-response parts. This is a **full first version of iClub practice content**, not proof of full Cambridge syllabus coverage or public release. Official reference: Economics 9708 syllabus v2 2026–2028, Paper 2 and Paper 4 assessment structure.
+
+**Verified first:** ten held prompts reviewed in EN/RU/UZ for correctness, expected concepts, A Level/AS level fit and nonduplication. Every one of 22 tasks was already marked approved in academic/language/source governance; all 22 matching private rubrics have valid SHA256 task hashes, and `private.iclub_exam_written_source_ready_v1` returned true on all. Each P2/P4 Section A totals 20 marks. Source cards Isara and Nerava and ten source bindings remained approved.
+
+**Execution:** PR #417 expansion migration `20261029121518_iclub_economics_written_complete_22_beta_v1` in Supabase is applied. All 14 P2 + 8 P4 v3 tasks now `release_enabled=true`; historical 22 drafts remain OFF. Old beta student's 12 original steps were **not reordered**; ten additional pending parts were **appended at 13–22**, preserving three existing advances and current position 4. All future eligible controlled beta plans begin with 22 tasks ordered P2 then P4. No new learner accounts or consents, no extra UI actions, no AI grading or mentor queue. Beta cap 3 unchanged, Maths, Tours, Practice and local user state untouched.
+
+**Tests:** CI `Economics Written 22 Practice Bank Gate` PASS, run 40871625992. Rollback-only full auth E2E traversed 19 remaining steps with source/criteria/Next in all locales and verified owner-only access and completion at 22; separate production post-apply replay and criteria smoke also passed, without changing real student history. Full release report: `docs/economics-9708-written-22-bank-release-audit-20261029.md`. Browser under a learner account and independent examiner audit remain **separate** from this server-and-bank expansion.

@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const migration=read('supabase/migrations/20261029130000_iclub_economics_written_complete_22_beta_v1.sql');
+const migration=read('supabase/migrations/20261029121518_iclub_economics_written_complete_22_beta_v1.sql');
 const contract=JSON.parse(read('exam-prep/contracts/written-learning-contract-v1.json'));
 const view=read('exam-prep/runtime/written-core-view-v1.js');
 const controller=read('exam-prep/runtime/written-core-controller-v1.js');
