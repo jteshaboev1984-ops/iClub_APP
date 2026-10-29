@@ -100,10 +100,10 @@ function writtenCase(language){
  assert(css.includes('.ep-native-screen-back:focus-visible'),'Accessible native keyboard focus required');
  assert(writtenCss.includes('.ep-written-screen-back:focus-visible'),'Accessible written keyboard focus required');
  assert(!native.includes('localStorage.clear(')&&!written.includes('localStorage.clear('),'Never reset local progress');
- for(const token of ['exam-prep-economics-native.js?v=econ-plan-compact-back-20261028',
-  'exam-prep-economics-native.css?v=econ-plan-compact-back-20261028',
-  'written-core-view-v1.js?v=econ-plan-compact-back-20261028',
-  'written-core-source-v1.css?v=econ-plan-compact-back-20261028'])
+ for(const token of ['exam-prep-economics-native.js?v=econ-plan-no-consent-20261029',
+  'exam-prep-economics-native.css?v=econ-plan-no-consent-20261029',
+  'written-core-view-v1.js?v=econ-plan-no-consent-20261029',
+  'written-core-source-v1.css?v=econ-plan-no-consent-20261029'])
   assert(html.includes(token),'Stale browser asset '+token);
  console.log('ECONOMICS PREMIUM NAVIGATION PASS — 3 languages, actual 4 metrics, mobile grid and both Back headers');
 })().catch(err=>{console.error(err);process.exitCode=1;});
