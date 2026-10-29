@@ -1,0 +1,23 @@
+name: Isolated Biology G2 historical synthetic QA
+on:
+  pull_request:
+    paths:
+      - 'qa/biology-g2-v13/**'
+      - '.github/workflows/biology-g2-isolated-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-fixture-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read-only checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test offline synthetic fixture
+        run: node --test qa/biology-g2-v13/qa-isolation.test.cjs
