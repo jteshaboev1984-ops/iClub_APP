@@ -114,19 +114,18 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument('p1',type=Path)
     p.add_argument('p3',type=Path)
-    p.add_argument('--private-answer-review',type=Path,default=None,help='optional PRIVATE local first-pass answer manifest; never commit the manifest')
+    p.add_argument('--private-answer-review',type=Path,required=True,help='REQUIRED private first-pass answer manifest; never commit the manifest')
     args=p.parse_args()
     assert args.p1.parent.resolve()==args.p3.parent.resolve(),'both files must be in same private source folder'
     root=args.p1.parent
     a=check(root,args.p1,'P1');b=check(root,args.p3,'P3')
     k1=load(args.p1);k3=load(args.p3)
-    if args.private_answer_review:
-        m=load(args.private_answer_review)
-        assert check_private_answer_manifest(root,args.p1,m,'P1')
-        assert check_private_answer_manifest(root,args.p3,m,'P3')
+    m=load(args.private_answer_review)
+    assert check_private_answer_manifest(root,args.p1,m,'P1')
+    assert check_private_answer_manifest(root,args.p3,m,'P3')
     assert not set(i['item_key'] for i in k1['items']).intersection(i['item_key'] for i in k3['items']),'cross paper item-key overlap'
     assert not set(i['skill_key'] for i in k1['items']).intersection(i['skill_key'] for i in k3['items']),'cross paper skill collision'
-    print('PASS closed-candidate technical integrity;'+(' first-pass key manifest consistent;' if args.private_answer_review else '')+' no release approval or examiner certification.')
+    print('PASS closed-candidate technical integrity;'+' first-pass key manifest consistent;'+' no release approval or examiner certification.')
     for out in [a,b]:print(json.dumps(out,ensure_ascii=False,sort_keys=True))
 
 if __name__=='__main__':main()
