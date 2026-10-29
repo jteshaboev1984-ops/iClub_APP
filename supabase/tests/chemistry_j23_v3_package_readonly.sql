@@ -16,7 +16,7 @@ SELECT
  (SELECT count(*) FROM theory) AS theory_cards_expected_91,
  (SELECT count(DISTINCT card->>'skill_key') FROM theory) AS unique_theory_expected_91,
  (SELECT count(*) FROM tutors) AS tutor_rows_expected_273,
- (SELECT count(DISTINCT tutor->>'skill_key'||'/'||tutor->>'locale') FROM tutors) AS unique_tutors_expected_273,
+ (SELECT count(DISTINCT (tutor->>'skill_key')||'/'||(tutor->>'locale')) FROM tutors) AS unique_tutors_expected_273,
  (SELECT count(*) FROM theory WHERE NOT (card ?& ARRAY[
    'skill_key','tour_no','official_syllabus_point','content_hash','locales'])) AS theory_missing_fields_expected_0,
  (SELECT count(*) FROM tutors WHERE NOT (tutor ?& ARRAY[
