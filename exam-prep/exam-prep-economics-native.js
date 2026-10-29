@@ -765,6 +765,23 @@
     units.append(rows);view.append(units);
     const actions=e("div","ep-live-actions");
     actions.append(btn(t().backReview,draw,true));
+    // Earlier plans remain readable after a recheck. Use only an already
+    // finalized, owned history entry from this Paper and assessment type;
+    // the existing RPC independently verifies ownership and progress.
+    const finalizedAt=Date.parse(data.finalized_at||"");
+    const earlier=Number.isFinite(finalizedAt)?state.history
+      .filter(entry=>entry.session_id&&entry.session_id!==data.session_id&&
+        entry.paper_code===data.paper_code&&
+        entry.session_kind===data.session_kind&&
+        entry.status==="finalized"&&
+        Date.parse(entry.started_at||"")<finalizedAt)
+      .sort((a,b)=>Date.parse(b.started_at)-Date.parse(a.started_at))[0]:null;
+    if(earlier){
+      const label={ru:"Предыдущий учебный план",
+        uz:"Oldingi o‘quv rejasi",en:"Previous study plan"};
+      actions.append(btn(label[state.lang]||label.ru,
+        ()=>openHistory(earlier,true),true));
+    }
     if(!plannedTopicsStudied)
       actions.append(btn(data.session_kind==="diagnostic"?t().repeatCheck:t().retest,
         ()=>begin(state.paper,data.session_kind||"paper"),true));
