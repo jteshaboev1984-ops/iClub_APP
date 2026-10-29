@@ -359,4 +359,43 @@ BEGIN
 END;
 $function$
 
+-- Math Beta approval no longer depends on historical cohort opt-in; model-specific AI
+-- eligibility remains controlled by its independent provider/AI policy.
+CREATE OR REPLACE FUNCTION private.iclub_ai_math_beta_pro_quota_eligible_v1(p_user_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+ SELECT p_user_id IS NOT NULL AND EXISTS(
+  SELECT 1 FROM private.iclub_ai_practice_beta_grants_v1 g
+  JOIN private.exam_prep_beta_members bm ON bm.user_id=g.user_id
+    AND bm.member_status='active' AND bm.service_mode='ai_assist'
+  JOIN private.exam_prep_beta_cohorts c ON c.id=bm.cohort_id
+    AND c.program_key='math_as_p1_p5' AND c.cohort_status='canary'
+  JOIN private.exam_prep_feature_entitlements ent ON ent.user_id=g.user_id
+    AND ent.entitlement_status='active' AND ent.core_access AND ent.ai_assist
+    AND (ent.valid_from IS NULL OR ent.valid_from<=now())
+    AND (ent.valid_until IS NULL OR ent.valid_until>now())
+  JOIN private.iclub_ai_v21_beta_members global_ai ON global_ai.user_id=g.user_id
+    AND global_ai.enabled AND global_ai.consent_at IS NOT NULL
+    AND global_ai.consent_version='global_ai_beta_v21'
+  JOIN private.iclub_plan_policies plan ON plan.plan_code='pro'
+    AND plan.is_active AND plan.policy_version='global_ai_tariffs_v1'
+    AND plan.ai_usage_policy_code='pro_v1'
+  JOIN private.iclub_ai_usage_policies pol
+    ON pol.usage_policy_code=plan.ai_usage_policy_code
+    AND pol.is_active AND pol.policy_version='global_ai_tariffs_v1'
+    AND pol.period_seconds=18000 AND pol.allowance_units=14
+    AND pol.prepared_weight=1 AND pol.generation_weight=5
+  WHERE g.user_id=p_user_id AND g.enabled
+    AND EXISTS(SELECT 1 FROM private.iclub_ai_practice_context_v1_control
+       WHERE singleton=1 AND enabled AND owner_user_id IS NULL)
+    AND EXISTS(SELECT 1 FROM private.iclub_ai_practice_freeform_pc3_control
+       WHERE singleton=1 AND enabled)
+    AND EXISTS(SELECT 1 FROM private.iclub_ai_practice_receipt_v1_control
+       WHERE singleton=1 AND enabled)
+ )
+$function$
+
 COMMIT;
