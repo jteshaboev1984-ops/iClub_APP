@@ -398,4 +398,13 @@ AS $function$
  )
 $function$
 
+-- Existing beta users retain their active entitlements and all progress.
+-- Close only obsolete learner-initiated enrollment/consent RPC privileges.
+-- Owner-managed cohort administration, capacity and synthetic firewalls remain.
+REVOKE ALL ON FUNCTION public.claim_my_exam_prep_beta_core_seat_v1(text,text)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.grant_my_exam_prep_beta_consent_v1(text,text)
+ FROM PUBLIC,anon,authenticated;
+-- Historical self-revocation remains callable; do not erase user audit history.
+
 COMMIT;
