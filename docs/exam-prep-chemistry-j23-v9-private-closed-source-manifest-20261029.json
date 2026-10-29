@@ -1,0 +1,65 @@
+{
+  "subject": "chemistry",
+  "project": "iClub",
+  "workstream": "J23 AS 9701",
+  "date": "2026-10-29",
+  "candidateVersion": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v9",
+  "status": "CLOSED_PENDING_ACADEMIC_RIGHTS_TUTOR_SIGNOFF",
+  "previousSourceVersion": "chemistry9701_j23_20261029_as_91_sixfield_candidate_v7",
+  "stagesPreserved": [
+    "v7",
+    "v8"
+  ],
+  "notes": "Historical v8 is an intermediate corrected source with a trilingual tail defect, fixed append-only in v9.",
+  "scienceCorrections": [
+    {
+      "skill": "CHEM9701-13-03",
+      "kind": "assessed cis/trans terminology; E/Z optional",
+      "localeCount": 3
+    },
+    {
+      "skill": "CHEM9701-20-02",
+      "kind": "condensation polymer topic marked optional beyond AS 20.1",
+      "localeCount": 3
+    },
+    {
+      "skill": "CHEM9701-20-03",
+      "kind": "exam check covers polyalkene disposal instead of compulsory PET hydrolysis",
+      "localeCount": 3
+    }
+  ],
+  "ruTutorTone": "Formal student-directed imperatives; 39 replacement rules; 48 tutor records with textual edits relative to v7 including trilingual scope notes",
+  "editorialAuthored": "6 new protected question-answer lineage rows for 13-03 and 20-03 across EN/RU/UZ",
+  "theoryCards": 91,
+  "tutorLocaleRecords": 273,
+  "theorySha256": "3389e6a77d0347ab34fcfb9ad01b50bfceaa916552f8da197dad7c856954d302",
+  "tutorSha256": "28e7dfe84e36136daed48635f44c32cb7a670d9243c9425785032f1ea9c2ed93",
+  "packageSha256": "c17a1b193d4f713d44e77b9b1a1ce3e42427c2fdce7a99599b56dcb6da1f64eb",
+  "privateDataPublishedToGitHub": false,
+  "readOnlyProductionTest": "supabase/tests/chemistry_j23_v9_closed_fullsource_readonly.sql",
+  "validation": {
+    "cardShaErrors": 0,
+    "sourceTheoryMismatches": 0,
+    "sourceTutorMismatches": 0,
+    "tutorPointerErrors": 0,
+    "tutorDigestErrors": 0,
+    "ruUzUntranslatedTailErrors": 0,
+    "unresolvedTargetRuInformals": 0,
+    "packageHashesCorrect": true
+  },
+  "gates": {
+    "j24Enabled": false,
+    "j25Audience": "closed",
+    "draftPR": 397,
+    "mergedToMain": false,
+    "studentRelease": false,
+    "externalBackupAndRestoreProven": false,
+    "exactV9PythonPackagerRun": false,
+    "rightsSignedOff": false,
+    "architectApproved": false
+  },
+  "sources": [
+    "https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf#page=32",
+    "https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf#page=37"
+  ]
+}
