@@ -7,6 +7,7 @@ on:
       - 'supabase/migrations/20261029180000_iclub_ai_finance_all_routes_unknown_holds_v1.sql'
       - 'supabase/tests/iclub_ai_finance_safety_v1_fixture.sql'
       - 'supabase/tests/iclub_ai_finance_safety_v1_matrix.sql'
+      - 'supabase/tests/iclub_ai_finance_safety_v1_concurrent.sh'
       - 'supabase/functions/exam-prep-ai/index.ts'
       - 'supabase/functions/practice-ai/index.ts'
       - '.github/scripts/iclub_ai_finance_safety_v1_contract.cjs'
@@ -57,6 +58,8 @@ jobs:
           set -o pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_finance_safety_v1_matrix.sql 2>&1 | tee finance-matrix.log
           ! grep -Eiq '\b(delete[[:space:]]+from|truncate|update)[[:space:]]+public\.(users|user_subjects|practice_attempts|tour_attempts|certificates)\b' supabase/migrations/20261029180000_iclub_ai_finance_all_routes_unknown_holds_v1.sql
+      - name: Verify competing AI routes cannot overspend same cap
+        run: bash supabase/tests/iclub_ai_finance_safety_v1_concurrent.sh
       - name: Provider dispatch and settlement TypeScript contract
         run: node .github/scripts/iclub_ai_finance_safety_v1_contract.cjs
       - name: Typecheck existing Edge functions (no provider calls)
