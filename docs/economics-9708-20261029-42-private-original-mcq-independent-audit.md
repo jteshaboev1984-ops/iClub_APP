@@ -1,6 +1,9 @@
 # iClub APP — Economics 9708 P1/P3: direct audit of 42 private original MCQ candidates
 **Date:** 2026-10-29. **Status:** INTERNAL REVIEW / PRIVATE DRAFT; **NO content approval or production publication**. Repository branch: `audit/economics-9708-master-coverage-20261029` (PR #419, draft). Cambridge primary: https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf (Version 2, Dec 2025). Live program `economics_9708 / economics_2026_2028_v1`.
 
+> **Follow-up superseding update (2026-10-29):** The corrected P1 v2 **was subsequently uploaded successfully to personal Library**, and the first-pass authored AO metadata was **independently reclassified** using Cambridge's broader AO1 definition. The provisional second pass is P1 AO1=21/AO2=9/AO3=0 and P3 AO1=6/AO2=6/AO3=0 certain, NOT the raw author tags 2/28/0 and 0/9/3. Eight new protected private AO3 v2 candidates were also authored and deposited in Library, never in production. The authoritative newer report is [`economics-9708-20261029-42-original-AO-reclassification-and-independent-reserve-plan.md`](economics-9708-20261029-42-original-AO-reclassification-and-independent-reserve-plan.md); source paragraphs below are retained as an earlier checkpoint, including the upload failure at that time. No answer content in GitHub.
+
+
 ## 1. Source truth — verified actual bytes, not earlier working-plan text
 User-owned private Library path `/iClub APP/Exam Prep/`:
 - `iClub_Economics_P1_30_original_CLOSED_CANDIDATE_20261029.json`: **30 items**, raw-file SHA-256 **`78e624bb8a6c45f5dc79f14d527ae3903a2fd8981fec64a247c6a859023e1a91`** (same hash recorded in working plan).
