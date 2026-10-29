@@ -20,7 +20,7 @@ A learner's normal iClub sign-in, selected active subject and enabled server ent
 - **Future subjects:** reuse the same subject registration, authenticated server eligibility, owner-configured component release and content source integrity. Do not duplicate Mathematics beta consent tables or create new subject-level opt-in steps. Release can be beta-allowlisted or general by owner decision; never infer release from frontend state alone.
 
 ## Database implementation notes
-New versioned SQL migration `20261029094000_exam_prep_math_economics_no_extra_consent_v1.sql` is **staged, NOT applied**. It keeps existing Math membership, entitlements, capacity guard, synthetic-identity firewall and public consent history immutable; removes only historical consent as an additional server admission prerequisite. Economics P1 authorization still requires active beta cohort, activated membership, live Core entitlement, subject and feature config. Economics written practice requires prior finalized diagnostic and its own enabled maximum-3 cohort gate. No data migration of existing attempts, grades, questions or progress.
+**Two unapplied, ordered migrations:** Phase 1 `20261029094000_exam_prep_math_economics_no_extra_consent_v1.sql` installs consent-free checks / written start but **keeps legacy RPC grants temporarily** for already-open clients; Phase 2 `20261029095000_exam_prep_legacy_self_enrollment_revoke_v1.sql` disables old learner self-enrollment/consent-grant privileges **only after the updated frontend is deployed and verified**. Both are staged, NOT applied. It keeps existing Math membership, entitlements, capacity guard, synthetic-identity firewall and public consent history immutable; removes only historical consent as an additional server admission prerequisite. Economics P1 authorization still requires active beta cohort, activated membership, live Core entitlement, subject and feature config. Economics written practice requires prior finalized diagnostic and its own enabled maximum-3 cohort gate. No data migration of existing attempts, grades, questions or progress.
 
 ## Release / rollback
 - Versioned frontend asset caches (API, host and Economics native); no localStorage writes.
@@ -30,3 +30,13 @@ New versioned SQL migration `20261029094000_exam_prep_math_economics_no_extra_co
 
 ## Holds
 No backend migration applied or production configuration changed; no live learner simulation. Existing Math `qa_open_all_core` and open recruitment governance need a separate owner rollout audit. AI Tutor provider-specific safety/privacy is not silently disabled by this subject-level UX change.
+
+## 2026-10-29 extra production impact evidence
+Read-only query: 880 current Mathematics subject subscribers, only 3 active individual Exam Prep Core entitlements, 7 distinct Exam Prep session accounts within 30 days, and 6 of those session accounts lack individual Core entitlements. Current `qa_open_all_core=true` means simply turning it off would remove live access for some existing sessions. Do **not** change Math QA-open state or delete existing attempts in this opt-in removal PR. Separate governed migration/entitlement reconciliation is required before any beta-to-release tightening.
+
+## Safe deployment ordering
+1. Validate isolated SQL, permissions and lifecycle, check current live user baseline without exposing user IDs, and confirm a no-session-loss fallback.
+2. Apply **Phase 1** backend migration; verify old and new RPCs coexist, and new RPC does not write a consent row.
+3. Deploy matching version-pinned frontend and smoke test signed-in Mathematics, Economics P1 / P2 and cross-subject Back on protected Preview then production.
+4. Apply **Phase 2** only after new frontend operates and legacy tabs are no longer relied upon; verify deprecated self-enrollment is denied and all 3 existing entitlements/6 recent session accounts retain intended access.
+5. At any failed step, stop. Never delete consent history or rollback by erasing learner data; use reviewed code/config rollback.
