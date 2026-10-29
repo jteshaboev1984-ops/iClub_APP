@@ -57,7 +57,7 @@ async function main(){
         if(body.intent==="ask"&&body.prompt_key==="catalog_help"){
           window.__isolated.preparedCalls.push(body);
           return{data:{ok:true,mode:"prepared",
-            message:"Откройте Учёбу, выберите предмет и начните Practice.",
+            message:"**Начало:** Откройте Учёбу, выберите предмет и начните Practice. Пример 2**3. <b>Это текст</b>.",
             provider_called:false,academic_state_changed:false},error:null};
         }
         return{data:{ok:false,reason:"isolated_no_other_routes"},error:null};
@@ -218,6 +218,25 @@ async function main(){
   const prepared=await page.evaluate(()=>window.__isolated.preparedCalls[0]);
   assert.equal(prepared.prompt_key,"catalog_help");
   assert.equal(activity.asks.length,0,"Prepared answer triggered paid generation");
+  // Approved / model answer formatting is presentation-only. Bold pairs
+  // become safe DOM emphasis, unmatched operator stars and HTML stay literal.
+  await page.waitForFunction(()=>document.querySelector(
+    ".iclub-global-ai-message.is-assistant .iclub-global-ai-bubble strong"
+  )?.textContent==="Начало:",null,{timeout:8000});
+  const safeRichText=await page.locator(
+    ".iclub-global-ai-message.is-assistant .iclub-global-ai-bubble"
+  ).last().evaluate(bubble=>({
+    text:bubble.textContent,
+    bold:bubble.querySelector("strong")?.textContent,
+    injectedElement:bubble.querySelector("b")
+  }));
+  assert.equal(safeRichText.bold,"Начало:");
+  assert.equal(safeRichText.text.includes("**Начало:**"),false);
+  assert.equal(safeRichText.text.includes("2**3"),true);
+  assert.equal(safeRichText.text.includes("<b>Это текст</b>"),true);
+  assert.equal(safeRichText.injectedElement,null,
+    "Tutor answer text must never be parsed as HTML");
+
   await page.evaluate(()=>{
     window.i18n.getLang=()=>"uz";window.iClubGlobalAiShell.open();
   });

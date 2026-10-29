@@ -819,6 +819,32 @@
     ];
   }
 
+  // Render only paired **bold** spans as emphasis; all content stays text.
+  // Never parse provider/approved content as HTML or alter the saved reply.
+  // Learner-written messages remain literal text.
+  function appendSafeAssistantText(bubble, text) {
+    const value = String(text ?? "");
+    const emphasis = /\*\*([^*\r\n]+)\*\*/g;
+    let match;
+    let cursor = 0;
+    let rendered = false;
+    while ((match = emphasis.exec(value)) !== null) {
+      if (match.index > cursor) {
+        bubble.appendChild(document.createTextNode(value.slice(cursor, match.index)));
+      }
+      const strong = document.createElement("strong");
+      strong.textContent = match[1];
+      bubble.appendChild(strong);
+      cursor = emphasis.lastIndex;
+      rendered = true;
+    }
+    if (!rendered) {
+      bubble.textContent = value;
+    } else if (cursor < value.length) {
+      bubble.appendChild(document.createTextNode(value.slice(cursor)));
+    }
+  }
+
   function createMessageNode(message) {
     const row = document.createElement("div");
     row.className = `iclub-global-ai-message is-${message.role}${message.kind === "notice" ? " is-notice" : ""}`;
@@ -873,6 +899,8 @@
       } else {
         bubble.textContent = message.text;
       }
+    } else if (message.role === "assistant" && message.kind !== "notice") {
+      appendSafeAssistantText(bubble, message.text);
     } else {
       bubble.textContent = message.text;
     }
