@@ -56,7 +56,7 @@ assert(css.includes('ep-written-mark-breakdown')&&css.includes('ep-written-actio
 for(const needle of ['written-core-view-v1.js?v=econ-plan-compact-back-20261028',
  'written-core-controller-v1.js?v=econ-assessment-criteria-nohints-20261028',
  'written-core-source-v1.css?v=econ-plan-compact-back-20261028',
- 'exam-prep-economics-native.js?v=econ-plan-no-consent-20261029'])
+ 'exam-prep-economics-native.js?v=econ-p0-answer-parity-no-consent-20261029'])
  assert(html.includes(needle),'Stale asset would hide change: '+needle);
 const root={};vm.runInNewContext(controller,{globalThis:root,module:{exports:{}},console});
 const ctl=(()=>{const sandbox={module:{exports:{}},console};vm.runInNewContext(controller,sandbox);return sandbox.module.exports})();

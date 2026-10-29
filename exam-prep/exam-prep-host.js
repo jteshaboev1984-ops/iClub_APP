@@ -41,6 +41,9 @@
         entryBadgeAi: "Cambridge AS · Mathematics · AI",
         entryTitle: "Exam Prep",
         comingSoonBadge: "Ishlab chiqilmoqda",
+        economicsLimitedBadge: "Kirish cheklangan",
+        economicsLimitedDesc: "Economics Exam Prep hozircha faqat sinov ishtirokchilari uchun ochiq.",
+        economicsLimitedNote: "Practice orqali o‘rganishni davom ettirishingiz va Toursda jadval bo‘yicha qatnashishingiz mumkin.",
         comingSoonDesc: "Bu fan bo‘yicha imtihonga tayyorgarlik ishlab chiqilmoqda.",
         comingSoonNote: "Hozircha Practice va Tours orqali mashq qilishingiz mumkin.",
         comingSoonCta: "Batafsil",
@@ -66,6 +69,9 @@
         entryBadgeAi: "Cambridge AS · Mathematics · AI",
         entryTitle: "Exam Prep",
         comingSoonBadge: "In development",
+        economicsLimitedBadge: "Limited access",
+        economicsLimitedDesc: "Economics Exam Prep is currently available only to testing participants.",
+        economicsLimitedNote: "You can keep learning in Practice and join Tours when they open.",
         comingSoonDesc: "Exam preparation for this subject is in development.",
         comingSoonNote: "You can continue learning through Practice and Tours in the meantime.",
         comingSoonCta: "Learn more",
@@ -90,6 +96,9 @@
       entryBadgeAi: "Cambridge AS · Mathematics · ИИ",
       entryTitle: "Exam Prep",
       comingSoonBadge: "В разработке",
+        economicsLimitedBadge: "Доступ ограничен",
+        economicsLimitedDesc: "Economics Exam Prep сейчас доступен только участникам тестирования.",
+        economicsLimitedNote: "Вы можете продолжать заниматься в Практике и участвовать в Турах по расписанию.",
       comingSoonDesc: "Экзаменационная подготовка по этому предмету находится в разработке.",
       comingSoonNote: "Пока вы можете продолжать обучение через Practice и Tours.",
       comingSoonCta: "Подробнее",
@@ -193,6 +202,7 @@
     const chemActive = state.subjectKey === CHEMISTRY_KEY &&
       (state.chemistryShell?.enabled === true || state.chemistryEntryShell?.enabled === true);
     const comingSoon = Boolean(state.subjectKey && state.subjectKey !== MATHEMATICS_KEY && !econActive && !chemActive);
+    const economicsLimited = state.subjectKey === ECONOMICS_KEY && !econActive;
     const econSub = state.language === "uz"
       ? "Paper 1 va Paper 3: imtihon, javoblar va natijalar"
       : state.language === "en"
@@ -206,12 +216,12 @@
       entry.setAttribute("data-ep-entry-mode", comingSoon ? "coming-soon" : "live");
       entry.setAttribute("data-ep-ai-visible", aiActive ? "true" : "false");
     }
-    if (badge) badge.textContent = econActive ? "Cambridge · Economics 9708" : (comingSoon ? text.comingSoonBadge : (aiActive ? text.entryBadgeAi : text.entryBadge));
+    if (badge) badge.textContent = econActive ? "Cambridge · Economics 9708" : (comingSoon ? (economicsLimited ? text.economicsLimitedBadge : text.comingSoonBadge) : (aiActive ? text.entryBadgeAi : text.entryBadge));
     if (title) title.textContent = text.entryTitle;
-    if (sub) sub.textContent = econActive ? econSub : (comingSoon ? text.comingSoonDesc : text.entryDesc);
+    if (sub) sub.textContent = econActive ? econSub : (comingSoon ? (economicsLimited ? text.economicsLimitedDesc : text.comingSoonDesc) : text.entryDesc);
     if (p1) p1.textContent = econActive ? "Paper 1 · AS Level · 60 min" : text.entryP1;
     if (p5) p5.textContent = econActive ? "Paper 3 · A Level · 75 min" : text.entryP5;
-    if (note) note.textContent = econActive ? econSub : (comingSoon ? text.comingSoonNote : (aiActive ? text.entryAiNote : text.entryNote));
+    if (note) note.textContent = econActive ? econSub : (comingSoon ? (economicsLimited ? text.economicsLimitedNote : text.comingSoonNote) : (aiActive ? text.entryAiNote : text.entryNote));
     if (cta) cta.textContent = comingSoon ? text.comingSoonCta : text.entryCta;
     if (p5?.parentElement) p5.parentElement.style.display = chemActive ? "none" : "";
     if (chemActive) {
@@ -301,16 +311,16 @@
     shell.setAttribute('aria-label', text.entryTitle);
     const badge = document.createElement('div');
     badge.className = 'ep-host-kicker';
-    badge.textContent = text.comingSoonBadge;
+    badge.textContent = state.subjectKey === ECONOMICS_KEY ? text.economicsLimitedBadge : text.comingSoonBadge;
     const heading = document.createElement('h2');
     heading.className = 'ep-host-title';
     heading.textContent = text.entryTitle;
     const description = document.createElement('p');
     description.className = 'ep-host-note';
-    description.textContent = text.comingSoonDesc;
+    description.textContent = state.subjectKey === ECONOMICS_KEY ? text.economicsLimitedDesc : text.comingSoonDesc;
     const note = document.createElement('p');
     note.className = 'ep-host-note';
-    note.textContent = text.comingSoonNote;
+    note.textContent = state.subjectKey === ECONOMICS_KEY ? text.economicsLimitedNote : text.comingSoonNote;
     const closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.className = 'ep-host-btn ep-host-btn-secondary';
