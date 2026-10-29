@@ -15,7 +15,7 @@ for(const word of ["renderInvitationShell","handleGrantConsent","handleRevokeCon
  assert(!host.includes(word)&&!api.includes(word),"No legacy Math beta UI/API path: "+word);
 assert(host.includes("const visible = showable()"),"Existing entitlement-controlled navigation stays");
 assert(host.includes("allowed(state.capabilities) && renderLiveShell()"),"No invitation fallback on Math open");
-assert(host.includes('const CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED = false;'),"Existing Chemistry feature gate preserved on main");
+assert(!host.includes("CHEMISTRY_PRELAUNCH_INVITATIONS_ENABLED") && !host.includes("get_my_exam_prep_chemistry_beta_status_v1"),"No legacy Chemistry invitation or consent UI");
 assert(!economics.includes("iclub_econ_written_beta_join_v1"),"No old Economics consent-based start");
 assert(!economics.includes("iclub_econ_written_beta_leave_v1"),"No withdraw-consent learner UI");
 assert(economics.includes('rpc("iclub_econ_written_start_v2",{})'),"No-confirmation written start");
