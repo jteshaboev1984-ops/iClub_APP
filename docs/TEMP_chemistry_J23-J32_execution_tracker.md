@@ -1,4 +1,6 @@
 # TEMP Chemistry J23–J32 execution tracker — DELETE WHEN COMPLETE
+J23 CURRENT: the three wording holds in 02-05 EN/UZ, 15-01 EN, and 19-01 UZ are corrected as unapproved private v4 drafts. Current private v4 SHA-256: `6d28261c661c5e7d8036eb0089c0e0f3bfdfe0f1f77c0a0a8560712f60cadb78`; v3 remains historical. See `docs/exam-prep-chemistry-j23-v4-private-closed-editorial-delta-20261029.json`. No learner release, review/rights/restore pending.
+
 Keep only until the full agreed Chemistry J23–J32 plan is finished, then delete this temporary file. Retain permanent academic/release evidence.
 - [x] J23 initial 154 Theory/462 locales/12 LAB and Entry/Recheck/P1 baseline inventory
 - [x] J23 version-preserving P1 SO2/SO3 correction created (v5; 7 reviews PENDING)
