@@ -64,3 +64,14 @@ Live source: `private.iclub_subject_library_theory`, immutable `chemistry9701_20
 - No substantive discrepancy found. No release approval until full source/version review and owner-controlled manifest signoff.
 
 **Updated bounded batch status: 5/91 full three-locale explanations read, 3 provisional no-defect outcomes, 2 translation HOLDs. All 91 remain unreleased.**
+
+## J23 batch: AS stoichiometry 02-01 through 02-05 — 2026-10-29
+Sources checked: live immutable Chemistry `chemistry9701_20261022_stageb_draft` EN/RU/UZ full explanation texts; user-provided Lawrie Ryan & Roger Norris, *Chemistry for Cambridge International AS & A Level* (3e), Chapter 3 learning intentions, amounts and reaction calculations; Cambridge International Chemistry 9701 official **2025–2027 syllabus, pp. 18–19**, §§2.2–2.4: https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf . Source lesson hashes remain untouched. Editorial review is bounded and is NOT independent human academic approval.
+
+- **J23-SCI-008 | CHEM9701-02-01 | §2.2 | BOUNDED PASS.** All EN/RU/UZ definitions of the mole and exact Avogadro constant agree; `0.500 mol × 6.02×10²³ = 3.01×10²³`, `0.250 mol CO₂ = 0.750 mol atoms`, `0.100 mol CaCl₂ = 0.100 mol Ca²⁺ + 0.200 mol Cl⁻` are consistent. Exact SI constant and rounded exam value are correctly distinguished.
+- **J23-SCI-009 | CHEM9701-02-02 | §2.3 | BOUNDED PASS.** Percent-to-mole ratios `40.0/12 ≈3.333`, `6.7/1=6.7`, `53.3/16≈3.331` yield CH₂O, then Mᵣ 180 gives C₆H₁₂O₆; hydrate loss `2.46−1.20=1.26 g`, mole ratio `(1.26/18)/(1.20/120.4)≈7.02`, giving MgSO₄·7H₂O. All three translations retain the heating/no-decomposition caveat.
+- **J23-SCI-010 | CHEM9701-02-03 | §2.3 | BOUNDED PASS.** Al₂(SO₄)₃ charge balance, MgCl₂(aq)+2NaOH(aq) net ionic precipitation equation, Mg²⁺+2OH⁻→Mg(OH)₂(s), spectator Na⁺ and Cl⁻ and state symbols agree in all languages. Matches syllabus outcomes for ionic formulas and equations.
+- **J23-SCI-011 | CHEM9701-02-04 | §2.4 | BOUNDED PASS.** Mg+2HCl example has correct 1:2:1 mole ratio; `M=1.25×8.31×300/100=31.1625≈31.2 g mol⁻¹` at specified kPa/dm³/K units, consistent EN/RU/UZ; conditions caveat for 24.0 dm³ mol⁻¹ present. Topic is broader than the explicit syllabus's reacting masses/volumes focus but explanation is valid application, not independent outcome.
+- **J23-SCI-012 | CHEM9701-02-05 | §2.4 | BOUNDED PASS.** Mg/O₂ limiting reagent: maximum 0.200 mol MgO, realised 0.150 mol → 75%; Al/Cl₂ limiting reagent: reaction extents 0.200 vs 0.150, theoretical AlCl₃ 0.300 mol, obtained 0.255 → 85%. All numbers, species, coefficient logic and language meanings align.
+
+**Cumulative substantive review: 10/91 AS lessons; 8 provisional no-defect findings, 2 translation HOLDs (01-02, 01-03).** Remaining 81 unreviewed; all 91 held from release. No public write, no source-hash change, no launch approval.
