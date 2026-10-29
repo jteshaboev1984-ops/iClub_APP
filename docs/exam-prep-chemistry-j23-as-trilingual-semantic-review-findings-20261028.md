@@ -119,3 +119,14 @@ Grounding: original live EN/RU/UZ descriptions, immutable source version `chemis
 - **J23-SCI-031 | CHEM9701-06-04 | §6.1 | BOUNDED PASS**: Cold dilute base gives Cl⁻ + ClO⁻ (Cl 0 → −1,+1), hot concentrated base gives 5Cl⁻ + ClO₃⁻ (0 → −1,+5); equations atom- and charge-balanced, EN/RU/UZ consistent.
 
 **Cumulative reviewed 30/91; 27 provisional no-defect, 3 locale HOLDs (01-02, 01-03, 06-03).** Existing hashes unchanged; approval of all 91 and release remain blocked.
+
+## J23 batch: Equilibria and acid/alkali CHEM9701-07-01–07-05 (2026-10-29)
+Sources: complete EN/RU/UZ immutable library texts; Lawrie Ryan/Roger Norris Chemistry 3e; official Cambridge 9701 2025–2027 syllabus §7.1–7.2, p. 24 (https://www.cambridgeinternational.org/Images/664563-2025-2027-syllabus.pdf).
+
+- **J23-SCI-032 | CHEM9701-07-01 | §7.1 | BOUNDED PASS**: closed-system dynamic equilibrium requires equal forward/reverse rates, not equal reagent/product concentrations; catalyst affects the approach but not equilibrium position; H₂+I₂⇌2HI gaseous stoichiometry has Δn=0, no preferential pressure shift. All locales consistent.
+- **J23-SCI-033 | CHEM9701-07-02 | §7.1 | BOUNDED PASS**: Le Chatelier Haber exothermic forward direction (high p→NH₃, high T→reactants), Contact catalyst and equilibrium rate-yield tradeoff, pressure change by compression with Δn=0, inert gas at constant V/T and temperature-only K dependency maintained in EN/RU/UZ.
+- **J23-SCI-034 | CHEM9701-07-03 | §7.1 | BOUNDED PASS**: Kc for H₂+I₂⇌2HI correctly `0.6²/(0.3×0.2)=6` (no concentration units). Haber Kc `0.4²/(0.5×0.2³)=40 dm⁶ mol⁻²` (net exponent −2) identical in all three languages. Purity/state caveats retained.
+- **J23-SCI-035 | CHEM9701-07-04 | §7.1 | BOUNDED PASS**: mole fractions 2:3:1 at total pressure 600 kPa give partial pressures N₂=200, H₂=300, NH₃=100 kPa; `Kp=100²/(200×300³)=1.85185×10⁻⁶ kPa⁻²`, matching EN/RU/UZ. Do not use Kp–Kc conversion (not required in syllabus).
+- **J23-SCI-036 | CHEM9701-07-05 | §7.2 | BOUNDED PASS**: strong versus weak acid degree of dissociation, equivalence versus indicator end point, weak acid+strong alkali equivalence >7, strong acid+weak alkali <7, weak acid+weak alkali lacks a sharp indicator transition. The specified **volume of alkali added** graph axis is retained in all locales; no unsupported exact equivalence pH claimed.
+
+**Cumulative: 35/91 read in all three languages; 32 provisional no-defect, 3 translation HOLD.** No approved 91-card manifest, Chemistry AS Theory remains locked.
