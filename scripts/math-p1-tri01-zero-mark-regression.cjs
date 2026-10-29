@@ -21,7 +21,10 @@ for(const s of [
 ])expect(s);
 assert.doesNotMatch(sql, /\b(?:DELETE\s+FROM|TRUNCATE|DROP\s+TABLE|ALTER\s+TABLE)\b/i);
 assert.doesNotMatch(sql, /UPDATE\s+private\.exam_prep_(?:responses|sessions|skill_states|weekly_plans)/i);
-assert.doesNotMatch(sql, /UPDATE\s+private\.exam_prep_written_tasks\s+SET[\s\S]*?WHERE\s+id\s+IN\s*\(\s*17\s*,\s*184\s*\)/i);
+const taskWrites = [...sql.matchAll(/UPDATE\s+private\.exam_prep_written_tasks\s+SET[\s\S]*?;/gi)].map(m => m[0]);
+assert.equal(taskWrites.length, 1, "Exactly one targeted task-status UPDATE expected");
+assert.match(taskWrites[0], /WHERE\s+id=279\s+AND\s+lifecycle_state='draft'/i);
+assert.doesNotMatch(taskWrites[0], /\b(?:17|184)\b/);
 assert.equal(Math.abs(2*Math.sin(Math.PI/6)-1)<1e-12, true);
 assert.equal(Math.abs(2*Math.sin(5*Math.PI/6)-1)<1e-12, true);
 assert.equal(4+3+2+1,10);
