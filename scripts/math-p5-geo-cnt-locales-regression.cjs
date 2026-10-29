@@ -18,7 +18,7 @@ for (const s of [
 ]) assert.ok(sql.includes(s),"Missing invariant: "+s);
 assert.doesNotMatch(sql,/\b(?:DELETE\s+FROM|TRUNCATE|DROP\s+TABLE|ALTER\s+TABLE)\b/i);
 assert.doesNotMatch(sql,/UPDATE\s+private\.exam_prep_(?:responses|sessions|skill_states|weekly_plans)/i);
-const targets=[...sql.matchAll(/UPDATE\s+private\.(exam_prep_[a-z_]+)\s+\w+\s+SET[\s\S]*?;/gi)].map(m=>m[1]);
+const targets=[...sql.matchAll(/UPDATE\s+private\.(exam_prep_[a-z_0-9]+)\s+\w+\s+SET[\s\S]*?;/gi)].map(m=>m[1]);
 assert.deepEqual(targets.sort(),[
  "exam_prep_written_criteria_locale_v1",
  "exam_prep_written_understanding_checks",
