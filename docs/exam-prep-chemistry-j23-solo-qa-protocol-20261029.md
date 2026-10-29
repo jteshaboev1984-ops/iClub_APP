@@ -44,3 +44,6 @@ An internal QA result may be documented as `AI_SELF_REVIEW_PASS` only for the pa
 - The exact GitHub read-only SQL verifier `supabase/tests/chemistry_j23_v5_bundle_readonly.sql` was run against closed Supabase v5: Theory=91, Tutor=273 and exact Theory/Tutor/combined SHA-256 booleans all true.
 - The **actual Python packager** still has not been run against the 1.4MB protected source bytes. The Python test file in GitHub is synthetic-only and has not yielded a verified CI job run; do not conflate those two checks.
 - All original source, previous candidate versions and learner progress remain untouched; RLS private tables retain no anon/authenticated read grants.
+
+## J24 read-only upgrade compatibility preflight
+A read-only join of the **closed v5** candidate with `private.iclub_exam_core_skills_v1` (Chemistry 9701, AS, current curriculum version) found exactly 91/91 matching skill keys, 0 tour-number mismatches, 0 syllabus-point mismatches and 1 correctly labelled enrichment-only item. All 91 v5 content hashes differ from original hash values as required for new six-field lessons. This is **compatibility evidence**, not a new core-skills version or J24 activation. Avoid simply switching a hard-coded release version without atomically reconciling Theory, Tutor and skill-hash pointers. J24 remains disabled, J25 closed.
