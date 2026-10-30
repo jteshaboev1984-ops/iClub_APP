@@ -221,7 +221,7 @@ begin
  '11111111-1111-4111-8111-111111111111',4,'expires-123456789'),'prior_retest_expired');
  perform public.synthetic_expect_code_v1(public.iclub_econ_retest_start_v1(
  '11111111-1111-4111-8111-111111111111',4,'another-expired-12345'),'prior_retest_expired');
-end $;
+end $$;
 
 -- Revoked server-side session fails even if JWT contents still appear valid.
 reset role;
