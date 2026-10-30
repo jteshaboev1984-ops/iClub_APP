@@ -47,4 +47,30 @@ assert.match(stage,/INSERT\s+INTO\s+public\.questions/i);
 assert.match(stage,/INSERT\s+INTO\s+private\.exam_prep_question_content_meta/i);
 assert.match(stage,/INSERT\s+INTO\s+private\.exam_prep_assessment_items/i);
 assert.doesNotMatch(post,/\b(?:UPDATE|INSERT|DELETE|TRUNCATE|ALTER|DROP)\s/i);
+
+const all15=fs.readFileSync(path.join(__dirname,"fixtures/math-second-pass-p1-cir03-15-readonly.sql"),"utf8");
+const pi=Math.PI;
+const allOracles=[
+ ["P1CIR03-A01-QA20261030",()=>.5*100*(.8-Math.sin(.8)),"4.13 cm²",4.13,.005],
+ ["P1CIR03-A02",()=>36/(.5*(64-16)),"1.5",1.5,1e-10],
+ ["P1CIR03-A03-QA20261030",()=>.5*36*(2.2-Math.sin(2.2)),"25.05",25.05,.005],
+ ["P1CIR03-D01",()=>.5*36*pi/3,"6π",6*pi,1e-10],
+ ["P1CIR03-D02",()=>.5*100*(1.1-.4),"35 cm²",35,1e-10],
+ ["P1CIR03-D03",()=>.5*36*(pi/3-Math.sin(pi/3)),"6π−9√3 cm²",6*pi-9*Math.sqrt(3),1e-10],
+ ["P1CIR03-L01",()=>.5*25*1.2,"15",15,1e-10],
+ ["P1CIR03-L02",()=>24/(.5*16),"3",3,1e-10],
+ ["P1CIR03-L03",()=>.5*16*(pi/2-Math.sin(pi/2)),"4π−8",4*pi-8,1e-10],
+ ["P1CIR03-M01",()=>.5*(36-9)*pi/3,"9π/2",9*pi/2,1e-10],
+ ["P1CIR03-M02",()=>((.5+.25)*pi*16)/pi,"12",12,1e-10],
+ ["P1CIR03-R01",()=>.5*9*2,"9",9,1e-10],
+ ["P1CIR03-R02",()=>Math.sqrt(2*10/.8),"5",5,1e-10],
+ ["P1CIR03-R03",()=>.5*(100-36)*.5,"16",16,1e-10],
+ ["P1CIR03-R04",()=>27/(.5*36),"1.5",1.5,1e-10]
+];
+assert.equal(allOracles.length,15);
+for(const [key,fn,selected,expected,tolerance] of allOracles){
+ assert.ok(all15.includes("('"+key+"','"+selected+"')"),"P1-CIR-03 source/key fixture missing "+key);
+ assert.ok(Math.abs(fn()-expected)<=tolerance,"Independent P1-CIR-03 formula mismatch "+key);
+}
+assert.doesNotMatch(all15,/\b(?:UPDATE|INSERT|DELETE|TRUNCATE|ALTER|DROP)\s+(?:private\.|public\.)/i);
 console.log("Math second-pass P1 circular segments: independent sine oracles and safe versioned release PASS");
