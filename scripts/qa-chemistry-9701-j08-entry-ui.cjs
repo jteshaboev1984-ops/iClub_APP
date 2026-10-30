@@ -76,10 +76,31 @@ module.exports=async source=>{
  await button("Fanning o‘quv materiallariga").handlers.click();await flush();
  assert.equal(returned,true);
  ui.unmount();
- return {passed:11,checks:["entry gate OFF","existing shared-host entry",
+ // Fail closed if a response leaks a key, loses an option, or omits no-mastery markers.
+ const originalRpc=w.sb.rpc;
+ for(const mode of ["early-key","malformed-choice-list","missing-safety-marker"]){
+   w.sb.rpc=async(name,args)=>{
+     const response=await originalRpc(name,args);
+     if(name!=="iclub_exam_chemistry_entry_get_v1")return response;
+     const data=response.data;
+     const items=data.items.map((item,i)=>({...item,
+       correct_index:mode==="early-key"&&i===0?1:null,explanation:null,
+       options:mode==="malformed-choice-list"&&i===0?item.options.slice(0,3):item.options}));
+     return {data:{...data,status:"active",score:null,items,
+       can_credit_mastery:mode==="missing-safety-marker"?undefined:false}};
+   };
+   assert.equal(ui.mount({root,shell,language:"ru"}),true);
+   await flush();
+   await button("Начать или продолжить").handlers.click();await flush();
+   assert.equal(root.find(".ep-native-stem").length,0,mode);
+   assert.ok(root.find(".ep-host-note").some(x=>x.attrs.role==="alert"),mode);
+   ui.unmount();
+ }
+ return {passed:14,checks:["entry gate OFF","existing shared-host entry",
  "22-question map","no early explanations","save and next","RU→UZ",
  "server-saved answer","result","post-finish explanation",
- "skill-specific review list","back to Chemistry subject"]};
+ "skill-specific review list","back to Chemistry subject",
+ "reject premature answer key","reject malformed choices","reject missing no-mastery marker"]};
 };
 if(require.main===module){
  const fs=require("node:fs"),path=require("node:path");
