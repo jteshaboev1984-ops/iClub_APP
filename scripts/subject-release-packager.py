@@ -19,6 +19,14 @@ def lit(v):
 def digest(value): return hashlib.sha256(value).hexdigest()
 def compact_json(obj): return json.dumps(obj,ensure_ascii=False,separators=(',',':'))
 
+# Hash a fixed-order tuple; no lesson/answer text is embedded in postcheck SQL.
+# Unit separator is rejected in content so field boundaries are unambiguous.
+SEP = '\x1f'
+def fingerprint(parts):
+    values=[str(part) for part in parts]
+    must(all(SEP not in part for part in values),'Reserved control character in release input')
+    return digest(SEP.join(values).encode('utf-8'))
+
 def package(theory_path,tutor_path,subject,version,names,output,batch=75):
     theory_bytes=pathlib.Path(theory_path).read_bytes(); tutor_bytes=pathlib.Path(tutor_path).read_bytes()
     t=json.loads(theory_bytes); u=json.loads(tutor_bytes)
