@@ -51,4 +51,10 @@ close(1-Phi(2),0.02275013);
 close(Phi(1)-Phi(-1),0.68268949);
 assert.equal(10+11+10+10+10+6,57);
 assert.equal(8+10+10+8+8+10,54);
+const readOnly=fs.readFileSync(path.join(__dirname,"fixtures/math-six-academic-post-publish-readonly.sql"),"utf8");
+assert.doesNotMatch(readOnly, /\b(?:UPDATE|INSERT|DELETE|TRUNCATE|DROP|CREATE\s+TABLE|ALTER\s+TABLE)\b/i);
+for(const text of ["MATH_SIX_READONLY_CONTRACT_PASS","MATH_SIX_READONLY_LOCALE_HASH_FAILED",
+    "MATH_SIX_READONLY_MARKS_FAILED","published_corrected_tasks","published_locales"]){
+  assert.ok(readOnly.includes(text), "Missing read-only release checkpoint: "+text);
+}
 console.log("Atomic six-fix math: gates, 57 marks, 54 locales, 4 protected tables PASS");
