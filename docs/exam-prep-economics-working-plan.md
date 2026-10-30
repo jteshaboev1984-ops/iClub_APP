@@ -789,3 +789,16 @@ A fresh read-only Supabase join compared the exact **42 original candidate skill
 **Further holds (before any new learner access):** (1) fuller academic semantic and RU/UZ/EN validation of entire 71 item set; (2) ensure second/third alternatives for repeated skill retests if needed; (3) private server-only original storage/versioning under least privileges with secure backup/rollback; (4) first error-linked, owner-authenticated idempotent issuance and exclusion of previously shown source IDs; (5) logged negative-role/expired/duplicate/owner-scoped E2E; (6) explicit architect approval for controlled beta. Do not replace existing 72 historical Practice-based sources, rescore old exams, expose answers in GitHub or the browser, or enable the new bank prematurely. The 30-question live P1/P3 tests and earlier P2/P4 non-grading written flow remain unchanged.
 
 **References:** Cambridge Economics 9708 syllabus 2026–2028 **Version 2** https://www.cambridgeinternational.org/Images/697423-2026-2028-syllabus.pdf (P1 30 MCQ/60 min, P3 30 MCQ/75 min); uploaded Bamford & Grant 4e 637-page coursebook. No official Cambridge endorsement implied.
+
+
+---
+
+## 30.10.2026 — Real isolated PostgreSQL 17 runtime test: success (production untouched)
+
+**Executed work:** PR #430 SQL candidate compiled and ran in a disposable PostgreSQL 17 instance. Fixture contains only fictional Auth users/sessions, legacy questions/attempts and candidate sources. Full synthetic authenticated workflow, owner isolation, error-only start, source approval gates, no pre-submit answer leakage, server-scored one-time finish, duplicate/resume, expired/revoked session protection, separate concurrent same-user starts (one issued session only), kill switch/history continuity, and pg_dump/pg_restore of fictional state all passed.
+
+**Verified CI:** `Economics Retest Isolated PostgreSQL Runtime Gate` run 41014591935 PASS at commit `a94e39d14ce1c921b28447c7a0345f23e06ecc56`; accompanying semantic synthetic and unified-access gates PASS. Added actual negative tests for retry after finalization (`already_retested`) and expiry (`prior_retest_expired`), preventing the earlier generic unique-violation response. Detailed scope: `docs/release-candidates/economics-retest-pg17-e2e-validation-20261030.md`.
+
+**Limits and HOLD:** PostgreSQL test uses synthetic mocked Supabase Auth and limited old-table schema. It does **not** prove production Supabase JWT/REST/entitlements, backup coverage, genuine account browser paths, full examiner signoff or permitted source release. Closed private 71-item bank stays OFF and out of public GitHub; six semantic revisions only in private Library. No production SQL, Vercel, DB, user progress or legacy assessment writes were made. PR #430 stays Draft. Keep release NO-GO until real staged Supabase negative/positive E2E, backup/restore validation and explicit owner release approval.
+
+**Cross-subject design decision:** GitHub issue #432 records the requirement for independent unseen same-skill retesting when updating Mathematics, Chemistry, Biology, Computer Science and future Exam Prep question banks. Adapt each skill/paper/assessment evidence, do not copy Economics scoring. No immediate live product changes.
