@@ -9,6 +9,7 @@ on:
       - "scripts/math-second-pass-cir03-regression.cjs"
       - "scripts/math-second-pass-p5-bingeo-oracles.cjs"
       - "scripts/fixtures/math-second-pass-p5-bin-geo-30-readonly.sql"
+      - "scripts/fixtures/math-second-pass-p1-cir03-15-readonly.sql"
       - ".github/workflows/math-second-pass-cir03.yml"
   workflow_dispatch:
 jobs:
