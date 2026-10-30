@@ -1,0 +1,17 @@
+name: Mathematics P1 circular segment academic correction
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/20261030_p1_cir03_segment_math_repair_stage.sql"
+      - "scripts/math-p1-circular-segment-regression.cjs"
+      - ".github/workflows/math-p1-circular-segment.yml"
+  workflow_dispatch:
+jobs:
+  p1-circular-segment:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify triangle geometry, segment math and safe versioning
+        run: node scripts/math-p1-circular-segment-regression.cjs
