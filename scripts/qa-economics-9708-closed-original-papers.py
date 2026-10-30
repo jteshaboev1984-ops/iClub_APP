@@ -48,6 +48,8 @@ def check(root,paper,expected=None):
     assert len(set(i['item_key'] for i in obj['items']))==30,'duplicate item key'
     assert len(set(i['skill_key'] for i in obj['items']))==30,'duplicate primary skill'
     assert all(isinstance(v,str) and re.fullmatch(r'[0-9a-f]{64}',v) for v in obj['source_closed_file_sha256'].values())
+    referenced_sources={i['source_closed_library_basename'] for i in obj['items']}
+    assert set(obj['source_closed_file_sha256'])==referenced_sources, 'source dependency manifest must exactly equal used sources'
     cache={}
     for basename,digest in obj['source_closed_file_sha256'].items():
         # For path security, do not open nested locations or accept parent traversal from untrusted JSON.
@@ -125,7 +127,7 @@ def main():
     assert check_private_answer_manifest(root,args.p3,m,'P3')
     assert not set(i['item_key'] for i in k1['items']).intersection(i['item_key'] for i in k3['items']),'cross paper item-key overlap'
     assert not set(i['skill_key'] for i in k1['items']).intersection(i['skill_key'] for i in k3['items']),'cross paper skill collision'
-    print('PASS closed-candidate technical integrity;'+' first-pass key manifest consistent;'+' no release approval or examiner certification.')
+    print('PASS closed-candidate technical integrity; exact-source dependency set;'+' first-pass key manifest consistent;'+' no release approval or examiner certification.')
     for out in [a,b]:print(json.dumps(out,ensure_ascii=False,sort_keys=True))
 
 if __name__=='__main__':main()
