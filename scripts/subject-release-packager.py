@@ -112,21 +112,41 @@ insert into private.iclub_subject_library_releases(subject_key,version_key,packa
     tutor_sql_fields = ','.join('u.'+field for field in
         ('tutor_card_key','content_version','title','main_explanation',
          'simple_explanation','alternative_explanation','focus_explanation','source_card_hash'))
+    # concat_ws() skips SQL NULL and does not escape embedded delimiters.
+    # Reject BOTH cases in staged data before trusting a fingerprint, otherwise
+    # different rows could have identical tuple bytes without a SHA collision.
+    theory_sql_values = ['t.tour_no::text','t.syllabus_point','t.content_hash'] + [
+        "t.locales->"+lit(lang)+"->>"+lit(field)
+        for lang in LOCALES for field in THEORY_FIELDS
+    ]
+    tutor_sql_values = ['u.'+field for field in
+        ('tutor_card_key','content_version','title','main_explanation',
+         'simple_explanation','alternative_explanation','focus_explanation','source_card_hash')]
+    theory_sql_guard = ' and '.join(
+        '('+value+' is not null and strpos('+value+',chr(31))=0)'
+        for value in theory_sql_values
+    )
+    tutor_sql_guard = ' and '.join(
+        '('+value+' is not null and strpos('+value+',chr(31))=0)'
+        for value in tutor_sql_values
+    )
     checks=f"""-- STRICT READ-ONLY post-import gate; never alters source or learner data.
 -- ALL checks, including stage_matches_exact_source, must pass. It does NOT publish.
 -- Digest tuples use U+001F (reserved/rejected in source) for precise boundaries.
 with expected_theory(skill_key,expected_hash) as (values {expected_cards_sql}),
 expected_tutor(skill_key,locale,expected_hash) as (values {expected_tutors_sql}),
 actual_theory as (
- select t.skill_key,encode(extensions.digest(convert_to(concat_ws(chr(31),
+ select t.skill_key,case when {theory_sql_guard} then
+ encode(extensions.digest(convert_to(concat_ws(chr(31),
  t.tour_no::text,t.syllabus_point,t.content_hash,{theory_sql_fields}
- ),'UTF8'),'sha256'),'hex') as actual_hash
+ ),'UTF8'),'sha256'),'hex') else null end as actual_hash
  from private.iclub_subject_library_theory t
  where t.subject_key={lit(subject)} and t.version_key={lit(version)}
 ),
 actual_tutor as (
- select u.skill_key,u.locale,encode(extensions.digest(convert_to(concat_ws(chr(31),
- {tutor_sql_fields}),'UTF8'),'sha256'),'hex') as actual_hash
+ select u.skill_key,u.locale,case when {tutor_sql_guard} then
+ encode(extensions.digest(convert_to(concat_ws(chr(31),
+ {tutor_sql_fields}),'UTF8'),'sha256'),'hex') else null end as actual_hash
  from private.iclub_subject_library_tutor u
  where u.subject_key={lit(subject)} and u.version_key={lit(version)}
 ),
