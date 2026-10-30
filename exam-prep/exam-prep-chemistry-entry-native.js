@@ -223,7 +223,21 @@
     if(!active()||token!==state.seq)return;
     state.busy=false;
     if(state.localeQueued){state.localeQueued=false;await load();return;}
-    if(!r.ok||!Array.isArray(r.items)||r.items.length!==22){errorScreen(load);return;}
+    const validItems=Array.isArray(r.items)&&r.items.length===22
+      &&r.items.every((item,i)=>item&&item.order===i+1
+        &&typeof item.question==="string"&&item.question.trim().length>0
+        &&Array.isArray(item.options)&&item.options.length===4
+        &&item.options.every(option=>typeof option==="string"&&option.trim().length>0)
+        &&typeof item.answered==="boolean"
+        &&(item.selected_index===null
+          ||(Number.isInteger(item.selected_index)&&item.selected_index>=0
+            &&item.selected_index<4))
+        &&(r.status!=="active"
+          ||(item.correct_index==null&&item.explanation==null)));
+    if(!r.ok||!["active","finalized"].includes(r.status)||!validItems
+      ||r.can_credit_mastery!==false||r.calibrated_diagnostic!==false){
+      errorScreen(load);return;
+    }
     state.data=r;draw();
   }
   function clock(label){
@@ -240,6 +254,7 @@
   function draw(){
     ++state.seq;const p=panel(),data=state.data;if(!p||!data)return;
     const done=data.status==="finalized";
+    if(done)stopTimer();
     const header=el("div",undefined,"ep-native-header");
     header.append(el("strong","Entry · AS"));
     const timelabel=el("span",undefined,"ep-native-timer");header.append(timelabel);p.append(header);
