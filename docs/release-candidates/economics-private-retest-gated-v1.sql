@@ -67,6 +67,7 @@ create table private.iclub_econ_retest_sessions_v1 (
   foreign key(item_key,content_version)
     references private.iclub_econ_retest_sources_v1(item_key,content_version),
   unique(user_id,request_key),
+  unique(user_id,source_session_id,source_item_order),
   unique(user_id,item_key),
   check ((status='active' and selected_index is null
        and is_correct is null and finalized_at is null and submit_key is null)
@@ -170,10 +171,170 @@ begin
   v_skill:=v_old_item->>'skill_key';
   if v_skill is null or length(v_skill)<3 then
     return jsonb_build_object('ok',false,'code','no_skill_mapping'); end if;
+  if coalesce(v_old_item->>'key','') !~ '^[A-D]
+  -- Stable idempotency key: retry returns the SAME session after authorization.
+  select * into v_prior from private.iclub_econ_retest_sessions_v1
+   where user_id=v_user and request_key=p_request_key;
+  if found then
+    if v_prior.source_session_id<>p_source_session_id
+       or v_prior.source_item_order<>p_source_item_order
+    then return jsonb_build_object('ok',false,'code','request_key_reused'); end if;
+    return jsonb_build_object('ok',true,'session_id',v_prior.id,
+     'status',v_prior.status,'resumed',true); end if;
+  -- Prefer an existing active attempt for this exact original error.
+  select * into v_prior from private.iclub_econ_retest_sessions_v1
+   where user_id=v_user and source_session_id=p_source_session_id
+     and source_item_order=p_source_item_order and status='active'
+   order by issued_at desc limit 1;
+  if found then return jsonb_build_object('ok',true,'session_id',v_prior.id,
+     'status','active','resumed',true); end if;
+
+  select r.* into v_source
+  from private.iclub_econ_retest_sources_v1 r
+  join private.iclub_exam_core_skills_v1 sk
+    on sk.program_key=r.program_key and sk.version_key=r.version_key
+     and sk.skill_key=r.skill_key
+  join private.iclub_exam_core_paper_skills_v1 ps
+    on ps.program_key=r.program_key and ps.version_key=r.version_key
+     and ps.paper_code=r.paper_code and ps.skill_key=r.skill_key
+  where r.program_key='economics_9708'
+    and r.version_key='economics_2026_2028_v1'
+    and r.paper_code=v_exam.paper_code and r.skill_key=v_skill
+    and r.release_enabled and r.academic_status='approved'
+    and r.language_status='pass' and r.semantic_distinct_status='pass'
+    and sk.status='reviewed' and ps.status='approved' and ps.link_role='direct'
+    and sk.level_code=case when v_exam.paper_code='P1' then 'AS' else 'A' end
+    -- Exclude all previously issued original items, even if unanswered.
+    and not exists (
+      select 1 from private.iclub_econ_retest_sessions_v1 seen
+      where seen.user_id=v_user
+        and seen.item_key=r.item_key
+    )
+    -- Defence-in-depth for future native exams containing original item_keys.
+    and not exists (
+      select 1 from private.iclub_exam_native_mcq_attempts_v1 past
+      cross join lateral jsonb_array_elements(past.items) shown
+      where past.user_id=v_user
+        and shown->>'item_key'=r.item_key
+    )
+  order by r.created_at,r.item_key,r.content_version limit 1;
+  if not found then
+    return jsonb_build_object('ok',false,'code','no_unseen_approved_item'); end if;
+  if not (
+     jsonb_typeof(v_source.locales->'en'->'options')='array'
+     and jsonb_typeof(v_source.locales->'ru'->'options')='array'
+     and jsonb_typeof(v_source.locales->'uz'->'options')='array'
+     and jsonb_array_length(v_source.locales->'en'->'options')=4
+     and jsonb_array_length(v_source.locales->'ru'->'options')=4
+     and jsonb_array_length(v_source.locales->'uz'->'options')=4
+     and length(coalesce(v_source.locales->'en'->>'question',''))>10
+     and length(coalesce(v_source.locales->'ru'->>'question',''))>10
+     and length(coalesce(v_source.locales->'uz'->>'question',''))>10
+  ) then return jsonb_build_object('ok',false,'code','invalid_source'); end if;
+  insert into private.iclub_econ_retest_sessions_v1
+    (user_id,source_session_id,source_item_order,paper_code,skill_key,
+     item_key,content_version,request_key,deadline_at)
+  values (v_user,p_source_session_id,p_source_item_order,v_exam.paper_code,v_skill,
+    v_source.item_key,v_source.content_version,p_request_key,
+    clock_timestamp()+interval '10 minutes') returning id into v_new_id;
+  return jsonb_build_object('ok',true,'session_id',v_new_id,
+    'status','active','resumed',false);
+exception when unique_violation then
+  return jsonb_build_object('ok',false,'code','concurrent_retry');
+end; $$;
+
+-- Only owner can read; active question never includes answer_key or explanation.
+create function public.iclub_econ_retest_get_v1(p_session_id uuid,p_language text default 'en')
+returns jsonb language plpgsql stable security definer set search_path='' as $$
+declare v_user uuid:=private.iclub_econ_retest_current_user_v1();
+  v_s private.iclub_econ_retest_sessions_v1%rowtype;
+  v_q private.iclub_econ_retest_sources_v1%rowtype; v_l jsonb;
+begin
+  if v_user is null then return jsonb_build_object('ok',false,'code','not_authorized'); end if;
+  if p_language not in ('en','ru','uz') or p_session_id is null then
+    return jsonb_build_object('ok',false,'code','invalid_request'); end if;
+  select * into v_s from private.iclub_econ_retest_sessions_v1
+   where id=p_session_id and user_id=v_user;
+  if not found then return jsonb_build_object('ok',false,'code','not_found'); end if;
+  if v_s.status='active' and clock_timestamp()>v_s.deadline_at then
+    return jsonb_build_object('ok',false,'code','expired'); end if;
+  select * into v_q from private.iclub_econ_retest_sources_v1
+   where item_key=v_s.item_key and content_version=v_s.content_version;
+  v_l:=v_q.locales->p_language;
+  return jsonb_build_object('ok',true,'session_id',v_s.id,
+    'status',v_s.status,'paper_code',v_s.paper_code,'skill_key',v_s.skill_key,
+    'started_at',v_s.issued_at,'deadline_at',v_s.deadline_at,
+    'question',v_l->>'question','options',v_l->'options',
+    'selected_index',case when v_s.status='finalized' then v_s.selected_index else null end,
+    'is_correct',case when v_s.status='finalized' then v_s.is_correct else null end,
+    'correct_index',case when v_s.status='finalized' then ascii(v_q.answer_key)-65 else null end,
+    'explanation',case when v_s.status='finalized' then v_l->>'explanation' else null end);
+end; $$;
+
+-- One immutable server-scored answer. Concurrent calls lock the SAME session.
+create function public.iclub_econ_retest_submit_v1(
+ p_session_id uuid,p_selected_index integer,p_submit_key text)
+returns jsonb language plpgsql security definer set search_path='' as $$
+declare v_user uuid:=private.iclub_econ_retest_current_user_v1();
+  v_s private.iclub_econ_retest_sessions_v1%rowtype;
+  v_key text; v_correct boolean;
+begin
+  if v_user is null then return jsonb_build_object('ok',false,'code','not_authorized'); end if;
+  if p_session_id is null or p_selected_index not between 0 and 3
+    or length(coalesce(p_submit_key,'')) not between 12 and 128
+  then return jsonb_build_object('ok',false,'code','invalid_request'); end if;
+  select * into v_s from private.iclub_econ_retest_sessions_v1
+   where id=p_session_id and user_id=v_user for update;
+  if not found then return jsonb_build_object('ok',false,'code','not_found'); end if;
+  if v_s.status='finalized' then
+    if v_s.submit_key=p_submit_key and v_s.selected_index=p_selected_index then
+      return jsonb_build_object('ok',true,'status','finalized',
+        'is_correct',v_s.is_correct,'duplicate',true); end if;
+    return jsonb_build_object('ok',false,'code','already_finalized');
+  end if;
+  if clock_timestamp()>v_s.deadline_at then
+    return jsonb_build_object('ok',false,'code','expired'); end if;
+  -- Kill switch stops NEW issuance; an already-issued answer may finish.
+  select answer_key into v_key from private.iclub_econ_retest_sources_v1
+   where item_key=v_s.item_key and content_version=v_s.content_version;
+  if v_key is null then return jsonb_build_object('ok',false,'code','source_not_found'); end if;
+  v_correct:=(p_selected_index=ascii(v_key)-65);
+  update private.iclub_econ_retest_sessions_v1
+    set status='finalized',selected_index=p_selected_index,
+      is_correct=v_correct,submit_key=p_submit_key,finalized_at=clock_timestamp()
+    where id=v_s.id and status='active';
+  return jsonb_build_object('ok',true,'status','finalized',
+    'is_correct',v_correct,'duplicate',false);
+end; $$;
+
+-- Prevent exposure via the DEFAULT PUBLIC function EXECUTE grant.
+revoke all on function private.iclub_econ_retest_protect_issued_source_v1() from public,anon,authenticated;
+revoke all on function private.iclub_econ_retest_current_user_v1() from public,anon,authenticated;
+revoke all on function public.iclub_econ_retest_start_v1(uuid,integer,text) from public,anon,authenticated;
+revoke all on function public.iclub_econ_retest_get_v1(uuid,text) from public,anon,authenticated;
+revoke all on function public.iclub_econ_retest_submit_v1(uuid,integer,text) from public,anon,authenticated;
+grant execute on function public.iclub_econ_retest_start_v1(uuid,integer,text) to authenticated;
+grant execute on function public.iclub_econ_retest_get_v1(uuid,text) to authenticated;
+grant execute on function public.iclub_econ_retest_submit_v1(uuid,integer,text) to authenticated;
+-- Defined in private schema; SECURITY DEFINER public RPC can call this helper.
+-- Keep private schema out of Supabase exposed API schemas.
+
+commit;
+
+-- PAUSE: no source data imported, no approved flags and issuance_enabled=false.
+-- Emergency stop: update private.iclub_econ_retest_control_v1
+--   set issuance_enabled=false,updated_at=clock_timestamp() where id=1;
+-- Recovery: revert NEW FUNCTION GRANTS/deployment; preserve all retest sessions.
+-- Do not DROP these tables if they contain student results.
+
+    or jsonb_typeof(v_old_item->'display_order') is distinct from 'array'
+    or jsonb_array_length(v_old_item->'display_order')<>4
+  then return jsonb_build_object('ok',false,'code','invalid_source_evidence'); end if;
   v_old_choice:=(v_exam.responses->p_source_item_order::text->>'choice')::integer;
   v_old_key:=ascii(v_old_item->>'key')-65;
-  if v_old_choice is not null
-      and (v_old_item->'display_order'->>v_old_choice)::integer=v_old_key
+  if v_old_choice is null or v_old_choice not between 0 and 3
+  then return jsonb_build_object('ok',false,'code','no_recorded_wrong_answer'); end if;
+  if (v_old_item->'display_order'->>v_old_choice)::integer=v_old_key
   then return jsonb_build_object('ok',false,'code','not_an_error'); end if;
   -- Stable idempotency key: retry returns the SAME session after authorization.
   select * into v_prior from private.iclub_econ_retest_sessions_v1
