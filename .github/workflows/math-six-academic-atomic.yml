@@ -1,0 +1,18 @@
+name: Mathematics six-repair academic release regression
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/20261030_math_p1p5_six_fix_atomic_publish.sql"
+      - "scripts/math-six-academic-atomic-regression.cjs"
+      - "scripts/fixtures/math-six-academic-post-publish-readonly.sql"
+      - ".github/workflows/math-six-academic-atomic.yml"
+  workflow_dispatch:
+jobs:
+  six-math-fixes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify six academic fixes, numerical oracles and protected production tables
+        run: node scripts/math-six-academic-atomic-regression.cjs
