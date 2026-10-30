@@ -1,14 +1,56 @@
 #!/usr/bin/env node
 'use strict';
-// STATIC CONTRACT CHECK ONLY. Does not prove Postgres compilation, authenticated
-// integration behaviour, database recovery, or readiness for a learner beta.
+// STATIC CONTRACT AND CORRUPTION CHECKS ONLY.
+// These do not compile SQL or replace isolated authenticated Postgres E2E.
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const sql=fs.readFileSync(path.resolve(__dirname,'../docs/release-candidates/economics-private-retest-gated-v1.sql'),'utf8');
-test('new tables private and new issuance defaults OFF',()=>{
-  assert.match(sql,/begin;[\s\S]*commit;/i);
+
+function assertSqlStructure(text){
+  const creates=[...text.matchAll(/^create function (?:public|private)\.iclub_econ_retest_[a-z0-9_]+\(/gm)];
+  const opened=[...text.matchAll(/\bset search_path=''\s+as \$\$\s*$/gm)];
+  const closed=[...text.matchAll(/^end; \$\$;$/gm)];
+  assert.equal(creates.length,6,'unexpected function count');
+  assert.equal(opened.length,creates.length,'broken dollar-quoted function opener');
+  assert.equal(closed.length,creates.length,'broken dollar-quoted function terminator');
+  assert.equal((text.match(/\$\$/g)||[]).length,2*creates.length,'unbalanced dollar delimiters');
+  assert.doesNotMatch(text,/\bas \$\s*\n|^end; \$;$/m,'corrupt single-dollar function delimiter');
+
+  const commits=[...text.matchAll(/^commit;$/gm)];
+  assert.equal(commits.length,1,'exactly one transaction commit expected');
+  const afterCommit=text.slice(commits[0].index+commits[0][0].length)
+    .split('\n').map(x=>x.trim()).filter(x=>x!==''&&!x.startsWith('--'));
+  assert.deepEqual(afterCommit,[],'SQL statements outside the committed transaction');
+
+  const originalErrorGuard=text.slice(
+    text.indexOf("  v_old_item:=v_exam.items->"),
+    text.indexOf("  -- Stable idempotency key:")
+  );
+  assert.match(originalErrorGuard,/if coalesce\(v_old_item->>'key',''\) !~ '\^\[A-D\]\$'/,'damaged original-answer guard');
+  assert.match(originalErrorGuard,/jsonb_typeof\(v_old_item->'display_order'\)/,'missing original order validation');
+  assert.match(originalErrorGuard,/no_recorded_wrong_answer/,'incorrectly accepting unanswered originals');
+  assert.match(originalErrorGuard,/not_an_error/,'incorrectly accepting previously correct answers');
+  assert.doesNotMatch(originalErrorGuard,/^\s*-- Stable/m,'broken guard boundary');
+}
+
+test('reject a damaged function body, dollar quote or duplicate SQL tail',()=>{
+  assert.doesNotThrow(()=>assertSqlStructure(sql));
+  assert.throws(()=>assertSqlStructure(sql.replace(
+    "if coalesce(v_old_item->>'key','') !~ '^[A-D]$'",
+    "if coalesce(v_old_item->>'key','') !~ '^[A-D]"
+  )),/damaged original-answer guard/);
+  assert.throws(()=>assertSqlStructure(sql.replace(
+    "returns jsonb language plpgsql stable security definer set search_path='' as $$",
+    "returns jsonb language plpgsql stable security definer set search_path='' as $"
+  )),/dollar|function/i);
+  assert.throws(()=>assertSqlStructure(sql+'\n    or jsonb_typeof(v_old_item->\'display_order\')=\'array\';\n'),
+    /outside the committed transaction/);
+});
+
+test('new tables private, RLS on, and issuance OFF',()=>{
+  assert.match(sql,/^begin;$/m);
   for(const t of ['control','sources','sessions']){
     assert.match(sql,new RegExp('create table private\\.iclub_econ_retest_'+t+'_v1','i'));
     assert.match(sql,new RegExp('alter table private\\.iclub_econ_retest_'+t+'_v1 enable row level security','i'));
@@ -19,17 +61,20 @@ test('new tables private and new issuance defaults OFF',()=>{
   assert.match(sql,/and r\.semantic_distinct_status='pass'/i);
   assert.match(sql,/and ps\.link_role='direct'/i);
 });
-test('only one original per user and unchanged historic attempts',()=>{
+
+test('different unseen item for each owned incorrect source answer',()=>{
   assert.match(sql,/unique\(user_id,item_key\)/);
   assert.match(sql,/unique\(user_id,source_session_id,source_item_order\)/);
-  assert.match(sql,/v_exam\.status='finalized'|status='finalized' and finalized_at is not null/);
+  assert.match(sql,/status='finalized' and finalized_at is not null/);
   assert.match(sql,/no_recorded_wrong_answer/);
+  assert.match(sql,/not_an_error/);
   assert.match(sql,/not exists \([\s\S]*?seen\.item_key=r\.item_key/i);
   assert.doesNotMatch(sql,/update\s+private\.iclub_exam_native_mcq_attempts_v1/i);
   assert.doesNotMatch(sql,/delete\s+from\s+private\.iclub_exam_native_mcq_attempts_v1/i);
   assert.doesNotMatch(sql,/drop\s+(table|function)/i);
 });
-test('authenticated session and server scoring and completion-only reveal',()=>{
+
+test('owner auth, server scoring and keys only after finalization',()=>{
   assert.match(sql,/from auth\.sessions s/i);
   assert.match(sql,/coalesce\(v_claims->>'is_anonymous'/i);
   assert.match(sql,/pg_advisory_xact_lock/);
@@ -40,7 +85,8 @@ test('authenticated session and server scoring and completion-only reveal',()=>{
   assert.match(sql,/v_s\.status='finalized'.*?then v_l->>'explanation'/s);
   assert.match(sql,/public\.iclub_econ_retest_resume_v1/);
 });
-test('all client public RPCs have explicit execute revoke and authenticated grant',()=>{
+
+test('client public RPCs have explicit EXECUTE revoke + narrow grant',()=>{
   for(const f of ['start_v1(uuid,integer,text)','get_v1(uuid,text)','resume_v1(uuid)','submit_v1(uuid,integer,text)']){
     const name='public.iclub_econ_retest_'+f.replaceAll('(', '\\(').replaceAll(')', '\\)');
     assert.match(sql,new RegExp('revoke all on function '+name+' from public,anon,authenticated','i'));
