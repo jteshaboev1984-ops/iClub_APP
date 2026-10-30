@@ -67,7 +67,7 @@ create table private.iclub_econ_retest_sessions_v1 (
   foreign key(item_key,content_version)
     references private.iclub_econ_retest_sources_v1(item_key,content_version),
   unique(user_id,request_key),
-  unique(user_id,item_key,content_version),
+  unique(user_id,item_key),
   check ((status='active' and selected_index is null
        and is_correct is null and finalized_at is null and submit_key is null)
     or (status='finalized' and selected_index is not null
@@ -205,13 +205,13 @@ begin
     and r.paper_code=v_exam.paper_code and r.skill_key=v_skill
     and r.release_enabled and r.academic_status='approved'
     and r.language_status='pass' and r.semantic_distinct_status='pass'
-    and sk.status='reviewed' and ps.status='approved'
+    and sk.status='reviewed' and ps.status='approved' and ps.link_role='direct'
     and sk.level_code=case when v_exam.paper_code='P1' then 'AS' else 'A' end
     -- Exclude all previously issued original items, even if unanswered.
     and not exists (
       select 1 from private.iclub_econ_retest_sessions_v1 seen
       where seen.user_id=v_user
-        and seen.item_key=r.item_key and seen.content_version=r.content_version
+        and seen.item_key=r.item_key
     )
     -- Defence-in-depth for future native exams containing original item_keys.
     and not exists (
@@ -219,7 +219,6 @@ begin
       cross join lateral jsonb_array_elements(past.items) shown
       where past.user_id=v_user
         and shown->>'item_key'=r.item_key
-        and shown->>'content_version'=r.content_version
     )
   order by r.created_at,r.item_key,r.content_version limit 1;
   if not found then
@@ -260,6 +259,8 @@ begin
   select * into v_s from private.iclub_econ_retest_sessions_v1
    where id=p_session_id and user_id=v_user;
   if not found then return jsonb_build_object('ok',false,'code','not_found'); end if;
+  if v_s.status='active' and clock_timestamp()>v_s.deadline_at then
+    return jsonb_build_object('ok',false,'code','expired'); end if;
   select * into v_q from private.iclub_econ_retest_sources_v1
    where item_key=v_s.item_key and content_version=v_s.content_version;
   v_l:=v_q.locales->p_language;
