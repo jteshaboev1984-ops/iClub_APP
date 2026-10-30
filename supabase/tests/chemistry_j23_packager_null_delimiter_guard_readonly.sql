@@ -23,7 +23,7 @@ audited AS (
  FROM cases x
 )
 SELECT count(*) AS synthetic_cases_expected_5,
- count(*) FILTER(WHERE (guarded_hash=expected_hash) IS NOT DISTINCT FROM should_pass) AS correct_classifications_expected_5,
+ count(*) FILTER(WHERE coalesce(guarded_hash=expected_hash,false)=should_pass) AS correct_classifications_expected_5,
  count(*) FILTER(WHERE insecure_hash=expected_hash AND guarded_hash IS NULL) AS delimiter_collisions_rejected_expected_2,
  count(*) FILTER(WHERE case_name='correct' AND guarded_hash=expected_hash) AS genuine_record_accepted_expected_1,
  count(*) FILTER(WHERE should_pass=false AND guarded_hash IS NOT DISTINCT FROM expected_hash) AS false_accepts_expected_0
