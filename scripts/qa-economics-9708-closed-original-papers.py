@@ -7,6 +7,7 @@ linguistic equivalence or Cambridge AO classification and cannot approve content
 """
 import argparse
 import collections
+import csv
 import hashlib
 import json
 import re
@@ -30,7 +31,31 @@ def normalize(s):
     return re.sub(r'[^\w]+',' ',s.casefold()).strip()
 
 
-def check(root,paper,expected=None):
+def load_canonical_skills(csv_path):
+    """Read the trusted 498-row canonical skill audit from this repository, never private answer data."""
+    required={'internal_skill_key','official_point','level','direct_papers'}
+    with csv_path.open(encoding='utf-8-sig',newline='') as f:
+        reader=csv.DictReader(f)
+        assert reader.fieldnames and required.issubset(set(reader.fieldnames)), 'canonical CSV missing required columns'
+        result={}
+        for row in reader:
+            key=(row.get('internal_skill_key') or '').strip()
+            assert key and key not in result, 'blank or duplicate canonical skill key'
+            assert re.fullmatch(r'ECON-9708-\d+\.\d+\.\d+-(?:BASE|\d+)',key), 'invalid canonical skill key'
+            assert row['official_point'] and row['level'] in ('AS','A'), 'invalid canonical row'
+            result[key]={'point':row['official_point'],'level':row['level'],'papers':row['direct_papers'].split(';')}
+    assert len(result)==498,f'Expected signed-off 498-row canonical economics matrix, got {len(result)}'
+    return result
+
+
+def check_canonical(it, paper_code, canonical):
+    mapped=canonical.get(it['skill_key'])
+    assert mapped is not None,'item references noncanonical skill key'
+    assert mapped['point']==it['syllabus_point'],'canonical official point mismatch'
+    assert paper_code in mapped['papers'],'skill is not a direct skill for this paper'
+    assert mapped['level']==('AS' if paper_code=='P1' else 'A'),'paper level / canonical skill mismatch'
+
+def check(root,paper,canonical,expected=None):
     obj=load(paper)
     paper_code=obj.get('paper_code')
     assert paper_code in QUOTAS,'unexpected paper'
@@ -68,6 +93,7 @@ def check(root,paper,expected=None):
         assert it.get('correct_answer') in ('A','B','C','D')
         assert re.fullmatch(r'\d+\.\d+\.\d+',it['syllabus_point'])
         assert it['skill_key'].startswith('ECON-9708-'+it['syllabus_point']+'-')
+        check_canonical(it,paper_code,canonical)
         assert it.get('exam_item_content_sha256')==sha({k:it[k] for k in FIELDS}),'item content hash mismatch'
         assert it['ao'][:3] in AO_COUNTS,'invalid provisional AO'
         unit[it['syllabus_point'].split('.')[0]]+=1
@@ -117,17 +143,19 @@ def main():
     p.add_argument('p1',type=Path)
     p.add_argument('p3',type=Path)
     p.add_argument('--private-answer-review',type=Path,required=True,help='REQUIRED private first-pass answer manifest; never commit the manifest')
+    p.add_argument('--canonical-skills-csv',type=Path,required=True,help='REQUIRED trusted 498-skill master CSV in GitHub audit branch')
     args=p.parse_args()
     assert args.p1.parent.resolve()==args.p3.parent.resolve(),'both files must be in same private source folder'
     root=args.p1.parent
-    a=check(root,args.p1,'P1');b=check(root,args.p3,'P3')
+    canonical=load_canonical_skills(args.canonical_skills_csv)
+    a=check(root,args.p1,canonical,'P1');b=check(root,args.p3,canonical,'P3')
     k1=load(args.p1);k3=load(args.p3)
     m=load(args.private_answer_review)
     assert check_private_answer_manifest(root,args.p1,m,'P1')
     assert check_private_answer_manifest(root,args.p3,m,'P3')
     assert not set(i['item_key'] for i in k1['items']).intersection(i['item_key'] for i in k3['items']),'cross paper item-key overlap'
     assert not set(i['skill_key'] for i in k1['items']).intersection(i['skill_key'] for i in k3['items']),'cross paper skill collision'
-    print('PASS closed-candidate technical integrity; exact-source dependency set;'+' first-pass key manifest consistent;'+' no release approval or examiner certification.')
+    print('PASS closed-candidate technical integrity; verified canonical 498 skills;'+' exact-source dependency set; first-pass key manifest consistent;'+' no release approval or examiner certification.')
     for out in [a,b]:print(json.dumps(out,ensure_ascii=False,sort_keys=True))
 
 if __name__=='__main__':main()
