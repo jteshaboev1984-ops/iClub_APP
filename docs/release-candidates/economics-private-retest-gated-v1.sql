@@ -271,6 +271,24 @@ begin
     'explanation',case when v_s.status='finalized' then v_l->>'explanation' else null end);
 end; $$;
 
+-- Resume an already-issued unexpired attempt using server-owned state only.
+-- No new question is created. Works across client reloads and after issuance OFF.
+create function public.iclub_econ_retest_resume_v1(p_source_session_id uuid default null)
+returns jsonb language plpgsql stable security definer set search_path='' as $
+declare v_user uuid:=private.iclub_econ_retest_current_user_v1();
+  v_s private.iclub_econ_retest_sessions_v1%rowtype;
+begin
+  if v_user is null then return jsonb_build_object('ok',false,'code','not_authorized'); end if;
+  select * into v_s
+  from private.iclub_econ_retest_sessions_v1
+  where user_id=v_user and status='active' and deadline_at>clock_timestamp()
+    and (p_source_session_id is null or source_session_id=p_source_session_id)
+  order by issued_at desc limit 1;
+  if not found then return jsonb_build_object('ok',false,'code','no_active_attempt'); end if;
+  return jsonb_build_object('ok',true,'session_id',v_s.id,'status','active',
+    'source_session_id',v_s.source_session_id,'resumed',true);
+end; $;
+
 -- One immutable server-scored answer. Concurrent calls lock the SAME session.
 create function public.iclub_econ_retest_submit_v1(
  p_session_id uuid,p_selected_index integer,p_submit_key text)
@@ -312,9 +330,11 @@ revoke all on function private.iclub_econ_retest_protect_issued_source_v1() from
 revoke all on function private.iclub_econ_retest_current_user_v1() from public,anon,authenticated;
 revoke all on function public.iclub_econ_retest_start_v1(uuid,integer,text) from public,anon,authenticated;
 revoke all on function public.iclub_econ_retest_get_v1(uuid,text) from public,anon,authenticated;
+revoke all on function public.iclub_econ_retest_resume_v1(uuid) from public,anon,authenticated;
 revoke all on function public.iclub_econ_retest_submit_v1(uuid,integer,text) from public,anon,authenticated;
 grant execute on function public.iclub_econ_retest_start_v1(uuid,integer,text) to authenticated;
 grant execute on function public.iclub_econ_retest_get_v1(uuid,text) to authenticated;
+grant execute on function public.iclub_econ_retest_resume_v1(uuid) to authenticated;
 grant execute on function public.iclub_econ_retest_submit_v1(uuid,integer,text) to authenticated;
 -- Defined in private schema; SECURITY DEFINER public RPC can call this helper.
 -- Keep private schema out of Supabase exposed API schemas.
