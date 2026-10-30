@@ -190,13 +190,22 @@ begin
     then return jsonb_build_object('ok',false,'code','request_key_reused'); end if;
     return jsonb_build_object('ok',true,'session_id',v_prior.id,
      'status',v_prior.status,'resumed',true); end if;
-  -- Prefer an existing active attempt for this exact original error.
+  -- Every specific wrong answer can be independently retested only once
+  -- in v1, regardless of completed/expired status or request-key rotation.
   select * into v_prior from private.iclub_econ_retest_sessions_v1
    where user_id=v_user and source_session_id=p_source_session_id
-     and source_item_order=p_source_item_order and status='active'
+     and source_item_order=p_source_item_order
    order by issued_at desc limit 1;
-  if found then return jsonb_build_object('ok',true,'session_id',v_prior.id,
-     'status','active','resumed',true); end if;
+  if found then
+    if v_prior.status='active' then
+      if v_prior.deadline_at<=clock_timestamp() then
+        return jsonb_build_object('ok',false,'code','prior_retest_expired');
+      end if;
+      return jsonb_build_object('ok',true,'session_id',v_prior.id,
+        'status','active','resumed',true);
+    end if;
+    return jsonb_build_object('ok',false,'code','already_retested');
+  end if;
 
   select r.* into v_source
   from private.iclub_econ_retest_sources_v1 r
