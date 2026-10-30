@@ -72,7 +72,7 @@ class Contract(unittest.TestCase):
     def test_reserved_fingerprint_separator(self):
         def bad(t,u):
             c=t["cards"][0]
-            c["locales"]["ru"]["explanation"]+="\\u001f"
+            c["locales"]["ru"]["explanation"]+=chr(31)
             c["content_hash"]="sha256:"+sha(json.dumps({"skill_key":c["skill_key"],"locales":c["locales"]},ensure_ascii=False,sort_keys=True,separators=(",",":")).encode())
             for row in u["data"]:row["source_card_hash"]=c["content_hash"]
         self.check(bad,"Reserved control character")
