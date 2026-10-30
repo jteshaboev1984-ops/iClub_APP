@@ -26,7 +26,8 @@ module.exports=async source=>{
  if(name==="iclub_exam_chemistry_entry_start_v1")
  return {data:{ok:true,session_id:"fake-only-session"}};
  if(name==="iclub_exam_chemistry_entry_get_v1")
- return {data:{ok:true,status:finished?"finalized":"active",score:finished?1:null,
+ return {data:{ok:true,can_credit_mastery:false,calibrated_diagnostic:false,
+ status:finished?"finalized":"active",score:finished?1:null,
  deadline_at:"2099-01-01T00:00:00Z",
  items:Array.from({length:22},(_,i)=>({order:i+1,unit:i+1,
  question:"Synthetic Q"+(i+1)+" "+args.p_language,
