@@ -5,6 +5,7 @@ on:
       - 'docs/release-candidates/economics-private-retest-gated-v1.sql'
       - 'scripts/fixtures/economics-retest-postgres-fixture-v1.sql'
       - 'scripts/fixtures/economics-retest-postgres-e2e-v1.sql'
+      - 'scripts/fixtures/economics-retest-parallel-start-v1.sql'
       - '.github/workflows/economics-retest-postgres-isolated.yml'
   workflow_dispatch:
 permissions:
@@ -42,3 +43,29 @@ jobs:
           docker exec -i "$PG_CONTAINER" psql -U postgres -d economics_retest_fictional -v ON_ERROR_STOP=1 -f - < scripts/fixtures/economics-retest-postgres-fixture-v1.sql
           docker exec -i "$PG_CONTAINER" psql -U postgres -d economics_retest_fictional -v ON_ERROR_STOP=1 -f - < docs/release-candidates/economics-private-retest-gated-v1.sql
           docker exec -i "$PG_CONTAINER" psql -U postgres -d economics_retest_fictional -v ON_ERROR_STOP=1 -f - < scripts/fixtures/economics-retest-postgres-e2e-v1.sql
+      - name: Two authenticated requests must not issue two different retests
+        shell: bash
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          set -euo pipefail
+          docker exec "$PG_CONTAINER" psql -U postgres -d economics_retest_fictional -v ON_ERROR_STOP=1 -c "create table public.synthetic_parallel_results_v1(key text primary key,session_id uuid not null); grant insert on public.synthetic_parallel_results_v1 to authenticated;"
+          docker exec -i "$PG_CONTAINER" psql -U postgres -d economics_retest_fictional -v ON_ERROR_STOP=1 -v concurrent_key=race-first-123456 -f - < scripts/fixtures/economics-retest-parallel-start-v1.sql &
+          pid1=$!
+          docker exec -i "$PG_CONTAINER" psql -U postgres -d economics_retest_fictional -v ON_ERROR_STOP=1 -v concurrent_key=race-second-12345 -f - < scripts/fixtures/economics-retest-parallel-start-v1.sql &
+          pid2=$!
+          wait "$pid1"
+          wait "$pid2"
+          result=$(docker exec "$PG_CONTAINER" psql -U postgres -d economics_retest_fictional -Atqc "select count(*) || ':' || count(distinct session_id) from public.synthetic_parallel_results_v1")
+          test "$result" = "2:1"
+      - name: Dump and restore fictional database including RLS and historical scores
+        shell: bash
+        env:
+          PG_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          set -euo pipefail
+          docker exec "$PG_CONTAINER" pg_dump -U postgres -Fc -d economics_retest_fictional -f /tmp/economics-retest-fiction-only.dump
+          docker exec "$PG_CONTAINER" createdb -U postgres economics_retest_restore_fictional
+          docker exec "$PG_CONTAINER" pg_restore -U postgres -d economics_retest_restore_fictional /tmp/economics-retest-fiction-only.dump
+          result=$(docker exec "$PG_CONTAINER" psql -U postgres -d economics_retest_restore_fictional -Atqc "select (select count(*) from private.iclub_exam_native_mcq_attempts_v1)=2 and (select count(*) from private.iclub_econ_retest_sessions_v1)=3 and (select count(*) from private.iclub_econ_retest_sources_v1)=2 and not has_table_privilege('authenticated','private.iclub_econ_retest_sources_v1','select')")
+          test "$result" = "t"
