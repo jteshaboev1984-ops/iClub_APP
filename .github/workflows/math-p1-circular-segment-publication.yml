@@ -1,0 +1,17 @@
+name: Mathematics P1 circular segment publication guard
+on:
+  pull_request:
+    paths:
+      - "scripts/ops/20261030_p1_cir03_segment_math_repair_publish.sql"
+      - "scripts/math-p1-circular-segment-publication-regression.cjs"
+      - ".github/workflows/math-p1-circular-segment-publication.yml"
+  workflow_dispatch:
+jobs:
+  p1-circular-segment-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify scoped version-only publication and exact segment mathematics
+        run: node scripts/math-p1-circular-segment-publication-regression.cjs
