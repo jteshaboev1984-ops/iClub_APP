@@ -1,0 +1,25 @@
+name: Mathematics independent second-pass circular segment regression
+on:
+  pull_request:
+    paths:
+      - "docs/math-p1p5-independent-second-pass-audit-20261030.md"
+      - "scripts/ops/20261030_math_second_pass_cir03_two_question_stage.sql"
+      - "scripts/ops/20261030_math_second_pass_cir03_two_question_release.sql"
+      - "scripts/fixtures/math-second-pass-cir03-postrelease.sql"
+      - "scripts/math-second-pass-cir03-regression.cjs"
+      - "scripts/math-second-pass-p5-bingeo-oracles.cjs"
+      - "scripts/fixtures/math-second-pass-p5-bin-geo-30-readonly.sql"
+      - "scripts/fixtures/math-second-pass-p1-cir03-15-readonly.sql"
+      - ".github/workflows/math-second-pass-cir03.yml"
+  workflow_dispatch:
+jobs:
+  second-pass-cir03:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify independent sine geometry, versioned replacement and immutable learner data
+        run: |
+          node scripts/math-second-pass-cir03-regression.cjs
+          node scripts/math-second-pass-p5-bingeo-oracles.cjs
