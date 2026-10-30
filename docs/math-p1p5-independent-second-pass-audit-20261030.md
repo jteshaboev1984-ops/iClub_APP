@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**, not independently human-certified. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; first **45 current question-bank items independently recalculated**, not independently human-certified. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -27,8 +27,8 @@ Note: the database has 334 published written **versions**; 101 older published v
 
 - Published `P1CIR03-A01` (source question 7154; learning pack v1/v2) says r=10, theta=0.8, and triangle area 24. A genuine central triangle has area `50*sin(0.8)=35.8678045...`, segment `40-50*sin(0.8)=4.1321955...` (2 d.p. = 4.13), **not 16**. A published MCQ key is therefore invalid for the stated geometry.
 - Published `P1CIR03-A03` (source question 7140; same packs) says r=6, theta=2.2, central triangle area 14.4. Correct value `18*sin(2.2)=14.5529353...`; segment `39.6-18*sin(2.2)=25.0470647...` (2 d.p. = 25.05), **not 25.2**.
-- Both legacy source questions have **zero** learner session-item exposures; their two parent pack versions also have **zero** sessions as of the preflight audit. Preserve legacy source records for traceability, but release corrected replacements and retire only these old unused packs after all guards pass.
-- Other P1-CIR-03 questions (15 item keys total: 6 published, 9 reserve) were reviewed against arc/sector/annular geometry; no *additional confirmed* defect in that focused family yet. This is **not** whole-bank academic completion.
+- Both legacy source questions had **zero** learner session-item exposures and their two parent pack versions had **zero** sessions, issued authorizations, goal references or review starts at preflight. **DONE:** released corrected source questions **10100 and 10099** and learning pack **465/v3**. Retired unused old packs **35421/v1 and 464/v2**, and old defective content metadata, without altering original question text or any learner data. The read-only live postflight **PASSED**.
+- P1-CIR-03 **15/15** latest published+reserve question keys now checked with independent geometry oracles and against live keyed answers: after two corrections, **0 discrepancies**. P5-BIN-02 and P5-GEO-02 **30/30** latest published+reserve question keys independently computed with binomial/geometric probability formulas and live keyed-answer assertions: **0 discrepancies**. This is *45/1,448* items, **not** whole-bank academic completion.
 - Previous checks passed 1,215 question-bank structure/translation-presence checks and 334 published written rubric/locale count checks; these are structural QA, **not** independent solutions.
 
 ## Operational quality bar
@@ -41,5 +41,6 @@ Every release should record: original ID and immutable source, new ID, changed E
 | --- | ---: | --- | --- |
 | Question-bank structure (both stages) | 1,215 | Verified structurally, not math | SQL read-only key/4-option/nonempty/i18n checks |
 | Published written total marks, locale rows/checksums | 334 versions | Verified structurally, not all math | Prior all-published SQL check |
-| P1-CIR-03 published + reserve question family | 15 | Focused geometric review; 2 confirmed defects | Trigonometric derivation and regression |
-| All remaining current-bank and written solutions | 1,433 | **NOT YET INDEPENDENTLY SOLVED** | Work queue; do not claim completion |
+| P1-CIR-03 published + reserve question family | 15 | **15 independently recalculated; 2 corrected and verified** | Sin/radian geometry, live 15/15 key contract |
+| P5-BIN-02 and P5-GEO-02 published + reserve | 30 | **30 independently recalculated; 0 mismatches** | Independent probability formulas, live 30/30 key contract |
+| Remaining question-bank + written academic solutions | 1,403 | **NOT YET INDEPENDENTLY SOLVED** | Work queue; do not claim completion |
