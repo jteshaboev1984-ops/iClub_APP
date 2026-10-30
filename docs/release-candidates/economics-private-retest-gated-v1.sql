@@ -188,6 +188,8 @@ begin
     if v_prior.source_session_id<>p_source_session_id
        or v_prior.source_item_order<>p_source_item_order
     then return jsonb_build_object('ok',false,'code','request_key_reused'); end if;
+    if v_prior.status='active' and v_prior.deadline_at<=clock_timestamp() then
+      return jsonb_build_object('ok',false,'code','prior_retest_expired'); end if;
     return jsonb_build_object('ok',true,'session_id',v_prior.id,
      'status',v_prior.status,'resumed',true); end if;
   -- Every specific wrong answer can be independently retested only once
