@@ -91,13 +91,76 @@ insert into private.iclub_subject_library_releases(subject_key,version_key,packa
         statements.append('insert into private.iclub_subject_library_tutor('+','.join(cols)+') values ('+','.join(lit(v) for v in vals)+') on conflict (subject_key,version_key,skill_key,locale) do nothing;')
     for i in range(0,len(statements),batch):
         (out/f'{30+i//batch:02d}_tutor_{i//batch+1:03d}.sql').write_text('begin;\nset local lock_timeout=\'3s\';\n'+ '\n'.join(statements[i:i+batch])+'\ncommit;\n',encoding='utf-8')
-    checks=f"""-- Read-only verifier; do not publish when any result disagrees with expected.
-select r.subject_key,r.version_key,r.package_sha256,r.expected_skills,
- (select count(*) from private.iclub_subject_library_theory t where t.subject_key=r.subject_key and t.version_key=r.version_key) as theory_rows,
- (select count(*) from private.iclub_subject_library_tutor u where u.subject_key=r.subject_key and u.version_key=r.version_key) as tutor_rows,
- (select count(*) from private.iclub_subject_library_tutor u join private.iclub_subject_library_theory t on t.subject_key=u.subject_key and t.version_key=u.version_key and t.skill_key=u.skill_key where u.subject_key=r.subject_key and u.version_key=r.version_key and u.source_card_hash<>t.content_hash) as hash_mismatches
- from private.iclub_subject_library_releases r
- where r.subject_key={lit(subject)} and r.version_key={lit(version)};
+    # A conflict-safe import may leave OLD rows intact. Compare every actual field
+    # to its source fingerprint before any release approval. Expected fingerprints
+    # contain no answer keys or Tutor plaintext.
+    theory_expected = [
+        (c['skill_key'],fingerprint([c['tour_no'],c['official_syllabus_point'],c['content_hash']] +
+            [c['locales'][lang][field] for lang in LOCALES for field in THEORY_FIELDS]))
+        for c in cards
+    ]
+    tutor_expected = [
+        (c['skill_key'],c['locale'],fingerprint([c['tutor_card_key'],c['content_version'],
+            c['title'],c['main_explanation'],c['simple_explanation'],
+            c['alternative_explanation'],c['focus_explanation'],c['source_card_hash']]))
+        for c in tutors
+    ]
+    expected_cards_sql = ','.join('('+lit(k)+','+lit(h)+')' for k,h in theory_expected)
+    expected_tutors_sql = ','.join('('+lit(k)+','+lit(l)+','+lit(h)+')' for k,l,h in tutor_expected)
+    theory_sql_fields = ','.join("t.locales->"+lit(lang)+"->>"+lit(field)
+        for lang in LOCALES for field in THEORY_FIELDS)
+    tutor_sql_fields = ','.join('u.'+field for field in
+        ('tutor_card_key','content_version','title','main_explanation',
+         'simple_explanation','alternative_explanation','focus_explanation','source_card_hash'))
+    checks=f"""-- STRICT READ-ONLY post-import gate; never alters source or learner data.
+-- ALL checks, including stage_matches_exact_source, must pass. It does NOT publish.
+-- Digest tuples use U+001F (reserved/rejected in source) for precise boundaries.
+with expected_theory(skill_key,expected_hash) as (values {expected_cards_sql}),
+expected_tutor(skill_key,locale,expected_hash) as (values {expected_tutors_sql}),
+actual_theory as (
+ select t.skill_key,encode(extensions.digest(convert_to(concat_ws(chr(31),
+ t.tour_no::text,t.syllabus_point,t.content_hash,{theory_sql_fields}
+ ),'UTF8'),'sha256'),'hex') as actual_hash
+ from private.iclub_subject_library_theory t
+ where t.subject_key={lit(subject)} and t.version_key={lit(version)}
+),
+actual_tutor as (
+ select u.skill_key,u.locale,encode(extensions.digest(convert_to(concat_ws(chr(31),
+ {tutor_sql_fields}),'UTF8'),'sha256'),'hex') as actual_hash
+ from private.iclub_subject_library_tutor u
+ where u.subject_key={lit(subject)} and u.version_key={lit(version)}
+),
+audit as (
+ select
+  (select count(*) from actual_theory) theory_rows,
+  (select count(*) from actual_tutor) tutor_rows,
+  (select count(*) from expected_theory e left join actual_theory a using(skill_key)
+   where a.actual_hash is distinct from e.expected_hash) theory_missing_or_changed,
+  (select count(*) from actual_theory a left join expected_theory e using(skill_key)
+   where e.skill_key is null) theory_extra,
+  (select count(*) from expected_tutor e left join actual_tutor a using(skill_key,locale)
+   where a.actual_hash is distinct from e.expected_hash) tutor_missing_or_changed,
+  (select count(*) from actual_tutor a left join expected_tutor e using(skill_key,locale)
+   where e.skill_key is null) tutor_extra
+)
+select {lit(subject)}::text subject_key,{lit(version)}::text version_key,
+ {lit(package_hash)}::text expected_package_sha256,
+ r.package_sha256 actual_package_sha256,r.state release_state,
+ a.*,
+ (r.package_sha256={lit(package_hash)}
+  and r.expected_skills={len(cards)}
+  and r.state='draft'
+  and (s.active_version is distinct from {lit(version)} or not s.visible_to_learners)
+  and a.theory_rows={len(cards)}
+  and a.tutor_rows={len(tutors)}
+  and a.theory_missing_or_changed=0 and a.theory_extra=0
+  and a.tutor_missing_or_changed=0 and a.tutor_extra=0
+ ) as stage_matches_exact_source
+from audit a
+left join private.iclub_subject_library_releases r
+ on r.subject_key={lit(subject)} and r.version_key={lit(version)}
+left join private.iclub_subject_library s
+ on s.subject_key={lit(subject)};
 """
     (out/'99_postcheck_READ_ONLY.sql').write_text(checks,encoding='utf-8')
     print(json.dumps({'subject':subject,'version':version,'skills':len(cards),'tutors':len(tutors),'digest':package_hash,'sql_chunks':len(list(out.glob('*.sql'))),'bytes':sum(x.stat().st_size for x in out.glob('*.sql'))},ensure_ascii=False))
