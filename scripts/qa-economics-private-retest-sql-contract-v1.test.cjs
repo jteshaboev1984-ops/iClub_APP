@@ -36,7 +36,7 @@ test('authenticated session and server scoring and completion-only reveal',()=>{
   assert.match(sql,/for update;/i);
   assert.match(sql,/selected_index=p_selected_index,/);
   assert.match(sql,/is_correct=v_correct/);
-  assert.match(sql,/v_s\.status='finalized'.*?then v_q\.answer_key/s);
+  assert.match(sql,/v_s\.status='finalized'.*?then ascii\(v_q\.answer_key\)/s);
   assert.match(sql,/v_s\.status='finalized'.*?then v_l->>'explanation'/s);
   assert.match(sql,/public\.iclub_econ_retest_resume_v1/);
 });
