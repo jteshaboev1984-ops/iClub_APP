@@ -27,7 +27,7 @@ for(const required of [
  "BEGIN;","COMMIT;","pg_advisory_xact_lock(611031528041)",
  "MATH_SECOND_PASS_SOURCE_OR_EXPOSURE_DRIFT","MATH_SECOND_PASS_CLONE_FAILED",
  "P1CIR03-A01-QA20261030","P1CIR03-A03-QA20261030",
- "question_snapshot_md5","NOT EXISTS","qa_math_status"
+ "question_snapshot_md5","OR EXISTS","qa_math_status"
 ])assert.ok(stage.includes(required), "Staging release guard missing "+required);
 for(const required of [
  "BEGIN;","COMMIT;","CIR03_SECOND_PASS_RELEASE_GUARD_DRIFT",
