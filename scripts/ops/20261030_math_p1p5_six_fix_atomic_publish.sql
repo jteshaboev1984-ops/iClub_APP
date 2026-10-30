@@ -172,7 +172,7 @@ BEGIN
   THEN RAISE EXCEPTION 'MATH_SIX_ATOMIC_RELEASE_POSTFLIGHT_FAILED_%',f.new_task_id; END IF;
  END LOOP;
  SELECT count(*) INTO observed
-  FROM private.exam_prep_sessions s JOIN _academic_fixes f ON f.new_assessment_id=s.assessment_id;
+  FROM private.exam_prep_sessions s JOIN _academic_fixes release_row ON release_row.new_assessment_id=s.assessment_id;
  IF observed<>0 THEN RAISE EXCEPTION 'MATH_SIX_UNEXPECTED_SESSION_CREATED'; END IF;
 END $postflight$;
 SELECT 'MATH_SIX_OWNER_AI_ASSISTED_PUBLISHED' AS release,
