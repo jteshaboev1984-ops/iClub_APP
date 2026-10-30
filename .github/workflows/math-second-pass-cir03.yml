@@ -7,6 +7,8 @@ on:
       - "scripts/ops/20261030_math_second_pass_cir03_two_question_release.sql"
       - "scripts/fixtures/math-second-pass-cir03-postrelease.sql"
       - "scripts/math-second-pass-cir03-regression.cjs"
+      - "scripts/math-second-pass-p5-bingeo-oracles.cjs"
+      - "scripts/fixtures/math-second-pass-p5-bin-geo-30-readonly.sql"
       - ".github/workflows/math-second-pass-cir03.yml"
   workflow_dispatch:
 jobs:
@@ -17,4 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Verify independent sine geometry, versioned replacement and immutable learner data
-        run: node scripts/math-second-pass-cir03-regression.cjs
+        run: |
+          node scripts/math-second-pass-cir03-regression.cjs
+          node scripts/math-second-pass-p5-bingeo-oracles.cjs
