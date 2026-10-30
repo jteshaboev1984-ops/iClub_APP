@@ -171,6 +171,8 @@ begin
  if v->>'duplicate' is distinct from 'true' then raise exception 'Duplicate submit altered state: %',v; end if;
  perform public.synthetic_expect_code_v1(public.iclub_econ_retest_submit_v1(
    v_id,1,'different-submit-12345'),'already_finalized');
+ perform public.synthetic_expect_code_v1(public.iclub_econ_retest_start_v1(
+   '11111111-1111-4111-8111-111111111111',1,'second-attempt-1234'),'already_retested');
  v:=public.iclub_econ_retest_get_v1(v_id,'uz');
  if v->>'status' is distinct from 'finalized'
    or v->>'correct_index' is distinct from '2'
@@ -215,7 +217,11 @@ begin
  perform public.synthetic_expect_code_v1(public.iclub_econ_retest_get_v1(v_id,'en'),'expired');
  perform public.synthetic_expect_code_v1(public.iclub_econ_retest_submit_v1(
  v_id,3,'expired-submit-1234'),'expired');
-end $$;
+ perform public.synthetic_expect_code_v1(public.iclub_econ_retest_start_v1(
+ '11111111-1111-4111-8111-111111111111',4,'expires-123456789'),'prior_retest_expired');
+ perform public.synthetic_expect_code_v1(public.iclub_econ_retest_start_v1(
+ '11111111-1111-4111-8111-111111111111',4,'another-expired-12345'),'prior_retest_expired');
+end $;
 
 -- Revoked server-side session fails even if JWT contents still appear valid.
 reset role;
