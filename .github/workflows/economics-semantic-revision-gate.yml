@@ -5,6 +5,8 @@ on:
       - 'scripts/qa-economics-private-retest-semantic-revision-v2.cjs'
       - 'scripts/qa-economics-private-retest-semantic-revision-v2.test.cjs'
       - 'scripts/qa-economics-private-retest-sql-contract-v1.test.cjs'
+      - 'scripts/qa-economics-private-retest-v9-integrity.cjs'
+      - 'scripts/qa-economics-private-retest-v9-integrity.test.cjs'
       - '.github/workflows/economics-semantic-revision-gate.yml'
       - 'docs/release-candidates/economics-private-retest-gated-v1.sql'
   workflow_dispatch:
@@ -20,8 +22,10 @@ jobs:
         with:
           node-version: '22'
       - name: Test semantic revision gates on synthetic items
-        run: node --test scripts/qa-economics-private-retest-semantic-revision-v2.test.cjs scripts/qa-economics-private-retest-sql-contract-v1.test.cjs
+        run: node --test scripts/qa-economics-private-retest-semantic-revision-v2.test.cjs scripts/qa-economics-private-retest-sql-contract-v1.test.cjs scripts/qa-economics-private-retest-v9-integrity.test.cjs
       - name: Assert no private answer bank or source snapshots were committed
         run: |
           test ! -e Economics_9708_P1_P3_71_Same_Skill_Retest_Combined_PRIVATE_DRAFT_20261029.json
           test ! -e Economics_9708_P1_P3_71_Same_Skill_Retest_ACADEMIC_SEMANTIC_REV2_PRIVATE_HOLD_20261030.json
+          test ! -e Economics_9708_P1_P3_71_Same_Skill_Retest_INTERNAL_MULTI_PASS_QA_PRIVATE_HOLD_v9_20261030.json
+          test ! -e Economics_9708_71_Internal_Multi_Pass_Item_QA_Ledger_v9_PRIVATE_20261030.json
