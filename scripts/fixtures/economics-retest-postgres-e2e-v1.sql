@@ -29,7 +29,8 @@ end $$;
 
 -- Source text is deliberately generic and fictional; no proprietary question.
 insert into private.iclub_econ_retest_sources_v1
-(item_key,content_version,paper_code,skill_key,source_sha256,locales,answer_key)
+(item_key,content_version,paper_code,skill_key,source_sha256,locales,answer_key,
+ known_legacy_source_id,known_legacy_snapshot_md5)
 values
 ('FICT-RETEST-A','fiction-v1','P1','SYNTH-P1-A',repeat('a',64),
  jsonb_build_object(
@@ -42,7 +43,7 @@ values
    'uz',jsonb_build_object('question','Qaysi shartli javob C deb belgilangan?',
      'options',jsonb_build_array('Shartli A','Shartli B','Shartli C','Shartli D'),
      'explanation','Bu sinov uchun C javobi to‘g‘ri deb belgilangan.')
- ),'C'),
+ ),'C',999,'ffffffffffffffffffffffffffffffff'),
 ('FICT-RETEST-B','fiction-v1','P1','SYNTH-P1-B',repeat('b',64),
  jsonb_build_object(
    'en',jsonb_build_object('question','Which fictional choice is labelled D?',
@@ -54,7 +55,7 @@ values
    'uz',jsonb_build_object('question','Qaysi shartli javob D deb belgilangan?',
      'options',jsonb_build_array('Shartli A','Shartli B','Shartli C','Shartli D'),
      'explanation','Bu sinov uchun D javobi to‘g‘ri deb belgilangan.')
- ),'D');
+ ),'D',null,null);
 
 -- As the synthetic authenticated learner, verify default OFF before release.
 set role authenticated;
@@ -137,6 +138,11 @@ declare v_id uuid:=(select session_id from public.synthetic_retest_run_v1 where 
 begin
  perform public.synthetic_expect_code_v1(public.iclub_econ_retest_get_v1(v_id,'en'),'not_found');
  perform public.synthetic_expect_code_v1(public.iclub_econ_retest_submit_v1(v_id,2,'foreign-submit-98765'),'not_found');
+ -- Native MCQ snapshots use source_id/snapshot_md5, not item_key.
+ -- This user already saw the candidate's known legacy source.
+ perform public.synthetic_expect_code_v1(public.iclub_econ_retest_start_v1(
+   '22222222-2222-4222-8222-222222222222',1,'previous-source-123456'),
+   'no_unseen_approved_item');
 end $$;
 
 -- Anonymous Supabase Auth account is blocked even with a valid session.
