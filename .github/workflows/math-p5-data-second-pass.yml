@@ -1,0 +1,17 @@
+name: Mathematics P5 Data second-pass academic guard
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p5-second-pass-dat*.sql"
+      - "scripts/math-p5-data-second-pass-150.cjs"
+      - ".github/workflows/math-p5-data-second-pass.yml"
+  workflow_dispatch:
+jobs:
+  p5-dat-150-oracles:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 150 independently checked data and statistics sources
+        run: node scripts/math-p5-data-second-pass-150.cjs
