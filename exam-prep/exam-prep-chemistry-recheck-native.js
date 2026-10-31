@@ -3,7 +3,7 @@
  // J10 independent RECHECK (unseen items). Entry, Paper 1 and mastery remain separate.
  const internal=window.iClubExamPrepHostInternal=window.iClubExamPrepHostInternal||{};
  const state={root:null,shell:null,lang:"ru",entryId:null,onBack:null,session:null,
- data:null,index:0,closed:true,busy:false,seq:0,timer:null,confirmed:false,localeQueued:false};
+ data:null,index:0,closed:true,busy:false,seq:0,timer:null,confirmed:false};
  const words={
  ru:{title:"Chemistry · Повторная проверка",intro:"22 новых вопроса · 30 минут. Сравним ответы со входной проверкой после повторения тем.",
  limit:"Один вопрос на тему не подтверждает её полного освоения и не меняет ваш учебный прогресс.",
@@ -63,7 +63,7 @@
  };
  const clearClock=()=>{if(state.timer!==null)window.clearInterval(state.timer);state.timer=null;};
  function unmount(){clearClock();state.seq++;state.closed=true;state.root=null;state.shell=null;state.entryId=null;
- state.onBack=null;state.session=null;state.data=null;state.index=0;state.busy=false;state.confirmed=false;state.localeQueued=false;}
+ state.onBack=null;state.session=null;state.data=null;state.index=0;state.busy=false;state.confirmed=false;}
  function screen(){
   if(!active())return null;
   const p=node("section",null,"ep-host-shell ep-native-chemistry ep-chem-recheck");
@@ -81,7 +81,7 @@
   p.append(note,button(t().retry,retry),button(t().back,()=>state.onBack?.(),true));
  }
  async function lobby(){
-  clearClock();const token=++state.seq;state.session=null;state.data=null;state.index=0;state.confirmed=false;state.localeQueued=false;
+  clearClock();const token=++state.seq;state.session=null;state.data=null;state.index=0;state.confirmed=false;
   const p=screen();if(!p)return;
   p.append(node("p",t().intro,"ep-host-note"),node("p",t().limit,"ep-host-note"));
   const form=node("div",null,"ep-chem-recheck-ready");
@@ -132,20 +132,7 @@
   const r=await authorized("iclub_exam_chemistry_recheck_get_v1",
    {p_session_id:state.session,p_language:state.lang});
   if(!active()||state.seq!==token)return;state.busy=false;
-  if(state.localeQueued){state.localeQueued=false;await load();return;}
-  const validItems=Array.isArray(r.items)&&r.items.length===22
-   &&r.items.every((item,i)=>item&&item.order===i+1
-     &&typeof item.question==="string"&&item.question.trim().length>0
-     &&Array.isArray(item.options)&&item.options.length===4
-     &&item.options.every(option=>typeof option==="string"&&option.trim().length>0)
-     &&typeof item.answered==="boolean"
-     &&(item.selected_index===null||(Number.isInteger(item.selected_index)
-       &&item.selected_index>=0&&item.selected_index<4))
-     &&(r.status!=="active"||(item.correct_index==null&&item.explanation==null)));
-  if(!r.ok||!["active","finalized"].includes(r.status)||!validItems
-    ||r.can_credit_mastery!==false||r.calibrated_diagnostic!==false){
-    errorScreen(load);return;
-  }
+  if(!r.ok||!Array.isArray(r.items)||r.items.length!==22){errorScreen(load);return;}
   state.data=r;draw();
  }
  function runClock(place){
@@ -215,9 +202,7 @@
   state.data.items[index].selected_index=chosen;state.data.items[index].answered=true;
   let next=state.data.items.findIndex((x,i)=>i>index&&!x.answered);
   if(next<0)next=state.data.items.findIndex(x=>!x.answered);
-  state.index=next<0?index:next;
-  if(state.localeQueued){state.localeQueued=false;await load();return;}
-  draw();
+  state.index=next<0?index:next;draw();
  }
  async function finish(auto){
   if(!active()||state.busy||state.data?.status!=="active")return;
@@ -237,7 +222,6 @@
    {p_session_id:id,p_language:state.lang});
   if(!active()||seq!==state.seq||id!==state.session)return;
   state.busy=false;
-  if(state.localeQueued){state.localeQueued=false;await review();return;}
   if(!r.ok||!Array.isArray(r.topics)||r.topics.length!==22||
    r.can_credit_mastery!==false||r.calibrated_diagnostic!==false||
    r.recheck_means_improvement_not_mastery!==true){errorScreen(review);return;}
@@ -278,7 +262,6 @@
  function setLanguage(locale){
   if(!["ru","uz","en"].includes(locale)||locale===state.lang)return;
   state.lang=locale;if(!active())return;
-  if(state.busy){state.localeQueued=true;return;}
   if(state.session)load();else lobby();
  }
  internal.chemistryRecheckNative=Object.freeze({mount,unmount,setLanguage,getLanguage:()=>state.lang,isMounted:()=>active()});
