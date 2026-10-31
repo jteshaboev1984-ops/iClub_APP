@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **510 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **555 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -49,7 +49,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P5-BIN-01, GEO-01 and NOR-01 | 45 | **45 reviewed conceptually against all four answer choices** | All three model-choice families inspected; live source structure check, 0 issues |
 | P5-CNT-01 to CNT-05 (published + reserve) | 75 | **75 independently derived factorial/combinatorial results, 0 mismatches** | Five read-only SQL formula-oracle fixtures executed against live Supabase; source/choices EN/RU/UZ reviewed |
 | P5-DAT-01 through DAT-10 (published + reserve) | 150 | **150 answer/semantics checks, zero observed mismatches** | 10 independent source-level read-only SQL fixtures executed against Supabase; regression CI | 
-| **Remaining current-bank and written items** | **938** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
+| P5-DRV-01 through DRV-03 (published + reserve) | 45 | **45 distribution/expectation/variance answers matched** | Three read-only SQL oracles executed against Supabase; independent numeric regression CI |
+| **Remaining current-bank and written items** | **893** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -75,3 +76,9 @@ The 150 current P5-DAT-01 to DAT-10 source questions (60 published and 90 reserv
 EN/RU/UZ option counts and non-empty stems/explanations all passed; no repeated literal alternatives or invalid keyed choice was found. Six numerical-option false-positive flags are caused by the translated paraphrase 'middle 50%' where EN describes 'middle spread', not by mathematical differences. Six numerical-stem false positives arose from spelled-out English numbers or equivalent notations x̄² versus mean². No confirmed error requiring an immutable replacement was found. Published questions, reserve content, academic QA statuses, and student state were **not modified**.
 
 Overall reviewed **510/1,448** current items; **938** remain. This coverage counts independently derived answer oracles and manually inspected conceptual alternatives, not an external human examination, not exhaustive proof of correct translation semantics, and not learner E2E or weekly beta authorization.
+
+## 2026-10-31 Discrete Random Variables — final P5 question-bank family
+
+All 45 P5-DRV-01, DRV-02 and DRV-03 questions (18 published and 27 reserve) were independently recomputed or semantically reviewed: probability normalization, distribution validity, linear expectations, expected payoffs, E(X²)−E(X)² and standard deviations (including square-root and fractional exact forms). Three independent live SQL source-key fixtures each returned **15 checked, zero mismatches**. Their numerical oracles parse exact fractions separately; descriptive or radical-text keys are checked explicitly with separate numerical computation. EN/RU/UZ stems, explanations and MCQ choices were inspected for completeness and number consistency; zero missing translations or option-number mismatches, zero duplicate literal alternatives and zero invalid MCQ answer keys. No confirmed mathematical defects requiring correction, so source rows were not rewritten.
+
+**P5 question-bank scope milestone:** All 540 published/reserve P5 questions across 36 skills have now undergone a second academic review by AI with formula recomputation for numerical questions and concept/choice review for model questions. This is **not** a completed review of the 103 current written P5 tasks, not human academic certification, and does not authorize a general learner rollout. Total current-item ledger: **555/1,448** (540 P5 question-bank + 15 P1 question-bank), with **893 pending** (660 P1 question-bank + 233 current written P1/P5 tasks). Historical source versions and 1,990 recorded learner responses/548 sessions were not altered by this read-only batch.
