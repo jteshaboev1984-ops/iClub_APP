@@ -1,0 +1,17 @@
+name: Mathematics P5 discrete random variable second-pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p5-second-pass-drv*.sql"
+      - "scripts/math-p5-discrete-second-pass-45.cjs"
+      - ".github/workflows/math-p5-discrete-second-pass.yml"
+  workflow_dispatch:
+jobs:
+  discrete-45:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 45 discrete expectation/variance source oracles
+        run: node scripts/math-p5-discrete-second-pass-45.cjs
