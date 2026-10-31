@@ -1,5 +1,6 @@
 -- Two concurrent PostgreSQL connections run this against fictional user B.
--- Each has a different idempotency key but the same historical wrong item.
+-- Each has a different idempotency key for the same unseen skill-B error.
+-- The other synthetic skill-A error is already exposed and must remain blocked.
 \set ON_ERROR_STOP on
 set role authenticated;
 select set_config('test.concurrent_key',:'concurrent_key',false) \gset
@@ -13,7 +14,7 @@ do $$
 declare v jsonb;
 begin
   v:=public.iclub_econ_retest_start_v1(
-    '22222222-2222-4222-8222-222222222222',1,
+    '22222222-2222-4222-8222-222222222222',2,
     current_setting('test.concurrent_key',true));
   if v->>'ok' is distinct from 'true'
      or v->>'session_id' is null then
