@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; first **45 current question-bank items independently recalculated**, not independently human-certified. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **285 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -43,4 +43,19 @@ Every release should record: original ID and immutable source, new ID, changed E
 | Published written total marks, locale rows/checksums | 334 versions | Verified structurally, not all math | Prior all-published SQL check |
 | P1-CIR-03 published + reserve question family | 15 | **15 independently recalculated; 2 corrected and verified** | Sin/radian geometry, live 15/15 key contract |
 | P5-BIN-02 and P5-GEO-02 published + reserve | 30 | **30 independently recalculated; 0 mismatches** | Independent probability formulas, live 30/30 key contract |
-| Remaining question-bank + written academic solutions | 1,403 | **NOT YET INDEPENDENTLY SOLVED** | Work queue; do not claim completion |
+| P5-NOR-03/04/06 and P5-PRO-02/06 | 75 | **75 key derivations matched; no new defects** | PR #434: 60 live source oracles and 15 inverse-normal checks |
+| P5-NOR-05 and P5-PRO-03/04/05 | 60 | **60 computed/conceptual answers matched** | Read-only live SQL calculations in 2026-10-31 session |
+| P5-BIN-03, GEO-03, PRO-01 and NOR-02 | 60 | **60 formula-based mathematical checks, no mismatches** | Four-skill read-only SQL oracles and CI |
+| P5-BIN-01, GEO-01 and NOR-01 | 45 | **45 reviewed conceptually against all four answer choices** | All three model-choice families inspected; live source structure check, 0 issues |
+| **Remaining current-bank and written items** | **1,163** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
+
+## 2026-10-31 P5 seven-skill second-pass batch
+
+- BIN-03 (15): binomial mean and variance, inverse parameters, nondegenerate mean/variance ratio. Formula oracle **15/15**.
+- GEO-03 (15): expected trial number, time-to-first-success, cubic-tail relation. Formula oracle **15/15**.
+- NOR-02 (15): z-scores, normal CDF and tail values, including Unicode minus normalization. Formula oracle **15/15**.
+- PRO-01 (15): Cartesian sample-space counting, independence, ordered outcomes, coins/dice/spinners. Formula oracle **15/15**.
+- BIN-01 (15), GEO-01 (15), NOR-01 (15): conditions for valid binomial/geometric/normal models; inspected all answer choices for semantic validity and live RU/UZ option alignment. **45/45 source structure checks passed**. These are conceptual decisions, **not numeric solutions**.
+- Across all 105: no missing language options, no duplicate literal MCQ alternatives and no EN/RU/UZ option number conflicts (one verbal Russian «первом испытании» vs English digit 1 is equivalent). Numeric stem token mismatches due to spelled English numbers and Russian semicolon decimal notation were inspected; none is a confirmed translation defect.
+- Four read-only fixtures have **already executed against Supabase and passed** (30 + 15 + 15 + 45). Regression runs through GitHub Actions; student state is untouched. No new confirmed academic errors in this batch.
+- Total after this batch **285 / 1,448 reviewed; 1,163 remain**. This is not a claim that all handwritten solution steps, all semantic equivalences or all future deliveries have been exhaustively tested.
