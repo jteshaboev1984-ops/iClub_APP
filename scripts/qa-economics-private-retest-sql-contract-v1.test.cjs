@@ -86,10 +86,16 @@ test('exclude prior native source_id / snapshot_md5 exposures, not only future i
       sql.indexOf('create trigger iclub_econ_retest_protect_issued_source_v1'));
   assert(issuedSourceTrigger.includes('new.known_legacy_source_id'),'mutable shown-source link');
   assert(issuedSourceTrigger.includes('new.known_legacy_snapshot_md5'),'mutable shown-hash link');
+  function requireActualHistoricalGuards(candidate){
+    for(const guard of [idGuard,hashGuard,oldGuard]){
+      assert(candidate.includes(guard),'missing actual native exposure comparison');
+    }
+  }
+  assert.doesNotThrow(()=>requireActualHistoricalGuards(sql));
   for(const guard of [idGuard,hashGuard]){
-    const mutation=sql.replace(guard,'false /* negative fixture: deleted exposure guard */');
-    assert(!mutation.includes(guard),'mutant should remove target guard');
-    assert.equal(mutation.includes(guard),false,'must reject a deleted real-exposure guard');
+    const mutation=sql.replace(guard,'false /* removed historical guard */');
+    assert.throws(()=>requireActualHistoricalGuards(mutation),
+      /missing actual native exposure comparison/);
   }
 });
 
