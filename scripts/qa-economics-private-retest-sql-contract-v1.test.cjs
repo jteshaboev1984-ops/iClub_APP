@@ -74,6 +74,25 @@ test('different unseen item for each owned incorrect source answer',()=>{
   assert.doesNotMatch(sql,/drop\s+(table|function)/i);
 });
 
+
+test('exclude prior native source_id / snapshot_md5 exposures, not only future item_key',()=>{
+  const idGuard="shown->>'source_id'=r.known_legacy_source_id::text";
+  const hashGuard="shown->>'snapshot_md5'=r.known_legacy_snapshot_md5";
+  const oldGuard="shown->>'item_key'=r.item_key";
+  for(const guard of [idGuard,hashGuard,oldGuard]) assert(sql.includes(guard),'missing shown-source guard');
+  assert.match(sql,/known_legacy_source_id bigint/);
+  assert.match(sql,/known_legacy_snapshot_md5 text/);
+  const issuedSourceTrigger=sql.slice(sql.indexOf('create function private.iclub_econ_retest_protect_issued_source_v1()'),
+      sql.indexOf('create trigger iclub_econ_retest_protect_issued_source_v1'));
+  assert(issuedSourceTrigger.includes('new.known_legacy_source_id'),'mutable shown-source link');
+  assert(issuedSourceTrigger.includes('new.known_legacy_snapshot_md5'),'mutable shown-hash link');
+  for(const guard of [idGuard,hashGuard]){
+    const mutation=sql.replace(guard,'false /* negative fixture: deleted exposure guard */');
+    assert(!mutation.includes(guard),'mutant should remove target guard');
+    assert.equal(mutation.includes(guard),false,'must reject a deleted real-exposure guard');
+  }
+});
+
 test('owner auth, server scoring and keys only after finalization',()=>{
   assert.match(sql,/from auth\.sessions s/i);
   assert.match(sql,/coalesce\(v_claims->>'is_anonymous'/i);
