@@ -66,17 +66,17 @@ insert into private.iclub_exam_native_mcq_attempts_v1
 select '11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
 'economics_9708','economics_2026_2028_v1','P1','finalized',clock_timestamp()-interval '30 minutes',
 '[
-{"skill_key":"SYNTH-P1-A","key":"B","display_order":[0,1,2,3]},
-{"skill_key":"SYNTH-P1-A","key":"A","display_order":[0,1,2,3]},
-{"skill_key":"SYNTH-P1-B","key":"D","display_order":[0,1,2,3]},
-{"skill_key":"SYNTH-P1-B","key":"C","display_order":[0,1,2,3]}
+{"skill_key":"SYNTH-P1-A","key":"B","display_order":[0,1,2,3],"source_id":101,"snapshot_md5":"11111111111111111111111111111111"},
+{"skill_key":"SYNTH-P1-A","key":"A","display_order":[0,1,2,3],"source_id":102,"snapshot_md5":"22222222222222222222222222222222"},
+{"skill_key":"SYNTH-P1-B","key":"D","display_order":[0,1,2,3],"source_id":103,"snapshot_md5":"33333333333333333333333333333333"},
+{"skill_key":"SYNTH-P1-B","key":"C","display_order":[0,1,2,3],"source_id":104,"snapshot_md5":"44444444444444444444444444444444"}
 ]'::jsonb,
 '{"1":{"choice":0},"2":{"choice":0},"4":{"choice":1}}'::jsonb;
 -- Second user's session: cannot be used by first user.
 insert into private.iclub_exam_native_mcq_attempts_v1
 select '22222222-2222-4222-8222-222222222222','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
 'economics_9708','economics_2026_2028_v1','P1','finalized',clock_timestamp()-interval '30 minutes',
-'[{"skill_key":"SYNTH-P1-A","key":"B","display_order":[0,1,2,3]}]'::jsonb,
+'[{"skill_key":"SYNTH-P1-A","key":"B","display_order":[0,1,2,3],"source_id":999,"snapshot_md5":"ffffffffffffffffffffffffffffffff"}]'::jsonb,
 '{"1":{"choice":0}}'::jsonb;
 
 create table public.synthetic_retest_run_v1(label text primary key,session_id uuid);
