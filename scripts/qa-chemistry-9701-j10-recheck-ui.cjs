@@ -39,7 +39,8 @@ module.exports=async(entrySource,recheckSource)=>{
     return {data:{ok:true,session_id:"recheck_fixture",status:"active"}};
    }
    if(name==="iclub_exam_chemistry_recheck_get_v1")
-    return {data:{ok:true,status:recheckFinal?"finalized":"active",
+    return {data:{ok:true,can_credit_mastery:false,calibrated_diagnostic:false,
+      status:recheckFinal?"finalized":"active",
       score:recheckFinal?20:null,deadline_at:"2099-01-01T00:00:00Z",
       items:Array.from({length:22},(_,i)=>({
         order:i+1,unit:i+1,skill_key:"S"+i,
@@ -92,6 +93,25 @@ module.exports=async(entrySource,recheckSource)=>{
  w.iClubExamPrepHostInternal.chemistryRecheckNative.setLanguage("uz");await flush();
  assert.equal(root.find(".ep-native-stem")[0].textContent,"New Q2 uz");
  assert.equal(saved[1],0);
+ // Language switch while an answer is being saved: finish save first, then
+ // render only the current locale from the server without losing that answer.
+ let releasePendingAnswer;
+ const originalRpc=w.sb.rpc;
+ w.sb.rpc=async(name,args={})=>{
+  if(name==="iclub_exam_chemistry_recheck_answer_v1"&&args.p_item_order===2)
+   await new Promise(resolve=>{releasePendingAnswer=resolve;});
+  return originalRpc(name,args);
+ };
+ const inFlight=root.find(".ep-native-option")[1].handlers.click();
+ await flush();
+ w.iClubExamPrepHostInternal.chemistryRecheckNative.setLanguage("ru");await flush();
+ assert.equal(root.find(".ep-native-stem")[0].textContent,"New Q2 uz");
+ assert.equal(typeof releasePendingAnswer,"function");
+ releasePendingAnswer();await inFlight;await flush();
+ assert.equal(saved[2],1);
+ assert.equal(root.find(".ep-native-stem")[0].textContent,"New Q3 ru");
+ w.sb.rpc=originalRpc;
+ w.iClubExamPrepHostInternal.chemistryRecheckNative.setLanguage("uz");await flush();
  await btn("Yakunlash").handlers.click();await flush();
  assert.equal(root.find(".ep-native-result")[0].textContent,"Qayta tekshiruv natijasi: 20 / 22");
  assert.ok(root.find(".ep-native-explanation").some(x=>x.textContent==="Synthetic new question explanation"));
@@ -105,13 +125,14 @@ module.exports=async(entrySource,recheckSource)=>{
  assert.equal(closed,false);
  w.iClubExamPrepHostInternal.chemistryEntryNative.unmount();
  w.iClubExamPrepHostInternal.chemistryRecheckNative.unmount();
- return {passed:16,checks:["closed recheck shell denied",
+ return {passed:17,checks:["closed recheck shell denied",
  "approved recheck offer after Entry","adapter transition without host teardown",
  "explicit readiness checkbox","start requires acknowledgement","22-question map",
  "no answer key or explanation before finish","autosaved answer","RU to UZ",
  "final score 20/22","explanation after finish","topic comparison",
  "focus on two wrong topics","all 22 topic comparisons",
- "no mastery claim","return to Entry without leaving subject"]};
+ "no mastery claim","return to Entry without leaving subject",
+ "in-flight save persists while the learner switches languages"]};
 };
 if(require.main===module){
  const fs=require("node:fs"),path=require("node:path");
