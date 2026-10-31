@@ -1,0 +1,17 @@
+name: Mathematics P5 seven-skill second-pass guards
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p5-second-pass-*.sql"
+      - "scripts/math-p5-seven-skill-second-pass.cjs"
+      - ".github/workflows/math-p5-seven-skill-second-pass.yml"
+  workflow_dispatch:
+jobs:
+  independent-oracles:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check 60 numeric source oracles and 45 conceptual model items
+        run: node scripts/math-p5-seven-skill-second-pass.cjs
