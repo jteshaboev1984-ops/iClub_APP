@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **360 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **510 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -48,7 +48,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P5-BIN-03, GEO-03, PRO-01 and NOR-02 | 60 | **60 formula-based mathematical checks, no mismatches** | Four-skill read-only SQL oracles and CI |
 | P5-BIN-01, GEO-01 and NOR-01 | 45 | **45 reviewed conceptually against all four answer choices** | All three model-choice families inspected; live source structure check, 0 issues |
 | P5-CNT-01 to CNT-05 (published + reserve) | 75 | **75 independently derived factorial/combinatorial results, 0 mismatches** | Five read-only SQL formula-oracle fixtures executed against live Supabase; source/choices EN/RU/UZ reviewed |
-| **Remaining current-bank and written items** | **1,088** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
+| P5-DAT-01 through DAT-10 (published + reserve) | 150 | **150 answer/semantics checks, zero observed mismatches** | 10 independent source-level read-only SQL fixtures executed against Supabase; regression CI | 
+| **Remaining current-bank and written items** | **938** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -66,3 +67,11 @@ Every release should record: original ID and immutable source, new ID, changed E
 All 75 published+reserve source questions in CNT-01 through CNT-05 were independently calculated using factorials, combinations, repeated-letter multisets and position/adjacency constraints. Five read-only SQL arithmetic oracle fixtures each checked 15 question IDs against their current keyed choice and returned **0 errors / 15** on live Supabase. Four-language (EN source plus RU/UZ) option cardinality/numeric token comparisons showed no confirmed semantic discrepancy; the one number-token flag was equivalent Russian wording «трёхзначного» for English «3-digit». Every MCQ retains four distinct literal alternatives. No learner data or published content was changed.
 
 Cumulative current audit coverage is now **360/1,448 reviewed**, **1,088 remaining**; do not call this independent human certification or a full end-to-end exam validation.
+
+## 2026-10-31 P5 Data & Statistics second-pass batch
+
+The 150 current P5-DAT-01 to DAT-10 source questions (60 published and 90 reserve) were read individually, checking chart selection, stem-and-leaf, box plots, histogram frequency density, cumulative frequency, means, spread transformations, comparison of datasets, sums-of-squares variance and grouped/coded means. Ten **independent mathematical/conceptual source-level oracle SQL fixtures** compared 15 answers per skill against current keys; **all 150 matched** when executed read-only on Supabase. Numeric expressions are independently derived from source stems; some chart-selection and interpretive answers are textual, and are reviewed semantically instead of being called numerical calculations. The ten live fixture runs returned zero flagged discrepancies.
+
+EN/RU/UZ option counts and non-empty stems/explanations all passed; no repeated literal alternatives or invalid keyed choice was found. Six numerical-option false-positive flags are caused by the translated paraphrase 'middle 50%' where EN describes 'middle spread', not by mathematical differences. Six numerical-stem false positives arose from spelled-out English numbers or equivalent notations x̄² versus mean². No confirmed error requiring an immutable replacement was found. Published questions, reserve content, academic QA statuses, and student state were **not modified**.
+
+Overall reviewed **510/1,448** current items; **938** remain. This coverage counts independently derived answer oracles and manually inspected conceptual alternatives, not an external human examination, not exhaustive proof of correct translation semantics, and not learner E2E or weekly beta authorization.
