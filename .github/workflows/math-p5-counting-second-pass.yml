@@ -1,0 +1,17 @@
+name: Mathematics P5 counting second pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p5-second-pass-cnt*.sql"
+      - "scripts/math-p5-counting-second-pass.cjs"
+      - ".github/workflows/math-p5-counting-second-pass.yml"
+  workflow_dispatch:
+jobs:
+  counting-75:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify independently derived permutations, combinations and safe SQL fixture coverage
+        run: node scripts/math-p5-counting-second-pass.cjs
