@@ -3,7 +3,7 @@
 **Date:** 2026-11-01  
 **Repository:** `jteshaboev1984-ops/iClub_APP`  
 **PR:** [#452](https://github.com/jteshaboev1984-ops/iClub_APP/pull/452)  
-**Evidence run:** [GitHub Actions 41322969750](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41322969750) — **GREEN** at observed candidate before the final ephemeral JWT-log masking hardening. Recheck workflow after masking before merging.
+**Final verified run:** [GitHub Actions 41323470127](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41323470127) — **GREEN** after masking ephemeral JWT signing key and loading the production written-understanding companion UI. Previous real HTTP integration green run: 41322969750.
 
 ## What actually runs (NO mocks for RPC results)
 
@@ -15,7 +15,7 @@
 - Real historical student accounts, responses, active sessions and production Supabase have **no involvement**.
 - CI reuses the already verified full P2-73-style migration bootstrap/order, rather than maintaining a divergent schema.
 
-## Verified integrated acceptance — exact green run 41322969750
+## Verified integrated acceptance — final green run 41323470127
 
 | Covered operation | Actual browser/HTTP/server/DB evidence |
 | --- | --- |
@@ -32,7 +32,7 @@
 | Cross-user session isolation | Test account B cannot obtain account A’s P1 session items |
 | Authoritative persistent DB evidence | `P1:finalized:5`, `P5:finalized:4`; 9 total complete sessions, zero real student changes |
 
-The smoke test intentionally submits synthetic answers without asserting fabricated correctness. Written Core and objective grading retain server authority. Failures before GREEN were in the **test harness assumptions** (component card auto-start; multiple screening cycles; server-owned assessment item count; asynchronous written-state reload before finalization), fixed in PR. No product runtime changes required.
+The smoke test intentionally submits synthetic answers without asserting fabricated correctness. Written Core and objective grading retain server authority. Failures before final GREEN were in **test harness assumptions** (component-card auto-start; multiple genuine screening cycles; server-owned item count; asynchronous written-state reload; omitted actual production written-understanding companion module). The final driver loads the existing production module, answers its noncredit companion MCQs when present, and preserves real server authority. No product runtime changes were necessary.
 
 ## Genuine remaining Stage B gaps
 
