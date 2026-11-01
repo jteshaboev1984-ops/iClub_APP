@@ -80,16 +80,16 @@ const LIVE='exam-prep/exam-prep-live.js';
 const HOST='exam-prep/exam-prep-host.js';
 const HTML='index.html';
 function namesFromSource(src,extra=false){
- const names=new Set([...src.matchAll(/\\brpc\\s*\\(\\s*(?:component\\s*,\\s*)?['"]([a-z_0-9]+)['"]/g)].map(m=>m[1]));
+ const names=new Set([...src.matchAll(/\brpc\s*\(\s*(?:component\s*,\s*)?['"]([a-z_0-9]+)['"]/g)].map(m=>m[1]));
  if(extra) for(const m of src.matchAll(/['"](get_exam_prep_[a-z_0-9]+)['"]/g))names.add(m[1]);
  return names;
 }
 const found=new Set();
 for(const [i,p] of PATHS.entries()){
  const code=read(p);
- assert.match(code,/window\\.sb/,'supabase client not bound in '+p);
- assert.match(code,/client\\.rpc\\(/,'server RPC transport missing in '+p);
- assert.doesNotMatch(code,/\\.from\\s*\\(/,'new direct table access in '+p+'; review RLS/data boundary first');
+ assert.match(code,/window\.sb/,'supabase client not bound in '+p);
+ assert.match(code,/client\.rpc\(/,'server RPC transport missing in '+p);
+ assert.doesNotMatch(code,/\.from\s*\(/,'new direct table access in '+p+'; review RLS/data boundary first');
  for(const n of namesFromSource(code,i===2))found.add(n);
 }
 const missing=EXPECTED.filter(n=>!found.has(n));
@@ -123,8 +123,8 @@ for(const n of ['get_exam_prep_weekly_progress_safe_v1','get_exam_prep_weekly_go
  // Snapshot method is bound through explicit METHODS config (its current name can vary).
  if(n==='get_exam_prep_weekly_progress_safe_v1')assert(progress.includes(n),'progress RPC missing');
 }
-assert.match(weekly,/window\\.iClubExamPrepWeeklyFlowEnabled\\s*!==\\s*true/,'weekly fail-closed cutover missing');
-assert.match(host,/state\\.subjectKey\\s*!==\\s*MATHEMATICS_KEY/,'subject isolation missing');
+assert.match(weekly,/window\.iClubExamPrepWeeklyFlowEnabled\s*!==\s*true/,'weekly fail-closed cutover missing');
+assert.match(host,/state\.subjectKey\s*!==\s*MATHEMATICS_KEY/,'subject isolation missing');
 assert.match(live,/writtenNotAuto/,'non-grading policy label missing');
 assert.match(live,/pendingSubmission/,'answer ACK preservation missing');
 for(const s of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
