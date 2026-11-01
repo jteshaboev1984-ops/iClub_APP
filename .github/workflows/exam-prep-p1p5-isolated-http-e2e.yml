@@ -9,6 +9,9 @@ on:
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
+      - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
+      - 'supabase/tests/p1p5_isolated_http_postdue_retest_seed.sql'
+      - 'supabase/tests/p1p5_isolated_http_postdue_retest_cleanup.sql'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   workflow_dispatch:
 permissions:
@@ -193,6 +196,44 @@ jobs:
             END
             \$\$;
           "
+      - name: Seed guarded canonical-only synthetic clock learner in disposable CI
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_postdue_retest_seed.sql > /tmp/p1p5-postdue-canonical-seed.log
+      - name: Complete genuine post-due retest using signed HTTP and P2-68 governed clock
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-isolated-http-postdue-retest.cjs
+          node scripts/p1p5-isolated-http-postdue-retest.cjs
+      - name: Postflight canonical synthetic run has no real-user or legacy data
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -At -c "
+            DO \$\$
+            BEGIN
+              IF (SELECT COUNT(*) FROM public.users) <> 3 OR
+                 (SELECT COUNT(*) FROM auth.users) <> 3 OR
+                 (SELECT COUNT(*) FROM private.exam_prep_synthetic_identities WHERE run_id='SV-P1P5-RETEST-HTTP-CI-01') <> 1 OR
+                 EXISTS (SELECT 1 FROM private.exam_prep_beta_weekly_reviews) OR
+                 EXISTS (SELECT 1 FROM public.practice_attempts) OR
+                 EXISTS (SELECT 1 FROM public.tour_attempts) OR
+                 EXISTS (SELECT 1 FROM public.certificates)
+              THEN
+                RAISE EXCEPTION 'canonical fake-learner spillover or fabricated release evidence';
+              END IF;
+            END
+            \$\$;
+          "
+      - name: Complete and clean canonical synthetic run without touching legacy
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_postdue_retest_cleanup.sql > /tmp/p1p5-postdue-governed-cleanup.log
+          echo "Governed synthetic identity cleanup and zero legacy spillover assertions: PASS"
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
