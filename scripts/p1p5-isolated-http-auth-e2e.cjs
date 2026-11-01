@@ -74,8 +74,16 @@ async function browserScenario(browser,component,token){
      profileSet=true;
    }
    await page.locator('[data-ep-live-component="'+component+'"]').click();
-   await page.locator('[data-ep-component-primary="diagnostic"]').waitFor({timeout:25000});
-   await page.locator('[data-ep-component-primary="diagnostic"]').click();
+   // The current Math component card starts the entry diagnostic automatically
+   // when stage0 is incomplete. Some older clients expose a second Start button.
+   // Accept either real UI route, never send an extra start RPC from the test.
+   await page.waitForFunction(()=>Boolean(
+     document.querySelector('[data-ep-live-active-assessment="true"]') ||
+     document.querySelector('[data-ep-component-primary="diagnostic"]')
+   ),null,{timeout:25000});
+   if(await page.locator('[data-ep-component-primary="diagnostic"]').count()){
+     await page.locator('[data-ep-component-primary="diagnostic"]').click();
+   }
    await page.locator('[data-ep-live-active-assessment="true"]').waitFor({timeout:25000});
    const trace=await page.evaluate(()=>window.__realRpcTrace);
    const start=trace.findLast(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1');
