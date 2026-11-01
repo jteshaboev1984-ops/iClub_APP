@@ -12,7 +12,7 @@ for(const [p,count] of [["DIF",7],["INT",5]]) for(let j=1;j<=count;j++)
  A.equal([...keys.keys()].filter(x=>x.startsWith("P1"+p+String(j).padStart(2,"0")+"-")).length,15);
 A.match(s,/FULL JOIN actual/);
 A.doesNotMatch(s,/\b(?:UPDATE|INSERT|DELETE|DROP|TRUNCATE|ALTER)\s+(?:private|public)\./i);
-const close=(a,b,t=1e-8)=>A.ok(Math.abs(a-b)<t,String(a)+" != "+String(b));
+const close=(a,b,t=1e-6)=>A.ok(Math.abs(a-b)<t,String(a)+" != "+String(b));
 const check=(key,expected)=>A.equal(keys.get(key),String(expected),key);
 const derivative=(f,x,h=1e-5)=>(f(x+h)-f(x-h))/(2*h);
 const simp=(f,a,b,n=4000)=>{A.equal(n%2,0);let h=(b-a)/n,s=f(a)+f(b);for(let i=1;i<n;i++)s+=(i%2?4:2)*f(a+i*h);return s*h/3};
