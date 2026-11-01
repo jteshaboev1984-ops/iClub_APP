@@ -61,6 +61,18 @@ After re-running the earlier 9 finalized synthetic Math P1/P5 diagnostic/learnin
 
 **Reproducibility:** `.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml` runs the original real browser journey *and then* `scripts/p1p5-isolated-http-correction-faults.cjs` on the same one-time PostgreSQL container; failures block CI. The latter performs only SELECT via local psql and authenticated public RPC actions. Only deterministic synthetic IDs are present. `main` receives documentation and test harness changes, not user-visible behavior.
 
+## PR #454 — actual lost-ACK and clean-browser resume of Math P5 (merged)
+
+**Exact GitHub candidate:** `56338238ddd96c5ec9452e314bf8912e9fd0152f`, **56/56 checks success**, including [dedicated signed HTTP E2E 41337182515](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41337182515). [Merged PR #454](https://github.com/jteshaboev1984-ops/iClub_APP/pull/454), `main` code commit `210a57764f038b6f17fee3ebc5130043c0bb75b1`.
+
+- Reproduced a **true UI recovery defect** with real PostgREST-backed Math P5 session. Following a durably committed response whose client ACK is deliberately dropped, the browser closed completely; the server retained the partial original session but the old UI did not offer `resume`.
+- Corrected by adding owner-scoped read-only `activePlanSession` API and honoring the server's `get_exam_prep_active_plan_session_safe_v1` response in the legacy Math component view (the guarded weekly-flow route remains independent). Same component + exactly one active session required; multiple-active never starts a replacement session.
+- The final green real HTTP/Chromium test proves the same user reopens the **same session with exactly one persisted answer** in a new browser context. No reset, duplicate academic response, or new session in the test. The app loads fresh versions of both `exam-prep-api.js` and `exam-prep-live.js`.
+- Existing synthetic browser regression fixtures were surgically extended to return the actual backend metadata contract, and reviewed code-hash allowlists were repinned to the audited files. Timed ACK, written, internationalized UI, profile and weekly paths completed in the 56/56 GREEN candidate.
+- The test uses ephemeral HMAC JWT/PostgREST and disposable PostgreSQL 17: **not** hosted Supabase GoTrue token refresh, production environment, actual Telegram browser, or genuine human sign-off.
+
+**Stage B still IN PROGRESS.** Next integrate actual post-due retest under the existing synthetic virtual-clock invariant, positive mixed-transfer and timed/full-paper routes, Math written criterion/Next and noncredit outcome, and hosted Auth/Telegram-specific smoke. Avoid bypassing official stage and review gates.
+
 ## Genuine remaining Stage B gaps
 
 **Stage B remains IN PROGRESS**. This green segment does **not** establish all of the following on the exact same HTTP/browser chain:
@@ -69,7 +81,7 @@ After re-running the earlier 9 finalized synthetic Math P1/P5 diagnostic/learnin
 - **PARTLY CLOSED in PR #453:** future-due event scheduled and early retest denied under real server time. Actual post-due fresh retest completion still outstanding; controlled synthetic clock must not alter real deadline authority.
 - Mixed transfer session and per-paper reserve isolation.
 - **PARTLY CLOSED in PR #453:** pre-stage full paper authorization denied. Positive timed/full-paper write, review and comparable scoring still outstanding.
-- Math-specific external written criteria / non-credit Next / honest resume, including signed-out browser reload after a partially completed task.
+- **PARTLY CLOSED IN PR #454:** genuine Math P5 signed HTTP lost-ACK + new-browser same-session resume (no duplicate). **Still open:** external written criteria/non-credit Next and hosted Auth-token refresh.
 - Real `@supabase/supabase-js` (currently HTTP-compatible fetch wrapper), full GoTrue managed session refresh, Telegram WebApp chrome/device. No synthetic test is evidence of real user consent or 4 real weekly beta reviews.
 
 ## Safety and hard gates
