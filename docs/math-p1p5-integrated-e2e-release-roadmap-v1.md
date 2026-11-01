@@ -33,7 +33,7 @@
 ## Execution: four substantial stages (do not split into micro-tasks)
 
 ### STAGE A — Trace and coverage-gap inventory
-**State: NOT STARTED.**
+**State: COMPLETE — 2026-11-01, source and live RPC inventory verified; not full-stack E2E.**
 - Trace all Mathematics Core journey entrypoints, front-end event handlers, API adapters, auth/session handling, Supabase RPCs, item selection, scoring/evidence, weekly plans, correction, delayed retest, mixed transfer, timed/full paper, written criteria and resume.
 - Reuse the existing tests instead of rerunning every past academic audit. Produce **source-path + RPC + authoritative table + invariant + test evidence** mapping. Specifically label tests as real API, real PostgreSQL direct, or mocked browser: never conflate them.
 - Inspect current branch/main versions, relevant migration order and exact consumer/contract compatibility. Identify smallest gap closure for authentic local API/Auth and real test identities. Work from schema/approved sanitized content; never copy production learners or export confidential question keys to public GitHub.
@@ -77,7 +77,7 @@
 
 | Stage | State | Exact SHA / PR / workflow evidence | Findings / next action |
 | --- | --- | --- | --- |
-| A: trace & gap | NOT STARTED | — | Start by mapping actual browser/HTTP/RPC boundaries; reuse existing testing |
+| A: trace & gap | **COMPLETE** | PR #451; 61/61 production read-only RPC permission audit; GitHub Actions run 41321004984 GREEN; `docs/math-p1p5-e2e-stage-a-source-server-trace-20261101.md` | Client/UI/source and authoritative DB route matrix saved. Remaining genuine Auth/HTTP→PostgreSQL integration isolated under Stage B. |
 | B: real-stack isolated E2E | NOT STARTED | — | Supply disposable Auth/API/DB, synthetic learner and actual P1/P5 click path |
 | C: model/fault/locale/coverage | NOT STARTED | — | Extend 15+18 profiles, validate 1,448 structural mappings; no fake grading |
 | D: integrated gate + release report | NOT STARTED | — | Orchestrate reproducible CI; preserve distinct real-world governance decision |
@@ -90,6 +90,15 @@
 
 > **Продолжай iClub APP — цифровой E2E-полигон Mathematics P1/P5. Прочитай на GitHub `jteshaboev1984-ops/iClub_APP`, ветка `main`, файл `docs/math-p1p5-integrated-e2e-release-roadmap-v1.md`, затем связанные документы. Проверь текущие статусы/CI, не повторяй завершённые проверки, продолжай с первого незавершённого этапа. Все изменения через защищённую ветку и проверки, production Supabase только read-only; прогресс пользователей и исторические записи не менять. После каждого крупного этапа обнови ledger в roadmap с точными ссылками на PR, коммит и CI. Если обнаружишь ошибки — исправляй их с повторным тестом; не ограничивайся отчётами. Массовый релиз не включай без отдельного решения владельца и действующих серверных шлюзов.**
 
+## Stage A execution evidence — 2026-11-01
+
+- **Production READ-ONLY:** literal 61-function source inventory generated from the 3 real client adapters; exact replay of `scripts/fixtures/exam-prep-math-p1p5-61-rpc-live-readonly.sql` returned `expected_client_rpcs=61`, `passed_exact_public_auth_only=61`, `missing_or_ambiguous=0`, `authenticated_missing=0`, `anonymous_leak=0`, `failed_function_names=[]`. No student data or session rows accessed by the fixture.
+- **GitHub CI GREEN:** `Mathematics P1/P5 Source to RPC Trace Guard`, exact PR run ID `41321004984`, job ID `124891011085`, conclusion `success`, includes syntax and real-repo route invariant checks.
+- **Actual work:** PR [#451](https://github.com/jteshaboev1984-ops/iClub_APP/pull/451) adds a zero-network Node client-RPC boundary guard, SELECT-only live function inventory, detailed 15-route UI→RPC→private storage trace matrix and source-level CI workflow. No app runtime code or migration altered.
+- **Gap discovered, prioritized:** legacy PostgreSQL simulation and mocked Chromium are well-covered *separately*, but a single actual authorized HTTP/PostgREST→RPC→isolated DB→UI roundtrip for both P1 and P5 remains **UNPROVEN**. Generic Written Core browser fixture is Economics P2; Math-specific written E2E needs authentic server path. Do not claim Stage B passed.
+- **No real release action:** all production flags/entitlements/sessions/Practice/Tours/certificates untouched. Existing mass-release `NO_GO` remains separate.
+
 ## Change log
 
+- **2026-11-01 / v1.1:** Stage A finished with 61/61 real schema/auth-grant audit + source trace CI GREEN; gap matrix and Stage B scope documented; no changes to production users.
 - **2026-11-01 / v1.0:** Created durable integrated E2E release roadmap at owner request. All four new stages NOT STARTED; historical completed work preserved and referenced. No code, config, learner or release-state modifications authorized by this documentation.
