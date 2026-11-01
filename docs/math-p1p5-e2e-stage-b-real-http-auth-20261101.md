@@ -34,14 +34,41 @@
 
 The smoke test intentionally submits synthetic answers without asserting fabricated correctness. Written Core and objective grading retain server authority. Failures before final GREEN were in **test harness assumptions** (component-card auto-start; multiple genuine screening cycles; server-owned item count; asynchronous written-state reload; omitted actual production written-understanding companion module). The final driver loads the existing production module, answers its noncredit companion MCQs when present, and preserves real server authority. No product runtime changes were necessary.
 
+## Stage B extension: actual correction, security and future-retention gate — 2026-11-01
+
+**Second independent real-HTTP integration suite [GREEN run 41333784857](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41333784857);** PR [#453](https://github.com/jteshaboev1984-ops/iClub_APP/pull/453).
+
+After re-running the earlier 9 finalized synthetic Math P1/P5 diagnostic/learning sessions against disposable PostgreSQL 17 and local JWT/PostgREST, the candidate also passed `scripts/p1p5-isolated-http-correction-faults.cjs`. The green log confirms:
+
+| Actual integration check | Observed result |
+| --- | --- |
+| Genuine learning mistake → correction case | **PASS**, P1 case created by the prior real learning attempt; no synthetic direct insert or stage override |
+| Issue correction authorization via public RPC | **PASS** |
+| Reopen active correction with newly signed same-user JWT | **PASS**; no replacement session or foreign access |
+| Complete issued corrective work via public answer/finalize RPCs | **PASS**, 4 answered items; test-only answer oracle kept on isolated PostgreSQL, never sent as client key payload |
+| Scheduled delayed fresh retest | **PASS**, a new event has a strictly future `due_not_before` |
+| Try retest immediately | **DENIED** by actual server |
+| User B attempts to write user A's answer | **DENIED** |
+| User B attempts to view user A's assessment review | **DENIED** |
+| User B attempts to view user A's *active correction* | **DENIED** |
+| Attempt full P1 paper without minimum operational stage | **DENIED** |
+| Simulated global clock changes | **NONE**; real server clock governs both retest and timed release |
+| Production writes, auth/access changes or real accounts | **NONE** |
+
+**One valuable test-suite repair:** the browser driver previously treated HTTP submit ACK as equivalent to screen advancement, occasionally submitting before the previous question had re-rendered. The candidate now waits for **actual rendered question advancement or finalization**, not merely a successful HTTP response. A failing run exposed this harness race; the fully amended client + correction suite passed together in the exact green run. **No product runtime code was changed**.
+
+**Not yet claimed:** fresh retest *after* real due date, mixed transfer, actual positive timed/full-paper submission, Math written criteria/Next browser completion with a recorded partial reload, official hosted GoTrue session refresh, or real Telegram device smoke. Retest due time was **not shortened** to produce a fake pass.
+
+**Reproducibility:** `.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml` runs the original real browser journey *and then* `scripts/p1p5-isolated-http-correction-faults.cjs` on the same one-time PostgreSQL container; failures block CI. The latter performs only SELECT via local psql and authenticated public RPC actions. Only deterministic synthetic IDs are present. `main` receives documentation and test harness changes, not user-visible behavior.
+
 ## Genuine remaining Stage B gaps
 
 **Stage B remains IN PROGRESS**. This green segment does **not** establish all of the following on the exact same HTTP/browser chain:
 
-- Correction case creation and one real owned correction session, under actual published content.
-- Delayed fresh retest and server-controlled due time; proper virtual test clock without faking academic progress.
+- **CLOSED in PR #453:** genuine correction case creation, remediation and active-session same-user HTTP reopen; cross-user denial verified.
+- **PARTLY CLOSED in PR #453:** future-due event scheduled and early retest denied under real server time. Actual post-due fresh retest completion still outstanding; controlled synthetic clock must not alter real deadline authority.
 - Mixed transfer session and per-paper reserve isolation.
-- Timed practice/full-paper deadline, write, review and qualified scoring in real HTTP roundtrip.
+- **PARTLY CLOSED in PR #453:** pre-stage full paper authorization denied. Positive timed/full-paper write, review and comparable scoring still outstanding.
 - Math-specific external written criteria / non-credit Next / honest resume, including signed-out browser reload after a partially completed task.
 - Real `@supabase/supabase-js` (currently HTTP-compatible fetch wrapper), full GoTrue managed session refresh, Telegram WebApp chrome/device. No synthetic test is evidence of real user consent or 4 real weekly beta reviews.
 
