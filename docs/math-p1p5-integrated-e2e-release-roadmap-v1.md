@@ -78,7 +78,7 @@
 | Stage | State | Exact SHA / PR / workflow evidence | Findings / next action |
 | --- | --- | --- | --- |
 | A: trace & gap | **COMPLETE** | PR #451; 61/61 production read-only RPC permission audit; GitHub Actions run 41321004984 GREEN; `docs/math-p1p5-e2e-stage-a-source-server-trace-20261101.md` | Client/UI/source and authoritative DB route matrix saved. Remaining genuine Auth/HTTP→PostgreSQL integration isolated under Stage B. |
-| B: real-stack isolated E2E | **IN PROGRESS** | PR #452; [green HTTP/Auth/PostgREST test 41322969750](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41322969750); `docs/math-p1p5-e2e-stage-b-real-http-auth-20261101.md` | Both real Math UI paper journeys passed 4+3 complete diagnostics → independent server plans → 1+1 complete learning sessions (9 finalized DB rows); foreign/anon/bad-JWT denied. Remaining real HTTP correction/retest/mixed/timed/paper/written/resume unproven. |
+| B: real-stack isolated E2E | **IN PROGRESS** | PR #452; [final GREEN HTTP/Auth/PostgREST test 41323470127](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41323470127); `docs/math-p1p5-e2e-stage-b-real-http-auth-20261101.md` | Both real Math UI paper journeys passed 4+3 complete diagnostics → independent server plans → 1+1 complete learning sessions (9 finalized DB rows); foreign/anon/bad-JWT denied. Remaining real HTTP correction/retest/mixed/timed/paper/written/resume unproven. |
 | C: model/fault/locale/coverage | NOT STARTED | — | Extend 15+18 profiles, validate 1,448 structural mappings; no fake grading |
 | D: integrated gate + release report | NOT STARTED | — | Orchestrate reproducible CI; preserve distinct real-world governance decision |
 
@@ -100,9 +100,10 @@
 
 ## Stage B incremental evidence — 2026-11-01
 
-- **First truly connected authenticated HTTP Math P1/P5 browser path GREEN** on [run 41322969750](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41322969750): source `exam-prep-live.js`, real PostgREST JWT/role dispatch, production-shaped migrated *disposable* PostgreSQL, actual DB finalizations.
+- **First truly connected authenticated HTTP Math P1/P5 browser path GREEN** on [final run 41323470127](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41323470127): source `exam-prep-live.js`, real PostgREST JWT/role dispatch, production-shaped migrated *disposable* PostgreSQL, actual DB finalizations.
 - P1 4 complete diagnostic sessions + 1 governed learning session (4 objective answers); P5 3 complete diagnostic sessions + 1 governed learning session (4 objective answers). Total 9 finalized synthetic sessions in PostgreSQL, 2 different component-owned plan IDs. The server, not the script, chose when Stage 0 was complete.
 - Anonymous, fake-token and cross-user session access denied. Independent owner session re-open succeeded. No fabricated free-form grading, human sign-offs, time jumps, or production user writes.
+- The final green run includes the actual production written-understanding UI module and noncredit companion checks, with ephemeral JWT key masked in CI logs. Prior test-harness omissions were corrected without changing app runtime.
 - Script used a browser HTTP `window.sb.rpc` adapter whose responses are *not mocked*; it is not equivalent to Supabase hosted GoTrue/Auth or official Supabase SDK. Remaining correction/delayed retest/mixed/timed/full-paper/written/partial-resume tests are required to finish Stage B.
 - PR [#452](https://github.com/jteshaboev1984-ops/iClub_APP/pull/452) includes executable CI, disposable fixture and test driver; details in `docs/math-p1p5-e2e-stage-b-real-http-auth-20261101.md`. No product runtime or production access state changed.
 
