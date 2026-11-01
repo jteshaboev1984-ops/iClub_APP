@@ -1,0 +1,17 @@
+name: Math P1 circular and quadratic 120-key second-pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p1-second-pass-*.sql"
+      - "scripts/math-p1-cir-qua-second-pass-120.cjs"
+      - ".github/workflows/math-p1-cir-qua-second-pass.yml"
+  workflow_dispatch:
+jobs:
+  p1-cir-qua-120:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independently verify numeric and algebraic oracles, 120 scoped question keys
+        run: node scripts/math-p1-cir-qua-second-pass-120.cjs
