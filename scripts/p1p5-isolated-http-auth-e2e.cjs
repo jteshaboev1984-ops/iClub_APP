@@ -129,10 +129,18 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
      assert(!failed,'server failed diagnostic action '+failed?.name+' HTTP '+failed?.status);
      if(current.some(x=>x.name==='finalize_exam_prep_session_safe_v1'&&x.ok)) break;
    }
+   // The final learner response is ACKed before the client finishes its
+   // additional written-state refresh and asynchronous session finalization.
+   // Do not mistake a valid delayed finalizer for a failed attempt.
+   const finalizerNames=['finalize_exam_prep_session_safe_v1','finalize_exam_prep_session_written_v1'];
+   await page.waitForFunction(names=>(window.__realRpcTrace||[]).some(x=>names.includes(x.name)&&x.ok),
+     finalizerNames,{timeout:30000});
    recorded=await page.evaluate(()=>window.__realRpcTrace);
-   assert(count>0,'no real diagnostic answers');
-   assert(recorded.some(x=>x.name==='submit_exam_prep_response_safe_v1'&&x.ok),'no real HTTP committed answer');
-   assert(recorded.some(x=>x.name==='finalize_exam_prep_session_safe_v1'&&x.ok),
+   assert(count>0,'no real submitted answers');
+   assert(recorded.some(x=>x.name==='submit_exam_prep_response_safe_v1'&&x.ok)||
+          recorded.some(x=>x.name==='advance_exam_prep_written_step_safe_v1'&&x.ok),
+     'no real HTTP committed response or written step');
+   assert(recorded.some(x=>finalizerNames.includes(x.name)&&x.ok),
      'no real HTTP finalization after '+count+'/'+expectedItems+' items in '+component+'/'+mode);
    assert.equal(errors.length,0,'browser errors: '+errors.join(';'));
    return {component,mode,answers:count,sessionId,profileSet,httpActions:recorded.filter(x=>x.ok).length};
