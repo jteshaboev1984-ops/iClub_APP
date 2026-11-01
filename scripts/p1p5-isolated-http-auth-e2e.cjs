@@ -115,6 +115,9 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
    for(let i=0;i<=expectedItems;i++){
      const question=page.locator('[data-ep-live-active-assessment="true"]');
      if(!await question.count()) break;
+     // Do not count the same on-screen question twice just because the HTTP
+     // submit returned before the asynchronous getSession/re-render finished.
+     const previousHeader=await page.locator('.ep-focus-head').textContent();
      const radio=page.locator('input[name="ep_live_answer"]');
      const input=page.locator('input[name="ep_live_text_answer"]');
      const written=page.locator('textarea[name="ep_live_written_answer"]');
@@ -138,11 +141,16 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
        await page.locator('[data-ep-live-submit]').click();
      }
      count++;
-     await page.waitForFunction(expected=>{
+     // Wait for the actual learner-visible advancement (or finalization),
+     // not just a submit ACK. Otherwise a slow HTTP read can lead to clicking
+     // the same MCQ several times while the previous response is processing.
+     await page.waitForFunction(({previousHeader})=>{
        const t=window.__realRpcTrace||[];
-       return t.filter(v=>v.name==='submit_exam_prep_response_safe_v1'||v.name==='advance_exam_prep_written_step_safe_v1').length>=expected ||
-         t.some(v=>v.name==='finalize_exam_prep_session_safe_v1'&&v.ok);
-     },count,{timeout:20000});
+       const finalized=t.some(v=>
+         (v.name==='finalize_exam_prep_session_safe_v1'||v.name==='finalize_exam_prep_session_written_v1')&&v.ok);
+       const header=document.querySelector('.ep-focus-head')?.textContent||'';
+       return finalized || (header!==previousHeader && Boolean(header));
+     },{previousHeader},{timeout:25000});
      const current=await page.evaluate(()=>window.__realRpcTrace);
      const failed=current.find(x=>!x.ok&&['submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1'].includes(x.name));
      assert(!failed,'server failed diagnostic action '+failed?.name+' HTTP '+failed?.status);
