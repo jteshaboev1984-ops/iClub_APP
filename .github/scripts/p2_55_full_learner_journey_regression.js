@@ -60,6 +60,7 @@ const path = require('path');
         window.__profile={exam_series:args.p_exam_series,target_grade:args.p_target_grade,total_student_hours_available:args.p_total_student_hours_available,mathematics_hours_budget:args.p_mathematics_hours_budget,active_week_no:1};
         return {data:{...window.__profile,profile_revision:1,paper_comparability_epoch:1,series_changed:false,target_changed:false,hours_changed:false,progress_retained:true,plan_rebuild_required:false},error:null};
       }
+      if (name==='get_exam_prep_active_plan_session_safe_v1') return {data:{contract_version:'active_plan_session_v1',component_code:args.p_component_code,status:'none',active_session_count:0},error:null};
       if (name==='get_exam_prep_diagnostic_progress_safe_v1') return {data:window.__progress[args.p_component_code],error:null};
       if (name==='get_exam_prep_state_safe_v1') return {data:window.__state[args.p_component_code],error:null};
       if (name==='start_exam_prep_next_diagnostic_safe_v1') {

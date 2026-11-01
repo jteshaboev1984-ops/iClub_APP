@@ -297,6 +297,12 @@
   async function authorizeRevalidationItem(caseId, itemOrder) {
     return rpc("authorize_exam_prep_revalidation_item_safe_v1", { p_case_id: caseId, p_item_order: Number(itemOrder) });
   }
+  // Authoritative owner-scoped active plan session lookup. The current plan may
+  // be superseded while an older learning/mixed/retest attempt is still active.
+  // The server returns only session metadata, never protected answer keys.
+  async function activePlanSession(componentCode) {
+    return rpc("get_exam_prep_active_plan_session_safe_v1", { p_component_code: componentArg(componentCode) });
+  }
   async function weeklyPlan(componentCode) { return rpc("get_exam_prep_weekly_plan_safe_v2", { p_component_code: componentArg(componentCode) }); }
   async function generateWeeklyPlan(componentCode) { return rpc("generate_exam_prep_weekly_plan_safe_v3", { p_component_code: componentArg(componentCode) }); }
   async function authorizePlanItem(planId, priorityOrder) {
@@ -350,7 +356,7 @@
     finalizeSessionWritten, sessionReviewWritten, recentResultsWritten,
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
-    weeklyPlan, generateWeeklyPlan, authorizePlanItem,
+    activePlanSession, weeklyPlan, generateWeeklyPlan, authorizePlanItem,
     timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
     readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration
   });
@@ -366,7 +372,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");
