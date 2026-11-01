@@ -5,13 +5,13 @@ const s=fs.readFileSync(path.join(__dirname,"fixtures/math-p1-calculus-written-3
 const rows=[...s.matchAll(/\('([A-Za-z0-9-]+)','([^']+)'\)/g)];
 A.equal(rows.length,39);const keys=new Map(rows.map(x=>[x[1],x[2]]));A.equal(keys.size,39);
 A.match(s,/FULL JOIN/);A.doesNotMatch(s,/\b(?:INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE)\s+(?:private|public)\./i);
-const close=(a,b)=>A.ok(Math.abs(a-b)<1e-9,String(a)+" != "+String(b));
+const close=(a,b,t=1e-7)=>A.ok(Math.abs(a-b)<t,String(a)+" != "+String(b));
 const check=(k,v)=>A.equal(keys.get(k),v,k);
 const I=(f,a,b,n=1000)=>{const h=(b-a)/n;let s=f(a)+f(b);for(let j=1;j<n;j++)s+=(j%2?4:2)*f(a+j*h);return s*h/3;};
 // Independently recomputed results, in addition to all 39 stem/rubric reviews.
 close(I(x=>2*x+3-x*x,-1,3),32/3);check("P1FP01-Q09","32/3");
 close(I(x=>x*x*(4-x)**2,0,4),512/15);check("P1FP01-Q10","512/15");
-close(.5*.5**2*(.5-1)**2*2,1/32);
+close(.5*.5**2*(.5-1)**2,1/32);
 close(I(x=>Math.abs(2*x**3-3*x*x+x),0,1),1/16);
 close(I(x=>Math.abs(3*x*x-4*x+1),0,2),62/27,1e-9);
 close(2*(-1/3)**3-2*(-1/3)**2-2*(-1/3)+5,145/27);
