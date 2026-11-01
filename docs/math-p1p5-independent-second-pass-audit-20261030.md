@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **1,376 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **AI-ASSISTED ACADEMIC SOURCE SECOND PASS CHECKPOINT COVERAGE COMPLETE**; **1,448 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -58,7 +58,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P1-DIF/INT latest written tasks | 39 | **39 stem-to-solution and criterion-level checks, zero confirmed defects** | Read-only live expected result fragments, rubric sum, locale checks + calculus numerical regression |
 | P5 full papers 01-03, timed blocks 01-02, mini mock 01 — current written tasks | 31 | **31/31 independent numerical and methodological checks matched live rubrics** | Full live read-only oracle + independent numerical probability/statistics/geometry reasoning regression |
 | P1 QUA/CIR/COO/FUN/SER/TRI current written tasks | 91 | **91/91 independently derived key result checkpoints match latest published live rubrics** | Complete live read-only 91-item expected-rubric oracle + noncalculus maths regression |
-| **Remaining current-bank and written items** | **72** | **NOT YET ACADEMICALLY RECHECKED** | 72 remaining current P5 written tasks (non-full-paper/timed/mini-mock) |
+| P5 BIN/CNT/DAT/DRV/GEO/NOR/PRO current W01/AW written tasks | 72 | **72/72 task-specific math/concept checkpoints matched latest live published rubrics** | Live current-version read-only 72-item FULL JOIN and seven-skill independent mathematical properties |
+| **Remaining with no academic-source checkpoint** | **0** | **COVERAGE COMPLETE** | All 1,448 current source objects have task-level AI second-pass evidence; not a separate human signoff |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -144,3 +145,17 @@ Second-pass written-solution and marking audit for **22 Differentiation and 17 I
 All current 91 written tasks outside the previously completed 39-item P1 DIF/INT cohort were retrieved from **production by actual last approved timestamp, not highest ID**. Their source stems and all criterion-level mathematical expectations were inspected; one task-specific independently derived mathematical output per task was compared with the newest published rubric via read-only SQL FULL JOIN: **91 checked, zero mathematical key-result discrepancies**. Coverage is QUA, CIR, COO, FUN, SER and TRI, including timed/full-paper tasks and the previously corrected circular minor-segment cases. Deterministic additional algebra/geometry/series/trig calculation and source inventory guards are checked in CI. Evidence is `scripts/fixtures/math-p1-noncalculus-91-written-oracle.sql` and `scripts/math-p1-noncalculus-written-91-regression.cjs`.
 
 The ledger now counts **1,376 / 1,448** AI-reviewed current source items. The remaining **72 P5 written tasks** still require complete current-version academic review. An exact result in a rubric does not itself prove that the marking engine can evaluate every valid handwritten method, and there is no independent human reviewer or learner E2E sign-off. No production mutations; mass release NO_GO.
+
+## 2026-11-01 P5 72 learning written tasks — final current-source checkpoint review
+
+The final **72** currently published P5 learning written tasks (36 standard W01 + 36 supplementary AW) were enumerated from production by current approved timestamp, not highest numeric ID. Complete English prompts and all marking criteria were independently inspected for discrete/binomial/geometric model assumptions, outcomes, counting, distributions and interpretation, variance/coding, grouped data, central limit and normal approximation/rounding. **72 task-specific independently computed mathematical/concept result checkpoints match 72 live current rubrics, 0 confirmed numerical or key inconsistencies**. Automated independent calculations validate representative mathematical properties across all seven P5 skill families. Full reproducible SQL: `scripts/fixtures/math-p5-learning-written-72-secondpass.sql`. Independent Node regression and CI: `scripts/math-p5-learning-written-72-secondpass.cjs`.
+
+### Final inventory-based academic second-pass status
+
+- **P1 question bank 675/675 + P5 question bank 540/540:** independent source-key checking covered 1,215/1,215 current published and reserve questions; previously confirmed defects corrected and live-verified through versioned releases.
+- **P1 written 130/130:** 39 DIF/INT + 91 noncalculus current tasks; live-current independently derived expected mathematical end-result / criterion checks.
+- **P5 written 103/103:** 31 full-paper/timed/mini-mock + 72 learning tasks; live-current independently derived mathematical/criterion checkpoints.
+- **TOTAL current source coverage = 1,448/1,448**, with 0 source items lacking a second-pass mathematical/criterion checkpoint. P1/P5 latest-version selection has 18 historical numeric-id inversions (7/11) handled by approved-time order. All 233 current written tasks pass rubric sum, criterion uniqueness and approved RU/UZ translated-criterion hash structural checks.
+- **No further confirmed defect requires a new version in this continuation.** Earlier P5PRO06-W01 confusing migration rubric and P1CIR03-AW14 inconsistent historic triangle were already corrected in current released versions. No in-place edits, backfills or learner-state writes.
+
+**IMPORTANT COVERAGE SCOPE:** A task-level answer/rubric checkpoint and criterion-by-criterion AI inspection is not an independent human examiner's complete worked solution/translation or proof that every mathematically equivalent handwritten method earns credit in an automatic scorer. Current source coverage closure does **not** lift protections or the mass-release NO_GO. Separate examiner-language review and student-facing E2E/beta stages (which the owner postponed) are not represented as completed. No learner answer/session/mark/skill-progress changes, feature flags, or production release modifications.

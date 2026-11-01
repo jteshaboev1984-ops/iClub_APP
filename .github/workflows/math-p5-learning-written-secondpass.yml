@@ -1,0 +1,16 @@
+name: Mathematics P5 remaining 72 written second-pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p5-learning-written-72-secondpass.sql"
+      - "scripts/math-p5-learning-written-72-secondpass.cjs"
+      - ".github/workflows/math-p5-learning-written-secondpass.yml"
+  workflow_dispatch:
+jobs:
+  independent-learning-rubrics:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/math-p5-learning-written-72-secondpass.cjs
