@@ -48,7 +48,7 @@ ck("P1FUN07-AW06","(-2,-5)");
 ck("P1FUN08-W01","(2,−4)");
 // Sequences and series: binomial coefficients, AP/GP bounds and tails.
 close(C(6,3)*(-2)**3+C(6,2)*(-2)**2,-100);ck("P1FP01-Q06","-100");
-close(243*(1-(2/3)**8)<235?0:1,1);close(243*(1-(2/3)**9)>235?1:0,1);
+close(243*(1-(2/3)**8)<235?1:0,1);close(243*(1-(2/3)**9)>235?1:0,1);
 ck("P1FP02-Q06","least n=9");
 close(25*(3*25+7)/2,1025);ck("P1FP03-Q06","n=25");
 close(30*(2*2+(30-1)*4)/2,1800);ck("P1SER03-AW18","1800");
@@ -56,7 +56,7 @@ close(6*(2**8-1),1530);ck("P1SER04-AW18","1530");
 close(12*(-.5)**4/(1+.5),.5);ck("P1SER05-AW18","tail after four terms as 1/2");
 close(20*(-.25)**4/(1+.25),.0625);ck("P1SER05-W01","0.0625");
 // Trigonometry: all solutions, exact quadrant signs, domain restrictions.
-close(2*Math.sin(Math.PI/6)**2+3*Math.cos(2*Math.PI/3),0,1.1); // root-family sign check below.
+close(2*Math.sin(2*Math.PI/3)**2+3*Math.cos(2*Math.PI/3),0,1e-9); // root-family sign check below.
 close(Math.sin(210*Math.PI/180),-.5);ck("P1TRI02-AW14","sin210°=−1/2");
 close(Math.cos(240*Math.PI/180),-.5);ck("P1TRI02-W01","cos240°=−1/2");
 close(Math.tan(315*Math.PI/180),-1,1e-8);
