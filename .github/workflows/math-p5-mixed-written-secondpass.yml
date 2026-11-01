@@ -1,0 +1,18 @@
+name: Mathematics P5 mixed written independent second pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p5-mixed-written-31-current-oracle.sql"
+      - "scripts/fixtures/math-written-current-version-and-locales-readonly.sql"
+      - "scripts/math-p5-mixed-written-secondpass-31.cjs"
+      - ".github/workflows/math-p5-mixed-written-secondpass.yml"
+  workflow_dispatch:
+jobs:
+  p5-written-oracles:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent maths and safe read-only SQL contract
+        run: node scripts/math-p5-mixed-written-secondpass-31.cjs

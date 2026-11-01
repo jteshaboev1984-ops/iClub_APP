@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **1,254 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **1,285 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -56,7 +56,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P1-COO-01..06 (published + reserve) | 90 | **90 live source stems and keyed answers reviewed; 90/90 oracle matches** | Two 45-item SQL source oracles, independent line/circle/chord/tangency numerical tests, EN/RU/UZ checks |
 | P1-DIF-01..07 and P1-INT-01..05 (published+reserve) | 180 | **180 independently solved from live stems; 180/180 current keys match** | Live read-only 180-row FULL JOIN answer-oracle + locale checks + numerical calculus regression |
 | P1-DIF/INT latest written tasks | 39 | **39 stem-to-solution and criterion-level checks, zero confirmed defects** | Read-only live expected result fragments, rubric sum, locale checks + calculus numerical regression |
-| **Remaining current-bank and written items** | **194** | **NOT YET ACADEMICALLY RECHECKED** | 91 other P1 + 103 P5 current written tasks |
+| P5 full papers 01-03, timed blocks 01-02, mini mock 01 — current written tasks | 31 | **31/31 independent numerical and methodological checks matched live rubrics** | Full live read-only oracle + independent numerical probability/statistics/geometry reasoning regression |
+| **Remaining current-bank and written items** | **163** | **NOT YET ACADEMICALLY RECHECKED** | 91 other P1 + 72 other P5 current written tasks |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -126,3 +127,13 @@ All 105 P1-DIF-01..07 and 75 P1-INT-01..05 questions, across published and reser
 Second-pass written-solution and marking audit for **22 Differentiation and 17 Integration** current tasks, including full-paper mixed sets. Each English prompt and rubric criterion was inspected against derivative rules, stationary classification, related rates, reverse chain rule, boundary/infinite-limit handling, signed versus total area and disk volume computations. An independently derived representative numerical/exact result per task was confirmed against the current rubric via a reproducible **39/39 live read-only FULL JOIN**; **0 rubric-answer, missing-locale, max-mark sum or expected-key discrepancies**. Node numerical calculation also checks representative full task solutions rather than only stored answer text. No new confirmed mathematical error requiring versioning. This remains AI-assisted math review; it is **not** examiner-human signoff, not proof of complete English/Russian/Uzbek mathematical prose equivalence, and not E2E beta evidence.
 
 **Progress:** **1,254 / 1,448** independently reviewed current academic items; remaining **194 written tasks (91 P1, 103 P5)**. No question/task revisions, learner history, feature flags, scoring authority or rollout state changed. Mass rollout remains NO_GO.
+
+## 2026-11-01 Further written audit and version provenance
+
+**Version provenance defect in earlier audit method:** all 233 current written tasks were enumerated using latest `approved_at DESC,created_at DESC,id DESC` per `(content_version_id,task_key)`. **18 published key pairs (P1=7, P5=11)** choose a historical version when incorrectly using `id DESC` alone. This includes `P1CIR03-AW14`: old mathematical inconsistency remains only in immutable historic `15638` while the corrected approved version is `286/v2` (triangle 40.5sin(1.2), segment 10.85). `P5PRO06-W01` was also independently inspected live: current `259/wtv3` and earlier published `175/wtv2` both state correct one-red probability 15/28; the confusing discarded legacy migration rubric is not current. **No duplicate production corrections were made.**
+
+**Comprehensive structural and locale preflight:** the full currently approved **130 P1 and 103 P5** written task set has 0 bad rubric mark sums, 0 duplicate criterion identifiers, 0 blank criterion rules, 0 missing EN/RU/UZ prompts or self-reviews, and 0 missing/unapproved/mismatched RU/UZ criterion hashes. Read-only dynamic checks are included at `scripts/fixtures/math-written-current-version-and-locales-readonly.sql`. Passing these guards does not, by itself, prove semantic translation correctness or full handwritten-method evaluation.
+
+**Independently solved new cohort:** **31 P5** live-current written tasks — **21 full-paper questions (FP01/02/03), 6 timed-block questions (TB01/02) and 4 mini-mock questions (MM01)**. The complete English prompts and detailed marking criteria were inspected for model assumptions, exact/counting arithmetic, grouped-data moments, conditional probability, binomial/geometric conventions and normal probability/continuity corrections. Independent numerical checkpoints derived before viewing the live keyed rubrics match **31/31**, with 0 identified answer mismatches. Reproducible full live SQL oracle: `scripts/fixtures/math-p5-mixed-written-31-current-oracle.sql`; independent mathematical regression and GitHub CI: `scripts/math-p5-mixed-written-secondpass-31.cjs`.
+
+**Ledger after this work:** **1,285 / 1,448** source items have completed AI-assisted second-pass review; **163 written items (91 P1, 72 P5)** remain for the rigorous independent-current-version mathematical review. Not external human signoff, not proof of UI/E2E beta suitability. No production writes or historical learner-state changes. Mass release **NO_GO**, previously postponed learner E2E and beta stages remain deferred.
