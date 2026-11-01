@@ -54,9 +54,18 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
      }};
      window.i18n={getLang:()=> 'en'};
    },token);
-   for(const p of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js','exam-prep/exam-prep-live.js']){
+   for(const p of [
+     'exam-prep/exam-prep-api.js',
+     'exam-prep/exam-prep-host.js',
+     'exam-prep/exam-prep-live.js',
+     // API script dynamic loaders do not run for Playwright inline addScriptTag.
+     // Explicitly load the production companion written-understanding module.
+     'exam-prep/exam-prep-written-understanding-ui.js'
+   ]){
      await page.addScriptTag({path:path.resolve(p)});
    }
+   assert.equal(await page.evaluate(()=>window.__iclubExamPrepWrittenUnderstanding),
+     'written-understanding-v1','real Math written-understanding companion not mounted');
    const opened=await page.evaluate(async()=>{
      const synced=await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});
      const open=await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});
@@ -114,8 +123,18 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
      else{
        if(await radio.count()){await radio.first().check();}
        else if(await input.count()){await input.fill('1');}
-       else if(await written.count()){await written.fill('Synthetic isolated answer; no verified credit');}
-       else throw Error('unsupported Math diagnostic UI item control');
+       else if(await written.count()){
+         await written.fill('Synthetic isolated answer; no verified credit');
+         // A real published Math learning pack may require noncredit companion
+         // understanding MCQs before the written artifact can be submitted.
+         // Reproduce the production UI, not a synthetic server bypass.
+         await page.waitForTimeout(30);
+         const checkGroups=page.locator('[data-ep-written-understanding-check]');
+         for(let n=0;n<await checkGroups.count();n++){
+           await checkGroups.nth(n).locator('input[type="radio"]').first().check();
+         }
+       }
+       else throw Error('unsupported Math assessment UI item control');
        await page.locator('[data-ep-live-submit]').click();
      }
      count++;
