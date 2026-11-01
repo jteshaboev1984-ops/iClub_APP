@@ -706,7 +706,8 @@
       return { kind: "diagnostic", title: stageLabel(0), detail: started ? c.continueCheck : c.start, label: started ? c.continueCheck : c.start };
     }
     if (["resume", "ready_to_finalize"].includes(recovery?.status) && recovery?.session_id &&
-        recovery?.component_code === component && Number(recovery?.active_session_count) === 1) {
+        (recovery?.contract_version !== "active_plan_session_v1" ||
+         (recovery?.component_code === component && Number(recovery?.active_session_count) === 1))) {
       return { kind: "resume", title: home.continueTask, detail: stageLabel(Number(summary?.operational_stage || 0)), label: home.continueTask, sessionId: recovery.session_id };
     }
     // Never create a replacement attempt when the server reports ambiguous
