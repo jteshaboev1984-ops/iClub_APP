@@ -11,6 +11,7 @@ on:
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
       - 'supabase/tests/p1p5_isolated_http_postdue_retest_seed.sql'
+      - 'supabase/tests/p1p5_isolated_http_postdue_retest_cleanup.sql'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   workflow_dispatch:
 permissions:
@@ -226,6 +227,13 @@ jobs:
             END
             \$\$;
           "
+      - name: Complete and clean canonical synthetic run without touching legacy
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_postdue_retest_cleanup.sql > /tmp/p1p5-postdue-governed-cleanup.log
+          echo "Governed synthetic identity cleanup and zero legacy spillover assertions: PASS"
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
