@@ -103,9 +103,13 @@ async function scenario(browser, lang, width, dueState, guardedFlow) {
               open_corrections: 0, confirmed_skills: 0, coverage_pct: 0, goals: []
             });
           case 'get_exam_prep_active_plan_session_safe_v1':
+            // The actual backend always supplies this owner-scoped contract.
+            // Legacy Math UI now requires it before it can offer a new attempt.
             return ok(state.active
-              ? { status: 'resume', component_code: component, session_id: sessionId, first_unanswered_item_order: 1 }
-              : { status: 'none', component_code: component });
+              ? { contract_version:'active_plan_session_v1', status: 'resume', active_session_count: 1,
+                  component_code: component, session_id: sessionId, first_unanswered_item_order: 1 }
+              : { contract_version:'active_plan_session_v1', status: 'none', active_session_count: 0,
+                  component_code: component });
           case 'ensure_exam_prep_balanced_weekly_plan_safe_v1':
             return ok({ contract_version: 'stable_weekly_plan_v1', status: 'existing',
               plan_id: planId, component_code: component, created: false });
