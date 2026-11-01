@@ -144,10 +144,27 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
   assert(cap.ok,'signed isolated JWT did not resolve valid capabilities HTTP='+cap.status+' code='+cap.data?.code);
   const browser=await chromium.launch({headless:true});
   try{
-    const p1=await browserScenario(browser,'P1',tokenA);
+    // A first completed diagnostic is not necessarily complete Stage 0.
+    // Continue only through authentic server-selected next assessments until
+    // the server confirms coverage, never force a stage or fabricate evidence.
+    const screenings={P1:[],P5:[]};
+    for(const component of ['P1','P5']){
+      let complete=false;
+      for(let cycle=0;cycle<24;cycle++){
+        const before=await rpc('get_exam_prep_diagnostic_progress_safe_v1',{p_component_code:component},tokenA);
+        assert(before.ok,'diagnostic progress HTTP failure '+component);
+        if(before.data?.stage0_complete){complete=true;break;}
+        screenings[component].push(await browserScenario(browser,component,tokenA));
+        const after=await rpc('get_exam_prep_diagnostic_progress_safe_v1',{p_component_code:component},tokenA);
+        assert(after.ok,'diagnostic progress postflight HTTP failure '+component);
+        if(after.data?.stage0_complete){complete=true;break;}
+      }
+      assert(complete,'governed Stage 0 did not complete through real HTTP/browser for '+component);
+    }
+    const p1=screenings.P1[0],p5=screenings.P5[0];
+    assert(p1&&p5,'both papers require at least one actual screening session');
     const unauthorized=await rpc('get_exam_prep_session_safe_v1',{p_session_id:p1.sessionId,p_language:'en'},tokenB);
     assert(!unauthorized.ok||!unauthorized.data?.items?.length,'User B accessed user A P1 session');
-    const p5=await browserScenario(browser,'P5',tokenA);
     assert.notEqual(p1.sessionId,p5.sessionId,'P1/P5 session identity collision');
     // Move across the real public HTTP API into independent governed plans.
     const planIds={};
@@ -169,9 +186,14 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
     assert.equal(own1.data?.component_code,'P1','P1 session replay mismatch');
     assert.equal(own5.data?.component_code,'P5','P5 session replay mismatch');
     const states=dbCount();
-    assert(states.includes('P1:finalized:2')&&states.includes('P5:finalized:2'),
-      'authoritative PostgreSQL missing diagnostic + governed learning for each component: '+states);
+    const counts=Object.fromEntries(states.split('\n').filter(Boolean).map(x=>{
+      const [component,status,n]=x.split(':');return [component+':'+status,Number(n)];
+    }));
+    assert(counts['P1:finalized']>=screenings.P1.length+1 &&
+           counts['P5:finalized']>=screenings.P5.length+1,
+      'authoritative PostgreSQL missing screening cycles + learning: '+states);
     console.log('ISOLATED REAL HTTP/JWT/PostgREST/PG17 + TRUE Math UI: PASS',
-      JSON.stringify({p1,p5,learningP1,learningP5,plansSeparate:true,anonDenied:true,foreignDenied:true,sqlStates:states}));
+      JSON.stringify({screeningCount:{P1:screenings.P1.length,P5:screenings.P5.length},p1,p5,
+        learningP1,learningP5,plansSeparate:true,anonDenied:true,foreignDenied:true,sqlStates:states}));
   }finally{await browser.close();}
 })().catch(e=>{console.error('E2E FAILED:',e.message);process.exitCode=1;});
