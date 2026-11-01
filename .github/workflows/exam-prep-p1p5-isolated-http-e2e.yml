@@ -130,7 +130,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "P1P5_E2E_JWT_SECRET=$(openssl rand -hex 48)" >> "$GITHUB_ENV"
+          disposable_jwt_secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$disposable_jwt_secret"
+          echo "P1P5_E2E_JWT_SECRET=$disposable_jwt_secret" >> "$GITHUB_ENV"
           docker pull postgrest/postgrest:v12.2.3
       - name: Start disposable HTTP API
         shell: bash
