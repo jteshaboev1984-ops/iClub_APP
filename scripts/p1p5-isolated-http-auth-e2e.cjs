@@ -33,7 +33,7 @@ function dbCount(){
  const sql=`SELECT component_code||':'||status||':'||count(*) FROM private.exam_prep_sessions WHERE user_id='${A}'::uuid GROUP BY component_code,status ORDER BY component_code,status`;
  return execFileSync('psql',['-At','-v','ON_ERROR_STOP=1','-c',sql],{encoding:'utf8'}).trim();
 }
-async function browserScenario(browser,component,token){
+async function browserScenario(browser,component,token,mode='diagnostic'){
  const page=await browser.newPage({viewport:{width:390,height:844},timezoneId:'Asia/Tashkent'});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  let count=0,sessionId=null,recorded=[],profileSet=false;
@@ -74,20 +74,25 @@ async function browserScenario(browser,component,token){
      profileSet=true;
    }
    await page.locator('[data-ep-live-component="'+component+'"]').click();
-   // The current Math component card starts the entry diagnostic automatically
-   // when stage0 is incomplete. Some older clients expose a second Start button.
-   // Accept either real UI route, never send an extra start RPC from the test.
-   await page.waitForFunction(()=>Boolean(
-     document.querySelector('[data-ep-live-active-assessment="true"]') ||
-     document.querySelector('[data-ep-component-primary="diagnostic"]')
-   ),null,{timeout:25000});
-   if(await page.locator('[data-ep-component-primary="diagnostic"]').count()){
-     await page.locator('[data-ep-component-primary="diagnostic"]').click();
+   if(mode==='learning'){
+     await page.locator('[data-ep-component-primary="task"],[data-ep-component-primary="prepare"]').first().waitFor({timeout:25000});
+     await page.locator('[data-ep-component-primary="task"],[data-ep-component-primary="prepare"]').first().click();
+   }else{
+     // Current Math component card starts Stage-0 automatically; older
+     // compatible releases also expose an explicit Start control.
+     await page.waitForFunction(()=>Boolean(
+       document.querySelector('[data-ep-live-active-assessment="true"]') ||
+       document.querySelector('[data-ep-component-primary="diagnostic"]')
+     ),null,{timeout:25000});
+     if(await page.locator('[data-ep-component-primary="diagnostic"]').count()){
+       await page.locator('[data-ep-component-primary="diagnostic"]').click();
+     }
    }
    await page.locator('[data-ep-live-active-assessment="true"]').waitFor({timeout:25000});
    const trace=await page.evaluate(()=>window.__realRpcTrace);
-   const start=trace.findLast(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1');
-   assert(start?.ok&&start.session_id,'diagnostic start had no durable HTTP session');
+   const start=trace.findLast(x=>x.name===(mode==='learning'
+     ? 'start_exam_prep_session_safe_v1':'start_exam_prep_next_diagnostic_safe_v1'));
+   assert(start?.ok&&start.session_id,mode+' start had no durable HTTP session');
    sessionId=start.session_id;
    // Actual browser controls submit each question; answers are intentionally
    // arbitrary. The authoritative database evaluates them, not this script.
@@ -122,7 +127,7 @@ async function browserScenario(browser,component,token){
    assert(recorded.some(x=>x.name==='submit_exam_prep_response_safe_v1'&&x.ok),'no real HTTP committed answer');
    assert(recorded.some(x=>x.name==='finalize_exam_prep_session_safe_v1'&&x.ok),'no real HTTP finalization');
    assert.equal(errors.length,0,'browser errors: '+errors.join(';'));
-   return {component,answers:count,sessionId,profileSet,httpActions:recorded.filter(x=>x.ok).length};
+   return {component,mode,answers:count,sessionId,profileSet,httpActions:recorded.filter(x=>x.ok).length};
  }catch(e){
    const trace=await page.evaluate(()=>window.__realRpcTrace||[]).catch(()=>[]);
    console.error('FAIL '+component+': '+e.message,'recent_http_statuses:',JSON.stringify(trace.slice(-12).map(x=>({name:x.name,status:x.status}))));
@@ -144,13 +149,29 @@ async function browserScenario(browser,component,token){
     assert(!unauthorized.ok||!unauthorized.data?.items?.length,'User B accessed user A P1 session');
     const p5=await browserScenario(browser,'P5',tokenA);
     assert.notEqual(p1.sessionId,p5.sessionId,'P1/P5 session identity collision');
+    // Move across the real public HTTP API into independent governed plans.
+    const planIds={};
+    for(const component of ['P1','P5']){
+      const generated=await rpc('generate_exam_prep_weekly_plan_safe_v3',{p_component_code:component},tokenA);
+      assert(generated.ok&&generated.data?.plan_id,'real HTTP plan generation failed '+component+' status='+generated.status+' code='+generated.data?.code);
+      const read=await rpc('get_exam_prep_weekly_plan_safe_v2',{p_component_code:component},tokenA);
+      assert(read.ok&&read.data?.plan_id===generated.data.plan_id,'real HTTP plan readback mismatch '+component);
+      assert(read.data?.items?.some(i=>i.item_type==='learning'&&i.status==='pending'),'no governed learning item '+component);
+      planIds[component]=generated.data.plan_id;
+    }
+    assert.notEqual(planIds.P1,planIds.P5,'P1/P5 plans unexpectedly share identity');
+    const learningP1=await browserScenario(browser,'P1',tokenA,'learning');
+    const learningP5=await browserScenario(browser,'P5',tokenA,'learning');
+    assert.notEqual(learningP1.sessionId,learningP5.sessionId,'learning session ID collision');
     const own1=await rpc('get_exam_prep_session_safe_v1',{p_session_id:p1.sessionId,p_language:'en'},tokenA);
     const own5=await rpc('get_exam_prep_session_safe_v1',{p_session_id:p5.sessionId,p_language:'en'},tokenA);
     assert(own1.ok&&own5.ok,'reopened owner sessions unavailable');
     assert.equal(own1.data?.component_code,'P1','P1 session replay mismatch');
     assert.equal(own5.data?.component_code,'P5','P5 session replay mismatch');
     const states=dbCount();
-    assert(states.includes('P1:finalized:')&&states.includes('P5:finalized:'),'authoritative PostgreSQL did not persist P1/P5 finalization: '+states);
-    console.log('ISOLATED REAL HTTP/JWT/PostgREST/PG17 + TRUE Math UI: PASS',JSON.stringify({p1,p5,anonDenied:true,foreignDenied:true,sqlStates:states}));
+    assert(states.includes('P1:finalized:2')&&states.includes('P5:finalized:2'),
+      'authoritative PostgreSQL missing diagnostic + governed learning for each component: '+states);
+    console.log('ISOLATED REAL HTTP/JWT/PostgREST/PG17 + TRUE Math UI: PASS',
+      JSON.stringify({p1,p5,learningP1,learningP5,plansSeparate:true,anonDenied:true,foreignDenied:true,sqlStates:states}));
   }finally{await browser.close();}
 })().catch(e=>{console.error('E2E FAILED:',e.message);process.exitCode=1;});
