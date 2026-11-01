@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **555 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **675 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -50,7 +50,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P5-CNT-01 to CNT-05 (published + reserve) | 75 | **75 independently derived factorial/combinatorial results, 0 mismatches** | Five read-only SQL formula-oracle fixtures executed against live Supabase; source/choices EN/RU/UZ reviewed |
 | P5-DAT-01 through DAT-10 (published + reserve) | 150 | **150 answer/semantics checks, zero observed mismatches** | 10 independent source-level read-only SQL fixtures executed against Supabase; regression CI | 
 | P5-DRV-01 through DRV-03 (published + reserve) | 45 | **45 distribution/expectation/variance answers matched** | Three read-only SQL oracles executed against Supabase; independent numeric regression CI |
-| **Remaining current-bank and written items** | **893** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
+| P1-CIR-01/02 and P1-QUA-01..06 (published + reserve) | 120 | **120 correct keyed answers verified with independent geometry and algebra derivations** | Eight read-only live SQL oracle fixtures, numerical regression and locale consistency checks |
+| **Remaining current-bank and written items** | **773** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -82,3 +83,11 @@ Overall reviewed **510/1,448** current items; **938** remain. This coverage coun
 All 45 P5-DRV-01, DRV-02 and DRV-03 questions (18 published and 27 reserve) were independently recomputed or semantically reviewed: probability normalization, distribution validity, linear expectations, expected payoffs, E(X²)−E(X)² and standard deviations (including square-root and fractional exact forms). Three independent live SQL source-key fixtures each returned **15 checked, zero mismatches**. Their numerical oracles parse exact fractions separately; descriptive or radical-text keys are checked explicitly with separate numerical computation. EN/RU/UZ stems, explanations and MCQ choices were inspected for completeness and number consistency; zero missing translations or option-number mismatches, zero duplicate literal alternatives and zero invalid MCQ answer keys. No confirmed mathematical defects requiring correction, so source rows were not rewritten.
 
 **P5 question-bank scope milestone:** All 540 published/reserve P5 questions across 36 skills have now undergone a second academic review by AI with formula recomputation for numerical questions and concept/choice review for model questions. This is **not** a completed review of the 103 current written P5 tasks, not human academic certification, and does not authorize a general learner rollout. Total current-item ledger: **555/1,448** (540 P5 question-bank + 15 P1 question-bank), with **893 pending** (660 P1 question-bank + 233 current written P1/P5 tasks). Historical source versions and 1,990 recorded learner responses/548 sessions were not altered by this read-only batch.
+
+## 2026-11-01 P1 Circular Measure and Quadratics second-pass batch
+
+The 120 current published/reserve questions (48 published, 72 reserve) across P1-CIR-01/02 and P1-QUA-01..06 were read at the level of original English stems, keyed options and English solution explanations. Independent checks include degree/radian conversion, arc length and sector perimeter, completing squares, vertex extrema, discriminant and tangency boundaries, real-root solutions, strict/non-strict polynomial inequalities, simultaneous intersection systems and quartic substitutions. Eight read-only live Supabase source-level oracle SQL fixtures each returned **15 checked and 0 mismatches**. Independent arithmetic/algebraic property checks are also supplied in a separate Node regression test; these are a second method beyond checking the database's saved key.
+
+All 120 question prompts, explanations and options are present in EN/RU/UZ; no invalid MCQ answer index, duplicate literal option, locale-option number change or differing inequality symbol was flagged. These checks do not prove exhaustive semantic equivalence of all translated wording. No confirmed mathematical defect requiring a source replacement was discovered in this batch.
+
+Cumulative current-item second-pass coverage: **675 / 1,448**, comprising **540 P5 bank, 135 P1 bank and 0 full written-task solutions** in this second-pass counting methodology; **773 pending** (540 current P1 bank + 233 current written P1/P5 tasks). Previous written-task repair and structural QA do not silently count as full independent written-solution review. Historical learner answers/sessions, mass rollout NO_GO and skipped learner E2E/beta remain unchanged.
