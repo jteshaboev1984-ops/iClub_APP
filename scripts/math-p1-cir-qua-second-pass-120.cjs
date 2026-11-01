@@ -72,7 +72,7 @@ const biquad=(a,b,c)=>roots(a,b,c).filter(u=>u>=0).flatMap(u=>u===0?[0]:[-Math.s
 assert.deepEqual(biquad(1,-5,4),[-2,-1,1,2]);
 assert.deepEqual(biquad(1,-13,36),[-3,-2,2,3]);
 const calc=biquad(1,-7,12).map(x=>Math.round(x*10000)/10000);
-const target=[-Math.sqrt(2),-3**.25,3**.25,Math.sqrt(2)].map(x=>Math.round(x*10000)/10000).sort((a,b)=>a-b);
+const target=[-Math.sqrt(2),-(3**.25),3**.25,Math.sqrt(2)].map(x=>Math.round(x*10000)/10000).sort((a,b)=>a-b);
 assert.deepEqual(calc,target);
 close(2+2+5+5,14);
 console.log("P1 CIR/QUA second-pass: 120 distinct keyed questions, independent geometry/algebra oracles, no writes PASS");
