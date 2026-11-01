@@ -95,5 +95,5 @@ for(const [fn,t,from,to,last,expected]of [
  [cos,-.5,0,360,false,[120,240]],[tan,-Math.sqrt(3),0,360,false,[120,300]],
  [sin,0,-360,360,true,[-360,-180,0,180,360]]
 ])A.deepEqual(solve(fn,t,from,to,last),expected);
-near(solve(sin,cos(45),0,360,false).reduce((a,x)=>a+x,0),90); // unrelated unit check kept simple
+A.deepEqual(solve(sin,cos(45),0,360,false),[45,135]);
 console.log("TRI/SER 150 keyed source checks; independent binomial, progressions, trigonometry and interval roots PASS");
