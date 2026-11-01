@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **825 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **1,035 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -52,7 +52,9 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P5-DRV-01 through DRV-03 (published + reserve) | 45 | **45 distribution/expectation/variance answers matched** | Three read-only SQL oracles executed against Supabase; independent numeric regression CI |
 | P1-CIR-01/02 and P1-QUA-01..06 (published + reserve) | 120 | **120 correct keyed answers verified with independent geometry and algebra derivations** | Eight read-only live SQL oracle fixtures, numerical regression and locale consistency checks |
 | P1-TRI-01..05 and P1-SER-01..05 (published + reserve) | 150 | **149 previously correct, 1 wrong published MCQ key repaired, all 150 current keys matched after correction** | Independent trigonometry/series calculations, 2 read-only 75-item live fixtures, corrected Q10101/assessment466 and live postflight |
-| **Remaining current-bank and written items** | **623** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
+| P1-FUN-01..08 (published + reserve) | 120 | **120 live source stems and keyed answers reviewed; 120/120 oracle matches** | Two 60-item SQL source oracles, independent inverse/domain/range/transformation numerical tests, EN/RU/UZ checks |
+| P1-COO-01..06 (published + reserve) | 90 | **90 live source stems and keyed answers reviewed; 90/90 oracle matches** | Two 45-item SQL source oracles, independent line/circle/chord/tangency numerical tests, EN/RU/UZ checks |
+| **Remaining current-bank and written items** | **413** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -100,3 +102,11 @@ Cumulative current-item second-pass coverage: **675 / 1,448**, comprising **540 
 The 150 current P1-TRI-01..05 and P1-SER-01..05 source questions (60 published, 90 reserve) were independently examined: ranges, principal-value inverse functions, exact special angles, trigonometric identities and interval boundary solutions; binomial coefficients, AP/GP classification, nth terms, finite sums, convergence and infinite tails. Two read-only source-key fixtures completed **75/75 TRI and 75/75 SER with zero mismatches AFTER correction**. Additional numeric/symbolic regression includes independent trigonometric values, degrees-to-radians, exact radicals, polynomial convolution, arithmetic/geometric sums and enumeration of inclusive vs strict solution domains. The key fixtures are compared to independently reviewed solutions, not treated as mathematical proof by themselves.
 
 EN/RU/UZ checks for all 150 confirmed no missing stems/rationales, invalid choice indices, repeated literal alternatives, option numeric mismatch, or mismatch in inequality signs. Two stem-number lexical differences for `P1TRI03-M01` are equivalent instructions: “1 decimal place” vs “0.1° precision”, **not** a proven translation error. Full human semantic qualification is unavailable. P1 current bank still has **390 unchecked questions**. Total reviewed second-pass current items: **825/1,448**; **623 outstanding (390 P1 bank + 233 written)**. Old student state and mass launch NO_GO remain untouched.
+
+## 2026-11-01 P1 Functions and Coordinate Geometry second pass (210 items)
+
+A previously blocked Supabase connector **recovered** and a read-only SELECT 1 healthcheck succeeded. Review used **live current Supabase question text and answer keys**, not just historical GitHub migrations. P1-FUN two 60-key fixtures and P1-COO two 45-key fixtures compare independently read/derived answers with actual live published/reserve answer options; **all four executions returned zero discrepancies** (60/60 + 60/60 + 45/45 + 45/45). FULL JOIN detects missing/extra keys. Independent numeric regression includes inverse functions, quadratic restricted extrema, line gradients and intercepts, midpoint, circle equation, perpendicularity, chord lengths, tangency, and point transformations.
+
+A separate live EN/RU/UZ inspection covered all 210 stems, explanations, four MCQ alternatives, key type, literal/numeric duplicate alternatives, numerical and inequality-sign agreement. Results: zero missing locales, zero bad choice structures, zero duplicate lists, zero mismatched stem numbers/operators. One Russian variant for P1FUN08-L02 adds the equivalent words “в 4 раза” to scale factor 1/4; this is semantically consistent. Previously fixed P1FUN06-A01 now correctly keys left/down; the P1FUN05-A02 intersection explanation in the live database contains the repaired derivation. No new mathematically confirmed defect; **no production content mutation**.
+
+**Cumulative review: 1,035/1,448 current items; 413 pending** (105 P1 Differentiation, 75 P1 Integration, 233 current written P1/P5 tasks). This is AI-assisted academic QA, not independent human certification. Automated property calculations independently check representative mathematical problems; they are not a full proof that every translated sentence is equivalent. Learner E2E/beta stages remain incomplete. Mass rollout remains NO_GO; student progress must stay immutable.

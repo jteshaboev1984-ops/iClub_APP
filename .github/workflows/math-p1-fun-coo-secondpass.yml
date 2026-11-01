@@ -1,0 +1,18 @@
+name: Math P1 Functions and Coordinate Geometry 210 second-pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p1-fun-*-secondpass.sql"
+      - "scripts/fixtures/math-p1-coo-*-secondpass.sql"
+      - "scripts/math-p1-functions-coordinate-secondpass-210.cjs"
+      - ".github/workflows/math-p1-fun-coo-secondpass.yml"
+  workflow_dispatch:
+jobs:
+  mathematical-oracles:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independently verify functions and coordinate geometry, unique 210 source keys
+        run: node scripts/math-p1-functions-coordinate-secondpass-210.cjs
