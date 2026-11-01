@@ -45,6 +45,7 @@ async function scenario(browser,language,width,component,sessionType,kind,mode,e
         syllabusTracker:async component=>wrap({component_code:component,
           denominator_count:component==='P1'?45:36,coverage_count:2,areas:[]}),
         correctionQueue:async()=>wrap({active_count:0,cases:[]}),
+        activePlanSession:async component=>wrap({contract_version:'active_plan_session_v1',component_code:component,status:'none',active_session_count:0}),
         weeklyPlan:async()=>wrap({plan_id:null,items:[]}),
         recentResults:async()=>wrap({results:[]}),
         timedCatalog:async()=>wrap({assessments:[{assessment_id:91,marks_available:20,time_limit_sec:600,title:'Fixture timed test'}]}),
