@@ -1,0 +1,31 @@
+name: Mathematics P1/P5 Source to RPC Trace Guard
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-host.js'
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-weekly-flow-adapter.js'
+      - 'exam-prep/exam-prep-progress-ux-api.js'
+      - 'exam-prep/runtime/written-core-controller-v1.js'
+      - 'scripts/exam-prep-math-p1p5-source-rpc-trace.cjs'
+      - '.github/workflows/exam-prep-math-p1p5-source-rpc-trace.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-trace:
+    name: 61 RPC source + P1/P5 UI route guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check source audit script syntax
+        run: node --check scripts/exam-prep-math-p1p5-source-rpc-trace.cjs
+      - name: Audit traced client RPC and guarded Math host
+        run: node scripts/exam-prep-math-p1p5-source-rpc-trace.cjs
