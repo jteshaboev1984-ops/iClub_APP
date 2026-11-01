@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+"use strict";
+const A=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
+const s=fs.readFileSync(path.join(__dirname,"fixtures/math-p1-calculus-written-39-secondpass.sql"),"utf8");
+const rows=[...s.matchAll(/\('([A-Za-z0-9-]+)','([^']+)'\)/g)];
+A.equal(rows.length,39);const keys=new Map(rows.map(x=>[x[1],x[2]]));A.equal(keys.size,39);
+A.match(s,/FULL JOIN/);A.doesNotMatch(s,/\b(?:INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE)\s+(?:private|public)\./i);
+const close=(a,b)=>A.ok(Math.abs(a-b)<1e-9,String(a)+" != "+String(b));
+const check=(k,v)=>A.equal(keys.get(k),v,k);
+const I=(f,a,b,n=1000)=>{const h=(b-a)/n;let s=f(a)+f(b);for(let j=1;j<n;j++)s+=(j%2?4:2)*f(a+j*h);return s*h/3;};
+// Independently recomputed results, in addition to all 39 stem/rubric reviews.
+close(I(x=>2*x+3-x*x,-1,3),32/3);check("P1FP01-Q09","32/3");
+close(I(x=>x*x*(4-x)**2,0,4),512/15);check("P1FP01-Q10","512/15");
+close(.5*.5**2*(.5-1)**2*2,1/32);
+close(I(x=>Math.abs(2*x**3-3*x*x+x),0,1),1/16);
+close(I(x=>Math.abs(3*x*x-4*x+1),0,2),62/27,1e-9);
+close(2*(-1/3)**3-2*(-1/3)**2-2*(-1/3)+5,145/27);
+close(2*2**3-4*2+7,15);check("P1INT02-AW22","y(2)=15");
+close(3**3-2*3**2+2*3+6,21);
+close(I(x=>Math.abs(x*x-4),-3,3),46/3,1e-8);
+close(I(x=>Math.abs(x*x-1),-2,2),4);
+close(I(x=>(2*x-x*x)**2,0,2),16/15);
+close(I(x=>(2*x)**2,0,3),36);
+close(6*Math.sqrt(4)-3/(2*Math.sqrt(4))-2/(4**2),89/8);
+close(15/2*4**(3/2)-6*Math.sqrt(4)-2/16,383/8);
+close(30*2**4-12*6**2,48);
+close(4*Math.PI*5*1,20*Math.PI);
+close(8*Math.PI*5*1,40*Math.PI);
+close(12*12,144);close(10*10,100);
+close(72/(3*6**2),2/3);
+close(12*2*2-2*2**3,32);
+console.log("PASS: 39 unique independently reviewed DIF/INT written task checkpoints, maths properties, safe SQL.");
