@@ -40,7 +40,7 @@
 **Done when:** traceability matrix covers every major P1/P5 state-changing route, each has an authoritative invariant and test type, and missing integrated paths are clearly enumerated.
 
 ### STAGE B — Integrated isolated authenticated E2E
-**State: IN PROGRESS — real browser→signed local JWT→PostgREST→disposable PostgreSQL P1/P5 screening and learning verified; full correction/retest/mixed/timed/written journey still open.**
+**State: IN PROGRESS — real Math P1/P5 screening + learning + correction/future-due retest scheduling verified through signed local JWT/PostgREST/disposable PG17; full post-due retest, mixed, positive timed/paper and written/resume journeys still open.**
 - Reuse ephemeral PostgreSQL 17 `p2-73` setup. Add local compatible Auth + PostgREST/Supabase API (or verified equivalent with actual auth.uid(), JWT claims, roles and grants) in CI. Must label any remaining simulated transport as simulation, not real full-stack acceptance.
 - Use synthetic IDs and sessions ONLY in isolated DB/temporary containers. Create minimum sanitized fixture pack that exercises actual P1/P5 content version selection and answer mechanisms without leaking protected answer keys. Fail the test if it targets a production hostname/project/key, lacks explicit isolation marker, or has access to real learner data.
 - Drive actual iClub Mathematics P1/P5 host with Playwright and authenticate fake test users through local auth. Trace via HTTP: profile → entry → diagnostic → answer/finalize → placement → learning/weekly plan → correction → fresh delayed retest → mixed → timed/paper → written criteria/Next → logout/reopen/resume. If progression is evidence-gated, synthesize **valid incremental academic evidence**, not raw stage flips or calendar advancement.
@@ -78,7 +78,7 @@
 | Stage | State | Exact SHA / PR / workflow evidence | Findings / next action |
 | --- | --- | --- | --- |
 | A: trace & gap | **COMPLETE** | PR #451; 61/61 production read-only RPC permission audit; GitHub Actions run 41321004984 GREEN; `docs/math-p1p5-e2e-stage-a-source-server-trace-20261101.md` | Client/UI/source and authoritative DB route matrix saved. Remaining genuine Auth/HTTP→PostgreSQL integration isolated under Stage B. |
-| B: real-stack isolated E2E | **IN PROGRESS** | PR #452; [final GREEN HTTP/Auth/PostgREST test 41323470127](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41323470127); `docs/math-p1p5-e2e-stage-b-real-http-auth-20261101.md` | Both real Math UI paper journeys passed 4+3 complete diagnostics → independent server plans → 1+1 complete learning sessions (9 finalized DB rows); foreign/anon/bad-JWT denied. Remaining real HTTP correction/retest/mixed/timed/paper/written/resume unproven. |
+| B: real-stack isolated E2E | **IN PROGRESS** | PR #452; [final GREEN HTTP/Auth/PostgREST test 41323470127](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41323470127); `docs/math-p1p5-e2e-stage-b-real-http-auth-20261101.md` | Both real Math UI paper journeys passed 4+3 complete diagnostics → independent server plans → 1+1 complete learning sessions (9 finalized DB rows); foreign/anon/bad-JWT denied. PR #453 [GREEN CI 41333784857](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41333784857) adds genuine correction (4 items), future-due retest + early denial, stage-locked full-paper denial, same-user active correction readback, foreign answer/review/access denial. Post-due retest, mixed, positive timed/paper and written/partial-resume remain. |
 | C: model/fault/locale/coverage | NOT STARTED | — | Extend 15+18 profiles, validate 1,448 structural mappings; no fake grading |
 | D: integrated gate + release report | NOT STARTED | — | Orchestrate reproducible CI; preserve distinct real-world governance decision |
 
@@ -107,8 +107,18 @@
 - Script used a browser HTTP `window.sb.rpc` adapter whose responses are *not mocked*; it is not equivalent to Supabase hosted GoTrue/Auth or official Supabase SDK. Remaining correction/delayed retest/mixed/timed/full-paper/written/partial-resume tests are required to finish Stage B.
 - PR [#452](https://github.com/jteshaboev1984-ops/iClub_APP/pull/452) includes executable CI, disposable fixture and test driver; details in `docs/math-p1p5-e2e-stage-b-real-http-auth-20261101.md`. No product runtime or production access state changed.
 
+## Stage B additional integration checkpoint — 2026-11-01
+
+- **Actual security + correction HTTP CI GREEN** at [run 41333784857](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41333784857), [PR #453](https://github.com/jteshaboev1984-ops/iClub_APP/pull/453): the full prior Math P1/P5 browser diagnostic+learning journey plus an HTTP-only authentic, server-governed correction path; real signed JWT, local PostgREST, disposable PG17.
+- P1 genuine wrong learning evidence created an unresolved correction; authenticated RPC authorized its remediation; newly signed learner A JWT resumed the active correction; four answers finalized. Server scheduled a `due_not_before > now()` retest and rejected premature authorization without synthetic clock manipulation. Early full-paper authorization denied.
+- Account B failed all foreign attempts: active correction read, finalized assessment review and answer write. No private answer keys in HTTP review before authorization.
+- Harness regression from previous PR: waits for actual UI advance or finalization instead of a submit ACK; eliminates a detected test race without altering learner app runtime.
+- **Remaining Stage B**: actual fresh retest after due (without overriding real auth clock), mixed-transfer positive path, timed and full-paper positive path/review/scoring, Math written criteria/Next with mid-session browser reload, official hosted Supabase Auth and Telegram-device smoke. No fake human beta signoff.
+- Production unchanged: no Supabase DML, feature toggle, entitlement updates or live learners touched. The 4 human weekly reviews/mass gate remain separately outstanding.
+
 ## Change log
 
+- **2026-11-01 / v1.3:** Stage B real HTTP correction + future retest guard + unauthorized access and stage gate tests GREEN, and browser test race fixed; remaining positive exam paths open.
 - **2026-11-01 / v1.2:** Stage B partial genuine client→JWT/PostgREST→isolated DB E2E GREEN with nine persisted synthetic sessions; remaining full-funnel cases still open.
 - **2026-11-01 / v1.1:** Stage A finished with 61/61 real schema/auth-grant audit + source trace CI GREEN; gap matrix and Stage B scope documented; no changes to production users.
 - **2026-11-01 / v1.0:** Created durable integrated E2E release roadmap at owner request. All four new stages NOT STARTED; historical completed work preserved and referenced. No code, config, learner or release-state modifications authorized by this documentation.
