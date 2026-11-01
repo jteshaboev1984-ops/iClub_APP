@@ -1,0 +1,17 @@
+name: Math P1 Differentiation and Integration 180 second-pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p1-calculus-*-secondpass.sql"
+      - "scripts/math-p1-calculus-secondpass-180.cjs"
+      - ".github/workflows/math-p1-calculus-secondpass.yml"
+  workflow_dispatch:
+jobs:
+  mathematical-oracles:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 180 independently derived calculus oracle entries and numerical regressions
+        run: node scripts/math-p1-calculus-secondpass-180.cjs
