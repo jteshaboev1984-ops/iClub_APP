@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **1,215 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **1,254 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -55,7 +55,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P1-FUN-01..08 (published + reserve) | 120 | **120 live source stems and keyed answers reviewed; 120/120 oracle matches** | Two 60-item SQL source oracles, independent inverse/domain/range/transformation numerical tests, EN/RU/UZ checks |
 | P1-COO-01..06 (published + reserve) | 90 | **90 live source stems and keyed answers reviewed; 90/90 oracle matches** | Two 45-item SQL source oracles, independent line/circle/chord/tangency numerical tests, EN/RU/UZ checks |
 | P1-DIF-01..07 and P1-INT-01..05 (published+reserve) | 180 | **180 independently solved from live stems; 180/180 current keys match** | Live read-only 180-row FULL JOIN answer-oracle + locale checks + numerical calculus regression |
-| **Remaining current-bank and written items** | **233** | **NOT YET ACADEMICALLY RECHECKED** | 130 P1 + 103 P5 latest written tasks require full solution and rubric review |
+| P1-DIF/INT latest written tasks | 39 | **39 stem-to-solution and criterion-level checks, zero confirmed defects** | Read-only live expected result fragments, rubric sum, locale checks + calculus numerical regression |
+| **Remaining current-bank and written items** | **194** | **NOT YET ACADEMICALLY RECHECKED** | 91 other P1 + 103 P5 current written tasks |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -119,3 +120,9 @@ All 105 P1-DIF-01..07 and 75 P1-INT-01..05 questions, across published and reser
 **Syllabus scope check:** Official Cambridge 9709 syllabus v3 (2026–2027), section 1.8 printed page 22 explicitly includes simple improper integrals such as x^(-1/2) from 0 to 1. Therefore current x^(-1/2) from 0 to 4 examples are within scope; no edits or forced retirement. Source: https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf .
 
 **New cumulative status:** **1,215/1,448** current items independently reviewed by AI: all **675 P1 and 540 P5** multiple-choice/input sources, with **233 written tasks (130 latest P1 + 103 latest P5)** remaining for independent complete solution/rubric examination. Old versions, 1,990 learner responses and 548 sessions unchanged. Mass rollout still **NO_GO**; previously deferred learner E2E/beta phases not revived.
+
+## 2026-11-01 P1 Calculus written tasks — 39 current latest versions
+
+Second-pass written-solution and marking audit for **22 Differentiation and 17 Integration** current tasks, including full-paper mixed sets. Each English prompt and rubric criterion was inspected against derivative rules, stationary classification, related rates, reverse chain rule, boundary/infinite-limit handling, signed versus total area and disk volume computations. An independently derived representative numerical/exact result per task was confirmed against the current rubric via a reproducible **39/39 live read-only FULL JOIN**; **0 rubric-answer, missing-locale, max-mark sum or expected-key discrepancies**. Node numerical calculation also checks representative full task solutions rather than only stored answer text. No new confirmed mathematical error requiring versioning. This remains AI-assisted math review; it is **not** examiner-human signoff, not proof of complete English/Russian/Uzbek mathematical prose equivalence, and not E2E beta evidence.
+
+**Progress:** **1,254 / 1,448** independently reviewed current academic items; remaining **194 written tasks (91 P1, 103 P5)**. No question/task revisions, learner history, feature flags, scoring authority or rollout state changed. Mass rollout remains NO_GO.
