@@ -120,6 +120,7 @@ const path = require('path');
       if (name === 'get_my_exam_prep_beta_invitation_v1') return { data: { invited: false, invitations: [] }, error: null };
       if (name === 'get_exam_prep_exam_profile_v1') return { data: [window.__profile], error: null };
       if (name === 'get_exam_prep_diagnostic_progress_safe_v1') return { data: window.__progress[args.p_component_code], error: null };
+      if (name === 'get_exam_prep_active_plan_session_safe_v1') return { data: {contract_version:'active_plan_session_v1',component_code:args.p_component_code,status:'none',active_session_count:0}, error: null };
       if (name === 'get_exam_prep_state_safe_v1') return { data: window.__state[args.p_component_code], error: null };
       if (name === 'get_exam_prep_syllabus_tracker_safe_v1') return { data: window.__tracker[args.p_component_code], error: null };
       if (name === 'get_exam_prep_skill_detail_safe_v1') return { data: window.__detail, error: null };
