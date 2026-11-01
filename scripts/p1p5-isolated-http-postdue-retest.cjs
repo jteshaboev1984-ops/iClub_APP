@@ -149,6 +149,8 @@ async function run(){
    advanceClock(uid,7*24*3600);steps++;
  }
  assert(!due(caseRow.id).future,'clock advanced but due gate remains future; never modify real due timestamp');
+ const existingEvidenceCount=Number(psql("SELECT count(*) FROM private.exam_prep_responses WHERE session_id='"+corrStart.session_id+"'::uuid"));
+ assert(existingEvidenceCount>=1,'corrective evidence unexpectedly missing before retest');
  const retest=requireOK(await rpc('authorize_exam_prep_retest_safe_v1',{p_correction_case_id:caseRow.id},token),'positive post-due retest');
  assert(retest.authorization_id&&retest.assessment_id,'no actual fresh retest authorization');
  const started=requireOK(await rpc('start_exam_prep_session_safe_v1',{
@@ -163,7 +165,7 @@ async function run(){
  const resolved=row("SELECT status FROM private.exam_prep_correction_cases WHERE id='"+caseRow.id+"'::uuid");
  assert(resolved.status==='resolved','valid fresh retest did not resolve correction case');
  const oldResponseCount=Number(psql("SELECT count(*) FROM private.exam_prep_responses WHERE session_id='"+corrStart.session_id+"'::uuid"));
- assert(oldResponseCount>=1,'prior corrected evidence was damaged');
+ assert.equal(oldResponseCount,existingEvidenceCount,'fresh retest modified original corrective evidence');
  const p5Untouched=Number(psql("SELECT count(*) FROM private.exam_prep_sessions WHERE user_id='"+uid+"'::uuid AND component_code='P5' AND session_type IN('correction','retest')"));
  assert(p5Untouched===0,'P1 correction leaked into P5');
  console.log('STAGE B AUTHENTIC HTTP POST-DUE RETEST PASS',JSON.stringify({
