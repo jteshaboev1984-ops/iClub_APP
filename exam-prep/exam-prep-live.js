@@ -837,7 +837,10 @@
         ? internal.api.activePlanSession(component).catch(() => null)
         : Promise.resolve(null)
     ]);
-    if (stage0Complete && !flow &&
+    // A cached older API or an isolated component without the additive
+    // discovery getter must retain the preexisting route, not strand learners.
+    // When the new getter is present, errors fail closed to prevent duplicates.
+    if (stage0Complete && !flow && typeof internal.api.activePlanSession === "function" &&
         (!activePlanResult?.ok ||
          activePlanResult.data?.contract_version !== "active_plan_session_v1" ||
          activePlanResult.data?.component_code !== component)) {
