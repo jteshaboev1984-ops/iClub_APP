@@ -94,9 +94,16 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
      ? 'start_exam_prep_session_safe_v1':'start_exam_prep_next_diagnostic_safe_v1'));
    assert(start?.ok&&start.session_id,mode+' start had no durable HTTP session');
    sessionId=start.session_id;
+   // Assessment size is authoritative. Later diagnostic waves can contain many
+   // more questions than the first wave; never assume an 8/36-item fixture.
+   const frozen=await rpc('get_exam_prep_session_safe_v1',
+     {p_session_id:sessionId,p_language:'en'},token);
+   const expectedItems=Number(frozen.data?.total_items||frozen.data?.items?.length||0);
+   assert(frozen.ok&&expectedItems>=1&&expectedItems<=240,
+     'invalid server-owned assessment length '+component+'/'+mode+'/'+expectedItems);
    // Actual browser controls submit each question; answers are intentionally
    // arbitrary. The authoritative database evaluates them, not this script.
-   for(let i=0;i<36;i++){
+   for(let i=0;i<=expectedItems;i++){
      const question=page.locator('[data-ep-live-active-assessment="true"]');
      if(!await question.count()) break;
      const radio=page.locator('input[name="ep_live_answer"]');
@@ -125,7 +132,8 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
    recorded=await page.evaluate(()=>window.__realRpcTrace);
    assert(count>0,'no real diagnostic answers');
    assert(recorded.some(x=>x.name==='submit_exam_prep_response_safe_v1'&&x.ok),'no real HTTP committed answer');
-   assert(recorded.some(x=>x.name==='finalize_exam_prep_session_safe_v1'&&x.ok),'no real HTTP finalization');
+   assert(recorded.some(x=>x.name==='finalize_exam_prep_session_safe_v1'&&x.ok),
+     'no real HTTP finalization after '+count+'/'+expectedItems+' items in '+component+'/'+mode);
    assert.equal(errors.length,0,'browser errors: '+errors.join(';'));
    return {component,mode,answers:count,sessionId,profileSet,httpActions:recorded.filter(x=>x.ok).length};
  }catch(e){
