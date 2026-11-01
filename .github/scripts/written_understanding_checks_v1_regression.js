@@ -41,6 +41,7 @@ const path = require('path');
       if (name === 'get_my_exam_prep_beta_invitation_v1') return { data:{invited:false,invitations:[]}, error:null };
       if (name === 'get_exam_prep_exam_profile_v1') return { data:[window.__profile], error:null };
       if (name === 'get_exam_prep_diagnostic_progress_safe_v1') return { data:window.__progress[args.p_component_code], error:null };
+      if (name === 'get_exam_prep_active_plan_session_safe_v1') return { data:{contract_version:'active_plan_session_v1',component_code:args.p_component_code,status:'none',active_session_count:0}, error:null };
       if (name === 'get_exam_prep_state_safe_v1') return { data:window.__state[args.p_component_code], error:null };
       if (name === 'get_exam_prep_weekly_plan_safe_v2') return { data:window.__plan, error:null };
       if (name === 'generate_exam_prep_weekly_plan_safe_v3') return { data:{plan_id:window.__plan.plan_id,component_code:'P1',priority_count:1}, error:null };
