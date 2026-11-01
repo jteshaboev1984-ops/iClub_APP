@@ -297,6 +297,12 @@
   async function authorizeRevalidationItem(caseId, itemOrder) {
     return rpc("authorize_exam_prep_revalidation_item_safe_v1", { p_case_id: caseId, p_item_order: Number(itemOrder) });
   }
+  // Authoritative owner-scoped active plan session lookup. The current plan may
+  // be superseded while an older learning/mixed/retest attempt is still active.
+  // The server returns only session metadata, never protected answer keys.
+  async function activePlanSession(componentCode) {
+    return rpc("get_exam_prep_active_plan_session_safe_v1", { p_component_code: componentArg(componentCode) });
+  }
   async function weeklyPlan(componentCode) { return rpc("get_exam_prep_weekly_plan_safe_v2", { p_component_code: componentArg(componentCode) }); }
   async function generateWeeklyPlan(componentCode) { return rpc("generate_exam_prep_weekly_plan_safe_v3", { p_component_code: componentArg(componentCode) }); }
   async function authorizePlanItem(planId, priorityOrder) {
@@ -350,7 +356,7 @@
     finalizeSessionWritten, sessionReviewWritten, recentResultsWritten,
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
-    weeklyPlan, generateWeeklyPlan, authorizePlanItem,
+    activePlanSession, weeklyPlan, generateWeeklyPlan, authorizePlanItem,
     timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
     readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration
   });
