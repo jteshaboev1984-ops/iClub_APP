@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **1,035 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **1,215 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -54,7 +54,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P1-TRI-01..05 and P1-SER-01..05 (published + reserve) | 150 | **149 previously correct, 1 wrong published MCQ key repaired, all 150 current keys matched after correction** | Independent trigonometry/series calculations, 2 read-only 75-item live fixtures, corrected Q10101/assessment466 and live postflight |
 | P1-FUN-01..08 (published + reserve) | 120 | **120 live source stems and keyed answers reviewed; 120/120 oracle matches** | Two 60-item SQL source oracles, independent inverse/domain/range/transformation numerical tests, EN/RU/UZ checks |
 | P1-COO-01..06 (published + reserve) | 90 | **90 live source stems and keyed answers reviewed; 90/90 oracle matches** | Two 45-item SQL source oracles, independent line/circle/chord/tangency numerical tests, EN/RU/UZ checks |
-| **Remaining current-bank and written items** | **413** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
+| P1-DIF-01..07 and P1-INT-01..05 (published+reserve) | 180 | **180 independently solved from live stems; 180/180 current keys match** | Live read-only 180-row FULL JOIN answer-oracle + locale checks + numerical calculus regression |
+| **Remaining current-bank and written items** | **233** | **NOT YET ACADEMICALLY RECHECKED** | 130 P1 + 103 P5 latest written tasks require full solution and rubric review |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -110,3 +111,11 @@ A previously blocked Supabase connector **recovered** and a read-only SELECT 1 h
 A separate live EN/RU/UZ inspection covered all 210 stems, explanations, four MCQ alternatives, key type, literal/numeric duplicate alternatives, numerical and inequality-sign agreement. Results: zero missing locales, zero bad choice structures, zero duplicate lists, zero mismatched stem numbers/operators. One Russian variant for P1FUN08-L02 adds the equivalent words “в 4 раза” to scale factor 1/4; this is semantically consistent. Previously fixed P1FUN06-A01 now correctly keys left/down; the P1FUN05-A02 intersection explanation in the live database contains the repaired derivation. No new mathematically confirmed defect; **no production content mutation**.
 
 **Cumulative review: 1,035/1,448 current items; 413 pending** (105 P1 Differentiation, 75 P1 Integration, 233 current written P1/P5 tasks). This is AI-assisted academic QA, not independent human certification. Automated property calculations independently check representative mathematical problems; they are not a full proof that every translated sentence is equivalent. Learner E2E/beta stages remain incomplete. Mass rollout remains NO_GO; student progress must stay immutable.
+
+## 2026-11-01 P1 Differentiation and Integration — complete question-bank second pass
+
+All 105 P1-DIF-01..07 and 75 P1-INT-01..05 questions, across published and reserve, were independently solved from their live English question stems and all four English choices (or exact input). A frozen 180-item key oracle was compared read-only with actual live production question IDs/keys using FULL JOIN: **180 checked, 0 mismatches**, including input fractions/signs. Additional independently implemented numerical differentiation, definite integration, convergence-safe improper integral, geometric area and volume tests are in the Node regression. Live RU/UZ stems and explanations and EN/RU/UZ option structures: **180/180 present; 0 invalid option lengths; 0 duplicate literal MCQ options**. Eighteen numeric-token/notation translation flags were individually inspected; they reflect comma-vs-dot decimals, mathematical exponents or equivalent bounds, not proven translation defects. This is AI-assisted academic QA, not a human examiner sign-off and not exhaustive human translation proofreading.
+
+**Syllabus scope check:** Official Cambridge 9709 syllabus v3 (2026–2027), section 1.8 printed page 22 explicitly includes simple improper integrals such as x^(-1/2) from 0 to 1. Therefore current x^(-1/2) from 0 to 4 examples are within scope; no edits or forced retirement. Source: https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf .
+
+**New cumulative status:** **1,215/1,448** current items independently reviewed by AI: all **675 P1 and 540 P5** multiple-choice/input sources, with **233 written tasks (130 latest P1 + 103 latest P5)** remaining for independent complete solution/rubric examination. Old versions, 1,990 learner responses and 548 sessions unchanged. Mass rollout still **NO_GO**; previously deferred learner E2E/beta phases not revived.
