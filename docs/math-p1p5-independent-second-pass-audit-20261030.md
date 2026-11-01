@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **1,285 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **1,376 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -57,7 +57,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P1-DIF-01..07 and P1-INT-01..05 (published+reserve) | 180 | **180 independently solved from live stems; 180/180 current keys match** | Live read-only 180-row FULL JOIN answer-oracle + locale checks + numerical calculus regression |
 | P1-DIF/INT latest written tasks | 39 | **39 stem-to-solution and criterion-level checks, zero confirmed defects** | Read-only live expected result fragments, rubric sum, locale checks + calculus numerical regression |
 | P5 full papers 01-03, timed blocks 01-02, mini mock 01 — current written tasks | 31 | **31/31 independent numerical and methodological checks matched live rubrics** | Full live read-only oracle + independent numerical probability/statistics/geometry reasoning regression |
-| **Remaining current-bank and written items** | **163** | **NOT YET ACADEMICALLY RECHECKED** | 91 other P1 + 72 other P5 current written tasks |
+| P1 QUA/CIR/COO/FUN/SER/TRI current written tasks | 91 | **91/91 independently derived key result checkpoints match latest published live rubrics** | Complete live read-only 91-item expected-rubric oracle + noncalculus maths regression |
+| **Remaining current-bank and written items** | **72** | **NOT YET ACADEMICALLY RECHECKED** | 72 remaining current P5 written tasks (non-full-paper/timed/mini-mock) |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -137,3 +138,9 @@ Second-pass written-solution and marking audit for **22 Differentiation and 17 I
 **Independently solved new cohort:** **31 P5** live-current written tasks — **21 full-paper questions (FP01/02/03), 6 timed-block questions (TB01/02) and 4 mini-mock questions (MM01)**. The complete English prompts and detailed marking criteria were inspected for model assumptions, exact/counting arithmetic, grouped-data moments, conditional probability, binomial/geometric conventions and normal probability/continuity corrections. Independent numerical checkpoints derived before viewing the live keyed rubrics match **31/31**, with 0 identified answer mismatches. Reproducible full live SQL oracle: `scripts/fixtures/math-p5-mixed-written-31-current-oracle.sql`; independent mathematical regression and GitHub CI: `scripts/math-p5-mixed-written-secondpass-31.cjs`.
 
 **Ledger after this work:** **1,285 / 1,448** source items have completed AI-assisted second-pass review; **163 written items (91 P1, 72 P5)** remain for the rigorous independent-current-version mathematical review. Not external human signoff, not proof of UI/E2E beta suitability. No production writes or historical learner-state changes. Mass release **NO_GO**, previously postponed learner E2E and beta stages remain deferred.
+
+## 2026-11-01 P1 written noncalculus independent check (91 tasks)
+
+All current 91 written tasks outside the previously completed 39-item P1 DIF/INT cohort were retrieved from **production by actual last approved timestamp, not highest ID**. Their source stems and all criterion-level mathematical expectations were inspected; one task-specific independently derived mathematical output per task was compared with the newest published rubric via read-only SQL FULL JOIN: **91 checked, zero mathematical key-result discrepancies**. Coverage is QUA, CIR, COO, FUN, SER and TRI, including timed/full-paper tasks and the previously corrected circular minor-segment cases. Deterministic additional algebra/geometry/series/trig calculation and source inventory guards are checked in CI. Evidence is `scripts/fixtures/math-p1-noncalculus-91-written-oracle.sql` and `scripts/math-p1-noncalculus-written-91-regression.cjs`.
+
+The ledger now counts **1,376 / 1,448** AI-reviewed current source items. The remaining **72 P5 written tasks** still require complete current-version academic review. An exact result in a rubric does not itself prove that the marking engine can evaluate every valid handwritten method, and there is no independent human reviewer or learner E2E sign-off. No production mutations; mass release NO_GO.
