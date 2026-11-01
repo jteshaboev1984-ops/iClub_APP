@@ -1,0 +1,16 @@
+name: Math P1 calculus 39 written tasks second-pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p1-calculus-written-39-secondpass.sql"
+      - "scripts/math-p1-calculus-written-39-secondpass.cjs"
+      - ".github/workflows/math-p1-calculus-written-secondpass.yml"
+  workflow_dispatch:
+jobs:
+  written-maths:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/math-p1-calculus-written-39-secondpass.cjs
