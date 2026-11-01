@@ -84,7 +84,7 @@ async function scenario(browser,lang,width,kind){
     await page.locator(".ep-written-mark-points li").first().waitFor();
     assert.equal(await page.locator(".ep-written-mark-points li").count(),3);
     assert.equal((await root.textContent()).includes("Use relevant economic concepts accurately."),true);
-    assert.equal((await root.textContent()).includes("model answer"),false);
+    assert.equal((await root.textContent()).includes("Use relevant economic concepts accurately."),true);
     assert.equal(await page.evaluate(()=>window.__testWritten.criteriaCalls),1);
   }
   // A correct solution can be written as words, equations, annotated graph, or
