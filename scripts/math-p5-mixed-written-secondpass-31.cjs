@@ -55,7 +55,7 @@ close(C(5,2)/(C(12,2)-C(7,2)),2/9);check("P5FP03-Q03","2/9");
 const p3=C(8,3)*.3**3*.7**5,pAtLeast2=1-.7**8-8*.3*.7**7;
 close(p3/pAtLeast2,.3412,.0001);check("P5FP03-Q04","0.3412");
 close(.8**2-.8**6,.377856,1e-9);check("P5FP03-Q05","0.377856");
-close(70+8*1.2816,80.3,.005);check("P5FP03-Q06","80.3");
+close(Math.round((70+8*1.2816)*10)/10,80.3,1e-9);check("P5FP03-Q06","80.3");
 close(Phi(10.5/Math.sqrt(48))-Phi(-10.5/Math.sqrt(48)),.870,.001);check("P5FP03-Q07","0.870");
 // Timed blocks and mini mock.
 close(Math.sqrt(66/10-(24/10)**2),.917,.001);check("P5TB01-Q01","0.917");
