@@ -705,8 +705,14 @@
       const started = Boolean(progress?.active_session) || Number(screening.answered_items || 0) > 0;
       return { kind: "diagnostic", title: stageLabel(0), detail: started ? c.continueCheck : c.start, label: started ? c.continueCheck : c.start };
     }
-    if (["resume", "ready_to_finalize"].includes(recovery?.status) && recovery?.session_id) {
+    if (["resume", "ready_to_finalize"].includes(recovery?.status) && recovery?.session_id &&
+        recovery?.component_code === component && Number(recovery?.active_session_count) === 1) {
       return { kind: "resume", title: home.continueTask, detail: stageLabel(Number(summary?.operational_stage || 0)), label: home.continueTask, sessionId: recovery.session_id };
+    }
+    // Never create a replacement attempt when the server reports ambiguous
+    // active sessions. Preserve every earlier response and require review.
+    if (recovery?.status === "multiple_active") {
+      return { kind: "waiting", title: home.continueTask, detail: home.waiting, label: home.waiting };
     }
     const selection = window.iClubExamPrepWeeklyFlowEnabled === true
       ? weeklyPlanSelection(component, plan, weeklyProgress)
@@ -818,13 +824,24 @@
       ? await internal.api.getState(component)
       : { ok: true, data: null };
     if (!stateResult?.ok) { state.busy = false; renderError(); return; }
-    const [trackerResult, queueResult, planResult, recoveryResult, recentResult] = await Promise.all([
+    const [trackerResult, queueResult, planResult, recoveryResult, recentResult, activePlanResult] = await Promise.all([
       typeof internal.api.syllabusTracker === "function" ? internal.api.syllabusTracker(component).catch(() => null) : Promise.resolve(null),
       typeof internal.api.correctionQueue === "function" ? internal.api.correctionQueue(component).catch(() => null) : Promise.resolve(null),
       typeof internal.api.weeklyPlan === "function" ? internal.api.weeklyPlan(component).catch(() => null) : Promise.resolve(null),
       flow?.version === "weekly_flow_adapter_v1" ? flow.recover(component).catch(() => null) : Promise.resolve(null),
-      typeof internal.api.recentResults === "function" ? internal.api.recentResults(component,5).catch(() => null) : Promise.resolve(null)
+      typeof internal.api.recentResults === "function" ? internal.api.recentResults(component,5).catch(() => null) : Promise.resolve(null),
+      // Even in legacy weekly mode, find unfinished authorized sessions
+      // independently of the current week's plan. Do not repeat Stage-0 checks.
+      stage0Complete && !flow && typeof internal.api.activePlanSession === "function"
+        ? internal.api.activePlanSession(component).catch(() => null)
+        : Promise.resolve(null)
     ]);
+    if (stage0Complete && !flow &&
+        (!activePlanResult?.ok ||
+         activePlanResult.data?.contract_version !== "active_plan_session_v1" ||
+         activePlanResult.data?.component_code !== component)) {
+      state.busy = false; renderError(); return;
+    }
     const weeklyProgressResult = flow?.version === "weekly_flow_adapter_v1" &&
       typeof internal.progressUxApi?.progress === "function"
       ? await internal.progressUxApi.progress(component).catch(() => null)
@@ -837,7 +854,7 @@
       tracker: trackerResult?.ok ? trackerResult.data : null,
       queue: queueResult?.ok ? queueResult.data : null,
       plan: planResult?.ok ? planResult.data : null,
-      recovery: recoveryResult?.ok ? recoveryResult.data : null,
+      recovery: flow ? (recoveryResult?.ok ? recoveryResult.data : null) : (activePlanResult?.data || null),
       recent: recentResult?.ok ? recentResult.data : null,
       weeklyProgress: weeklyProgressResult?.ok ? weeklyProgressResult.data : null
     });
