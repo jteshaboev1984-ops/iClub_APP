@@ -1,6 +1,6 @@
 # Mathematics 9709 P1/P5 — independent second-pass academic audit
 
-Status: **IN PROGRESS**; **675 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
+Status: **IN PROGRESS**; **825 / 1,448 current items** have undergone a second-pass academic review (numerical derivations where applicable, conceptual validation for model-selection items). This is **not independent human certification**. Prepared 2026-10-30 at owner's request. This plan governs **content quality**, not mass-rollout approval. Existing learner answers/sessions are immutable.
 
 ## Source inventory (read-only Supabase, 2026-10-30)
 
@@ -51,7 +51,8 @@ Every release should record: original ID and immutable source, new ID, changed E
 | P5-DAT-01 through DAT-10 (published + reserve) | 150 | **150 answer/semantics checks, zero observed mismatches** | 10 independent source-level read-only SQL fixtures executed against Supabase; regression CI | 
 | P5-DRV-01 through DRV-03 (published + reserve) | 45 | **45 distribution/expectation/variance answers matched** | Three read-only SQL oracles executed against Supabase; independent numeric regression CI |
 | P1-CIR-01/02 and P1-QUA-01..06 (published + reserve) | 120 | **120 correct keyed answers verified with independent geometry and algebra derivations** | Eight read-only live SQL oracle fixtures, numerical regression and locale consistency checks |
-| **Remaining current-bank and written items** | **773** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
+| P1-TRI-01..05 and P1-SER-01..05 (published + reserve) | 150 | **149 previously correct, 1 wrong published MCQ key repaired, all 150 current keys matched after correction** | Independent trigonometry/series calculations, 2 read-only 75-item live fixtures, corrected Q10101/assessment466 and live postflight |
+| **Remaining current-bank and written items** | **623** | **NOT YET ACADEMICALLY RECHECKED** | Do not claim completed semantic audit |
 
 ## 2026-10-31 P5 seven-skill second-pass batch
 
@@ -91,3 +92,11 @@ The 120 current published/reserve questions (48 published, 72 reserve) across P1
 All 120 question prompts, explanations and options are present in EN/RU/UZ; no invalid MCQ answer index, duplicate literal option, locale-option number change or differing inequality symbol was flagged. These checks do not prove exhaustive semantic equivalence of all translated wording. No confirmed mathematical defect requiring a source replacement was discovered in this batch.
 
 Cumulative current-item second-pass coverage: **675 / 1,448**, comprising **540 P5 bank, 135 P1 bank and 0 full written-task solutions** in this second-pass counting methodology; **773 pending** (540 current P1 bank + 233 current written P1/P5 tasks). Previous written-task repair and structural QA do not silently count as full independent written-solution review. Historical learner answers/sessions, mass rollout NO_GO and skipped learner E2E/beta remain unchanged.
+
+## 2026-11-01 P1 Trigonometry & Series academic corrections
+
+**Discovered and repaired a substantive live mathematical key defect** in published `P1TRI02-A01` (`public.questions.id=7142`): the question explicitly asks `sin 210°`; keyed option **C = −√3/2** was wrong while the explanation correctly shows `sin(180°+30°)=−1/2`, which is **option A**. This is not a translation or formatting issue: it could incorrectly score a learner. Confirmed zero related session items, zero existing learning-pack sessions/authorizations/goal snapshots/review starts. Cloned Q**10101** with key **A**, all three language alternatives and explanations intact, governed content-key `P1TRI02-A01-QA20261101` and assessment **466/v2** with all other items unchanged. Old source question was **not overwritten**; old content meta and unused assessment **35422/v1** were retired. Single-transaction guarded versioned repair was executed and the separate read-only live postflight **PASSED**; explicit provenance is owner-requested AI-assisted verification, not human approval.
+
+The 150 current P1-TRI-01..05 and P1-SER-01..05 source questions (60 published, 90 reserve) were independently examined: ranges, principal-value inverse functions, exact special angles, trigonometric identities and interval boundary solutions; binomial coefficients, AP/GP classification, nth terms, finite sums, convergence and infinite tails. Two read-only source-key fixtures completed **75/75 TRI and 75/75 SER with zero mismatches AFTER correction**. Additional numeric/symbolic regression includes independent trigonometric values, degrees-to-radians, exact radicals, polynomial convolution, arithmetic/geometric sums and enumeration of inclusive vs strict solution domains. The key fixtures are compared to independently reviewed solutions, not treated as mathematical proof by themselves.
+
+EN/RU/UZ checks for all 150 confirmed no missing stems/rationales, invalid choice indices, repeated literal alternatives, option numeric mismatch, or mismatch in inequality signs. Two stem-number lexical differences for `P1TRI03-M01` are equivalent instructions: “1 decimal place” vs “0.1° precision”, **not** a proven translation error. Full human semantic qualification is unavailable. P1 current bank still has **390 unchecked questions**. Total reviewed second-pass current items: **825/1,448**; **623 outstanding (390 P1 bank + 233 written)**. Old student state and mass launch NO_GO remain untouched.

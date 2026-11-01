@@ -1,0 +1,20 @@
+name: Math P1 Trigonometry and Series 150 second-pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p1-second-pass-tri-75.sql"
+      - "scripts/fixtures/math-p1-second-pass-ser-75.sql"
+      - "scripts/fixtures/math-p1-tri02-sin210-postrelease-readonly.sql"
+      - "scripts/ops/20261101_math_p1_tri02_sin210_versioned_repair.sql"
+      - "scripts/math-p1-tri-ser-second-pass-150.cjs"
+      - ".github/workflows/math-p1-tri-ser-second-pass.yml"
+  workflow_dispatch:
+jobs:
+  tri-ser-150:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check 150 unique source keys, independent mathematical answers, correct sin210 and no learner writes
+        run: node scripts/math-p1-tri-ser-second-pass-150.cjs
