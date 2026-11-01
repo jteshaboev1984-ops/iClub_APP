@@ -1,0 +1,16 @@
+name: Mathematics P1 remaining 91 written tasks second pass
+on:
+  pull_request:
+    paths:
+      - "scripts/fixtures/math-p1-noncalculus-91-written-oracle.sql"
+      - "scripts/math-p1-noncalculus-written-91-regression.cjs"
+      - ".github/workflows/math-p1-noncalculus-written-secondpass.yml"
+  workflow_dispatch:
+jobs:
+  p1-written-oracles:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/math-p1-noncalculus-written-91-regression.cjs
