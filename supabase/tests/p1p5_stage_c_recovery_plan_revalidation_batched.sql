@@ -258,11 +258,11 @@ BEGIN
  PERFORM public.generate_exam_prep_weekly_plan_safe_v3('P1');
  SELECT id INTO STRICT v_plan1 FROM private.exam_prep_weekly_plans
  WHERE user_id=v_user AND component_code='P1' AND status='active'
- ORDER BY created_at DESC,id DESC LIMIT 1;
+ ORDER BY plan_version DESC,id DESC LIMIT 1;
  PERFORM public.generate_exam_prep_weekly_plan_safe_v3('P1');
  SELECT id INTO STRICT v_plan2 FROM private.exam_prep_weekly_plans
  WHERE user_id=v_user AND component_code='P1' AND status='active'
- ORDER BY created_at DESC,id DESC LIMIT 1;
+ ORDER BY plan_version DESC,id DESC LIMIT 1;
  IF v_plan1=v_plan2 THEN RAISE EXCEPTION 'Stage C plan version did not rotate'; END IF;
  SELECT count(*) INTO v_before_sessions
  FROM private.exam_prep_session_authorizations WHERE user_id=v_user;
