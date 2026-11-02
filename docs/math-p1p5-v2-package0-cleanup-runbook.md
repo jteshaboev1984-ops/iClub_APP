@@ -71,6 +71,14 @@ An **actual current-migrations PG17 regression** now passes on two fake P1/P5 ac
 4. Test interrupted cleanup (transaction rollback), duplicate execution (idempotency), late existing browser tokens and epoch/cache reset. An already-open beta tab must not reinsert stale academic progress or overwrite post-launch data.
 5. Refuse run if new incoming FK, missing backup, policy ambiguity, unexpected user ownership, question-bank content variation, mismatched count or unauthorized subject appears.
 
+## Current full 32-table disposable rehearsal — verified 2026-11-02
+
+[GitHub Actions #41502015565](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41502015565) GREEN at exact executable SHA `9bbdf9ac5b75451f9242f2d466d2d4337a9ce06a` with the complete existing P1/P5 signed HTTP/Chromium/PG17 path. After prior learning evidence and negative auth/fault tests, `supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql` ran all 32 **owner-scoped** table deletion statements, tested refusal of immutable facts before synthetic-only authorization, and tested repeat (idempotency), preservation of the other fake learner and protected public records, SAVEPOINT restore and final ROLLBACK. Protected public tables absent from minimalist old E2E bootstrap were *test-created and fake-seeded inside the rollback-only transaction*.
+
+**Critical limitation:** nonempty current-migration facts for all 32 tables were **not** established; some tests merely exercise the empty branch. CI never used real accounts, live feature flags, production cleanup or authentic backed-up restore data. This is a production-SCHEMA structural and transactional test, not evidence that final real-beta launch reset or governance is approved.
+
+**Next substantive deliverable:** separate one-shot real-prelaunch reset authorization design with protected immutable facts retained during ordinary use; test new authorization negative paths, secure synthetic backup/restore, late beta-token/session behavior, schema drift, audit retention policy and staged release-epoch gating before Package 0 signoff.
+
 ## Future release-time procedure, NOT authorized now
 
 **G0:** Receive explicit architect release GO. Check new *versioned* accelerated public-core gate, exact release SHA and all required tests. Decide the beta-consent/audit retention scope.
