@@ -214,7 +214,8 @@ BEGIN
  IF v_reval_id IS NULL THEN RAISE EXCEPTION 'Stage C no long-break revalidation case'; END IF;
 
  SELECT count(*) INTO v_before_evidence
- FROM private.exam_prep_evidence_events WHERE user_id=v_user;
+ FROM private.exam_prep_evidence_events
+ WHERE user_id=v_user AND verification_status='app_verified';
  v_reval_auth:=public.authorize_exam_prep_revalidation_item_safe_v1(v_reval_id,1);
  IF v_reval_auth->>'academic_credit'<>'false' THEN
    RAISE EXCEPTION 'Stage C revalidation incorrectly created crediting authorization'; END IF;
@@ -226,8 +227,18 @@ BEGIN
  PERFORM pg_temp.p269_complete_session_correct_v1(
   v_reval_session,'stagec-longbreak-noncredit');
  SELECT count(*) INTO v_after_evidence
- FROM private.exam_prep_evidence_events WHERE user_id=v_user;
+ FROM private.exam_prep_evidence_events
+ WHERE user_id=v_user AND verification_status='app_verified';
  IF v_after_evidence<>v_before_evidence
+  OR NOT EXISTS(
+   SELECT 1 FROM private.exam_prep_evidence_events
+   WHERE session_id=v_reval_session AND user_id=v_user
+     AND verification_status='app_checked_noncredit'
+     AND evidence_payload->>'academic_credit'='false')
+  OR EXISTS(
+   SELECT 1 FROM private.exam_prep_evidence_events
+   WHERE session_id=v_reval_session
+     AND verification_status<>'app_checked_noncredit')
   OR NOT EXISTS(
    SELECT 1 FROM private.exam_prep_sessions
    WHERE id=v_reval_session AND user_id=v_user AND status='finalized')
@@ -235,7 +246,12 @@ BEGIN
    SELECT 1 FROM private.exam_prep_progress_revalidation_items
    WHERE case_id=v_reval_id AND item_order=1 AND status='completed'
    AND session_id=v_reval_session)
- THEN RAISE EXCEPTION 'Stage C revalidation was not finalized noncredit'; END IF;
+ THEN RAISE EXCEPTION
+ 'Stage C revalidation invariant failed verified_before=% verified_after=% reval_items=%',
+   v_before_evidence,v_after_evidence,
+   (SELECT coalesce(jsonb_agg(jsonb_build_object('status',status,'session',session_id IS NOT NULL)),'[]'::jsonb)
+      FROM private.exam_prep_progress_revalidation_items WHERE case_id=v_reval_id);
+ END IF;
 
  -- Current plan/old plan: regenerate the true weekly plan. Old plan token
  -- must fail closed, with no new authorization or session side effects.
