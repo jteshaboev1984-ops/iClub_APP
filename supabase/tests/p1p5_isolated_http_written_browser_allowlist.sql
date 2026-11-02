@@ -11,6 +11,20 @@ BEGIN
     OR (SELECT count(*) FROM public.users)<>2
     OR NOT EXISTS(SELECT 1 FROM public.users WHERE id=v_user)
   THEN RAISE EXCEPTION 'REFUSED: written-on-paper fixture needs exact two fake users in isolated PG17'; END IF;
+  -- SECURITY: verify the actual locale gate denies any paper activation
+  -- when the disposable schema lacks the reviewed locale ledger.
+  BEGIN
+    INSERT INTO private.exam_prep_written_learning_config_v1(component_code,enabled)
+    VALUES('P1',true);
+    RAISE EXCEPTION 'UNSAFE: paper mode enabled without any reviewed locale';
+  EXCEPTION WHEN check_violation THEN
+    NULL; -- required fail-closed: exam_prep_written_locale_approvals_incomplete
+  END;
+  IF EXISTS(SELECT 1 FROM private.exam_prep_written_learning_config_v1
+            WHERE component_code='P1' AND enabled=true) THEN
+    RAISE EXCEPTION 'unsafe paper config survived rejected activation';
+  END IF;
+
   -- The full production locale review ledger is NOT stored in migrations.
   -- Only in disposable CI, synthesize deliberately non-academic placeholder
   -- rubric locales to exercise actual owner/locale gate and UI navigation.
