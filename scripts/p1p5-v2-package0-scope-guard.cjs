@@ -61,7 +61,12 @@ assert(!/\b(?:insert|update|delete|truncate|drop|alter|create|grant|revoke|call|
 assert(dag.includes('GRAPH_PRECHECK_PASS_NO_DELETE_AUTHORIZED'),'live graph must not claim release permission');
 assert(dag.includes('consumed_session_id')&&dag.includes('correction_case_id'),
   'both FK cut points are essential');
-const targets=[...full.matchAll(/DELETE FROM private\.(exam_prep_\w+)/g)].map(x=>x[1]);
+// Exclude the deliberate pre-authorization negative DELETE probe; validate only
+// the two complete 32-table scoped cleanup/replay sequences.
+const delMarker='-- Two real nullable links must be removed before cascading through DAG.';
+assert(full.includes(delMarker),'missing full-scope cleanup start marker');
+const guardedCleanup=full.slice(full.indexOf(delMarker));
+const targets=[...guardedCleanup.matchAll(/DELETE FROM private\.(exam_prep_\w+)/g)].map(x=>x[1]);
 assert.equal(targets.length,64,'isolated cleanup needs exactly 32 scoped deletes and 32 replay checks');
 for(const name of reset)assert.equal(targets.filter(t=>t===name).length,2,
   'each candidate must appear exactly twice: '+name);
