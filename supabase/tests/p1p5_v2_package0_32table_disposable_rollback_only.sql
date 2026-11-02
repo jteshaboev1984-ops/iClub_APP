@@ -104,6 +104,30 @@ CREATE TEMP TABLE p0_target_auth AS SELECT id FROM private.exam_prep_session_aut
 CREATE TEMP TABLE p0_target_corrections AS SELECT id FROM private.exam_prep_correction_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
 CREATE TEMP TABLE p0_target_revalidations AS SELECT id FROM private.exam_prep_progress_revalidation_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
 SAVEPOINT p0_before_actual_full_cleanup;
+-- Negative: real immutable evidence must remain protected by default.
+DO $
+DECLARE v_uid uuid:='11111111-1111-4111-8111-111111111191'::uuid;
+BEGIN
+ IF NOT EXISTS(SELECT 1 FROM private.exam_prep_responses WHERE user_id=v_uid)
+ THEN RAISE EXCEPTION 'REFUSED: no actual disposable response evidence to validate immutability'; END IF;
+ BEGIN
+  DELETE FROM private.exam_prep_responses WHERE id=(
+   SELECT id FROM private.exam_prep_responses WHERE user_id=v_uid ORDER BY id LIMIT 1
+  );
+  RAISE EXCEPTION 'FAIL: immutable evidence deletion accepted without explicit synthetic-cleanup guard';
+ EXCEPTION WHEN raise_exception THEN
+  IF SQLERRM='immutable_exam_prep_fact' THEN
+   RAISE NOTICE 'PASS: authentic immutable evidence trigger denies unguarded delete';
+  ELSE
+   RAISE;
+  END IF;
+ END;
+END $;
+-- This is an EXISTING, GOVERNED synthetic-data mode defined in
+-- private.exam_prep_block_immutable_mutation_v1(). It is allowed ONLY inside
+-- the disposable two-fake-user CI database (guarded above), NOT for real beta
+-- learner cleanup or live production. On SAVEPOINT rollback the GUC reverts.
+SELECT set_config('iclub.exam_prep_synthetic_cleanup','on',true) AS ci_synthetic_only_cleanup_mode;
 -- Two real nullable links must be removed before cascading through DAG.
 UPDATE private.exam_prep_session_authorizations
 SET consumed_session_id=NULL,correction_case_id=NULL
