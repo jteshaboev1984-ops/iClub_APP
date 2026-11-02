@@ -61,7 +61,7 @@ The disposable full 32-table rehearsal deliberately verifies that immutable rows
 
 **Release requirement:** design and review a NEW narrowly authorized, versioned one-shot prelaunch-cleanup service with strict architect-approved release epoch, locked write intake, independently verified backup/restore, user/program allowlist, concurrent transaction isolation, full integrity checks, auditable before/after row manifest and no exposed public SQL bypass. Preserve immutable protections during ordinary usage; only explicitly governed release cleanup may erase old test facts. Do not disable triggers or globally grant cleanup permissions.
 
-## Required isolated full-schema acceptance (PARTIALLY completed)
+## Required isolated full-schema acceptance (scope/rollback/backup rehearsal completed; epoch/access acceptance open)
 
 An **actual current-migrations PG17 regression** now passes on two fake P1/P5 accounts: [full-schema FK cycle and SAVEPOINT test](../supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql) through [real HTTP/Chromium GitHub Actions run 41499740468](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740468), all job steps GREEN. This confirms one actual session/authorization FK pair under real schema constraints, not a complete 32-table deletion or backup restore. The separate simplified PG17 model now additionally verifies the correction/evidence cycle after a *second* nullable unlink ([run 41499740447](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740447), GREEN).
 
@@ -97,12 +97,21 @@ An **actual current-migrations PG17 regression** now passes on two fake P1/P5 ac
 
 **Rollback after new users begin learning:** do not restore an old beta snapshot over any newer genuine learning record. First roll back feature code/gate safely; restoring prelaunch beta data needs a special collision-free reconciliation plan, not generic DB PITR overwriting the active site.
 
-## Minimal current proof
+## Minimal current proof — updated 2026-11-02
 
-Production real schema: read-only 32-table, 19,794-row scope report and two-FK-cut DAG PASS; no data changes. Synthetic PG17 [41499740447](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740447) GREEN on both cycles, retained Mentor blocker, idempotent delete and rollback. Actual current-migrations P1/P5 isolated HTTP/Chromium [41499740468](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740468) GREEN including full-schema session/authorization FK rollback and all existing integrated tests. All **32-table cleanup**, user-epoch replay and encrypted backup/restore remain outstanding; release remains NO_GO.
+- Production **SELECT-only** candidate inventory: 32 tables, 19,794 sampled rows, two nullable FK unlink points, zero remaining cycles in graph and one retained Mentor blocker. This is not approval to reset any real user.
+- [32-table full current-migrations isolated PG17 fake-user cleanup, idempotent retry and SAVEPOINT/full rollback](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41502015565) **GREEN**; immutable fact refuses ordinary delete.
+- [Independent custom PG17 backup and restore](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41503416002) **GREEN** at code SHA `b87afff6d49e51bfc31812b9221aa1edbb182b1c` with exact matching synthetic account, progress, content and protected-domain fingerprints. PgDump-16/PG17 version mismatch was repaired by using an ephemeral matching PG17 CLI container. No private data is archived.
+- [Static source/authorization/backup guard](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41504358562) **GREEN**, including all 32 target tables twice, two FK cuts and strict test-only guards.
+- [Draft real-release permission/retention contract](math-p1p5-v2-package0-release-authorization-contract.md) written but **NOT architect-approved as execution permission**.
 
-[GitHub Actions #41498044157](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41498044157) GREEN on a simplified two-learner PostgreSQL 17 model with real RESTRICT cycle and retained Mentor blocker, idempotent scoped delete and rollback. This test **does not** prove all 122-table production migrations. Actual production SELECT-only scope report completed with 19,794 candidate rows. Public release remains **NO_GO**.
+**Limitations:** the 32-table model may cover zero-row branches for some tables. No authentic production backup has been taken, restored or independently approved. No real-prelaunch immutable-fact cleanup execution privilege is implemented, and no old-device release-epoch replay regression has yet been run. Production user history and new postlaunch learner state must not be mixed.
 
 ## Exact next engineer action
 
-Work on the **remaining actual 32-table deletion/restore drill** using PG17 and current migrations; both cycles now mapped and tested at two levels. Inspect newest main SHA and compare PR #468 branch; do not rewrite already-green diagnostic/HTTP/600x10 CI. After full rehearsal, update docs/math-p1p5-v2-execution-ledger.md and GitHub Issue #450.
+1. Design, independently review and test an internal-only, versioned **real-prelaunch one-shot release-epoch authorization** using isolated PG17 positive/negative security tests; do not call the existing synthetic cleanup GUC on real users or disable normal immutable protections.
+2. Resolve retention approval for real beta consents, historical audit/AI/mentor/security facts; default KEEP until specifically authorized. Implement stale beta-tab/active-session lockout test and comprehensive restoration of affected evidence after interrupted release.
+3. Before any actual cleanup, require an explicit new architect GO, protected counts/fingerprints, an encrypted production-scope backup with verified independent restore and a locked release window. These are future operations, not part of this PR.
+4. When Package 0 governance is formally accepted, proceed to Package 1 verified P1/P5 exam dates and study calendar in a separate safe implementation increment; do not reopen already-GREEN E2E diagnostic flows.
+
+**Status: Package 0 digital synthetic engineering proofs GREEN; final production release permission and mass gate NO_GO. All work in draft PR #468; main/user records unaffected.**
