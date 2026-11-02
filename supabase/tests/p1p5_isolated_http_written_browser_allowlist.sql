@@ -11,6 +11,36 @@ BEGIN
     OR (SELECT count(*) FROM public.users)<>2
     OR NOT EXISTS(SELECT 1 FROM public.users WHERE id=v_user)
   THEN RAISE EXCEPTION 'REFUSED: written-on-paper fixture needs exact two fake users in isolated PG17'; END IF;
+  -- The full production locale review ledger is NOT stored in migrations.
+  -- Only in disposable CI, synthesize deliberately non-academic placeholder
+  -- rubric locales to exercise actual owner/locale gate and UI navigation.
+  -- This is NOT an independent mathematical or language QA approval.
+  -- The real production published locales were checked read-only separately.
+  INSERT INTO private.exam_prep_written_criteria_locale_v1(
+    written_task_id,task_version,criterion_id,language,source_rule_md5,
+    translated_rule,review_state,academic_review_ref,language_review_ref,reviewed_at
+  )
+  SELECT wt.id,wt.task_version,c.value->>'id',l.language,
+    md5(c.value->>'rule'),
+    CASE WHEN l.language='ru' THEN 'Тестовый критерий CI: ' ELSE 'CI sinov mezoni: ' END ||
+      left(c.value->>'id',100),
+    'approved','DISPOSABLE_SYNTHETIC_CI_NOT_ACADEMIC_QA',
+    'DISPOSABLE_SYNTHETIC_CI_NOT_LANGUAGE_QA',now()
+  FROM private.exam_prep_written_tasks wt
+  CROSS JOIN LATERAL jsonb_array_elements(
+    coalesce(wt.rubric_json->'criteria','[]'::jsonb)) c(value)
+  CROSS JOIN (VALUES('ru'::text),('uz'::text)) l(language)
+  WHERE wt.component_code IN ('P1','P5') AND wt.lifecycle_state='published'
+    AND wt.qa_math_status='pass' AND wt.qa_language_status='pass'
+    AND wt.qa_technical_status='pass'
+  ON CONFLICT (written_task_id,task_version,criterion_id,language)
+  DO NOTHING;
+  IF EXISTS(
+    SELECT 1 FROM private.exam_prep_written_criteria_locale_v1
+    WHERE review_state='approved'
+      AND academic_review_ref<>'DISPOSABLE_SYNTHETIC_CI_NOT_ACADEMIC_QA'
+  ) THEN RAISE EXCEPTION 'Unexpected non-synthetic review rows in fresh fixture'; END IF;
+
   INSERT INTO private.exam_prep_written_learning_config_v1(component_code,enabled)
   VALUES ('P1',true),('P5',true)
   ON CONFLICT (component_code) DO UPDATE SET enabled=excluded.enabled;
