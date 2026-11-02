@@ -22,7 +22,8 @@ END
 
 restore_db="iclub_p0_synthetic_restore"
 archive="$(mktemp /tmp/p1p5-package0-fake-only-XXXXXX.dump)"
-trap 'dropdb --if-exists --force "$restore_db" >/dev/null 2>&1 || true; rm -f "$archive"' EXIT
+created_restore=0
+trap 'if [[ "$created_restore" == "1" ]]; then dropdb --if-exists --force "$restore_db" >/dev/null 2>&1 || true; fi; rm -f "$archive"' EXIT
 if psql -At -d postgres -c "SELECT 1 FROM pg_database WHERE datname='$restore_db';" | grep -q 1; then
   echo 'REFUSED: restore database unexpectedly already exists' >&2
   exit 1
@@ -30,6 +31,7 @@ fi
 pg_dump --format=custom --no-owner --no-acl --dbname=postgres --file="$archive"
 test -s "$archive"
 createdb --template=template0 "$restore_db"
+created_restore=1
 pg_restore --no-owner --no-acl --exit-on-error --dbname="$restore_db" "$archive"
 
 fingerprint_query=$(cat <<'SQL'
