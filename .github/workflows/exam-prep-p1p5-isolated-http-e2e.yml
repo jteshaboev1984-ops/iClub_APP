@@ -7,6 +7,7 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql'
+      - 'supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
@@ -357,6 +358,17 @@ jobs:
           node scripts/p1p5-isolated-http-retired-content-recovery.cjs | tee /tmp/p1p5-stage-c-real-http-stale-content.log
           grep -q 'STAGE C REAL HTTP CONTENT RETIREMENT EXPIRY AND PROTECTED REVIEW PASS' /tmp/p1p5-stage-c-real-http-stale-content.log
           grep -q 'STAGE C REAL HTTP P1 CONTENT RESTORED TWO DISPOSABLE USER BOUNDARY PASS' /tmp/p1p5-stage-c-real-http-stale-content.log
+      - name: Package 0 full 32-table scoped fake-learner cleanup and complete rollback
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql \
+            | tee /tmp/p1p5-v2-package0-32table-rehearsal.log
+          echo "PASS: 32 table fake-user rollback-only rehearsal completed"
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
