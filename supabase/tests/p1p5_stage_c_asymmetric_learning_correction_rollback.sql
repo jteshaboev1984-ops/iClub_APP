@@ -64,6 +64,7 @@ DECLARE
  v_stage_strong int;
  v_stage_weak int;
  v_manifest jsonb;
+ v_clock_ready boolean:=false;
 BEGIN
  PERFORM private.register_exam_prep_canonical_synthetic_run_v2(
     v_run,'p2_67_canonical_v2_0',
@@ -89,6 +90,18 @@ BEGIN
    'stage-c-isolated-learner-'||v_profile,
    'Stage C isolated asymmetric Core history','en'
   );
+  IF NOT v_clock_ready THEN
+    -- Synthetic academic evidence can be recorded only under an ACTIVE,
+    -- owned governed validation run with the P2-68 bounded academic clock.
+    PERFORM private.transition_exam_prep_synthetic_validation_run_v1(
+      v_run,'registered','running',null,null,
+      jsonb_build_object('stage_c','asymmetric-learning-start')
+    );
+    PERFORM private.initialize_exam_prep_synthetic_clock_v1(
+      v_run,'Stage C owned synthetic academic clock'
+    );
+    v_clock_ready:=true;
+  END IF;
   INSERT INTO private.exam_prep_feature_entitlements(
     user_id,entitlement_status,core_access,ai_assist,
     mentor_care_entitled,cohort_key,valid_from
