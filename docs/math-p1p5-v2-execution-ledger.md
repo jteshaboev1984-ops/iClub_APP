@@ -110,3 +110,29 @@ A source-to-database ambiguity from the older plans has been resolved **without 
 **Result:** Package 0 investigation is progressing but exact scoped cleanup allowlist, browser-key inventory, full FK graph / restore rehearsal remain OPEN. No production DML performed.
 
 **Protection decision for next chat:** treat current Mathematics Practice published v2 and its current v4 sessions as preserved production data regardless of any earlier shorthand "Practice v3." Do not reset it during Exam Prep launch. Also do not hide the Economics launch-enabled discrepancy: preserve history, plan selective D02 access restrictions for a later approved technical package.
+
+## Checkpoint P0-03 — verified dry-run and isolated PG17 guard (2026-11-02)
+
+**Package 0 IN PROGRESS; production release NO_GO.**
+
+- [Consolidated read-only candidate scope report](../supabase/tests/p1p5_v2_package0_cleanup_scope_report_readonly.sql) was run against actual production Supabase under SELECT-only guard. Returned DRY_RUN_ONLY__NO_MUTATIONS. **32 provisional learner-state tables; 19,794 exact current rows total**. This is NOT a production cleanup approval or a scoped user-by-user DELETE count.
+- FK scope: 38 inbound foreign keys, of which one originates from a retained table — Mentor queue -> human review recommendation (ON DELETE RESTRICT). Currently zero populated Mentor queue references; fail closed if nonzero at release.
+- Non-deferrable authorization/session FK cycle: 548 authorization consumed-session links and 548 mandatory session authorization links. An eventually authorized transaction must unlink nullable consumed_session_id, handle every dependent child, and only then delete root rows. NO such transaction ran in production.
+- Protected production baseline: 1,476 user accounts; 881 Mathematics subject selections; 149 Mathematics tour attempts, 2,477 tour answers, 66 Math certificates; current Mathematics Practice server generation 2 with 15 sessions, 14 drills, 13 practice_attempts; 496 non-Math Practice attempts; three active AI grants; three beta consents; 14,748 Exam Prep audit events; 70 Math content versions and 334 written tasks. Economics native launch_enabled=true is a separate access task, not an excuse for wiping beta history.
+- Exclude from any automatic reset: users, app registration, all Tours, certificates, Mathematics Practice current published bank and post-cutover local keys, other subject records, published academic content, AI grants, beta consents/policy until explicitly governed, audit records, source/QA metadata.
+- Exam Prep live JS is server-driven for learner state; exam-prep-store.js is a preview store, not authoritative live progression. The exact existing practice cleanup script security/practice-v2-local-reset.js only removes old practice_history_v2:mathematics:tour_* after server publication proof and preserves current practice_history_v3. Do NOT call localStorage.clear().
+
+### Genuine disposable PostgreSQL test, not production
+
+- [Synthetic isolated PG17 rehearsal](../supabase/tests/p1p5_v2_package0_cleanup_isolated_fk_rehearsal.sql) explicitly tests actual NOT DEFERRABLE ON DELETE RESTRICT parent cycle, retained Mentor link rejection, scoped learner-state deletion, non-target learner retention, protected Practice/Tour/certificate retention, repeated cleanup and SAVEPOINT rollback. The entire rehearsal transaction is rolled back.
+- [Node source guard](../scripts/p1p5-v2-package0-scope-guard.cjs) rejects mutation keywords in actual production dry-run files and checks the 32-table provisional manifest and excluded data contracts.
+- [GitHub Actions run 41498044157](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41498044157) COMPLETED SUCCESS: real isolated PostgreSQL 17 workflow job 125458041110, every required step success, including synthetic FK rollback and zero remaining rehearsal schema. These are genuine automated technical tests but the schema is a deliberately simplified model, not full 122-table production-equivalent rehearsal.
+
+### Remaining Package 0
+
+1. Full current-migrations disposable PG17 rehearsal with all actual relevant FK parents, real structural checks, release backup/restore drill. Do not substitute the small synthetic model for this.
+2. Exact approved allowlist by program/learner plus deferred beta/audit/AI retention decision and all indirect children; produce fail-closed cleanup authorization dry-run. No direct DELETE yet.
+3. Review with master implementation / beta / content / safety governance docs and formally approve versioned accelerated release gate. Current old mass gate still NO_GO.
+4. Once all Package 0 release-safety artifacts are verified, advance to Package 1 dates and diagnostic anchoring.
+
+**No production DML, DDL, feature flag, AI permission, clearance or mass release was performed in this checkpoint.**
