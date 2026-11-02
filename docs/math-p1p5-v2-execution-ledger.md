@@ -184,3 +184,14 @@ A source-to-database ambiguity from the older plans has been resolved **without 
 4. Once Package 0 is formally accepted, proceed to Package 1 (confirmed P1/P5 exam dates + completion-anchored study horizon).
 
 **Production Supabase DML/DDL: ZERO. Vercel production deploy: NONE. AI users/flags, practice data, Tours, other subject data: UNCHANGED. Old public release gate: NO_GO. PR #468 remains draft.**
+
+## Checkpoint P0-06 — independent synthetic PostgreSQL 17 backup/restore GREEN (2026-11-02)
+
+**Actual successful test:** [GitHub Actions run 41503416002](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41503416002), exact code SHA `b87afff6d49e51bfc31812b9221aa1edbb182b1c`, job `125476453184`, status SUCCESS. Both the earlier 32-table scoped fake-user rollback and the new independent backup+restore step were GREEN.
+
+- The first backup attempt on SHA `7590b9ea19c0b8aa51f742ce73e5c28c91093f24` failed **only** because the GitHub Ubuntu runner supplied `pg_dump 16.15` to a `PostgreSQL 17.11` server. This was fixed by running the existing repository backup script inside the ephemeral `postgres:17` container with localhost-only PG and exact two-fake-user guards. No application runtime or production migration changed.
+- The [synthetic-only backup/restore script](../scripts/p1p5-v2-package0-synthetic-backup-restore.sh) creates a private custom-format archive of the disposable two-user integration database, restores it to an **independent new PG17 database**, compares deterministic account/session/authorization/response/evidence fingerprints and counts of academic content, entitlements and protected Practice/Tours/certificates, and then deletes the temporary archive and disposable restore database. No archive is uploaded to GitHub; no production user data is downloaded.
+- Actual job log confirms `PASS: synthetic-only PG17 backup restored to independent DB; exact account, academic, content and protected fingerprints match` after the immutable-fact negative test, 32-table isolated fake-user reset, repeat and SAVEPOINT restore all passed.
+- **Package 0 remaining:** approving preservation/retention of audit and beta-control facts, specifying strictly controlled versioned *real-prelaunch* cleanup authorization (must not use synthetic cleanup GUC against real learners), securing/validating real production scoped backup at final GO, and formal governance/release-gate approval. A synthetic independent restore is not evidence that a real production encrypted backup exists. Other subjects and existing user progress remain protected.
+
+**No Supabase production DML/DDL, no Vercel release, no access/AI flag changes and no live cleanup. Package 0 engineering backup rehearsal PASS, release NO_GO.**
