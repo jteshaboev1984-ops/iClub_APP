@@ -53,6 +53,14 @@ Groups:
 6. Audit JSON and local browser keys are NOT fully represented by FK analysis; must be separately inspected for stale beta state before public access.
 7. Numeric snapshot counts can change while app remains live; MUST re-run preflight at exact release boundary under safe writes blockade.
 
+## Immutable-evidence permission boundary (new confirmed blocker)
+
+Production function `private.exam_prep_block_immutable_mutation_v1()` intentionally rejects UPDATE/DELETE of objective responses, immutable evidence, correction actions, integrity events, learning review starts and timed result rows. Only a special transaction-local **synthetic cleanup** GUC `iclub.exam_prep_synthetic_cleanup=on` allows DELETE. The current authorized `public.cleanup_exam_prep_beta_synthetic_progress_v1/v2` cleanup depends on this GUC but **also requires** synthetic-present development state, no real-review epoch, AI off, kill switch on, no active beta sessions. The live production state is `real_monitoring` with an established epoch, QA Core open and AI beta enabled, so **these old synthetic cleanup procedures are NOT valid for the future prelaunch real-beta reset**.
+
+The disposable full 32-table rehearsal deliberately verifies that immutable rows reject deletion *without* this GUC, then uses the existing GUC only with guarded synthetic local accounts and entirely rolled-back transactions. This is permitted synthetic test behavior, **not** authority to set the same GUC on production for real students.
+
+**Release requirement:** design and review a NEW narrowly authorized, versioned one-shot prelaunch-cleanup service with strict architect-approved release epoch, locked write intake, independently verified backup/restore, user/program allowlist, concurrent transaction isolation, full integrity checks, auditable before/after row manifest and no exposed public SQL bypass. Preserve immutable protections during ordinary usage; only explicitly governed release cleanup may erase old test facts. Do not disable triggers or globally grant cleanup permissions.
+
 ## Required isolated full-schema acceptance (PARTIALLY completed)
 
 An **actual current-migrations PG17 regression** now passes on two fake P1/P5 accounts: [full-schema FK cycle and SAVEPOINT test](../supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql) through [real HTTP/Chromium GitHub Actions run 41499740468](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740468), all job steps GREEN. This confirms one actual session/authorization FK pair under real schema constraints, not a complete 32-table deletion or backup restore. The separate simplified PG17 model now additionally verifies the correction/evidence cycle after a *second* nullable unlink ([run 41499740447](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740447), GREEN).
