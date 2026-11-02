@@ -244,7 +244,7 @@ jobs:
           set -euo pipefail
           # Reuse only P2-69 helper function DEFINITIONS, never its rollback
           # transaction/main synthetic scenario or invented mastery result.
-          awk '/^-- Complete a normal non-timed/{copy=1} /^DO \\$main\\$/{exit} copy{print}' \
+          awk '/^-- Complete a normal non-timed/{copy=1} /^DO /{exit} copy{print}' \
             supabase/tests/p2_69_full_stage0_6_core_simulation.sql > /tmp/p1p5-stage3-published-helpers.sql
           test "$(wc -c </tmp/p1p5-stage3-published-helpers.sql)" -gt 8000
           cat /tmp/p1p5-stage3-published-helpers.sql \
