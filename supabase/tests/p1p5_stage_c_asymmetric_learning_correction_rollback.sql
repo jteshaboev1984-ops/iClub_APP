@@ -130,7 +130,7 @@ BEGIN
   WHERE user_id=v_user AND component_code=v_weak
     AND program_version_id=v_program
     AND engine_version='objective_state_v1' AND objective_level>=2;
-  IF v_strong_after<CASE v_strong WHEN 'P1' THEN 7 ELSE 6 END
+  IF v_strong_after < (CASE v_strong WHEN 'P1' THEN 7 ELSE 6 END)
     OR v_weak_after IS DISTINCT FROM v_weak_before
   THEN
    RAISE EXCEPTION 'Stage C real asymmetric mastery leaked strong=% L2=% weak=% before=% after=%',
@@ -189,7 +189,7 @@ BEGIN
  END LOOP;
  IF (SELECT count(*) FROM stage_c_progression_result)<>2
   OR EXISTS(SELECT 1 FROM stage_c_progression_result
-    WHERE earned_l2<CASE strong_component WHEN 'P1' THEN 7 ELSE 6 END
+    WHERE earned_l2 < (CASE strong_component WHEN 'P1' THEN 7 ELSE 6 END)
      OR weak_l2_after<>weak_l2_before OR new_correction_cases<1
      OR weak_learning_sessions<>0)
   OR (SELECT count(*) FROM private.exam_prep_beta_weekly_reviews)<>0
