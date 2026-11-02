@@ -43,14 +43,19 @@ Groups:
 
 ## SQL/dependency risks discovered
 
-1. exam_prep_session_authorizations.consumed_session_id -> exam_prep_sessions.id is nullable but RESTRICT / NOT DEFERRABLE.
-2. exam_prep_sessions.authorization_id -> exam_prep_session_authorizations.id is NOT NULL and RESTRICT / NOT DEFERRABLE.
-3. exam_prep_mentor_queue_items.recommendation_id -> exam_prep_human_review_recommendations.id is a **retained table referencing a proposed reset table**; currently zero non-NULL references. Must stop if it becomes populated.
-4. Session items, responses, integrity events, evidence events, correction actions, retest events, learning review starts, weekly goal snapshots have multiple RESTRICT back-links. A single "DELETE sessions" would fail; do not remove FK constraints to force deletion.
-5. Audit JSON and local browser keys are NOT fully represented by FK analysis; must be separately inspected for stale beta state before public access.
-6. Numeric snapshot counts can change while app remains live; MUST re-run preflight at exact release boundary under safe writes blockade.
+**New verified DAG proof (2026-11-02):** [dynamic SELECT-only structural proof](../supabase/tests/p1p5_v2_package0_fk_graph_readonly.sql) returned GRAPH_PRECHECK_PASS_NO_DELETE_AUTHORIZED against actual production: 32 nodes, 37 internal FKs and zero cycles **only after two** nullable authorization links are conceptually excluded. This analysis changed no data. Read-only ownership check across all 28 direct-user scope tables found zero rows owned by accounts without a Mathematics subject selection.
 
-## Required isolated full-schema acceptance (not done)
+1. exam_prep_session_authorizations.consumed_session_id -> exam_prep_sessions.id is nullable but RESTRICT / NOT DEFERRABLE.
+2. exam_prep_session_authorizations.correction_case_id -> exam_prep_correction_cases.id is ALSO nullable and RESTRICT / NOT DEFERRABLE. It creates a SECOND cycle via correction_cases -> evidence_events -> responses -> session_items -> sessions -> authorizations. **Both** nullable authorization links require review and explicit transactional handling before any cleanup.
+3. exam_prep_sessions.authorization_id -> exam_prep_session_authorizations.id is NOT NULL and RESTRICT / NOT DEFERRABLE.
+4. exam_prep_mentor_queue_items.recommendation_id -> exam_prep_human_review_recommendations.id is a **retained table referencing a proposed reset table**; currently zero non-NULL references. Must stop if it becomes populated.
+5. Session items, responses, integrity events, evidence events, correction actions, retest events, learning review starts, weekly goal snapshots have multiple RESTRICT back-links. A single "DELETE sessions" would fail; do not remove FK constraints to force deletion.
+6. Audit JSON and local browser keys are NOT fully represented by FK analysis; must be separately inspected for stale beta state before public access.
+7. Numeric snapshot counts can change while app remains live; MUST re-run preflight at exact release boundary under safe writes blockade.
+
+## Required isolated full-schema acceptance (PARTIALLY completed)
+
+An **actual current-migrations PG17 regression** now passes on two fake P1/P5 accounts: [full-schema FK cycle and SAVEPOINT test](../supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql) through [real HTTP/Chromium GitHub Actions run 41499740468](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740468), all job steps GREEN. This confirms one actual session/authorization FK pair under real schema constraints, not a complete 32-table deletion or backup restore. The separate simplified PG17 model now additionally verifies the correction/evidence cycle after a *second* nullable unlink ([run 41499740447](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740447), GREEN).
 
 1. Apply actual current migration stack in disposable PostgreSQL 17 using existing project replay procedure (cf. .github/workflows/exam-prep-p1p5-isolated-http-e2e.yml); create a proper governed fake Math learner, plus a fake other-user and protected fake Tour/Practice/certificate records.
 2. Rehearse deterministic **scoped and reversible** cleanup against all actual 32 learner tables and both branches of every FK. Use SAVEPOINT/ROLLBACK; verify retained Mentor queue cannot reference deletable content.
@@ -78,8 +83,10 @@ Groups:
 
 ## Minimal current proof
 
+Production real schema: read-only 32-table, 19,794-row scope report and two-FK-cut DAG PASS; no data changes. Synthetic PG17 [41499740447](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740447) GREEN on both cycles, retained Mentor blocker, idempotent delete and rollback. Actual current-migrations P1/P5 isolated HTTP/Chromium [41499740468](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740468) GREEN including full-schema session/authorization FK rollback and all existing integrated tests. All **32-table cleanup**, user-epoch replay and encrypted backup/restore remain outstanding; release remains NO_GO.
+
 [GitHub Actions #41498044157](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41498044157) GREEN on a simplified two-learner PostgreSQL 17 model with real RESTRICT cycle and retained Mentor blocker, idempotent scoped delete and rollback. This test **does not** prove all 122-table production migrations. Actual production SELECT-only scope report completed with 19,794 candidate rows. Public release remains **NO_GO**.
 
 ## Exact next engineer action
 
-Work on **full schema** disposable cleanup rehearsal with PG17 and current migrations. Inspect newest main SHA and compare PR #468 branch; do not rewrite already-green diagnostic/HTTP/600x10 CI. After full rehearsal, update docs/math-p1p5-v2-execution-ledger.md and GitHub Issue #450.
+Work on the **remaining actual 32-table deletion/restore drill** using PG17 and current migrations; both cycles now mapped and tested at two levels. Inspect newest main SHA and compare PR #468 branch; do not rewrite already-green diagnostic/HTTP/600x10 CI. After full rehearsal, update docs/math-p1p5-v2-execution-ledger.md and GitHub Issue #450.
