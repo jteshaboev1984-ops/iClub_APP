@@ -21,6 +21,8 @@ on:
       - 'supabase/tests/p1p5_stage_c_33_independent_stage0_rollbacks.sql'
       - 'supabase/tests/p1p5_stage_c_asymmetric_learning_correction_rollback.sql'
       - 'supabase/tests/p1p5_stage_c_recovery_plan_revalidation_batched.sql'
+      - 'supabase/tests/p1p5_stage_c_real_http_stale_content_fixture.sql'
+      - 'scripts/p1p5-isolated-http-retired-content-recovery.cjs'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   workflow_dispatch:
 permissions:
@@ -330,6 +332,19 @@ jobs:
             | tee /tmp/p1p5-stage-c-recovery-batch.log
           grep -q 'STAGE C BATCH 16 RECOVERY TZ DAYBAND P1P5 PRESERVATION PASS' /tmp/p1p5-stage-c-recovery-batch.log
           grep -q 'STAGE C BATCH ZERO SYNTHETIC RESIDUE RESTORED TWO ORIGINAL CI USERS PASS' /tmp/p1p5-stage-c-recovery-batch.log
+      - name: Stage C real signed learner HTTP stale content, expired authorization, feedback and exactly-once retry
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_stage_c_real_http_stale_content_fixture.sql > /tmp/p1p5-stage-c-stale-content-seed.log
+          node --check scripts/p1p5-isolated-http-retired-content-recovery.cjs
+          node scripts/p1p5-isolated-http-retired-content-recovery.cjs | tee /tmp/p1p5-stage-c-real-http-stale-content.log
+          grep -q 'STAGE C REAL HTTP CONTENT RETIREMENT EXPIRY AND PROTECTED REVIEW PASS' /tmp/p1p5-stage-c-real-http-stale-content.log
+          grep -q 'STAGE C REAL HTTP P1 CONTENT RESTORED TWO DISPOSABLE USER BOUNDARY PASS' /tmp/p1p5-stage-c-real-http-stale-content.log
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
