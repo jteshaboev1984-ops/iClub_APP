@@ -109,7 +109,9 @@ const denied=(r,label)=>{
 };
 async function main(){
  const a=token(OWNER),b=token(OTHER),badSub=token(UNKNOWN),expired=token(OWNER,{expired:true});
- const invalidSignature=a.slice(0,-1)+(a.at(-1)==='A'?'B':'A');
+ const signatureStart=a.lastIndexOf('.')+1;
+ const invalidSignature=a.slice(0,signatureStart)+
+  (a[signatureStart]==='A'?'B':'A')+a.slice(signatureStart+1);
  const paper=ownedWritten();
  assert(paper.length===2&&paper.map(r=>r.component_code).join(',')==='P1,P5',
   'Stage B did not leave exactly two component-owned committed written steps');
