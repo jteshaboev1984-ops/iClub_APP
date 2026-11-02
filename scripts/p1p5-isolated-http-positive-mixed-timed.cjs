@@ -141,12 +141,32 @@ async function run(){
   assert(!foreign.ok||!foreign.data?.session_id,'other learner read foreign full-paper result');
   papers.push({component,marksAvailable:full.marks_available,fullPaper:true,...result});
  }
+ const timedSections=[];
+ for(const component of ['P1','P5']){
+  const catalog=ok(await rpc('get_exam_prep_timed_catalog_safe_v1',{p_component_code:component},token),'timed-section catalog '+component);
+  const timed=(catalog.assessments||[]).find(x=>x.attempt_kind==='timed_section');
+  assert(timed,'server-authorized timed-section option missing '+component);
+  const a=ok(await rpc('authorize_exam_prep_timed_safe_v1',{p_assessment_id:timed.assessment_id},token),
+   'public timed-section authorization '+component);
+  assert(a.authorization_id&&a.purpose==='timed','timed training did not use server authorization');
+  const start=ok(await rpc('start_exam_prep_session_safe_v1',{
+   p_authorization_id:a.authorization_id,p_idempotency_key:'real-http-section-'+component+'-start'
+  },token),'start timed-section '+component);
+  const done=await finishSession(start.session_id,token,'real-http-section-'+component,true);
+  assert(!done.paper,'timed section was incorrectly recorded as a full paper');
+  const foreign=await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:start.session_id},other);
+  assert(!foreign.ok||!foreign.data?.session_id,'foreign user read timed section');
+  timedSections.push({component,items:done.total,objective:done.objective,written:done.written,
+   scoreStatus:done.scoreStatus,timingComparable:done.timingComparable});
+ }
+ assert(timedSections.length===2&&timedSections.every(x=>x.items>0),
+  'P1/P5 separate timed section proof missing');
  assert(papers.every(x=>x.attempted===x.total&&x.fullPaper),'not all full-paper questions submitted');
  const after=list("SELECT component_code component,operational_stage stage FROM private.exam_prep_stage_states WHERE user_id='"+uid+"'::uuid AND engine_version='objective_state_v1' ORDER BY component_code");
  assert(after.length===2,'P1/P5 states not independent');
  console.log('STAGE B REAL HTTP POSITIVE MIXED AND FULL PAPER PASS',JSON.stringify({
   realSignedHttp:true,serverGradedStage3Prep:true,fullPaperAuthorizedByServer:true,
-  mixed,papers,stageBefore:before.map(x=>({component:x.component,stage:x.stage})),stageAfter:after
+  mixed,papers,timedSections,stageBefore:before.map(x=>({component:x.component,stage:x.stage})),stageAfter:after
  }));
 }
 run().catch(err=>{console.error('STAGE B MIXED/TIMED HTTP FAILED:',err.message);process.exitCode=1});
