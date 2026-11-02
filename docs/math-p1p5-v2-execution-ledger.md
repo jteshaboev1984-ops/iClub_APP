@@ -158,3 +158,29 @@ A source-to-database ambiguity from the older plans has been resolved **without 
 4. Only after Package 0 acceptance proceed to Package 1: confirmed P1/P5 dates, diagnostic completion anchors and personal study horizon. The full workplan is in docs/math-p1p5-release-workplan-v2-20261102.md, PR #468 and Issue #450.
 
 **No user accounts or progress, feature configuration, AI grants, existing Practice v2, other subject data, production DDL/DML, or Vercel production deployment was changed by these tests.**
+
+## Checkpoint P0-05 — full 32-table isolated cleanup/rollback CI GREEN (2026-11-02)
+
+**First successful exact executable SHA:** `9bbdf9ac5b75451f9242f2d466d2d4337a9ce06a`; **[GitHub Actions real-HTTP/Chromium/PG17 run #41502015565](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41502015565) completed SUCCESS**, job `125471610990` (36 steps), including the new `Package 0 full 32-table scoped fake-learner cleanup and complete rollback` step SUCCESS. This commit differs from later documentation-only commits; don't misrepresent a different SHA as tested.
+
+### What the actual production-shaped isolated schema test proves
+
+- Exact new fixture: [`supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql`](../supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql). Runs **only in disposable PG17** with `current_database()='postgres'`, guarded `iclub.e2e_isolated=true` and exactly two specific fake P1/P5 users; never sent to production.
+- All **32 scoped table DELETE statements** executed in the two-FK-cut DAG order for only synthetic fake user A. Four dependent child tables use joins to user-owned session/plan/revalidation/correction IDs. No public user, Practice, Tour or certificate rows were deleted. The second fake learner and protected counters remained unchanged.
+- The test first required a real immutable learner response and attempted an unguarded DELETE: actual immutable trigger correctly rejected it (CI log `PASS: authentic immutable evidence trigger denies unguarded delete`). Only afterward **in disposable CI** did the test set transaction-local existing `iclub.exam_prep_synthetic_cleanup=on` to use the pre-existing narrowly synthetic cleanup exemption, never disabling triggers.
+- CI log independently reports `PASS P0 actual 32-table synthetic learner-state reset; protected public and other user unchanged`; `PASS P0 second same-scope cleanup is idempotent`; `PASS P0 full 32-table learner-state counts restored by SAVEPOINT`. All checks executed under one transaction and a final ROLLBACK. Existing diagnostic, due retest, mixed transfer, timed/paper, multilingual written/HTTP, fault and security test steps also GREEN on this SHA.
+- The synthetic bootstrap is intentionally narrower than real iClub app: only missing protected public tables were provisioned with fake rows inside the always-rolled-back CI transaction. Most of the 32 table routes use genuine post-E2E learner records; some zero-row paths remain and therefore are schema/order tests rather than nonempty deletion tests. **This is NOT proof of actual encrypted production backup/restore or a relaunch-ready cleanup.**
+
+### Genuine blocker discovered and documented
+
+- Production `private.exam_prep_block_immutable_mutation_v1()` protects responses, evidence events, correction actions, integrity events, timed result facts and other immutable records. Only `iclub.exam_prep_synthetic_cleanup=on` currently permits some deletes. The existing `public.cleanup_exam_prep_beta_synthetic_progress_v1/v2` requires synthetic-present review state, no real monitoring epoch, AI disabled, kill switch on; **does not apply** to the current real-monitoring beta or future real prelaunch test-state purge.
+- The future release-time cleanup needs a **new versioned, strictly authorized one-shot real-prelaunch procedure** with owner-approved exact target, secure backup/recovery, locked new Exam Prep writes, explicit allowlist, preservation of historical audit/consent/AI policy as decided, and no ordinary-app permission bypass. Do not use the synthetic cleanup flag in production on real beta learners.
+
+### Status and next precise work (Package 0 remains IN PROGRESS)
+
+1. Prepare verified secure backup/restore implementation and governance plan for the ONE-TIME controlled release-time purge, using only synthetic records in CI. Do not export real account records into GitHub.
+2. Formalize exactly what to retain or archive among 14,748 audit events, beta consent/membership, AI entitlements, optional Mentor/security records. Current published Practice bank and Tour history are protected.
+3. Draft/review versioned release-cleanup authorization and accelerated mass Core gate without falsifying prior 4-week/72-hour evidence. Do not actually apply production migration/flags until final architect release GO.
+4. Once Package 0 is formally accepted, proceed to Package 1 (confirmed P1/P5 exam dates + completion-anchored study horizon).
+
+**Production Supabase DML/DDL: ZERO. Vercel production deploy: NONE. AI users/flags, practice data, Tours, other subject data: UNCHANGED. Old public release gate: NO_GO. PR #468 remains draft.**
