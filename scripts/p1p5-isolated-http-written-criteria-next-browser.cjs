@@ -38,8 +38,8 @@ async function rpc(name,args={},subject=token){
  let data=null;try{data=await response.json()}catch{}
  return {ok:response.ok,status:response.status,data};
 }
-async function pageOpen(browser,lang,dropAck=false) {
- const context=await browser.newContext({viewport:{width:385,height:812},timezoneId:'Asia/Tashkent',locale:lang==='uz'?'uz-UZ':lang==='ru'?'ru-RU':'en-GB'});
+async function pageOpen(browser,lang,dropAck=false,viewportWidth=385) {
+ const context=await browser.newContext({viewport:{width:viewportWidth,height:viewportWidth>=1000?900:812},timezoneId:'Asia/Tashkent',locale:lang==='uz'?'uz-UZ':lang==='ru'?'ru-RU':'en-GB'});
  const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.route(HOST+'/',route=>route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><html lang="'+lang+'"><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><section id="courses-subject-hub"><div id="subject-hub-exam-prep-entry" hidden aria-hidden="true"><span id="subject-hub-exam-prep-title"></span><span id="subject-hub-exam-prep-sub"></span></div><div id="exam-prep-host-root" hidden aria-hidden="true"></div></section></body></html>'}));
  await page.goto(HOST+'/');
@@ -148,8 +148,8 @@ async function main(){
    let id=null,lastItem=null;
    const preAdvanceAnswers=[];
    // Every fresh context uses the same real JWT, with no localStorage carryover.
-   for(const lang of ['en','ru','uz']){
-    const opening=await pageOpen(browser,lang,lang==='uz');
+   for(const {lang,width} of ['en','ru','uz'].flatMap(lang=>[385,1280].map(width=>({lang,width})))){
+    const opening=await pageOpen(browser,lang,lang==='uz'&&width===1280,width);
     try{
      const located=await navigateToPlan(opening.page,component,id);
      if(!id){
@@ -162,8 +162,10 @@ async function main(){
      const snapshot=await criteriaFor(opening.page,id,component,lang);
      if(lastItem!=null)assert.equal(snapshot.itemOrder,lastItem,'reopened a different written step');
      lastItem=snapshot.itemOrder;
-     preAdvanceAnswers.push({lang,available:snapshot.available});
-     if(lang==='uz'){
+     const horizontalOverflow=await opening.page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
+     assert(!horizontalOverflow,'horizontal viewport overflow '+component+'/'+lang+'/'+width);
+     preAdvanceAnswers.push({lang,width,available:snapshot.available});
+     if(lang==='uz'&&width===1280){
       const before=count('exam_prep_responses',id,' AND item_order='+lastItem);
       assert(before===0,'written Core received stored essay/answer before Next');
       await opening.page.locator('[data-ep-written-next]').click();
