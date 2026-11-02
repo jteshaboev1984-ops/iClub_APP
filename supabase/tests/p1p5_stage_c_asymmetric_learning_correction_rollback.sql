@@ -42,8 +42,49 @@ CREATE TEMP TABLE stage_c_progression_result(
   weak_l2_before integer NOT NULL,
   weak_l2_after integer NOT NULL,
   new_correction_cases integer NOT NULL,
-  weak_learning_sessions integer NOT NULL
+  weak_learning_sessions integer NOT NULL,
+  retest_status text NOT NULL,
+  too_early_rejected boolean NOT NULL,
+  correction_events int NOT NULL,
+  clock_only_credit_delta bigint NOT NULL
 ) ON COMMIT DROP;
+
+-- Deliberate all-objective-wrong retest: answers are submitted and graded
+-- by the real public RPC; this helper NEVER writes is_correct or mastery.
+CREATE OR REPLACE FUNCTION pg_temp.stagec_submit_wrong_retest_v1(
+ p_session_id uuid,p_prefix text
+) RETURNS void LANGUAGE plpgsql AS $fail$
+DECLARE v_item record;v_answer text;v_payload jsonb;v_n int:=0;
+BEGIN
+ FOR v_item IN
+  SELECT si.item_order,si.item_kind,q.qtype,q.correct_answer
+  FROM private.exam_prep_session_items si
+  LEFT JOIN public.questions q ON q.id=si.question_id
+  WHERE si.session_id=p_session_id ORDER BY si.item_order
+ LOOP
+  IF v_item.item_kind='question' THEN
+   IF v_item.correct_answer IS NULL THEN
+    RAISE EXCEPTION 'Stage C failed retest had no authoritative answer key';
+   END IF;
+   v_answer:=CASE WHEN v_item.qtype='mcq'
+    THEN CASE upper(trim(v_item.correct_answer)) WHEN 'A' THEN 'B' ELSE 'A' END
+    ELSE CASE WHEN trim(v_item.correct_answer)='0' THEN '1' ELSE '0' END END;
+   v_payload:=jsonb_build_object('answer',v_answer);
+   v_n:=v_n+1;
+  ELSE
+   v_payload:=jsonb_build_object('artifact',jsonb_build_object(
+    'working','not automatically graded','method','synthetic','conclusion','unverified'
+   ));
+  END IF;
+  PERFORM public.submit_exam_prep_response_safe_v1(
+   p_session_id,v_item.item_order,v_payload,
+   p_prefix||'-wrong-'||v_item.item_order,1200,'en'
+  );
+ END LOOP;
+ IF v_n=0 THEN RAISE EXCEPTION 'Stage C retest lacks objective questions'; END IF;
+ PERFORM public.finalize_exam_prep_session_safe_v1(p_session_id,p_prefix||'-final');
+END
+$fail$;
 
 DO $cases$
 DECLARE
@@ -65,6 +106,14 @@ DECLARE
  v_stage_weak int;
  v_manifest jsonb;
  v_clock_ready boolean:=false;
+ v_case uuid;
+ v_retest jsonb;
+ v_authorization jsonb;
+ v_retest_status text;
+ v_early_denied boolean;
+ v_event_count integer;
+ v_before_evidence bigint;
+ v_after_evidence bigint;
 BEGIN
  PERFORM private.register_exam_prep_canonical_synthetic_run_v2(
     v_run,'p2_67_canonical_v2_0',
@@ -196,15 +245,118 @@ BEGIN
   THEN RAISE EXCEPTION 'Stage C incorrect learning created cross-component credit';
   END IF;
 
+  -- Canonical source adversarial events:
+  -- ADV-02 (P5 failed retest reopens), ADV-03 (P1 delayed fresh passes).
+  SELECT id INTO v_case FROM private.exam_prep_correction_cases
+  WHERE user_id=v_user AND component_code=v_strong AND skill_code=v_skill
+    AND status IN ('open','remediating','retest_due','reopened')
+  ORDER BY opened_at DESC LIMIT 1;
+  IF v_case IS NULL THEN RAISE EXCEPTION 'Stage C missing original correction case'; END IF;
+
+  v_authorization:=public.authorize_exam_prep_correction_safe_v1(v_case);
+  v_session:=(public.start_exam_prep_session_safe_v1(
+   (v_authorization->>'authorization_id')::uuid,
+   'stagec-remediation-start-'||lower(v_strong)
+  )->>'session_id')::uuid;
+  PERFORM pg_temp.p269_complete_session_correct_v1(
+   v_session,'stagec-remediation-'||lower(v_strong)
+  );
+
+  v_early_denied:=false;
+  BEGIN
+   PERFORM public.authorize_exam_prep_retest_safe_v1(v_case);
+  EXCEPTION WHEN OTHERS THEN
+   IF SQLERRM='exam_prep_retest_too_early'
+   THEN v_early_denied:=true; ELSE RAISE; END IF;
+  END;
+  IF NOT v_early_denied THEN
+   RAISE EXCEPTION 'Stage C retest authorized before min-delay component=%',v_strong;
+  END IF;
+
+  SELECT count(*) INTO v_before_evidence
+  FROM private.exam_prep_evidence_events
+  WHERE user_id=v_user AND component_code=v_strong;
+
+  -- P2-68 is test-only, bounded, attributable and enforces time progression.
+  -- One source profile may be retested after the other calendar has advanced;
+  -- this does not grant an academic credit, only unlocks after-due eligibility.
+  PERFORM pg_temp.p269_advance_days_v1(
+   v_run,7,'Stage C immutable retest due calendar advancement');
+  SELECT count(*) INTO v_after_evidence
+  FROM private.exam_prep_evidence_events
+  WHERE user_id=v_user AND component_code=v_strong;
+  IF v_after_evidence<>v_before_evidence THEN
+   RAISE EXCEPTION 'Stage C calendar alone created academic evidence';
+  END IF;
+
+  v_retest:=public.authorize_exam_prep_retest_safe_v1(v_case);
+  v_session:=(public.start_exam_prep_session_safe_v1(
+   (v_retest->>'authorization_id')::uuid,
+   'stagec-due-retest-start-'||lower(v_strong)
+  )->>'session_id')::uuid;
+
+  IF v_strong='P5' THEN
+   PERFORM pg_temp.stagec_submit_wrong_retest_v1(
+    v_session,'stagec-retest-fail-p5');
+   v_retest_status:='reopened';
+  ELSE
+   PERFORM pg_temp.p269_complete_session_correct_v1(
+    v_session,'stagec-retest-pass-p1');
+   v_retest_status:='resolved';
+  END IF;
+
+  IF (SELECT status FROM private.exam_prep_correction_cases
+      WHERE id=v_case)<>v_retest_status THEN
+   RAISE EXCEPTION 'Stage C real retest outcome mismatch profile=% expected=% actual=%',
+     v_profile,v_retest_status,
+     (SELECT status FROM private.exam_prep_correction_cases WHERE id=v_case);
+  END IF;
+
+  SELECT count(*)::int INTO v_event_count
+  FROM private.exam_prep_correction_actions
+  WHERE correction_case_id=v_case
+    AND action_type=(CASE WHEN v_retest_status='reopened'
+      THEN 'retest_failed' ELSE 'retest_passed' END)
+    AND session_id=v_session;
+  IF v_event_count<>1 THEN
+   RAISE EXCEPTION 'Stage C expected genuine correction retest event exactly once';
+  END IF;
+
+  -- The failed P5 retest cannot award L2 on the deliberately new skill;
+  -- no repair action on the strong paper can credit the weak paper.
+  PERFORM private.rebuild_exam_prep_state_v1(v_user,v_strong);
+  PERFORM private.rebuild_exam_prep_state_v1(v_user,v_weak);
+  SELECT count(*)::int INTO v_weak_after
+  FROM private.exam_prep_skill_states
+  WHERE user_id=v_user AND component_code=v_weak
+    AND program_version_id=v_program
+    AND engine_version='objective_state_v1' AND objective_level>=2;
+  IF v_weak_after<>v_weak_before THEN
+   RAISE EXCEPTION 'Stage C retest affected opposite paper mastery';
+  END IF;
+  IF v_strong='P5' AND EXISTS (
+   SELECT 1 FROM private.exam_prep_skill_states
+   WHERE user_id=v_user AND component_code='P5'
+     AND program_version_id=v_program
+     AND skill_code=v_skill AND engine_version='objective_state_v1'
+     AND objective_level>=2
+  ) THEN
+   RAISE EXCEPTION 'Stage C failed retest improperly created L2 on failed skill';
+  END IF;
+
   INSERT INTO stage_c_progression_result VALUES(
    v_profile,v_user,v_strong,v_weak,v_strong_after,v_weak_before,
-   v_weak_after,v_corrections,v_weak_learning);
+   v_weak_after,v_corrections,v_weak_learning,v_retest_status,
+   v_early_denied,v_event_count,v_after_evidence-v_before_evidence);
  END LOOP;
  IF (SELECT count(*) FROM stage_c_progression_result)<>2
   OR EXISTS(SELECT 1 FROM stage_c_progression_result
     WHERE earned_l2 < (CASE strong_component WHEN 'P1' THEN 7 ELSE 6 END)
      OR weak_l2_after<>weak_l2_before OR new_correction_cases<1
-     OR weak_learning_sessions<>0)
+     OR weak_learning_sessions<>0 OR NOT too_early_rejected
+     OR correction_events<>1 OR clock_only_credit_delta<>0
+     OR (strong_component='P1' AND retest_status<>'resolved')
+     OR (strong_component='P5' AND retest_status<>'reopened'))
   OR (SELECT count(*) FROM private.exam_prep_beta_weekly_reviews)<>0
   OR (SELECT count(*) FROM public.practice_attempts)<>0
   OR (SELECT count(*) FROM public.tour_attempts)<>0
@@ -215,8 +367,15 @@ $cases$;
 
 SELECT 'STAGE C SOURCE-ANCHORED P1 P5 ASYMMETRIC LEARNING CORRECTION PASS' AS marker,
  profile,strong_component,weak_component,earned_l2,weak_l2_before,
- weak_l2_after,new_correction_cases,weak_learning_sessions
+ weak_l2_after,new_correction_cases,weak_learning_sessions,
+ retest_status,too_early_rejected,correction_events,clock_only_credit_delta
 FROM stage_c_progression_result ORDER BY profile;
+SELECT 'STAGE C ACTUAL P1 DELAYED PASS P5 FAILED REOPENED RETEST PASS' AS marker,
+ count(*) FILTER (WHERE strong_component='P1' AND retest_status='resolved') AS successful_p1,
+ count(*) FILTER (WHERE strong_component='P5' AND retest_status='reopened') AS reopened_p5,
+ count(*) FILTER (WHERE too_early_rejected) AS denied_early_retests,
+ sum(clock_only_credit_delta) AS calendar_generated_evidence
+FROM stage_c_progression_result;
 
 ROLLBACK;
 
