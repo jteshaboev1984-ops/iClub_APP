@@ -29,6 +29,19 @@ CREATE TABLE responses(
   user_id integer NOT NULL REFERENCES learners(id) ON DELETE RESTRICT,
   session_id integer NOT NULL REFERENCES sessions(id) ON DELETE RESTRICT
 );
+CREATE TABLE evidence_events(
+  id integer PRIMARY KEY,
+  user_id integer NOT NULL REFERENCES learners(id),
+  response_id integer NOT NULL REFERENCES responses(id) ON DELETE RESTRICT,
+  session_id integer NOT NULL REFERENCES sessions(id) ON DELETE RESTRICT
+);
+CREATE TABLE correction_cases(
+  id integer PRIMARY KEY,
+  user_id integer NOT NULL REFERENCES learners(id),
+  opened_from_evidence_id integer NOT NULL REFERENCES evidence_events(id) ON DELETE RESTRICT
+);
+ALTER TABLE authorizations ADD COLUMN correction_case_id integer
+  REFERENCES correction_cases(id) ON DELETE RESTRICT;
 CREATE TABLE recommendations(
   id integer PRIMARY KEY,
   user_id integer NOT NULL REFERENCES learners(id) ON DELETE RESTRICT
@@ -51,6 +64,12 @@ INSERT INTO sessions(id,user_id,authorization_id) VALUES (101,1,11),(102,2,12);
 UPDATE authorizations SET consumed_session_id=101 WHERE id=11;
 UPDATE authorizations SET consumed_session_id=102 WHERE id=12;
 INSERT INTO responses(id,user_id,session_id) VALUES (201,1,101),(202,2,102);
+INSERT INTO evidence_events(id,user_id,response_id,session_id)
+VALUES (251,1,201,101),(252,2,202,102);
+INSERT INTO correction_cases(id,user_id,opened_from_evidence_id)
+VALUES (351,1,251),(352,2,252);
+UPDATE authorizations SET correction_case_id=351 WHERE id=11;
+UPDATE authorizations SET correction_case_id=352 WHERE id=12;
 INSERT INTO recommendations(id,user_id) VALUES (301,1),(302,2);
 INSERT INTO retained_mentor_queue(id,recommendation_id) VALUES (401,302);
 INSERT INTO profiles(id,user_id) VALUES (501,1),(502,2);
@@ -83,8 +102,27 @@ BEGIN
 END $$;
 ROLLBACK TO SAVEPOINT mentor_blocker;
 
--- Positive targeted cleanup: explicit unlink, then leaves to root, only user 1.
+-- Negative: even if the direct session link is detached, the other
+-- authorization -> correction -> evidence -> response -> session cycle
+-- keeps correction cases protected until the second nullable FK is detached.
+SAVEPOINT correction_blocker;
 UPDATE authorizations SET consumed_session_id=NULL WHERE user_id=1;
+DO $$
+BEGIN
+  BEGIN
+    DELETE FROM correction_cases WHERE id=351;
+    RAISE EXCEPTION 'FAIL: second real FK cycle did not reject correction deletion';
+  EXCEPTION WHEN foreign_key_violation THEN
+    RAISE NOTICE 'PASS: second correction/evidence/session cycle requires separate unlink';
+  END;
+END $$;
+ROLLBACK TO SAVEPOINT correction_blocker;
+
+-- Positive targeted cleanup: explicit unlink, then leaves to root, only user 1.
+UPDATE authorizations
+SET consumed_session_id=NULL,correction_case_id=NULL WHERE user_id=1;
+DELETE FROM correction_cases WHERE user_id=1;
+DELETE FROM evidence_events WHERE user_id=1;
 DELETE FROM responses WHERE user_id=1;
 DELETE FROM sessions WHERE user_id=1;
 DELETE FROM authorizations WHERE user_id=1;
@@ -100,17 +138,24 @@ BEGIN
      (SELECT count(*) FROM authorizations WHERE user_id=2)<>1 OR
      (SELECT count(*) FROM sessions WHERE user_id=2)<>1 OR
      (SELECT count(*) FROM responses WHERE user_id=2)<>1 OR
+     (SELECT count(*) FROM evidence_events WHERE user_id=2)<>1 OR
+     (SELECT count(*) FROM correction_cases WHERE user_id=2)<>1 OR
      (SELECT count(*) FROM retained_mentor_queue)<>1 OR
      (SELECT count(*) FROM profiles WHERE user_id=1)<>0 OR
      (SELECT count(*) FROM sessions WHERE user_id=1)<>0 OR
      (SELECT count(*) FROM authorizations WHERE user_id=1)<>0 OR
-     (SELECT count(*) FROM recommendations WHERE user_id=1)<>0
+     (SELECT count(*) FROM recommendations WHERE user_id=1)<>0 OR
+     (SELECT count(*) FROM correction_cases WHERE user_id=1)<>0 OR
+     (SELECT count(*) FROM evidence_events WHERE user_id=1)<>0
   THEN RAISE EXCEPTION 'FAIL: cleanup preservation or target scope mismatch'; END IF;
   RAISE NOTICE 'PASS: math test-state cleared, non-target and protected app state preserved';
 END $$;
 
 -- Positive: replay same targeted cleanup is idempotent.
-UPDATE authorizations SET consumed_session_id=NULL WHERE user_id=1;
+UPDATE authorizations
+SET consumed_session_id=NULL,correction_case_id=NULL WHERE user_id=1;
+DELETE FROM correction_cases WHERE user_id=1;
+DELETE FROM evidence_events WHERE user_id=1;
 DELETE FROM responses WHERE user_id=1;
 DELETE FROM sessions WHERE user_id=1;
 DELETE FROM authorizations WHERE user_id=1;
@@ -124,12 +169,14 @@ BEGIN
   IF (SELECT count(*) FROM authorizations)<>2 OR
      (SELECT count(*) FROM sessions)<>2 OR
      (SELECT count(*) FROM responses)<>2 OR
+     (SELECT count(*) FROM evidence_events)<>2 OR
+     (SELECT count(*) FROM correction_cases)<>2 OR
      (SELECT count(*) FROM recommendations)<>2 OR
      (SELECT count(*) FROM profiles)<>2 OR
      (SELECT count(*) FROM practice_attempts)<>2 OR
      (SELECT count(*) FROM tour_attempts)<>2 OR
      (SELECT count(*) FROM certificates)<>2 OR
-     (SELECT count(*) FROM authorizations WHERE user_id=1 AND consumed_session_id=101)<>1
+     (SELECT count(*) FROM authorizations WHERE user_id=1 AND consumed_session_id=101 AND correction_case_id=351)<>1
   THEN RAISE EXCEPTION 'FAIL: test-only rollback did not restore original model'; END IF;
   RAISE NOTICE 'PASS: full test-only rollback restored all original rows';
 END $$;
