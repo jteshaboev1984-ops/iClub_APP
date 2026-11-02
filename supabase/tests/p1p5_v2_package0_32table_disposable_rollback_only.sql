@@ -105,7 +105,7 @@ CREATE TEMP TABLE p0_target_corrections AS SELECT id FROM private.exam_prep_corr
 CREATE TEMP TABLE p0_target_revalidations AS SELECT id FROM private.exam_prep_progress_revalidation_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
 SAVEPOINT p0_before_actual_full_cleanup;
 -- Negative: real immutable evidence must remain protected by default.
-DO $
+DO $$
 DECLARE v_uid uuid:='11111111-1111-4111-8111-111111111191'::uuid;
 BEGIN
  IF NOT EXISTS(SELECT 1 FROM private.exam_prep_responses WHERE user_id=v_uid)
@@ -122,7 +122,7 @@ BEGIN
    RAISE;
   END IF;
  END;
-END $;
+END $$;
 -- This is an EXISTING, GOVERNED synthetic-data mode defined in
 -- private.exam_prep_block_immutable_mutation_v1(). It is allowed ONLY inside
 -- the disposable two-fake-user CI database (guarded above), NOT for real beta
