@@ -24,6 +24,9 @@ on:
       - 'supabase/tests/p1p5_stage_c_real_http_stale_content_fixture.sql'
       - 'scripts/p1p5-isolated-http-retired-content-recovery.cjs'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
+      - .github/workflows/p1p5-stage-d-consolidated-release-gate.yml
+      - scripts/p1p5-stage-d-release-gate.cjs
+      - scripts/p1p5-stage-d-release-gate.test.cjs
   workflow_dispatch:
 permissions:
   contents: read

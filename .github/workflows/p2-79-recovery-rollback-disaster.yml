@@ -16,6 +16,9 @@ on:
       - .github/scripts/p2_74_ai_shadow_safety_regression.js
       - exam-prep/**
       - .github/workflows/p2-79-recovery-rollback-disaster.yml
+      - .github/workflows/p1p5-stage-d-consolidated-release-gate.yml
+      - scripts/p1p5-stage-d-release-gate.cjs
+      - scripts/p1p5-stage-d-release-gate.test.cjs
   push:
     branches:
       - main
