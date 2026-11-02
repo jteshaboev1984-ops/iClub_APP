@@ -17,6 +17,8 @@ on:
       - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
       - 'supabase/tests/p1p5_isolated_http_written_browser_allowlist.sql'
       - 'scripts/p1p5-isolated-http-written-criteria-next-browser.cjs'
+      - 'scripts/math-p1p5-stage-c-structural-inventory.cjs'
+      - 'scripts/fixtures/math-p1p5-stage-c-structural-integrity-readonly.sql'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   workflow_dispatch:
 permissions:
@@ -129,6 +131,11 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
 
 
+      - name: Stage C dynamic P1/P5 complete content, skill, exposure, and scenario integrity
+        run: |
+          set -euo pipefail
+          node --check scripts/math-p1p5-stage-c-structural-inventory.cjs
+          node scripts/math-p1p5-stage-c-structural-inventory.cjs
       - name: Seed ONLY disposable authenticated learners
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
