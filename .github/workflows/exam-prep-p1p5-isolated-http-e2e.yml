@@ -376,8 +376,17 @@ jobs:
         run: |
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
           bash -n scripts/p1p5-v2-package0-synthetic-backup-restore.sh
-          bash scripts/p1p5-v2-package0-synthetic-backup-restore.sh
+          # GitHub Ubuntu runner ships pg_dump 16 while isolated server is 17.
+          # Run all dump/restore clients INSIDE disposable postgres:17;
+          # never install a client, connect to live DB, or upload archives.
+          docker run --rm --network host --entrypoint bash \
+            -e P1P5_E2E_ISOLATED -e PGHOST -e PGPORT -e PGUSER \
+            -e PGPASSWORD -e PGDATABASE -e PGOPTIONS \
+            -v "$PWD/scripts/p1p5-v2-package0-synthetic-backup-restore.sh:/p0-restore-test.sh:ro" \
+            postgres:17 /p0-restore-test.sh
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
