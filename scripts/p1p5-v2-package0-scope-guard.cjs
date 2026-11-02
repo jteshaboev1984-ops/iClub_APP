@@ -50,4 +50,48 @@ for(const x of [
 'ON DELETE RESTRICT','EXCEPTION WHEN foreign_key_violation','DELETE FROM sessions',
 'DELETE FROM recommendations','retained_mentor_queue','practice_attempts','tour_attempts','certificates'
 ]) assert(isolated.includes(x),'isolated rehearsal contract missing: '+x);
+// Gate added at Package 0 independent-PG17-backup checkpoint.
+const dag=read('supabase/tests/p1p5_v2_package0_fk_graph_readonly.sql');
+const full=read('supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql');
+const backup=read('scripts/p1p5-v2-package0-synthetic-backup-restore.sh');
+const e2e=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+const authorization=read('docs/math-p1p5-v2-package0-release-authorization-contract.md');
+assert(!/\b(?:insert|update|delete|truncate|drop|alter|create|grant|revoke|call|do|execute|copy|vacuum)\b/i.test(strip(dag)),
+  'full live FK graph must remain SELECT-only');
+assert(dag.includes('GRAPH_PRECHECK_PASS_NO_DELETE_AUTHORIZED'),'live graph must not claim release permission');
+assert(dag.includes('consumed_session_id')&&dag.includes('correction_case_id'),
+  'both FK cut points are essential');
+const targets=[...full.matchAll(/DELETE FROM private\.(exam_prep_\w+)/g)].map(x=>x[1]);
+assert.equal(targets.length,64,'isolated cleanup needs exactly 32 scoped deletes and 32 replay checks');
+for(const name of reset)assert.equal(targets.filter(t=>t===name).length,2,
+  'each candidate must appear exactly twice: '+name);
+for(const statement of [
+  "current_database()<>'postgres'",
+  "current_setting('iclub.e2e_isolated',true)",
+  'SAVEPOINT p0_before_actual_full_cleanup',
+  'ROLLBACK TO SAVEPOINT p0_before_actual_full_cleanup',
+  'ROLLBACK;',
+  "'iclub.exam_prep_synthetic_cleanup','on',true",
+  'PASS: authentic immutable evidence trigger denies unguarded delete'
+])assert(full.includes(statement),'isolated-only rollback guard missing: '+statement);
+assert(!/DISABLE\s+TRIGGER|SET\s+session_replication_role|localStorage\.clear\s*\(/i.test(full),
+  'isolated test must not disable protections');
+for(const token of ['P1P5_E2E_ISOLATED','PGHOST','PGDATABASE','pg_dump','pg_restore',
+                     'createdb','dropdb','fingerprint_query','mktemp']){
+  assert(backup.includes(token),'backup/restore guard missing: '+token);
+}
+assert(backup.includes("SELECT count(*) FROM public.users")&&backup.includes("SELECT count(*) FROM auth.users"),
+  'backup must reject unexpected real learners');
+assert(e2e.includes('docker run --rm --network host --entrypoint bash')&&
+       e2e.includes('postgres:17 /p0-restore-test.sh'),
+  'backup client must match isolated PG17 server (runner defaults to PG16)');
+assert(e2e.includes('p1p5_v2_package0_32table_disposable_rollback_only.sql'),
+  'full scoped cleanup test must be in real HTTP E2E');
+for(const phrase of ['NOT release GO','synthetic-only','ONE','Practice','Tour','AI','audit',
+                     'one-shot','NO_GO']){
+  assert(authorization.toLowerCase().includes(phrase.toLowerCase()),
+    'release-time authorization must keep protected data and fail closed: '+phrase);
+}
+console.log('PASS P0 full 32-table exact scoped rollback and independent PG17-only backup/restore safety contracts');
+
 console.log('PASS v2 Package 0 SELECT-only live queries, 32 provisional candidates, protected invariants, synthetic PG rollback contracts');
