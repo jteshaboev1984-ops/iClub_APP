@@ -6,6 +6,7 @@ on:
       - 'exam-prep/**'
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
+      - 'supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
@@ -145,6 +146,14 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql > /tmp/p1p5-e2e-seed.log
           echo "Disposable seed applied; no live project, token or account involved"
+      - name: Package 0 actual-migrations P1/P5 session/authorization FK rollback
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql
+          echo "PASS: full migration schema retained and fake FK probe rolled back"
       - name: Generate ephemeral JWT signing key and start local PostgREST
         shell: bash
         run: |
