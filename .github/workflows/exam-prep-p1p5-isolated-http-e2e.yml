@@ -20,6 +20,7 @@ on:
       - 'scripts/p1p5-isolated-http-stage-c-security-race.cjs'
       - 'supabase/tests/p1p5_stage_c_33_independent_stage0_rollbacks.sql'
       - 'supabase/tests/p1p5_stage_c_asymmetric_learning_correction_rollback.sql'
+      - 'supabase/tests/p1p5_stage_c_recovery_plan_revalidation_batched.sql'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   workflow_dispatch:
 permissions:
@@ -314,6 +315,21 @@ jobs:
           grep -q 'STAGE C SOURCE-ANCHORED P1 P5 ASYMMETRIC LEARNING CORRECTION PASS' /tmp/p1p5-stage-c-asymmetric-progress.log
           grep -q 'STAGE C ASYMMETRIC LEARNING + CORRECTION ROLLBACK RESTORED TWO USERS PASS' /tmp/p1p5-stage-c-asymmetric-progress.log
           grep -q 'STAGE C ACTUAL P1 DELAYED PASS P5 FAILED REOPENED RETEST PASS' /tmp/p1p5-stage-c-asymmetric-progress.log
+      - name: Stage C consolidated 16 recovery cases, governed noncredit revalidation, stale plan and profile revision with atomic rollback
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          test -s /tmp/p1p5-stage3-published-helpers.sql
+          cat /tmp/p1p5-stage3-published-helpers.sql \
+            supabase/tests/p1p5_stage_c_recovery_plan_revalidation_batched.sql \
+            | psql -X -v ON_ERROR_STOP=1 \
+            | tee /tmp/p1p5-stage-c-recovery-batch.log
+          grep -q 'STAGE C BATCH 16 RECOVERY TZ DAYBAND P1P5 PRESERVATION PASS' /tmp/p1p5-stage-c-recovery-batch.log
+          grep -q 'STAGE C BATCH ZERO SYNTHETIC RESIDUE RESTORED TWO ORIGINAL CI USERS PASS' /tmp/p1p5-stage-c-recovery-batch.log
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
