@@ -140,6 +140,79 @@ async function criteriaFor(page,id,component,lang) {
   'reading criteria silently advanced academic progress');
  return {itemOrder:item.item_order,available:result.data.available===true,lang};
 }
+// Stage C: fail the browser's FIRST Next request *before* it reaches the DB.
+ // The real app must reconcile status=open and offer a safe retry.
+ // Then race that same on-screen retry against eight independently signed real
+ // HTTP/PostgREST calls while the first committed written row does NOT yet exist.
+ // All clients must converge on exactly one server advance without written marks.
+async function firstCommitOfflineRace(page,sessionId,itemOrder,component) {
+ const onlyItem=' AND item_order='+itemOrder;
+ assert.equal(count('exam_prep_written_step_advances_v1',sessionId,onlyItem),0,
+  'Stage C requires a genuinely uncommitted written step');
+ let blockedFirst=false;
+ const routeName='**/rpc/advance_exam_prep_written_step_safe_v1';
+ await page.route(routeName,async route=>{
+  if(!blockedFirst){
+   blockedFirst=true;
+   await route.abort('internetdisconnected');
+  }else await route.continue();
+ });
+ await page.locator('[data-ep-written-next]').click();
+ // A failed BEFORE-COMMIT request may never be treated as saved. The
+ // existing production UI must read actual server status before retry.
+ const retry=page.locator('[data-ep-written-recovery] button').last();
+ await retry.waitFor({state:'visible',timeout:30000});
+ await page.waitForFunction(
+  ()=>document.querySelectorAll('[data-ep-written-recovery] button').length===2,
+  null,{timeout:30000});
+ assert(blockedFirst,'offline-before-commit injection did not occur');
+ const pre=await rpc('get_exam_prep_written_step_status_safe_v1',
+  {p_session_id:sessionId,p_item_order:itemOrder});
+ assert(pre.ok&&pre.data?.status==='open'&&pre.data?.can_advance===true,
+  'server incorrectly persisted an offline BEFORE-COMMIT Next');
+ assert.equal(count('exam_prep_written_step_advances_v1',sessionId,onlyItem),0,
+  'offline-before-commit changed durable written evidence');
+ assert.equal(count('exam_prep_responses',sessionId,onlyItem),0,
+  'offline-before-commit manufactured an answer');
+
+ // Eight HTTP requests begin independently, one UI retry is a ninth writer.
+ // All use genuine owner JWT and actual PostgREST/PG17; no RPC mocks.
+ const keys=Array.from({length:8},(_,n)=>
+  'stage-c-first-commit-'+component.toLowerCase()+'-'+n);
+ const requests=keys.map(p_idempotency_key=>rpc(
+  'advance_exam_prep_written_step_safe_v1',
+  {p_session_id:sessionId,p_item_order:itemOrder,p_idempotency_key}));
+ const click=retry.click();
+ const responses=await Promise.all(requests);
+ await click;
+ assert(responses.every(r=>r.ok&&r.data?.status==='advanced'),
+  'concurrent genuine first-commit HTTP callers did not all resolve');
+ const nonReplay=responses.filter(r=>r.data?.replayed===false).length;
+ assert(nonReplay<=1,'more than one HTTP caller inserted the first written row');
+ await page.waitForFunction(()=>window.__lostWrittenAck===true,null,{timeout:30000});
+ await page.waitForFunction(
+  ()=>(window.__realWrittenTrace||[]).some(x=>
+   x.name==='get_exam_prep_written_step_status_safe_v1'&&x.ok),
+  null,{timeout:30000});
+ const confirmed=await rpc('get_exam_prep_written_step_status_safe_v1',
+  {p_session_id:sessionId,p_item_order:itemOrder});
+ assert(confirmed.ok&&confirmed.data?.status==='advanced',
+  'lost ACK after the concurrent first commit was not reconciled');
+ assert.equal(count('exam_prep_written_step_advances_v1',sessionId,onlyItem),1,
+  'concurrent first writes generated duplicate/missing durable Next');
+ assert.equal(count('exam_prep_responses',sessionId,onlyItem),0,
+  'concurrent first writes fabricated a written answer/score');
+ const winner=db("select client_idempotency_key from private.exam_prep_written_step_advances_v1"+
+  " where session_id='"+sessionId+"'::uuid and item_order="+itemOrder);
+ if(keys.includes(winner))assert.equal(nonReplay,1,
+  'winning HTTP request missing first-commit evidence');
+ else assert.equal(nonReplay,0,
+  'UI won first commit but a parallel HTTP caller also inserted');
+ await page.unroute(routeName);
+ return {component,offlineBeforeCommitDenied:true,serverStatusBeforeRetry:'open',
+  simultaneousHttpFirstWriters:8,realUiRetry:true,firstWrittenInserts:1,
+  ackLostAfterCommit:true,serverReconciliation:true,writtenGradingCredit:0};
+}
 async function main(){
  const browser=await chromium.launch({headless:true});
  const result=[];
@@ -168,13 +241,7 @@ async function main(){
      if(lang==='uz'&&width===1280){
       const before=count('exam_prep_responses',id,' AND item_order='+lastItem);
       assert(before===0,'written Core received stored essay/answer before Next');
-      await opening.page.locator('[data-ep-written-next]').click();
-      await opening.page.waitForFunction(()=>window.__lostWrittenAck===true,null,{timeout:30000});
-      // Lost ACK is reconciled by real HTTP read-only status; NEVER resend.
-      await opening.page.waitForFunction(()=>{
-       const trace=window.__realWrittenTrace||[];
-       return trace.some(x=>x.name==='get_exam_prep_written_step_status_safe_v1'&&x.ok);
-      },null,{timeout:30000});
+      const stageC=await firstCommitOfflineRace(opening.page,id,lastItem,component);
       const advanced=await rpc('get_exam_prep_written_step_status_safe_v1',{p_session_id:id,p_item_order:lastItem});
       assert(advanced.ok&&advanced.data.status==='advanced','real Next not persisted after lost ACK');
       assert.equal(count('exam_prep_written_step_advances_v1',id,' AND item_order='+lastItem),1,
@@ -188,7 +255,7 @@ async function main(){
       );
       assert(!badUser.ok,'foreign user read written Next status');
       result.push({component,languages:preAdvanceAnswers,oneRealNext:true,duplicateWrittenResponses:false,
-       unreadWrittenMarkNotAwarded:true,foreignDenied:true});
+       unreadWrittenMarkNotAwarded:true,foreignDenied:true,firstCommitRace:stageC});
      }
      assert.equal(opening.errors.length,0,'browser JS errors '+component+'/'+lang+': '+opening.errors.join('|'));
     }finally{await opening.context.close();}
@@ -196,6 +263,8 @@ async function main(){
   }
   assert(result.length===2,'written e2e did not cover both P1/P5');
   console.log('STAGE B TRUE MATH UI HTTP WRITTEN CRITERIA NEXT RELOAD PASS',JSON.stringify(result));
+  console.log('STAGE C FIRST-COMMIT OFFLINE + CONCURRENT UI HTTP PASS',
+   JSON.stringify(result.map(r=>r.firstCommitRace)));
  }finally{await browser.close()}
 }
 main().catch(e=>{console.error('STAGE B REAL WRITTEN BROWSER FAILED:',e.message);process.exitCode=1});
