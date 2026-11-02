@@ -313,6 +313,7 @@ jobs:
             | tee /tmp/p1p5-stage-c-asymmetric-progress.log
           grep -q 'STAGE C SOURCE-ANCHORED P1 P5 ASYMMETRIC LEARNING CORRECTION PASS' /tmp/p1p5-stage-c-asymmetric-progress.log
           grep -q 'STAGE C ASYMMETRIC LEARNING + CORRECTION ROLLBACK RESTORED TWO USERS PASS' /tmp/p1p5-stage-c-asymmetric-progress.log
+          grep -q 'STAGE C ACTUAL P1 DELAYED PASS P5 FAILED REOPENED RETEST PASS' /tmp/p1p5-stage-c-asymmetric-progress.log
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
