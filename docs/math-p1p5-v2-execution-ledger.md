@@ -136,3 +136,25 @@ A source-to-database ambiguity from the older plans has been resolved **without 
 4. Once all Package 0 release-safety artifacts are verified, advance to Package 1 dates and diagnostic anchoring.
 
 **No production DML, DDL, feature flag, AI permission, clearance or mass release was performed in this checkpoint.**
+
+## Checkpoint P0-04 — two nullable FK cuts and actual migration-schema test (2026-11-02)
+
+**Package 0 still IN PROGRESS; no production writes; beta/mass release NO_GO.**
+
+### New independently verified facts
+
+- [Authoritative read-only structural FK check](../supabase/tests/p1p5_v2_package0_fk_graph_readonly.sql) was executed on actual production Supabase; verdict GRAPH_PRECHECK_PASS_NO_DELETE_AUTHORIZED. Exactly 32 candidate learner tables, 37 internal FK edges; after excluding **TWO** nullable authorizations FK links, the 32-table dependency graph has zero cycles. The links are exam_prep_session_authorizations.consumed_session_id -> sessions and exam_prep_session_authorizations.correction_case_id -> correction_cases. Do not bypass constraints: releasing only consumed_session_id leaves the correction/evidence/response/session/authorization cycle unresolved.
+- One currently empty retained inbound exception: exam_prep_mentor_queue_items.recommendation_id -> human_review_recommendations.id, RESTRICT. Fail-closed if its row count becomes nonzero at cutover. This is not a grant to delete historical Mentor Care records.
+- Live read-only owner-scope check: **28 of 32 candidate tables have direct user_id / learner_user_id** and **zero rows in those tables belong to accounts lacking current Mathematics subject enrollment**. The remaining four tables are indirect references and require relational ownership joins. These counts are evidence only, not authorization for table-wide deletes.
+- [Expanded synthetic PG17 two-cycle and Mentor blocker test](../supabase/tests/p1p5_v2_package0_cleanup_isolated_fk_rehearsal.sql) GREEN: [run 41499740447](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740447); genuine FK violations on premature deletion, two-link unlink, idempotent scoped simulated deletion, protected other learner/Practice/Tours and rollback.
+- [Real current-migrations PG17 fake learner FK proof](../supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql) integrated into the existing [full P1/P5 signed HTTP/Chromium suite](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41499740468), run 41499740468 **COMPLETED SUCCESS**, including the new actual-schema P1 fake session/auth link block/unlink/delete and SAVEPOINT rollback. All previously required browser/RPC suite steps also succeeded. It does not yet execute a full 32-table deletion, and the second correction chain is currently checked in real schema through read-only FK metadata plus PG17 representative synthetic model.
+- The historical Stage D exact-SHA gate for this newer candidate was still running at this checkpoint. It requires separate load and disaster workflows on the **same** SHA; do not describe current partial P0 tests as old Stage D PASS or release GO. Historical Stage D PR #467 technical PASS remains separate.
+
+### Required next technical work
+
+1. Extend existing disposable current-migrations PostgreSQL 17 rehearsal to generate real target records across **all 32** learner-state tables, then test two-link scoped cleanup and re-entrant rollback without retaining Mentor-child references or touching second synthetic account/Practice/Tours/content. No production SQL writes.
+2. Build exact per-table ownership/indirect joins and compile an explicit fail-closed allowlist that is **only executable in isolated CI** until final architect GO. Re-run current FK graph after code changes; a schema drift must block.
+3. Prepare secure scoped backup and verified restore strategy for real cutover, including preserved AI entitlements, beta consent/audit retention decision, login/session epoch and cross-subject invariants. Old 4 real weekly reviews/72h gate requires versioned replacement; never fake evidence.
+4. Only after Package 0 acceptance proceed to Package 1: confirmed P1/P5 dates, diagnostic completion anchors and personal study horizon. The full workplan is in docs/math-p1p5-release-workplan-v2-20261102.md, PR #468 and Issue #450.
+
+**No user accounts or progress, feature configuration, AI grants, existing Practice v2, other subject data, production DDL/DML, or Vercel production deployment was changed by these tests.**
