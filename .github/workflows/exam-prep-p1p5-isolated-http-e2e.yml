@@ -12,6 +12,9 @@ on:
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
       - 'supabase/tests/p1p5_isolated_http_postdue_retest_seed.sql'
       - 'supabase/tests/p1p5_isolated_http_postdue_retest_cleanup.sql'
+      - 'supabase/tests/p1p5_isolated_http_mixed_timed_stage3_prep.sql'
+      - 'supabase/tests/p1p5_isolated_http_mixed_timed_cleanup.sql'
+      - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   workflow_dispatch:
 permissions:
@@ -234,6 +237,32 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_postdue_retest_cleanup.sql > /tmp/p1p5-postdue-governed-cleanup.log
           echo "Governed synthetic identity cleanup and zero legacy spillover assertions: PASS"
+      - name: Prepare authentic Stage 3 P1/P5 academic evidence in disposable PG17
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          # Reuse only P2-69 helper function DEFINITIONS, never its rollback
+          # transaction/main synthetic scenario or invented mastery result.
+          awk '/^-- Complete a normal non-timed/{copy=1} /^DO \\$main\\$/{exit} copy{print}' \
+            supabase/tests/p2_69_full_stage0_6_core_simulation.sql > /tmp/p1p5-stage3-published-helpers.sql
+          test "$(wc -c </tmp/p1p5-stage3-published-helpers.sql)" -gt 8000
+          cat /tmp/p1p5-stage3-published-helpers.sql \
+            supabase/tests/p1p5_isolated_http_mixed_timed_stage3_prep.sql \
+            | psql -v ON_ERROR_STOP=1 > /tmp/p1p5-stage3-server-graded-prep.log
+          echo "Stage 3 earned by server-graded published learning evidence: PASS"
+      - name: Run real signed HTTP governed mixed and full-paper attempt with noncredit written self-marks
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-isolated-http-positive-mixed-timed.cjs
+          node scripts/p1p5-isolated-http-positive-mixed-timed.cjs
+      - name: Complete and cleanup canonical mixed/full-paper synthetic learner
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_mixed_timed_cleanup.sql > /tmp/p1p5-timed-cleanup.log
+          echo "Governed real signed HTTP paper learner cleanup: PASS"
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
