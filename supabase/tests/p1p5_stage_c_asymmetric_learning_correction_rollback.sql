@@ -85,7 +85,7 @@ BEGIN
   THEN RAISE EXCEPTION 'Stage C asymmetric source invariant invalid: %',v_profile; END IF;
 
   v_user:=private.create_exam_prep_synthetic_identity_v1(
-   v_run,'learner',upper(replace('SVF-SC-ASYM-'||v_profile,'-','_')),
+   v_run,'learner','SVF-S463-'||upper(v_profile),
    'stage-c-isolated-learner-'||v_profile,
    'Stage C isolated asymmetric Core history','en'
   );
