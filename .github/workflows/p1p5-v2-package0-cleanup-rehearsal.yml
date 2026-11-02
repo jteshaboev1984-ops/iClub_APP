@@ -1,0 +1,47 @@
+name: Mathematics P1/P5 v2 Package 0 isolated cleanup guard
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/tests/p1p5_v2_package0_*'
+      - 'scripts/p1p5-v2-package0-scope-guard.cjs'
+      - '.github/workflows/p1p5-v2-package0-cleanup-rehearsal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-cleanup-rehearsal:
+    name: Readonly guard and disposable PostgreSQL 17 FK rehearsal
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated_test_only
+          POSTGRES_DB: iclub_p1p5_package0_test
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d iclub_p1p5_package0_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: isolated_test_only
+      PGDATABASE: iclub_p1p5_package0_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate readonly production-audit scripts and 32-table provisional scope
+        run: node scripts/p1p5-v2-package0-scope-guard.cjs
+      - name: Run isolated cycle, retained-Mentor blocker and rollback transaction
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_cleanup_isolated_fk_rehearsal.sql
+      - name: Prove synthetic schema fully rolled back
+        run: |
+          test "$(psql -At -c "SELECT count(*) FROM pg_namespace WHERE nspname='p1p5_package0_isolated';")" = "0"
+          echo "PASS: disposable PostgreSQL has no Package-0 rehearsal schema"
