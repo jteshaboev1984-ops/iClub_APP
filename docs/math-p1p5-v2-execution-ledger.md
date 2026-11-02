@@ -95,3 +95,18 @@ The old E2E tracker is valuable but **not a substitute for v2 new functionality*
 ## Update protocol for every new chat / major package
 
 Append one dated checkpoint containing: baseline SHA; exact changed files; verified tests and actual results; unresolved defects; old vs new release gate status; production DML/deploy disclosure; next task. Update issue #450 to point here. Never mark work complete from mere source presence, synthetic-only record posed as consented beta, or an unstated policy override.
+
+
+## Checkpoint P0-02 — Practice version and non-Math access reality (2026-11-02, SELECT only)
+
+A source-to-database ambiguity from the older plans has been resolved **without writes**:
+
+- Current *published server Mathematics Practice bank* is **v2**, release key \`math_p1_practice_v2_2026_10_07\`, numeric \`public.practice_bank_generations.generation=2\`. Published release audit records 490 old memberships replaced by 495 new memberships on 2026-10-08, \`status='published'\`, no rollback; \`public.is_math_practice_v2_published_safe_v1\` exists. **Do not invent a published bank generation=3.**
+- The separately named browser local storage namespace \`practice_history_v3\` in Practice v2's historical runbook is **not** proof of a newer server bank. D06's "preserve new Practice v3" must be implemented as **preserve current published Practice bank plus postrelease local state**, regardless of version naming. Check actual app source for exact keys before cleanup.
+- Current user activity **must be protected**: in public.practice_sessions_v4 there are 15 Mathematics rows with bank_generation=2, and in public.practice_drill_sessions_v4 there are 14 Mathematics rows with generation=2. public.practice_attempts contains 13 Mathematics rows with NULL bank_generation, for 7 distinct users: these cannot automatically be classified and deleted as old test garbage. Zero \`private.practice_reset_archives_v1\` rows does NOT disprove a completed reset because the published audit is a stronger source for the v2 controlled release.
+- Economics native Exam Prep registration is \`status=published, launch_enabled=true\` (chemistry is \`status=draft,launch_enabled=false\`). The shared Math host still checks a server-supplied Economics shell. This conflicts with newly approved D02 for **future public Math release**: the exact change must be coordinated at Package 6 and must not delete Economics beta content or change its production flag without controlled access transition.
+- The independent math program entry in \`private.iclub_exam_core_programs_v1\` remains \`status=legacy_external, launch_enabled=false\`: do not infer Math Core is disabled from this separate native-shell registry; Math currently uses its own server entitlement/QA logic.
+
+**Result:** Package 0 investigation is progressing but exact scoped cleanup allowlist, browser-key inventory, full FK graph / restore rehearsal remain OPEN. No production DML performed.
+
+**Protection decision for next chat:** treat current Mathematics Practice published v2 and its current v4 sessions as preserved production data regardless of any earlier shorthand "Practice v3." Do not reset it during Exam Prep launch. Also do not hide the Economics launch-enabled discrepancy: preserve history, plan selective D02 access restrictions for a later approved technical package.
