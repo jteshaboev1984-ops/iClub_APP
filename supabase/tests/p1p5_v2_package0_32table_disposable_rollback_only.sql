@@ -1,0 +1,449 @@
+-- ONLY disposable PostgreSQL 17 with actual applied migrations and fake 2-user CI fixture.
+-- Mathematics P1/P5 #450 v2 Package 0 full 32-table transaction + rollback proof.
+-- NOT A PRODUCTION CLEANUP SCRIPT. DO NOT EXECUTE via Supabase connector.
+-- Always retain user/Practice/Tours/certs/AI/other subjects. All work rolled back.
+\set ON_ERROR_STOP on
+BEGIN;
+DO $$
+DECLARE v_uid uuid:='11111111-1111-4111-8111-111111111191'::uuid;
+BEGIN
+ IF current_database()<>'postgres' OR
+    current_setting('iclub.e2e_isolated',true) IS DISTINCT FROM 'true' OR
+    (SELECT count(*) FROM public.users)<>2 OR
+    (SELECT count(*) FROM auth.users)<>2 OR
+    NOT EXISTS(SELECT 1 FROM public.users WHERE id=v_uid) OR
+    NOT EXISTS(SELECT 1 FROM public.users WHERE id='22222222-2222-4222-8222-222222222292'::uuid)
+ THEN RAISE EXCEPTION 'REFUSED: full 32-table cleanup ONLY in disposable 2-fake-user CI';
+ END IF;
+ IF EXISTS (
+ SELECT 1 FROM private.exam_prep_mentor_queue_items m
+ JOIN private.exam_prep_human_review_recommendations h ON h.id=m.recommendation_id
+ WHERE h.learner_user_id=v_uid
+ ) THEN RAISE EXCEPTION 'REFUSED: retained mentor FK blocker';
+ END IF;
+END $$;
+
+CREATE TEMP TABLE p0_protected_before AS SELECT jsonb_build_object(
+ 'users',(SELECT count(*) FROM public.users),
+ 'auth_users',(SELECT count(*) FROM auth.users),
+ 'math_subjects',(SELECT count(*) FROM public.user_subjects WHERE subject_id=5),
+ 'practice_attempts',(SELECT count(*) FROM public.practice_attempts),
+ 'practice_answers',(SELECT count(*) FROM public.practice_answers),
+ 'practice_sessions',(SELECT count(*) FROM public.practice_sessions_v4),
+ 'practice_drills',(SELECT count(*) FROM public.practice_drill_sessions_v4),
+ 'tour_attempts',(SELECT count(*) FROM public.tour_attempts),
+ 'tour_answers',(SELECT count(*) FROM public.tour_answers),
+ 'certificates',(SELECT count(*) FROM public.certificates),
+ 'content_versions',(SELECT count(*) FROM private.exam_prep_content_versions),
+ 'assessments',(SELECT count(*) FROM private.exam_prep_assessments),
+ 'ai_grants',(SELECT count(*) FROM private.exam_prep_feature_entitlements WHERE ai_assist AND entitlement_status='active'),
+ 'beta_consents',(SELECT count(*) FROM private.exam_prep_beta_consents),
+ 'other_user_sessions',(SELECT count(*) FROM private.exam_prep_sessions WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid),
+ 'other_user_auth',(SELECT count(*) FROM private.exam_prep_session_authorizations WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid)
+) AS snapshot;
+CREATE TEMP TABLE p0_owner_before(table_name text PRIMARY KEY,n bigint);
+INSERT INTO p0_owner_before(table_name,n) VALUES
+  ('exam_prep_component_access_gates',(SELECT count(*)::bigint FROM private.exam_prep_component_access_gates WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_component_placements',(SELECT count(*)::bigint FROM private.exam_prep_component_placements WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_correction_actions',(SELECT count(*)::bigint FROM private.exam_prep_correction_actions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_correction_cases',(SELECT count(*)::bigint FROM private.exam_prep_correction_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_evidence_events',(SELECT count(*)::bigint FROM private.exam_prep_evidence_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_exam_appointments',(SELECT count(*)::bigint FROM private.exam_prep_exam_appointments WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_exam_map_revisions',(SELECT count(*)::bigint FROM private.exam_prep_exam_map_revisions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_exam_ops_confirmations',(SELECT count(*)::bigint FROM private.exam_prep_exam_ops_confirmations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_exam_profiles',(SELECT count(*)::bigint FROM private.exam_prep_exam_profiles WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_human_review_recommendations',(SELECT count(*)::bigint FROM private.exam_prep_human_review_recommendations WHERE learner_user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_integrity_events',(SELECT count(*)::bigint FROM private.exam_prep_integrity_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_learning_review_starts_v1',(SELECT count(*)::bigint FROM private.exam_prep_learning_review_starts_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_legacy_evidence_references',(SELECT count(*)::bigint FROM private.exam_prep_legacy_evidence_references WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_prerequisite_states',(SELECT count(*)::bigint FROM private.exam_prep_prerequisite_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_progress_revalidation_cases',(SELECT count(*)::bigint FROM private.exam_prep_progress_revalidation_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_recovery_cases',(SELECT count(*)::bigint FROM private.exam_prep_recovery_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_responses',(SELECT count(*)::bigint FROM private.exam_prep_responses WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_retest_events',(SELECT count(*)::bigint FROM private.exam_prep_retest_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_session_authorizations',(SELECT count(*)::bigint FROM private.exam_prep_session_authorizations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_sessions',(SELECT count(*)::bigint FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_skill_states',(SELECT count(*)::bigint FROM private.exam_prep_skill_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_stage_states',(SELECT count(*)::bigint FROM private.exam_prep_stage_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_timed_attempt_results',(SELECT count(*)::bigint FROM private.exam_prep_timed_attempt_results WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_timed_written_self_marks',(SELECT count(*)::bigint FROM private.exam_prep_timed_written_self_marks WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_weekly_flow_enrollment_v1',(SELECT count(*)::bigint FROM private.exam_prep_weekly_flow_enrollment_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_weekly_goal_snapshots',(SELECT count(*)::bigint FROM private.exam_prep_weekly_goal_snapshots WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_weekly_plans',(SELECT count(*)::bigint FROM private.exam_prep_weekly_plans WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)),
+  ('exam_prep_written_step_advances_v1',(SELECT count(*)::bigint FROM private.exam_prep_written_step_advances_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+CREATE TEMP TABLE p0_target_sessions AS SELECT id FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+CREATE TEMP TABLE p0_target_plans AS SELECT id FROM private.exam_prep_weekly_plans WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+CREATE TEMP TABLE p0_target_auth AS SELECT id FROM private.exam_prep_session_authorizations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+CREATE TEMP TABLE p0_target_corrections AS SELECT id FROM private.exam_prep_correction_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+CREATE TEMP TABLE p0_target_revalidations AS SELECT id FROM private.exam_prep_progress_revalidation_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+SAVEPOINT p0_before_actual_full_cleanup;
+-- Two real nullable links must be removed before cascading through DAG.
+UPDATE private.exam_prep_session_authorizations
+SET consumed_session_id=NULL,correction_case_id=NULL
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+-- This order was derived from 37 actual internal FK edges and rechecked
+-- by the live SELECT-only DAG validator (acyclic after two explicit cuts).
+DELETE FROM private.exam_prep_component_access_gates
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_component_placements
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_correction_actions
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_exam_appointments
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_exam_map_revisions
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_exam_ops_confirmations
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_exam_profiles
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_human_review_recommendations
+WHERE learner_user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_integrity_events
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_learning_review_starts_v1
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_legacy_evidence_references
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_prerequisite_states
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_progress_revalidation_items
+WHERE (case_id IN (SELECT id FROM private.exam_prep_progress_revalidation_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)
+ OR authorization_id IN (SELECT id FROM private.exam_prep_session_authorizations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)
+ OR session_id IN (SELECT id FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+
+DELETE FROM private.exam_prep_progress_revalidation_cases
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_retest_events
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_skill_states
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_stage_states
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_timed_written_self_marks
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_timed_attempt_results
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_weekly_flow_enrollment_v1
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_weekly_goal_snapshots
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_weekly_plan_items
+WHERE (plan_id IN (SELECT id FROM private.exam_prep_weekly_plans WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)
+ OR correction_case_id IN (SELECT id FROM private.exam_prep_correction_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+
+DELETE FROM private.exam_prep_correction_cases
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_evidence_events
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_responses
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_written_session_check_snapshots
+WHERE (session_id IN (SELECT id FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+
+DELETE FROM private.exam_prep_written_step_advances_v1
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_session_items
+WHERE (session_id IN (SELECT id FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+
+DELETE FROM private.exam_prep_sessions
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_session_authorizations
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_weekly_plans
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_recovery_cases
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DO $$
+BEGIN
+ IF EXISTS (SELECT 1 FROM private.exam_prep_component_access_gates WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_component_access_gates'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_component_placements WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_component_placements'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_correction_actions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_correction_actions'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_correction_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_correction_cases'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_evidence_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_evidence_events'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_exam_appointments WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_exam_appointments'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_exam_map_revisions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_exam_map_revisions'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_exam_ops_confirmations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_exam_ops_confirmations'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_exam_profiles WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_exam_profiles'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_human_review_recommendations WHERE learner_user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_human_review_recommendations'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_integrity_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_integrity_events'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_learning_review_starts_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_learning_review_starts_v1'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_legacy_evidence_references WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_legacy_evidence_references'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_prerequisite_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_prerequisite_states'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_progress_revalidation_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_progress_revalidation_cases'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_recovery_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_recovery_cases'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_responses WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_responses'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_retest_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_retest_events'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_session_authorizations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_session_authorizations'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_sessions'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_skill_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_skill_states'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_stage_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_stage_states'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_timed_attempt_results WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_timed_attempt_results'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_timed_written_self_marks WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_timed_written_self_marks'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_weekly_flow_enrollment_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_weekly_flow_enrollment_v1'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_weekly_goal_snapshots WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_weekly_goal_snapshots'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_weekly_plans WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_weekly_plans'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_written_step_advances_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) THEN RAISE EXCEPTION 'P0 FAILED: remaining learner rows in exam_prep_written_step_advances_v1'; END IF;
+ IF EXISTS (SELECT 1 FROM private.exam_prep_session_items WHERE session_id IN (SELECT id FROM p0_target_sessions))
+ OR EXISTS (SELECT 1 FROM private.exam_prep_written_session_check_snapshots WHERE session_id IN (SELECT id FROM p0_target_sessions))
+ OR EXISTS (SELECT 1 FROM private.exam_prep_weekly_plan_items WHERE plan_id IN (SELECT id FROM p0_target_plans))
+ OR EXISTS (SELECT 1 FROM private.exam_prep_progress_revalidation_items WHERE case_id IN (SELECT id FROM p0_target_revalidations))
+ OR EXISTS (SELECT 1 FROM private.exam_prep_progress_revalidation_items WHERE authorization_id IN (SELECT id FROM p0_target_auth))
+ OR EXISTS (SELECT 1 FROM private.exam_prep_progress_revalidation_items WHERE session_id IN (SELECT id FROM p0_target_sessions))
+ OR (SELECT jsonb_build_object(
+ 'users',(SELECT count(*) FROM public.users),
+ 'auth_users',(SELECT count(*) FROM auth.users),
+ 'math_subjects',(SELECT count(*) FROM public.user_subjects WHERE subject_id=5),
+ 'practice_attempts',(SELECT count(*) FROM public.practice_attempts),
+ 'practice_answers',(SELECT count(*) FROM public.practice_answers),
+ 'practice_sessions',(SELECT count(*) FROM public.practice_sessions_v4),
+ 'practice_drills',(SELECT count(*) FROM public.practice_drill_sessions_v4),
+ 'tour_attempts',(SELECT count(*) FROM public.tour_attempts),
+ 'tour_answers',(SELECT count(*) FROM public.tour_answers),
+ 'certificates',(SELECT count(*) FROM public.certificates),
+ 'content_versions',(SELECT count(*) FROM private.exam_prep_content_versions),
+ 'assessments',(SELECT count(*) FROM private.exam_prep_assessments),
+ 'ai_grants',(SELECT count(*) FROM private.exam_prep_feature_entitlements WHERE ai_assist AND entitlement_status='active'),
+ 'beta_consents',(SELECT count(*) FROM private.exam_prep_beta_consents),
+ 'other_user_sessions',(SELECT count(*) FROM private.exam_prep_sessions WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid),
+ 'other_user_auth',(SELECT count(*) FROM private.exam_prep_session_authorizations WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid)
+)) IS DISTINCT FROM (SELECT snapshot FROM p0_protected_before)
+ THEN RAISE EXCEPTION 'P0 FAIL full 32 table learner/protected test mismatch'; END IF;
+ RAISE NOTICE 'PASS P0 actual 32-table synthetic learner-state reset; protected public and other user unchanged';
+END $$;
+
+-- Repeating an already-completed targeted cleanup must not fail or alter data.
+UPDATE private.exam_prep_session_authorizations
+ SET consumed_session_id=NULL,correction_case_id=NULL WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+DELETE FROM private.exam_prep_component_access_gates
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_component_placements
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_correction_actions
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_exam_appointments
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_exam_map_revisions
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_exam_ops_confirmations
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_exam_profiles
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_human_review_recommendations
+WHERE learner_user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_integrity_events
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_learning_review_starts_v1
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_legacy_evidence_references
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_prerequisite_states
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_progress_revalidation_items
+WHERE (case_id IN (SELECT id FROM private.exam_prep_progress_revalidation_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)
+ OR authorization_id IN (SELECT id FROM private.exam_prep_session_authorizations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)
+ OR session_id IN (SELECT id FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+
+DELETE FROM private.exam_prep_progress_revalidation_cases
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_retest_events
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_skill_states
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_stage_states
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_timed_written_self_marks
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_timed_attempt_results
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_weekly_flow_enrollment_v1
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_weekly_goal_snapshots
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_weekly_plan_items
+WHERE (plan_id IN (SELECT id FROM private.exam_prep_weekly_plans WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)
+ OR correction_case_id IN (SELECT id FROM private.exam_prep_correction_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+
+DELETE FROM private.exam_prep_correction_cases
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_evidence_events
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_responses
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_written_session_check_snapshots
+WHERE (session_id IN (SELECT id FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+
+DELETE FROM private.exam_prep_written_step_advances_v1
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_session_items
+WHERE (session_id IN (SELECT id FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid));
+
+DELETE FROM private.exam_prep_sessions
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_session_authorizations
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_weekly_plans
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+
+DELETE FROM private.exam_prep_recovery_cases
+WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid;
+DO $$
+BEGIN
+ IF (SELECT jsonb_build_object(
+ 'users',(SELECT count(*) FROM public.users),
+ 'auth_users',(SELECT count(*) FROM auth.users),
+ 'math_subjects',(SELECT count(*) FROM public.user_subjects WHERE subject_id=5),
+ 'practice_attempts',(SELECT count(*) FROM public.practice_attempts),
+ 'practice_answers',(SELECT count(*) FROM public.practice_answers),
+ 'practice_sessions',(SELECT count(*) FROM public.practice_sessions_v4),
+ 'practice_drills',(SELECT count(*) FROM public.practice_drill_sessions_v4),
+ 'tour_attempts',(SELECT count(*) FROM public.tour_attempts),
+ 'tour_answers',(SELECT count(*) FROM public.tour_answers),
+ 'certificates',(SELECT count(*) FROM public.certificates),
+ 'content_versions',(SELECT count(*) FROM private.exam_prep_content_versions),
+ 'assessments',(SELECT count(*) FROM private.exam_prep_assessments),
+ 'ai_grants',(SELECT count(*) FROM private.exam_prep_feature_entitlements WHERE ai_assist AND entitlement_status='active'),
+ 'beta_consents',(SELECT count(*) FROM private.exam_prep_beta_consents),
+ 'other_user_sessions',(SELECT count(*) FROM private.exam_prep_sessions WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid),
+ 'other_user_auth',(SELECT count(*) FROM private.exam_prep_session_authorizations WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid)
+)) IS DISTINCT FROM (SELECT snapshot FROM p0_protected_before)
+ THEN RAISE EXCEPTION 'P0 FAIL re-entrant safe cleanup changed protected state'; END IF;
+ RAISE NOTICE 'PASS P0 second same-scope cleanup is idempotent';
+END $$;
+
+ROLLBACK TO SAVEPOINT p0_before_actual_full_cleanup;
+DO $$
+BEGIN
+ IF (SELECT count(*) FROM private.exam_prep_component_access_gates WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_component_access_gates') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_component_access_gates'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_component_placements WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_component_placements') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_component_placements'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_correction_actions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_correction_actions') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_correction_actions'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_correction_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_correction_cases') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_correction_cases'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_evidence_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_evidence_events') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_evidence_events'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_exam_appointments WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_exam_appointments') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_exam_appointments'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_exam_map_revisions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_exam_map_revisions') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_exam_map_revisions'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_exam_ops_confirmations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_exam_ops_confirmations') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_exam_ops_confirmations'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_exam_profiles WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_exam_profiles') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_exam_profiles'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_human_review_recommendations WHERE learner_user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_human_review_recommendations') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_human_review_recommendations'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_integrity_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_integrity_events') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_integrity_events'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_learning_review_starts_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_learning_review_starts_v1') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_learning_review_starts_v1'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_legacy_evidence_references WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_legacy_evidence_references') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_legacy_evidence_references'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_prerequisite_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_prerequisite_states') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_prerequisite_states'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_progress_revalidation_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_progress_revalidation_cases') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_progress_revalidation_cases'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_recovery_cases WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_recovery_cases') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_recovery_cases'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_responses WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_responses') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_responses'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_retest_events WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_retest_events') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_retest_events'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_session_authorizations WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_session_authorizations') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_session_authorizations'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_sessions WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_sessions') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_sessions'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_skill_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_skill_states') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_skill_states'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_stage_states WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_stage_states') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_stage_states'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_timed_attempt_results WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_timed_attempt_results') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_timed_attempt_results'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_timed_written_self_marks WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_timed_written_self_marks') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_timed_written_self_marks'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_weekly_flow_enrollment_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_weekly_flow_enrollment_v1') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_weekly_flow_enrollment_v1'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_weekly_goal_snapshots WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_weekly_goal_snapshots') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_weekly_goal_snapshots'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_weekly_plans WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_weekly_plans') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_weekly_plans'; END IF;
+ IF (SELECT count(*) FROM private.exam_prep_written_step_advances_v1 WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) <>
+  (SELECT n FROM p0_owner_before WHERE table_name='exam_prep_written_step_advances_v1') THEN RAISE EXCEPTION 'P0 FAILED rollback count exam_prep_written_step_advances_v1'; END IF;
+ IF (SELECT jsonb_build_object(
+ 'users',(SELECT count(*) FROM public.users),
+ 'auth_users',(SELECT count(*) FROM auth.users),
+ 'math_subjects',(SELECT count(*) FROM public.user_subjects WHERE subject_id=5),
+ 'practice_attempts',(SELECT count(*) FROM public.practice_attempts),
+ 'practice_answers',(SELECT count(*) FROM public.practice_answers),
+ 'practice_sessions',(SELECT count(*) FROM public.practice_sessions_v4),
+ 'practice_drills',(SELECT count(*) FROM public.practice_drill_sessions_v4),
+ 'tour_attempts',(SELECT count(*) FROM public.tour_attempts),
+ 'tour_answers',(SELECT count(*) FROM public.tour_answers),
+ 'certificates',(SELECT count(*) FROM public.certificates),
+ 'content_versions',(SELECT count(*) FROM private.exam_prep_content_versions),
+ 'assessments',(SELECT count(*) FROM private.exam_prep_assessments),
+ 'ai_grants',(SELECT count(*) FROM private.exam_prep_feature_entitlements WHERE ai_assist AND entitlement_status='active'),
+ 'beta_consents',(SELECT count(*) FROM private.exam_prep_beta_consents),
+ 'other_user_sessions',(SELECT count(*) FROM private.exam_prep_sessions WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid),
+ 'other_user_auth',(SELECT count(*) FROM private.exam_prep_session_authorizations WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid)
+)) IS DISTINCT FROM (SELECT snapshot FROM p0_protected_before)
+ THEN RAISE EXCEPTION 'P0 FAIL rollback mutated protected state'; END IF;
+ RAISE NOTICE 'PASS P0 full 32-table learner-state counts restored by SAVEPOINT';
+END $$;
+ROLLBACK;
