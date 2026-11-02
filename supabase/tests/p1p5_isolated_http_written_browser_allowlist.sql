@@ -11,8 +11,9 @@ BEGIN
     OR (SELECT count(*) FROM public.users)<>2
     OR NOT EXISTS(SELECT 1 FROM public.users WHERE id=v_user)
   THEN RAISE EXCEPTION 'REFUSED: written-on-paper fixture needs exact two fake users in isolated PG17'; END IF;
-  UPDATE private.exam_prep_written_learning_config_v1 SET enabled=true
-  WHERE component_code IN ('P1','P5');
+  INSERT INTO private.exam_prep_written_learning_config_v1(component_code,enabled)
+  VALUES ('P1',true),('P5',true)
+  ON CONFLICT (component_code) DO UPDATE SET enabled=excluded.enabled;
   IF (SELECT count(*) FROM private.exam_prep_written_learning_config_v1
       WHERE component_code IN ('P1','P5') AND enabled=true)<>2 THEN
     RAISE EXCEPTION 'missing two existing Mathematics paper learning configuration rows';
