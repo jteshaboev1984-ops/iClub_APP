@@ -147,7 +147,14 @@ function centreInput(iso){
     await page.locator('[data-ep-study-days]').selectOption(String(days));
     await button.evaluate(el=>{el.dataset.staleScheduleDom='yes';});
     await button.click();
-    await page.waitForFunction(()=>document.querySelector('[data-ep-study-save]')?.dataset.staleScheduleDom!=='yes',null,{timeout:25000});
+    // Do NOT interpret the transient loading view (no button) as completed
+    // dashboard render. Verify BOTH real cards and the new schedule input.
+    await page.waitForFunction(()=> {
+      const b=document.querySelector('[data-ep-study-save]');
+      return Boolean(b && b.dataset.staleScheduleDom!=='yes' &&
+        document.querySelector('[data-ep-live-open-component="P1"]') &&
+        document.querySelector('[data-ep-live-open-component="P5"]'));
+    },null,{timeout:25000});
     const got=await rpc('get_exam_prep_study_schedule_safe_v1',{},tA);
     assert(got.ok,'Study schedule readback failed');
     assert.equal(Number(got.data.study_minutes_per_day),30);
