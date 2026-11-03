@@ -126,11 +126,14 @@ begin
      extract(month from v_diagnostic_anchor at time zone 'Asia/Tashkent')::int)
   );
   if v_month_number>=1 then
-    v_end:=v_diagnostic_anchor+make_interval(months=>v_month_number);
+    v_end:=((v_diagnostic_anchor at time zone 'Asia/Tashkent')+
+      make_interval(months=>v_month_number)) at time zone 'Asia/Tashkent';
     if v_end>v_now then v_month_number:=v_month_number-1; end if;
     if v_month_number>=1 then
-      v_start:=v_diagnostic_anchor+make_interval(months=>v_month_number-1);
-      v_end:=v_diagnostic_anchor+make_interval(months=>v_month_number);
+      v_start:=((v_diagnostic_anchor at time zone 'Asia/Tashkent')+
+        make_interval(months=>v_month_number-1)) at time zone 'Asia/Tashkent';
+      v_end:=((v_diagnostic_anchor at time zone 'Asia/Tashkent')+
+      make_interval(months=>v_month_number)) at time zone 'Asia/Tashkent';
       select
         count(*) filter (where s.component_code='P1' and s.session_type in ('learning','mixed','retest'))::int,
         count(*) filter (where s.component_code='P5' and s.session_type in ('learning','mixed','retest'))::int,
