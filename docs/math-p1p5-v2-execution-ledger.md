@@ -311,3 +311,17 @@ A source-to-database ambiguity from the older plans has been resolved **without 
 **Incidental real CI compatibility defect:** existing Written Understanding workflow attempted Playwright 1.55 Chromium on unsupported floating Ubuntu 26.04; draft branch changes **only** \`runs-on: ubuntu-latest\` to tested \`ubuntu-24.04\` in \`.github/workflows/written-understanding-checks-v1.yml\`; [written-understanding CI #41588885821](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41588885821) and [full isolated Math UI HTTP E2E #41588885961](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41588885961) must be checked before claiming all-green.
 
 **NEXT:** defensible *actual* per-skill active study-time measurements/observation protocol, 81 independent QA review and private norm approval, versioned no-cross-component scheduling prototype, three explicit consent-only choices. No Cambridge personal-grade predictions. **NO_GO** public release, targeted beta cleanup and production deployment. Legacy users/Practice/Tours/history, flags/AI grants and production Supabase untouched.
+
+
+## P2-08 final exact-SHA CI resolution — 16/16 SUCCESS (2026-11-03)
+
+**Draft PR #470 HEAD:** \`6d92c5291ea069c3c67f8d205fec0a6d451d3219\`. Verified **all 16 triggered GitHub Actions workflow runs are \`completed\` / \`success\` at that exact SHA**, including:
+
+- [Original P2-08 source/measurement fail-closed gate #41589236795](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41589236795) — SUCCESS.
+- [Real signed JWT/PostgREST/Chromium/PG17 Mathematics P1/P5 E2E #41589237370](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41589237370) — SUCCESS.
+- [P2-72 legacy preservation #41589236697](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41589236697), [P2-73 three-seed engineering #41589236787](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41589236787), [P2-79 recovery/rollback #41589236862](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41589236862), [P2-80 independent technical audit #41589236880](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41589236880), and [Written Understanding #41589236758](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41589236758) — all SUCCESS.
+- [Stage D exact-SHA consolidated evidence #41589236813](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41589236813) — SUCCESS (its human/release gate remains separate and NO_GO).
+
+**Root cause fixed without learning-code alteration:** GitHub floating Ubuntu image advanced to unsupported 26.04 for the repository's installed Playwright. Five existing workflow files were pinned to supported \`ubuntu-24.04\` in draft PR only, after confirming the actual install failure. No production write, no real-user-data cleanup, no deployment, no new permissions.
+
+**Outstanding substantive blocker:** No independently established per-skill learning/revision min/max duration records; 81 per-skill values intentionally NULL/unreviewed. The observation gate's success tests provenance/negative cases and does not prove representative academic study-time intervals or authorize a personal time recommendation. Next: source-backed skill-specific instructional/time review, distinct academic approval, then server recommendation engine and the student's explicit three choices. Public release **NO_GO**.
