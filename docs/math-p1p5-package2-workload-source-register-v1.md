@@ -61,6 +61,33 @@ The read-only source and evidence view `private.exam_prep_workload_academic_revi
 
 A source-integrity PG17 step and a signed-JWT PostgREST step use the already established **two disposable CI actors**, **not invented progress**, to assert 45/36, objective-vs-unknown classification, owner access, exact official 110/75 paper blocks and absolutely no fabricated recommended study hours. They do not modify genuine Supabase records.
 
+## 3B. Real published-question inventory and timing-data suitability (2026-11-03, SELECT-only)
+
+Compared the actual active-program **81 source skills** with `private.exam_prep_question_content_meta`, published content versions, `private.exam_prep_written_tasks`, published assessment routes, `public.questions.time_limit_sec` and existing actual response `elapsed_ms`. This is grounded in the real deployed bank, not a manufactured learner scenario.
+
+| Real bank, QA `pass` for mathematics/language/technical/scope | P1 | P5 |
+| --- | ---: | ---: |
+| Canonical skills | 45 | 36 |
+| Published objective questions | 270 | 216 |
+| Protected reserve questions, **not to expose in student API** | 405 | 324 |
+| Previously retired objective questions | 3 | 0 |
+| Objective published questions **per skill** | 6 | 6 |
+| Protected reserve objective questions **per skill** | 9 | 9 |
+| Published written tasks (total, all maths/language/technical QA `pass`) | 170 | 164 |
+| Published written tasks per skill | 2–7 | 2–12 |
+| Skills without at least one published objective + written task | 0 | 0 |
+| Time-limit of an individual published objective question | 25–90 s | 30–90 s |
+
+Distinct question IDs rather than repeated assessment links are counted. All current 81 skills are also represented by a **published diagnostic, learning and retest assessment**; the actual paper and timed assessment mappings are much narrower, and their recorded raw marks do not justify a personal grade forecast. Required-mastery evidence in the original `01_Academic_Syllabus_Source_Map_P1_P5_v1.0` uses **four distinct pedagogical evidence templates**, not 81 Cambridge-issued workload benchmarks (P1 19 routine/transfer, 16 contextual/proof, 5 diagram/interpretation, 5 recognition/transfer; P5 12/14/5/5 respectively). The original map expressly states that **81 is an iClub decomposition of official content bullets**, not an official Cambridge skill count.
+
+**Critical deployment invariant:** all 1,218 current Exam Prep question records have `public.questions.is_active=false` because Exam Prep uses its separate permissioned question/assessment lifecycle. Within its own protected content metadata **486 are published, 729 protected reserve and 3 retired**, all with academic QA status `pass`. **Do not bulk-set `public.questions.is_active=true`** or send reserve IDs/pool counts to students. Existing genuine signed HTTP/Chromium E2E already confirms the intended private published route works.
+
+The measured response-time field `private.exam_prep_responses.elapsed_ms` is **not suitable as a self-study-time estimator** on the present beta data: P1 diagnostic-machine median among plausibly nonzero values was only **~1.4 seconds** across 1,401 qualifying responses; P5 diagnostic-machine had **46 responses** (median ~21 seconds), and P5 learning-machine had only **3 responses**. These observations can contain test/synthetic actors, fast taps or client timing limitations; no validated user classification, active foreground session-time accounting or out-of-app learning. Avoid drawing a population learning-rate conclusion. A per-item question deadline is a *maximum examination time for that question*, not a typical learning block, and it excludes explanation, working, corrections, revision, and delayed retests.
+
+Implementation: new private, read-only `exam_prep_skill_content_calibration_inventory_v1` joins current 81 syllabus source rows with independently approved/published objective questions, protected reserves (internal only), written exercises, actual published diagnostic/learning/retest routes and per-item timer limits. It records explicit **false** flags for any attempt to interpret question timers, observed elapsed_ms or historic 2020 teacher-contact hours as personal study norms. A strict PG17 check requires core published question/written/route coverage and no false time claims. The view performs **zero** student state writes, entitlement updates or learner-facing reserve exposure.
+
+**Academic decision:** current data establish **content availability**, but not a defensible `minutes to learn skill` interval. Leave all 81 `estimated_core_min/max_minutes` and `estimated_revision_min/max_minutes` NULL pending authentic instructional time evidence and mathematical review of representative written/routine/transfer methods. Never replace the original unknown state with a negative readiness label, and never create daily reminders or study-hour access caps.
+
 ## 4. Boundaries and next step
 
 This PR is **not** academic certification of all 81 skill-time intervals. All current numeric skill norms are intentionally missing. Next is source-specific individual time-range review (a real academic task), then independently checked readiness engine and genuine UI consent controls. No production deployment, no cleanup, no Stage D mass-Core GO. Preserve the approved course and historical user progress across upgrades.
