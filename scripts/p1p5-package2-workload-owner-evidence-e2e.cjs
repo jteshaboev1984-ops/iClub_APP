@@ -63,6 +63,42 @@ async function signedRpc(name, uid, args={}) {
  assert.equal(timeline.p1_p5_hour_budgets_are_not_additive,true);
  assert.equal(timeline.no_progress_mutation,true);
  assert.equal(timeline.no_automatic_schedule_change,true);
+ const quantified=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_A);
+ assert(quantified.ok,'Source weighted iClub estimate unavailable: '+
+   quantified.status+' '+JSON.stringify(quantified.data));
+ const q=quantified.data;
+ assert.equal(q.contract_version,'exam_prep_one_line_progress_timeline_v2_estimated');
+ assert.equal(q.baseline_math_guided_content_hours,140);
+ assert.equal(q.source_guided_hours_are_not_private_study_hours,true);
+ assert.equal(q.factors_are_iclub_planning_assumptions_not_official_cambridge,true);
+ assert.equal(q.estimate_is_not_a_grade_or_completion_guarantee,true);
+ assert.equal(q.recommended_schedule_applied_automatically,false);
+ assert.equal(q.study_access_capped,false);
+ assert.equal(q.learning_evidence_mutated,false);
+ let sum=0;
+ for(const [paper,max] of [['P1',90],['P5',50]]) {
+   const t=q[paper],raw=remaining[paper];
+   assert.equal(t.total_syllabus_skills,raw.skills_total);
+   assert.equal(t.objectively_covered_skills,
+     raw.skills_objective_coverage_confirmed_not_final_mastery);
+   assert.equal(t.estimate_is_iclub_heuristic,true);
+   assert(typeof t.estimated_remaining_study_hours==='number');
+   assert(t.estimated_remaining_study_hours>=0 && t.estimated_remaining_study_hours<=max,
+     'P2-14 cannot exceed unlearned Cambridge topic teaching proxy');
+   assert(t.estimated_remaining_study_hours_low<=t.estimated_remaining_study_hours);
+   assert(t.estimated_remaining_study_hours_high>=t.estimated_remaining_study_hours);
+   if(t.exam_date_status!=='valid_exam_date')
+     assert.equal(t.estimated_component_weekly_hours,null);
+   sum+=t.estimated_remaining_study_hours;
+ }
+ assert.equal(q.estimated_remaining_math_hours,Math.round(sum*10)/10);
+ if(q.P1.exam_date_status!=='valid_exam_date' ||
+    q.P5.exam_date_status!=='valid_exam_date') {
+   assert.equal(q.estimated_joint_math_hours_per_week,null);
+   assert.equal(q.joint_paper_dates_status,'missing_at_least_one_paper_exam_date');
+ }
+ const anonEstimate=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',null);
+ assert(!anonEstimate.ok,'Anonymous actor must not read learner estimate');
  for(const [paper,n] of [['P1',45],['P5',36]]) {
    const t=timeline[paper];
    const o=remaining[paper];
