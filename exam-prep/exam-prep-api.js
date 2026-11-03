@@ -160,6 +160,19 @@
   }
 
   async function examMapStatus() { return rpc("get_exam_prep_exam_map_status_safe_v1"); }
+  // Dates remain learner-confirmed, and the horizon begins only after the
+  // corresponding component's actual completed diagnostic. No grade forecast.
+  async function personalHorizon() {
+    return rpc("get_exam_prep_personal_horizon_safe_v1");
+  }
+  async function confirmExamDate(componentCode, scheduledStartAt) {
+    return rpc("save_my_exam_prep_exam_appointment_v2", {
+      p_component_code: componentArg(componentCode),
+      p_scheduled_start_at: String(scheduledStartAt || ""),
+      p_school_confirmed: true
+    });
+  }
+
 
   const componentArg = componentCode => String(componentCode || "");
 
@@ -348,7 +361,7 @@
 
   root.api = Object.freeze({
     capabilities,
-    examProfile, saveExamProfile, examMapStatus,
+    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
