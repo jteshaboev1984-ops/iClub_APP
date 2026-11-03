@@ -7,6 +7,8 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'supabase/tests/p1p5_package2_workload_registry_source_contract.sql'
+      - 'supabase/tests/p1p5_package2_action_time_source_contract.sql'
+      - 'supabase/tests/p1p5_package2_action_time_synthetic_rollback.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package2-workload-owner-evidence-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -153,6 +155,12 @@ jobs:
             2>&1 | tee /tmp/p1p5-package2-workload-source-check.log
           grep -q 'PASS P2: 81 actual source-mapped skills' \
             /tmp/p1p5-package2-workload-source-check.log
+      - name: P2-10 prove 81x6 action source registry, no unapproved minutes and direct private access denied
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          psql -X -v ON_ERROR_STOP=1             -f supabase/tests/p1p5_package2_action_time_source_contract.sql 2>&1             | tee /tmp/p1p5-p2-10-action-source.log
+          grep -q 'PASS P2-10: 486 action norms' /tmp/p1p5-p2-10-action-source.log
       - name: Seed ONLY disposable authenticated learners
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
@@ -203,6 +211,16 @@ jobs:
           test "$P1P5_E2E_ISOLATED" = "true"
           node --check scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
           node scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
+      - name: P2-10 test private reviewed-action arithmetic using disposable ONLY fixture, then ROLLBACK
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1             -f supabase/tests/p1p5_package2_action_time_synthetic_rollback.sql 2>&1             | tee /tmp/p1p5-p2-10-fake-time-rollback.log
+          grep -q 'PASS P2-10: rollback restored zero artificial approvals'             /tmp/p1p5-p2-10-fake-time-rollback.log
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
