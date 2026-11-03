@@ -165,6 +165,16 @@
   async function personalHorizon() {
     return rpc("get_exam_prep_personal_horizon_safe_v1");
   }
+  async function studySchedule() {
+    return rpc("get_exam_prep_study_schedule_safe_v1");
+  }
+  async function saveStudySchedule(minutesPerDay, daysPerWeek) {
+    return rpc("save_exam_prep_study_schedule_safe_v1", {
+      p_minutes_per_day: Number(minutesPerDay),
+      p_days_per_week: Number(daysPerWeek)
+    });
+  }
+
   async function confirmExamDate(componentCode, scheduledStartAt) {
     return rpc("save_my_exam_prep_exam_appointment_v2", {
       p_component_code: componentArg(componentCode),
@@ -361,7 +371,7 @@
 
   root.api = Object.freeze({
     capabilities,
-    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate,
+    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate, studySchedule, saveStudySchedule,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
