@@ -1,12 +1,14 @@
 /* iClub Mathematics P1/P5: compact learner timeline.
- * OPT-IN only. Read-only. Never modifies exam profile, weekly schedule,
- * progress, localStorage, content language, sessions or assessment routes.
+ * OPT-IN only. Reads learner progress; can write ONLY learner-selected P1/P5
+ * dates after an explicit Save tap. Never changes study budgets, progress,
+ * localStorage, content language, sessions or assessments.
  */
 (() => {
   'use strict';
   if (window.iClubExamPrepSimpleTimelineUiEnabled !== true) return;
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = 'p2_15_simple_timeline_ui_v1';
+  const VERSION = 'p2_16_learner_dates_ui_v1';
+  const SAVE_RPC = 'save_my_exam_prep_timeline_dates_safe_v1';
   const RPC = 'get_exam_prep_simple_learning_timeline_with_hours_safe_v2';
   const SELECTOR = '[data-ep-simple-timeline]';
   let observer = null, pending = false, requestId = 0, currentIntro = null;
@@ -19,7 +21,14 @@
       hours: 'ч', perWeek: 'ч/нед', skills: 'навыков',
       noDates: 'Укажите даты экзаменов P1 и P5, чтобы рассчитать недельный ориентир.',
       assumption: 'Приблизительная оценка iClub по разделам Cambridge и вашим результатам. Фактическое время может отличаться.',
-      noTime: 'Время пока недоступно', noChange: 'Ваше расписание не изменено.'
+      noTime: 'Время пока недоступно', noChange: 'Ваше расписание не изменено.',
+      chooseDate:'Выбрать дату', changeDate:'Изменить дату',
+      editTitle:'Даты моих экзаменов', saveDates:'Сохранить даты',
+      saving:'Сохранение…', cancel:'Отмена', clear:'Очистить',
+      dateHelp:'Выберите даты P1 и P5. Их можно изменить позже.',
+      dateError:'Выберите будущую дату в пределах трёх лет.',
+      saveError:'Не удалось сохранить даты. Попробуйте снова.',
+      saved:'Даты сохранены. План пересчитан.'
     },
     uz: {
       title: 'Imtihongacha yo‘lim', start: 'Boshlanishi', today: 'Bugun', exam: 'Imtihonlar',
@@ -29,7 +38,14 @@
       hours: 'soat', perWeek: 'soat/hafta', skills: 'ko‘nikma',
       noDates: 'Haftalik mo‘ljal uchun P1 va P5 imtihon sanalarini kiriting.',
       assumption: 'iClub taxmini Cambridge bo‘limlari va natijalaringizga asoslangan. Haqiqiy vaqt farq qilishi mumkin.',
-      noTime: 'Vaqt hozircha mavjud emas', noChange: 'Jadvalingiz o‘zgartirilmadi.'
+      noTime: 'Vaqt hozircha mavjud emas', noChange: 'Jadvalingiz o‘zgartirilmadi.',
+      chooseDate:'Sanani tanlash', changeDate:'Sanani o‘zgartirish',
+      editTitle:'Imtihon sanalarim', saveDates:'Sanalarni saqlash',
+      saving:'Saqlanmoqda…', cancel:'Bekor qilish', clear:'Tozalash',
+      dateHelp:'P1 va P5 sanalarini tanlang. Keyin o‘zgartirish mumkin.',
+      dateError:'Kelgusi uch yil ichidagi sanani tanlang.',
+      saveError:'Sanalarni saqlab bo‘lmadi. Qayta urinib ko‘ring.',
+      saved:'Sanalar saqlandi. Reja yangilandi.'
     },
     en: {
       title: 'My exam timeline', start: 'Started', today: 'Today', exam: 'Exams',
@@ -39,7 +55,14 @@
       hours: 'h', perWeek: 'h/week', skills: 'skills',
       noDates: 'Add your P1 and P5 exam dates to calculate a weekly target.',
       assumption: 'This is an approximate iClub estimate based on Cambridge topics and your results. Actual study time may vary.',
-      noTime: 'Estimate unavailable', noChange: 'Your study plan has not changed.'
+      noTime: 'Estimate unavailable', noChange: 'Your study plan has not changed.',
+      chooseDate:'Choose date', changeDate:'Change date',
+      editTitle:'My exam dates', saveDates:'Save dates',
+      saving:'Saving…', cancel:'Cancel', clear:'Clear',
+      dateHelp:'Choose your P1 and P5 dates. You can change them later.',
+      dateError:'Choose a future date within the next three years.',
+      saveError:'Could not save dates. Please try again.',
+      saved:'Dates saved. Study target updated.'
     }
   });
   function language() {
@@ -99,11 +122,37 @@
       timeZone:'Asia/Tashkent',day:'numeric',month:'short',year:'numeric'
     }).format(d);
   }
+
+  function inputDate(value) {
+    if (!value) return '';
+    const d=new Date(value);
+    if (!Number.isFinite(d.getTime())) return '';
+    const parts=new Intl.DateTimeFormat('en-GB',{
+      timeZone:'Asia/Tashkent',year:'numeric',month:'2-digit',day:'2-digit'
+    }).formatToParts(d);
+    const p=Object.fromEntries(parts.filter(x=>['year','month','day'].includes(x.type))
+      .map(x=>[x.type,x.value]));
+    return p.year+'-'+p.month+'-'+p.day;
+  }
+  function inputBounds() {
+    const day=inputDate(new Date());
+    const limit=inputDate(new Date(Date.now()+Math.floor(365.0*3)*86400000));
+    const tomorrow=inputDate(new Date(Date.now()+86400000));
+    return {today:day,min:tomorrow,max:limit};
+  }
+  function validInputDate(value,bounds) {
+    return value==='' || (/^\d{4}-\d{2}-\d{2}$/.test(value)
+      && value>=bounds.min && value<=bounds.max);
+  }
   function viewHtml(model,lang='ru') {
     const w=WORDS[lang]||WORDS.ru;
     const date=n=>esc(formatDate(n,lang)||w.unset);
     const metric=(label,value)=>'<div class="ep-tl-stat"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>';
-    const exams=model.cards.map(x=>'<span><strong>'+x.code+'</strong> '+date(x.examAt)+'</span>').join('');
+    const exams=model.cards.map(x=>'<button type="button" class="ep-tl-exam-chip"'+
+      ' data-ep-tl-open-date="'+x.code+'" aria-label="'+esc(x.code+' · '+(x.examAt?w.changeDate:w.chooseDate))+'">'+
+      '<strong>'+x.code+'</strong><span>'+date(x.examAt)+'</span>'+
+      '<svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+
+      '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></button>').join('');
     const cards=model.cards.map(x=>{
       const finished=Math.max(0,Math.min(100,100*x.confirmed/x.total));
       const attempted=Math.max(0,Math.min(100-finished,100*x.attempted/x.total));
@@ -123,6 +172,21 @@
       ? '<p class="ep-tl-guidance">'+esc(w.noDates)+'</p>'
       : metric(w.weekly,niceNumber(model.weekly,lang)+' '+w.perWeek);
     const current=model.chosen===null?'':metric(w.chosen,niceNumber(model.chosen,lang)+' '+w.perWeek);
+    const bounds=inputBounds();
+    const editor='<form class="ep-tl-date-editor" data-ep-tl-date-editor hidden novalidate>'+
+      '<h4>'+esc(w.editTitle)+'</h4><div class="ep-tl-date-fields">'+
+      model.cards.map(x=>'<div class="ep-tl-date-field">'+
+        '<label for="ep-tl-date-'+x.code+'"><strong>'+x.code+'</strong></label>'+
+        '<div class="ep-tl-date-input-line"><input id="ep-tl-date-'+x.code+'" type="date"'+
+        ' data-ep-tl-date="'+x.code+'" value="'+esc(inputDate(x.examAt))+'"'+
+        ' min="'+bounds.min+'" max="'+bounds.max+'" autocomplete="off" />'+
+        '<button class="ep-tl-clear" type="button" data-ep-tl-clear="'+x.code+'"'+
+        ' aria-label="'+esc(w.clear+' '+x.code)+'">'+esc(w.clear)+'</button></div></div>').join('')+
+      '</div><p class="ep-tl-date-hint">'+esc(w.dateHelp)+'</p>'+
+      '<p class="ep-tl-date-error" data-ep-tl-error role="alert" hidden></p>'+
+      '<div class="ep-tl-date-actions"><button type="button" data-ep-tl-cancel>'+esc(w.cancel)+'</button>'+
+      '<button type="submit" class="ep-tl-date-save" data-ep-tl-save disabled>'+esc(w.saveDates)+'</button></div>'+
+      '</form>';
     return '<section class="ep-tl-card" data-ep-simple-timeline aria-label="'+esc(w.title)+'">'+
       '<h3 class="ep-tl-title">'+esc(w.title)+'</h3>'+
       '<div class="ep-tl-rail" aria-hidden="true"><span></span><span></span><span></span></div>'+
@@ -132,8 +196,104 @@
         '<div><span>'+esc(w.exam)+'</span><div class="ep-tl-exams">'+exams+'</div></div></div>'+
       '<div class="ep-tl-papers">'+cards+'</div>'+
       '<div class="ep-tl-bottom">'+sum+pace+current+'</div>'+
+      editor+
       '<p class="ep-tl-footnote">'+esc(w.assumption)+' '+esc(w.noChange)+'</p>'+
+      '<p class="ep-tl-date-success" data-ep-tl-success role="status" hidden></p>'+
       '</section>';
+  }
+
+  function bindCard(section,model) {
+    if (!section || typeof section.addEventListener!=='function') return;
+    const w=WORDS[language()]||WORDS.ru;
+    const editor=section.querySelector('[data-ep-tl-date-editor]');
+    const save=section.querySelector('[data-ep-tl-save]');
+    const error=section.querySelector('[data-ep-tl-error]');
+    const original=Object.fromEntries(model.cards.map(x=>[x.code,inputDate(x.examAt)]));
+    const bounds=inputBounds();
+    const input=paper=>section.querySelector('[data-ep-tl-date="'+paper+'"]');
+    const values=()=>({P1:input('P1')?.value||'',P5:input('P5')?.value||''});
+    let busy=false;
+    const setError=message=>{
+      if (!error) return;
+      error.textContent=message||'';
+      error.hidden=!message;
+    };
+    const refresh=()=>{
+      const v=values();
+      const invalid=!validInputDate(v.P1,bounds)||!validInputDate(v.P5,bounds);
+      const changed=v.P1!==original.P1||v.P5!==original.P5;
+      if (save) save.disabled=busy||invalid||!changed;
+      if (!busy) setError(invalid?w.dateError:'');
+    };
+    section.addEventListener('click',event=>{
+      const btn=event.target?.closest?.('[data-ep-tl-open-date], [data-ep-tl-clear], [data-ep-tl-cancel]');
+      if (!btn || !section.contains(btn) || busy || !canShow(root())) return;
+      if (btn.hasAttribute('data-ep-tl-cancel')) {
+        for(const code of ['P1','P5']) if(input(code)) input(code).value=original[code];
+        if(editor) editor.hidden=true;
+        setError('');
+        refresh();
+        return;
+      }
+      if (btn.hasAttribute('data-ep-tl-clear')) {
+        const code=btn.dataset.epTlClear;
+        if (code==='P1'||code==='P5') {
+          const target=input(code);
+          if(target) {target.value='';target.focus();refresh();}
+        }
+        return;
+      }
+      const code=btn.dataset.epTlOpenDate;
+      if(code!=='P1'&&code!=='P5') return;
+      if(editor) editor.hidden=false;
+      setError('');
+      refresh();
+      const picker=input(code);
+      if(picker) {
+        picker.focus();
+        // Native picker is more accessible than a custom calendar and
+        // obeys the OS locale and mobile tap/keyboard behavior.
+        try {picker.showPicker?.();} catch (_) {}
+      }
+    });
+    editor?.addEventListener('input',refresh);
+    editor?.addEventListener('change',refresh);
+    editor?.addEventListener('submit',async event=>{
+      event.preventDefault();
+      if(busy || !canShow(root()) || !root()?.contains(section)) return;
+      const v=values();
+      if(!validInputDate(v.P1,bounds)||!validInputDate(v.P5,bounds)){
+        setError(w.dateError);return;
+      }
+      if(v.P1===original.P1 && v.P5===original.P5) return;
+      const sb=window.sb;
+      if(!sb || typeof sb.rpc!=='function') {setError(w.saveError);return;}
+      busy=true;refresh();
+      if(save) save.textContent=w.saving;
+      const generation=requestId;
+      try {
+        const response=await sb.rpc(SAVE_RPC,{
+          p_p1_date:v.P1||null,p_p5_date:v.P5||null
+        });
+        if(response?.error) throw response.error;
+        const updated=parsePayload(Array.isArray(response?.data)?response.data[0]:response?.data);
+        if(!updated) throw Error('Timeline response missing');
+        if(generation!==requestId || !canShow(root()) || !root()?.contains(section)) return;
+        const container=document.createElement('div');
+        container.innerHTML=viewHtml(updated,language());
+        const replacement=container.firstElementChild;
+        if(!replacement) throw Error('Timeline refresh failed');
+        section.replaceWith(replacement);
+        bindCard(replacement,updated);
+        const feedback=replacement.querySelector('[data-ep-tl-success]');
+        if(feedback){feedback.textContent=(WORDS[language()]||WORDS.ru).saved;feedback.hidden=false;}
+      } catch (_) {
+        if(generation===requestId && root()?.contains(section)) setError(w.saveError);
+      } finally {
+        busy=false;
+        if(save){save.textContent=w.saveDates;refresh();}
+      }
+    });
   }
   function root() { return document.querySelector('#exam-prep-host-root'); }
   function canShow(r) {
@@ -163,7 +323,10 @@
         if (!model) return;
         const card=document.createElement('div');
         card.innerHTML=viewHtml(model,language());
-        if (card.firstElementChild) intro.insertAdjacentElement('afterend',card.firstElementChild);
+        if (card.firstElementChild) {
+          intro.insertAdjacentElement('afterend',card.firstElementChild);
+          bindCard(card.firstElementChild,model);
+        }
       } catch (_) { /* Fail closed. Existing Exam Prep UI stays untouched. */ }
     })();
   }
@@ -172,7 +335,7 @@
     pending=true;
     Promise.resolve().then(()=>{pending=false;reconcile();});
   }
-  internal.simpleTimelineUi=Object.freeze({version:VERSION,parsePayload,viewHtml,reconcile});
+  internal.simpleTimelineUi=Object.freeze({version:VERSION,parsePayload,viewHtml,reconcile,inputDate,validInputDate,bindCard});
   if (typeof MutationObserver==='function') {
     observer=new MutationObserver(schedule);
     observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,
