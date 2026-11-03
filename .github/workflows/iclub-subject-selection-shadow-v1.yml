@@ -48,7 +48,9 @@ permissions:
 
 jobs:
   subject-selection-safety:
-    runs-on: ubuntu-latest
+    # Chromium via Playwright 1.55 cannot install on Ubuntu 26.04.
+    # This pins isolated CI only; production hosting is unchanged.
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
