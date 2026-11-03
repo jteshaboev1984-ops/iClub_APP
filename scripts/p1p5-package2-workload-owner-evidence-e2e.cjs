@@ -97,8 +97,10 @@ async function signedRpc(name, uid, args={}) {
  const plan=verified.data;
  assert.equal(plan.P1.status,'calendar_capacity_available');
  assert.equal(plan.P5.status,'calendar_capacity_available');
- assert.equal(plan.earliest_ready_paper_start_at,p1Date);
- assert.equal(plan.latest_ready_paper_start_at,p5Date);
+ assert.equal(Date.parse(plan.earliest_ready_paper_start_at),Date.parse(p1Date),
+   'Earliest paper date changed during PostgreSQL timestamptz serialization');
+ assert.equal(Date.parse(plan.latest_ready_paper_start_at),Date.parse(p5Date),
+   'Latest paper date changed during PostgreSQL timestamptz serialization');
  const capacity=date=>Math.round(
     Number(plan.chosen_math_hours_per_week) *
     (Date.parse(date)-Date.parse(plan.as_of))/604800000*100)/100;
