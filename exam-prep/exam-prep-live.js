@@ -997,7 +997,7 @@
         status = `${c.remaining}: ${Math.max(0, Number(item.days_remaining || 0))} · ${c.initial}: ${Math.max(0, Number(item.days_diagnostic_to_exam || 0))}`;
       } else if (examStart) status = c.before;
       const proof = examStart ? (item.official_timetable_verified === true ? c.verified : c.centre) : "";
-      const dateText = examStart ? formatDateTime(examStart) : "";
+      const dateText = examStart ? new Intl.DateTimeFormat(dateLocale(), { timeZone: "Asia/Tashkent", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(examStart)) : "";
       const value = examCentreLocalValue(examStart);
       return `<div class="ep-live-exam-date-row" data-ep-exam-date-component="${component}">
         <div class="ep-live-exam-date-summary">
