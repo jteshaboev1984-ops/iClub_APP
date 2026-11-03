@@ -35,6 +35,11 @@ begin
   end if;
 
   foreach v_component in array array['P1','P5'] loop
+    select q.skill_items,q.unknown_total,q.unconfirmed_total,q.confirmed_total,
+           q.correction_skill_total,q.correction_entry_total,q.pending_slots
+    into v_rows,v_unknown,v_unconfirmed,v_confirmed,
+         v_needs_correction,v_unresolved_errors,v_pending_action_slots
+    from (
     with latest_states as (
       select distinct on (s.skill_code)
         s.skill_code,
@@ -124,16 +129,15 @@ begin
           'remaining_minutes_max',null,
           'academic_hours_approved',false
         ) order by w.skill_code
-      ),'[]'::jsonb),
-      count(*) filter(where w.evidence_category='unobserved')::int,
-      count(*) filter(where w.evidence_category='observed_unconfirmed')::int,
-      count(*) filter(where w.evidence_category='objective_coverage_confirmed')::int,
-      count(*) filter(where w.open_corrections>0)::int,
-      coalesce(sum(w.open_corrections),0)::int,
-      coalesce(sum(cardinality(w.pending_actions)),0)::int
-    into v_rows,v_unknown,v_unconfirmed,v_confirmed,
-         v_needs_correction,v_unresolved_errors,v_pending_action_slots
-    from work w;
+      ),'[]'::jsonb) as skill_items,
+      count(*) filter(where w.evidence_category='unobserved')::int as unknown_total,
+      count(*) filter(where w.evidence_category='observed_unconfirmed')::int as unconfirmed_total,
+      count(*) filter(where w.evidence_category='objective_coverage_confirmed')::int as confirmed_total,
+      count(*) filter(where w.open_corrections>0)::int as correction_skill_total,
+      coalesce(sum(w.open_corrections),0)::int as correction_entry_total,
+      coalesce(sum(cardinality(w.pending_actions)),0)::int as pending_slots
+    from work w
+    ) as q;
 
     if jsonb_array_length(v_rows) <> case when v_component='P1' then 45 else 36 end then
       raise exception 'exam_prep_canonical_81_skill_contract_incomplete';
