@@ -159,6 +159,18 @@ function centreInput(iso){
     assert.equal(Number(got.data.total_student_hours_per_week),Number(orig.total_student_hours_available),
       'Daily schedule cannot silently change total study hours');
   }
+
+  // Saving or exceeding an elected study budget never gates the course:
+  // the learner can still start/continue Mathematics after a week is planned.
+  const p1HomeAction=page.locator('[data-ep-live-open-component="P1"]');
+  assert(await p1HomeAction.count()>0,'P1 learner entry disappeared after saving study schedule');
+  assert(await p1HomeAction.isEnabled(),'P1 entry was incorrectly disabled by a voluntary study budget');
+  const p5HomeAction=page.locator('[data-ep-live-open-component="P5"]');
+  assert(await p5HomeAction.count()>0,'P5 learner entry disappeared after saving study schedule');
+  assert(await p5HomeAction.isEnabled(),'P5 entry was incorrectly disabled by a voluntary study budget');
+  const scheduleInfo=await page.locator('[data-ep-study-schedule]').innerText();
+  assert(scheduleInfo.includes('iClub не остановит занятия'),
+    'Study schedule must explicitly say that extra study does not lock access');
   assert.equal(errors.length,0,'JavaScript errors: '+errors.join(', '));
  }finally{await page.close();await browser.close();}
  const after=await rpc('get_exam_prep_personal_horizon_safe_v1',{},tA);
