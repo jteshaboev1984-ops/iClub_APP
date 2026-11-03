@@ -1,0 +1,28 @@
+name: P1 P5 workload academic review pack guard
+on:
+  push:
+    branches:
+      - feature/math-p1p5-workload-registry-v1-20261103
+    paths:
+      - 'docs/math-p1p5-package2-81-skill-review-pack-v1.json'
+      - 'docs/math-p1p5-package2-81-skill-review-protocol-v1.md'
+      - 'scripts/math-p1p5-validate-workload-review-pack-v1.cjs'
+      - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
+  pull_request:
+    paths:
+      - 'docs/math-p1p5-package2-81-skill-review-pack-v1.json'
+      - 'docs/math-p1p5-package2-81-skill-review-protocol-v1.md'
+      - 'scripts/math-p1p5-validate-workload-review-pack-v1.cjs'
+      - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
+permissions:
+  contents: read
+jobs:
+  source-safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/math-p1p5-validate-workload-review-pack-v1.cjs
