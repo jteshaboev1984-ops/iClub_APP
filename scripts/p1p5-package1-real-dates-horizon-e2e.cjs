@@ -129,6 +129,34 @@ function centreInput(iso){
   const trace=await page.evaluate(()=>window.__dateRpcTrace);
   assert.equal(trace.filter(x=>x.name==='save_my_exam_prep_exam_appointment_v2'&&x.ok).length,2,
    'Both P1 and P5 centre-confirmed dates must save from actual UI');
+  // Real daily study schedule: 30 minutes x 5 days = 2.5 hours/week,
+  // switching to seven days gives 3.5. No invented per-skill forecast.
+  const invalid=await rpc('save_exam_prep_study_schedule_safe_v1',{
+    p_minutes_per_day:30,p_days_per_week:0
+  },tA);
+  assert(!invalid.ok,'0 study days accepted');
+  const excessive=await rpc('save_exam_prep_study_schedule_safe_v1',{
+    p_minutes_per_day:240,p_days_per_week:7
+  },tA);
+  assert(!excessive.ok,'28 hours/week accepted beyond total budget');
+  for(const [days,hours] of [[5,2.5],[7,3.5]]){
+    const button=page.locator('[data-ep-study-save]');
+    await page.locator('[data-ep-study-minutes]').fill('30');
+    await page.locator('[data-ep-study-days]').selectOption(String(days));
+    await button.evaluate(el=>{el.dataset.staleScheduleDom='yes';});
+    await button.click();
+    await page.waitForFunction(()=>document.querySelector('[data-ep-study-save]')?.dataset.staleScheduleDom!=='yes',null,{timeout:25000});
+    const got=await rpc('get_exam_prep_study_schedule_safe_v1',{},tA);
+    assert(got.ok,'Study schedule readback failed');
+    assert.equal(Number(got.data.study_minutes_per_day),30);
+    assert.equal(Number(got.data.study_days_per_week),days);
+    assert.equal(Number(got.data.mathematics_hours_per_week),hours,
+      '30 minutes x '+days+' days must yield '+hours+' h/week');
+    assert.equal(got.data.forecast_available,false,'No unapproved Cambridge personal forecast');
+    const orig=Array.isArray(baseline.data)?baseline.data[0]:baseline.data;
+    assert.equal(Number(got.data.total_student_hours_per_week),Number(orig.total_student_hours_available),
+      'Daily schedule cannot silently change total study hours');
+  }
   assert.equal(errors.length,0,'JavaScript errors: '+errors.join(', '));
  }finally{await page.close();await browser.close();}
  const after=await rpc('get_exam_prep_personal_horizon_safe_v1',{},tA);
@@ -150,8 +178,10 @@ function centreInput(iso){
  assert(finalProfile.ok,'Existing original profile lost');
  const b=Array.isArray(baseline.data)?baseline.data[0]:baseline.data;
  const n=Array.isArray(finalProfile.data)?finalProfile.data[0]:finalProfile.data;
- assert.equal(String(n.mathematics_hours_budget),String(b.mathematics_hours_budget),
-   'Saving a date must not change the chosen study budget');
+ assert.equal(Number(n.mathematics_hours_budget),3.5,
+   'Last explicit 30-minute x 7-day choice must be 3.5 Mathematics hours/week');
+ assert.equal(String(n.total_student_hours_available),String(b.total_student_hours_available),
+   'The total study hours must not change on saving the Mathematics daily schedule');
  assert.equal(String(n.target_grade),String(b.target_grade),'Saving a date must not change target');
  console.log('PASS real Math P1/P5 centre-confirmed exam dates, diagnostic-to-exam calendar, independent components, no fake grade/workload and preserved budget');
 })().catch(e=>{console.error(e);process.exitCode=1});
