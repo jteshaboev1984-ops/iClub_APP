@@ -1,45 +1,6 @@
--- iClub Mathematics P1/P5: learner-result-first REMAINING WORK inventory.
--- Package 2 / Issue #450 / Architect decision: evidence identifies outstanding
--- work; do NOT multiply repeated wrong responses by a whole learning cycle.
--- No learner-specific hours until real independently approved activity-duration
--- norms exist. Additive owner-only READ-ONLY API. Legacy state untouched.
-
-create or replace function public.get_exam_prep_remaining_work_by_skill_safe_v1()
-returns jsonb
-language plpgsql
-stable
-security definer
-set search_path to ''
-as $function$
-declare
-  v_uid uuid;
-  v_program_version_id bigint;
-  v_component text;
-  v_rows jsonb;
-  v_unknown int;
-  v_unconfirmed int;
-  v_confirmed int;
-  v_needs_correction int;
-  v_unresolved_errors int;
-  v_pending_action_slots int;
-  v_result jsonb:='{}'::jsonb;
-begin
-  v_uid:=private.exam_prep_require_core_access_v1();
-
-  select p.program_version_id into v_program_version_id
-  from private.exam_prep_exam_profiles p
-  where p.user_id=v_uid;
-
-  if v_program_version_id is null then
-    raise exception 'exam_prep_profile_required';
-  end if;
-
-  foreach v_component in array array['P1','P5'] loop
-    select q.skill_items,q.unknown_total,q.unconfirmed_total,q.confirmed_total,
-           q.correction_skill_total,q.correction_entry_total,q.pending_slots
-    into v_rows,v_unknown,v_unconfirmed,v_confirmed,
-         v_needs_correction,v_unresolved_errors,v_pending_action_slots
-    from (
+-- Internal SQL computation, read-only. No numeric-hour recommendations.
+create or replace function private.exam_prep_remaining_work_internal_v1(p_uid uuid,p_version bigint,p_component text)
+returns jsonb language sql stable security invoker set search_path to '' as $q$
     with latest_states as (
       select distinct on (s.skill_code)
         s.skill_code,
@@ -51,9 +12,9 @@ begin
         s.has_transfer_evidence,
         s.has_written_evidence
       from private.exam_prep_skill_states s
-      where s.user_id=v_uid and
-            s.program_version_id=v_program_version_id and
-            s.component_code=v_component
+      where s.user_id=p_uid and
+            s.program_version_id=p_version and
+            s.component_code=p_component
       order by s.skill_code,s.derived_at desc,s.engine_version desc
     ),
     joined as (
@@ -76,8 +37,8 @@ begin
         on k.program_version_id=c.program_version_id
           and k.component_code=c.component_code
           and k.skill_code=c.skill_code
-      where c.program_version_id=v_program_version_id
-        and c.component_code=v_component
+      where c.program_version_id=p_version
+        and c.component_code=p_component
     ),
     categories as (
       select j.*,
@@ -111,80 +72,50 @@ begin
         end as pending_actions
       from categories z
     )
-    select
-      coalesce(jsonb_agg(
-        jsonb_build_object(
-          'skill_code',w.skill_code,
-          'component_code',w.component_code,
-          'syllabus_section',w.official_syllabus_section,
-          'evidence_status',w.evidence_category,
-          'pending_actions',to_jsonb(w.pending_actions),
-          'wrong_answer_multiplication_allowed',false,
-          'recorded_unresolved_correction_count',w.open_corrections,
-          'unresolved_corrections_counted_as_separate_full_skill_courses',false,
-          'correction_retest_may_be_required_after_resolution',
-             w.open_corrections>0,
-          'written_activity_is_verified_method_mark',false,
-          'remaining_minutes_min',null,
-          'remaining_minutes_max',null,
-          'academic_hours_approved',false
-        ) order by w.skill_code
-      ),'[]'::jsonb) as skill_items,
-      count(*) filter(where w.evidence_category='unobserved')::int as unknown_total,
-      count(*) filter(where w.evidence_category='observed_unconfirmed')::int as unconfirmed_total,
-      count(*) filter(where w.evidence_category='objective_coverage_confirmed')::int as confirmed_total,
-      count(*) filter(where w.open_corrections>0)::int as correction_skill_total,
-      coalesce(sum(w.open_corrections),0)::int as correction_entry_total,
-      coalesce(sum(cardinality(w.pending_actions)),0)::int as pending_slots
-    from work w
-    ) as q;
 
-    if jsonb_array_length(v_rows) <> case when v_component='P1' then 45 else 36 end then
-      raise exception 'exam_prep_canonical_81_skill_contract_incomplete';
-    end if;
+select jsonb_build_object(
+ 'component_code',p_component,
+ 'skills_total',count(*),
+ 'skills_unobserved',count(*) filter(where evidence_category='unobserved'),
+ 'skills_observed_not_yet_confirmed',count(*) filter(where evidence_category='observed_unconfirmed'),
+ 'skills_objective_coverage_confirmed_not_final_mastery',count(*) filter(where evidence_category='objective_coverage_confirmed'),
+ 'skills_with_open_corrections',count(*) filter(where open_corrections>0),
+ 'historical_current_open_correction_entries',coalesce(sum(open_corrections),0),
+ 'unique_pending_action_slots',coalesce(sum(cardinality(pending_actions)),0),
+ 'items',coalesce(jsonb_agg(jsonb_build_object(
+  'component_code',component_code,'skill_code',skill_code,
+  'evidence_status',evidence_category,'pending_actions',to_jsonb(pending_actions),
+  'recorded_unresolved_correction_count',open_corrections,
+  'remaining_minutes_min',null,'remaining_minutes_max',null,
+  'academic_hours_approved',false,'wrong_answer_multiplication_allowed',false,
+  'unresolved_corrections_counted_as_separate_full_skill_courses',false,
+  'written_activity_is_verified_method_mark',false
+ ) order by skill_code),'[]'::jsonb),
+ 'remaining_study_minutes_min',null,'remaining_study_minutes_max',null,
+ 'individually_recommended_weekly_hours',null
+) from work;
+$q$;
+revoke all on function private.exam_prep_remaining_work_internal_v1(uuid,bigint,text) from public,anon,authenticated;
 
-    v_result:=v_result||jsonb_build_object(
-      v_component,jsonb_build_object(
-        'component_code',v_component,
-        'skills_total',jsonb_array_length(v_rows),
-        'skills_unobserved',v_unknown,
-        'skills_observed_not_yet_confirmed',v_unconfirmed,
-        'skills_objective_coverage_confirmed_not_final_mastery',v_confirmed,
-        'skills_with_open_corrections',v_needs_correction,
-        'historical_current_open_correction_entries',v_unresolved_errors,
-        'unique_pending_action_slots',v_pending_action_slots,
-        'items',v_rows,
-        'remaining_study_minutes_min',null,
-        'remaining_study_minutes_max',null,
-        'individually_recommended_weekly_hours',null
-      )
-    );
-  end loop;
-
-  return jsonb_build_object(
-    'contract_version','exam_prep_result_led_remaining_work_v1',
-    'academic_authority','existing_server_verified_skill_states_and_contracts',
-    'P1',v_result->'P1',
-    'P5',v_result->'P5',
-    'time_estimate_status','academic_activity_durations_not_approved',
-    'numeric_recommendation_available',false,
-    'recommended_weekly_hours',null,
-    'recommendation_accept_enabled',false,
-    'unknown_is_not_weak',true,
-    'repeated_errors_deduplicated_by_component_skill_phase',true,
-    'objective_coverage_is_not_written_method_verification',true,
-    'shared_mathematics_budget_double_counted',false,
-    'student_may_study_beyond_plan',true,
-    'grades_predicted',false,
-    'writes_academic_progress',false
-  );
+create or replace function public.get_exam_prep_remaining_work_by_skill_safe_v1()
+returns jsonb language plpgsql stable security definer set search_path to '' as $p$
+declare u uuid; v bigint; a jsonb; b jsonb;
+begin
+ u:=private.exam_prep_require_core_access_v1();
+ select program_version_id into v from private.exam_prep_exam_profiles where user_id=u;
+ if v is null then raise exception 'exam_prep_profile_required'; end if;
+ a:=private.exam_prep_remaining_work_internal_v1(u,v,'P1');
+ b:=private.exam_prep_remaining_work_internal_v1(u,v,'P5');
+ if (a->>'skills_total')::int<>45 or (b->>'skills_total')::int<>36
+ then raise exception 'exam_prep_canonical_81_skill_contract_incomplete'; end if;
+ return jsonb_build_object(
+ 'contract_version','exam_prep_result_led_remaining_work_v1',
+ 'P1',a,'P5',b,'numeric_recommendation_available',false,
+ 'recommended_weekly_hours',null,'recommendation_accept_enabled',false,
+ 'unknown_is_not_weak',true,'repeated_errors_deduplicated_by_component_skill_phase',true,
+ 'shared_mathematics_budget_double_counted',false,
+ 'student_may_study_beyond_plan',true,'grades_predicted',false);
 end;
-$function$;
-
-revoke all on function public.get_exam_prep_remaining_work_by_skill_safe_v1()
-  from public,anon;
-grant execute on function public.get_exam_prep_remaining_work_by_skill_safe_v1()
-  to authenticated,service_role;
-
-comment on function public.get_exam_prep_remaining_work_by_skill_safe_v1() is
-'Owner-only read-only 81-skill P1/P5 remaining actions. Unknown is checked, not assumed weak; repeated wrong responses collapse into one skill correction action; no unapproved personal minutes, no written method score or learning caps.';
+$p$;
+revoke all on function public.get_exam_prep_remaining_work_by_skill_safe_v1() from public,anon;
+grant execute on function public.get_exam_prep_remaining_work_by_skill_safe_v1() to authenticated,service_role;
