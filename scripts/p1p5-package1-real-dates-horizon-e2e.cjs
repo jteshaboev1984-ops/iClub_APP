@@ -54,10 +54,12 @@ function centreInput(iso){
  const baseRow=Array.isArray(baseline.data)?baseline.data[0]:baseline.data;
  const chosenSeries=String(baseRow?.exam_series||'');
  const chosenYear=Number(chosenSeries.match(/20\d{2}/)?.[0]||0);
- const chosenMonth=/may\/june/i.test(chosenSeries)?'05':'10';
+ const june=/may\/june/i.test(chosenSeries);
+ const p1Month=june?'04':'10'; // June-series 9709 P1 can occur in April
+ const p5Month=june?'05':'10';
  assert(chosenYear>=2026,'Missing real profile exam-series year');
- const p1Date=new Date(String(chosenYear)+'-'+chosenMonth+'-10T09:00:00+05:00').toISOString();
- const p5Date=new Date(String(chosenYear)+'-'+chosenMonth+'-13T09:00:00+05:00').toISOString();
+ const p1Date=new Date(String(chosenYear)+'-'+p1Month+'-10T09:00:00+05:00').toISOString();
+ const p5Date=new Date(String(chosenYear)+'-'+p5Month+'-13T09:00:00+05:00').toISOString();
  assert(new Date(p1Date).getTime()>Date.now()+86400000,'Selected future test series has already expired');
  const wrongSeriesDate=new Date(String(chosenYear)+'-01-10T09:00:00+05:00').toISOString();
  const wrong=await rpc('save_my_exam_prep_exam_appointment_v2',{
