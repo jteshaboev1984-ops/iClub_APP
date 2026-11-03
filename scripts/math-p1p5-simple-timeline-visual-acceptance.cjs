@@ -77,8 +77,10 @@ function html(lang){
             ...payload,joint_paper_dates_status:both?'both_paper_dates_confirmed':'missing_at_least_one_paper_exam_date',
             estimated_joint_math_hours_per_week:both?5.5:null,
             P1:{...payload.P1,exam_at:toStamp(args.p_p1_date),
+              estimated_component_weekly_hours:args.p_p1_date?4.2:null,
               exam_date_status:args.p_p1_date?'valid_exam_date':'exam_date_not_yet_selected'},
             P5:{...payload.P5,exam_at:toStamp(args.p_p5_date),
+              estimated_component_weekly_hours:args.p_p5_date?2.4:null,
               exam_date_status:args.p_p5_date?'valid_exam_date':'exam_date_not_yet_selected'}
           };
           return {data:next,error:null};
@@ -121,7 +123,8 @@ function html(lang){
       const savedText=await page.locator('[data-ep-simple-timeline]').innerText();
       assert(!/school confirmation|подтверждение школ|maktab tasdiqlash/i.test(savedText));
       if(withDates) assert(!savedText.includes(LABELS[lang].missing));
-      else assert(savedText.includes(LABELS[lang].missing));
+      else assert(savedText.includes('P1') && !savedText.includes(LABELS[lang].missing),
+        'One date must show P1 weekly target without inventing joint rate');
       assert.equal(await page.evaluate(()=>
         document.documentElement.scrollWidth<=document.documentElement.clientWidth),true,
         lang+' '+width+' saved state cannot overflow');
