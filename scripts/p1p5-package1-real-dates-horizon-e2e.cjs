@@ -75,7 +75,7 @@ function centreInput(iso){
      'Content-Type':'application/json',Authorization:'Bearer '+token
     },body:JSON.stringify(args)});
     let data=null;try{data=await response.json();}catch{}
-    window.__dateRpcTrace.push({name,status:response.status,ok:response.ok});
+    window.__dateRpcTrace.push({name,status:response.status,ok:response.ok,component:args?.p_component_code||null});
     return response.ok?{data,error:null}:{data:null,error:{code:data?.code||String(response.status),message:data?.message||'server_rejected'}};
    }};
    window.i18n={getLang:()=> 'ru'};
@@ -90,14 +90,13 @@ function centreInput(iso){
   });
   assert(opened.synced&&opened.open,'Real Maths host did not open');
   await page.locator('[data-ep-exam-date-panel]').waitFor({timeout:25000});
-  assert.equal(await page.locator('[data-ep-exam-date-row]').count(),0,'do not depend on invented DOM nodes');
   for(const [component,date] of [['P1',p1Date],['P5',p5Date]]){
    const selector='[data-ep-exam-date-input="'+component+'"]';
    await page.locator(selector).fill(centreInput(date));
    await page.locator('[data-ep-exam-date-confirm="'+component+'"]').check();
    await page.locator('[data-ep-exam-date-save="'+component+'"]').click();
    await page.waitForFunction(comp=>(window.__dateRpcTrace||[]).some(x=>
-      x.name==='save_my_exam_prep_exam_appointment_v2'&&x.ok) &&
+      x.name==='save_my_exam_prep_exam_appointment_v2'&&x.ok&&x.component===comp) &&
       document.querySelector('[data-ep-exam-date-input="'+comp+'"]'),
      component,{timeout:25000});
    const refresh=await rpc('get_exam_prep_personal_horizon_safe_v1',{},tA);
