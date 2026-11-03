@@ -7,9 +7,12 @@ const INDEX=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const CSS=fs.readFileSync(path.join(__dirname,'../exam-prep/exam-prep-simple-timeline-ui.css'),'utf8');
 function boot(flag, overrides={}){
   const internal={lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
-  const state={rpcCount:0,injected:[],listeners:[]};
+  const state={rpcCount:0,injected:[],listeners:[],boundEvents:0};
   let currentIntro={nextElementSibling:null,insertAdjacentElement(position,el){
-    assert.equal(position,'afterend');state.injected.push(el.html);this.nextElementSibling={
+    assert.equal(position,'afterend');state.injected.push(el.html);
+    // Real DOM: inserting the child into the page removes it from wrapper.
+    if(el.parentWrapper) el.parentWrapper.child=null;
+    this.nextElementSibling={
       matches:(selector)=>selector==='[data-ep-simple-timeline]'
     };
   }};
@@ -25,7 +28,11 @@ function boot(flag, overrides={}){
       return null;
     },
     createElement(){
-      return {set innerHTML(v){this.html=v;},get firstElementChild(){return {html:this.html,addEventListener(){},querySelector(){return null;}};}};
+      const wrapper={child:null,set innerHTML(v){
+        this.child={html:v,parentWrapper:this,
+          addEventListener(){state.boundEvents++;},querySelector(){return null;}};
+      },get firstElementChild(){return this.child;}};
+      return wrapper;
     }
   };
   const window={iClubExamPrepSimpleTimelineUiEnabled:flag,iClubExamPrepHostInternal:internal,
@@ -132,6 +139,7 @@ async function main(){
   ui.reconcile();await new Promise(setImmediate);
   assert.equal(b.state.rpcCount,1);
   assert.equal(b.state.injected.length,1,'One card, no duplicate');
+  assert(b.state.boundEvents>0,'Native calendar click must bind to actual moved DOM node');
   assert(b.state.injected[0].includes('data-ep-simple-timeline'));
   ui.reconcile();await new Promise(setImmediate);
   assert.equal(b.state.rpcCount,1,'No duplicate request for same dashboard');
