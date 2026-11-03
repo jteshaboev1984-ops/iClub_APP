@@ -975,9 +975,9 @@
     const fmt = n => new Intl.NumberFormat(dateLocale(), { maximumFractionDigits: 2 }).format(n);
     const options = Array.from({ length: 7 }, (_, i) => {
       const n = i + 1;
-      return \`<option value="${n}" ${n === days ? "selected" : ""}>${n}</option>\`;
+      return `<option value="${n}" ${n === days ? "selected" : ""}>${n}</option>`;
     }).join("");
-    return \`<section class="ep-live-card ep-live-study-schedule" data-ep-study-schedule>
+    return `<section class="ep-live-card ep-live-study-schedule" data-ep-study-schedule>
       <div class="ep-live-head"><strong>${esc(c.title)}</strong></div>
       <p class="ep-live-meta">${esc(c.hint)}</p>
       <div class="ep-live-study-schedule-fields">
@@ -990,7 +990,7 @@
       </div>
       <button class="ep-live-btn secondary" type="button" data-ep-study-save>${esc(c.save)}</button>
       <div class="ep-live-meta" data-ep-study-feedback role="status" aria-live="polite"></div>
-    </section>\`;
+    </section>`;
   }
 
   function bindStudySchedule() {
