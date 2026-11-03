@@ -6,6 +6,7 @@ on:
       - 'exam-prep/**'
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
+      - 'supabase/tests/p1p5_package2_workload_registry_source_contract.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
@@ -138,6 +139,17 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
 
 
+      - name: Package 2 real 81-skill source register and no invented hours
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_package2_workload_registry_source_contract.sql \
+            2>&1 | tee /tmp/p1p5-package2-workload-source-check.log
+          grep -q 'PASS P2: 81 actual source-mapped skills' \
+            /tmp/p1p5-package2-workload-source-check.log
       - name: Seed ONLY disposable authenticated learners
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
