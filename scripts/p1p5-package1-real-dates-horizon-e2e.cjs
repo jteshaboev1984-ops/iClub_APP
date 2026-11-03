@@ -49,8 +49,21 @@ function centreInput(iso){
  const baseline=await rpc('get_exam_prep_exam_profile_v1',{},tA);
  assert(baseline.ok,'Learner profile not accessible');
 
- const p1Date=new Date(Date.now()+38*86400000).toISOString();
- const p5Date=new Date(Date.now()+42*86400000).toISOString();
+ // Dates are deliberately test data, not a claim about a Cambridge timetable.
+ // They must belong to the REAL stored exam-series label used by this fake learner.
+ const baseRow=Array.isArray(baseline.data)?baseline.data[0]:baseline.data;
+ const chosenSeries=String(baseRow?.exam_series||'');
+ const chosenYear=Number(chosenSeries.match(/20\\d{2}/)?.[0]||0);
+ const chosenMonth=/may\\/june/i.test(chosenSeries)?'05':'10';
+ assert(chosenYear>=2026,'Missing real profile exam-series year');
+ const p1Date=new Date(String(chosenYear)+'-'+chosenMonth+'-10T09:00:00+05:00').toISOString();
+ const p5Date=new Date(String(chosenYear)+'-'+chosenMonth+'-13T09:00:00+05:00').toISOString();
+ assert(new Date(p1Date).getTime()>Date.now()+86400000,'Selected future test series has already expired');
+ const wrongSeriesDate=new Date(String(chosenYear)+'-01-10T09:00:00+05:00').toISOString();
+ const wrong=await rpc('save_my_exam_prep_exam_appointment_v2',{
+   p_component_code:'P1',p_scheduled_start_at:wrongSeriesDate,p_school_confirmed:true
+ },tA);
+ assert(!wrong.ok,'Server saved a date in a month outside selected exam series');
  const denied=await rpc('save_my_exam_prep_exam_appointment_v2',{
    p_component_code:'P1',p_scheduled_start_at:p1Date,p_school_confirmed:false
  },tA);
