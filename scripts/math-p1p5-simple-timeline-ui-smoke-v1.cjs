@@ -98,6 +98,21 @@ async function main(){
   assert.equal(cappedModel.canAdopt,false,'Never offer one-tap hours beyond total availability');
   assert(ui.viewHtml(cappedModel,'en').includes('total weekly study budget'));
   assert(!ui.viewHtml(cappedModel,'en').includes('data-ep-tl-accept'));
+  const urgent=fixture();
+  urgent.existing_chosen_math_hours_per_week=4;
+  urgent.estimated_joint_math_hours_per_week=1250;
+  urgent.P1.estimated_component_weekly_hours=800;
+  urgent.P5.estimated_component_weekly_hours=550;
+  const urgentModel=ui.parsePayload(urgent);
+  assert(urgentModel && urgentModel.suggested===1250,
+    'Very near student-selected exam must still show the real extreme estimate');
+  assert.equal(urgentModel.canAdopt,false,
+    'Never suggest accepting over 168 hours per week');
+  const urgentHtml=ui.viewHtml(urgentModel,'ru');
+  assert(urgentHtml.includes('168 часов в неделю') &&
+    !urgentHtml.includes('Выберите дату хотя бы одного') &&
+    !urgentHtml.includes('data-ep-tl-accept'),
+    'High weekly target cannot be shown as missing exam date');
   const staleProfile=fixture();staleProfile.existing_chosen_math_hours_per_week=4;
   staleProfile.student_budget_profile_revision=null;
   assert.equal(ui.parsePayload(staleProfile).canAdopt,false,
