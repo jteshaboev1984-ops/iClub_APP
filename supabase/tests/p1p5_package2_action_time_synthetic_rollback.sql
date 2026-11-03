@@ -41,6 +41,24 @@ begin
      primary_reviewer_ref='CI_SIMULATED_A',independent_approver_ref='CI_SIMULATED_B',
      reviewed_at=now()-interval '1 hour',approved_at=now()
  where program_version_id=v_version;
+ -- An otherwise complete approved row with NO evidence references must
+ -- fail even though PostgreSQL CHECK ordinarily accepts UNKNOWN/NULL.
+ begin
+   update private.exam_prep_skill_action_time_norms_v1
+   set evidence_references=array[]::text[]
+   where program_version_id=v_version and component_code='P1'
+     and skill_code='P1-QUA-01' and action_code='targeted_check';
+   raise exception 'P2-10 evidence-free approved duration passed';
+ exception when check_violation then null;
+ end;
+ begin
+   update private.exam_prep_skill_action_time_norms_v1
+   set independent_approver_ref=primary_reviewer_ref
+   where program_version_id=v_version and component_code='P1'
+     and skill_code='P1-QUA-01' and action_code='targeted_check';
+   raise exception 'P2-10 same-reviewer approved duration passed';
+ exception when check_violation then null;
+ end;
  v_p1_after:=private.exam_prep_action_time_calibration_internal_v1(v_user,v_version,'P1');
  v_p5_after:=private.exam_prep_action_time_calibration_internal_v1(v_user,v_version,'P5');
  v_n1:=(v_p1_after->>'unique_pending_action_count')::int;
