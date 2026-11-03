@@ -62,7 +62,9 @@ begin
   -- Weekly periods follow the existing governed 7-day profile/weekly-goal
   -- clock, not browser midnights. No backlog of multiple old weeks at login.
   v_week_number:=floor(extract(epoch from (v_now-v_profile.created_at))/604800)::int;
-  if v_week_number between 1 and 35 then
+  -- The canonical 36-week roadmap is a content plan, NOT a reporting cutoff.
+  -- The learner can continue preparing after week 36 without losing summaries.
+  if v_week_number between 1 and 156 then
     v_kind:='week';
     v_end:=v_profile.created_at+(v_week_number*interval '7 days');
     v_start:=greatest(v_end-interval '7 days',v_diagnostic_anchor);
