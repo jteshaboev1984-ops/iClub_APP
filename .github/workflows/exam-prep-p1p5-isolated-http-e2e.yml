@@ -8,6 +8,7 @@ on:
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'supabase/tests/p1p5_package2_workload_registry_source_contract.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
+      - 'scripts/p1p5-package2-workload-owner-evidence-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
@@ -194,6 +195,12 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-isolated-http-auth-e2e.cjs
+      - name: Package 2 validate actual owner P1/P5 skill evidence, unknown skills and official Paper duration
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node --check scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
+          node scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
