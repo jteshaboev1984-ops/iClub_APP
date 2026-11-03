@@ -106,6 +106,14 @@ async function main(){
   noDates.joint_paper_dates_status='missing_at_least_one_paper_exam_date';
   noDates.estimated_joint_math_hours_per_week=null;
   assert.equal(ui.parsePayload(noDates).weekly,null);
+  const singleDate=fixture();
+  singleDate.P1.estimated_component_weekly_hours=4.2;
+  singleDate.P5.exam_at=null;
+  singleDate.P5.exam_date_status='exam_date_not_yet_selected';
+  singleDate.estimated_joint_math_hours_per_week=null;
+  singleDate.joint_paper_dates_status='missing_at_least_one_paper_exam_date';
+  assert(ui.viewHtml(ui.parsePayload(singleDate),'ru').includes('P1 · Ориентир в неделю'),
+    'One learner date already provides their individual paper weekly target');
   const noDateHtml=ui.viewHtml(ui.parsePayload(noDates),'ru');
   assert(noDateHtml.includes('Укажите даты экзаменов P1 и P5'));
   assert(!noDateHtml.includes('8,9'));
