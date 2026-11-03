@@ -315,5 +315,69 @@ async function signedRpc(name, uid, args={}) {
  assert.equal(restored.data.P1.status,'calendar_capacity_available');
  assert.equal(Date.parse(restored.data.earliest_ready_paper_start_at),Date.parse(p1Date));
 
+ // P2-16: a learner's chosen DAY is the exam date for their iClub plan.
+ // No school approval, no series match, no official Cambridge clock claim.
+ const prior=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_A);
+ assert(prior.ok);
+ const hoursBefore=prior.data.estimated_remaining_math_hours;
+ const budgetBefore=prior.data.existing_chosen_math_hours_per_week;
+ const objectiveBefore=[prior.data.P1.objectively_covered_skills,prior.data.P5.objectively_covered_skills];
+ const savedPersonal=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',USER_A,{
+   p_p1_date:'2028-02-12',p_p5_date:'2028-02-20'
+ });
+ assert(savedPersonal.ok,'User-chosen date save failed '+savedPersonal.status+' '+JSON.stringify(savedPersonal.data));
+ for(const paper of ['P1','P5']){
+   assert.equal(savedPersonal.data[paper].exam_date_source,'learner_selected');
+   assert.equal(savedPersonal.data[paper].exam_date_status,'valid_exam_date',
+     'P1/P5 learner dates must not require school approval or exam-series match');
+   assert(savedPersonal.data[paper].estimated_component_weekly_hours>0);
+ }
+ assert.equal(savedPersonal.data.joint_paper_dates_status,'both_paper_dates_confirmed');
+ assert(savedPersonal.data.estimated_joint_math_hours_per_week>0);
+ assert.equal(savedPersonal.data.estimated_remaining_math_hours,hoursBefore);
+ assert.equal(savedPersonal.data.existing_chosen_math_hours_per_week,budgetBefore);
+ assert.equal(savedPersonal.data.P1.objectively_covered_skills,objectiveBefore[0]);
+ assert.equal(savedPersonal.data.P5.objectively_covered_skills,objectiveBefore[1]);
+ assert.equal(savedPersonal.data.recommended_schedule_applied_automatically,false);
+ const roundtrip=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_A);
+ assert(roundtrip.ok);
+ assert.equal(new Date(roundtrip.data.P1.exam_at).toISOString().slice(0,10),'2028-02-12');
+ assert.equal(new Date(roundtrip.data.P5.exam_at).toISOString().slice(0,10),'2028-02-20');
+
+ // Explicitly blank P1 clears the user preference, not legacy exam operations.
+ const clearOne=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',USER_A,{
+   p_p1_date:null,p_p5_date:'2028-03-10'
+ });
+ assert(clearOne.ok);
+ assert.equal(clearOne.data.P1.exam_date_source,'learner_selected');
+ assert.equal(clearOne.data.P1.exam_at,null);
+ assert.equal(clearOne.data.P1.exam_date_status,'exam_date_not_yet_selected');
+ assert.equal(clearOne.data.P5.exam_date_status,'valid_exam_date');
+ assert.equal(clearOne.data.estimated_joint_math_hours_per_week,null);
+ assert.equal(clearOne.data.estimated_remaining_math_hours,hoursBefore);
+ const legacyAfter=await signedRpc('get_exam_prep_shared_study_capacity_safe_v1',USER_A);
+ assert(legacyAfter.ok);
+ assert.equal(legacyAfter.data.P1.status,'calendar_capacity_available',
+   'Personal date changes must not mutate legacy exam operations');
+ assert.equal(Date.parse(legacyAfter.data.earliest_ready_paper_start_at),Date.parse(p1Date));
+
+ const rejected=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',USER_A,{
+   p_p1_date:'2024-02-12',p_p5_date:'2028-03-10'
+ });
+ assert(!rejected.ok,'Past date must be rejected');
+ const afterReject=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_A);
+ assert(afterReject.ok);
+ assert.equal(afterReject.data.P1.exam_at,null,'Rejected batch must not partially edit P1');
+ assert.equal(new Date(afterReject.data.P5.exam_at).toISOString().slice(0,10),'2028-03-10');
+ const anonSave=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',null,{
+   p_p1_date:'2028-02-12',p_p5_date:'2028-02-20'
+ });
+ assert(!anonSave.ok,'Anonymous user must never save personal dates');
+ const another=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_B);
+ assert(!another.ok || (
+   another.data.P1.exam_date_source!=='learner_selected' &&
+   another.data.P5.exam_date_source!=='learner_selected'
+ ),'Other user must not see saved personal P1/P5 dates');
+ console.log('PASS P2-16 real signed learner date save/clear, cross-series acceptance, instant weekly plan, privacy and legacy preservation');
  console.log('PASS P2 real learner objective/unknown evidence (45+36), official 110/75min papers, zero invented hours or grade forecasts, no study quota, owner-only JWT');
 })().catch(err=>{console.error(err);process.exitCode=1});
