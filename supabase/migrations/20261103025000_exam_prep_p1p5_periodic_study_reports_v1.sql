@@ -68,7 +68,9 @@ begin
     v_kind:='week';
     v_end:=v_profile.created_at+(v_week_number*interval '7 days');
     v_start:=greatest(v_end-interval '7 days',v_diagnostic_anchor);
-    if v_start<v_end then
+    -- No "weekly" report until a full seven days have elapsed since the
+    -- first completed diagnostic, even if a legacy profile week ended sooner.
+    if v_end>=v_diagnostic_anchor+interval '7 days' and v_start<v_end then
       v_p1_adherence:=null; v_p5_adherence:=null;
       -- Existing verified due-goal proof is optional; don't infer missed hours
       -- from zero app sessions or incorrect/ambiguous historical goal snapshots.
