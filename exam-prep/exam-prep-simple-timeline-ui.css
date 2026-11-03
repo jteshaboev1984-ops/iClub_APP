@@ -162,3 +162,34 @@
   }
   #exam-prep-host-root .ep-tl-exam-chip svg{display:none}
 }
+
+/* P2-17: learner-friendly comparison; never a study restriction. */
+#exam-prep-host-root .ep-tl-compare{
+  display:grid;gap:8px;padding:11px 12px;border-radius:11px;
+  background:rgba(47,111,214,.045);
+  border:1px solid rgba(47,111,214,.13);
+  min-width:0;box-sizing:border-box;
+}
+#exam-prep-host-root .ep-tl-compare p{margin:0;font-size:12px;line-height:1.5}
+#exam-prep-host-root .ep-tl-compare .ep-tl-enough{color:var(--success,#21825d);font-weight:700}
+#exam-prep-host-root .ep-tl-compare .ep-tl-short strong{font-size:14px;white-space:nowrap}
+#exam-prep-host-root .ep-tl-compare .ep-tl-total-cap{opacity:.75}
+#exam-prep-host-root .ep-tl-compare .ep-tl-scope{font-size:11px;opacity:.72}
+#exam-prep-host-root .ep-tl-accept{
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--primary,#2f6fd6);
+  border-radius:10px;background:var(--primary,#2f6fd6);
+  color:#fff;min-height:44px;max-width:100%;width:max-content;
+  padding:10px 16px;font:inherit;font-weight:750;font-size:13px;
+  line-height:1.4;text-align:center;cursor:pointer;
+}
+#exam-prep-host-root .ep-tl-accept:disabled{opacity:.55;cursor:default}
+#exam-prep-host-root .ep-tl-accept:focus-visible{
+  outline:2px solid var(--primary,#2f6fd6);outline-offset:2px;
+}
+#exam-prep-host-root [data-ep-tl-plan-feedback]:not([hidden]){
+  font-weight:700;font-size:12px;line-height:1.4;
+}
+@media(max-width:390px){
+  #exam-prep-host-root .ep-tl-accept{width:100%}
+}
