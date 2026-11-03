@@ -9,12 +9,16 @@ on:
       - 'scripts/math-p1p5-validate-workload-review-pack-v1.cjs'
       - 'scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs'
       - 'scripts/math-p1p5-result-led-time-sum-v1.cjs'
+      - 'scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs'
       - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
   pull_request:
     paths:
       - 'docs/math-p1p5-package2-81-skill-review-pack-v1.json'
       - 'docs/math-p1p5-package2-81-skill-review-protocol-v1.md'
       - 'scripts/math-p1p5-validate-workload-review-pack-v1.cjs'
+      - 'scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs'
+      - 'scripts/math-p1p5-result-led-time-sum-v1.cjs'
+      - 'scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs'
       - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
 permissions:
   contents: read
@@ -31,3 +35,5 @@ jobs:
       - run: node scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs --self-test
       - run: node scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs
       - run: node scripts/math-p1p5-result-led-time-sum-v1.cjs
+      - run: node scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs --self-test
+      - run: node scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs
