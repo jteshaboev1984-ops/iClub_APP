@@ -384,6 +384,20 @@
     load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
     load('script[data-exam-prep-exam-map]', "examPrepExamMap", "exam-prep-exam-map.js?v=p209map2");
     load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1");
+    // Architect-approved simple P1/P5 learning-time timeline is an optional
+    // presentation layer. Explicit test/preview switch only; no rollout by
+    // default, no changes to existing API or learning flow.
+    if (window.iClubExamPrepSimpleTimelineUiEnabled === true) {
+      if (valid && !document.querySelector('link[data-exam-prep-simple-timeline-style]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.dataset.examPrepSimpleTimelineStyle = 'true';
+        link.href = src.replace(/exam-prep-api\\.js(?:\\?.*)?$/, 'exam-prep-simple-timeline-ui.css?v=p2-15');
+        document.head.appendChild(link);
+      }
+      load('script[data-exam-prep-simple-timeline]', 'examPrepSimpleTimeline',
+        'exam-prep-simple-timeline-ui.js?v=p2-15');
+    }
     // Explicit pre-set true is still supported for preview/tests. In production,
     // controlled-beta capabilities call loadControlledProgressUx() after auth.
     if (window.iClubExamPrepProgressUxEnabled === true) {
