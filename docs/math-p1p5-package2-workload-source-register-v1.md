@@ -20,6 +20,19 @@ Migration `20261103030000_exam_prep_p1p5_workload_norm_registry_v1.sql` adds:
 - Safe owner-only `public.get_exam_prep_workload_norm_status_safe_v1()` can report academically approved coverage by paper, but always returns `numeric_recommendation_enabled=false` until the verified scheduling engine exists. Nothing in current live UI calls this function.
 - PostgreSQL 17 migration replay checks 81 source-bound rows, exact 45/36 split, zero published per-skill minutes and no premature review status. No fake learners needed for this source-integrity assertion.
 
+## 2A. Verified historical Cambridge topic-teaching reference (distinct from 81 skill norms)
+
+Found Cambridge Assessment International Education-authored **Mathematics 9709 Schemes of Work, Version 1, for examinations from 2020**. Both documents give approximate *guided teaching/contact time* by **syllabus topic** (not by 81 fine-grained skills, not a total personal study quota):
+
+| Paper | Topics | Guided teaching-time suggestions in the historical Scheme of Work |
+| --- | --- | --- |
+| P1 Pure Mathematics 1 | 1.1 Quadratics, 1.2 Functions, 1.3 Coordinate geometry, 1.4 Circular measure, 1.5 Trigonometry, 1.6 Series, 1.7 Differentiation, 1.8 Integration | **10, 10, 10, 4, 14, 10, 16, 16 hours** respectively; combined 90 hours |
+| P5 Probability & Statistics 1 | 5.1 Representation of data, 5.2 Permutations and combinations, 5.3 Probability, 5.4 Discrete random variables, 5.5 Normal distribution | **14, 4, 12, 8, 12 hours** respectively; combined 50 hours |
+
+Sources: [Cambridge-authored P1 scheme PDF, hosted by an educational institution](https://cdnsm5-ss20.sharpschool.com/UserFiles/Servers/Server_4756360/File/Academics/Magnet%20Program%20-%20Cambridge%20AICE/Cambridge%20Resources%20for%20Teaching/Mathematics%20Pure%20Math%20Paper%201%20Scheme%20of%20Work.pdf); [Cambridge-authored P5 scheme PDF, external archive](https://peipeimaths.wordpress.com/wp-content/uploads/2020/04/9709_y20-22_sw_probstats1_v1.pdf). Both original documents explicitly date themselves **from 2020**. Cambridge's [current official 2026–27 syllabus](https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf) describes about **180 guided learning hours for an AS qualification**, but does **not** authorize converting these topic contact hours into individual unsupervised skill workload.
+
+**Strict product limit:** these 140 total historical topic-guided contact hours are not asserted to equal the full 180-hour 2026 AS program, nor should the difference be invented or assigned to learners. Scheme of Work history may require update for 2026–27. Therefore the new `private.exam_prep_historical_topic_teaching_refs_v1` stores the 13 entries with status `historical_reference_unverified_for_2026_27`, source URLs, and `approved_as_personal_study_norm=false` (database CHECK blocks false-to-true mutation). This historical register is independent of 81 source-backed **unreviewed numeric skill norms**. No aggregate, topic or skill number is displayed as an individual iClub recommendation yet.
+
 ## 3. Required independent academic review, not a fake target
 
 Before approval of numeric ranges, for **each** skill record a defensible mathematical teaching path, baseline prior knowledge, whether mastery can be established by app-verified objective evidence, independent guided vs self-study assumptions, representative written/MCQ balance, correction and delayed-retest time, source provenance and valid uncertainty interval. Published exercises and time limits for answering a question **do not equal hours needed to learn a skill**.
