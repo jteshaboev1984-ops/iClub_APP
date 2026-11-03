@@ -43,6 +43,57 @@ async function signedRpc(name, uid, args={}) {
  const result=await request(USER_A);
  assert(result.ok,'Owner could not see real read-only projection: '+result.status+' '+JSON.stringify(result.data));
  const d=result.data;
+ const taskResult=await signedRpc('get_exam_prep_remaining_work_by_skill_safe_v1',USER_A);
+ assert(taskResult.ok,'Owner could not obtain live result-led skills: '+taskResult.status+' '+JSON.stringify(taskResult.data));
+ const remaining=taskResult.data;
+ assert.equal(remaining.contract_version,'exam_prep_result_led_remaining_work_v1');
+ assert.equal(remaining.numeric_recommendation_available,false);
+ assert.equal(remaining.recommended_weekly_hours,null);
+ assert.equal(remaining.recommendation_accept_enabled,false);
+ assert.equal(remaining.unknown_is_not_weak,true);
+ assert.equal(remaining.repeated_errors_deduplicated_by_component_skill_phase,true);
+ assert.equal(remaining.shared_mathematics_budget_double_counted,false);
+ for(const [component,expected] of [['P1',45],['P5',36]]) {
+   const itemGroup=remaining[component];
+   assert.equal(itemGroup.skills_total,expected);
+   assert.equal(itemGroup.items.length,expected);
+   const uniqueCodes=new Set();
+   let sumSlots=0;
+   for(const item of itemGroup.items) {
+     assert.equal(item.component_code,component);
+     assert(!uniqueCodes.has(item.skill_code),'Duplicate canonical skill action: '+item.skill_code);
+     uniqueCodes.add(item.skill_code);
+     assert(['unobserved','observed_unconfirmed','objective_coverage_confirmed'].includes(item.evidence_status));
+     assert.equal(item.remaining_minutes_min,null);
+     assert.equal(item.remaining_minutes_max,null);
+     assert.equal(item.academic_hours_approved,false);
+     assert.equal(item.wrong_answer_multiplication_allowed,false);
+     assert.equal(item.unresolved_corrections_counted_as_separate_full_skill_courses,false);
+     assert.equal(item.written_activity_is_verified_method_mark,false);
+     assert(Array.isArray(item.pending_actions));
+     assert.equal(new Set(item.pending_actions).size,item.pending_actions.length);
+     sumSlots+=item.pending_actions.length;
+     if(item.evidence_status==='unobserved')
+       assert.deepEqual(item.pending_actions,['targeted_check'],'Unknown is never an assumed fail');
+     if(item.recorded_unresolved_correction_count>0)
+       assert.deepEqual(item.pending_actions,['correction'],'Multiple wrong responses may not duplicate whole skill tuition');
+   }
+   assert.equal(uniqueCodes.size,expected);
+   assert.equal(itemGroup.unique_pending_action_slots,sumSlots);
+   assert.equal(itemGroup.skills_unobserved,d[component].skills_unknown_objective_level);
+   assert.equal(itemGroup.skills_observed_not_yet_confirmed,
+                d[component].skills_with_observed_but_unconfirmed_objective_level);
+   assert.equal(itemGroup.skills_objective_coverage_confirmed_not_final_mastery,
+                d[component].skills_with_confirmed_objective_coverage);
+   assert.equal(itemGroup.remaining_study_minutes_min,null);
+   assert.equal(itemGroup.individually_recommended_weekly_hours,null);
+ }
+ const noAccess=await signedRpc('get_exam_prep_remaining_work_by_skill_safe_v1',null);
+ assert(!noAccess.ok,'Anonymous actor read a real learner work inventory');
+ const crossUser=await signedRpc('get_exam_prep_remaining_work_by_skill_safe_v1',USER_B);
+ assert(!crossUser.ok || (crossUser.data.P1?.items?.every(i=>i.evidence_status==='unobserved') &&
+                          crossUser.data.P5?.items?.every(i=>i.evidence_status==='unobserved')),
+        'Other-user access exposed finished learner evidence');
  assert.equal(d.contract_version,'exam_prep_workload_review_projection_v1');
  assert.equal(d.recommendation_accept_enabled,false,'Academic minute recommendation was not approved');
  assert.equal(d.recommended_daily_minutes,null,'No guessed study-hour requirement');
