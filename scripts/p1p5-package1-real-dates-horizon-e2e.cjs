@@ -53,8 +53,8 @@ function centreInput(iso){
  // They must belong to the REAL stored exam-series label used by this fake learner.
  const baseRow=Array.isArray(baseline.data)?baseline.data[0]:baseline.data;
  const chosenSeries=String(baseRow?.exam_series||'');
- const chosenYear=Number(chosenSeries.match(/20\\d{2}/)?.[0]||0);
- const chosenMonth=/may\\/june/i.test(chosenSeries)?'05':'10';
+ const chosenYear=Number(chosenSeries.match(/20\d{2}/)?.[0]||0);
+ const chosenMonth=/may\/june/i.test(chosenSeries)?'05':'10';
  assert(chosenYear>=2026,'Missing real profile exam-series year');
  const p1Date=new Date(String(chosenYear)+'-'+chosenMonth+'-10T09:00:00+05:00').toISOString();
  const p5Date=new Date(String(chosenYear)+'-'+chosenMonth+'-13T09:00:00+05:00').toISOString();
