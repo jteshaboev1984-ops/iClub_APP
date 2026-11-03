@@ -41,7 +41,9 @@ permissions:
 
 jobs:
   isolated-visual-captures:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 Chromium cannot install on ubuntu26.04 runner.
+    # Isolated screenshot test only: no app hosting or release change.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate isolated screenshot, date, real-renderer and authorized-journey harnesses
