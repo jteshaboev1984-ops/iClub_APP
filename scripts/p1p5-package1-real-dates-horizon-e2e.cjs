@@ -171,6 +171,28 @@ function centreInput(iso){
   const scheduleInfo=await page.locator('[data-ep-study-schedule]').innerText();
   assert(scheduleInfo.includes('iClub не остановит занятия'),
     'Study schedule must explicitly say that extra study does not lock access');
+  // Weekly and monthly summaries are emitted only after a completed period.
+  // The authenticated, owner-only RPC records a one-time delivery receipt.
+  const periodicFirst=await rpc('claim_exam_prep_periodic_study_report_safe_v1',{},tA);
+  assert(periodicFirst.ok,'Periodic report RPC failed via signed HTTP '+periodicFirst.status);
+  assert.equal(periodicFirst.data.contract_version,'periodic_study_report_v1');
+  assert.equal(periodicFirst.data.daily_reminders,false,'Daily study notifications must be disabled');
+  const periodicAgain=await rpc('claim_exam_prep_periodic_study_report_safe_v1',{},tA);
+  assert(periodicAgain.ok,'Repeating claimed report must be safe');
+  assert.deepEqual(periodicAgain.data.reports,[],
+    'A weekly or monthly report must not be sent again on a second page visit');
+  const earlyReport=page.locator('[data-ep-periodic-report]');
+  const prior=periodicFirst.data.reports.length;
+  assert(prior<=2,'At most one completed week and one completed month may be delivered');
+  for(const digest of periodicFirst.data.reports){
+    assert(['week','month'].includes(digest.period_kind),'No daily reports allowed');
+    assert.equal(digest.learning_minutes,null,'Cannot invent student study minutes from task/session counts');
+    assert.equal(digest.can_continue_learning,true,'Time budgets must not block additional learning');
+    assert.equal(digest.access_limit_changed,false,'Monthly/weekly summaries cannot change access rights');
+  }
+  const noLogin=await rpc('claim_exam_prep_periodic_study_report_safe_v1',{});
+  assert(!noLogin.ok,'Anonymous student progress reports must not be accessible');
+  assert((await earlyReport.count())<=2,'Never render more than weekly+monthly summary cards');
   assert.equal(errors.length,0,'JavaScript errors: '+errors.join(', '));
  }finally{await page.close();await browser.close();}
  const after=await rpc('get_exam_prep_personal_horizon_safe_v1',{},tA);
