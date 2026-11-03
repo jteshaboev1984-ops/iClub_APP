@@ -333,9 +333,12 @@
         if (!model) return;
         const card=document.createElement('div');
         card.innerHTML=viewHtml(model,language());
-        if (card.firstElementChild) {
-          intro.insertAdjacentElement('afterend',card.firstElementChild);
-          bindCard(card.firstElementChild,model);
+        const inserted=card.firstElementChild;
+        if (inserted) {
+          // Moving the element detaches it from the temporary wrapper.
+          // Capture it BEFORE insertAdjacentElement or listeners are lost.
+          intro.insertAdjacentElement('afterend',inserted);
+          bindCard(inserted,model);
         }
       } catch (_) { /* Fail closed. Existing Exam Prep UI stays untouched. */ }
     })();
