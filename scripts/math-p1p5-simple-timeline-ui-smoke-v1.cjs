@@ -25,7 +25,7 @@ function boot(flag, overrides={}){
       return null;
     },
     createElement(){
-      return {set innerHTML(v){this.html=v;},get firstElementChild(){return {html:this.html};}};
+      return {set innerHTML(v){this.html=v;},get firstElementChild(){return {html:this.html,addEventListener(){},querySelector(){return null;}};}};
     }
   };
   const window={iClubExamPrepSimpleTimelineUiEnabled:flag,iClubExamPrepHostInternal:internal,
@@ -69,19 +69,27 @@ async function main(){
   assert.equal(off.state.rpcCount,0);
 
   const b=boot(true),ui=b.internal.simpleTimelineUi;
-  assert(ui && ui.version==='p2_15_simple_timeline_ui_v1');
+  assert(ui && ui.version==='p2_16_learner_dates_ui_v1');
   const model=ui.parsePayload(fixture());
   assert(model);
   assert.equal(model.totalHours,111.7);
   assert.equal(model.weekly,8.9);
   assert.equal(model.cards[0].confirmed,5);
   assert.equal(model.cards[1].unknown,33);
+  assert.equal(ui.inputDate('2027-05-12T07:00:00Z'),'2027-05-12');
+  assert.equal(ui.validInputDate('2028-05-12',{min:'2027-01-01',max:'2029-12-31'}),true);
+  assert.equal(ui.validInputDate('2024-01-01',{min:'2027-01-01',max:'2029-12-31'}),false);
+  assert.equal(ui.validInputDate('2032-01-01',{min:'2027-01-01',max:'2029-12-31'}),false);
   for(const [lang,label] of [['ru','Мой путь к экзамену'],['uz','Imtihongacha yo‘lim'],['en','My exam timeline']]){
     const markup=ui.viewHtml(model,lang);
     assert(markup.includes(label),lang);
     assert(markup.includes('data-ep-tl-paper="P1"') &&
       markup.includes('data-ep-tl-paper="P5"'));
     assert(markup.includes('data-ep-simple-timeline'));
+    assert(markup.includes('data-ep-tl-date-editor') && markup.includes('type="date"'));
+    assert(markup.includes('data-ep-tl-open-date="P1"') && markup.includes('data-ep-tl-open-date="P5"'));
+    assert(markup.includes('data-ep-tl-save disabled'),'One-save control must start disabled');
+    assert(!/school|школ|maktab/i.test(markup),'No school confirmation UI');
     assert(!markup.includes('NaN')&&!markup.includes('undefined'));
     assert(!markup.includes('486')&&!markup.includes('synthetic'));
   }
