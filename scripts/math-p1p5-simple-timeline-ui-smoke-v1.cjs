@@ -3,7 +3,7 @@
 // P2-15: pure DOM-less safety/format unit check. No live user data or API writes.
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
 const JS=fs.readFileSync(path.join(__dirname,'../exam-prep/exam-prep-simple-timeline-ui.js'),'utf8');
-const API=fs.readFileSync(path.join(__dirname,'../exam-prep/exam-prep-api.js'),'utf8');
+const INDEX=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const CSS=fs.readFileSync(path.join(__dirname,'../exam-prep/exam-prep-simple-timeline-ui.css'),'utf8');
 function boot(flag, overrides={}){
   const internal={lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
@@ -57,10 +57,10 @@ function fixture(){
   };
 }
 async function main(){
-  assert(API.includes("window.iClubExamPrepSimpleTimelineUiEnabled === true"),
-    'Production loader needs explicit opt-in; no automatic public beta UI');
-  assert(API.includes('exam-prep-simple-timeline-ui.js?v=p2-15'));
-  assert(API.includes('exam-prep-simple-timeline-ui.css?v=p2-15'));
+  assert(JS.includes("window.iClubExamPrepSimpleTimelineUiEnabled !== true"),
+    'Module must remain opt-in and fail-closed');
+  assert(INDEX.includes('exam-prep-simple-timeline-ui.js?v=p2-15'));
+  assert(INDEX.includes('exam-prep-simple-timeline-ui.css?v=p2-15'));
   assert(CSS.includes('@media (max-width:540px)'));
   assert(CSS.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
   assert(!CSS.includes('!important'));
