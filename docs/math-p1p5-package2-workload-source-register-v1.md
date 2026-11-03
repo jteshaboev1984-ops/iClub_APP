@@ -88,6 +88,18 @@ Implementation: new private, read-only `exam_prep_skill_content_calibration_inve
 
 **Academic decision:** current data establish **content availability**, but not a defensible `minutes to learn skill` interval. Leave all 81 `estimated_core_min/max_minutes` and `estimated_revision_min/max_minutes` NULL pending authentic instructional time evidence and mathematical review of representative written/routine/transfer methods. Never replace the original unknown state with a negative readiness label, and never create daily reminders or study-hour access caps.
 
+## 3C. Real pupil-chosen shared calendar capacity — not required workload
+
+The additive read-only, owner-only `public.get_exam_prep_shared_study_capacity_safe_v1()` now provides a numerically accurate **capacity-only** part of the future calculator. It uses the existing protected Math exam profile's explicitly selected `mathematics_hours_budget`, the real `stage0_complete` component diagnosis + finalized diagnostic timestamp, own already confirmed P1/P5 centre exam appointments, and the server's governed academic clock. For a future paper at time `t`, the *unchanged plan* would make available:
+
+`round(chosen Math weekly hours × max(seconds until t,0) / 604800, 2)`.
+
+The calculation uses fractional weeks rather than rounding each week up, and **P1 and P5 share a single Mathematics budget**. The API returns time to the **earliest** and **latest** *ready* paper, **not** two additive paper-hour allowances. It deliberately emits `horizon_hours_additive_across_p1_p5=false`, `capacity_is_recommendation=false`, `capacity_is_access_limit=false`, `may_study_above_plan=true` and `recommended_study_hours_per_week=null`. It cannot write a profile, grade, lesson session, correction or any previously earned evidence. The same real signed HTTP E2E actor completes authentic Stage 0, saves two school-date test inputs through the existing owner-only appointment RPC, and asserts both capacity values directly from exact timestamps and the student-elected weekly hours. The test dates are not official Cambridge claims.
+
+This is *calendar availability at the student's chosen pace*, not a statement that the learner needs this many hours for A, that this amount is sufficient, or that either paper is ready. Students can still study beyond their scheduled time with **no time-based lock**. If a paper date is not confirmed, has passed, or its diagnostic is incomplete, the API returns a reason and no fabricated numeric capacity for that paper. Genuine **skill learning requirements remain unknown** until an independently reviewed 81-skill academic model has credible minimum/maximum study intervals; only then can a requested change of hours be compared with available time and shown through the agreed three consent actions.
+
+The public `lessons` table has only **7** rows for Mathematics subject 5 and no video-duration field; this cannot supply missing teaching-hour calibration. The two provided coursebooks are image-only PDFs, so no claim of automated per-exercise timed reading or independent textbook-minute audit is justified.
+
 ## 4. Boundaries and next step
 
 This PR is **not** academic certification of all 81 skill-time intervals. All current numeric skill norms are intentionally missing. Next is source-specific individual time-range review (a real academic task), then independently checked readiness engine and genuine UI consent controls. No production deployment, no cleanup, no Stage D mass-Core GO. Preserve the approved course and historical user progress across upgrades.
