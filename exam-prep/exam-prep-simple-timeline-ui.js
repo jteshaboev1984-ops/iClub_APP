@@ -97,7 +97,8 @@
       if (confirmed<0 || attempted<0 || unknown<0 || confirmed+attempted+unknown!==total ||
           s.skills_not_yet_objectively_covered!==total-confirmed) return null;
       cards.push({ code,total,confirmed,attempted,unknown,hours:s.estimated_remaining_study_hours,
-        examAt:s.exam_date_status==='valid_exam_date' ? s.exam_at : null });
+        examAt:s.exam_date_status==='valid_exam_date' ? s.exam_at : null,
+        paperWeekly:finite(s.estimated_component_weekly_hours,0,500) ? s.estimated_component_weekly_hours : null });
     }
     if (!finite(payload.estimated_remaining_math_hours,0,140) ||
         Math.abs(payload.estimated_remaining_math_hours-cards.reduce((t,c)=>t+c.hours,0))>0.12) return null;
@@ -168,9 +169,12 @@
         '<span>'+esc(w.unchecked)+' <b>'+x.unknown+'</b></span></div></div>';
     }).join('');
     const sum=metric(w.total,niceNumber(model.totalHours,lang)+' '+w.hours);
-    const pace=model.weekly===null
-      ? '<p class="ep-tl-guidance">'+esc(w.noDates)+'</p>'
-      : metric(w.weekly,niceNumber(model.weekly,lang)+' '+w.perWeek);
+    const dated=model.cards.filter(x=>x.examAt&&x.paperWeekly!==null);
+    const pace=model.weekly!==null
+      ? metric(w.weekly,niceNumber(model.weekly,lang)+' '+w.perWeek)
+      : dated.length===1
+        ? metric(dated[0].code+' · '+w.weekly,niceNumber(dated[0].paperWeekly,lang)+' '+w.perWeek)
+        : '<p class="ep-tl-guidance">'+esc(w.noDates)+'</p>';
     const current=model.chosen===null?'':metric(w.chosen,niceNumber(model.chosen,lang)+' '+w.perWeek);
     const bounds=inputBounds();
     const editor='<form class="ep-tl-date-editor" data-ep-tl-date-editor hidden novalidate>'+
@@ -291,7 +295,13 @@
         if(generation===requestId && root()?.contains(section)) setError(w.saveError);
       } finally {
         busy=false;
-        if(save){save.textContent=w.saveDates;refresh();}
+        if(save) save.textContent=w.saveDates;
+        // Re-enable Save without erasing the visible error on failed requests.
+        if (save) {
+          const latest=values();
+          save.disabled=!(latest.P1!==original.P1||latest.P5!==original.P5)
+            || !validInputDate(latest.P1,bounds)||!validInputDate(latest.P5,bounds);
+        }
       }
     });
   }
