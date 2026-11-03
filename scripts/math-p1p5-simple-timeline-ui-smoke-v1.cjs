@@ -51,6 +51,7 @@ function fixture(){
     recommended_schedule_applied_automatically:false,learning_evidence_mutated:false,
     start_at:'2026-09-15T00:00:00+05:00',as_of:'2026-11-03T10:00:00+05:00',
     existing_chosen_math_hours_per_week:10,
+    student_total_hours_per_week:12,student_budget_profile_revision:2,
     joint_paper_dates_status:'both_paper_dates_confirmed',
     estimated_joint_math_hours_per_week:8.9,estimated_remaining_math_hours:111.7,
     P1:{component_code:'P1',total_syllabus_skills:45,objectively_covered_skills:5,
@@ -76,13 +77,31 @@ async function main(){
   assert.equal(off.state.rpcCount,0);
 
   const b=boot(true),ui=b.internal.simpleTimelineUi;
-  assert(ui && ui.version==='p2_16_learner_dates_ui_v1');
+  assert(ui && ui.version==='p2_17_weekly_choice_ui_v1');
   const model=ui.parsePayload(fixture());
   assert(model);
   assert.equal(model.totalHours,111.7);
   assert.equal(model.weekly,8.9);
   assert.equal(model.cards[0].confirmed,5);
   assert.equal(model.cards[1].unknown,33);
+  assert.equal(model.canAdopt,false,'Already enough time does not create pointless button');
+  const short=fixture();
+  short.existing_chosen_math_hours_per_week=4;
+  const shortModel=ui.parsePayload(short);
+  assert.equal(shortModel.canAdopt,true);
+  assert.equal(shortModel.profileRevision,2);
+  assert(ui.viewHtml(shortModel,'ru').includes('data-ep-tl-accept'));
+  const capped=fixture();
+  capped.existing_chosen_math_hours_per_week=4;
+  capped.student_total_hours_per_week=5;
+  const cappedModel=ui.parsePayload(capped);
+  assert.equal(cappedModel.canAdopt,false,'Never offer one-tap hours beyond total availability');
+  assert(ui.viewHtml(cappedModel,'en').includes('total weekly study budget'));
+  assert(!ui.viewHtml(cappedModel,'en').includes('data-ep-tl-accept'));
+  const staleProfile=fixture();staleProfile.existing_chosen_math_hours_per_week=4;
+  staleProfile.student_budget_profile_revision=null;
+  assert.equal(ui.parsePayload(staleProfile).canAdopt,false,
+    'One-click update requires real current owner profile revision');
   assert.equal(ui.inputDate('2027-05-12T07:00:00Z'),'2027-05-12');
   assert.equal(ui.validInputDate('2028-05-12',{min:'2027-01-01',max:'2029-12-31'}),true);
   assert.equal(ui.validInputDate('2024-01-01',{min:'2027-01-01',max:'2029-12-31'}),false);
@@ -124,6 +143,7 @@ async function main(){
   const noDateHtml=ui.viewHtml(ui.parsePayload(noDates),'ru');
   assert(noDateHtml.includes('Укажите даты экзаменов P1 и P5'));
   assert(!noDateHtml.includes('8,9'));
+  assert(!noDateHtml.includes('data-ep-tl-accept'),'No date, no weekly action');
   const malicious=fixture();malicious.as_of='<img src=x onerror=alert(1)>';
   assert(!ui.viewHtml(ui.parsePayload(malicious),'en').includes('<img'));
   b.hub.dataset.subjectKey='economics';
@@ -153,6 +173,6 @@ async function main(){
   inFlight.internal.simpleTimelineUi.reconcile();
   settle({data:fixture(),error:null});await new Promise(setImmediate);
   assert.equal(inFlight.state.injected.length,0,'Old owner/subject response never injected');
-  console.log('PASS P2-15: trilingual text, responsive two-paper timeline, exact count contract, no date fallback, fail-closed owner switch and stale response.');
+  console.log('PASS P2-17: trilingual text, responsive two-paper timeline, exact count contract, no date fallback, fail-closed owner switch and stale response.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
