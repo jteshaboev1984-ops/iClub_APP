@@ -27,6 +27,18 @@ async function request(uid){
  let data;try{data=await r.json()}catch{data=null}
  return {ok:r.ok,status:r.status,data};
 }
+
+async function signedRpc(name, uid, args={}) {
+ const response=await fetch(HOST+'/rpc/'+name,{
+  method:'POST',
+  headers:{'Content-Type':'application/json',Accept:'application/json',
+    ...(uid?{Authorization:'Bearer '+token(uid)}:{})},
+  body:JSON.stringify(args)
+ });
+ let data=null;try{data=await response.json()}catch{}
+ return {ok:response.ok,status:response.status,data};
+}
+
 (async()=>{
  const result=await request(USER_A);
  assert(result.ok,'Owner could not see real read-only projection: '+result.status+' '+JSON.stringify(result.data));
@@ -66,5 +78,48 @@ async function request(uid){
  assert(!other.ok || (other.data.P1?.diagnostic_completed_at===null &&
                       other.data.P5?.diagnostic_completed_at===null),
     'Different user could read another learner diagnostic evidence');
+ // Use existing completed Stage0 learner and the real school-confirmed date RPC.
+ // Dates are E2E learner inputs, never asserted to be official Cambridge dates.
+ const initial=await signedRpc('get_exam_prep_shared_study_capacity_safe_v1',USER_A);
+ assert(initial.ok,'Learner capacity lookup denied');
+ assert.equal(initial.data.planned_shared_math_hours_to_earliest_exam,null);
+ assert.equal(initial.data.recommendation_accept_enabled,false);
+ const p1Date='2027-05-12T04:00:00.000Z';
+ const p5Date='2027-06-02T04:00:00.000Z';
+ for(const [component,date] of [['P1',p1Date],['P5',p5Date]]){
+  const saved=await signedRpc('save_my_exam_prep_exam_appointment_v1',USER_A,{
+    p_component_code:component,p_scheduled_start_at:date
+  });
+  assert(saved.ok,'Authenticated date save failed '+component+' HTTP '+saved.status);
+ }
+ const verified=await signedRpc('get_exam_prep_shared_study_capacity_safe_v1',USER_A);
+ assert(verified.ok,'Learner capacity not available after saved dates');
+ const plan=verified.data;
+ assert.equal(plan.P1.status,'calendar_capacity_available');
+ assert.equal(plan.P5.status,'calendar_capacity_available');
+ assert.equal(plan.earliest_ready_paper_start_at,p1Date);
+ assert.equal(plan.latest_ready_paper_start_at,p5Date);
+ const capacity=date=>Math.round(
+    Number(plan.chosen_math_hours_per_week) *
+    (Date.parse(date)-Date.parse(plan.as_of))/604800000*100)/100;
+ assert(Math.abs(Number(plan.planned_shared_math_hours_to_earliest_exam)-capacity(p1Date))<=0.02,
+   'Shared capacity until first paper differs from weekly selected hours multiplied by fractional weeks');
+ assert(Math.abs(Number(plan.planned_shared_math_hours_to_latest_exam)-capacity(p5Date))<=0.02,
+   'Shared capacity until final paper differs from elected weekly hours');
+ assert.equal(plan.shared_across_both_papers,true);
+ assert.equal(plan.horizon_hours_additive_across_p1_p5,false);
+ assert.equal(plan.capacity_is_recommendation,false);
+ assert.equal(plan.capacity_is_access_limit,false);
+ assert.equal(plan.may_study_above_plan,true);
+ assert.equal(plan.recommended_study_hours_per_week,null);
+ assert.equal(plan.recommended_daily_minutes,null);
+ assert.equal(plan.recommendation_accept_enabled,false);
+ assert.equal(plan.progress_notifications_only,'after_completed_week_or_month');
+ const anonymousCapacity=await signedRpc('get_exam_prep_shared_study_capacity_safe_v1',null);
+ assert(!anonymousCapacity.ok,'Anonymous capacity read allowed');
+ const foreignCapacity=await signedRpc('get_exam_prep_shared_study_capacity_safe_v1',USER_B);
+ assert(!foreignCapacity.ok || foreignCapacity.data.earliest_ready_paper_start_at===null,
+    'Other user sees saved P1/P5 dates');
+
  console.log('PASS P2 real learner objective/unknown evidence (45+36), official 110/75min papers, zero invented hours or grade forecasts, no study quota, owner-only JWT');
 })().catch(err=>{console.error(err);process.exitCode=1});
