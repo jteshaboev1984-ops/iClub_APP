@@ -14,7 +14,6 @@
     personalHorizon: null,
     studySchedule: null,
     periodicStudyReports: [],
-    periodicStudyReportsClaimed: false,
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
     session: null,
@@ -1318,17 +1317,22 @@
     const [horizon, schedule, periodic] = await Promise.all([
       typeof internal.api.personalHorizon === "function" ? internal.api.personalHorizon() : Promise.resolve(null),
       typeof internal.api.studySchedule === "function" ? internal.api.studySchedule() : Promise.resolve(null),
-      !state.periodicStudyReportsClaimed && typeof internal.api.claimPeriodicStudyReports === "function"
+      typeof internal.api.claimPeriodicStudyReports === "function"
         ? internal.api.claimPeriodicStudyReports().catch(() => null) : Promise.resolve(null)
     ]);
     if (!canMount() || token !== state.mountToken) return;
     state.personalHorizon = horizon?.ok ? horizon.data : null;
     state.studySchedule = schedule?.ok ? schedule.data : null;
-    if (!state.periodicStudyReportsClaimed && periodic?.ok &&
-        periodic.data?.contract_version === "periodic_study_report_v1" &&
+    if (periodic?.ok && periodic.data?.contract_version === "periodic_study_report_v1" &&
         Array.isArray(periodic.data.reports)) {
-      state.periodicStudyReportsClaimed = true;
-      state.periodicStudyReports = periodic.data.reports;
+      // A long-lived SPA must still receive next week's/month's NEW digest.
+      // The server's receipt key prevents daily/repeated delivery.
+      const seen = new Set(state.periodicStudyReports.filter(Boolean).map(r =>
+        String(r.period_kind) + "|" + String(r.period_ended_at)));
+      for (const item of periodic.data.reports) {
+        const key = String(item?.period_kind) + "|" + String(item?.period_ended_at);
+        if (!seen.has(key)) { state.periodicStudyReports.push(item); seen.add(key); }
+      }
     }
     const c = copy();
     const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
@@ -2213,7 +2217,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.periodicStudyReports=[]; state.periodicStudyReportsClaimed=false; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.periodicStudyReports=[]; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
