@@ -2223,3 +2223,35 @@ body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidd
 @media(max-width:620px) {
   #exam-prep-host-root .ep-live-study-schedule-fields { grid-template-columns:minmax(0,1fr); }
 }
+
+
+/* Read-only advisory for independently verified missed weekly goals.
+   The box never overlays or blocks continuing Mathematics lessons. */
+#exam-prep-host-root .ep-live-pace-advisory {
+  display:grid;
+  gap:9px;
+  margin:14px 0;
+  min-width:0;
+  border:1px solid var(--ep-border,rgba(110,126,152,.25));
+}
+#exam-prep-host-root .ep-live-pace-advisory p {
+  margin:0;
+  line-height:1.55;
+}
+#exam-prep-host-root .ep-live-pace-actions {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  align-items:stretch;
+}
+#exam-prep-host-root .ep-live-pace-actions button {
+  width:100%;
+  min-height:42px;
+  white-space:normal;
+  line-height:1.3;
+}
+@media(max-width:620px) {
+  #exam-prep-host-root .ep-live-pace-actions {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
