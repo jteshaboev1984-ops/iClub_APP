@@ -378,6 +378,91 @@ async function signedRpc(name, uid, args={}) {
    another.data.P1.exam_date_source!=='learner_selected' &&
    another.data.P5.exam_date_source!=='learner_selected'
  ),'Other user must not see saved personal P1/P5 dates');
+
+ // P2-17: approximate weekly target is ADVISORY until explicit owner click.
+ // Use actual signed student and real source-based hours in disposable PG17.
+ const weekDates=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',USER_A,{
+   p_p1_date:'2027-02-12',p_p5_date:'2027-02-20'
+ });
+ assert(weekDates.ok,'P2-17 test must use real learner selected days');
+ const beforeAccept=weekDates.data;
+ assert.equal(beforeAccept.student_total_hours_per_week,12);
+ assert.equal(beforeAccept.existing_chosen_math_hours_per_week,6);
+ assert(Number.isInteger(beforeAccept.student_budget_profile_revision));
+ const initialRevision=beforeAccept.student_budget_profile_revision;
+ const suggested=beforeAccept.estimated_joint_math_hours_per_week;
+ assert(suggested>6 && suggested<=12,'Test fixture must require a realistic feasible increase');
+ assert.equal(beforeAccept.recommended_schedule_applied_automatically,false);
+ const staleTarget=await signedRpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',USER_A,{
+   p_expected_current_math_hours:6,
+   p_expected_profile_revision:initialRevision,
+   p_new_math_hours:Math.round((suggested+0.1)*10)/10
+ });
+ assert(!staleTarget.ok,'Client must not alter suggested number independently');
+ const badRevision=await signedRpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',USER_A,{
+   p_expected_current_math_hours:6,
+   p_expected_profile_revision:initialRevision-1,
+   p_new_math_hours:suggested
+ });
+ assert(!badRevision.ok,'Lost-update profile revision must reject');
+ const anonAccept=await signedRpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',null,{
+   p_expected_current_math_hours:6,
+   p_expected_profile_revision:initialRevision,
+   p_new_math_hours:suggested
+ });
+ assert(!anonAccept.ok,'Anonymous Math budget acceptance not allowed');
+ const noWrite=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_A);
+ assert(noWrite.ok);
+ assert.equal(noWrite.data.existing_chosen_math_hours_per_week,6,
+   'Invalid or anonymous accept must NEVER alter profile');
+ const accepted=await signedRpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',USER_A,{
+   p_expected_current_math_hours:6,
+   p_expected_profile_revision:initialRevision,
+   p_new_math_hours:suggested
+ });
+ assert(accepted.ok,'Authenticated explicit recommended-hours acceptance failed '+accepted.status+' '+JSON.stringify(accepted.data));
+ assert.equal(accepted.data.existing_chosen_math_hours_per_week,suggested);
+ assert.equal(accepted.data.student_total_hours_per_week,12);
+ assert.equal(accepted.data.student_budget_profile_revision,initialRevision+1);
+ assert.equal(accepted.data.estimated_remaining_math_hours,hoursBefore,
+   'Accepting schedule must not recalculate academic mastery');
+ assert.equal(accepted.data.P1.objectively_covered_skills,objectiveBefore[0]);
+ assert.equal(accepted.data.P5.objectively_covered_skills,objectiveBefore[1]);
+ const repeatAccept=await signedRpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',USER_A,{
+   p_expected_current_math_hours:6,
+   p_expected_profile_revision:initialRevision,
+   p_new_math_hours:suggested
+ });
+ assert(!repeatAccept.ok,'Double-tap old profile must fail closed and not double-write');
+ const tight=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',USER_A,{
+   p_p1_date:'2026-12-02',p_p5_date:'2026-12-04'
+ });
+ assert(tight.ok);
+ const impossible=tight.data.estimated_joint_math_hours_per_week;
+ assert(impossible>12,'Tight deadline should exceed actual 12h whole-week budget');
+ const overCapacity=await signedRpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',USER_A,{
+   p_expected_current_math_hours:suggested,
+   p_expected_profile_revision:accepted.data.student_budget_profile_revision,
+   p_new_math_hours:impossible
+ });
+ assert(!overCapacity.ok,'Never set more Mathematics hours than full weekly availability');
+ const afterNo=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_A);
+ assert(afterNo.ok);
+ assert.equal(afterNo.data.existing_chosen_math_hours_per_week,suggested,
+   'Capacity rejection cannot partially update profile');
+ assert.equal(afterNo.data.estimated_remaining_math_hours,hoursBefore);
+ // Restore the ONLY synthetic 6h budget via normal existing governed v2 writer.
+ const restoredHours=await signedRpc('save_exam_prep_exam_profile_v2',USER_A,{
+   p_exam_series:'May/June 2027',p_target_grade:'A',
+   p_total_student_hours_available:12,p_mathematics_hours_budget:6
+ });
+ assert(restoredHours.ok,'Fixture restoration through existing public v2 writer failed');
+ const afterRestore=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_A);
+ assert(afterRestore.ok);
+ assert.equal(afterRestore.data.existing_chosen_math_hours_per_week,6);
+ assert.equal(afterRestore.data.P1.objectively_covered_skills,objectiveBefore[0]);
+ assert.equal(afterRestore.data.P5.objectively_covered_skills,objectiveBefore[1]);
+ console.log('PASS P2-17: real JWT owner explicit target acceptance, profile audit revision, stale/anon/over-capacity rejection, no progress changes');
  console.log('PASS P2-16 real signed learner date save/clear, cross-series acceptance, instant weekly plan, privacy and legacy preservation');
  console.log('PASS P2 real learner objective/unknown evidence (45+36), official 110/75min papers, zero invented hours or grade forecasts, no study quota, owner-only JWT');
 })().catch(err=>{console.error(err);process.exitCode=1});
