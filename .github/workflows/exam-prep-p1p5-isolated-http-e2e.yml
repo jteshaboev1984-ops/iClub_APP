@@ -35,7 +35,9 @@ permissions:
 jobs:
   real-http-auth:
     name: actual Math UI JWT PostgREST PG17
-    runs-on: ubuntu-latest
+    # Playwright 1.55 supports Ubuntu 24.04, not ubuntu-latest's 26.04.
+    # Fixed OS only for disposable CI, no production hosting change.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
