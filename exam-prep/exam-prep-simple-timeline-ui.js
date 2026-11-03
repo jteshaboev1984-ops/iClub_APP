@@ -1,13 +1,15 @@
 /* iClub Mathematics P1/P5: compact learner timeline.
  * OPT-IN only. Reads learner progress; can write ONLY learner-selected P1/P5
- * dates after an explicit Save tap. Never changes study budgets, progress,
- * localStorage, content language, sessions or assessments.
+ * dates after explicit Save, and may change ONLY the Mathematics weekly
+ * budget after a separate deliberate Accept tap. No automatic change to
+ * progress, localStorage, content language, sessions or assessments.
  */
 (() => {
   'use strict';
   if (window.iClubExamPrepSimpleTimelineUiEnabled !== true) return;
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = 'p2_16_learner_dates_ui_v1';
+  const VERSION = 'p2_17_weekly_choice_ui_v1';
+  const ACCEPT_RPC = 'accept_my_exam_prep_timeline_weekly_target_safe_v1';
   const SAVE_RPC = 'save_my_exam_prep_timeline_dates_safe_v1';
   const RPC = 'get_exam_prep_simple_learning_timeline_with_hours_safe_v2';
   const SELECTOR = '[data-ep-simple-timeline]';
@@ -28,7 +30,15 @@
       dateHelp:'Выберите даты P1 и P5. Их можно изменить позже.',
       dateError:'Выберите будущую дату в пределах трёх лет.',
       saveError:'Не удалось сохранить даты. Попробуйте снова.',
-      saved:'Даты сохранены. План пересчитан.'
+      saved:'Даты сохранены. План пересчитан.',
+      enough:'По текущему ориентиру выделенного времени хватает.',
+      short:'Чтобы успеть, добавьте примерно',
+      within:'в неделю',
+      adopt:'Выделить', adoptSuffix:'ч/нед',
+      tooMuch:'Рекомендуемое время больше вашего общего недельного бюджета. Его можно изменить в настройках Exam Prep.',
+      onlyPaper:'Ориентир пока только для',
+      updating:'Сохранение…',updated:'Недельный план обновлён.',
+      acceptFailed:'Не удалось изменить время. Откройте план заново и попробуйте ещё раз.'
     },
     uz: {
       title: 'Imtihongacha yo‘lim', start: 'Boshlanishi', today: 'Bugun', exam: 'Imtihonlar',
@@ -45,7 +55,15 @@
       dateHelp:'P1 va P5 sanalarini tanlang. Keyin o‘zgartirish mumkin.',
       dateError:'Kelgusi uch yil ichidagi sanani tanlang.',
       saveError:'Sanalarni saqlab bo‘lmadi. Qayta urinib ko‘ring.',
-      saved:'Sanalar saqlandi. Reja yangilandi.'
+      saved:'Sanalar saqlandi. Reja yangilandi.',
+      enough:'Hozir ajratgan vaqtingiz taxminiy mo‘ljal uchun yetadi.',
+      short:'Yetib olish uchun taxminan qo‘shing',
+      within:'haftasiga',
+      adopt:'Ajratish', adoptSuffix:'soat/hafta',
+      tooMuch:'Tavsiya etilgan vaqt umumiy haftalik budjetingizdan ko‘p. Uni Exam Prep sozlamalarida o‘zgartirishingiz mumkin.',
+      onlyPaper:'Hozircha faqat',updating:'Saqlanmoqda…',
+      updated:'Haftalik reja yangilandi.',
+      acceptFailed:'Vaqt o‘zgarmadi. Rejani yangilab, qayta urinib ko‘ring.'
     },
     en: {
       title: 'My exam timeline', start: 'Started', today: 'Today', exam: 'Exams',
@@ -62,7 +80,15 @@
       dateHelp:'Choose your P1 and P5 dates. You can change them later.',
       dateError:'Choose a future date within the next three years.',
       saveError:'Could not save dates. Please try again.',
-      saved:'Dates saved. Study target updated.'
+      saved:'Dates saved. Study target updated.',
+      enough:'Your current study time meets this approximate target.',
+      short:'To stay on track, add about',
+      within:'per week',
+      adopt:'Set', adoptSuffix:'h/week',
+      tooMuch:'The suggested time exceeds your total weekly study budget. You can change it in Exam Prep settings.',
+      onlyPaper:'Target currently covers only',updating:'Saving…',
+      updated:'Weekly plan updated.',
+      acceptFailed:'Could not update your time. Refresh the plan and try again.'
     }
   });
   function language() {
@@ -107,8 +133,19 @@
       ? payload.estimated_joint_math_hours_per_week : null;
     const chosen=finite(payload.existing_chosen_math_hours_per_week,0,168)
       ? payload.existing_chosen_math_hours_per_week : null;
+    const totalBudget=finite(payload.student_total_hours_per_week,0,168)
+      ? payload.student_total_hours_per_week : null;
+    const profileRevision=Number.isInteger(payload.student_budget_profile_revision) &&
+      payload.student_budget_profile_revision>=1 ? payload.student_budget_profile_revision : null;
+    const dated=cards.filter(x=>x.examAt&&x.paperWeekly!==null);
+    const onePaper=weekly===null && dated.length===1 ? dated[0].code : null;
+    const suggested=weekly!==null ? weekly : onePaper!==null ? dated[0].paperWeekly : null;
+    const canAdopt=suggested!==null && suggested>0 && suggested<=168 &&
+      chosen!==null && totalBudget!==null && profileRevision!==null &&
+      suggested>chosen+0.04 && suggested<=totalBudget;
     return {startAt:payload.start_at,asOf:payload.as_of,cards,
-      totalHours:payload.estimated_remaining_math_hours,weekly,chosen};
+      totalHours:payload.estimated_remaining_math_hours,weekly,chosen,
+      suggested,onePaper,canAdopt,totalBudget,profileRevision};
   }
   function niceNumber(n,lang) {
     return new Intl.NumberFormat(lang==='uz'?'uz-UZ':lang==='en'?'en-GB':'ru-RU', {
@@ -176,6 +213,22 @@
         ? metric(dated[0].code+' · '+w.weekly,niceNumber(dated[0].paperWeekly,lang)+' '+w.perWeek)
         : '<p class="ep-tl-guidance">'+esc(w.noDates)+'</p>';
     const current=model.chosen===null?'':metric(w.chosen,niceNumber(model.chosen,lang)+' '+w.perWeek);
+    const gap=model.suggested===null||model.chosen===null ? null :
+      Math.max(0,Math.round((model.suggested-model.chosen)*10)/10);
+    const paperOnly=model.onePaper ? '<span class="ep-tl-scope">'+esc(w.onlyPaper+' '+model.onePaper)+'</span>' : '';
+    const compare=model.suggested===null||model.chosen===null ? '' :
+      '<div class="ep-tl-compare" data-ep-tl-compare>'+
+        (gap<=0.04
+          ? '<p class="ep-tl-enough">'+esc(w.enough)+'</p>'
+          : '<p class="ep-tl-short">'+esc(w.short)+' <strong>'+
+            esc(niceNumber(gap,lang))+' '+esc(w.perWeek)+'</strong> '+esc(w.within)+'</p>'+
+            (model.canAdopt
+              ? '<button type="button" data-ep-tl-accept class="ep-tl-accept">'+
+                  esc(w.adopt)+' '+esc(niceNumber(model.suggested,lang))+' '+esc(w.adoptSuffix)+'</button>'
+              : '<p class="ep-tl-total-cap">'+esc(w.tooMuch)+'</p>'))+
+        paperOnly+
+        '<p data-ep-tl-plan-feedback role="status" hidden></p>'+
+      '</div>';
     const bounds=inputBounds();
     const editor='<form class="ep-tl-date-editor" data-ep-tl-date-editor hidden novalidate>'+
       '<h4>'+esc(w.editTitle)+'</h4><div class="ep-tl-date-fields">'+
@@ -200,12 +253,52 @@
         '<div><span>'+esc(w.exam)+'</span><div class="ep-tl-exams">'+exams+'</div></div></div>'+
       '<div class="ep-tl-papers">'+cards+'</div>'+
       '<div class="ep-tl-bottom">'+sum+pace+current+'</div>'+
+      compare+
       editor+
       '<p class="ep-tl-footnote">'+esc(w.assumption)+' '+esc(w.noChange)+'</p>'+
       '<p class="ep-tl-date-success" data-ep-tl-success role="status" hidden></p>'+
       '</section>';
   }
 
+
+  async function acceptWeekly(section,model,button) {
+    if (!section || !button || button.disabled || !model.canAdopt ||
+        !canShow(root()) || !root()?.contains(section)) return;
+    const gen=requestId;
+    const w=WORDS[language()]||WORDS.ru;
+    const status=section.querySelector('[data-ep-tl-plan-feedback]');
+    const sb=window.sb;
+    if(!sb || typeof sb.rpc!=='function')return;
+    button.disabled=true;
+    const label=button.textContent;
+    button.textContent=w.updating;
+    try {
+      const response=await sb.rpc(ACCEPT_RPC,{
+        p_expected_current_math_hours:model.chosen,
+        p_expected_profile_revision:model.profileRevision,
+        p_new_math_hours:model.suggested
+      });
+      if(response?.error) throw response.error;
+      const updated=parsePayload(Array.isArray(response?.data)?response.data[0]:response?.data);
+      if(!updated)throw Error('Updated plan response missing');
+      if(gen!==requestId || !canShow(root()) || !root()?.contains(section))return;
+      const wrapper=document.createElement('div');
+      wrapper.innerHTML=viewHtml(updated,language());
+      const replacement=wrapper.firstElementChild;
+      if(!replacement)throw Error('Updated plan DOM missing');
+      section.replaceWith(replacement);
+      bindCard(replacement,updated);
+      const feedback=replacement.querySelector('[data-ep-tl-plan-feedback]') ||
+        replacement.querySelector('[data-ep-tl-date-success]');
+      if(feedback){feedback.hidden=false;feedback.textContent=(WORDS[language()]||WORDS.ru).updated;}
+    } catch (_) {
+      if(gen===requestId && canShow(root()) && root()?.contains(section) && status){
+        status.textContent=w.acceptFailed;status.hidden=false;
+      }
+    } finally {
+      button.disabled=false;button.textContent=label;
+    }
+  }
   function bindCard(section,model) {
     if (!section || typeof section.addEventListener!=='function') return;
     const w=WORDS[language()]||WORDS.ru;
@@ -230,6 +323,11 @@
       if (!busy) setError(invalid?w.dateError:'');
     };
     section.addEventListener('click',event=>{
+      const accept=event.target?.closest?.('[data-ep-tl-accept]');
+      if(accept && section.contains(accept)) {
+        void acceptWeekly(section,model,accept);
+        return;
+      }
       const btn=event.target?.closest?.('[data-ep-tl-open-date], [data-ep-tl-clear], [data-ep-tl-cancel]');
       if (!btn || !section.contains(btn) || busy || !canShow(root())) return;
       if (btn.hasAttribute('data-ep-tl-cancel')) {
@@ -348,7 +446,7 @@
     pending=true;
     Promise.resolve().then(()=>{pending=false;reconcile();});
   }
-  internal.simpleTimelineUi=Object.freeze({version:VERSION,parsePayload,viewHtml,reconcile,inputDate,validInputDate,bindCard});
+  internal.simpleTimelineUi=Object.freeze({version:VERSION,parsePayload,viewHtml,reconcile,inputDate,validInputDate,bindCard,acceptWeekly});
   if (typeof MutationObserver==='function') {
     observer=new MutationObserver(schedule);
     observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,
