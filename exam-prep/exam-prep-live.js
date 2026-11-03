@@ -950,7 +950,7 @@
         save: "Сохранить дату", missing: "Дата ещё не указана", before: "Срок подготовки станет доступен после входной диагностики",
         remaining: "Дней до экзамена", initial: "Дней от диагностики до экзамена",
         verified: "Сверено с официальным расписанием", centre: "Дата указана вами по данным школы/центра. Официальное расписание Cambridge здесь пока не подтверждено.",
-        passed: "Дата прошла. Проверьте актуальную экзаменационную сессию.", error: "Не удалось сохранить дату. Проверьте её и повторите попытку.",
+        passed: "Дата прошла. Проверьте актуальную экзаменационную сессию.", error: "Не удалось сохранить дату. Проверьте её и повторите попытку.", seriesMismatch: "Дата не соответствует выбранной экзаменационной сессии. Проверьте год и период экзамена.",
         invalid: "Укажите будущую дату и время начала экзамена.", acknowledgement: "Сначала подтвердите, что сверили дату с экзаменационным центром.",
         saved: "Дата экзамена сохранена", forecast: "Расчёт рекомендуемого учебного времени появится после утверждения норм по программе Cambridge.",
         diagnostic: "Завершение входной диагностики", edit: "Изменить дату",
@@ -962,7 +962,7 @@
         save: "Sanani saqlash", missing: "Sana hali kiritilmagan", before: "Tayyorgarlik muddati kirish diagnostikasidan keyin aniqlanadi",
         remaining: "Imtihongacha kunlar", initial: "Diagnostikadan imtihongacha kunlar",
         verified: "Rasmiy jadval bilan tasdiqlangan", centre: "Sana maktab/markaz ma’lumotiga ko‘ra kiritilgan. Cambridge rasmiy jadvali bu yerda hali tasdiqlanmagan.",
-        passed: "Bu sana o‘tgan. Amaldagi imtihon sessiyasini tekshiring.", error: "Sanani saqlab bo‘lmadi. Tekshirib, qayta urinib ko‘ring.",
+        passed: "Bu sana o‘tgan. Amaldagi imtihon sessiyasini tekshiring.", error: "Sanani saqlab bo‘lmadi. Tekshirib, qayta urinib ko‘ring.", seriesMismatch: "Sana tanlangan imtihon sessiyasiga mos kelmaydi. Yil va davrni tekshiring.",
         invalid: "Kelajakdagi imtihon sanasi va boshlanish vaqtini kiriting.", acknowledgement: "Avval sana imtihon markazida tekshirilganini tasdiqlang.",
         saved: "Imtihon sanasi saqlandi", forecast: "Tavsiya etilgan o‘quv vaqti Cambridge dasturi me’yorlari tasdiqlangach hisoblanadi.",
         diagnostic: "Kirish diagnostikasi yakunlangan vaqt", edit: "Sanani o‘zgartirish",
@@ -974,7 +974,7 @@
         save: "Save date", missing: "Date not entered yet", before: "Your study horizon will appear after the entry diagnostic",
         remaining: "Days until exam", initial: "Days from diagnostic to exam",
         verified: "Matched to an officially verified timetable", centre: "You entered this date from your school/centre. iClub has not verified the official Cambridge timetable here.",
-        passed: "This date has passed. Check your current exam series.", error: "Date could not be saved. Check it and try again.",
+        passed: "This date has passed. Check your current exam series.", error: "Date could not be saved. Check it and try again.", seriesMismatch: "The date is outside your selected exam series. Check the year and exam period.",
         invalid: "Enter a future exam date and start time.", acknowledgement: "Confirm the date with your exam centre first.",
         saved: "Exam date saved", forecast: "Recommended study time will follow once Cambridge syllabus workload norms are approved.",
         diagnostic: "Entry diagnostic completed", edit: "Change date",
@@ -1044,7 +1044,8 @@
       if (!result?.ok) {
         state.busy = false;
         button.disabled = false;
-        show(c.error);
+        const code = String(result.error?.message || result.error?.code || "");
+        show(code.includes("exam_prep_exam_date_series_mismatch") || code.includes("exam_prep_exam_series_unrecognized") ? c.seriesMismatch : c.error);
         return;
       }
       const next = await internal.api.personalHorizon();
