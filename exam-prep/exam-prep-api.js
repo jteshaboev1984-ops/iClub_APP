@@ -49,7 +49,7 @@
     if (!script) {
       script = document.createElement("script");
       script.dataset.examPrepProgressUxBoot = "true";
-      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux4");
+      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux5-periodic1");
       bootLoad = new Promise(resolve => {
         script.addEventListener("load", () => resolve(true), { once: true });
         script.addEventListener("error", () => resolve(false), { once: true });
@@ -409,7 +409,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-horizon1-schedule1-pace1");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-horizon1-schedule1-periodic1");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");
