@@ -11,6 +11,8 @@
     profile: null,
     personalHorizon: null,
     studySchedule: null,
+    previousWeekAdherence: null,
+    dismissedPaceWeeks: {},
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
     session: null,
@@ -941,21 +943,21 @@
   function studyScheduleCopy() {
     const all = {
       ru: {
-        title: "Ваш режим занятий", hint: "Укажите время на математику в один учебный день и число учебных дней за неделю. Это ваш выбор, а не оценка необходимого времени Cambridge.",
+        title: "Ваш режим занятий", hint: "Укажите время на математику в один учебный день и число учебных дней за неделю. Это ваш ориентир, а не ограничение: если хотите заниматься больше, iClub не остановит занятия. Временные ограничения экзаменационных попыток действуют отдельно.",
         minutes: "Минут в учебный день", days: "Дней в неделю", preview: "Получится", total: "Общее доступное время",
         current: "Текущий бюджет математики", save: "Сохранить режим", saved: "Режим занятий сохранён. Выполненные задания не изменились.",
         error: "Не удалось сохранить режим. Попробуйте ещё раз.", invalid: "Введите от 15 до 240 минут (шаг 5) и от 1 до 7 учебных дней.",
         exceeds: "Время на математику превышает общее доступное время. Скорректируйте данные профиля.", hours: "ч/нед"
       },
       uz: {
-        title: "O‘qish jadvalingiz", hint: "Matematika uchun bir kunda ajratiladigan vaqt va haftadagi o‘quv kunlarini kiriting. Bu sizning tanlovingiz, Cambridge talab qiladigan soatlar bahosi emas.",
+        title: "O‘qish jadvalingiz", hint: "Matematika uchun kunlik vaqt va haftadagi o‘quv kunlarini kiriting. Bu faqat rejangiz: ko‘proq o‘qisangiz, iClub darslarni to‘xtatmaydi. Imtihon urinishlarining vaqti alohida cheklanadi.",
         minutes: "Kuniga daqiqa", days: "Haftasiga kunlar", preview: "Haftalik jami", total: "Umumiy mavjud vaqt",
         current: "Matematikaga joriy vaqt", save: "Jadvalni saqlash", saved: "O‘qish jadvali saqlandi. Oldingi natijalar o‘zgarmadi.",
         error: "Jadval saqlanmadi. Qayta urinib ko‘ring.", invalid: "15–240 daqiqa (5 daqiqalik qadam) va 1–7 kunni kiriting.",
         exceeds: "Matematikaga ajratilgan vaqt umumiy vaqt chegarasidan oshadi. Profil ma’lumotlarini tekshiring.", hours: "soat/hafta"
       },
       en: {
-        title: "Your study schedule", hint: "Choose minutes for Mathematics on each study day and the number of study days per week. This is your choice, not a Cambridge estimate of required hours.",
+        title: "Your study schedule", hint: "Choose your daily Mathematics minutes and study days per week. This is a guide, not a learning cap: studying longer never locks your lessons. Timed exam attempts still have their own limits.",
         minutes: "Minutes per study day", days: "Study days per week", preview: "Weekly Mathematics time", total: "Total available study time",
         current: "Current Mathematics budget", save: "Save schedule", saved: "Study schedule saved. Previous learning results have not changed.",
         error: "Could not save this schedule. Try again.", invalid: "Enter 15–240 minutes in steps of 5, and 1–7 study days.",
@@ -963,6 +965,87 @@
       }
     };
     return all[state.language] || all.ru;
+  }
+
+
+  // Existing audited RPC reports missed FROZEN academic goals (not elapsed
+  // study minutes). No warning without a verifiable previous-week record.
+  function verifiedMissedPace(component, result) {
+    const d = result?.ok ? result.data : null;
+    if (!d || d.contract_version !== "previous_week_adherence_v1" ||
+        d.component_code !== component || d.status !== "missed" || d.can_alert !== true ||
+        !Number.isInteger(d.active_week_no) || d.active_week_no < 1 ||
+        !Number.isInteger(d.scheduled_goals) || d.scheduled_goals < 1 || d.scheduled_goals > 3 ||
+        !Number.isInteger(d.completed_now) || d.completed_now < 0 ||
+        d.completed_now >= d.scheduled_goals) return null;
+    const key = component + ":" + d.active_week_no;
+    if (state.dismissedPaceWeeks[key]) return null;
+    return { component, week: d.active_week_no, done: d.completed_now,
+      total: d.scheduled_goals, key };
+  }
+
+  function studyPacePanel() {
+    const found = ["P1", "P5"].map(code =>
+      verifiedMissedPace(code, state.previousWeekAdherence?.[code])).filter(Boolean);
+    if (!found.length) return "";
+    const c = ({
+      ru: {
+        heading: "Недельный план требует внимания",
+        line: (code, done, total) => `${code}: выполнено ${done} из ${total} запланированных задач`,
+        body: "По завершённым заданиям видно отставание за прошлую неделю. Это не подсчёт ваших учебных часов: занятия вне iClub не измеряются. Можно продолжить текущий план, пройти оставшиеся задания или изменить расписание. Рекомендуемое время по Cambridge будет показано только после проверки нормативов.",
+        keep: "Оставить план", tasks: "Продолжить задания", edit: "Изменить расписание"
+      },
+      uz: {
+        heading: "Haftalik rejaga e’tibor kerak",
+        line: (code, done, total) => `${code}: ${total} ta rejalashtirilgan topshiriqdan ${done} tasi bajarilgan`,
+        body: "O‘tgan haftadagi topshiriqlar bo‘yicha ortda qolish bor. Bu o‘qigan soatlaringiz hisoboti emas: iClub’dan tashqaridagi mashg‘ulotlar hisoblanmaydi. Rejani saqlash, qolgan topshiriqlarni bajarish yoki jadvalni o‘zgartirish mumkin. Cambridge asosidagi aniq vaqt tavsiyasi me’yorlar tasdiqlangach ko‘rsatiladi.",
+        keep: "Rejani saqlash", tasks: "Topshiriqlarni davom ettirish", edit: "Jadvalni o‘zgartirish"
+      },
+      en: {
+        heading: "Your weekly plan needs attention",
+        line: (code, done, total) => `${code}: ${done} of ${total} scheduled tasks completed`,
+        body: "Last week's verified tasks show a gap. This is not a count of hours studied: learning outside iClub is not measured. You can keep your plan, continue unfinished tasks or change your schedule. Cambridge-based time recommendations will only appear after workload norms are verified.",
+        keep: "Keep plan", tasks: "Continue tasks", edit: "Change schedule"
+      }
+    })[state.language] || null;
+    const text = c || {
+      heading: "Недельный план требует внимания",
+      line: (code, done, total) => `${code}: выполнено ${done} из ${total} запланированных задач`,
+      body: "Учебные часы нельзя достоверно определить по числу заданий. Продолжайте занятия или измените план; доступ к заданиям не ограничивается.",
+      keep: "Оставить план", tasks: "Продолжить задания", edit: "Изменить расписание"
+    };
+    const lines = found.map(x => `<p class="ep-live-meta">${esc(text.line(x.component,x.done,x.total))}</p>`).join("");
+    return `<section class="ep-live-card ep-live-pace-advisory" data-ep-study-pace role="status" aria-live="polite">
+      <strong>${esc(text.heading)}</strong>${lines}
+      <p class="ep-live-meta">${esc(text.body)}</p>
+      <div class="ep-live-pace-actions">
+        <button type="button" class="ep-live-btn secondary" data-ep-pace-keep>${esc(text.keep)}</button>
+        <button type="button" class="ep-live-btn secondary" data-ep-pace-tasks="${found[0].component}">${esc(text.tasks)}</button>
+        <button type="button" class="ep-live-btn secondary" data-ep-pace-edit>${esc(text.edit)}</button>
+      </div>
+    </section>`;
+  }
+
+  function bindStudyPacePanel() {
+    const root = rootEl(); if (!root) return;
+    root.querySelector("[data-ep-pace-keep]")?.addEventListener("click", () => {
+      for (const component of ["P1","P5"]) {
+        const d = verifiedMissedPace(component,state.previousWeekAdherence?.[component]);
+        if (d) state.dismissedPaceWeeks[d.key] = true;
+      }
+      // A preference to keep the current plan is display-only: never send
+      // a write, alter the study hours or erase academic evidence.
+      root.querySelector("[data-ep-study-pace]")?.remove();
+    });
+    root.querySelector("[data-ep-pace-edit]")?.addEventListener("click", () => {
+      const el = root.querySelector("[data-ep-study-minutes]");
+      el?.scrollIntoView?.({block:"center",behavior:"smooth"});
+      el?.focus?.();
+    });
+    root.querySelector("[data-ep-pace-tasks]")?.addEventListener("click", event => {
+      const component = event.currentTarget?.dataset?.epPaceTasks;
+      if (component === "P1" || component === "P5") void openPlan(component);
+    });
   }
 
   function studySchedulePanel() {
@@ -1189,13 +1272,18 @@
     if (!canMount() || token !== state.mountToken) return;
     if (!s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
-    const [horizon, schedule] = await Promise.all([
+    const [horizon, schedule, adherenceP1, adherenceP5] = await Promise.all([
       typeof internal.api.personalHorizon === "function" ? internal.api.personalHorizon() : Promise.resolve(null),
-      typeof internal.api.studySchedule === "function" ? internal.api.studySchedule() : Promise.resolve(null)
+      typeof internal.api.studySchedule === "function" ? internal.api.studySchedule() : Promise.resolve(null),
+      window.iClubExamPrepWeeklyFlowEnabled === true && typeof internal.api.previousWeekAdherence === "function"
+        ? internal.api.previousWeekAdherence("P1").catch(() => null) : Promise.resolve(null),
+      window.iClubExamPrepWeeklyFlowEnabled === true && typeof internal.api.previousWeekAdherence === "function"
+        ? internal.api.previousWeekAdherence("P5").catch(() => null) : Promise.resolve(null)
     ]);
     if (!canMount() || token !== state.mountToken) return;
     state.personalHorizon = horizon?.ok ? horizon.data : null;
     state.studySchedule = schedule?.ok ? schedule.data : null;
+    state.previousWeekAdherence = {P1:adherenceP1,P5:adherenceP5};
     const c = copy();
     const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
     const profileBits = [
@@ -1206,10 +1294,11 @@
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${examDatesPanel()}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${studyPacePanel()}${examDatesPanel()}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
     state.notice = null;
     bindExamDatePanel();
     bindStudySchedule();
+    bindStudyPacePanel();
     root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
       const component = card.dataset.epLiveOpenComponent;
       // The dashboard explicitly says "Start/Continue entry check".
@@ -2078,7 +2167,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.previousWeekAdherence=null; state.dismissedPaceWeeks={}; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
