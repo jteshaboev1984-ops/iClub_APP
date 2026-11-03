@@ -3,6 +3,8 @@
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const VERSION = "p206finalops1";
+  // Replaces the legacy repeatedly-rendered missed-week banner in this Math host.
+  internal.periodicStudyReviewMode = true;
   let attached = false;
 
   const state = {
@@ -11,8 +13,8 @@
     profile: null,
     personalHorizon: null,
     studySchedule: null,
-    previousWeekAdherence: null,
-    dismissedPaceWeeks: {},
+    periodicStudyReports: [],
+    periodicStudyReportsClaimed: false,
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
     session: null,
@@ -968,84 +970,125 @@
   }
 
 
-  // Existing audited RPC reports missed FROZEN academic goals (not elapsed
-  // study minutes). No warning without a verifiable previous-week record.
-  function verifiedMissedPace(component, result) {
-    const d = result?.ok ? result.data : null;
-    if (!d || d.contract_version !== "previous_week_adherence_v1" ||
-        d.component_code !== component || d.status !== "missed" || d.can_alert !== true ||
-        !Number.isInteger(d.active_week_no) || d.active_week_no < 1 ||
-        !Number.isInteger(d.scheduled_goals) || d.scheduled_goals < 1 || d.scheduled_goals > 3 ||
-        !Number.isInteger(d.completed_now) || d.completed_now < 0 ||
-        d.completed_now >= d.scheduled_goals) return null;
-    const key = component + ":" + d.active_week_no;
-    if (state.dismissedPaceWeeks[key]) return null;
-    return { component, week: d.active_week_no, done: d.completed_now,
-      total: d.scheduled_goals, key };
+
+  // All reports are produced server-side only after a FULL week/month. A
+  // persistent per-user delivery receipt prevents daily reappearance across
+  // browser restarts/devices. We do not infer study minutes from session counts.
+  function completedStudyReports() {
+    const reports=Array.isArray(state.periodicStudyReports) ? state.periodicStudyReports : [];
+    return reports.map((entry,index) => ({entry,index})).filter(({entry}) =>
+      entry && (entry.period_kind==="week" || entry.period_kind==="month") &&
+      entry.can_continue_learning===true && entry.access_limit_changed===false &&
+      Number.isFinite(Date.parse(entry.period_ended_at || "")) &&
+      ["P1","P5"].every(component => {
+        const row=entry[component];
+        return row && Number.isInteger(row.finalized_learning_sessions) && row.finalized_learning_sessions>=0 &&
+          Number.isInteger(row.finalized_timed_sessions) && row.finalized_timed_sessions>=0;
+      })
+    );
   }
 
-  function studyPacePanel() {
-    const found = ["P1", "P5"].map(code =>
-      verifiedMissedPace(code, state.previousWeekAdherence?.[code])).filter(Boolean);
-    if (!found.length) return "";
-    const c = ({
+  function periodicStudyReportCopy() {
+    const all = {
       ru: {
-        heading: "Недельный план требует внимания",
-        line: (code, done, total) => `${code}: выполнено ${done} из ${total} запланированных задач`,
-        body: "По завершённым заданиям видно отставание за прошлую неделю. Это не подсчёт ваших учебных часов: занятия вне iClub не измеряются. Можно продолжить текущий план, пройти оставшиеся задания или изменить расписание. Рекомендуемое время по Cambridge будет показано только после проверки нормативов.",
-        keep: "Оставить план", tasks: "Продолжить задания", edit: "Изменить расписание"
+        week:"Итоги недели",month:"Итоги месяца",
+        count:(component,learning,timed)=> `${component}: завершено учебных занятий — ${learning}, пробных экзаменов — ${timed}`,
+        gap:(component,done,total)=> `${component}: выполнено ${done} из ${total} подтверждённых целей`,
+        due:"Есть невыполненные цели прошлого периода. Можно продолжить задания, оставить план или изменить учебное расписание. Доступ к занятиям не ограничивается.",
+        empty:"За этот период в iClub нет завершённых учебных сессий. Это не означает, что вы не занимались вне приложения.",
+        normal:"Продолжайте подготовку в удобном темпе. Занятия сверх плана доступны без ограничений по выбранным часам.",
+        caveat:"Количество сессий не является подсчётом учебных часов. Рекомендации Cambridge по индивидуальной нагрузке пока не рассчитаны.",
+        keep:"Оставить план",tasks:"Продолжить задания",edit:"Изменить расписание",close:"Закрыть отчёт"
       },
       uz: {
-        heading: "Haftalik rejaga e’tibor kerak",
-        line: (code, done, total) => `${code}: ${total} ta rejalashtirilgan topshiriqdan ${done} tasi bajarilgan`,
-        body: "O‘tgan haftadagi topshiriqlar bo‘yicha ortda qolish bor. Bu o‘qigan soatlaringiz hisoboti emas: iClub’dan tashqaridagi mashg‘ulotlar hisoblanmaydi. Rejani saqlash, qolgan topshiriqlarni bajarish yoki jadvalni o‘zgartirish mumkin. Cambridge asosidagi aniq vaqt tavsiyasi me’yorlar tasdiqlangach ko‘rsatiladi.",
-        keep: "Rejani saqlash", tasks: "Topshiriqlarni davom ettirish", edit: "Jadvalni o‘zgartirish"
+        week:"Haftalik yakun",month:"Oylik yakun",
+        count:(component,learning,timed)=> `${component}: yakunlangan darslar — ${learning}, sinov imtihonlari — ${timed}`,
+        gap:(component,done,total)=> `${component}: ${total} ta tasdiqlangan maqsaddan ${done} tasi bajarilgan`,
+        due:"O‘tgan davrdagi ayrim maqsadlar bajarilmagan. Topshiriqlarni davom ettirish, rejani saqlash yoki jadvalni o‘zgartirish mumkin. Darslar cheklanmaydi.",
+        empty:"Bu davrda iClub’da yakunlangan mashg‘ulot qayd etilmagan. Bu ilovadan tashqarida o‘qimagansiz degani emas.",
+        normal:"Tayyorgarlikni o‘zingizga qulay sur’atda davom ettiring. Rejadan ko‘proq o‘qish cheklanmaydi.",
+        caveat:"Mashg‘ulotlar soni o‘qish soatlarini ko‘rsatmaydi. Cambridge asosidagi shaxsiy vaqt tavsiyasi hali hisoblanmagan.",
+        keep:"Rejani saqlash",tasks:"Topshiriqlarni davom ettirish",edit:"Jadvalni o‘zgartirish",close:"Hisobotni yopish"
       },
       en: {
-        heading: "Your weekly plan needs attention",
-        line: (code, done, total) => `${code}: ${done} of ${total} scheduled tasks completed`,
-        body: "Last week's verified tasks show a gap. This is not a count of hours studied: learning outside iClub is not measured. You can keep your plan, continue unfinished tasks or change your schedule. Cambridge-based time recommendations will only appear after workload norms are verified.",
-        keep: "Keep plan", tasks: "Continue tasks", edit: "Change schedule"
+        week:"Weekly summary",month:"Monthly summary",
+        count:(component,learning,timed)=> `${component}: completed study sessions — ${learning}, practice exams — ${timed}`,
+        gap:(component,done,total)=> `${component}: ${done} of ${total} verified goals completed`,
+        due:"Some verified goals were not completed this period. Continue tasks, keep your plan, or change your schedule. Study access stays open.",
+        empty:"No completed iClub learning sessions were recorded for this period. This does not imply you did not study elsewhere.",
+        normal:"Keep preparing at your own pace. You can study beyond your schedule without an hours-based cap.",
+        caveat:"Session counts are not a measure of study hours. Personal Cambridge-based workload recommendations are not calculated yet.",
+        keep:"Keep current plan",tasks:"Continue tasks",edit:"Change schedule",close:"Close report"
       }
-    })[state.language] || null;
-    const text = c || {
-      heading: "Недельный план требует внимания",
-      line: (code, done, total) => `${code}: выполнено ${done} из ${total} запланированных задач`,
-      body: "Учебные часы нельзя достоверно определить по числу заданий. Продолжайте занятия или измените план; доступ к заданиям не ограничивается.",
-      keep: "Оставить план", tasks: "Продолжить задания", edit: "Изменить расписание"
     };
-    const lines = found.map(x => `<p class="ep-live-meta">${esc(text.line(x.component,x.done,x.total))}</p>`).join("");
-    return `<section class="ep-live-card ep-live-pace-advisory" data-ep-study-pace role="status" aria-live="polite">
-      <strong>${esc(text.heading)}</strong>${lines}
-      <p class="ep-live-meta">${esc(text.body)}</p>
-      <div class="ep-live-pace-actions">
-        <button type="button" class="ep-live-btn secondary" data-ep-pace-keep>${esc(text.keep)}</button>
-        <button type="button" class="ep-live-btn secondary" data-ep-pace-tasks="${found[0].component}">${esc(text.tasks)}</button>
-        <button type="button" class="ep-live-btn secondary" data-ep-pace-edit>${esc(text.edit)}</button>
-      </div>
-    </section>`;
+    return all[state.language] || all.ru;
   }
 
-  function bindStudyPacePanel() {
-    const root = rootEl(); if (!root) return;
-    root.querySelector("[data-ep-pace-keep]")?.addEventListener("click", () => {
-      for (const component of ["P1","P5"]) {
-        const d = verifiedMissedPace(component,state.previousWeekAdherence?.[component]);
-        if (d) state.dismissedPaceWeeks[d.key] = true;
-      }
-      // A preference to keep the current plan is display-only: never send
-      // a write, alter the study hours or erase academic evidence.
-      root.querySelector("[data-ep-study-pace]")?.remove();
-    });
-    root.querySelector("[data-ep-pace-edit]")?.addEventListener("click", () => {
-      const el = root.querySelector("[data-ep-study-minutes]");
-      el?.scrollIntoView?.({block:"center",behavior:"smooth"});
-      el?.focus?.();
-    });
-    root.querySelector("[data-ep-pace-tasks]")?.addEventListener("click", event => {
-      const component = event.currentTarget?.dataset?.epPaceTasks;
-      if (component === "P1" || component === "P5") void openPlan(component);
-    });
+  function periodicStudyReportPanel() {
+    const reports=completedStudyReports();
+    if (!reports.length) return "";
+    const c=periodicStudyReportCopy();
+    const fmt=new Intl.DateTimeFormat(dateLocale(), {timeZone:"Asia/Tashkent",day:"2-digit",month:"long",year:"numeric"});
+    return reports.map(({entry,index})=>{
+      const gaps=[];
+      const summary=["P1","P5"].map(component=>{
+        const d=entry[component];
+        const a=d.verified_week_goals;
+        if (entry.period_kind==="week" && a && a.status==="missed" && a.can_alert===true &&
+            Number.isInteger(a.scheduled_goals) && a.scheduled_goals>=1 && a.scheduled_goals<=3 &&
+            Number.isInteger(a.completed_now) && a.completed_now>=0 && a.completed_now<a.scheduled_goals) {
+          gaps.push({component,done:a.completed_now,total:a.scheduled_goals});
+        }
+        return `<div class="ep-live-meta">${esc(c.count(component,d.finalized_learning_sessions,d.finalized_timed_sessions))}</div>`;
+      }).join("");
+      const n=["P1","P5"].reduce((total,comp)=>
+        total + entry[comp].finalized_learning_sessions + entry[comp].finalized_timed_sessions,0);
+      const attention=gaps.length>0 || n===0;
+      const extra=gaps.map(g=>`<div class="ep-live-meta">${esc(c.gap(g.component,g.done,g.total))}</div>`).join("");
+      const reason=gaps.length ? c.due : n===0 ? c.empty : c.normal;
+      const date=fmt.format(new Date(entry.period_ended_at));
+      const target=gaps[0]?.component ||
+        (state.progress.P1?.stage0_complete===true ? "P1" :
+          state.progress.P5?.stage0_complete===true ? "P5" : "");
+      const controls=attention
+        ? `<div class="ep-live-pace-actions">
+          <button class="ep-live-btn secondary" type="button" data-ep-periodic-keep="${index}">${esc(c.keep)}</button>
+          ${target ? `<button class="ep-live-btn secondary" type="button" data-ep-periodic-tasks="${index}" data-ep-periodic-component="${target}">${esc(c.tasks)}</button>` : ""}
+          <button class="ep-live-btn secondary" type="button" data-ep-periodic-edit="${index}">${esc(c.edit)}</button>
+        </div>`
+        : `<button class="ep-live-btn secondary" type="button" data-ep-periodic-keep="${index}">${esc(c.close)}</button>`;
+      return `<section class="ep-live-card ep-live-pace-advisory" data-ep-periodic-report="${index}" role="status" aria-live="polite">
+        <strong>${esc(entry.period_kind==="week" ? c.week : c.month)} · ${esc(date)}</strong>
+        ${summary}${extra}
+        <p class="ep-live-meta">${esc(reason)}</p>
+        <p class="ep-live-meta">${esc(c.caveat)}</p>
+        ${controls}
+      </section>`;
+    }).join("");
+  }
+
+  function bindPeriodicStudyReportPanel() {
+    const root=rootEl(); if (!root) return;
+    const dismiss=index=>{
+      if (!Number.isInteger(index)||index<0||index>=state.periodicStudyReports.length) return;
+      state.periodicStudyReports[index]=null;
+      root.querySelector(`[data-ep-periodic-report="${index}"]`)?.remove();
+    };
+    root.querySelectorAll("[data-ep-periodic-keep]").forEach(button=>
+      button.addEventListener("click",()=>dismiss(Number(button.dataset.epPeriodicKeep))));
+    root.querySelectorAll("[data-ep-periodic-edit]").forEach(button=>
+      button.addEventListener("click",()=>{
+        dismiss(Number(button.dataset.epPeriodicEdit));
+        const input=root.querySelector("[data-ep-study-minutes]");
+        input?.scrollIntoView?.({block:"center",behavior:"smooth"});
+        input?.focus?.();
+      }));
+    root.querySelectorAll("[data-ep-periodic-tasks]").forEach(button=>
+      button.addEventListener("click",()=>{
+        const component=button.dataset.epPeriodicComponent;
+        dismiss(Number(button.dataset.epPeriodicTasks));
+        if(component==="P1"||component==="P5") void openPlan(component);
+      }));
   }
 
   function studySchedulePanel() {
@@ -1272,18 +1315,21 @@
     if (!canMount() || token !== state.mountToken) return;
     if (!s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
-    const [horizon, schedule, adherenceP1, adherenceP5] = await Promise.all([
+    const [horizon, schedule, periodic] = await Promise.all([
       typeof internal.api.personalHorizon === "function" ? internal.api.personalHorizon() : Promise.resolve(null),
       typeof internal.api.studySchedule === "function" ? internal.api.studySchedule() : Promise.resolve(null),
-      window.iClubExamPrepWeeklyFlowEnabled === true && typeof internal.api.previousWeekAdherence === "function"
-        ? internal.api.previousWeekAdherence("P1").catch(() => null) : Promise.resolve(null),
-      window.iClubExamPrepWeeklyFlowEnabled === true && typeof internal.api.previousWeekAdherence === "function"
-        ? internal.api.previousWeekAdherence("P5").catch(() => null) : Promise.resolve(null)
+      !state.periodicStudyReportsClaimed && typeof internal.api.claimPeriodicStudyReports === "function"
+        ? internal.api.claimPeriodicStudyReports().catch(() => null) : Promise.resolve(null)
     ]);
     if (!canMount() || token !== state.mountToken) return;
     state.personalHorizon = horizon?.ok ? horizon.data : null;
     state.studySchedule = schedule?.ok ? schedule.data : null;
-    state.previousWeekAdherence = {P1:adherenceP1,P5:adherenceP5};
+    if (!state.periodicStudyReportsClaimed && periodic?.ok &&
+        periodic.data?.contract_version === "periodic_study_report_v1" &&
+        Array.isArray(periodic.data.reports)) {
+      state.periodicStudyReportsClaimed = true;
+      state.periodicStudyReports = periodic.data.reports;
+    }
     const c = copy();
     const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
     const profileBits = [
@@ -1294,11 +1340,11 @@
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${studyPacePanel()}${examDatesPanel()}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${periodicStudyReportPanel()}${examDatesPanel()}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
     state.notice = null;
     bindExamDatePanel();
     bindStudySchedule();
-    bindStudyPacePanel();
+    bindPeriodicStudyReportPanel();
     root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
       const component = card.dataset.epLiveOpenComponent;
       // The dashboard explicitly says "Start/Continue entry check".
@@ -2167,7 +2213,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.previousWeekAdherence=null; state.dismissedPaceWeeks={}; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.periodicStudyReports=[]; state.periodicStudyReportsClaimed=false; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
