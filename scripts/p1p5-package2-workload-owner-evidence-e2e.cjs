@@ -123,5 +123,32 @@ async function signedRpc(name, uid, args={}) {
  assert(!foreignCapacity.ok || foreignCapacity.data.earliest_ready_paper_start_at===null,
     'Other user sees saved P1/P5 dates');
 
+ // Existing legacy v1 date-save endpoint accepts arbitrary future timestamps.
+ // Even when called directly, private learning projections must NOT treat an
+ // out-of-series date as additional verified study capacity.
+ const offSeries=await signedRpc('save_my_exam_prep_exam_appointment_v1',USER_A,{
+   p_component_code:'P1',p_scheduled_start_at:'2028-02-12T04:00:00.000Z'
+ });
+ assert(offSeries.ok,'Legacy authenticated exam-date route changed unexpectedly');
+ const guardedCapacity=await signedRpc('get_exam_prep_shared_study_capacity_safe_v1',USER_A);
+ assert(guardedCapacity.ok);
+ assert.equal(guardedCapacity.data.P1.status,'exam_date_series_mismatch');
+ assert.equal(guardedCapacity.data.P5.status,'calendar_capacity_available');
+ assert.equal(Date.parse(guardedCapacity.data.earliest_ready_paper_start_at),Date.parse(p5Date),
+   'Off-series date must not inflate available study horizon');
+ const guardedProjection=await request(USER_A);
+ assert(guardedProjection.ok);
+ assert.equal(guardedProjection.data.P1.status,'exam_date_series_mismatch');
+ assert.equal(guardedProjection.data.P1.days_to_exam,null,
+   'Off-series direct RPC must not give an authoritative exam deadline');
+ const repairedDate=await signedRpc('save_my_exam_prep_exam_appointment_v1',USER_A,{
+   p_component_code:'P1',p_scheduled_start_at:p1Date
+ });
+ assert(repairedDate.ok);
+ const restored=await signedRpc('get_exam_prep_shared_study_capacity_safe_v1',USER_A);
+ assert(restored.ok);
+ assert.equal(restored.data.P1.status,'calendar_capacity_available');
+ assert.equal(Date.parse(restored.data.earliest_ready_paper_start_at),Date.parse(p1Date));
+
  console.log('PASS P2 real learner objective/unknown evidence (45+36), official 110/75min papers, zero invented hours or grade forecasts, no study quota, owner-only JWT');
 })().catch(err=>{console.error(err);process.exitCode=1});
