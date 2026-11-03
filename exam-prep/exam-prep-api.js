@@ -392,7 +392,7 @@
         const link = document.createElement('link');
         link.rel = 'stylesheet';
         link.dataset.examPrepSimpleTimelineStyle = 'true';
-        link.href = src.replace(/exam-prep-api\\.js(?:\\?.*)?$/, 'exam-prep-simple-timeline-ui.css?v=p2-15');
+        link.href = src.substring(0, src.lastIndexOf('/') + 1) + 'exam-prep-simple-timeline-ui.css?v=p2-15';
         document.head.appendChild(link);
       }
       load('script[data-exam-prep-simple-timeline]', 'examPrepSimpleTimeline',
