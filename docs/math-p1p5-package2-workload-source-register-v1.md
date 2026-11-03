@@ -47,6 +47,20 @@ The resulting engine must:
 5. Offer exactly three consent actions — `Оставить моё время`, `Принять рекомендуемое`, `Указать другое время` — **only when** estimates were independently approved. No silent change to a learner budget or blocked lessons when a student exceeds planned hours.
 6. Produce progress advice **only once at the end of a completed week/month**, not daily. Never turn session count into inferred hours and never assume learning outside iClub did not happen.
 
+## 3A. Working read-only learner evidence projection — no invented times
+
+A separate additive public owner-only RPC `get_exam_prep_workload_review_projection_safe_v1()` now joins:
+- Actual 45 P1 / 36 P5 canonical skill source rows with **latest** real objective skill evidence per learner, component and skill code (no double-counting retired engine versions).
+- True `stage0_complete` placement and last finalized component diagnostic session. An unfinished diagnostic wave is not counted as a completed diagnosis.
+- Own existing confirmed exam appointment snapshot, chosen total Mathematics weekly budget, and verified source registration status.
+- An official Cambridge 2026–27 exam-duration **minimum uninterrupted Paper block**: **P1 = 110 minutes (1 hour 50 minutes)** and **P5 = 75 minutes (1 hour 15 minutes)** (assessment overview pp. 14–15 of the current [official syllabus](https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf)). These are sitting durations, **not** a daily lesson cap, a personal study-hours recommendation or a Cambridge readiness score.
+
+Crucial classification: a missing per-skill record or zero objective observations is **unknown**, not `weak`; an objective observation with insufficient coverage is *observed but not confirmed*; stronger confirmed objective evidence with no unresolved correction is reported separately. Evidence consisting only of a written answer or mentor note does not silently become an independently marked objective answer. All summed personal workload and daily-minute recommendations remain `NULL`, `recommendation_accept_enabled=false`; this RPC cannot change a saved schedule, unlock/lock lessons, issue notifications or alter skill-state records.
+
+The read-only source and evidence view `private.exam_prep_workload_academic_review_queue_v1` allows a genuine content reviewer to inspect each of the 81 skills with the current 9709 syllabus paragraph, textbook reference, prerequisites, proof obligations, unreviewed iClub time fields, and related *historical teaching-time context* by topic. Authenticated learners and anonymous users have no direct access to the private view. Do not treat displaying its historical topic hours as academic approval of a skill range.
+
+A source-integrity PG17 step and a signed-JWT PostgREST step use the already established **two disposable CI actors**, **not invented progress**, to assert 45/36, objective-vs-unknown classification, owner access, exact official 110/75 paper blocks and absolutely no fabricated recommended study hours. They do not modify genuine Supabase records.
+
 ## 4. Boundaries and next step
 
 This PR is **not** academic certification of all 81 skill-time intervals. All current numeric skill norms are intentionally missing. Next is source-specific individual time-range review (a real academic task), then independently checked readiness engine and genuine UI consent controls. No production deployment, no cleanup, no Stage D mass-Core GO. Preserve the approved course and historical user progress across upgrades.
