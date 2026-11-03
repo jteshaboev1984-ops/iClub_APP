@@ -91,7 +91,7 @@ begin
                   count(*) filter(where component_code='P5')
     into v_n,v_p1,v_p5
   from private.exam_prep_skill_workload_norms_v1 w
-  join private.exam_prep_program_versions p using(program_version_id)
+  join private.exam_prep_program_versions p on p.id=w.program_version_id
   where p.program_key='math_as_p1_p5' and p.status='active';
   -- Fail closed on unexpected source drift: do not silently advertise a
   -- complete quantitative recommendation without source coverage.
