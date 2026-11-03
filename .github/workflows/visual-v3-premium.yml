@@ -46,7 +46,9 @@ permissions:
 
 jobs:
   premium-screens:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 Chromium is unsupported on the Ubuntu 26.04 latest runner.
+    # CI environment only; no product or deployment change.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
