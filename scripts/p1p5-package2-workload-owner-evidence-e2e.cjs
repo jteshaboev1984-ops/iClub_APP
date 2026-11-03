@@ -53,6 +53,31 @@ async function signedRpc(name, uid, args={}) {
  assert.equal(remaining.unknown_is_not_weak,true);
  assert.equal(remaining.repeated_errors_deduplicated_by_component_skill_phase,true);
  assert.equal(remaining.shared_mathematics_budget_double_counted,false);
+ const trajectoryResult=await signedRpc('get_exam_prep_conditional_trajectory_status_safe_v1',USER_A);
+ assert(trajectoryResult.ok,'Owner trajectory lookup failed: '+trajectoryResult.status+
+   ' '+JSON.stringify(trajectoryResult.data));
+ const trajectory=trajectoryResult.data;
+ assert.equal(trajectory.contract_version,'exam_prep_conditional_trajectory_status_v1');
+ assert.equal(trajectory.possible_future_work_not_assigned,true);
+ assert.equal(trajectory.unknown_skill_needs_check_not_whole_tuition,true);
+ assert.equal(trajectory.wrong_responses_not_multiplied_into_courses,true);
+ assert.equal(trajectory.numerical_weekly_hour_recommendation,null);
+ assert.equal(trajectory.recommendation_accept_enabled,false);
+ assert.equal(trajectory.student_progress_changed,false);
+ assert.equal(trajectory.no_written_self_awarded_grade,true);
+ for(const [paper,expected] of [['P1',45],['P5',36]]) {
+   assert.equal(trajectory[paper].canonical_skills,expected);
+   assert.equal(trajectory[paper].current_unique_action_slots,
+     remaining[paper].unique_pending_action_slots,
+     'Current P2-12 tasks must exactly equal genuine P2-09 actions '+paper);
+   assert(Number.isInteger(trajectory[paper].skills_with_possible_downstream_work));
+   assert(trajectory[paper].skills_with_possible_downstream_work>=0);
+   assert(trajectory[paper].skills_with_possible_downstream_work<=expected);
+   assert.equal(trajectory[paper].total_time_to_demonstrated_mastery_minutes_min,null);
+   assert.equal(trajectory[paper].total_time_to_demonstrated_mastery_minutes_max,null);
+ }
+ const anonymousTrajectory=await signedRpc('get_exam_prep_conditional_trajectory_status_safe_v1',null);
+ assert(!anonymousTrajectory.ok,'Anonymous access to P2-12 learner work is forbidden');
  const durationStatus=await signedRpc('get_exam_prep_action_time_calibration_status_safe_v1',USER_A);
  assert(durationStatus.ok,'Owner action time coverage unavailable: '+durationStatus.status+
         ' '+JSON.stringify(durationStatus.data));
