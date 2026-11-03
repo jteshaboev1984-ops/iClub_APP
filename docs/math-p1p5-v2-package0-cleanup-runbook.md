@@ -107,6 +107,10 @@ An **actual current-migrations PG17 regression** now passes on two fake P1/P5 ac
 
 **Limitations:** the 32-table model may cover zero-row branches for some tables. No authentic production backup has been taken, restored or independently approved. No real-prelaunch immutable-fact cleanup execution privilege is implemented, and no old-device release-epoch replay regression has yet been run. Production user history and new postlaunch learner state must not be mixed.
 
+## New prelaunch reporting receipt table — scope review required
+
+Draft PR #469 adds `private.exam_prep_periodic_study_report_receipts_v1` (one-per-user, completed week or month, with aggregate report payload). This is **not** among the earlier 32 verified candidate learner-state tables, and is **not** an authority to widen the release-time delete allowlist automatically. Before final one-time Exam Prep beta cleanup, rerun live SELECT-only dependency/owner-scope inventory, decide whether this prelaunch report/delivery history should be retained for audit or included in the separately approved academic-beta reset, and update the backup/restore manifest and isolated actual-schema tests accordingly. Its private user FK is to `public.users`; **never delete a user identity or Practice/Tour progress to clear a reporting receipt**. Do not treat a complete synthetic 32-table rehearsal as proof for a changed production schema.
+
 ## Exact next engineer action
 
 1. Design, independently review and test an internal-only, versioned **real-prelaunch one-shot release-epoch authorization** using isolated PG17 positive/negative security tests; do not call the existing synthetic cleanup GUC on real users or disable normal immutable protections.
