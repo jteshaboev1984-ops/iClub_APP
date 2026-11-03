@@ -64,10 +64,24 @@ function html(lang){
         window.i18n={getLang:()=>lang};
         window.iClubExamPrepHostInternal={lastCapabilities:{
           coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
-        window.sb={rpc:async name=>{
-          if(name!=='get_exam_prep_simple_learning_timeline_with_hours_safe_v2')
+        window.__p2DateSaves=[];
+        window.sb={rpc:async (name,args)=>{
+          if(name==='get_exam_prep_simple_learning_timeline_with_hours_safe_v2')
+            return {data:payload,error:null};
+          if(name!=='save_my_exam_prep_timeline_dates_safe_v1')
             throw Error('Unexpected RPC '+name);
-          return {data:payload,error:null};
+          window.__p2DateSaves.push(args);
+          const both=Boolean(args.p_p1_date&&args.p_p5_date);
+          const toStamp=date=>date?date+'T12:00:00+05:00':null;
+          const next={
+            ...payload,joint_paper_dates_status:both?'both_paper_dates_confirmed':'missing_at_least_one_paper_exam_date',
+            estimated_joint_math_hours_per_week:both?5.5:null,
+            P1:{...payload.P1,exam_at:toStamp(args.p_p1_date),
+              exam_date_status:args.p_p1_date?'valid_exam_date':'exam_date_not_yet_selected'},
+            P5:{...payload.P5,exam_at:toStamp(args.p_p5_date),
+              exam_date_status:args.p_p5_date?'valid_exam_date':'exam_date_not_yet_selected'}
+          };
+          return {data:next,error:null};
         }};
       },{payload:data(withDates),lang});
       await page.addScriptTag({path:path.resolve('exam-prep/exam-prep-simple-timeline-ui.js')});
@@ -85,11 +99,37 @@ function html(lang){
       assert(viewport && viewport.width<=width+0.5 && viewport.x>=-0.5,
         'Timeline cannot clip outside viewport '+lang+' '+width);
       assert.deepEqual(errors,[],'No JavaScript errors in '+lang+' '+width);
-      const shot=path.join(output,'math-timeline-'+lang+'-'+width+'-'+(withDates?'dated':'no-dates')+'.png');
-      await page.locator('[data-ep-simple-timeline]').screenshot({path:shot,animations:'disabled'});
+      const tag='math-timeline-'+lang+'-'+width+'-'+(withDates?'dated':'no-dates');
+      await page.locator('[data-ep-simple-timeline]').screenshot({
+        path:path.join(output,tag+'.png'),animations:'disabled'});
+      captures++;
+      await page.locator('[data-ep-tl-open-date="P1"]').click();
+      await page.waitForFunction(()=>document.querySelector('[data-ep-tl-date-editor]')?.hidden===false);
+      assert.equal(await page.locator('[data-ep-tl-date]').count(),2);
+      await page.locator('[data-ep-tl-date-editor]').screenshot({
+        path:path.join(output,tag+'-editor.png'),animations:'disabled'});
+      captures++;
+      await page.locator('[data-ep-tl-date="P1"]').fill('2028-02-12');
+      assert.equal(await page.locator('[data-ep-tl-save]').isDisabled(),false);
+      await page.locator('[data-ep-tl-save]').click();
+      await page.waitForFunction(()=>document.querySelector('[data-ep-tl-success]')?.hidden===false);
+      assert.equal(await page.locator('[data-ep-simple-timeline]').count(),1);
+      const writes=await page.evaluate(()=>window.__p2DateSaves);
+      assert.equal(writes.length,1,'Date saving must be one explicit action');
+      assert.equal(writes[0].p_p1_date,'2028-02-12');
+      assert.equal(writes[0].p_p5_date,withDates?'2027-05-20':null);
+      const savedText=await page.locator('[data-ep-simple-timeline]').innerText();
+      assert(!/school confirmation|подтверждение школ|maktab tasdiqlash/i.test(savedText));
+      if(withDates) assert(!savedText.includes(LABELS[lang].missing));
+      else assert(savedText.includes(LABELS[lang].missing));
+      assert.equal(await page.evaluate(()=>
+        document.documentElement.scrollWidth<=document.documentElement.clientWidth),true,
+        lang+' '+width+' saved state cannot overflow');
+      await page.locator('[data-ep-simple-timeline]').screenshot({
+        path:path.join(output,tag+'-saved.png'),animations:'disabled'});
       captures++;
       await page.close();
     }
-    console.log('PASS P2-15 VISUAL: '+captures+' synthetic RU/UZ/EN P1/P5 timelines, 320/390/1440 widths, dated and undated, no clipping/errors.');
+    console.log('PASS P2-16 VISUAL: '+captures+' synthetic RU/UZ/EN P1/P5 timelines, 320/390/1440 widths, dated and undated, no clipping/errors.');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
