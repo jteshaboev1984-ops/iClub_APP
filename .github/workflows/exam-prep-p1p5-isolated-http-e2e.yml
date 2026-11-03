@@ -16,6 +16,7 @@ on:
       - 'supabase/tests/p1p5_p2_17_student_weekly_acceptance_audit.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package2-workload-owner-evidence-e2e.cjs'
+      - 'scripts/p1p5-p2-17-weekly-owner-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
@@ -222,6 +223,12 @@ jobs:
           test "$P1P5_E2E_ISOLATED" = "true"
           node --check scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
           node scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
+      - name: P2-17 ONLY signed JWT weekly opt-in owner regression
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node --check scripts/p1p5-p2-17-weekly-owner-e2e.cjs
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs
       - name: P2-16 learner dates safe save RLS, no school verification or legacy modifications
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
