@@ -33,6 +33,7 @@
       saved:'Даты сохранены. План пересчитан.',
       enough:'По текущему ориентиру выделенного времени хватает.',
       short:'Дополнительно потребуется примерно',
+      impossible:'До выбранной даты расчётное время превышает 168 часов в неделю. Попробуйте выбрать более позднюю дату.',
       within:'в неделю',
       adopt:'Выделить', adoptSuffix:'ч/нед',
       tooMuch:'Рекомендуемое время больше вашего общего недельного бюджета. Его можно изменить в настройках Exam Prep.',
@@ -58,6 +59,7 @@
       saved:'Sanalar saqlandi. Reja yangilandi.',
       enough:'Hozir ajratgan vaqtingiz taxminiy mo‘ljal uchun yetadi.',
       short:'Qo‘shimcha kerak:',
+      impossible:'Tanlangan sanagacha taxminiy vaqt haftasiga 168 soatdan oshadi. Keyinroq sanani tanlab ko‘ring.',
       within:'haftasiga',
       adopt:'Ajratish', adoptSuffix:'soat/hafta',
       tooMuch:'Tavsiya etilgan vaqt umumiy haftalik budjetingizdan ko‘p. Uni Exam Prep sozlamalarida o‘zgartirishingiz mumkin.',
@@ -83,6 +85,7 @@
       saved:'Dates saved. Study target updated.',
       enough:'Your current study time meets this approximate target.',
       short:'Additional time needed:',
+      impossible:'The estimated time exceeds 168 hours per week before this exam. Consider a later date.',
       within:'per week',
       adopt:'Set', adoptSuffix:'h/week',
       tooMuch:'The suggested time exceeds your total weekly study budget. You can change it in Exam Prep settings.',
@@ -124,12 +127,12 @@
           s.skills_not_yet_objectively_covered!==total-confirmed) return null;
       cards.push({ code,total,confirmed,attempted,unknown,hours:s.estimated_remaining_study_hours,
         examAt:s.exam_date_status==='valid_exam_date' ? s.exam_at : null,
-        paperWeekly:finite(s.estimated_component_weekly_hours,0,500) ? s.estimated_component_weekly_hours : null });
+        paperWeekly:finite(s.estimated_component_weekly_hours,0,100000) ? s.estimated_component_weekly_hours : null });
     }
     if (!finite(payload.estimated_remaining_math_hours,0,140) ||
         Math.abs(payload.estimated_remaining_math_hours-cards.reduce((t,c)=>t+c.hours,0))>0.12) return null;
     const weekly=payload.joint_paper_dates_status==='both_paper_dates_confirmed' &&
-      finite(payload.estimated_joint_math_hours_per_week,0,500)
+      finite(payload.estimated_joint_math_hours_per_week,0,100000)
       ? payload.estimated_joint_math_hours_per_week : null;
     const chosen=finite(payload.existing_chosen_math_hours_per_week,0,168)
       ? payload.existing_chosen_math_hours_per_week : null;
@@ -225,7 +228,7 @@
             (model.canAdopt
               ? '<button type="button" data-ep-tl-accept class="ep-tl-accept">'+
                   esc(w.adopt)+' '+esc(niceNumber(model.suggested,lang))+' '+esc(w.adoptSuffix)+'</button>'
-              : '<p class="ep-tl-total-cap">'+esc(w.tooMuch)+'</p>'))+
+              : '<p class="ep-tl-total-cap">'+esc(model.suggested>168?w.impossible:w.tooMuch)+'</p>'))+
         paperOnly+
         '<p data-ep-tl-plan-feedback role="status" hidden></p>'+
       '</div>';
