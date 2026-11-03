@@ -43,7 +43,8 @@ begin
       v_uid,v_profile.program_version_id,v_component
     );
     v_total:=coalesce((v_evidence->>'skills_total')::int,0);
-    if v_total<>case when v_component='P1' then 45 else 36 end then
+    if (v_component='P1' and v_total<>45)
+       or (v_component='P5' and v_total<>36) then
       raise exception 'exam_prep_incomplete_syllabus';
     end if;
     v_confirmed:=coalesce((v_evidence->>'skills_objective_coverage_confirmed_not_final_mastery')::int,0);
