@@ -53,6 +53,35 @@ async function signedRpc(name, uid, args={}) {
  assert.equal(remaining.unknown_is_not_weak,true);
  assert.equal(remaining.repeated_errors_deduplicated_by_component_skill_phase,true);
  assert.equal(remaining.shared_mathematics_budget_double_counted,false);
+ const timelineResponse=await signedRpc('get_exam_prep_simple_learning_timeline_safe_v1',USER_A);
+ assert(timelineResponse.ok,
+   'Owner simple timeline unavailable: '+timelineResponse.status+' '+JSON.stringify(timelineResponse.data));
+ const timeline=timelineResponse.data;
+ assert.equal(timeline.contract_version,'exam_prep_one_line_progress_timeline_v1');
+ assert.equal(timeline.required_personal_hours_total,null);
+ assert.equal(timeline.planned_calendar_hours_are_not_proven_required_learning_hours,true);
+ assert.equal(timeline.p1_p5_hour_budgets_are_not_additive,true);
+ assert.equal(timeline.no_progress_mutation,true);
+ assert.equal(timeline.no_automatic_schedule_change,true);
+ for(const [paper,n] of [['P1',45],['P5',36]]) {
+   const t=timeline[paper];
+   const o=remaining[paper];
+   assert.equal(t.total_syllabus_skills,n);
+   assert.equal(t.objectively_covered_skills,o.skills_objective_coverage_confirmed_not_final_mastery);
+   assert.equal(t.already_attempted_not_yet_confirmed_skills,o.skills_observed_not_yet_confirmed);
+   assert.equal(t.not_yet_checked_skills,o.skills_unobserved);
+   assert.equal(t.skills_not_yet_objectively_covered,n-t.objectively_covered_skills);
+   assert.equal(t.objectively_covered_skills+
+     t.already_attempted_not_yet_confirmed_skills+t.not_yet_checked_skills,n);
+   assert.equal(t.required_hours_for_remaining_skills,null);
+   assert.equal(t.confirmed_objective_coverage_is_not_final_written_exam_mastery,true);
+   assert(['valid_exam_date','exam_date_not_yet_selected','exam_date_mismatch','exam_already_passed']
+     .includes(t.exam_date_status));
+   if(t.exam_date_status!=='valid_exam_date')
+     assert.equal(t.planned_math_hours_available_to_this_exam,null);
+ }
+ const anonTimeline=await signedRpc('get_exam_prep_simple_learning_timeline_safe_v1',null);
+ assert(!anonTimeline.ok,'Anonymous obtained owner timeline');
  const trajectoryResult=await signedRpc('get_exam_prep_conditional_trajectory_status_safe_v1',USER_A);
  assert(trajectoryResult.ok,'Owner trajectory lookup failed: '+trajectoryResult.status+
    ' '+JSON.stringify(trajectoryResult.data));
