@@ -13,6 +13,7 @@ on:
       - 'supabase/tests/p1p5_package2_conditional_trajectory_source_v1.sql'
       - 'supabase/tests/p1p5_package2_cambridge_heuristic_source_v1.sql'
       - 'supabase/tests/p1p5_p2_16_learner_dates_source_contract.sql'
+      - 'supabase/tests/p1p5_p2_17_student_weekly_acceptance_audit.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package2-workload-owner-evidence-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -234,6 +235,19 @@ jobs:
             | tee /tmp/p1p5-p2-16-learner-dates.log
           grep -q 'PASS P2-16: learner-selected dates source-scoped' \
             /tmp/p1p5-p2-16-learner-dates.log
+      - name: P2-17 prove student opt-in hours revision ledger, unchanged paper epoch and retained academic history
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p2_17_student_weekly_acceptance_audit.sql 2>&1 \
+            | tee /tmp/p1p5-p2-17-opt-in-profile-revision.log
+          grep -q 'PASS P2-17: explicit budget opt-in has audited' \
+            /tmp/p1p5-p2-17-opt-in-profile-revision.log
       - name: P2-14 prove authentic 90h P1 plus 50h P5 and 81 source-weighted iClub planning estimates
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
