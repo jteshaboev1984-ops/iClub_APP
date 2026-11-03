@@ -52,9 +52,9 @@ begin
   v_actual_year:=extract(year from p_scheduled_start_at at time zone 'Asia/Tashkent')::int;
   v_actual_month:=extract(month from p_scheduled_start_at at time zone 'Asia/Tashkent')::int;
   if v_series like 'may/june %' then
-    v_expected_months:=array[5,6];
+    v_expected_months:=array[4,5,6]; -- June series can contain April papers (e.g. 9709 P1 in 2026)
   elsif v_series like 'october/november %' or v_series like 'oct/nov %' then
-    v_expected_months:=array[10,11];
+    v_expected_months:=array[9,10,11]; -- November series can start in late September
   elsif v_series like 'october %' then
     v_expected_months:=array[10];
   else
