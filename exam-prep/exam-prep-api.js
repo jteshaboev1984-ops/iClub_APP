@@ -168,6 +168,14 @@
   async function studySchedule() {
     return rpc("get_exam_prep_study_schedule_safe_v1");
   }
+  // Previous week is audited by the existing server against frozen goals and
+  // finalized academic evidence. It measures completed tasks, NOT minutes.
+  async function previousWeekAdherence(componentCode) {
+    return rpc("get_exam_prep_previous_week_adherence_safe_v1", {
+      p_component_code: componentArg(componentCode)
+    });
+  }
+
   async function saveStudySchedule(minutesPerDay, daysPerWeek) {
     return rpc("save_exam_prep_study_schedule_safe_v1", {
       p_minutes_per_day: Number(minutesPerDay),
@@ -371,7 +379,7 @@
 
   root.api = Object.freeze({
     capabilities,
-    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate, studySchedule, saveStudySchedule,
+    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate, studySchedule, saveStudySchedule, previousWeekAdherence,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
