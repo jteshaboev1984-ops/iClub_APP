@@ -7,6 +7,7 @@ on:
       - 'docs/math-p1p5-package2-81-skill-review-pack-v1.json'
       - 'docs/math-p1p5-package2-81-skill-review-protocol-v1.md'
       - 'scripts/math-p1p5-validate-workload-review-pack-v1.cjs'
+      - 'scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs'
       - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
   pull_request:
     paths:
@@ -26,3 +27,5 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/math-p1p5-validate-workload-review-pack-v1.cjs
+      - run: node scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs --self-test
+      - run: node scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs
