@@ -168,6 +168,12 @@
   async function studySchedule() {
     return rpc("get_exam_prep_study_schedule_safe_v1");
   }
+  // Returns only the newest *completed* plan week / study month, and atomically
+  // claims each report once across devices. No daily notifications.
+  async function claimPeriodicStudyReports() {
+    return rpc("claim_exam_prep_periodic_study_report_safe_v1");
+  }
+
   // Previous week is audited by the existing server against frozen goals and
   // finalized academic evidence. It measures completed tasks, NOT minutes.
   async function previousWeekAdherence(componentCode) {
@@ -379,7 +385,7 @@
 
   root.api = Object.freeze({
     capabilities,
-    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate, studySchedule, saveStudySchedule, previousWeekAdherence,
+    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate, studySchedule, saveStudySchedule, previousWeekAdherence, claimPeriodicStudyReports,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
