@@ -25,8 +25,9 @@ function data(withDates){
     start_at:'2026-09-15T10:00:00+05:00',
     as_of:'2026-11-03T10:00:00+05:00',
     estimated_remaining_math_hours:118.5,estimated_joint_math_hours_per_week:withDates?5.3:null,
+    student_total_hours_per_week:12,student_budget_profile_revision:2,
     joint_paper_dates_status:withDates?'both_paper_dates_confirmed':'missing_at_least_one_paper_exam_date',
-    existing_chosen_math_hours_per_week:8,
+    existing_chosen_math_hours_per_week:4,
     P1:{component_code:'P1',total_syllabus_skills:45,objectively_covered_skills:4,
       already_attempted_not_yet_confirmed_skills:9,not_yet_checked_skills:32,
       skills_not_yet_objectively_covered:41,estimated_remaining_study_hours:73.5,
@@ -65,24 +66,36 @@ function html(lang){
         window.iClubExamPrepHostInternal={lastCapabilities:{
           coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
         window.__p2DateSaves=[];
+        window.__p2HoursAccepted=[];
+        window.__latestTimeline=payload;
         window.sb={rpc:async (name,args)=>{
           if(name==='get_exam_prep_simple_learning_timeline_with_hours_safe_v2')
-            return {data:payload,error:null};
+            return {data:window.__latestTimeline,error:null};
+          if(name==='accept_my_exam_prep_timeline_weekly_target_safe_v1') {
+            window.__p2HoursAccepted.push(args);
+            const next={...window.__latestTimeline,
+              existing_chosen_math_hours_per_week:args.p_new_math_hours,
+              student_budget_profile_revision:window.__latestTimeline.student_budget_profile_revision+1};
+            window.__latestTimeline=next;
+            return {data:next,error:null};
+          }
           if(name!=='save_my_exam_prep_timeline_dates_safe_v1')
             throw Error('Unexpected RPC '+name);
           window.__p2DateSaves.push(args);
           const both=Boolean(args.p_p1_date&&args.p_p5_date);
           const toStamp=date=>date?date+'T12:00:00+05:00':null;
+          const current=window.__latestTimeline;
           const next={
-            ...payload,joint_paper_dates_status:both?'both_paper_dates_confirmed':'missing_at_least_one_paper_exam_date',
+            ...current,joint_paper_dates_status:both?'both_paper_dates_confirmed':'missing_at_least_one_paper_exam_date',
             estimated_joint_math_hours_per_week:both?5.5:null,
-            P1:{...payload.P1,exam_at:toStamp(args.p_p1_date),
+            P1:{...current.P1,exam_at:toStamp(args.p_p1_date),
               estimated_component_weekly_hours:args.p_p1_date?4.2:null,
               exam_date_status:args.p_p1_date?'valid_exam_date':'exam_date_not_yet_selected'},
-            P5:{...payload.P5,exam_at:toStamp(args.p_p5_date),
+            P5:{...current.P5,exam_at:toStamp(args.p_p5_date),
               estimated_component_weekly_hours:args.p_p5_date?2.4:null,
               exam_date_status:args.p_p5_date?'valid_exam_date':'exam_date_not_yet_selected'}
           };
+          window.__latestTimeline=next;
           return {data:next,error:null};
         }};
       },{payload:data(withDates),lang});
@@ -131,8 +144,28 @@ function html(lang){
       await page.locator('[data-ep-simple-timeline]').screenshot({
         path:path.join(output,tag+'-saved.png'),animations:'disabled'});
       captures++;
+      // The new recommendation is optional. One explicit tap alone updates
+      // the synthetic Math budget; existing P1/P5 result counts stay fixed.
+      const accept=page.locator('[data-ep-tl-accept]');
+      assert.equal(await accept.count(),1,'Feasible shortfall needs one action');
+      await accept.click();
+      await page.waitForFunction(()=>document.querySelector('[data-ep-tl-plan-feedback]')?.hidden===false);
+      const adopted=await page.evaluate(()=>window.__p2HoursAccepted);
+      assert.equal(adopted.length,1,'Repeated automatic hours writes are forbidden');
+      assert.equal(adopted[0].p_expected_current_math_hours,4);
+      assert.equal(adopted[0].p_expected_profile_revision,2);
+      assert.equal(adopted[0].p_new_math_hours,withDates?5.5:4.2);
+      assert.equal(await page.locator('[data-ep-tl-accept]').count(),0,
+        'After acceptance current time is enough, no duplicate action');
+      assert.equal(await page.locator('[data-ep-tl-paper]').count(),2,
+        'Accepting weekly hours must not remove student paper cards');
+      assert.equal(await page.evaluate(()=>
+        document.documentElement.scrollWidth<=document.documentElement.clientWidth),true);
+      await page.locator('[data-ep-simple-timeline]').screenshot({
+        path:path.join(output,tag+'-accepted.png'),animations:'disabled'});
+      captures++;
       await page.close();
     }
-    console.log('PASS P2-16 VISUAL: '+captures+' synthetic RU/UZ/EN P1/P5 timelines, 320/390/1440 widths, dated and undated, no clipping/errors.');
+    console.log('PASS P2-17 VISUAL: '+captures+' synthetic RU/UZ/EN P1/P5 timelines, 320/390/1440 widths, dated and undated, no clipping/errors.');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
