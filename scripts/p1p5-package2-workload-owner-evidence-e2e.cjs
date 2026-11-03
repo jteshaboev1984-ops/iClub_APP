@@ -53,6 +53,30 @@ async function signedRpc(name, uid, args={}) {
  assert.equal(remaining.unknown_is_not_weak,true);
  assert.equal(remaining.repeated_errors_deduplicated_by_component_skill_phase,true);
  assert.equal(remaining.shared_mathematics_budget_double_counted,false);
+ const durationStatus=await signedRpc('get_exam_prep_action_time_calibration_status_safe_v1',USER_A);
+ assert(durationStatus.ok,'Owner action time coverage unavailable: '+durationStatus.status+
+        ' '+JSON.stringify(durationStatus.data));
+ const ds=durationStatus.data;
+ assert.equal(ds.contract_version,'exam_prep_action_time_calibration_status_v1');
+ assert.equal(ds.numeric_recommendation_available,false);
+ assert.equal(ds.recommendation_accept_enabled,false);
+ assert.equal(ds.recommended_weekly_hours,null);
+ assert.equal(ds.no_learning_time_cap,true);
+ assert.equal(ds.no_grade_forecast,true);
+ assert.equal(ds.shared_p1_p5_calendar_capacity_nonadditive,true);
+ for(const paper of ['P1','P5']) {
+   assert.equal(ds[paper].unique_pending_action_count,
+                remaining[paper].unique_pending_action_slots,
+                'Action time coverage must be derived from actual unique pending tasks '+paper);
+   assert.equal(ds[paper].academically_approved_action_count,0,
+                'Real skill-time ranges must not be approved by CI '+paper);
+   assert.equal(ds[paper].unapproved_action_count,
+                remaining[paper].unique_pending_action_slots);
+   assert.equal(ds[paper].targeted_minutes_min,null);
+   assert.equal(ds[paper].targeted_minutes_max,null);
+ }
+ const anonymousDuration=await signedRpc('get_exam_prep_action_time_calibration_status_safe_v1',null);
+ assert(!anonymousDuration.ok,'Anonymous actor could inspect owner study-state coverage');
  for(const [component,expected] of [['P1',45],['P5',36]]) {
    const itemGroup=remaining[component];
    assert.equal(itemGroup.skills_total,expected);
