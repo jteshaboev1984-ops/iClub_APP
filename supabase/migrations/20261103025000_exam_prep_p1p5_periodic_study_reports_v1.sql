@@ -48,12 +48,25 @@ begin
     raise exception 'exam_prep_profile_required';
   end if;
   v_now:=private.exam_prep_effective_academic_now_v1(v_uid);
-  select min(s.finalized_at) into v_diagnostic_anchor
+  -- Use the first ACTUALLY COMPLETE component diagnostic, not merely a
+  -- finalized partial screening session or a provisional placement.
+  select min(d.completed_at) into v_diagnostic_anchor
+  from (
+    select s.component_code,max(s.finalized_at) as completed_at
     from private.exam_prep_sessions s
     where s.user_id=v_uid and
       s.program_version_id=v_profile.program_version_id and
       s.session_type='diagnostic' and s.status='finalized' and
-      s.component_code in ('P1','P5') and s.finalized_at is not null;
+      s.component_code in ('P1','P5') and s.finalized_at is not null
+    group by s.component_code
+  ) d
+  join lateral (
+    select p.stage0_complete
+    from private.exam_prep_component_placements p
+    where p.user_id=v_uid and p.program_version_id=v_profile.program_version_id
+      and p.component_code=d.component_code
+    order by p.derived_at desc limit 1
+  ) placement on placement.stage0_complete is true;
   if v_diagnostic_anchor is null or v_diagnostic_anchor>v_now then
     return jsonb_build_object('contract_version','periodic_study_report_v1',
       'reports','[]'::jsonb,'daily_reminders',false);
