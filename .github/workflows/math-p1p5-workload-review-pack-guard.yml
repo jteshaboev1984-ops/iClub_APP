@@ -10,6 +10,10 @@ on:
       - 'scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs'
       - 'scripts/math-p1p5-result-led-time-sum-v1.cjs'
       - 'scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs'
+      - 'scripts/math-p1p5-simple-timeline-ui-smoke-v1.cjs'
+      - 'exam-prep/exam-prep-simple-timeline-ui.js'
+      - 'exam-prep/exam-prep-simple-timeline-ui.css'
+      - 'exam-prep/exam-prep-api.js'
       - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
   pull_request:
     paths:
@@ -19,6 +23,10 @@ on:
       - 'scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs'
       - 'scripts/math-p1p5-result-led-time-sum-v1.cjs'
       - 'scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs'
+      - 'scripts/math-p1p5-simple-timeline-ui-smoke-v1.cjs'
+      - 'exam-prep/exam-prep-simple-timeline-ui.js'
+      - 'exam-prep/exam-prep-simple-timeline-ui.css'
+      - 'exam-prep/exam-prep-api.js'
       - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
 permissions:
   contents: read
@@ -37,3 +45,4 @@ jobs:
       - run: node scripts/math-p1p5-result-led-time-sum-v1.cjs
       - run: node scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs --self-test
       - run: node scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs
+      - run: node scripts/math-p1p5-simple-timeline-ui-smoke-v1.cjs
