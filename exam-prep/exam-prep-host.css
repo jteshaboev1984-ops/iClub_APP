@@ -2184,3 +2184,42 @@ body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidd
   #exam-prep-host-root .ep-live-exam-date-grid { grid-template-columns: minmax(0, 1fr); }
   #exam-prep-host-root .ep-live-exam-date-row { padding: 12px; }
 }
+
+
+/* Mathematics P1/P5 voluntary daily study cadence. */
+#exam-prep-host-root .ep-live-study-schedule {
+  display:grid;
+  gap:12px;
+  min-width:0;
+  margin:14px 0;
+}
+#exam-prep-host-root .ep-live-study-schedule p { margin:0; line-height:1.55; }
+#exam-prep-host-root .ep-live-study-schedule-fields {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  align-items:end;
+}
+#exam-prep-host-root .ep-live-study-schedule-fields .ep-live-field {
+  min-width:0;
+  display:grid;
+  gap:6px;
+}
+#exam-prep-host-root .ep-live-study-schedule-fields .ep-live-input {
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+}
+#exam-prep-host-root .ep-live-study-schedule-summary {
+  display:grid;
+  gap:6px;
+  line-height:1.55;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+#exam-prep-host-root .ep-live-study-schedule-summary strong { font-size:.95rem; }
+#exam-prep-host-root .ep-live-study-schedule > button { width:100%; }
+#exam-prep-host-root [data-ep-study-feedback] { min-height:1em; }
+@media(max-width:620px) {
+  #exam-prep-host-root .ep-live-study-schedule-fields { grid-template-columns:minmax(0,1fr); }
+}
