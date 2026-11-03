@@ -69,5 +69,27 @@ begin
     raise exception 'P2 FAIL: academic review queue is not exactly 81 authentic skills with historical sources and unreviewed per-student hours';
   end if;
   raise notice 'PASS P2: private academic review queue 81 exact source skills, 13 historical teaching sections, all personal skill estimates unreviewed';
+  -- Private real content counts; never expose IDs from protected reserve pools
+  -- to the learner. Source QA and item timers are not inferred study hours.
+  if (select count(*) from private.exam_prep_skill_content_calibration_inventory_v1) <> 81 or
+     exists(select 1 from private.exam_prep_skill_content_calibration_inventory_v1
+       where content_coverage_status <> 'core_content_source_mapped'
+         or published_objective_items < 1
+         or protected_reserve_items < 1
+         or published_written_tasks < 1
+         or published_diagnostic_assessments < 1
+         or published_learning_assessments < 1
+         or published_retest_assessments < 1
+         or qa_passed_published_objective <> published_objective_items
+         or qa_passed_published_written <> published_written_tasks
+         or min_published_item_timer_sec is null
+         or max_published_item_timer_sec is null
+         or question_timer_is_personal_skill_study_norm
+         or observed_elapsed_is_reliable_learning_hours
+         or historic_scheme_is_personal_study_norm)
+  then
+    raise exception 'P2 FAIL: 81 real academic skills need separately QA-published objective+written+reserve sources and zero invalid personal-time claims';
+  end if;
+  raise notice 'PASS P2: 81 real skills have QA-published objectives, protected reserves, written tasks, diagnosis/learning/retest; timer caps not personal hours';
   raise notice 'PASS P2: 81 actual source-mapped skills (45 P1,36 P5); all source refs present, all time norms NULL until independent academic approval';
 end $$;
