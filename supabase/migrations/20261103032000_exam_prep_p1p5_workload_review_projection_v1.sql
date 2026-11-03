@@ -125,6 +125,8 @@ begin
      when not v_screening or v_diagnostic_done_at is null
        then 'diagnostic_incomplete'
      when v_start is null then 'exam_date_not_confirmed'
+     when not private.exam_prep_exam_date_matches_series_v1(v_profile.exam_series,v_start)
+       then 'exam_date_series_mismatch'
      when v_start<=v_now then 'exam_date_passed'
      when v_start<=v_diagnostic_done_at then 'exam_before_diagnostic'
      when v_norm_total<>v_total or v_approved<>v_total
@@ -149,8 +151,9 @@ begin
        'exam_start_at',v_start,
        'exam_date_confirmation',case when v_start is null then null
            else v_appointment.confirmation_source end,
-       'days_to_exam',case when v_start is null then null
-           else greatest(v_days_remaining,0) end,
+       'days_to_exam',case when v_start is null or
+             not private.exam_prep_exam_date_matches_series_v1(v_profile.exam_series,v_start)
+             then null else greatest(v_days_remaining,0) end,
        'cambridge_full_paper_exam_minutes',v_paper_minutes,
        'cambridge_paper_time_is_study_quota',false,
        'current_weekly_math_budget_hours',v_profile.mathematics_hours_budget,
