@@ -100,6 +100,14 @@ This is *calendar availability at the student's chosen pace*, not a statement th
 
 The public `lessons` table has only **7** rows for Mathematics subject 5 and no video-duration field; this cannot supply missing teaching-hour calibration. The two provided coursebooks are image-only PDFs, so no claim of automated per-exercise timed reading or independent textbook-minute audit is justified.
 
+## 3D. Direct legacy date-save bypass: fail-closed without destructive migration
+
+The existing authenticated `save_my_exam_prep_exam_appointment_v1` does not itself validate the scheduled start against the learner's selected Cambridge exam year/series. Package 1 introduces a stricter opt-in UI save RPC, but a legacy direct RPC may still exist. We **do not revoke or rewrite** the legacy endpoint during beta because that could break the existing authorized exam-day workflow.
+
+The additive private `exam_prep_exam_date_matches_series_v1(series,start)` checks the year and eligible local Uzbekistan paper months (May/June session may include April; Oct/Nov session can begin in September). Both owner-only read-only workload review and chosen-hours shared-capacity APIs **fail closed** for a date outside the declared exam series: status `exam_date_series_mismatch`, no deadline counted or capacity inflated. This uses no production data write or learner reset. A genuine signed PostgREST CI actor saves an intentionally invalid date through the existing legacy v1 API, confirms both projections reject it, then re-saves its original valid date and confirms the two-paper capacity is restored. Those dates are **disposable test inputs only**, never official Cambridge dates.
+
+The correct future permanent fix is a reviewed, backwards-compatible server validation policy for *all* appointment writes, after checking Stage 4 legacy clients and migration history; this is not a request to strip current permissions from production users.
+
 ## 4. Boundaries and next step
 
 This PR is **not** academic certification of all 81 skill-time intervals. All current numeric skill norms are intentionally missing. Next is source-specific individual time-range review (a real academic task), then independently checked readiness engine and genuine UI consent controls. No production deployment, no cleanup, no Stage D mass-Core GO. Preserve the approved course and historical user progress across upgrades.
