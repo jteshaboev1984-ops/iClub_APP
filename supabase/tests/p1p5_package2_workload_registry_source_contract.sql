@@ -54,5 +54,20 @@ begin
     raise exception 'P2 FAIL: historical Cambridge topic GUIDE must remain 8 P1+5 P5, 90+50 teacher contact hours and not personal study norms';
   end if;
   raise notice 'PASS P2: 13 historical Cambridge 2020 Scheme of Work topics, 90h P1 + 50h P5 GUIDED teaching only; zero personalized hours';
+  if (select count(*) from private.exam_prep_workload_academic_review_queue_v1)<>81 or
+     (select count(*) from private.exam_prep_workload_academic_review_queue_v1
+       where component_code='P1')<>45 or
+     (select count(*) from private.exam_prep_workload_academic_review_queue_v1
+       where component_code='P5')<>36 or
+     (select count(*) from private.exam_prep_workload_academic_review_queue_v1
+       where historical_topic_teacher_contact_hours is null)<>0 or
+     exists(select 1 from private.exam_prep_workload_academic_review_queue_v1
+       where estimated_core_min_minutes is not null or
+             estimated_revision_max_minutes is not null or
+             personal_skill_estimate_review_status <> 'unreviewed')
+  then
+    raise exception 'P2 FAIL: academic review queue is not exactly 81 authentic skills with historical sources and unreviewed per-student hours';
+  end if;
+  raise notice 'PASS P2: private academic review queue 81 exact source skills, 13 historical teaching sections, all personal skill estimates unreviewed';
   raise notice 'PASS P2: 81 actual source-mapped skills (45 P1,36 P5); all source refs present, all time norms NULL until independent academic approval';
 end $$;
