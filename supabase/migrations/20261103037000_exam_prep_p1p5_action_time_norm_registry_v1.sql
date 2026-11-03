@@ -43,7 +43,7 @@ create table private.exam_prep_skill_action_time_norms_v1 (
       min_active_minutes is not null and max_active_minutes is not null and
       nullif(btrim(coalesce(method_version,'')),'') is not null and
       length(btrim(coalesce(methodology_notes,''))) >= 40 and
-      array_length(evidence_references,1) >= 1 and
+      coalesce(array_length(evidence_references,1),0) >= 1 and
       nullif(btrim(coalesce(primary_reviewer_ref,'')),'') is not null and
       nullif(btrim(coalesce(independent_approver_ref,'')),'') is not null and
       primary_reviewer_ref <> independent_approver_ref and
