@@ -112,6 +112,15 @@ function centreInput(iso){
       x.name==='save_my_exam_prep_exam_appointment_v2'&&x.ok&&x.component===comp) &&
       document.querySelector('[data-ep-exam-date-input="'+comp+'"]'),
      component,{timeout:25000});
+   // The save ACK is earlier than the asynchronous dashboard rerender.
+   // Wait for the actual learner-visible updated component summary before
+   // interacting with the next paper's form.
+   await page.waitForFunction(comp=>{
+     const row=document.querySelector('[data-ep-exam-date-component="'+comp+'"]');
+     const summary=row?.querySelector('.ep-live-exam-date-summary')?.textContent||'';
+     return summary.includes('Дней до экзамена') &&
+       (window.__dateRpcTrace||[]).some(x=>x.name==='save_my_exam_prep_exam_appointment_v2'&&x.ok&&x.component===comp);
+   },component,{timeout:25000});
    const refresh=await rpc('get_exam_prep_personal_horizon_safe_v1',{},tA);
    assert(refresh.ok&&refresh.data?.[component]?.exam_start_at,'Date persisted for '+component);
    assert.equal(refresh.data[component].official_timetable_verified,false,
