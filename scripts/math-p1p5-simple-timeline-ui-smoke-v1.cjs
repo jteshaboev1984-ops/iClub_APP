@@ -141,7 +141,7 @@ async function main(){
   assert(ui.viewHtml(ui.parsePayload(singleDate),'ru').includes('P1 · Ориентир в неделю'),
     'One learner date already provides their individual paper weekly target');
   const noDateHtml=ui.viewHtml(ui.parsePayload(noDates),'ru');
-  assert(noDateHtml.includes('Укажите даты экзаменов P1 и P5'));
+  assert(noDateHtml.includes('Выберите дату хотя бы одного экзамена'));
   assert(!noDateHtml.includes('8,9'));
   assert(!noDateHtml.includes('data-ep-tl-accept'),'No date, no weekly action');
   const malicious=fixture();malicious.as_of='<img src=x onerror=alert(1)>';

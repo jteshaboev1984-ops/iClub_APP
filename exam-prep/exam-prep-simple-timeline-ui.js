@@ -21,7 +21,7 @@
       unchecked: 'Не проверено', remaining: 'Осталось примерно',
       total: 'Общий остаток', weekly: 'Ориентир в неделю', chosen: 'Сейчас выделено',
       hours: 'ч', perWeek: 'ч/нед', skills: 'навыков',
-      noDates: 'Укажите даты экзаменов P1 и P5, чтобы рассчитать недельный ориентир.',
+      noDates: 'Выберите дату хотя бы одного экзамена, чтобы увидеть недельный ориентир.',
       assumption: 'Приблизительная оценка iClub по разделам Cambridge и вашим результатам. Фактическое время может отличаться.',
       noTime: 'Время пока недоступно', noChange: 'Ваше расписание не изменено.',
       chooseDate:'Выбрать дату', changeDate:'Изменить дату',
@@ -32,7 +32,7 @@
       saveError:'Не удалось сохранить даты. Попробуйте снова.',
       saved:'Даты сохранены. План пересчитан.',
       enough:'По текущему ориентиру выделенного времени хватает.',
-      short:'Чтобы успеть, добавьте примерно',
+      short:'Дополнительно потребуется примерно',
       within:'в неделю',
       adopt:'Выделить', adoptSuffix:'ч/нед',
       tooMuch:'Рекомендуемое время больше вашего общего недельного бюджета. Его можно изменить в настройках Exam Prep.',
@@ -46,7 +46,7 @@
       unchecked: 'Tekshirilmagan', remaining: 'Taxminan qoldi',
       total: 'Jami qolgan vaqt', weekly: 'Haftalik mo‘ljal', chosen: 'Hozir ajratilgan',
       hours: 'soat', perWeek: 'soat/hafta', skills: 'ko‘nikma',
-      noDates: 'Haftalik mo‘ljal uchun P1 va P5 imtihon sanalarini kiriting.',
+      noDates: 'Haftalik mo‘ljal uchun kamida bitta imtihon sanasini tanlang.',
       assumption: 'iClub taxmini Cambridge bo‘limlari va natijalaringizga asoslangan. Haqiqiy vaqt farq qilishi mumkin.',
       noTime: 'Vaqt hozircha mavjud emas', noChange: 'Jadvalingiz o‘zgartirilmadi.',
       chooseDate:'Sanani tanlash', changeDate:'Sanani o‘zgartirish',
@@ -57,7 +57,7 @@
       saveError:'Sanalarni saqlab bo‘lmadi. Qayta urinib ko‘ring.',
       saved:'Sanalar saqlandi. Reja yangilandi.',
       enough:'Hozir ajratgan vaqtingiz taxminiy mo‘ljal uchun yetadi.',
-      short:'Yetib olish uchun taxminan qo‘shing',
+      short:'Qo‘shimcha kerak:',
       within:'haftasiga',
       adopt:'Ajratish', adoptSuffix:'soat/hafta',
       tooMuch:'Tavsiya etilgan vaqt umumiy haftalik budjetingizdan ko‘p. Uni Exam Prep sozlamalarida o‘zgartirishingiz mumkin.',
@@ -71,7 +71,7 @@
       unchecked: 'Not yet checked', remaining: 'About',
       total: 'Estimated time left', weekly: 'Weekly target', chosen: 'Your current plan',
       hours: 'h', perWeek: 'h/week', skills: 'skills',
-      noDates: 'Add your P1 and P5 exam dates to calculate a weekly target.',
+      noDates: 'Choose at least one exam date to see a weekly target.',
       assumption: 'This is an approximate iClub estimate based on Cambridge topics and your results. Actual study time may vary.',
       noTime: 'Estimate unavailable', noChange: 'Your study plan has not changed.',
       chooseDate:'Choose date', changeDate:'Change date',
@@ -82,7 +82,7 @@
       saveError:'Could not save dates. Please try again.',
       saved:'Dates saved. Study target updated.',
       enough:'Your current study time meets this approximate target.',
-      short:'To stay on track, add about',
+      short:'Additional time needed:',
       within:'per week',
       adopt:'Set', adoptSuffix:'h/week',
       tooMuch:'The suggested time exceeds your total weekly study budget. You can change it in Exam Prep settings.',
@@ -221,7 +221,7 @@
         (gap<=0.04
           ? '<p class="ep-tl-enough">'+esc(w.enough)+'</p>'
           : '<p class="ep-tl-short">'+esc(w.short)+' <strong>'+
-            esc(niceNumber(gap,lang))+' '+esc(w.perWeek)+'</strong> '+esc(w.within)+'</p>'+
+            esc(niceNumber(gap,lang))+' '+esc(w.perWeek)+'</strong></p>'+
             (model.canAdopt
               ? '<button type="button" data-ep-tl-accept class="ep-tl-accept">'+
                   esc(w.adopt)+' '+esc(niceNumber(model.suggested,lang))+' '+esc(w.adoptSuffix)+'</button>'
