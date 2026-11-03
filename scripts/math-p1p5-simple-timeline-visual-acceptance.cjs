@@ -9,9 +9,9 @@ const assert=require('node:assert/strict');
 const output=path.resolve('progress-ux-visual-evidence');
 fs.mkdirSync(output,{recursive:true});
 const LABELS={
-  ru:{title:'Мой путь к экзамену',missing:'Укажите даты экзаменов P1 и P5'},
-  uz:{title:'Imtihongacha yo‘lim',missing:'Haftalik mo‘ljal uchun P1 va P5'},
-  en:{title:'My exam timeline',missing:'Add your P1 and P5 exam dates'}
+  ru:{title:'Мой путь к экзамену',missing:'Выберите дату хотя бы одного экзамена'},
+  uz:{title:'Imtihongacha yo‘lim',missing:'Haftalik mo‘ljal uchun kamida bitta'},
+  en:{title:'My exam timeline',missing:'Choose at least one exam date'}
 };
 function data(withDates){
   const future1=withDates?'2027-05-12T09:00:00+05:00':null;
