@@ -39,7 +39,8 @@ begin
       or v_data->'total_time_to_demonstrated_mastery_minutes_min'<>'null'::jsonb
       or v_data->'total_time_to_demonstrated_mastery_minutes_max'<>'null'::jsonb
       or (v_data->>'student_schedule_modified')::boolean is not false
-      or jsonb_array_length(v_data->'items')<>case when v_paper='P1' then 45 else 36 end
+      or (v_paper='P1' and jsonb_array_length(v_data->'items')<>45)
+      or (v_paper='P5' and jsonb_array_length(v_data->'items')<>36)
    then raise exception 'P2-12 invented learner hours or altered study state'; end if;
    for v_item in select value from jsonb_array_elements(v_data->'items') loop
       if v_item->>'component_code'<>v_paper or
