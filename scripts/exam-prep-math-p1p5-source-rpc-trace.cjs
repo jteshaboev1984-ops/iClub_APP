@@ -19,6 +19,7 @@ const EXPECTED=[
   "authorize_exam_prep_plan_item_safe_v1",
   "authorize_exam_prep_revalidation_item_safe_v1",
   "authorize_exam_prep_timed_safe_v1",
+  "claim_exam_prep_periodic_study_report_safe_v1",
   "ensure_exam_prep_balanced_weekly_plan_safe_v1",
   "finalize_exam_prep_session_safe_v1",
   "finalize_exam_prep_session_written_v1",
@@ -38,6 +39,7 @@ const EXPECTED=[
   "get_exam_prep_materials_library_safe_v1",
   "get_exam_prep_overview_safe_v1",
   "get_exam_prep_past_paper_companion_safe_v1",
+  "get_exam_prep_personal_horizon_safe_v1",
   "get_exam_prep_placement_result_safe_v1",
   "get_exam_prep_placement_safe_v1",
   "get_exam_prep_previous_week_adherence_safe_v1",
@@ -55,6 +57,7 @@ const EXPECTED=[
   "get_exam_prep_stage3_closure_safe_v1",
   "get_exam_prep_stage4_consolidation_safe_v1",
   "get_exam_prep_state_safe_v1",
+  "get_exam_prep_study_schedule_safe_v1",
   "get_exam_prep_syllabus_tracker_safe_v1",
   "get_exam_prep_timed_catalog_safe_v1",
   "get_exam_prep_timed_result_safe_v1",
@@ -63,18 +66,23 @@ const EXPECTED=[
   "get_exam_prep_weekly_progress_safe_v1",
   "get_exam_prep_written_criteria_safe_v1",
   "get_exam_prep_written_step_status_safe_v1",
+  "get_my_exam_prep_extra_hard_attempt_safe_v1",
+  "get_my_exam_prep_extra_hard_catalog_safe_v1",
   "get_my_exam_prep_weekly_flow_status_v1",
+  "start_my_exam_prep_extra_hard_safe_v1",
+  "submit_my_exam_prep_extra_hard_safe_v1",
   "record_exam_prep_integrity_event_safe_v1",
   "record_my_exam_prep_interruption_v2",
   "save_exam_prep_exam_profile_v2",
+  "save_exam_prep_study_schedule_safe_v1",
   "save_my_exam_prep_exam_appointment_v1",
+  "save_my_exam_prep_exam_appointment_v2",
   "set_my_exam_prep_exam_ops_confirmation_v1",
   "start_exam_prep_learning_review_safe_v1",
   "start_exam_prep_next_diagnostic_safe_v1",
   "start_exam_prep_plan_session_once_safe_v1",
   "start_exam_prep_session_safe_v1",
-  "submit_exam_prep_response_safe_v1",
-  "submit_exam_prep_timed_written_self_mark_safe_v1"
+  "submit_exam_prep_response_safe_v1"
 ];
 const LIVE='exam-prep/exam-prep-live.js';
 const HOST='exam-prep/exam-prep-host.js';
@@ -92,18 +100,30 @@ for(const [i,p] of PATHS.entries()){
  assert.doesNotMatch(code,/\.from\s*\(/,'new direct table access in '+p+'; review RLS/data boundary first');
  for(const n of namesFromSource(code,i===2))found.add(n);
 }
+// All five Package 1 routes must have a reviewed scope, caller, and negative gate.
+const package1Review=read('docs/math-p1p5-package1-five-rpc-source-trace-and-receipt-epoch-20261104.md');
+for(const n of [
+ 'claim_exam_prep_periodic_study_report_safe_v1',
+ 'get_exam_prep_personal_horizon_safe_v1',
+ 'get_exam_prep_study_schedule_safe_v1',
+ 'save_exam_prep_study_schedule_safe_v1',
+ 'save_my_exam_prep_exam_appointment_v2'
+]){
+ assert(package1Review.includes('`'+n+'`'),'Package 1 new RPC has no reviewed contract: '+n);
+}
 const missing=EXPECTED.filter(n=>!found.has(n));
 const added=[...found].filter(n=>!EXPECTED.includes(n)).sort();
 assert.deepEqual(missing,[],'historical RPC removed/renamed; first reconcile actual backend signature');
 assert.deepEqual(added,[],'new untraced RPC; first document path, permissions and invariant');
-assert.equal(EXPECTED.length,61,'P1/P5 source contract count changed without trace review');
+assert.equal(EXPECTED.length,69,'P1/P5 Extra Hard scope requires four additional reviewed RPCs');
 const api=read(PATHS[0]),weekly=read(PATHS[1]),progress=read(PATHS[2]);
 const live=read(LIVE),host=read(HOST),html=read(HTML);
 for(const n of [
  'startNextDiagnostic','getSession','startSession','submitResponse','finalizeSession',
  'weeklyPlan','generateWeeklyPlan','authorizePlanItem','timedCatalog','authorizeTimed',
  'finalizeTimed','writtenCriteria','advanceWrittenStep','getSessionWritten',
- 'sessionReview','timedResult','readinessSummary'
+ 'sessionReview','timedResult','readinessSummary',
+ 'extraHardCatalog','extraHardStart','extraHardSubmit','extraHardAttempt'
 ]){
  assert(api.includes(n),'public client method missing: '+n);
 }
@@ -126,11 +146,29 @@ for(const n of ['get_exam_prep_weekly_progress_safe_v1','get_exam_prep_weekly_go
 assert.match(weekly,/window\.iClubExamPrepWeeklyFlowEnabled\s*!==\s*true/,'weekly fail-closed cutover missing');
 assert.match(host,/state\.subjectKey\s*!==\s*MATHEMATICS_KEY/,'subject isolation missing');
 assert.match(live,/writtenNotAuto/,'non-grading policy label missing');
+const secureMigration=read('supabase/migrations/20261104120000_exam_prep_p1p5_extra_hard_optional_noncredit_v1.sql');
+const extraView=read('exam-prep/exam-prep-extra-hard-ui.js');
+assert(secureMigration.includes('enabled boolean NOT NULL DEFAULT false'),
+ 'Extra Hard public release must default OFF');
+assert(!/INSERT INTO private\.exam_prep_extra_hard_tasks_v1\s*\(/i.test(secureMigration),
+ 'Protected tasks or solutions must NEVER be seeded from PUBLIC repository');
+assert(!extraView.includes('localStorage.setItem') && !extraView.includes('marks_awarded'),
+ 'Extra Hard route must not alter legacy progress or award scores');
+assert(html.includes('exam-prep/exam-prep-extra-hard-ui.js'),
+ 'Extra Hard view not loaded by optional learner shell');
+assert(live.includes('data-ep-component-link="extra-hard"'),
+ 'P1/P5 voluntary challenge link missing');
+for(const [label,src] of [['API',api],['learner UI',live]]) {
+ assert(!src.includes('submitTimedSelfMark') && !src.includes('submit_exam_prep_timed_written_self_mark_safe_v1'),
+   'D03 forbids callable self-mark endpoint: '+label);
+}
+assert(live.includes('writtenNotGraded') && live.includes('data-ep-live-next-written'),
+  'D03 rubric-only review missing');
 assert.match(live,/pendingSubmission/,'answer ACK preservation missing');
 for(const s of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
  'exam-prep/runtime/written-core-controller-v1.js']){
  assert(html.includes(s),'production index is not loading '+s);
 }
 assert(html.includes('id="exam-prep-host-root"'),'learner host root missing');
-console.log('Stage A source RPC trace GREEN: 61/61 named RPCs; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
+console.log('Stage A source RPC trace GREEN: '+EXPECTED.length+'/'+EXPECTED.length+' named RPCs; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
 console.log('NOTE: source-only regression; real authenticated HTTP→PostgREST→DB and actual device journeys are Stage B/C, NOT implied by GREEN.');

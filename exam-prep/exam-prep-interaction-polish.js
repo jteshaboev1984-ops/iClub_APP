@@ -22,7 +22,7 @@
     "[data-ep-live-back-timed]",
     "[data-ep-live-readiness]",
     "[data-ep-live-calibration]",
-    "[data-ep-live-save-self]",
+    "[data-ep-live-next-written]",
     "[data-ep-live-dashboard]",
     "[data-ep-live-exit]",
     "[data-ep-live-home]",
