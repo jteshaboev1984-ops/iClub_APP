@@ -4,8 +4,9 @@
 // Server-graded evidence has ALREADY prepared Stage 3 from published academic
 // content in isolated PostgreSQL; neither client nor fixture assigns mastery.
 // The result of all scored timed attempts originates in the public finalizer.
-// Written responses are learner artifacts, and self-marks are explicit 0,
-// NEVER machine/examiner-verified marks or an artificial readiness claim.
+// Written responses are learner artifacts: neither learner nor app may assign
+// marks. The public RPC must deny old clients; result shows unknown written
+// correctness while preserving objectively checked in-time evidence.
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
@@ -99,19 +100,33 @@ async function finishSession(id,token,prefix,timed=false){
    p_session_id:id,p_idempotency_key:prefix+'-final',p_completion_reason:'submitted'
  },token),'idempotent finalizer replay');
  assert(replay.replayed===true,'timed duplicate finalization not idempotent');
- const selfChecks=frozen.filter(i=>i.kind==='written');
- const reviewBefore=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed before self review');
- if(selfChecks.length)assert(reviewBefore.score_status==='pending_self_review',
-  'unreviewed written content was incorrectly treated as machine-scored');
- for(const i of selfChecks){
-  const marked=ok(await rpc('submit_exam_prep_timed_written_self_mark_safe_v1',{
-   p_session_id:id,p_item_order:i.ord,p_marks_awarded:0,
-   p_idempotency_key:prefix+'-selfmark-'+i.ord,
-   p_review_note:'CI synthetic learner self review; deliberately no verified marks'
-  },token),'explicit self-review '+i.ord);
-  assert(marked.readiness_claim!==true,'self-mark cannot award readiness');
+ const writtenChecks=frozen.filter(i=>i.kind==='written');
+ const beforeResult=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'objective-only timed result');
+ assert.equal(beforeResult.result_scope,'objective_only','server must exclude unverified written awards');
+ assert.equal(beforeResult.marks_in_time,beforeResult.objective_marks_in_time,
+   'written self marks were added to verified score');
+ if(writtenChecks.length){
+  assert.equal(beforeResult.score_status,'written_ungraded','written completeness is not verified correctness');
+  assert.equal(beforeResult.score_comparable,false,'written without verification cannot qualify as comparable full-paper evidence');
+  assert.equal(beforeResult.in_time_percent,null,'no full Paper percentage from ungraded writing');
+  const review=ok(await rpc('get_exam_prep_timed_review_pack_safe_v1',{
+   p_session_id:id,p_language:'en'
+  },token),'ungraded written review pack');
+  assert(review.items.length>0,'written solution/rubric evidence disappeared');
+  assert(review.items.every(item=>item.written_correctness==='unknown' &&
+       !Object.hasOwn(item,'self_marks_awarded') &&
+       !Object.hasOwn(item,'self_marked')),
+       'written review exposed archived learner marks');
+  const forbidden=await rpc('submit_exam_prep_timed_written_self_mark_safe_v1',{
+    p_session_id:id,p_item_order:writtenChecks[0].ord,p_marks_awarded:0,
+    p_idempotency_key:prefix+'-selfmark-forbidden-0001',
+    p_review_note:null
+  },token);
+  assert(!forbidden.ok,'direct signed HTTP must not allow self-awarded written marks');
  }
- const after=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed result after self review');
+ const after=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed result after forbidden self-score');
+ assert.equal(after.marks_in_time,beforeResult.marks_in_time,'disabled self-mark changed score');
+ assert.equal(after.score_comparable,beforeResult.score_comparable,'disabled self-mark changed comparability');
  assert(after.readiness_claim!==true,'test result promoted to human-certified readiness');
  assert(after.answered_items===frozen.length,'timed server did not count all submitted answers');
  assert(after.unattempted_items===0,'timed server lost answered item');
