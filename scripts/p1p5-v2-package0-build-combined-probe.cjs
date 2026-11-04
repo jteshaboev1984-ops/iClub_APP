@@ -48,7 +48,7 @@ let result=original;
 for (const [section,marker] of markers) {
   const occurrences=result.split(marker).length-1;
   assert.equal(occurrences,1,'expected exactly one safe insertion marker for '+section);
-  result=result.replace(marker,sections[section]+'\n'+marker);
+  // Function replacement preserves literal DO $; string replacement would fold $ to $.\n  result=result.replace(marker,()=>sections[section]+'\n'+marker);
 }
 assert(result.indexOf('P0-10 SECTION')<0,'section marker unexpectedly stitched');
 assert(result.trimEnd().endsWith('ROLLBACK;'));
