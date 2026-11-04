@@ -46,6 +46,7 @@ function boot(flag, overrides={}){
 }
 function fixture(){
   return {contract_version:'exam_prep_one_line_progress_timeline_v2_estimated',
+    numeric_recommendation_enabled:true, // future reviewed-contract mock only, NOT a live approved norm
     factors_are_iclub_planning_assumptions_not_official_cambridge:true,
     source_guided_hours_are_not_private_study_hours:true,
     recommended_schedule_applied_automatically:false,learning_evidence_mutated:false,
@@ -78,7 +79,28 @@ async function main(){
 
   const b=boot(true),ui=b.internal.simpleTimelineUi;
   assert(ui && ui.version==='p2_18_three_explicit_time_choices_v1');
-  const model=ui.parsePayload(fixture());
+  const notReady=fixture();
+   notReady.contract_version='exam_prep_one_line_progress_timeline_v2_academic_review_pending';
+   notReady.numeric_recommendation_enabled=false;
+   notReady.recommendation_accept_enabled=false;
+   notReady.estimated_remaining_math_hours=null;
+   notReady.estimated_joint_math_hours_per_week=null;
+   for(const code of ['P1','P5']){
+     notReady[code].estimated_remaining_study_hours=null;
+     notReady[code].estimated_component_weekly_hours=null;
+   }
+   const pendingModel=ui.parsePayload(notReady);
+   assert(pendingModel?.timeReviewPending===true,'Current unapproved time state must retain learner timeline');
+   for(const lang of ['ru','uz','en']){
+     const html=ui.viewHtml(pendingModel,lang);
+     assert(html.includes('data-ep-tl-paper="P1"')&&html.includes('data-ep-tl-paper="P5"'));
+     assert(!html.includes('data-ep-tl-accept')&&!html.includes('data-ep-tl-keep'),
+       'No academic recommendation may be accepted or acknowledged before independent review');
+     assert(!html.includes('111.7')&&!html.includes('8.9'), 'No unapproved study hour appears');
+   }
+   const fakeApproved=fixture();fakeApproved.numeric_recommendation_enabled=false;
+   assert.equal(ui.parsePayload(fakeApproved),null,'Legacy heuristic with missing academic approval must not render');
+   const model=ui.parsePayload(fixture());
   assert(model);
   assert.equal(model.totalHours,111.7);
   assert.equal(model.weekly,8.9);
