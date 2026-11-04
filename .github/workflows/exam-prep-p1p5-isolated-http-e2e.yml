@@ -210,6 +210,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = "true"
+          export P0_13_FIXED_IAT="$(date -u +%s)" # same signed JWT reused after epoch transition
           node --check scripts/p1p5-v2-package0-signed-old-epoch-http.cjs
           node scripts/p1p5-v2-package0-signed-old-epoch-http.cjs before
           psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.p0_13_epoch_gate SET paused=true WHERE program='math_as_p1_p5';"
