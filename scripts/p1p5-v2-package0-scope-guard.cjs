@@ -195,3 +195,31 @@ for(const marker of [
   'checks_epoch'
 ]) assert(p012.includes(marker),'P0-12 lacks safety audit coverage: '+marker);
 console.log('PASS P0-12 read-only write-API/epoch coverage inventory, no live mutations');
+
+
+// P0-13 real signed-JWT disposable epoch gate: never deploy as live RPC.
+const p013=read('supabase/tests/p1p5_v2_package0_signed_epoch_http_disposable.sql');
+const p013Http=read('scripts/p1p5-v2-package0-signed-old-epoch-http.cjs');
+const p013E2e=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+for(const token of [
+  'DISPOSABLE PG17 ONLY','current_database()', 'iclub.e2e_isolated',
+  '(SELECT count(*) FROM public.users)<>2','(SELECT count(*) FROM auth.users)<>2',
+  'private.p0_13_epoch_gate','private.p0_13_fake_write_events',
+  'FOR SHARE','stale_or_paused_academic_epoch','PT409',
+  'REVOKE ALL ON FUNCTION public.p0_13_submit_signed_epoch_test_v1',
+  'GRANT EXECUTE ON FUNCTION public.p0_13_submit_signed_epoch_test_v1'
+]) assert(p013.includes(token),'P0-13 SQL fixture safety boundary missing: '+token);
+assert(!/DELETE\s+FROM\s+(?:private\.exam_prep_|public\.)/i.test(p013),
+  'P0-13 cannot delete any real assessment or public table');
+assert(!/TRUNCATE|DISABLE\s+TRIGGER|session_replication_role|service_role/i.test(p013),
+  'P0-13 must not bypass database protections');
+for(const phrase of [
+  "HOST='http://127.0.0.1:3000'","P1P5_E2E_ISOLATED",
+  "PGDATABASE==='postgres'","phase==='before'","phase==='during'",
+  'post-cutover stale tab','same key changed payload','foreign learner',
+  'anonymous','bad JWT','PT409'
+]) assert(p013Http.includes(phrase),'P0-13 signed HTTP coverage missing: '+phrase);
+assert(p013E2e.includes('P0-13 signed old-device HTTP epoch') &&
+       p013E2e.includes('p1p5_v2_package0_signed_epoch_http_disposable.sql'),
+       'P0-13 real PostgREST/PG17 E2E workflow step absent');
+console.log('PASS P0-13 real signed-JWT disposable epoch-only source/privilege guards');
