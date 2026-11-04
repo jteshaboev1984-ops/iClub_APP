@@ -67,8 +67,8 @@ function fixture(){
 async function main(){
   assert(JS.includes("window.iClubExamPrepSimpleTimelineUiEnabled !== true"),
     'Module must remain opt-in and fail-closed');
-  assert(INDEX.includes('exam-prep-simple-timeline-ui.js?v=p2-17'));
-  assert(INDEX.includes('exam-prep-simple-timeline-ui.css?v=p2-17'));
+  assert(INDEX.includes('exam-prep-simple-timeline-ui.js?v=p2-18'));
+  assert(INDEX.includes('exam-prep-simple-timeline-ui.css?v=p2-18'));
   assert(CSS.includes('@media (max-width:540px)'));
   assert(CSS.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
   assert(!CSS.includes('!important'));
@@ -77,7 +77,7 @@ async function main(){
   assert.equal(off.state.rpcCount,0);
 
   const b=boot(true),ui=b.internal.simpleTimelineUi;
-  assert(ui && ui.version==='p2_17_weekly_choice_ui_v1');
+  assert(ui && ui.version==='p2_18_three_explicit_time_choices_v1');
   const model=ui.parsePayload(fixture());
   assert(model);
   assert.equal(model.totalHours,111.7);
@@ -90,14 +90,31 @@ async function main(){
   const shortModel=ui.parsePayload(short);
   assert.equal(shortModel.canAdopt,true);
   assert.equal(shortModel.profileRevision,2);
-  assert(ui.viewHtml(shortModel,'ru').includes('data-ep-tl-accept'));
+  const shortHtml=ui.viewHtml(shortModel,'ru');
+  assert(shortHtml.includes('data-ep-tl-accept'));
+  assert(shortHtml.includes('data-ep-tl-keep') && shortHtml.includes('data-ep-tl-other'));
+  for(const [loc,keep,other,adopt] of [
+    ['ru','Оставить свой план','Выбрать другое время','Принять рекомендуемое'],
+    ['uz','O‘z rejamni qoldirish','Boshqa vaqtni tanlash','Tavsiya etilganini qabul qilish'],
+    ['en','Keep my plan','Choose another time','Accept suggestion']
+  ]) {
+    const view=ui.viewHtml(shortModel,loc);
+    assert(view.includes(keep) && view.includes(other) && view.includes(adopt),
+      'Three explicit study-time choices missing: '+loc);
+    assert(view.indexOf('data-ep-tl-keep')<view.indexOf('data-ep-tl-accept') &&
+      view.indexOf('data-ep-tl-accept')<view.indexOf('data-ep-tl-other'),
+      'Choices must have consistent visual order: '+loc);
+  }
   const capped=fixture();
   capped.existing_chosen_math_hours_per_week=4;
   capped.student_total_hours_per_week=5;
   const cappedModel=ui.parsePayload(capped);
   assert.equal(cappedModel.canAdopt,false,'Never offer one-tap hours beyond total availability');
   assert(ui.viewHtml(cappedModel,'en').includes('total weekly study budget'));
-  assert(!ui.viewHtml(cappedModel,'en').includes('data-ep-tl-accept'));
+  const cappedHtml=ui.viewHtml(cappedModel,'en');
+  assert(!cappedHtml.includes('data-ep-tl-accept'));
+  assert(cappedHtml.includes('data-ep-tl-keep') && cappedHtml.includes('data-ep-tl-other'),
+    'Keeping current budget and editing other time must remain possible');
   const urgent=fixture();
   urgent.existing_chosen_math_hours_per_week=4;
   urgent.estimated_joint_math_hours_per_week=1250;
@@ -158,7 +175,9 @@ async function main(){
   const noDateHtml=ui.viewHtml(ui.parsePayload(noDates),'ru');
   assert(noDateHtml.includes('Выберите дату хотя бы одного экзамена'));
   assert(!noDateHtml.includes('8,9'));
-  assert(!noDateHtml.includes('data-ep-tl-accept'),'No date, no weekly action');
+  assert(!noDateHtml.includes('data-ep-tl-accept') &&
+    !noDateHtml.includes('data-ep-tl-keep') &&
+    !noDateHtml.includes('data-ep-tl-other'),'No date, no invented time-choice actions');
   const malicious=fixture();malicious.as_of='<img src=x onerror=alert(1)>';
   assert(!ui.viewHtml(ui.parsePayload(malicious),'en').includes('<img'));
   b.hub.dataset.subjectKey='economics';

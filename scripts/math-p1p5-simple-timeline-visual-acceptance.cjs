@@ -43,6 +43,7 @@ function html(lang){
     '<main id="courses-subject-hub" class="exam-prep-host-open" data-subject-key="mathematics">'+
     '<div id="exam-prep-host-root" class="exam-prep-host-root">'+
     '<section class="ep-host-shell ep-live"><section class="ep-live-dashboard-intro"><h2>Cambridge AS Mathematics</h2></section>'+
+    '<section data-ep-study-schedule><label>Study schedule <input data-ep-study-minutes type="number" value="60"></label></section>'+
     '<div class="ep-live-grid">'+
     '<article data-ep-live-component="P1" class="ep-live-card"><strong>Paper 1</strong></article>'+
     '<article data-ep-live-component="P5" class="ep-live-card"><strong>Paper 5</strong></article>'+
@@ -144,8 +145,21 @@ function html(lang){
       await page.locator('[data-ep-simple-timeline]').screenshot({
         path:path.join(output,tag+'-saved.png'),animations:'disabled'});
       captures++;
-      // The new recommendation is optional. One explicit tap alone updates
-      // the synthetic Math budget; existing P1/P5 result counts stay fixed.
+      // Keep and Other are read-only decisions: NO budget/profile RPC.
+      assert.equal(await page.locator('[data-ep-tl-keep]').count(),1);
+      assert.equal(await page.locator('[data-ep-tl-other]').count(),1);
+      await page.locator('[data-ep-tl-keep]').click();
+      assert.equal((await page.evaluate(()=>window.__p2HoursAccepted)).length,0,
+        'Keep existing plan must not change the budget');
+      assert.equal((await page.evaluate(()=>window.__p2DateSaves)).length,1,
+        'Keep must not edit learner dates');
+      await page.locator('[data-ep-tl-other]').click();
+      assert.equal(await page.evaluate(()=>
+        document.activeElement?.hasAttribute('data-ep-study-minutes')),true,
+        'Other must focus the EXISTING schedule editor');
+      assert.equal((await page.evaluate(()=>window.__p2HoursAccepted)).length,0,
+        'Opening existing editor must not change hours');
+      // Accept invokes the existing server-validated compare-and-save once.
       const accept=page.locator('[data-ep-tl-accept]');
       assert.equal(await accept.count(),1,'Feasible shortfall needs one action');
       await accept.click();
