@@ -8,6 +8,8 @@ on:
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql'
       - 'supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql'
+      - 'supabase/tests/p1p5_v2_package0_future_state_overlay_disposable.sql'
+      - 'scripts/p1p5-v2-package0-build-combined-probe.cjs'
       - 'scripts/p1p5-v2-package0-synthetic-backup-restore.sh'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -370,6 +372,19 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql \
             | tee /tmp/p1p5-v2-package0-32table-rehearsal.log
           echo "PASS: 32 table fake-user rollback-only rehearsal completed"
+      - name: P0-10 real-schema 32-table plus future dates scoped reset, receipts HOLD, and rollback
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          dir="$(mktemp -d /tmp/p0-10-XXXXXX)"
+          trap 'rm -rf "$dir"' EXIT
+          node --check scripts/p1p5-v2-package0-build-combined-probe.cjs
+          node scripts/p1p5-v2-package0-build-combined-probe.cjs "$dir/combined.sql"
+          psql -X -v ON_ERROR_STOP=1 -f "$dir/combined.sql" > /tmp/p1p5-p0-10-combined-test.log
+          echo "PASS: original 32 learner-state tables plus prospective date+receipt scope verified; full transaction ROLLBACK"
       - name: Package 0 real PG17 synthetic-only custom backup and independent restore proof
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
