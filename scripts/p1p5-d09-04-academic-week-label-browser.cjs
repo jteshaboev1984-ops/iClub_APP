@@ -82,8 +82,12 @@ async function check(browser,language,width){
       'exam-prep/exam-prep-live.js'])
     await page.addScriptTag({path:path.resolve(script)});
   await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
-  await page.waitForSelector('[data-ep-live-plan="P5"]');
-  await page.locator('[data-ep-live-plan="P5"]').click();
+  // Match the established weekly-flow native-browser acceptance: the
+  // dashboard button is mounted but hidden while the fake host remains
+  // deliberately headless. Dispatch its real click handler, not a forced
+  // Playwright user-visible click on an intentionally hidden host control.
+  await page.waitForSelector('[data-ep-live-plan="P5"]',{state:'attached'});
+  await page.evaluate(()=>document.querySelector('[data-ep-live-plan="P5"]').click());
   await page.waitForSelector('[data-ep-plan-period-label]');
   const label=await page.locator('[data-ep-plan-period-label]').innerText();
   for(const part of locales[language])
