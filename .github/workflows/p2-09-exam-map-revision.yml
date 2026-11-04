@@ -32,7 +32,9 @@ permissions:
 
 jobs:
   exam-map-revision:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 cannot install Chromium on the newer Ubuntu 26.04 runner.
+    # CI-only environment pin; application behavior and deployment unchanged.
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:17

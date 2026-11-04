@@ -10,6 +10,10 @@ on:
       - 'scripts/progress-ux-live-acceptance.cjs'
       - 'scripts/progress-ux-authorized-journey.cjs'
       - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-simple-timeline-ui.js'
+      - 'exam-prep/exam-prep-simple-timeline-ui.css'
+      - 'index.html'
+      - 'scripts/math-p1p5-simple-timeline-visual-acceptance.cjs'
       - 'exam-prep/exam-prep-live.js'
       - 'exam-prep/exam-prep-learner-flow-ux.js'
       - 'exam-prep/exam-prep-progress-ux-*.js'
@@ -26,6 +30,10 @@ on:
       - 'scripts/progress-ux-live-acceptance.cjs'
       - 'scripts/progress-ux-authorized-journey.cjs'
       - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-simple-timeline-ui.js'
+      - 'exam-prep/exam-prep-simple-timeline-ui.css'
+      - 'index.html'
+      - 'scripts/math-p1p5-simple-timeline-visual-acceptance.cjs'
       - 'exam-prep/exam-prep-live.js'
       - 'exam-prep/exam-prep-learner-flow-ux.js'
       - 'exam-prep/exam-prep-progress-ux-*.js'
@@ -41,7 +49,9 @@ permissions:
 
 jobs:
   isolated-visual-captures:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 Chromium cannot install on ubuntu26.04 runner.
+    # Isolated screenshot test only: no app hosting or release change.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate isolated screenshot, date, real-renderer and authorized-journey harnesses
@@ -51,6 +61,7 @@ jobs:
           node --check scripts/progress-ux-retest-date-regression.cjs
           node --check scripts/progress-ux-live-acceptance.cjs
           node --check scripts/progress-ux-authorized-journey.cjs
+          node --check scripts/math-p1p5-simple-timeline-visual-acceptance.cjs
           ! grep -Eq 'SUPABASE_SERVICE|SUPABASE_URL|process\.env\.|https?://' scripts/progress-ux-visual-acceptance.cjs scripts/progress-ux-retest-date-regression.cjs scripts/progress-ux-live-acceptance.cjs scripts/progress-ux-authorized-journey.cjs
       - name: Install isolated browser
         run: |
@@ -64,6 +75,8 @@ jobs:
         run: node scripts/progress-ux-authorized-journey.cjs
       - name: Capture three-language overview and plan
         run: node scripts/progress-ux-visual-acceptance.cjs
+      - name: Validate Mathematics simple-timeline layout at 320/390/1440px in RU/UZ/EN
+        run: node scripts/math-p1p5-simple-timeline-visual-acceptance.cjs
       - name: Retain private-to-CI synthetic screenshots for inspection
         if: always()
         uses: actions/upload-artifact@v4

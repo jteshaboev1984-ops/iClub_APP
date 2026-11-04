@@ -6,7 +6,17 @@ on:
       - 'exam-prep/**'
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
+      - 'supabase/tests/p1p5_package2_workload_registry_source_contract.sql'
+      - 'supabase/tests/p1p5_package2_action_time_source_contract.sql'
+      - 'supabase/tests/p1p5_package2_action_time_synthetic_rollback.sql'
+      - 'supabase/tests/p1p5_package2_action_calibration_candidates_v1.sql'
+      - 'supabase/tests/p1p5_package2_conditional_trajectory_source_v1.sql'
+      - 'supabase/tests/p1p5_package2_cambridge_heuristic_source_v1.sql'
+      - 'supabase/tests/p1p5_p2_16_learner_dates_source_contract.sql'
+      - 'supabase/tests/p1p5_p2_17_student_weekly_acceptance_audit.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
+      - 'scripts/p1p5-package2-workload-owner-evidence-e2e.cjs'
+      - 'scripts/p1p5-p2-17-weekly-owner-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
@@ -33,7 +43,9 @@ permissions:
 jobs:
   real-http-auth:
     name: actual Math UI JWT PostgREST PG17
-    runs-on: ubuntu-latest
+    # Playwright 1.55 supports Ubuntu 24.04, not ubuntu-latest's 26.04.
+    # Fixed OS only for disposable CI, no production hosting change.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
@@ -138,6 +150,29 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
 
 
+      - name: Package 2 real 81-skill source register and no invented hours
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_package2_workload_registry_source_contract.sql \
+            2>&1 | tee /tmp/p1p5-package2-workload-source-check.log
+          grep -q 'PASS P2: 81 actual source-mapped skills' \
+            /tmp/p1p5-package2-workload-source-check.log
+      - name: P2-10 prove 81x6 action source registry, no unapproved minutes and direct private access denied
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          psql -X -v ON_ERROR_STOP=1             -f supabase/tests/p1p5_package2_action_time_source_contract.sql 2>&1             | tee /tmp/p1p5-p2-10-action-source.log
+          grep -q 'PASS P2-10: 486 action norms' /tmp/p1p5-p2-10-action-source.log
+      - name: P2-11 inspect real 486 academic candidate routes without study-time claims
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_package2_action_calibration_candidates_v1.sql 2>&1 | tee /tmp/p1p5-p2-11-academic-candidate-audit.log
+          grep -q 'PASS P2-11: 486 authentic source-bound action candidates' /tmp/p1p5-p2-11-academic-candidate-audit.log
       - name: Seed ONLY disposable authenticated learners
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
@@ -182,6 +217,111 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-isolated-http-auth-e2e.cjs
+      - name: Package 2 validate actual owner P1/P5 skill evidence, unknown skills and official Paper duration
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node --check scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
+          node scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
+      - name: P2-16 learner dates safe save RLS, no school verification or legacy modifications
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p2_16_learner_dates_source_contract.sql 2>&1 \
+            | tee /tmp/p1p5-p2-16-learner-dates.log
+          grep -q 'PASS P2-16: learner-selected dates source-scoped' \
+            /tmp/p1p5-p2-16-learner-dates.log
+      - name: P2-17 verify JS syntax
+        run: node --check scripts/p1p5-p2-17-weekly-owner-e2e.cjs
+      - name: P2-17 dates - select future dates and calculate feasible weekly target
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs dates
+      - name: P2-17 tampered - reject client-altered Math hours
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          timeout 70s node scripts/p1p5-p2-17-weekly-owner-e2e.cjs tampered
+      - name: P2-17 stale - reject stale profile revision
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          timeout 70s node scripts/p1p5-p2-17-weekly-owner-e2e.cjs stale
+      - name: P2-17 anonymous - reject unauthenticated Math budget write
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          timeout 70s node scripts/p1p5-p2-17-weekly-owner-e2e.cjs anonymous
+      - name: P2-17 accept - apply explicit owner budget using audited v2 profile
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs accept
+      - name: P2-17 replay - reject replay and over-capacity budgets
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs replay
+      - name: P2-17 restore - restore synthetic learner original profile and progress
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs restore
+      - name: P2-17 prove student opt-in hours revision ledger, unchanged paper epoch and retained academic history
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p2_17_student_weekly_acceptance_audit.sql 2>&1 \
+            | tee /tmp/p1p5-p2-17-opt-in-profile-revision.log
+          grep -q 'PASS P2-17: explicit budget opt-in has audited' \
+            /tmp/p1p5-p2-17-opt-in-profile-revision.log
+      - name: P2-14 prove authentic 90h P1 plus 50h P5 and 81 source-weighted iClub planning estimates
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_package2_cambridge_heuristic_source_v1.sql 2>&1 \
+            | tee /tmp/p1p5-p2-14-source-estimate.log
+          grep -q 'PASS P2-14: 90h P1 + 50h P5' \
+            /tmp/p1p5-p2-14-source-estimate.log
+      - name: P2-12 prove REAL 81-skill future learning branches cannot be miscounted as current work
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_package2_conditional_trajectory_source_v1.sql 2>&1 \
+            | tee /tmp/p1p5-p2-12-conditional-trajectory.log
+          grep -q 'PASS P2-12: 81 real evidence-led trajectories' \
+            /tmp/p1p5-p2-12-conditional-trajectory.log
+      - name: P2-10 test private reviewed-action arithmetic using disposable ONLY fixture, then ROLLBACK
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1             -f supabase/tests/p1p5_package2_action_time_synthetic_rollback.sql 2>&1             | tee /tmp/p1p5-p2-10-fake-time-rollback.log
+          grep -q 'PASS P2-10: rollback restored zero artificial approvals'             /tmp/p1p5-p2-10-fake-time-rollback.log
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
