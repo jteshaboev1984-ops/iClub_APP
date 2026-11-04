@@ -51,6 +51,10 @@ for (const [section,marker] of markers) {
   // Function replacement preserves literal DO $; string replacement would fold $ to $.\n  result=result.replace(marker,()=>sections[section]+'\n'+marker);
 }
 assert(result.indexOf('P0-10 SECTION')<0,'section marker unexpectedly stitched');
+const originalDollarDo=(original.match(/\bDO \$\$/g)||[]).length;
+const stitchedDollarDo=(result.match(/\bDO \$\$/g)||[]).length;
+assert.equal(stitchedDollarDo,originalDollarDo,'literal PostgreSQL DO $ quoting was altered');
+assert(!/^DO \$\s*$/m.test(result),'single-dollar DO delimiter detected');
 assert(result.trimEnd().endsWith('ROLLBACK;'));
 assert(!/\b(?:DISABLE\s+TRIGGER|session_replication_role|TRUNCATE\s+public|DROP\s+TABLE\s+public\.users)\b/i.test(result));
 fs.writeFileSync(target,result,{encoding:'utf8',mode:0o600,flag:'wx'});
