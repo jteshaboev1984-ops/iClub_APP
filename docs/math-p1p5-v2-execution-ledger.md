@@ -508,3 +508,10 @@ Authoritative architect-approved UX: one optional weekly-hours comparison for pe
 **Durable evidence:** [P0-16A technical decision](math-p1p5-p0-16a-expanded-writer-discovery-20261104.md), [replayable SELECT-only SQL](../supabase/tests/p1p5_v2_package0_rpc_write_graph_expanded_readonly.sql), updated [static scope/NO_GO source guard](../scripts/p1p5-v2-package0-scope-guard.cjs). **Do not mark CI green until the exact new draft HEAD has a successful completed run.** PR #468 remains DRAFT; current `main` / production Supabase, Vercel, real learner evidence, Practice v3, Tours, certificates and other subjects untouched.
 
 **NEXT P0-16B (still first incomplete safety package):** comprehensive and reviewed actual-write route ownership/epoch coverage on exact combined #469–#476 source (including getters and non-prefix wrappers); additive disabled-by-default server-owned epoch and maintenance fence; authentic full-migration signed JWT/PostgREST/PG17 + old-device/multi-connection + backup/restore testing. The architect's exact release/cleanup/retention GO is a separate future gate. **PUBLIC NO_GO.**
+
+
+## P0-20 three side-effecting getters — disposable old-JWT E2E candidate (2026-11-04)
+
+P0-16A discovered three `get_exam_prep_*` RPCs that trigger placement/state writes. They were **outside the prior P0-17 30-root shadow**. Added a separately guarded disposable PG17 shadow and actual signed-JWT/PostgREST regression for these three, inserted after P0-17 in the full E2E workflow, plus new Package0 static guard. Exact implementation: [SQL](../supabase/tests/p1p5_v2_package0_getter_rebuild_epoch_shadow_disposable.sql), [HTTP test](../scripts/p1p5-v2-package0-getter-rebuild-epoch-http.cjs). Old signed JWT must receive PT409 **before** any rebuild, untouched protected-state fingerprints; new signed JWT must retain original successful getter. Scoped source guard prevents Chemistry/consent changes.
+
+**CANDIDATE only; do not mark green before completed exact-SHA CI**. No production migration or real user state changes. Full real writer fence, exact combined future PRs, backup/retention and architect release GO remain open. **NO_GO.**
