@@ -19,6 +19,8 @@ on:
       - 'scripts/p1p5-v2-package0-real-core30-epoch-http.cjs'
       - 'supabase/tests/p1p5_v2_package0_draft469_three_writers_epoch_shadow_disposable.sql'
       - 'scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs'
+      - 'supabase/tests/p1p5_v2_package0_draft470_new_dates_weekly_epoch_shadow_disposable.sql'
+      - 'scripts/p1p5-v2-package0-draft470-old-jwt-http.cjs'
       - 'scripts/p1p5-v2-package0-synthetic-backup-restore.sh'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -575,6 +577,55 @@ jobs:
           node --check scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs
           node scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs
           echo "PASS: pinned unmerged PR469 actual study-date/report writers fenced in disposable signed HTTP; NO live deployment"
+      - name: P0-19 fetch PINNED PR470 P2 workload and chosen dates for test DB ONLY
+        uses: actions/checkout@v4
+        with:
+          ref: a6c76a8fba6d11aaa4c138bb6212aad11075d45b
+          path: ._p0_19_draft470
+          persist-credentials: false
+      - name: P0-19 combine pinned PR469 plus PR470 schemas and sign old-date/weekly HTTP denies
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          test "$(git -C ._p0_19_draft470 rev-parse HEAD)" = \
+               "a6c76a8fba6d11aaa4c138bb6212aad11075d45b"
+          for base in \
+            20261103030000_exam_prep_p1p5_workload_norm_registry_v1.sql \
+            20261103031000_exam_prep_p1p5_historical_topic_teaching_references_v1.sql \
+            20261103032000_exam_prep_p1p5_workload_review_projection_v1.sql \
+            20261103033000_exam_prep_p1p5_workload_academic_review_queue_v1.sql \
+            20261103034000_exam_prep_p1p5_real_content_calibration_inventory_v1.sql \
+            20261103035000_exam_prep_p1p5_shared_study_capacity_v1.sql \
+            20261103036000_exam_prep_p1p5_remaining_work_from_evidence_v1.sql \
+            20261103037000_exam_prep_p1p5_action_time_norm_registry_v1.sql \
+            20261103038000_exam_prep_p1p5_action_calibration_candidates_v1.sql \
+            20261103039000_exam_prep_p1p5_conditional_learning_trajectory_v1.sql \
+            20261103040000_exam_prep_simple_learning_timeline_v1.sql \
+            20261103041000_exam_prep_simple_cambridge_source_time_estimate_v1.sql \
+            20261103042000_exam_prep_learner_chosen_dates_v1.sql \
+            20261103043000_exam_prep_student_accept_weekly_study_target_v1.sql
+          do
+            psql -X -v ON_ERROR_STOP=1 \
+              -f "._p0_19_draft470/supabase/migrations/$base" \
+              >> /tmp/p019-pr470-14-pinned-migrations.log
+          done
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_v2_package0_draft470_new_dates_weekly_epoch_shadow_disposable.sql \
+            > /tmp/p019-chosen-date-2-rpc-epoch-shadow.log
+          psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
+          sleep 2
+          export P0_19_OLD_IAT="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT min_signed_jwt_iat-1 FROM private.p0_16_academic_epoch_gate
+            WHERE program_key='math_as_p1_p5';")"
+          test "$P0_19_OLD_IAT" -gt 1700000000
+          node --check scripts/p1p5-v2-package0-draft470-old-jwt-http.cjs
+          node scripts/p1p5-v2-package0-draft470-old-jwt-http.cjs
+          echo "PASS: pinned unmerged P2 student-owned P1/P5 dates protected over actual JWT/HTTP; production unchanged"
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
