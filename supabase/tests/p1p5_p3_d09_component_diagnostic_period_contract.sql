@@ -1,6 +1,6 @@
 -- P3/D09 exact seven-day and independent paper boundary proof.
 -- SELECT-only assertions on disposable PG17 after all migrations.
-\\set ON_ERROR_STOP on
+\set ON_ERROR_STOP on
 DO $d09$
 DECLARE
  t0 timestamptz:='2026-10-01 09:00:00+05'::timestamptz;
