@@ -33,7 +33,7 @@ AS $function$
     join private.exam_prep_exam_profiles p on p.user_id=t.user_id and p.program_version_id=s.program_version_id
     where t.session_id=p_session_id
   ),false);
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.get_exam_prep_timed_review_pack_safe_v1(p_session_id uuid, p_language text DEFAULT 'en'::text)
@@ -119,7 +119,7 @@ BEGIN
     'items',v_items
   );
 END;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.get_exam_prep_timed_result_safe_v1(p_session_id uuid)
@@ -170,7 +170,7 @@ begin
     'readiness_claim',false,'finalized_at',v_b.finalized_at
   );
 end;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION private.exam_prep_stage5_readiness_status_v1(p_user_id uuid, p_program_version_id bigint, p_component_code text)
@@ -301,7 +301,7 @@ begin
     'stage6_unlocked',false
   );
 end;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.submit_exam_prep_timed_written_self_mark_safe_v1(
