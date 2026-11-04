@@ -243,3 +243,19 @@ for(const x of [
 assert(p014Flow.includes('P0-14 real two-session PG17 epoch maintenance lock race'),
        'P0-14 real-lock step absent from full JWT/PG17 workflow');
 console.log('PASS P0-14 genuine two-connection lock gate is isolated and in full E2E');
+
+
+// P0-15 read-only reachable call graph: RPC textual candidates, not authority.
+const p015=read('supabase/tests/p1p5_v2_package0_rpc_write_graph_readonly.sql');
+assert(/--.*READ ONLY/i.test(p015),'P0-15 must state READ ONLY');
+assert(!/\b(?:insert|update|delete|truncate|drop|alter|create|grant|revoke|call|do|execute|copy|vacuum)\b/i.test(strip(p015)),
+  'P0-15 catalog source has DML/DDL outside quoted patterns');
+for(const token of [
+ 'WITH RECURSIVE','pg_proc','pg_get_functiondef','regexp_matches',
+ 'has_function_privilege','NOT e.target_oid=ANY(w.visited)',
+ 'authenticated_root_rpcs','indirect_only_dml_candidates',
+ 'write_candidates_without_named_core_guard',
+ 'write_candidates_with_named_epoch_marker','scope_warning',
+ 'regex excludes dynamic/unqualified calls'
+])assert(p015.includes(token),'P0-15 missing tested read-only audit contract: '+token);
+console.log('PASS P0-15 read-only authenticated direct/indirect RPC epoch coverage catalog guard');
