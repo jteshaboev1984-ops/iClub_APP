@@ -87,7 +87,12 @@
        !Array.isArray(b.priority_slots) || b.priority_slots.length>3 ||
        !b.priority_slots.every(x=>Number.isInteger(x.priority_order)&&
           x.priority_order>=1&&x.priority_order<=3&&validNumber(x.available_study_minutes)) ||
-       b.priority_slots.reduce((v,x)=>v+x.available_study_minutes,0)>b.component_available_minutes)
+       !Number.isInteger(b.priority_count) || b.priority_count!==b.priority_slots.length ||
+       b.priority_slots.some(x=>!['learning','correction','retest','mixed_transfer','rebaseline'].includes(x.item_type) ||
+         typeof x.status!=='string' || !x.status) ||
+       new Set(b.priority_slots.map(x=>x.priority_order)).size!==b.priority_slots.length ||
+       (b.priority_slots.length>0 && b.priority_slots.reduce((v,x)=>v+x.available_study_minutes,0)!==b.component_available_minutes) ||
+       (b.priority_slots.length===0 && b.priority_slots.reduce((v,x)=>v+x.available_study_minutes,0)!==0))
       return fail('invalid_budget_contract');
     return result;
   }

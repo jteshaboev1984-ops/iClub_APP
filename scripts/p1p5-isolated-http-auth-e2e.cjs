@@ -211,6 +211,7 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
     assert.notEqual(p1.sessionId,p5.sessionId,'P1/P5 session identity collision');
     // Move across the real public HTTP API into independent governed plans.
     const planIds={};
+    const planItemsBeforeBudget={};
     for(const component of ['P1','P5']){
       const generated=await rpc('generate_exam_prep_weekly_plan_safe_v3',{p_component_code:component},tokenA);
       assert(generated.ok&&generated.data?.plan_id,'real HTTP plan generation failed '+component+' status='+generated.status+' code='+generated.data?.code);
@@ -218,6 +219,7 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
       assert(read.ok&&read.data?.plan_id===generated.data.plan_id,'real HTTP plan readback mismatch '+component);
       assert(read.data?.items?.some(i=>i.item_type==='learning'&&i.status==='pending'),'no governed learning item '+component);
       planIds[component]=generated.data.plan_id;
+      planItemsBeforeBudget[component]=structuredClone(read.data.items);
     }
     assert.notEqual(planIds.P1,planIds.P5,'P1/P5 plans unexpectedly share identity');
     // Plan periods now consume ONE Math hours budget across P1/P5. This
@@ -238,9 +240,11 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
         'Component time is inconsistent with the shared snapshot');
       assert(row.priority_slots?.length>=1 && row.priority_slots.length<=3,
         'Visible budget must attach to actual governed plan priorities');
-      assert(row.priority_slots.reduce((a,x)=>a+x.available_study_minutes,0)
-        <=row.component_available_minutes,
-        'Priorities assigned more available time than the component budget');
+      assert.equal(row.priority_slots.reduce((a,x)=>a+x.available_study_minutes,0),
+        row.component_available_minutes,
+        'Existing weekly priorities must share exactly their available component time');
+      assert.equal(row.priority_count,row.priority_slots.length,
+        'Server claimed priorities that are absent from the existing plan');
       assert(row.priority_minutes_are_available_time_not_task_duration===true &&
         row.learning_access_capped===false && row.academic_results_mutated===false,
         'A planning preference became an academic grade or access quota');
@@ -253,12 +257,32 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
     const repeated=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
       p_component_code:'P1',p_plan_id:planIds.P1
     },tokenA);
-    assert(repeated.ok && repeated.data.p1_reserved_minutes===shares.P1.p1_reserved_minutes,
-      'Reopening the same weekly plan silently changed its budget');
+    assert(repeated.ok,'Reopening shared budget must succeed');
+    for(const key of ['available_math_minutes','p1_reserved_minutes','p5_reserved_minutes',
+      'component_available_minutes','profile_revision_at_capture','priority_slots'])
+      assert.deepEqual(repeated.data[key],shares.P1[key],
+        'Reopening weekly plan changed frozen field '+key);
     const stolen=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
       p_component_code:'P1',p_plan_id:planIds.P1
     },tokenB);
     assert(!stolen.ok,'Another learner could read/record the owner weekly budget');
+    const wrongPaper=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
+      p_component_code:'P5',p_plan_id:planIds.P1
+    },tokenA);
+    assert(!wrongPaper.ok,'P1 plan was accepted as a P5 plan');
+    const wrongPlan=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
+      p_component_code:'P1',p_plan_id:'00000000-0000-4000-8000-000000000001'
+    },tokenA);
+    assert(!wrongPlan.ok,'Unknown plan created a shared-time snapshot');
+    for(const component of ['P1','P5']){
+      const afterBudget=await rpc('get_exam_prep_weekly_plan_safe_v2',{
+        p_component_code:component
+      },tokenA);
+      assert(afterBudget.ok&&afterBudget.data.plan_id===planIds[component],
+        'Budget accessor replaced an existing weekly plan '+component);
+      assert.deepEqual(afterBudget.data.items,planItemsBeforeBudget[component],
+        'Budget accessor changed task status, priority or correction in '+component);
+    }
     const learningP1=await browserScenario(browser,'P1',tokenA,'learning');
     const learningP5=await browserScenario(browser,'P5',tokenA,'learning');
     assert.notEqual(learningP1.sessionId,learningP5.sessionId,'learning session ID collision');
