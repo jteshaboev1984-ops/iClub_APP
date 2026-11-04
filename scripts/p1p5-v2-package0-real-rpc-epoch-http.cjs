@@ -8,6 +8,7 @@ const HOST='http://127.0.0.1:3000';
 const SECRET=process.env.P1P5_E2E_JWT_SECRET;
 const OLD_IAT=Number(process.env.P0_16_OLD_IAT);
 const STALE_SESSION=process.env.P0_16_STALE_SESSION_ID;
+const STALE_AUTH=process.env.P0_16_STALE_AUTH_ID;
 const phase=process.argv[2];
 const A='11111111-1111-4111-8111-111111111191';
 const B='22222222-2222-4222-8222-222222222292';
@@ -20,6 +21,8 @@ assert(Number.isSafeInteger(OLD_IAT)&&OLD_IAT>1700000000,
   'P0-16 old bearer token must have immutable pre-cutover iat');
 assert(/^[a-f0-9-]{36}$/i.test(STALE_SESSION||''),
   'P0-16 must use a genuine frozen PG17 prelaunch session id');
+assert(/^[a-f0-9-]{36}$/i.test(STALE_AUTH||''),
+  'P0-16 must use a real frozen PG17 session authorization');
 
 const enc=o=>Buffer.from(JSON.stringify(o)).toString('base64url');
 function jwt(uid,iat){
@@ -51,7 +54,7 @@ const next=['start_exam_prep_next_diagnostic_safe_v1',{
 }];
 const timed=['authorize_exam_prep_timed_safe_v1',{p_assessment_id:1}];
 const start=['start_exam_prep_session_safe_v1',{
- p_authorization_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaa101',
+ p_authorization_id:STALE_AUTH,
  p_idempotency_key:'p016-isolated-authorize-session-0001'
 }];
 const answer=['submit_exam_prep_response_safe_v1',{
@@ -86,6 +89,8 @@ function epoch409(r,route,kind){
    const fresh=jwt(A,now);
    const saved=await rpc(...profile,fresh);
    assert(saved.ok,'P0-16 genuine profile writer failed with fresh signed JWT: '+JSON.stringify(saved));
+   epoch409(await rpc(...start,fresh),'start_exam_prep_session_safe_v1',
+     'fresh JWT trying stale server-issued authorization');
    epoch409(await rpc(...answer,fresh),'submit_exam_prep_response_safe_v1',
      'fresh JWT trying stale server-issued session');
    epoch409(await rpc(...finalize,fresh),'finalize_exam_prep_session_safe_v1',
