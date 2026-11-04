@@ -55,7 +55,7 @@
       }
       const asset = document.createElement('script');
       asset.dataset.examPrepWeeklyFlowAdapter = 'true';
-      asset.src = `${base}exam-prep-weekly-flow-adapter.js?v=weeklyflow2`;
+      asset.src = `${base}exam-prep-weekly-flow-adapter.js?v=weeklyflow2-p3sharedweek`;
       asset.async = false;
       asset.onload = () => internal.weeklyFlowApi?.version === 'weekly_flow_adapter_v1' && stillEnabled()
         ? resolve() : reject(new Error('weekly adapter contract unavailable'));
@@ -102,7 +102,7 @@
       }
       const asset = document.createElement('script');
       asset.dataset.examPrepWeeklyAdherenceUi = 'true';
-      asset.src = `${base}exam-prep-weekly-adherence-ui.js?v=weeklyadherence1`;
+      asset.src = `${base}exam-prep-weekly-adherence-ui.js?v=weeklyadherence2-periodic1`;
       asset.async = false;
       asset.onload = () => internal.weeklyAdherenceUi?.version === 'weekly_adherence_ui_v1' && stillEnabled()
         ? resolve() : reject(new Error('weekly adherence asset unavailable'));

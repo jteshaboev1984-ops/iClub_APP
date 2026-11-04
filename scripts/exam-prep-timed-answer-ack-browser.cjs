@@ -9,21 +9,24 @@ const AUTH='44444444-4444-4444-8444-444444444444';
 const SESSION='55555555-5555-4555-8555-555555555555';
 const ok=data=>({ok:true,data});
 
-async function scenario(browser,language,width,component,sessionType,kind,mode,expired=false) {
+async function scenario(browser,language,width,component,sessionType,kind,mode,expired=false,skewHours=0) {
   const page=await browser.newPage({viewport:{width,height:850},timezoneId:'Asia/Tashkent'});
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.route(/^https?:\/\//,route=>route.abort());
   try {
     await page.setContent('<!doctype html><html><body><div id="exam-prep-host-root" aria-hidden="false"></div></body></html>');
-    await page.evaluate(([language,component,sessionType,kind,mode,expired])=>{
+    await page.evaluate(([language,component,sessionType,kind,mode,expired,skewHours])=>{
+      const realNow=Date.now.bind(Date);
+      window.__timedServerNow=realNow;
+      if(skewHours) Date.now=()=>realNow()+skewHours*3600000;
       window.iClubExamPrepWeeklyFlowEnabled=false;
       window.iClubExamPrepProgressUxEnabled=false;
       window.i18n={getLang:()=>language};
       const s=window.__timedTest={
         language,component,sessionType,kind,mode,expired,
         answered:false,finalized:false,sendCount:0,finalizeCount:0,readCount:0,
-        keys:[],payloads:[],elapsed:[],deadline:Date.now()+(expired?4500:120000)
+        keys:[],payloads:[],elapsed:[],deadline:window.__timedServerNow()+(expired?4500:120000)
       };
       const answerItem=()=>({
         item_order:1,item_kind:kind==='written'?'written':'question',
@@ -56,7 +59,8 @@ async function scenario(browser,language,width,component,sessionType,kind,mode,e
           if(id!=='55555555-5555-4555-8555-555555555555')throw Error('Wrong session ID');
           return wrap({session_id:id,component_code:s.component,session_type:s.sessionType,
             status:s.finalized?'finalized':'active',
-            timing_contract:{deadline_at:new Date(s.deadline).toISOString()},
+            timing_contract:{deadline_at:new Date(s.deadline).toISOString(),
+              server_now:new Date(window.__timedServerNow()).toISOString()},
             items:[answerItem()]});
         },
         submitResponse:async (id,order,payload,key,elapsedMs)=>{
@@ -71,7 +75,7 @@ async function scenario(browser,language,width,component,sessionType,kind,mode,e
         },
         finalizeTimed:async(id,key,reason)=>{
           if(id!=='55555555-5555-4555-8555-555555555555')throw Error('Wrong timed finish ID');
-          if(!s.answered)throw Error('False finalize before answer reconciliation');
+          if(!s.answered && reason!=='time_expired')throw Error('False finalize before answer reconciliation');
           s.finalizeCount++;s.finalized=true;s.finalReason=reason;
           return wrap({status:'finalized'});
         },
@@ -81,14 +85,29 @@ async function scenario(browser,language,width,component,sessionType,kind,mode,e
       window.iClubExamPrep={open:async()=>true,isOpen:()=>true,back:()=>true,close:()=>true,
         syncSubjectHub:async()=>true,refreshCapabilities:async()=>true};
       window.confirm=()=>true;
-    },[language,component,sessionType,kind,mode,expired]);
+    },[language,component,sessionType,kind,mode,expired,skewHours]);
     await page.addScriptTag({path:file('exam-prep/exam-prep-live.js')});
     await page.evaluate(language=>window.iClubExamPrep.open({language,subjectKey:'mathematics'}),language);
     await page.click('[data-ep-live-open-component="'+component+'"]');
     await page.click('[data-ep-component-link="timed"]');
     await page.click('[data-ep-live-timed-start="91"]');
     await page.waitForSelector('[data-ep-live-submit]');
+    const clockText=await page.locator('[data-ep-live-timer]').textContent();
+    assert(/\d{2}:\d{2}/.test(clockText||''),'Timed/Paper countdown must be visible');
+    if(!expired)assert(/(?:01:5\d|02:00)/.test(clockText||''),
+      'Wrong device clock cannot prematurely finish a timed paper: '+clockText);
     if(mode==='hung'||expired)await page.clock.install();
+    if(mode==='auto_expire'){
+      await page.clock.fastForward(6500);
+      await page.waitForFunction(()=>window.__timedTest.finalized);
+      const done=await page.evaluate(()=>window.__timedTest);
+      assert.equal(done.finalReason,'time_expired');
+      assert.equal(done.finalizeCount,1);
+      assert.equal(done.sendCount,0,'Unattempted paper must not fabricate answer');
+      assert.deepEqual(errors,[],'Expiry should not throw');
+      console.log('PASS '+[language,component,sessionType,'auto_expire'].join('/'));
+      return;
+    }
     const originalText='Detailed handwritten reasoning: x = pi / 2';
     if(kind==='written') await page.fill('textarea[name="ep_live_written_answer"]',originalText);
     else await page.check('input[name="ep_live_answer"][value="0"]');
@@ -144,6 +163,13 @@ async function scenario(browser,language,width,component,sessionType,kind,mode,e
       for(const component of ['P1','P5'])
       for(const sessionType of ['timed','paper'])
         await scenario(browser,language,390,component,sessionType,'written','hung',true);
-    console.log('GREEN: 96 lost-ACK and 12 hung-after-deadline Chromium scenarios. Synthetic RPC only, no real learner data.');
+    for(const language of ['ru','uz','en'])
+      for(const component of ['P1','P5'])
+      for(const sessionType of ['timed','paper']) {
+        await scenario(browser,language,390,component,sessionType,'mcq','auto_expire',true);
+        for(const skewHours of [-2,2])
+          await scenario(browser,language,390,component,sessionType,'mcq','after_commit',false,skewHours);
+      }
+    console.log('GREEN: 96 ACK, 12 blocked deadline, 12 auto-expiry, 24 two-hour device clock-skew Chromium cases. Synthetic RPC only.');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
