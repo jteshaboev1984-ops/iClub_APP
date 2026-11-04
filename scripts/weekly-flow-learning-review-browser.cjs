@@ -27,7 +27,7 @@ async function scenario(browser, language, width) {
       const s = window.__reviewTest = {
         planId, goalId, sessionId, active: false, finalized: false,
         answered: [false, false, false, false], reviewStarts: 0, regularStarts: 0,
-        oldPlanGenerators: 0, submitCalls: 0, finalizes: 0, notes: [],
+        oldPlanGenerators: 0, budgetRequests: 0, submitCalls: 0, finalizes: 0, notes: [],
         authorizationCalls: 0, componentWrites: [], academicCredit: 0
       };
       const ok = data => ({ ok: true, data });
@@ -107,6 +107,12 @@ async function scenario(browser, language, width) {
             goal_id: goalId, plan_id: planId, repeat_learning: true, academic_credit: false,
             prior_progress_retained: true, not_a_new_independent_check: true });
         }
+        if(name==='ensure_my_exam_prep_weekly_budget_safe_v1'){
+          // Optional P3 calendar capacity can be absent from older backends.
+          // Its failure must never create a new assessment or block learning.
+          s.budgetRequests++;
+          return reject();
+        }
         s.regularStarts++;
         return reject();
       }};
@@ -137,6 +143,7 @@ async function scenario(browser, language, width) {
     assert.equal(s.reviewStarts, 1, 'One noncredit review starter only');
     assert.equal(s.submitCalls, 4, 'Three objective and saved written responses');
     assert.equal(s.finalizes, 1, 'One finalization only');
+    assert(s.budgetRequests>=1,'Optional P3 budget lookup was not attempted');
     assert.equal(s.regularStarts, 0, 'Never call original fresh session start');
     assert.equal(s.oldPlanGenerators, 0, 'Never replace saved weekly plan');
     assert.equal(s.planId, PLAN);

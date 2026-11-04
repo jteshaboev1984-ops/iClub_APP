@@ -75,7 +75,9 @@ permissions:
 
 jobs:
   regression:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 cannot launch Chromium on Ubuntu 26.04 runner images.
+    # Pin supported test runner without changing live iClub hosting.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
