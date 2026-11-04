@@ -229,3 +229,17 @@ assert(p013E2e.includes('P0-13 signed old-device HTTP epoch') &&
        p013E2e.includes('p1p5_v2_package0_signed_epoch_http_disposable.sql'),
        'P0-13 real PostgREST/PG17 E2E workflow step absent');
 console.log('PASS P0-13 real signed-JWT disposable epoch-only source/privilege guards');
+
+
+// P0-14 two-connection release maintenance lock: no fake "sequential" proof.
+const p014=read('scripts/p1p5-v2-package0-concurrent-epoch-lock.cjs');
+const p014Flow=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+for(const x of [
+ 'P1P5_E2E_ISOLATED','PGDATABASE','127.0.0.1','spawnSync',
+ 'P0_14_SHARE_LOCK_HELD','FOR SHARE','lock timeout',
+ 'UPDATE private.p0_13_epoch_gate SET paused=true',
+ 'P0_14_CLEAN','holder.stdin.end'
+])assert(p014.includes(x),'P0-14 real-lock regression missing '+x);
+assert(p014Flow.includes('P0-14 real two-session PG17 epoch maintenance lock race'),
+       'P0-14 real-lock step absent from full JWT/PG17 workflow');
+console.log('PASS P0-14 genuine two-connection lock gate is isolated and in full E2E');
