@@ -172,7 +172,7 @@ DO $rights$
 BEGIN
  IF has_function_privilege('p0_mock_learner',
     'p0_09_fixture.mock_release_once(bigint,text)','EXECUTE')
- OR has_function_privilege('p0_mock_learner',
+ OR has_table_privilege('p0_mock_learner',
     'p0_09_fixture.test_progress','DELETE') THEN
     RAISE EXCEPTION 'fixture learner mistakenly receives destructive rights';
  END IF;
