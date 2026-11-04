@@ -288,7 +288,7 @@ assert(!/DELETE\s+FROM\s+(?:private\.exam_prep_|public\.)|TRUNCATE|DISABLE\s+TRI
 for(const marker of [
   "HOST='http://127.0.0.1:3000'", "P1P5_E2E_ISOLATED",
   "PGDATABASE==='postgres'", 'OLD_IAT', 'phase===',
-  'fresh JWT trying stale server-issued session','same', // source-wide literal
+  'fresh JWT trying stale server-issued session',
   'six=[profile,next,timed,start,answer,finalize]'
 ]) assert(p016js.includes(marker),'P0-16 real-signed-HTTP test coverage missing: '+marker);
 assert(p016flow.includes('P0-16 REAL six Math public RPCs') &&
