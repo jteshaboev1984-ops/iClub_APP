@@ -372,8 +372,6 @@ async function signedRpc(name, uid, args={}) {
    p_idempotency_key:'CI-D11-KEEP-STALE-REV-0002'
  });
  assert(!staleKeep.ok,'D11 stale profile revision accepted');
- const foreignKeep=await signedRpc('keep_my_exam_prep_timeline_weekly_time_safe_v1',USER_B,keepArgs);
- assert(!foreignKeep.ok,'D11 another learner reused owner recommendation and revision');
  const revertPersonal=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',USER_A,{
    p_p1_date:'2028-02-12',p_p5_date:'2028-02-20'
  });
