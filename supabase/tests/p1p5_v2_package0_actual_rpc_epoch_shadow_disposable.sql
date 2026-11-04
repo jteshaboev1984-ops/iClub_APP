@@ -37,6 +37,9 @@ VALUES ('math_as_p1_p5',1,false,0),('economics_as',1,false,0);
 ALTER TABLE private.exam_prep_sessions
  ADD COLUMN p0_16_issued_epoch integer NOT NULL DEFAULT 1
  CHECK(p0_16_issued_epoch BETWEEN 1 AND 2);
+ALTER TABLE private.exam_prep_session_authorizations
+ ADD COLUMN p0_16_issued_epoch integer NOT NULL DEFAULT 1
+ CHECK(p0_16_issued_epoch BETWEEN 1 AND 2);
 
 CREATE OR REPLACE FUNCTION private.p0_16_require_current_epoch_v1(
  p_user_id uuid,p_session_id uuid DEFAULT NULL
@@ -112,6 +115,46 @@ CREATE TRIGGER p0_16_stamp_new_session_fixture
  BEFORE INSERT ON private.exam_prep_sessions
  FOR EACH ROW EXECUTE FUNCTION private.p0_16_stamp_new_session_v1();
 
+
+-- Both server-issued authorization AND accepted session are epoch-owned.
+-- A new valid JWT cannot revive an old prelaunch authorization.
+CREATE OR REPLACE FUNCTION private.p0_16_require_issued_authorization_epoch_v1(
+ p_user_id uuid,p_authorization_id uuid
+) RETURNS void LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path TO ''
+AS $fn$
+DECLARE v_current integer; v_issued integer;
+BEGIN
+ PERFORM private.p0_16_require_current_epoch_v1(p_user_id,NULL::uuid);
+ SELECT g.epoch INTO v_current
+ FROM private.p0_16_academic_epoch_gate g
+ WHERE g.program_key='math_as_p1_p5' FOR SHARE;
+ SELECT a.p0_16_issued_epoch INTO v_issued
+ FROM private.exam_prep_session_authorizations a
+ WHERE a.id=p_authorization_id AND a.user_id=p_user_id;
+ IF NOT FOUND OR v_issued IS DISTINCT FROM v_current THEN
+  RAISE EXCEPTION 'p0_16_stale_issued_authorization' USING ERRCODE='PT409';
+ END IF;
+END $fn$;
+REVOKE ALL ON FUNCTION private.p0_16_require_issued_authorization_epoch_v1(uuid,uuid)
+ FROM public,anon,authenticated;
+
+CREATE OR REPLACE FUNCTION private.p0_16_stamp_new_authorization_v1()
+RETURNS trigger LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path TO ''
+AS $fn$
+DECLARE v_epoch integer;
+BEGIN
+ PERFORM private.p0_16_require_current_epoch_v1(NEW.user_id,NULL::uuid);
+ SELECT epoch INTO v_epoch FROM private.p0_16_academic_epoch_gate
+ WHERE program_key='math_as_p1_p5' FOR SHARE;
+ NEW.p0_16_issued_epoch:=v_epoch;
+ RETURN NEW;
+END $fn$;
+REVOKE ALL ON FUNCTION private.p0_16_stamp_new_authorization_v1()
+ FROM public,anon,authenticated;
+CREATE TRIGGER p0_16_stamp_new_authorization_fixture
+ BEFORE INSERT ON private.exam_prep_session_authorizations
+ FOR EACH ROW EXECUTE FUNCTION private.p0_16_stamp_new_authorization_v1();
+
 -- Inject the guarded epoch check into the genuine, migrated source of SIX
 -- named public writer functions and NO others. Unmatched source is a hard error.
 -- The schema change is strictly inside the disposable CI process; never copy
@@ -147,7 +190,10 @@ BEGIN
       ELSE 'NULL::uuid' END;
    v_new:=replace(v_source,v_anchor,
        v_anchor||E'\n  PERFORM private.p0_16_require_current_epoch_v1(v_uid,'||
-       v_session_argument||');');
+       v_session_argument||');'||
+       CASE WHEN v_signature LIKE 'public.start_exam_prep_session_safe_v1%'
+         THEN E'\n  PERFORM private.p0_16_require_issued_authorization_epoch_v1(v_uid,p_authorization_id);'
+         ELSE '' END);
    EXECUTE v_new;
    v_count:=v_count+1;
  END LOOP;
@@ -161,5 +207,7 @@ BEGIN
  OR has_table_privilege('anon','private.p0_16_academic_epoch_gate','UPDATE')
  OR has_function_privilege('authenticated',
     'private.p0_16_require_current_epoch_v1(uuid,uuid)','EXECUTE')
+ OR has_function_privilege('authenticated',
+    'private.p0_16_require_issued_authorization_epoch_v1(uuid,uuid)','EXECUTE')
  THEN RAISE EXCEPTION 'P0-16 browser can bypass maintenance or write fence'; END IF;
 END $rights$;
