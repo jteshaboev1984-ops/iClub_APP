@@ -20,6 +20,11 @@ DECLARE
  v_denied boolean:=false;
  v_view jsonb;
  v_report_function text;
+ v_horizon jsonb;
+ v_shared_capacity jsonb;
+ v_probe_ok boolean:=false;
+ v_rows_changed integer;
+ v_recent_time timestamptz;
 BEGIN
  IF current_database()<>'postgres'
     OR current_setting('server_version_num')::integer<170000
@@ -104,6 +109,53 @@ BEGIN
     OR (v_view->'P5'->>'diagnostic_completed_at')::timestamptz IS DISTINCT FROM
        v_original_p5.diagnostic_completed_at
  THEN RAISE EXCEPTION 'D09-02 frozen P1/P5 first periods mismatched: %',v_view; END IF;
+
+ -- D09-03: simulate a later diagnostic finalization time ONLY inside a
+ -- nested exception subtransaction on the already fake P1 learner. The
+ -- write must be rolled back before the existing session fingerprints.
+ -- Both existing read-only projections must stay on the FIRST frozen T0.
+ BEGIN
+  UPDATE private.exam_prep_sessions
+     SET finalized_at=finalized_at+interval '2 days'
+   WHERE id=(
+    SELECT s.id FROM private.exam_prep_sessions s
+    WHERE s.user_id=v_uid AND s.program_version_id=v_program
+      AND s.component_code='P1' AND s.session_type='diagnostic'
+      AND s.status='finalized' AND s.finalized_at IS NOT NULL
+    ORDER BY s.finalized_at DESC LIMIT 1
+   );
+  GET DIAGNOSTICS v_rows_changed=ROW_COUNT;
+  IF v_rows_changed<>1 THEN
+   RAISE EXCEPTION 'D09-03 no real synthetic P1 finalized diagnostic to probe';
+  END IF;
+  SELECT max(s.finalized_at) INTO v_recent_time
+  FROM private.exam_prep_sessions s
+  WHERE s.user_id=v_uid AND s.program_version_id=v_program
+    AND s.component_code='P1' AND s.session_type='diagnostic'
+    AND s.status='finalized' AND s.finalized_at IS NOT NULL;
+  IF v_recent_time<=v_original_p1.diagnostic_completed_at THEN
+   RAISE EXCEPTION 'D09-03 probe did not create a truly later completed diagnostic';
+  END IF;
+  v_horizon:=public.get_exam_prep_personal_horizon_safe_v1();
+  v_shared_capacity:=public.get_exam_prep_shared_study_capacity_safe_v1();
+  IF (v_horizon->'P1'->>'diagnostic_completed_at')::timestamptz
+       IS DISTINCT FROM v_original_p1.diagnostic_completed_at
+     OR (v_shared_capacity->'P1'->>'diagnostic_completed_at')::timestamptz
+       IS DISTINCT FROM v_original_p1.diagnostic_completed_at
+     OR (v_horizon->'P5'->>'diagnostic_completed_at')::timestamptz
+       IS DISTINCT FROM v_original_p5.diagnostic_completed_at
+     OR (v_shared_capacity->'P5'->>'diagnostic_completed_at')::timestamptz
+       IS DISTINCT FROM v_original_p5.diagnostic_completed_at
+     OR v_shared_capacity->>'shared_across_both_papers'<>'true'
+     OR v_shared_capacity->>'capacity_is_access_limit'<>'false'
+  THEN RAISE EXCEPTION 'D09-03 retest displaced an immutable horizon or doubled/limited Math capacity'; END IF;
+  v_probe_ok:=true;
+  RAISE EXCEPTION 'D09-03_RETURN_TO_PRE_RETEST_HISTORY';
+ EXCEPTION WHEN SQLSTATE 'P0001' THEN
+  IF SQLERRM<>'D09-03_RETURN_TO_PRE_RETEST_HISTORY' THEN RAISE; END IF;
+ END;
+ IF NOT v_probe_ok THEN RAISE EXCEPTION 'D09-03 retest projection proof not executed'; END IF;
+ RAISE NOTICE 'D09-03 PASS: later finalized diagnostic does not shift P1/P5 original horizon or shared Math capacity; inner probe rolled back';
 
  SELECT coalesce(jsonb_agg(to_jsonb(t)),'[]'::jsonb) INTO v_after_other
  FROM private.exam_prep_diagnostic_t0_snapshots_v1 t WHERE t.user_id=v_other;
