@@ -1392,23 +1392,27 @@
         slot:'Доступно для приоритета',minutes:'мин',
         caution:'Ориентир по выбранным часам и текущему прогрессу; не обязательная длительность задания. Заниматься сверх плана можно.',
         next:'Изменённый режим времени будет учтён в плане следующей недели.',
-        kept:'Решение оставить текущие часы учтено.'},
+        kept:'Решение оставить текущие часы учтено.',
+        planWeek:'Неделя учебного плана',diagnosticWeek:'Неделя с диагностики'},
       uz:{weekly:'Bu haftada matematikaga vaqt',split:'Vaqt taqsimoti',
         slot:'Ustuvor vazifa uchun vaqt',minutes:'daq.',
         caution:'Tanlangan vaqt va hozirgi natijalarga asoslangan mo‘ljal. Bu topshiriqning majburiy davomiyligi emas; ko‘proq o‘qish mumkin.',
         next:'Vaqt jadvalidagi o‘zgarish kelgusi hafta rejasida hisobga olinadi.',
-        kept:'Hozirgi soatlarni qoldirish tanlovingiz hisobga olindi.'},
+        kept:'Hozirgi soatlarni qoldirish tanlovingiz hisobga olindi.',
+        planWeek:'O‘quv rejasi haftasi',diagnosticWeek:'Diagnostikadan keyingi hafta'},
       en:{weekly:'Mathematics time this week',split:'Time allocation',
         slot:'Time available for this priority',minutes:'min',
         caution:'Based on your chosen hours and current progress; not a required task duration. You can study beyond the plan.',
         next:'Your changed schedule will be used for the next weekly plan.',
-        kept:'Your choice to keep current hours was applied.'}
+        kept:'Your choice to keep current hours was applied.',
+        planWeek:'Study plan week',diagnosticWeek:'Week since diagnostic'}
     })[state.language] || weekBudgetCopyFallback();
   }
   function weekBudgetCopyFallback(){return {weekly:'Mathematics time this week',split:'Time allocation',
     slot:'Time available for this priority',minutes:'min',
     caution:'Available time, not a required duration or a grade.',
-    next:'Schedule changes apply to the next weekly plan.',kept:'Your current hours were kept.'};}
+    next:'Schedule changes apply to the next weekly plan.',kept:'Your current hours were kept.',
+    planWeek:'Study plan week',diagnosticWeek:'Week since diagnostic'};}
   function itemTypeLabel(type) {
     const c = copy(); return ({ learning: c.learning, correction: c.correction, retest: c.retest, mixed_transfer: c.mixed, rebaseline: c.rebaseline })[type] || c.learning;
   }
@@ -1467,8 +1471,23 @@
       budget.plan_id===plan.plan_id && budget.component_code===component &&
       Array.isArray(budget.priority_slots) &&
       budget.priority_minutes_are_available_time_not_task_duration===true &&
-      budget.learning_access_capped===false ? budget : null;
+      budget.learning_access_capped===false &&
+      budget.planner_week_kind==='legacy_shared_plan_id' &&
+      budget.legacy_plan_id_preserved===true &&
+      budget.diagnostic_period_never_rekeys_existing_plan===true &&
+      budget.active_week_no===plan.active_week_no ? budget : null;
     const bc=weekBudgetCopy();
+    const activePlanWeek=Number(plan.active_week_no || 1);
+    const academicPeriod=verifiedBudget?.component_diagnostic_periods?.[component];
+    const diagnosticWeek=(academicPeriod?.status==='diagnostic_period_ready' &&
+      Number.isSafeInteger(academicPeriod.current_period_no) &&
+      academicPeriod.current_period_no>=1) ? academicPeriod.current_period_no : null;
+    // Existing protected plan and its historical week number remain intact.
+    // Show P1/P5's separately counted academic week as factual context only.
+    const weekDescription=verifiedBudget
+      ? `${esc(bc.planWeek)} ${activePlanWeek}${diagnosticWeek === null ? '' :
+          ` · ${esc(bc.diagnosticWeek)} ${diagnosticWeek}`}`
+      : `${esc(c.week)} ${activePlanWeek}`;
     const budgetSummary=verifiedBudget ?
       `<section class="ep-live-week-budget" data-ep-week-budget>
         <strong>${esc(bc.weekly)}: ${Number(verifiedBudget.available_math_minutes)} ${esc(bc.minutes)}</strong>
@@ -1498,7 +1517,7 @@
         ? `<div class="ep-live-week-budget-slot">${esc(bc.slot)}: ${minutes} ${esc(bc.minutes)}</div>` : "";
       return `<div class="ep-live-plan-item"><div><strong>${esc(itemTypeLabel(item.item_type))}</strong>${due ? `<div class="ep-live-due">${esc(formatDateTime(due))}</div>` : ""}${timeNote}</div>${button}</div>`;
     }).join("") : `<div class="ep-live-notice">${esc(c.noPlan)}</div>`;
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><div><strong>${component} · ${esc(c.plan)}</strong><div class="ep-live-meta">${esc(c.week)} ${Number(plan.active_week_no || 1)}</div></div><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${budgetSummary}${rows}</div>`);
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><div><strong>${component} · ${esc(c.plan)}</strong><div class="ep-live-meta" data-ep-plan-period-label>${weekDescription}</div></div><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${budgetSummary}${rows}</div>`);
     state.notice = null;
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelectorAll('[data-ep-live-plan-item]').forEach(b => b.addEventListener('click', () => launchPlanItem(component, plan.plan_id, Number(b.dataset.epLivePlanItem))));
