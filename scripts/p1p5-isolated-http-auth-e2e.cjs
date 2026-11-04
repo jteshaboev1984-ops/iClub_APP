@@ -220,6 +220,45 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
       planIds[component]=generated.data.plan_id;
     }
     assert.notEqual(planIds.P1,planIds.P5,'P1/P5 plans unexpectedly share identity');
+    // Plan periods now consume ONE Math hours budget across P1/P5. This
+    // checks genuine authenticated RPCs, not a separate fake lesson generator.
+    const shares={};
+    for(const component of ['P1','P5']){
+      const b=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
+        p_component_code:component,p_plan_id:planIds[component]
+      },tokenA);
+      assert(b.ok && b.data?.contract_version==='exam_prep_shared_weekly_available_time_v1',
+        'Owner weekly capacity failed: '+component+' '+JSON.stringify(b.data));
+      const row=b.data;
+      assert.equal(row.available_math_minutes,
+        row.p1_reserved_minutes+row.p5_reserved_minutes,
+        'P1/P5 double-counted chosen Math weekly time');
+      assert.equal(row.component_available_minutes,
+        component==='P1'?row.p1_reserved_minutes:row.p5_reserved_minutes,
+        'Component time is inconsistent with the shared snapshot');
+      assert(row.priority_slots?.length>=1 && row.priority_slots.length<=3,
+        'Visible budget must attach to actual governed plan priorities');
+      assert(row.priority_slots.reduce((a,x)=>a+x.available_study_minutes,0)
+        <=row.component_available_minutes,
+        'Priorities assigned more available time than the component budget');
+      assert(row.priority_minutes_are_available_time_not_task_duration===true &&
+        row.learning_access_capped===false && row.academic_results_mutated===false,
+        'A planning preference became an academic grade or access quota');
+      shares[component]=row;
+    }
+    assert.equal(shares.P1.available_math_minutes,shares.P5.available_math_minutes,
+      'P1/P5 did not share the same weekly Mathematics budget');
+    assert.equal(shares.P1.p1_reserved_minutes,shares.P5.p1_reserved_minutes,
+      'P1/P5 produced incompatible allocations across one week');
+    const repeated=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
+      p_component_code:'P1',p_plan_id:planIds.P1
+    },tokenA);
+    assert(repeated.ok && repeated.data.p1_reserved_minutes===shares.P1.p1_reserved_minutes,
+      'Reopening the same weekly plan silently changed its budget');
+    const stolen=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
+      p_component_code:'P1',p_plan_id:planIds.P1
+    },tokenB);
+    assert(!stolen.ok,'Another learner could read/record the owner weekly budget');
     const learningP1=await browserScenario(browser,'P1',tokenA,'learning');
     const learningP5=await browserScenario(browser,'P5',tokenA,'learning');
     assert.notEqual(learningP1.sessionId,learningP5.sessionId,'learning session ID collision');
