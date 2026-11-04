@@ -259,3 +259,41 @@ for(const token of [
  'regex excludes dynamic/unqualified calls'
 ])assert(p015.includes(token),'P0-15 missing tested read-only audit contract: '+token);
 console.log('PASS P0-15 read-only authenticated direct/indirect RPC epoch coverage catalog guard');
+
+
+// P0-16 six real Math RPCs guarded IN DISPOSABLE CI ONLY. Explicitly does not
+// authorize release, claims no full 37-path closure and cannot target Supabase.
+const p016sql=read('supabase/tests/p1p5_v2_package0_actual_rpc_epoch_shadow_disposable.sql');
+const p016js=read('scripts/p1p5-v2-package0-real-rpc-epoch-http.cjs');
+const p016flow=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+for(const token of [
+ 'ABSOLUTELY DISPOSABLE PG17 ONLY', 'current_database()', 'iclub.e2e_isolated',
+ "(SELECT count(*) FROM public.users)<>2", "(SELECT count(*) FROM auth.users)<>2",
+ 'private.p0_16_academic_epoch_gate', 'private.p0_16_require_current_epoch_v1',
+ "current_setting('request.jwt.claims',true)", 'FOR SHARE',
+ 'p0_16_old_signed_jwt', 'p0_16_stale_session_epoch',
+ 'p0_16_stamp_new_session_fixture', 'p0_16_issued_epoch',
+ 'v_count<>6', 'refusing RPC source drift', 'anon,authenticated'
+]) assert(p016sql.includes(token),'P0-16 real RPC shadow risk guard missing: '+token);
+for(const route of [
+ 'public.save_exam_prep_exam_profile_v2',
+ 'public.start_exam_prep_next_diagnostic_safe_v1',
+ 'public.authorize_exam_prep_timed_safe_v1',
+ 'public.start_exam_prep_session_safe_v1',
+ 'public.submit_exam_prep_response_safe_v1',
+ 'public.finalize_exam_prep_session_safe_v1'
+]) assert(p016sql.includes(route),'P0-16 real RPC test omission: '+route);
+assert(!/DELETE\s+FROM\s+(?:private\.exam_prep_|public\.)|TRUNCATE|DISABLE\s+TRIGGER|session_replication_role/i.test(p016sql),
+  'P0-16 must not delete any real academic facts or bypass protections');
+for(const marker of [
+  "HOST='http://127.0.0.1:3000'", "P1P5_E2E_ISOLATED",
+  "PGDATABASE==='postgres'", 'OLD_IAT', 'phase===',
+  'fresh JWT trying stale server-issued session','same', // source-wide literal
+  'six=[profile,next,timed,start,answer,finalize]'
+]) assert(p016js.includes(marker),'P0-16 real-signed-HTTP test coverage missing: '+marker);
+assert(p016flow.includes('P0-16 REAL six Math public RPCs') &&
+       p016flow.includes('p1p5_v2_package0_actual_rpc_epoch_shadow_disposable.sql') &&
+       p016flow.includes('P0_16_OLD_IAT') &&
+       p016flow.includes('P0_16_STALE_SESSION_ID'),
+       'P0-16 actual full-stack E2E test is not wired');
+console.log('PASS P0-16 isolated six-actual-RPC JWT/session epoch test source bounds; 37+ others still NO_GO');
