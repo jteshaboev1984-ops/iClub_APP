@@ -230,11 +230,21 @@ jobs:
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = "true"
           node scripts/p1p5-p2-17-weekly-owner-e2e.cjs dates
-      - name: P2-17 denials - reject tampered, stale and anonymous budget edits
+      - name: P2-17 tampered - reject client-altered Math hours
         run: |
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = "true"
-          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs denials
+          timeout 70s node scripts/p1p5-p2-17-weekly-owner-e2e.cjs tampered
+      - name: P2-17 stale - reject stale profile revision
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          timeout 70s node scripts/p1p5-p2-17-weekly-owner-e2e.cjs stale
+      - name: P2-17 anonymous - reject unauthenticated Math budget write
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          timeout 70s node scripts/p1p5-p2-17-weekly-owner-e2e.cjs anonymous
       - name: P2-17 accept - apply explicit owner budget using audited v2 profile
         run: |
           set -euo pipefail

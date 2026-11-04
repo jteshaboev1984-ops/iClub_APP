@@ -8,7 +8,7 @@ const HOST='http://127.0.0.1:3000',UID='11111111-1111-4111-8111-111111111191';
 const secret=process.env.P1P5_E2E_JWT_SECRET,phase=String(process.argv[2]||'');
 assert(process.env.P1P5_E2E_ISOLATED==='true','REFUSED: disposable PG17 only');
 assert(secret&&secret.length>=32,'REFUSED: missing disposable JWT key');
-assert(['dates','denials','accept','replay','restore'].includes(phase),'Expected one named phase');
+assert(['dates','tampered','stale','anonymous','accept','replay','restore'].includes(phase),'Expected one named phase');
 function tok(o){return Buffer.from(JSON.stringify(o)).toString('base64url')}
 function jwt(uid){
  const now=Math.floor(Date.now()/1000),data=tok({alg:'HS256',typ:'JWT'})+'.'+tok({
@@ -20,7 +20,7 @@ async function rpc(name,args={},uid=UID){
  const r=await fetch(HOST+'/rpc/'+name,{method:'POST',headers:{
   'Content-Type':'application/json',Accept:'application/json',
   ...(uid?{Authorization:'Bearer '+jwt(uid)}:{})
- },body:JSON.stringify(args)});
+ },body:JSON.stringify(args),signal:AbortSignal.timeout(20000)});
  let d=null;try{d=await r.json()}catch{}
  return {ok:r.ok,status:r.status,data:d};
 }
@@ -56,19 +56,24 @@ async function main(){
    selected.estimated_joint_math_hours_per_week<=12,
    'No feasible weekly target for actual source-based content');
  }
- if(phase==='denials'){
+ if(['tampered','stale','anonymous'].includes(phase)){
   const m=await timeline();baseline(m);
   const rec=m.estimated_joint_math_hours_per_week,rev=m.student_budget_profile_revision;
-  assert(rec>6&&rec<=12);
-  const attempts=[
-   [{p_expected_current_math_hours:6,p_expected_profile_revision:rev,p_new_math_hours:Math.round((rec+.1)*10)/10},UID],
-   [{p_expected_current_math_hours:6,p_expected_profile_revision:rev-1,p_new_math_hours:rec},UID],
-   [{p_expected_current_math_hours:6,p_expected_profile_revision:rev,p_new_math_hours:rec},null]
-  ];
-  for(const [args,uid] of attempts){
-   const resp=await rpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',args,uid);
-   assert(!resp.ok,'Forbidden/tampered write succeeded');
-  }
+  assert(rec>6&&rec<=12,'Source-based suggested hours outside test bounds');
+  const checks={
+   tampered:{uid:UID,expected:'altered value',
+    args:{p_expected_current_math_hours:6,p_expected_profile_revision:rev,
+     p_new_math_hours:Math.round((rec+.1)*10)/10}},
+   stale:{uid:UID,expected:'outdated revision',
+    args:{p_expected_current_math_hours:6,p_expected_profile_revision:rev-1,
+     p_new_math_hours:rec}},
+   anonymous:{uid:null,expected:'unauthenticated actor',
+    args:{p_expected_current_math_hours:6,p_expected_profile_revision:rev,
+     p_new_math_hours:rec}}
+  };
+  const test=checks[phase];
+  const response=await rpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',test.args,test.uid);
+  assert(!response.ok,phase+' must be rejected for '+test.expected);
   const after=await timeline();baseline(after);
   assert.equal(after.student_budget_profile_revision,rev);
  }
