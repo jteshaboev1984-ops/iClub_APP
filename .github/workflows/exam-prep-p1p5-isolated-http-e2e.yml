@@ -418,6 +418,7 @@ jobs:
             -f supabase/tests/p1p5_p3_d09_immutable_t0_disposable.sql \
             2>&1 | tee /tmp/p1p5-d09-first-t0.log
           grep -Fq 'D09-02 PASS: actual first Stage0 T0 frozen' /tmp/p1p5-d09-first-t0.log
+          grep -Fq 'D09-03 PASS: later finalized diagnostic does not shift' /tmp/p1p5-d09-first-t0.log
           grep -Fq 'D09-02 POST-ROLLBACK PASS' /tmp/p1p5-d09-first-t0.log
           echo 'D09-02 PASS: immutable first diagnosis, no learner state mutation'
 
