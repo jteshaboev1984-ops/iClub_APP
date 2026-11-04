@@ -1009,6 +1009,8 @@
         empty:"За этот период в iClub нет завершённых учебных сессий. Это не означает, что вы не занимались вне приложения.",
         normal:"Продолжайте подготовку в удобном темпе. Занятия сверх плана доступны без ограничений по выбранным часам.",
         caveat:"Количество сессий не является подсчётом учебных часов. Рекомендации Cambridge по индивидуальной нагрузке пока не рассчитаны.",
+        focusTitle:"Что проверить дальше",sectionLabel:"Раздел",focusAsOf:"По текущим результатам на момент формирования отчёта. Это не изменение учебного плана.",
+        focusActions:{correction:"Исправить выявленную ошибку",delayed_retest:"Пройти назначенную повторную проверку",mixed_transfer:"Применить знания в смешанных задачах",targeted_practice:"Закрепить тему по результатам проверки",targeted_check:"Проверить тему, по которой пока нет результатов",written_work_unscored:"Попрактиковаться в записи решения без автоматической оценки"},
         keep:"Оставить план",tasks:"Продолжить задания",edit:"Изменить расписание",close:"Закрыть отчёт"
       },
       uz: {
@@ -1019,6 +1021,8 @@
         empty:"Bu davrda iClub’da yakunlangan mashg‘ulot qayd etilmagan. Bu ilovadan tashqarida o‘qimagansiz degani emas.",
         normal:"Tayyorgarlikni o‘zingizga qulay sur’atda davom ettiring. Rejadan ko‘proq o‘qish cheklanmaydi.",
         caveat:"Mashg‘ulotlar soni o‘qish soatlarini ko‘rsatmaydi. Cambridge asosidagi shaxsiy vaqt tavsiyasi hali hisoblanmagan.",
+        focusTitle:"Keyin nimalarni tekshirish kerak",sectionLabel:"Bo‘lim",focusAsOf:"Hisobot tuzilgan paytdagi tasdiqlangan natijalarga asoslangan. Bu o‘quv rejasini o‘zgartirmaydi.",
+        focusActions:{correction:"Aniqlangan xatoni tuzatish",delayed_retest:"Belgilangan vaqtda qayta tekshiruvdan o‘tish",mixed_transfer:"Bilimni aralash masalalarda qo‘llash",targeted_practice:"Tekshiruv natijasiga ko‘ra mavzuni mustahkamlash",targeted_check:"Hali tekshirilmagan mavzu bo‘yicha bilimni tekshirish",written_work_unscored:"Yechimni yozib mashq qilish (avtomatik bahosiz)"},
         keep:"Rejani saqlash",tasks:"Topshiriqlarni davom ettirish",edit:"Jadvalni o‘zgartirish",close:"Hisobotni yopish"
       },
       en: {
@@ -1029,6 +1033,8 @@
         empty:"No completed iClub learning sessions were recorded for this period. This does not imply you did not study elsewhere.",
         normal:"Keep preparing at your own pace. You can study beyond your schedule without an hours-based cap.",
         caveat:"Session counts are not a measure of study hours. Personal Cambridge-based workload recommendations are not calculated yet.",
+        focusTitle:"What to check next",sectionLabel:"Section",focusAsOf:"Based on verified results available when this report was prepared. Your study plan has not changed.",
+        focusActions:{correction:"Correct an identified error",delayed_retest:"Complete the scheduled retest",mixed_transfer:"Apply knowledge in mixed problems",targeted_practice:"Practise a topic based on check results",targeted_check:"Check a topic with no recorded results yet",written_work_unscored:"Practise written working without automatic marking"},
         keep:"Keep current plan",tasks:"Continue tasks",edit:"Change schedule",close:"Close report"
       }
     };
@@ -1056,6 +1062,21 @@
         total + entry[comp].finalized_learning_sessions + entry[comp].finalized_timed_sessions,0);
       const attention=gaps.length>0 || n===0;
       const extra=gaps.map(g=>`<div class="ep-live-meta">${esc(c.gap(g.component,g.done,g.total))}</div>`).join("");
+      const focus=entry.period_kind==="week" ? entry.evidence_next_steps : null;
+      const allowedActions=c.focusActions||{};
+      const focusItems=focus?.contract_version==="exam_prep_weekly_evidence_focus_v1" &&
+        focus.read_at==="report_claim_time_not_historical_week_end" &&
+        focus.not_additional_weekly_plan===true &&
+        focus.student_selected_math_hours_unchanged===true &&
+        Array.isArray(focus.items) && focus.items.length<=3 &&
+        focus.items.every(item=>["P1","P5"].includes(item?.component_code) &&
+          typeof item?.syllabus_section==="string" &&
+          typeof allowedActions[item?.next_action]==="string") ? focus.items : [];
+      const focusHtml=focusItems.length ?
+        `<div class="ep-live-week-focus" data-ep-weekly-focus><strong>${esc(c.focusTitle)}</strong>
+          ${focusItems.map(item=>`<div class="ep-live-meta">${esc(item.component_code)} ·
+            ${esc(c.sectionLabel)} ${esc(item.syllabus_section)}: ${esc(allowedActions[item.next_action])}</div>`).join("")}
+          <p class="ep-live-meta">${esc(c.focusAsOf)}</p></div>` : "";
       const reason=gaps.length ? c.due : n===0 ? c.empty : c.normal;
       const date=fmt.format(new Date(entry.period_ended_at));
       const target=gaps[0]?.component ||
@@ -1070,7 +1091,7 @@
         : `<button class="ep-live-btn secondary" type="button" data-ep-periodic-keep="${index}">${esc(c.close)}</button>`;
       return `<section class="ep-live-card ep-live-pace-advisory" data-ep-periodic-report="${index}" role="status" aria-live="polite">
         <strong>${esc(entry.period_kind==="week" ? c.week : c.month)} · ${esc(date)}</strong>
-        ${summary}${extra}
+        ${summary}${extra}${focusHtml}
         <p class="ep-live-meta">${esc(reason)}</p>
         <p class="ep-live-meta">${esc(c.caveat)}</p>
         ${controls}
