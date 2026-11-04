@@ -16,6 +16,7 @@
     itemStartedAt: 0,
     notice: null,
     timerId: null,
+    clockSkewMs: 0,
     pendingWrittenStep: null,
     writtenCriteriaRequest: 0,
     mountToken: 0
@@ -1189,7 +1190,9 @@
 
   function deadlineMs(session) {
     const value = session?.timing_contract?.deadline_at; const ms = value ? new Date(value).getTime() : NaN;
-    return Number.isFinite(ms) ? ms : null;
+    // Use the server deadline on the device clock; the real expiry and marks
+    // are always enforced by the original server-side finalizer.
+    return Number.isFinite(ms) ? ms - (Number(state.clockSkewMs) || 0) : null;
   }
 
   function startTimer(sessionId) {
@@ -1226,6 +1229,11 @@
       }
     }
     if (!result?.ok) { renderError(); return; }
+    // Timed and Paper sessions include server_now in their private-to-owner
+    // read response. Correct the countdown for an incorrect device clock.
+    // Do not change persisted session times, attempts or user settings.
+    const serverNow = Date.parse(result.data?.timing_contract?.server_now || "");
+    state.clockSkewMs = Number.isFinite(serverNow) ? serverNow - Date.now() : 0;
     state.session = result.data;
     const items = Array.isArray(state.session?.items) ? state.session.items : [], next = items.find(item => item && !itemIsComplete(item));
     const timed = ["timed","paper"].includes(state.session?.session_type);
@@ -1840,7 +1848,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.clockSkewMs=0; state.busy = false; state.profile = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
