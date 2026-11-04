@@ -46,6 +46,7 @@ BEGIN
    OR (SELECT count(*) FROM public.users) <> 2
    OR NOT EXISTS(SELECT 1 FROM public.users WHERE id=v_uid)
    OR NOT EXISTS(SELECT 1 FROM public.users WHERE id=v_other)
+   OR to_regclass('private.exam_prep_weekly_flow_enrollment_v1') IS NULL
    OR to_regclass('private.exam_prep_weekly_budget_snapshots_v1') IS NULL
    OR to_regprocedure('public.ensure_my_exam_prep_weekly_budget_safe_v1(text,uuid)') IS NULL
    OR to_regprocedure('public.ensure_exam_prep_balanced_weekly_plan_safe_v1(text)') IS NULL
@@ -137,6 +138,20 @@ BEGIN
      AND active_week_no=2)
  THEN RAISE EXCEPTION 'P3-03 week two existed before genuine plan creation'; END IF;
 
+ -- The real weekly planner is an independently opt-in beta route.
+ -- Enrol ONLY fake A, ONLY in this immediately rolled-back transaction.
+ -- Never flip global qa_open_all_*, Core, AI or the production rollout state.
+ IF private.exam_prep_weekly_flow_enrolled_v1(v_uid) IS DISTINCT FROM true THEN
+   INSERT INTO private.exam_prep_weekly_flow_enrollment_v1(
+     user_id,enabled,approved_by,approved_at
+   ) VALUES (v_uid,true,v_uid,clock_timestamp())
+   ON CONFLICT(user_id) DO UPDATE SET
+     enabled=excluded.enabled,
+     approved_by=excluded.approved_by,
+     approved_at=excluded.approved_at;
+ END IF;
+ IF private.exam_prep_weekly_flow_enrolled_v1(v_uid) IS DISTINCT FROM true
+ THEN RAISE EXCEPTION 'P3-03 weekly Core route cannot be enabled for isolated fake A'; END IF;
  -- One existing normal academic plan authority, never a new planner.
  v_next_p1:=public.ensure_exam_prep_balanced_weekly_plan_safe_v1('P1');
  v_next_p5:=public.ensure_exam_prep_balanced_weekly_plan_safe_v1('P5');
@@ -242,6 +257,8 @@ BEGIN
      WHERE user_id=v_uid AND active_week_no=2)
   OR EXISTS (SELECT 1 FROM private.exam_prep_weekly_plans
      WHERE user_id=v_uid AND active_week_no=2)
+  OR EXISTS (SELECT 1 FROM private.exam_prep_weekly_flow_enrollment_v1
+     WHERE user_id=v_uid AND enabled)
  THEN RAISE EXCEPTION 'P3-03 refused: transaction did not restore original fake learner'; END IF;
  RAISE NOTICE 'P3-03 POST-ROLLBACK PASS: original two synthetic users restored, no next-week test rows';
 END;
