@@ -44,11 +44,21 @@ async function rpc(fn,token){
   const p=owner.data[component],h=personal.data[component];
   assert.equal(p.component_code,component);
   assert.equal(p.status,'diagnostic_period_ready','Only actual completed diagnostic has a starting point');
-  assert.equal(p.anchor_immutable,false,'Latest horizon session is not an immutable original T0');
+  assert.equal(typeof p.anchor_immutable,'boolean','D09 anchor provenance must be explicit');
+  assert.equal(p.anchor_source,
+    p.anchor_immutable ? 'first_verified_stage0_transition' :
+    'current_horizon_latest_finalized_diagnostic');
+  // New first transitions are frozen. Legacy students continue to display
+  // explicitly derived anchors, never fake a historical immutable T0.
   assert.equal(p.calendar_promotes_stage,false);
   assert(p.diagnostic_completed_at && h.diagnostic_completed_at,'Actual diagnostic completion anchor missing');
-  assert.equal(Date.parse(p.diagnostic_completed_at),Date.parse(h.diagnostic_completed_at),
-   'D09 '+component+' must read exactly the real pre-existing diagnostic horizon anchor');
+  if(p.anchor_immutable){
+    assert(Date.parse(p.diagnostic_completed_at)<=Date.parse(h.diagnostic_completed_at),
+      'Immutable initial diagnostic cannot move after a later horizon recalculation');
+  }else{
+    assert.equal(Date.parse(p.diagnostic_completed_at),Date.parse(h.diagnostic_completed_at),
+      'Legacy derived diagnostic must match current horizon when not frozen');
+  }
   assert(Number.isInteger(p.completed_7day_periods)&&p.completed_7day_periods>=0,
    'Negative or invented completed weeks');
   assert.equal(p.current_period_no,p.completed_7day_periods+1);
@@ -72,9 +82,14 @@ async function rpc(fn,token){
   for(const paper of ['P1','P5']){
    const t=other.data[paper]?.diagnostic_completed_at;
    const h=hB.data[paper]?.diagnostic_completed_at;
-   assert.equal(t?Date.parse(t):null,h?Date.parse(h):null,
-    'B received academic anchor not supported by own horizon '+paper);
+   if(other.data[paper]?.anchor_immutable) {
+    assert(t&&h&&Date.parse(t)<=Date.parse(h),
+      'B immutable T0 must come from B actual completed diagnostic');
+   }else{
+    assert.equal(t?Date.parse(t):null,h?Date.parse(h):null,
+      'B received derived anchor not supported by own horizon '+paper);
+   }
   }
  }
- console.log('PASS D09 real signed owner HTTP: independent P1/P5 diagnostic T0 projections, exact 7-day windows, anonymous denial, no grade/budget/session writes');
+ console.log('PASS D09 real signed owner HTTP: immutable new Stage0 T0 or labeled legacy fallback, P1/P5 seven-day periods, anonymous denial, no progress writes');
 })().catch(err=>{console.error(err);process.exitCode=1});
