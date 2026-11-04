@@ -18,6 +18,9 @@ on:
       - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
       - 'supabase/tests/p1p5_isolated_http_written_browser_allowlist.sql'
       - 'scripts/p1p5-isolated-http-written-criteria-next-browser.cjs'
+      - 'scripts/p1p5-extra-hard-real-http.cjs'
+      - 'supabase/tests/p1p5_extra_hard_disposable_real_http_*.sql'
+      - 'exam-prep/exam-prep-extra-hard-ui.js'
       - 'scripts/p1p5-isolated-http-stage-c-security-race.cjs'
       - 'supabase/tests/p1p5_stage_c_33_independent_stage0_rollbacks.sql'
       - 'supabase/tests/p1p5_stage_c_asymmetric_learning_correction_rollback.sql'
@@ -185,6 +188,11 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-isolated-http-auth-e2e.cjs
+      - name: Extra Hard owner-only noncredit protected-key HTTP with disposable example
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-extra-hard-real-http.cjs
+          node scripts/p1p5-extra-hard-real-http.cjs
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
