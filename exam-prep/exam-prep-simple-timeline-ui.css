@@ -175,21 +175,37 @@
 #exam-prep-host-root .ep-tl-compare .ep-tl-short strong{font-size:14px;white-space:nowrap}
 #exam-prep-host-root .ep-tl-compare .ep-tl-total-cap{opacity:.75}
 #exam-prep-host-root .ep-tl-compare .ep-tl-scope{font-size:11px;opacity:.72}
-#exam-prep-host-root .ep-tl-accept{
-  display:flex;align-items:center;justify-content:center;
-  border:1px solid var(--primary,#2f6fd6);
-  border-radius:10px;background:var(--primary,#2f6fd6);
-  color:#fff;min-height:44px;max-width:100%;width:max-content;
-  padding:10px 16px;font:inherit;font-weight:750;font-size:13px;
-  line-height:1.4;text-align:center;cursor:pointer;
+/* P2-18: one balanced choice group; no hidden automatic change. */
+#exam-prep-host-root .ep-tl-time-choices{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;align-items:stretch;min-width:0;
 }
-#exam-prep-host-root .ep-tl-accept:disabled{opacity:.55;cursor:default}
-#exam-prep-host-root .ep-tl-accept:focus-visible{
+#exam-prep-host-root .ep-tl-time-choice{
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:3px;min-width:0;min-height:56px;padding:10px 9px;
+  border:1px solid rgba(47,111,214,.32);border-radius:10px;
+  font:inherit;font-weight:700;font-size:12px;line-height:1.35;
+  text-align:center;overflow-wrap:anywhere;cursor:pointer;box-sizing:border-box;
+}
+#exam-prep-host-root .ep-tl-time-choice-secondary{
+  color:inherit;background:transparent;
+}
+#exam-prep-host-root .ep-tl-time-choice-primary{
+  border-color:var(--primary,#2f6fd6);
+  background:var(--primary,#2f6fd6);color:#fff;
+}
+#exam-prep-host-root .ep-tl-time-choice strong{
+  display:block;font-size:12px;font-weight:800;
+}
+#exam-prep-host-root .ep-tl-time-choice:disabled{opacity:.55;cursor:default}
+#exam-prep-host-root .ep-tl-time-choice:focus-visible,
+#exam-prep-host-root .ep-live-study-schedule:focus-within{
   outline:2px solid var(--primary,#2f6fd6);outline-offset:2px;
 }
 #exam-prep-host-root [data-ep-tl-plan-feedback]:not([hidden]){
   font-weight:700;font-size:12px;line-height:1.4;
 }
-@media(max-width:390px){
-  #exam-prep-host-root .ep-tl-accept{width:100%}
+@media(max-width:540px){
+  #exam-prep-host-root .ep-tl-time-choices{grid-template-columns:1fr}
+  #exam-prep-host-root .ep-tl-time-choice{min-height:44px}
 }
