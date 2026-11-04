@@ -33,11 +33,13 @@ REVOKE ALL ON private.exam_prep_learner_exam_dates_v1 FROM public,anon,authentic
 
 CREATE TABLE private.exam_prep_periodic_study_report_receipts_v1 (
   user_id uuid not null references public.users(id) on delete cascade,
+  program_version_id bigint not null references private.exam_prep_program_versions(id) on delete restrict,
+  diagnostic_anchor_at timestamptz not null,
   period_kind text not null check (period_kind in ('week','month')),
   period_ended_at timestamptz not null,
   claimed_at timestamptz not null default now(),
   report_payload jsonb not null,
-  primary key (user_id,period_kind,period_ended_at)
+  primary key (user_id,program_version_id,diagnostic_anchor_at,period_kind,period_ended_at)
 );
 ALTER TABLE private.exam_prep_periodic_study_report_receipts_v1 ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON private.exam_prep_periodic_study_report_receipts_v1 FROM public,anon,authenticated;
@@ -57,8 +59,12 @@ BEGIN
  IF (SELECT count(*) FROM information_schema.columns
    WHERE table_schema='private'
      AND table_name='exam_prep_periodic_study_report_receipts_v1'
-     AND column_name='program_version_id')<>0 THEN
-   RAISE EXCEPTION 'P0-10 receipt schema changed: re-review scoping';
+     AND column_name='program_version_id')<>1 OR
+    (SELECT count(*) FROM information_schema.columns
+     WHERE table_schema='private'
+       AND table_name='exam_prep_periodic_study_report_receipts_v1'
+       AND column_name='diagnostic_anchor_at')<>1 THEN
+   RAISE EXCEPTION 'P0-11 draft receipt version/diagnostic scoping absent';
  END IF;
  IF has_table_privilege('authenticated','private.exam_prep_learner_exam_dates_v1','DELETE')
     OR has_table_privilege('anon','private.exam_prep_learner_exam_dates_v1','DELETE')
@@ -80,12 +86,40 @@ SELECT '22222222-2222-4222-8222-222222222292'::uuid,
 FROM p0_future_selected_program p;
 
 INSERT INTO private.exam_prep_periodic_study_report_receipts_v1
- (user_id,period_kind,period_ended_at,report_payload)
-VALUES
- ('11111111-1111-4111-8111-111111111191'::uuid,'week','2026-11-02T00:00:00Z',
-  '{"test":"old_math_beta_receipt"}'::jsonb),
- ('22222222-2222-4222-8222-222222222292'::uuid,'week','2026-11-02T00:00:00Z',
-  '{"test":"other_learner_receipt"}'::jsonb);
+ (user_id,program_version_id,diagnostic_anchor_at,period_kind,period_ended_at,report_payload)
+SELECT '11111111-1111-4111-8111-111111111191'::uuid,
+       p.program_version_id,'2026-09-01T09:00:00Z'::timestamptz,
+       'week','2026-11-02T00:00:00Z','{"test":"old_math_beta_receipt"}'::jsonb
+FROM p0_future_selected_program p
+UNION ALL
+SELECT '22222222-2222-4222-8222-222222222292'::uuid,
+       p.program_version_id,'2026-09-01T09:00:00Z'::timestamptz,
+       'week','2026-11-02T00:00:00Z','{"test":"other_learner_receipt"}'::jsonb
+FROM p0_future_selected_program p
+UNION ALL
+SELECT '11111111-1111-4111-8111-111111111191'::uuid,
+       p.program_version_id,'2026-10-01T09:00:00Z'::timestamptz,
+       'week','2026-11-02T00:00:00Z','{"test":"fresh_cycle_same_period"}'::jsonb
+FROM p0_future_selected_program p;
+-- A replay in the SAME cycle is ignored, but a fresh completed diagnostic
+-- is entitled to its own receipt, even if week-end timestamps coincide.
+DO $p0_receipt$
+DECLARE v_inserted integer;
+BEGIN
+ WITH attempted AS (
+   INSERT INTO private.exam_prep_periodic_study_report_receipts_v1
+     (user_id,program_version_id,diagnostic_anchor_at,period_kind,period_ended_at,report_payload)
+   SELECT '11111111-1111-4111-8111-111111111191'::uuid,
+          p.program_version_id,'2026-09-01T09:00:00Z'::timestamptz,
+          'week','2026-11-02T00:00:00Z','{"test":"duplicate_old_cycle"}'::jsonb
+   FROM p0_future_selected_program p ON CONFLICT DO NOTHING RETURNING 1
+ )
+ SELECT count(*) INTO v_inserted FROM attempted;
+ IF v_inserted<>0 OR
+    (SELECT count(*) FROM private.exam_prep_periodic_study_report_receipts_v1)<>3
+ THEN RAISE EXCEPTION 'P0-11 per diagnostic-cycle receipt uniqueness broken'; END IF;
+ RAISE NOTICE 'PASS P0-11 same-period reports separated by diagnostic cycle; replay denied';
+END $p0_receipt$;
 CREATE TEMP TABLE p0_future_before AS SELECT
  (SELECT count(*) FROM private.exam_prep_learner_exam_dates_v1
     WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid) AS target_dates,
@@ -97,8 +131,8 @@ CREATE TEMP TABLE p0_future_before AS SELECT
     WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid) AS other_receipts,
  (SELECT md5(coalesce(string_agg(user_id::text||':'||component_code||':'||exam_date::text,
      '|' ORDER BY user_id,component_code),'')) FROM private.exam_prep_learner_exam_dates_v1) AS dates_fingerprint,
- (SELECT md5(coalesce(string_agg(user_id::text||':'||period_kind||':'||report_payload::text,
-     '|' ORDER BY user_id,period_kind),'')) FROM private.exam_prep_periodic_study_report_receipts_v1) AS receipts_fingerprint;
+ (SELECT md5(coalesce(string_agg(user_id::text||':'||program_version_id::text||':'||diagnostic_anchor_at::text||':'||period_kind||':'||report_payload::text,
+     '|' ORDER BY user_id,diagnostic_anchor_at,period_kind),'')) FROM private.exam_prep_periodic_study_report_receipts_v1) AS receipts_fingerprint;
 
 -- Negative: a previously unknown retained FK must block deletion rather than
 -- being bypassed. Savepoint removes the simulated new FK after proof.
@@ -134,7 +168,7 @@ DO $p0_counts$
 BEGIN
  IF (SELECT target_dates FROM p0_future_before)<>2
  OR (SELECT other_dates FROM p0_future_before)<>1
- OR (SELECT target_receipts FROM p0_future_before)<>1
+ OR (SELECT target_receipts FROM p0_future_before)<>2
  OR (SELECT other_receipts FROM p0_future_before)<>1
  THEN RAISE EXCEPTION 'P0-10 failed to seed exact prospective scope'; END IF;
  RAISE NOTICE 'PASS P0-10 prospective new-table source/privilege, two-user/receipt setup, unknown-FK stop';
@@ -142,8 +176,9 @@ END $p0_counts$;
 
 -- P0-10 SECTION FIRST_DELETE
 -- Extend the legacy 32-table synthetic reset INSIDE its original savepoint.
--- Receipt retention remains HOLD: cannot safely reset before program/epoch
--- attribution is explicitly defined. No claim of a full release-ready reset.
+-- Receipt retention remains HOLD for release policy approval, despite the
+-- draft program+diagnostic-cycle scoping now preventing old/new collisions.
+-- No claim of a full release-ready reset.
 DELETE FROM private.exam_prep_learner_exam_dates_v1 d
 WHERE d.user_id='11111111-1111-4111-8111-111111111191'::uuid
   AND d.program_version_id IN (SELECT program_version_id FROM p0_future_selected_program);
@@ -153,8 +188,8 @@ BEGIN
            WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid)
  OR (SELECT count(*) FROM private.exam_prep_learner_exam_dates_v1
      WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid)<>1
- OR (SELECT md5(coalesce(string_agg(user_id::text||':'||period_kind||':'||report_payload::text,
-   '|' ORDER BY user_id,period_kind),'')) FROM private.exam_prep_periodic_study_report_receipts_v1)
+ OR (SELECT md5(coalesce(string_agg(user_id::text||':'||program_version_id::text||':'||diagnostic_anchor_at::text||':'||period_kind||':'||report_payload::text,
+   '|' ORDER BY user_id,diagnostic_anchor_at,period_kind),'')) FROM private.exam_prep_periodic_study_report_receipts_v1)
    IS DISTINCT FROM (SELECT receipts_fingerprint FROM p0_future_before)
  THEN RAISE EXCEPTION 'P0-10 future date scope or receipt retention violated'; END IF;
  RAISE NOTICE 'PASS P0-10 first scoped future-date cleanup; all receipts HELD';
@@ -169,7 +204,7 @@ DO $p0_second$
 BEGIN
  IF (SELECT count(*) FROM private.exam_prep_learner_exam_dates_v1
      WHERE user_id='22222222-2222-4222-8222-222222222292'::uuid)<>1
- OR (SELECT count(*) FROM private.exam_prep_periodic_study_report_receipts_v1)<>2
+ OR (SELECT count(*) FROM private.exam_prep_periodic_study_report_receipts_v1)<>3
  THEN RAISE EXCEPTION 'P0-10 repeat unexpectedly changed protected records'; END IF;
  RAISE NOTICE 'PASS P0-10 future date repeat idempotent';
 END $p0_second$;
@@ -187,8 +222,8 @@ BEGIN
        '|' ORDER BY user_id,component_code),''))
        FROM private.exam_prep_learner_exam_dates_v1)
     IS DISTINCT FROM (SELECT dates_fingerprint FROM p0_future_before)
- OR (SELECT md5(coalesce(string_agg(user_id::text||':'||period_kind||':'||report_payload::text,
-       '|' ORDER BY user_id,period_kind),''))
+ OR (SELECT md5(coalesce(string_agg(user_id::text||':'||program_version_id::text||':'||diagnostic_anchor_at::text||':'||period_kind||':'||report_payload::text,
+       '|' ORDER BY user_id,diagnostic_anchor_at,period_kind),''))
        FROM private.exam_prep_periodic_study_report_receipts_v1)
     IS DISTINCT FROM (SELECT receipts_fingerprint FROM p0_future_before)
  THEN RAISE EXCEPTION 'P0-10 combined SAVEPOINT restoration was not byte-equivalent'; END IF;
