@@ -105,6 +105,21 @@ async function main(){
       view.indexOf('data-ep-tl-accept')<view.indexOf('data-ep-tl-other'),
       'Choices must have consistent visual order: '+loc);
   }
+  // D10: explain source and uncertainty without gating any student choice.
+  const provenance=[
+    ['ru','2020 года','не норма самостоятельной подготовки','Только вы решаете'],
+    ['uz','2020-yilgi','mustaqil tayyorgarlik me’yori','faqat o‘zingiz'],
+    ['en','2020 materials','not a measured independent-study requirement','Only you decide']
+  ];
+  for(const [locale,...fragments] of provenance){
+    const html=ui.viewHtml(shortModel,locale);
+    for(const fragment of fragments) assert(html.includes(fragment),
+      'Missing D10 estimate explanation in '+locale+': '+fragment);
+    assert(html.includes('data-ep-tl-keep') &&
+      html.includes('data-ep-tl-accept') &&
+      html.includes('data-ep-tl-other'),
+      'D10 copy must not introduce a new time-choice blocker');
+  }
   const capped=fixture();
   capped.existing_chosen_math_hours_per_week=4;
   capped.student_total_hours_per_week=5;
