@@ -65,7 +65,7 @@ async function scenario(browser,language,width){
   const visible=await report.innerText();
   for(const expected of labels[language])
     assert(visible.includes(expected),language+'/'+width+' missing accurate action '+expected+' in '+visible);
-  assert.equal(await report.locator('[data-ep-weekly-focus] .ep-live-meta').count(),2,
+  assert.equal(await report.locator('[data-ep-weekly-focus] > div.ep-live-meta').count(),2,
     'More or fewer than two actual evidence-led focus cards');
   assert(!/T0|legacy|epoch|academic_contract_missing|source_mapped|internal/.test(visible),
     'Technical internals exposed on learner-facing weekly report');
