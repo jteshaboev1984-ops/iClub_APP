@@ -6,6 +6,7 @@ on:
       - 'exam-prep/**'
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
+      - 'scripts/p1p5-d09-04-academic-week-label-browser.cjs'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package1-real-dates-horizon-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -188,6 +189,17 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-isolated-http-auth-e2e.cjs
+      - name: D09-04 original plan week plus independent P1 P5 diagnostic weeks (RU UZ EN Chromium)
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node --check exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-weekly-flow-adapter.js
+          node --check scripts/p1p5-d09-04-academic-week-label-browser.cjs
+          node scripts/p1p5-d09-04-academic-week-label-browser.cjs | tee /tmp/p1p5-d09-04-week-label.log
+          grep -Fq 'PASS D09-04 native ru 390px' /tmp/p1p5-d09-04-week-label.log
+          grep -Fq 'PASS D09-04 native uz 1280px' /tmp/p1p5-d09-04-week-label.log
+          grep -Fq 'PASS D09-04 native en 1280px' /tmp/p1p5-d09-04-week-label.log
       - name: Extra Hard owner-only noncredit protected-key HTTP with disposable example
         run: |
           set -euo pipefail
