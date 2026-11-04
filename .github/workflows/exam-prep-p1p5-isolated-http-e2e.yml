@@ -223,6 +223,19 @@ jobs:
           test "$P1P5_E2E_ISOLATED" = "true"
           node --check scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
           node scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
+      - name: P2-16 learner dates safe save RLS, no school verification or legacy modifications
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p2_16_learner_dates_source_contract.sql 2>&1 \
+            | tee /tmp/p1p5-p2-16-learner-dates.log
+          grep -q 'PASS P2-16: learner-selected dates source-scoped' \
+            /tmp/p1p5-p2-16-learner-dates.log
       - name: P2-17 verify JS syntax
         run: node --check scripts/p1p5-p2-17-weekly-owner-e2e.cjs
       - name: P2-17 dates - select future dates and calculate feasible weekly target
@@ -260,19 +273,6 @@ jobs:
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = "true"
           node scripts/p1p5-p2-17-weekly-owner-e2e.cjs restore
-      - name: P2-16 learner dates safe save RLS, no school verification or legacy modifications
-        env:
-          PGOPTIONS: -c iclub.e2e_isolated=true
-        run: |
-          set -euo pipefail
-          test "$P1P5_E2E_ISOLATED" = "true"
-          test "$PGHOST" = "127.0.0.1"
-          test "$PGDATABASE" = "postgres"
-          psql -X -v ON_ERROR_STOP=1 \
-            -f supabase/tests/p1p5_p2_16_learner_dates_source_contract.sql 2>&1 \
-            | tee /tmp/p1p5-p2-16-learner-dates.log
-          grep -q 'PASS P2-16: learner-selected dates source-scoped' \
-            /tmp/p1p5-p2-16-learner-dates.log
       - name: P2-17 prove student opt-in hours revision ledger, unchanged paper epoch and retained academic history
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
