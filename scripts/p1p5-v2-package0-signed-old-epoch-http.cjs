@@ -71,6 +71,7 @@ function conflict(r,label){
    console.log('PASS P0-13 held release maintenance denies every learner write');
  }else{
    conflict(await request(1,'old-tab-after-cutover','alpha',a),'post-cutover stale tab');
+   conflict(await request(2,'old-tab-after-cutover','alpha',a),'tampered new epoch with old issued session');
    success(await request(2,'epoch-two-request','beta',a),false);
    success(await request(2,'epoch-two-request','beta',a),true);
    denied(await request(2,'foreign-new-epoch','beta',b),'foreign learner after cutover');
