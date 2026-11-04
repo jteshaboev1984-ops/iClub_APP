@@ -66,7 +66,11 @@ const EXPECTED=[
   "get_exam_prep_weekly_progress_safe_v1",
   "get_exam_prep_written_criteria_safe_v1",
   "get_exam_prep_written_step_status_safe_v1",
+  "get_my_exam_prep_extra_hard_attempt_safe_v1",
+  "get_my_exam_prep_extra_hard_catalog_safe_v1",
   "get_my_exam_prep_weekly_flow_status_v1",
+  "start_my_exam_prep_extra_hard_safe_v1",
+  "submit_my_exam_prep_extra_hard_safe_v1",
   "record_exam_prep_integrity_event_safe_v1",
   "record_my_exam_prep_interruption_v2",
   "save_exam_prep_exam_profile_v2",
@@ -111,14 +115,15 @@ const missing=EXPECTED.filter(n=>!found.has(n));
 const added=[...found].filter(n=>!EXPECTED.includes(n)).sort();
 assert.deepEqual(missing,[],'historical RPC removed/renamed; first reconcile actual backend signature');
 assert.deepEqual(added,[],'new untraced RPC; first document path, permissions and invariant');
-assert.equal(EXPECTED.length,65,'P1/P5 D03 source contract count changed without trace review');
+assert.equal(EXPECTED.length,69,'P1/P5 Extra Hard scope requires four additional reviewed RPCs');
 const api=read(PATHS[0]),weekly=read(PATHS[1]),progress=read(PATHS[2]);
 const live=read(LIVE),host=read(HOST),html=read(HTML);
 for(const n of [
  'startNextDiagnostic','getSession','startSession','submitResponse','finalizeSession',
  'weeklyPlan','generateWeeklyPlan','authorizePlanItem','timedCatalog','authorizeTimed',
  'finalizeTimed','writtenCriteria','advanceWrittenStep','getSessionWritten',
- 'sessionReview','timedResult','readinessSummary'
+ 'sessionReview','timedResult','readinessSummary',
+ 'extraHardCatalog','extraHardStart','extraHardSubmit','extraHardAttempt'
 ]){
  assert(api.includes(n),'public client method missing: '+n);
 }
@@ -141,6 +146,18 @@ for(const n of ['get_exam_prep_weekly_progress_safe_v1','get_exam_prep_weekly_go
 assert.match(weekly,/window\.iClubExamPrepWeeklyFlowEnabled\s*!==\s*true/,'weekly fail-closed cutover missing');
 assert.match(host,/state\.subjectKey\s*!==\s*MATHEMATICS_KEY/,'subject isolation missing');
 assert.match(live,/writtenNotAuto/,'non-grading policy label missing');
+const secureMigration=read('supabase/migrations/20261104120000_exam_prep_p1p5_extra_hard_optional_noncredit_v1.sql');
+const extraView=read('exam-prep/exam-prep-extra-hard-ui.js');
+assert(secureMigration.includes('enabled boolean NOT NULL DEFAULT false'),
+ 'Extra Hard public release must default OFF');
+assert(!/INSERT INTO private\.exam_prep_extra_hard_tasks_v1\s*\(/i.test(secureMigration),
+ 'Protected tasks or solutions must NEVER be seeded from PUBLIC repository');
+assert(!extraView.includes('localStorage.setItem') && !extraView.includes('marks_awarded'),
+ 'Extra Hard route must not alter legacy progress or award scores');
+assert(html.includes('exam-prep/exam-prep-extra-hard-ui.js'),
+ 'Extra Hard view not loaded by optional learner shell');
+assert(live.includes('data-ep-component-link="extra-hard"'),
+ 'P1/P5 voluntary challenge link missing');
 for(const [label,src] of [['API',api],['learner UI',live]]) {
  assert(!src.includes('submitTimedSelfMark') && !src.includes('submit_exam_prep_timed_written_self_mark_safe_v1'),
    'D03 forbids callable self-mark endpoint: '+label);
