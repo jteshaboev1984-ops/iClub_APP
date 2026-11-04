@@ -9,6 +9,9 @@ const SECRET=process.env.P1P5_E2E_JWT_SECRET;
 const A='11111111-1111-4111-8111-111111111191';
 const B='22222222-2222-4222-8222-222222222292';
 const phase=process.argv[2];
+const FIXED_IAT=Number(process.env.P0_13_FIXED_IAT);
+assert(Number.isSafeInteger(FIXED_IAT) && FIXED_IAT>1700000000,
+  'P0-13 requires same pre-cutover JWT timestamp for all phases');
 assert(['before','during','after'].includes(phase),'P0-13 requires explicit phase');
 assert(process.env.P1P5_E2E_ISOLATED==='true','disposable environment required');
 assert(process.env.PGDATABASE==='postgres','production database blocked');
@@ -17,7 +20,7 @@ assert(HOST==='http://127.0.0.1:3000','external host blocked');
 
 const enc=o=>Buffer.from(JSON.stringify(o)).toString('base64url');
 function token(uid){
- const now=Math.floor(Date.now()/1000);
+ const now=FIXED_IAT; // exact same still-valid signed JWT across before/during/after
  const body=enc({alg:'HS256',typ:'JWT'})+'.'+
    enc({role:'authenticated',aud:'authenticated',sub:uid,iat:now,exp:now+1200});
  return body+'.'+crypto.createHmac('sha256',SECRET).update(body).digest('base64url');
