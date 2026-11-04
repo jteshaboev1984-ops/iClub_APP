@@ -224,6 +224,9 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
     assert.notEqual(planIds.P1,planIds.P5,'P1/P5 plans unexpectedly share identity');
     // Plan periods now consume ONE Math hours budget across P1/P5. This
     // checks genuine authenticated RPCs, not a separate fake lesson generator.
+    const periods=await rpc('get_exam_prep_diagnostic_periods_safe_v1',{},tokenA);
+    assert(periods.ok&&periods.data?.contract_version==='diagnostic_period_readonly_v1',
+      'Owner actual academic P1/P5 periods unavailable');
     const shares={};
     for(const component of ['P1','P5']){
       const b=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
@@ -232,6 +235,20 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
       assert(b.ok && b.data?.contract_version==='exam_prep_shared_weekly_available_time_v1',
         'Owner weekly capacity failed: '+component+' '+JSON.stringify(b.data));
       const row=b.data;
+      assert.equal(row.planner_week_kind,'legacy_shared_plan_id');
+      assert.equal(row.legacy_plan_id_preserved,true);
+      assert.equal(row.diagnostic_period_never_rekeys_existing_plan,true);
+      assert.equal(row.plan_id,planIds[component],'Academic date replaced old owned plan ID');
+      for(const paper of ['P1','P5']){
+        const shown=row.component_diagnostic_periods?.[paper];
+        const real=periods.data?.[paper];
+        assert(shown&&real,'Independent verified '+paper+' diagnostic period missing');
+        assert.equal(shown.status,real.status);
+        assert.equal(shown.current_period_no,real.current_period_no,
+          'Client sees legacy plan week instead of '+paper+' academic period');
+        assert.equal(shown.next_period_ends_at,real.next_period_ends_at);
+        assert.equal(shown.anchor_immutable,real.anchor_immutable);
+      }
       assert.equal(row.available_math_minutes,
         row.p1_reserved_minutes+row.p5_reserved_minutes,
         'P1/P5 double-counted chosen Math weekly time');
@@ -262,6 +279,10 @@ async function browserScenario(browser,component,token,mode='diagnostic'){
       'component_available_minutes','profile_revision_at_capture','priority_slots'])
       assert.deepEqual(repeated.data[key],shares.P1[key],
         'Reopening weekly plan changed frozen field '+key);
+    for(const paper of ['P1','P5'])
+      assert.deepEqual(repeated.data.component_diagnostic_periods[paper],
+        shares.P1.component_diagnostic_periods[paper],
+        'Reopening unchanged actual diagnostic week was inconsistent '+paper);
     const stolen=await rpc('ensure_my_exam_prep_weekly_budget_safe_v1',{
       p_component_code:'P1',p_plan_id:planIds.P1
     },tokenB);
