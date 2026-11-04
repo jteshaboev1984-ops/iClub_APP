@@ -100,3 +100,24 @@ for(const phrase of ['NOT release GO','synthetic-only','ONE','Practice','Tour','
 console.log('PASS P0 full 32-table exact scoped rollback and independent PG17-only backup/restore safety contracts');
 
 console.log('PASS v2 Package 0 SELECT-only live queries, 32 provisional candidates, protected invariants, synthetic PG rollback contracts');
+
+
+// P0-08 draft-branch schema drift: the old 32-table reset scope is NOT final.
+const future=read('supabase/tests/p1p5_v2_package0_future_tables_readonly.sql');
+const driftDecision=read('docs/math-p1p5-v2-package0-draft-schema-drift-20261104.md');
+assert(/READ ONLY/i.test(future),'cross-PR scope inspection must be READ ONLY');
+assert(!/\b(?:delete|update|insert|truncate|drop|alter|create|grant|revoke|call|do|execute|copy|vacuum)\b/i.test(strip(future)),
+  'draft-schema scope inspection contains a write command');
+for(const [name,pr] of [
+  ['exam_prep_periodic_study_report_receipts_v1','469'],
+  ['exam_prep_learner_exam_dates_v1','470']
+]){
+  assert(future.includes(name),'P0-08 SQL must detect new draft user state '+name);
+  assert(driftDecision.includes(name),'P0-08 release hold must classify '+name);
+  assert(driftDecision.includes('PR #'+pr),'P0-08 must link original PR #'+pr);
+  assert(!reset.includes(name),'original 32-table rehearsal must not silently assume future table '+name);
+}
+assert(driftDecision.includes('No')||driftDecision.includes('NO_GO'),'scope drift must not grant release');
+assert(driftDecision.includes('program_version_id')&&driftDecision.includes('one-shot'),
+  'missing receipt ownership or release epoch review');
+console.log('PASS P0-08 draft-schema drift: two newly proposed per-user tables identified, both outside original 32-table scope, release NO_GO');
