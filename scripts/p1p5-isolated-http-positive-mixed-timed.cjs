@@ -4,8 +4,9 @@
 // Server-graded evidence has ALREADY prepared Stage 3 from published academic
 // content in isolated PostgreSQL; neither client nor fixture assigns mastery.
 // The result of all scored timed attempts originates in the public finalizer.
-// Written responses are learner artifacts, and self-marks are explicit 0,
-// NEVER machine/examiner-verified marks or an artificial readiness claim.
+// Written responses are learner artifacts: neither learner nor app may assign
+// marks. The public RPC must deny old clients; result shows unknown written
+// correctness while preserving objectively checked in-time evidence.
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
@@ -37,6 +38,31 @@ async function rpc(name,args={},token){
  return {ok:res.ok,data,status:res.status,code:res.ok?'':data?.code||data?.message||res.status};
 }
 const ok=(r,label)=>{assert(r.ok&&r.data!=null,label+' HTTP '+r.status+' reason='+r.code);return r.data};
+
+async function proveSignedTimedClock(id,ownerToken,foreignToken,component,expectedType){
+ const owner=ok(await rpc('get_exam_prep_session_safe_v1',{
+  p_session_id:id,p_language:'en'
+ },ownerToken),'owner clock projection '+component);
+ assert.equal(owner.component_code,component);
+ assert.equal(owner.session_type,expectedType);
+ const t=owner.timing_contract;
+ assert(t&&typeof t==='object'&&!Array.isArray(t),'Timed/Paper clock missing');
+ assert.deepEqual(Object.keys(t).sort(),
+  ['deadline_at','time_limit_sec','strict_timing','attempt_kind','server_now'].sort(),
+  'Do not expose private comparison, marks or keys');
+ assert(Date.parse(t.deadline_at)>Date.parse(t.server_now),'Server deadline must be in future');
+ assert(Number.isInteger(t.time_limit_sec)&&t.time_limit_sec>0);
+ assert(typeof t.strict_timing==='boolean');
+ assert(typeof t.attempt_kind==='string'&&t.attempt_kind.length>0);
+ assert(Date.parse(t.deadline_at)-Date.parse(t.server_now)<=t.time_limit_sec*1000,
+  'Countdown must use immutable server duration');
+ const foreign=await rpc('get_exam_prep_session_safe_v1',{p_session_id:id,p_language:'en'},foreignToken);
+ assert(!foreign.ok,'Foreign learner read another Timed/Paper clock');
+ const anonymous=await rpc('get_exam_prep_session_safe_v1',{p_session_id:id,p_language:'en'});
+ assert(!anonymous.ok,'Anonymous actor read Timed/Paper clock');
+ return owner;
+}
+
 const sessionItems=id=>list("SELECT si.item_order ord,si.item_kind kind,si.reserve_role role,q.qtype qtype,q.correct_answer ans,ti.max_marks max_marks FROM private.exam_prep_session_items si LEFT JOIN public.questions q ON q.id=si.question_id LEFT JOIN private.exam_prep_timed_assessment_items ti ON ti.assessment_id=(SELECT assessment_id FROM private.exam_prep_sessions WHERE id=si.session_id) AND ti.item_order=si.item_order WHERE si.session_id='"+id+"'::uuid ORDER BY si.item_order");
 async function finishSession(id,token,prefix,timed=false){
  assert(/^[a-f0-9-]{36}$/.test(id),'bad uuid');
@@ -74,19 +100,33 @@ async function finishSession(id,token,prefix,timed=false){
    p_session_id:id,p_idempotency_key:prefix+'-final',p_completion_reason:'submitted'
  },token),'idempotent finalizer replay');
  assert(replay.replayed===true,'timed duplicate finalization not idempotent');
- const selfChecks=frozen.filter(i=>i.kind==='written');
- const reviewBefore=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed before self review');
- if(selfChecks.length)assert(reviewBefore.score_status==='pending_self_review',
-  'unreviewed written content was incorrectly treated as machine-scored');
- for(const i of selfChecks){
-  const marked=ok(await rpc('submit_exam_prep_timed_written_self_mark_safe_v1',{
-   p_session_id:id,p_item_order:i.ord,p_marks_awarded:0,
-   p_idempotency_key:prefix+'-selfmark-'+i.ord,
-   p_review_note:'CI synthetic learner self review; deliberately no verified marks'
-  },token),'explicit self-review '+i.ord);
-  assert(marked.readiness_claim!==true,'self-mark cannot award readiness');
+ const writtenChecks=frozen.filter(i=>i.kind==='written');
+ const beforeResult=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'objective-only timed result');
+ assert.equal(beforeResult.result_scope,'objective_only','server must exclude unverified written awards');
+ assert.equal(beforeResult.marks_in_time,beforeResult.objective_marks_in_time,
+   'written self marks were added to verified score');
+ if(writtenChecks.length){
+  assert.equal(beforeResult.score_status,'written_ungraded','written completeness is not verified correctness');
+  assert.equal(beforeResult.score_comparable,false,'written without verification cannot qualify as comparable full-paper evidence');
+  assert.equal(beforeResult.in_time_percent,null,'no full Paper percentage from ungraded writing');
+  const review=ok(await rpc('get_exam_prep_timed_review_pack_safe_v1',{
+   p_session_id:id,p_language:'en'
+  },token),'ungraded written review pack');
+  assert(review.items.length>0,'written solution/rubric evidence disappeared');
+  assert(review.items.every(item=>item.written_correctness==='unknown' &&
+       !Object.hasOwn(item,'self_marks_awarded') &&
+       !Object.hasOwn(item,'self_marked')),
+       'written review exposed archived learner marks');
+  const forbidden=await rpc('submit_exam_prep_timed_written_self_mark_safe_v1',{
+    p_session_id:id,p_item_order:writtenChecks[0].ord,p_marks_awarded:0,
+    p_idempotency_key:prefix+'-selfmark-forbidden-0001',
+    p_review_note:null
+  },token);
+  assert(!forbidden.ok,'direct signed HTTP must not allow self-awarded written marks');
  }
- const after=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed result after self review');
+ const after=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed result after forbidden self-score');
+ assert.equal(after.marks_in_time,beforeResult.marks_in_time,'disabled self-mark changed score');
+ assert.equal(after.score_comparable,beforeResult.score_comparable,'disabled self-mark changed comparability');
  assert(after.readiness_claim!==true,'test result promoted to human-certified readiness');
  assert(after.answered_items===frozen.length,'timed server did not count all submitted answers');
  assert(after.unattempted_items===0,'timed server lost answered item');
@@ -119,6 +159,8 @@ async function run(){
   },token),'start mixed '+component);
   const pack=row("SELECT component_code,session_type,assessment_id FROM private.exam_prep_sessions WHERE id='"+begin.session_id+"'::uuid");
   assert(pack.component_code===component&&pack.session_type==='mixed','mixed package crossed paper boundary');
+  const nonTimed=ok(await rpc('get_exam_prep_session_safe_v1',{p_session_id:begin.session_id,p_language:'en'},token),'non-timed projection');
+  assert.equal(nonTimed.timing_contract,null,'Non-timed session must return JSON null clock');
   const done=await finishSession(begin.session_id,token,'real-http-mixed-'+component);
   const foreign=await rpc('get_exam_prep_session_safe_v1',{p_session_id:begin.session_id,p_language:'en'},other);
   assert(!foreign.ok||!foreign.data?.items?.length,'other learner accessed mixed package');
@@ -136,6 +178,7 @@ async function run(){
    p_authorization_id:auth.authorization_id,p_idempotency_key:'real-http-paper-'+component+'-start'
   },token),'start paper '+component);
   assert(start.session_id,'timed start missing session ID');
+  await proveSignedTimedClock(start.session_id,token,other,component,'paper');
   const result=await finishSession(start.session_id,token,'real-http-paper-'+component,true);
   const foreign=await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:start.session_id},other);
   assert(!foreign.ok||!foreign.data?.session_id,'other learner read foreign full-paper result');
@@ -152,6 +195,7 @@ async function run(){
   const start=ok(await rpc('start_exam_prep_session_safe_v1',{
    p_authorization_id:a.authorization_id,p_idempotency_key:'real-http-section-'+component+'-start'
   },token),'start timed-section '+component);
+  await proveSignedTimedClock(start.session_id,token,other,component,'timed');
   const done=await finishSession(start.session_id,token,'real-http-section-'+component,true);
   assert(!done.paper,'timed section was incorrectly recorded as a full paper');
   const foreign=await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:start.session_id},other);

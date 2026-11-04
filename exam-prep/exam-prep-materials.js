@@ -292,7 +292,7 @@
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.dataset.examPrepLearnerFlowUx = "true";
-    link.href = `${base}exam-prep-learner-flow-ux.css?v=flowux3`;
+    link.href = `${base}exam-prep-learner-flow-ux.css?v=flowux3-p3budget`;
     document.head.appendChild(link);
   }
 
