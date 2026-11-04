@@ -112,7 +112,7 @@ BEGIN
    SELECT '11111111-1111-4111-8111-111111111191'::uuid,
           p.program_version_id,'2026-09-01T09:00:00Z'::timestamptz,
           'week','2026-11-02T00:00:00Z','{"test":"duplicate_old_cycle"}'::jsonb
-   FROM p0_future_selected_program p ON CONFLICT DO NOTHING RETURNING 1
+   FROM p0_future_selected_program p WHERE true ON CONFLICT DO NOTHING RETURNING 1
  )
  SELECT count(*) INTO v_inserted FROM attempted;
  IF v_inserted<>0 OR
