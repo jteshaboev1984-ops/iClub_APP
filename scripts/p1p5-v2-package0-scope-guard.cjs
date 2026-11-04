@@ -174,3 +174,24 @@ assert(p010Workflow.includes('node scripts/p1p5-v2-package0-build-combined-probe
        p010Workflow.includes('PGOPTIONS: -c iclub.e2e_isolated=true'),
        'P0-10 actual migrated PostgreSQL E2E is absent');
 console.log('PASS P0-10 prospective state overlay and combined real-schema test authorization guard');
+
+
+// P0-12 read-only RPC entrypoint inventory: NEVER use catalog metadata to
+// authorize production cleanup or claim that nested write calls are all found.
+const p012=read('supabase/tests/p1p5_v2_package0_write_entrypoints_readonly.sql');
+assert(/--.*READ ONLY/i.test(p012),'P0-12 RPC audit must state READ ONLY');
+assert(!/\b(?:insert|update|delete|truncate|drop|alter|create|grant|revoke|call|do|execute|copy|vacuum)\b/i.test(strip(p012)),
+  'P0-12 production catalog inspection contains a non-SELECT statement');
+for(const marker of [
+  'pg_proc',
+  'pg_get_functiondef',
+  'has_function_privilege',
+  'exam_prep_require_core_access_v1',
+  'start_exam_prep_next_diagnostic_safe_v1',
+  'submit_exam_prep_response_safe_v1',
+  'finalize_exam_prep_session_safe_v1',
+  'auth_contains_release_epoch_token',
+  'public wrappers',
+  'checks_epoch'
+]) assert(p012.includes(marker),'P0-12 lacks safety audit coverage: '+marker);
+console.log('PASS P0-12 read-only write-API/epoch coverage inventory, no live mutations');
