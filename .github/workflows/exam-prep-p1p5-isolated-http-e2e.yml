@@ -405,6 +405,22 @@ jobs:
           node scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs
           echo 'D09 PASS: read-only independent P1/P5 periods and actual owner JWT/PG17'
 
+      - name: D09-02 immutable original Stage0 date survives second placement (disposable PG17)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d09_immutable_t0_disposable.sql \
+            2>&1 | tee /tmp/p1p5-d09-first-t0.log
+          grep -Fq 'D09-02 PASS: actual first Stage0 T0 frozen' /tmp/p1p5-d09-first-t0.log
+          grep -Fq 'D09-02 POST-ROLLBACK PASS' /tmp/p1p5-d09-first-t0.log
+          echo 'D09-02 PASS: immutable first diagnosis, no learner state mutation'
+
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
