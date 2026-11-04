@@ -10,6 +10,7 @@
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const VERSION = 'p2_18_three_explicit_time_choices_v1';
   const ACCEPT_RPC = 'accept_my_exam_prep_timeline_weekly_target_safe_v1';
+  const KEEP_RPC = 'keep_my_exam_prep_timeline_weekly_time_safe_v1';
   const SAVE_RPC = 'save_my_exam_prep_timeline_dates_safe_v1';
   const RPC = 'get_exam_prep_simple_learning_timeline_with_hours_safe_v2';
   const SELECTOR = '[data-ep-simple-timeline]';
@@ -38,7 +39,8 @@
       adopt:'Принять рекомендуемое', adoptSuffix:'ч/нед',
       choicesTitle:'Как поступить с учебным временем?',
       keep:'Оставить свой план', other:'Выбрать другое время',
-      kept:'Текущее расписание оставлено без изменений.',
+      kept:'Ваш выбор сохранён. Недельные часы остались прежними.',
+      keepFailed:'Не удалось зафиксировать выбор. Обновите план и попробуйте снова.',
       otherHint:'Измените минуты и учебные дни ниже, затем нажмите «Сохранить расписание».',
       settingsUnavailable:'Настройки времени недоступны. Вернитесь к своему учебному плану.',
       tooMuch:'Рекомендуемое время больше вашего общего недельного бюджета. Его можно изменить в настройках Exam Prep.',
@@ -69,7 +71,8 @@
       adopt:'Tavsiya etilganini qabul qilish', adoptSuffix:'soat/hafta',
       choicesTitle:'O‘qish vaqtini qanday belgilaysiz?',
       keep:'O‘z rejamni qoldirish', other:'Boshqa vaqtni tanlash',
-      kept:'Hozirgi rejangiz o‘zgartirilmadi.',
+      kept:'Tanlovingiz saqlandi. Haftalik soatlaringiz o‘zgarmadi.',
+      keepFailed:'Tanlovni saqlab bo‘lmadi. Rejani yangilab qayta urinib ko‘ring.',
       otherHint:'Quyida daqiqa va o‘qish kunlarini tanlab, «Jadvalni saqlash» tugmasini bosing.',
       settingsUnavailable:'Vaqt sozlamalari hozir mavjud emas. O‘qish rejangizga qayting.',
       tooMuch:'Tavsiya etilgan vaqt umumiy haftalik budjetingizdan ko‘p. Uni Exam Prep sozlamalarida o‘zgartirishingiz mumkin.',
@@ -100,7 +103,8 @@
       adopt:'Accept suggestion', adoptSuffix:'h/week',
       choicesTitle:'How would you like to set your study time?',
       keep:'Keep my plan', other:'Choose another time',
-      kept:'Your existing study plan was kept unchanged.',
+      kept:'Your choice was saved. Your weekly study hours are unchanged.',
+      keepFailed:'Could not record your choice. Refresh the plan and try again.',
       otherHint:'Change the minutes and study days below, then select Save schedule.',
       settingsUnavailable:'Study time settings are unavailable. Return to your study plan.',
       tooMuch:'The suggested time exceeds your total weekly study budget. You can change it in Exam Prep settings.',
@@ -288,6 +292,45 @@
   }
 
 
+  async function keepWeekly(section,model,button,key) {
+    if(!section || !button || button.disabled || model.suggested===null ||
+      model.chosen===null || model.profileRevision===null ||
+      model.suggested<=model.chosen+0.04 ||
+      !canShow(root()) || !root()?.contains(section)) return;
+    const gen=requestId;
+    const w=WORDS[language()]||WORDS.ru;
+    const status=section.querySelector('[data-ep-tl-plan-feedback]');
+    const sb=window.sb;
+    if(!sb || typeof sb.rpc!=='function'){
+      if(status){status.textContent=w.keepFailed;status.hidden=false;}
+      return;
+    }
+    button.disabled=true;
+    try {
+      const response=await sb.rpc(KEEP_RPC,{
+        p_expected_current_math_hours:model.chosen,
+        p_expected_profile_revision:model.profileRevision,
+        p_expected_suggested_math_hours:model.suggested,
+        p_idempotency_key:key
+      });
+      if(response?.error) throw response.error;
+      const payload=Array.isArray(response?.data)?response.data[0]:response?.data;
+      const verified=parsePayload(payload);
+      if(!verified || payload?.decision_recorded!==true ||
+        payload?.hours_changed!==false ||
+        verified.chosen!==model.chosen ||
+        verified.profileRevision!==model.profileRevision)
+        throw Error('Keep confirmation contract mismatch');
+      if(gen===requestId && canShow(root()) && root()?.contains(section) && status){
+        status.textContent=w.kept;status.hidden=false;
+      }
+    }catch(_){
+      if(gen===requestId && canShow(root()) && root()?.contains(section) && status){
+        status.textContent=w.keepFailed;status.hidden=false;
+      }
+    }finally{button.disabled=false;}
+  }
+
   async function acceptWeekly(section,model,button) {
     if (!section || !button || button.disabled || !model.canAdopt ||
         !canShow(root()) || !root()?.contains(section)) return;
@@ -334,6 +377,9 @@
     const error=section.querySelector('[data-ep-tl-error]');
     const original=Object.fromEntries(model.cards.map(x=>[x.code,inputDate(x.examAt)]));
     const bounds=inputBounds();
+    // Stable for this rendered recommendation: safe lost-ACK retry, no localStorage.
+    const keepKey='p218_keep_'+(window.crypto?.randomUUID?.() ||
+      (Date.now()+'_'+Math.floor(Math.random()*1e12)));
     const input=paper=>section.querySelector('[data-ep-tl-date="'+paper+'"]');
     const values=()=>({P1:input('P1')?.value||'',P5:input('P5')?.value||''});
     let busy=false;
@@ -357,8 +403,8 @@
         if(choice.hasAttribute('data-ep-tl-accept')) {
           void acceptWeekly(section,model,choice);
         } else if(choice.hasAttribute('data-ep-tl-keep')) {
-          // Deliberate choice without any server update.
-          if(feedback){feedback.textContent=w.kept;feedback.hidden=false;}
+          // Record deliberate risk acknowledgment; NEVER update chosen hours.
+          void keepWeekly(section,model,choice,keepKey);
         } else {
           // Reuse existing study schedule editor; only its Save may write.
           const settings=root()?.querySelector('[data-ep-study-schedule]');
