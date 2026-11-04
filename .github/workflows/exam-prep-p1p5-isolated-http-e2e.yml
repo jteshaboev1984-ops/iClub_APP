@@ -8,6 +8,7 @@ on:
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'scripts/p1p5-d09-04-academic-week-label-browser.cjs'
       - 'scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs'
+      - 'scripts/p1p5-p3-d09-05-weekly-claim-real-http.cjs'
       - 'supabase/tests/p1p5_p3_d09_05_evidence_focus_disposable.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package1-real-dates-horizon-e2e.cjs'
@@ -449,6 +450,9 @@ jobs:
             -f supabase/tests/p1p5_p3_d09_05_evidence_focus_disposable.sql \
             2>&1 | tee /tmp/p1p5-d09-05-focus-sql.log
           grep -Fq 'D09-05 PASS: 81 original skills' /tmp/p1p5-d09-05-focus-sql.log
+          node --check scripts/p1p5-p3-d09-05-weekly-claim-real-http.cjs
+          node scripts/p1p5-p3-d09-05-weekly-claim-real-http.cjs | tee /tmp/p1p5-d09-05-real-http.log
+          grep -Fq 'D09-05 HTTP PASS' /tmp/p1p5-d09-05-real-http.log
           node --check scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs
           node scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs | tee /tmp/p1p5-d09-05-focus-browser.log
           grep -Fq 'D09-05 UX PASS ru 390px' /tmp/p1p5-d09-05-focus-browser.log
