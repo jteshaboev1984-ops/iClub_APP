@@ -32,12 +32,26 @@ CREATE TABLE private.p0_13_fake_write_events(
  payload_digest text NOT NULL,
  UNIQUE(user_id,program,epoch,request_key)
 );
+CREATE TABLE private.p0_13_fake_authorizations(
+  user_id uuid NOT NULL,
+  program text NOT NULL,
+  request_key text NOT NULL,
+  issued_epoch int NOT NULL CHECK(issued_epoch>=1),
+  PRIMARY KEY(user_id,program,request_key)
+);
 ALTER TABLE private.p0_13_epoch_gate ENABLE ROW LEVEL SECURITY;
 ALTER TABLE private.p0_13_fake_write_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE private.p0_13_fake_authorizations ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON private.p0_13_epoch_gate FROM public,anon,authenticated;
 REVOKE ALL ON private.p0_13_fake_write_events FROM public,anon,authenticated;
+REVOKE ALL ON private.p0_13_fake_authorizations FROM public,anon,authenticated;
 INSERT INTO private.p0_13_epoch_gate(program,epoch,paused)
 VALUES ('math_as_p1_p5',1,false),('economics_as',1,false);
+INSERT INTO private.p0_13_fake_authorizations(user_id,program,request_key,issued_epoch)
+VALUES
+ ('11111111-1111-4111-8111-111111111191'::uuid,'math_as_p1_p5','epoch-one-request',1),
+ ('11111111-1111-4111-8111-111111111191'::uuid,'math_as_p1_p5','during-maintenance-old',1),
+ ('11111111-1111-4111-8111-111111111191'::uuid,'math_as_p1_p5','old-tab-after-cutover',1);
 
 -- Test-only public RPC runs against *fabricated* tables. Its access guard
 -- intentionally checks both signed auth.uid() AND the exact disposable
@@ -53,6 +67,7 @@ DECLARE
  v_paused boolean;
  v_added bigint;
  v_old text;
+ v_issued_epoch integer;
 BEGIN
  IF current_database()<>'postgres'
     OR (SELECT count(*) FROM public.users)<>2
@@ -74,6 +89,17 @@ BEGIN
  FOR SHARE;
  IF NOT FOUND OR v_paused OR v_epoch IS DISTINCT FROM p_epoch THEN
    RAISE EXCEPTION 'stale_or_paused_academic_epoch' USING ERRCODE='PT409';
+ END IF;
+
+ -- The server-issued request key is bound to its ORIGINAL component
+ -- authorization epoch. A still-valid old JWT cannot upgrade a previously
+ -- issued attempt merely by changing p_epoch from 1 to 2.
+ SELECT a.issued_epoch INTO v_issued_epoch
+ FROM private.p0_13_fake_authorizations a
+ WHERE a.user_id=v_uid AND a.program='math_as_p1_p5'
+       AND a.request_key=p_request_key;
+ IF NOT FOUND OR v_issued_epoch IS DISTINCT FROM p_epoch THEN
+   RAISE EXCEPTION 'issued_attempt_epoch_mismatch' USING ERRCODE='PT409';
  END IF;
 
  INSERT INTO private.p0_13_fake_write_events
@@ -104,6 +130,7 @@ DO $rights$
 BEGIN
  IF has_table_privilege('authenticated','private.p0_13_fake_write_events','INSERT')
  OR has_table_privilege('authenticated','private.p0_13_epoch_gate','UPDATE')
+ OR has_table_privilege('authenticated','private.p0_13_fake_authorizations','INSERT')
  OR has_function_privilege('anon','public.p0_13_submit_signed_epoch_test_v1(integer,text,text)','EXECUTE')
  THEN RAISE EXCEPTION 'P0-13 direct client mutation / anon gate open'; END IF;
  RAISE NOTICE 'PASS P0-13 disposable owner-only signed JWT epoch model installed';
