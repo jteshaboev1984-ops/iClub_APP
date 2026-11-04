@@ -1,13 +1,17 @@
 -- Mathematics P1/P5: one in-app report after each completed plan-week and
--- diagnostic-anchored calendar month. Never a daily reminder, study-hour counter
+-- diagnostic-anchored calendar month. Receipts are scoped to the real Math
+-- program version and diagnostic anchor so an old beta cycle cannot suppress
+-- a fresh post-release week/month. Never a daily reminder, study-hour counter
 -- or activity access quota. Existing academic records are read, never mutated.
 create table if not exists private.exam_prep_periodic_study_report_receipts_v1 (
   user_id uuid not null references public.users(id) on delete cascade,
+  program_version_id bigint not null references private.exam_prep_program_versions(id) on delete restrict,
+  diagnostic_anchor_at timestamptz not null,
   period_kind text not null check (period_kind in ('week','month')),
   period_ended_at timestamptz not null,
   claimed_at timestamptz not null default now(),
   report_payload jsonb not null,
-  primary key (user_id,period_kind,period_ended_at)
+  primary key (user_id,program_version_id,diagnostic_anchor_at,period_kind,period_ended_at)
 );
 alter table private.exam_prep_periodic_study_report_receipts_v1 enable row level security;
 revoke all on private.exam_prep_periodic_study_report_receipts_v1
@@ -126,8 +130,8 @@ begin
         'suggested_minutes_per_day',null,'no_auto_schedule_change',true
       );
       insert into private.exam_prep_periodic_study_report_receipts_v1
-        (user_id,period_kind,period_ended_at,report_payload)
-      values (v_uid,'week',v_end,v_report)
+        (user_id,program_version_id,diagnostic_anchor_at,period_kind,period_ended_at,report_payload)
+      values (v_uid,v_profile.program_version_id,v_diagnostic_anchor,'week',v_end,v_report)
       on conflict do nothing
       returning report_payload into v_added;
       if v_added is not null then v_results:=v_results||jsonb_build_array(v_added); end if;
@@ -175,8 +179,8 @@ begin
       );
       v_added:=null;
       insert into private.exam_prep_periodic_study_report_receipts_v1
-        (user_id,period_kind,period_ended_at,report_payload)
-      values (v_uid,'month',v_end,v_report)
+        (user_id,program_version_id,diagnostic_anchor_at,period_kind,period_ended_at,report_payload)
+      values (v_uid,v_profile.program_version_id,v_diagnostic_anchor,'month',v_end,v_report)
       on conflict do nothing
       returning report_payload into v_added;
       if v_added is not null then v_results:=v_results||jsonb_build_array(v_added); end if;
@@ -194,4 +198,4 @@ revoke all on function public.claim_exam_prep_periodic_study_report_safe_v1()
 grant execute on function public.claim_exam_prep_periodic_study_report_safe_v1()
   to authenticated,service_role;
 comment on function public.claim_exam_prep_periodic_study_report_safe_v1() is
-'Owner-only once-per-completed-week/month in-app study summaries, idempotently claimed across devices; never logs artificial time, locks studying or predicts Cambridge scores.';
+'Owner-only once-per-completed-week/month in-app study summaries, unique per syllabus program and completed diagnostic cycle across devices; never logs artificial time, locks studying or predicts Cambridge scores.';
