@@ -12,6 +12,7 @@ on:
       - 'scripts/p1p5-v2-package0-build-combined-probe.cjs'
       - 'supabase/tests/p1p5_v2_package0_signed_epoch_http_disposable.sql'
       - 'scripts/p1p5-v2-package0-signed-old-epoch-http.cjs'
+      - 'scripts/p1p5-v2-package0-concurrent-epoch-lock.cjs'
       - 'scripts/p1p5-v2-package0-synthetic-backup-restore.sh'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -236,6 +237,16 @@ jobs:
               RAISE NOTICE 'PASS P0-13 real signed-JWT fake epoch guard, no other program mutation';
             END
             \$\$;"
+      - name: P0-14 real two-session PG17 epoch maintenance lock race
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGDATABASE" = "postgres"
+          node --check scripts/p1p5-v2-package0-concurrent-epoch-lock.cjs
+          node scripts/p1p5-v2-package0-concurrent-epoch-lock.cjs
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
