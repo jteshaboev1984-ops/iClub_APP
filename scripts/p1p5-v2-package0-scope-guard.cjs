@@ -408,3 +408,26 @@ assert(p019Http.includes("HOST='http://127.0.0.1:3000'") &&
        p019Http.includes('exam_prep_learner_exam_dates_v1'),
        'P0-19 old signed JWT / protected legacy appointment test absent');
 console.log('PASS P0-19 pinned learner-owned dates/weekly target source guard, all fake/local');
+
+
+// P0-16A actual live metadata catalog proof is SELECT-only, not a release fence.
+// Wider qualified graph reveals getters which invoke side-effectful rebuild helpers.
+// No test may reinterpret these observations as production epoch enforcement.
+const p016=read('supabase/tests/p1p5_v2_package0_rpc_write_graph_expanded_readonly.sql');
+const p016Decision=read('docs/math-p1p5-p0-16a-expanded-writer-discovery-20261104.md');
+assert(/--.*READ ONLY/i.test(p016),'P0-16A must be declared READ ONLY');
+assert(!/\b(?:delete|update|insert|truncate|drop|alter|create|grant|revoke|call|do|execute|copy|vacuum)\b/i.test(strip(p016)),
+  'P0-16A cannot execute any write/DDL command');
+for(const token of [
+  'pg_proc','pg_namespace','has_function_privilege','pg_get_functiondef',
+  'WITH RECURSIVE','reachable_any_dml_candidates','route_fingerprint_md5',
+  'release_verdict','NO_GO','P0-16A_SELECT_only_source_text_review_NO_GO'
+]) assert(p016.includes(token),'P0-16A source audit missing: '+token);
+for(const token of [
+  '98','43','41','grant_my_exam_prep_beta_consent_v1',
+  'get_exam_prep_placement_safe_v1',
+  'get_exam_prep_state_safe_v1',
+  'get_exam_prep_diagnostic_progress_safe_v1',
+  'Chemistry','NO_GO','P0-16B'
+]) assert(p016Decision.includes(token),'P0-16A disposition missing: '+token);
+console.log('PASS P0-16A expanded source graph READ-ONLY, getter-side effects documented, release remains NO_GO');
