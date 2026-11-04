@@ -21,6 +21,7 @@ const EXPECTED=[
   "authorize_exam_prep_timed_safe_v1",
   "claim_exam_prep_periodic_study_report_safe_v1",
   "ensure_exam_prep_balanced_weekly_plan_safe_v1",
+  "ensure_my_exam_prep_weekly_budget_safe_v1",
   "finalize_exam_prep_session_safe_v1",
   "finalize_exam_prep_session_written_v1",
   "finalize_exam_prep_timed_safe_v1",
@@ -115,7 +116,7 @@ const missing=EXPECTED.filter(n=>!found.has(n));
 const added=[...found].filter(n=>!EXPECTED.includes(n)).sort();
 assert.deepEqual(missing,[],'historical RPC removed/renamed; first reconcile actual backend signature');
 assert.deepEqual(added,[],'new untraced RPC; first document path, permissions and invariant');
-assert.equal(EXPECTED.length,69,'P1/P5 Extra Hard scope requires four additional reviewed RPCs');
+assert.equal(EXPECTED.length,70,'P1/P5 time-budget snapshot adds one reviewed optional RPC');
 const api=read(PATHS[0]),weekly=read(PATHS[1]),progress=read(PATHS[2]);
 const live=read(LIVE),host=read(HOST),html=read(HTML);
 for(const n of [
@@ -146,6 +147,18 @@ for(const n of ['get_exam_prep_weekly_progress_safe_v1','get_exam_prep_weekly_go
 assert.match(weekly,/window\.iClubExamPrepWeeklyFlowEnabled\s*!==\s*true/,'weekly fail-closed cutover missing');
 assert.match(host,/state\.subjectKey\s*!==\s*MATHEMATICS_KEY/,'subject isolation missing');
 assert.match(live,/writtenNotAuto/,'non-grading policy label missing');
+const timeAllocation=read('supabase/migrations/20261104122000_exam_prep_p1p5_shared_weekly_time_snapshot_v1.sql');
+const flowAdapter=read('exam-prep/exam-prep-weekly-flow-adapter.js');
+assert(timeAllocation.includes('CREATE TABLE IF NOT EXISTS private.exam_prep_weekly_budget_snapshots_v1'),
+ 'Shared P1/P5 weekly capacity table missing');
+assert(timeAllocation.includes('p1_available_minutes+p5_available_minutes=available_math_minutes'),
+ 'Double-counting Math hours is forbidden');
+assert(timeAllocation.includes('current_week_snapshot_not_rewritten'),
+ 'Current-week time must not silently change');
+assert(!/UPDATE private\.exam_prep_weekly_plans|DELETE FROM private\.exam_prep_weekly_plan_items/i.test(timeAllocation),
+ 'Weekly-budget overlay must not change stable plan priorities');
+assert(flowAdapter.includes('ensure_my_exam_prep_weekly_budget_safe_v1'),
+ 'Shared budget RPC not wired after normal weekly plan');
 const secureMigration=read('supabase/migrations/20261104120000_exam_prep_p1p5_extra_hard_optional_noncredit_v1.sql');
 const extraView=read('exam-prep/exam-prep-extra-hard-ui.js');
 assert(secureMigration.includes('enabled boolean NOT NULL DEFAULT false'),
