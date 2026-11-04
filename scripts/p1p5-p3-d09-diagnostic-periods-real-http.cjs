@@ -27,13 +27,18 @@ async function rpc(fn,token){
 }
 (async()=>{
  const tA=jwt(A),tB=jwt(B);
- const [owner,personal,anon]=await Promise.all([
+ const [owner,personal,capacity,anon]=await Promise.all([
   rpc('get_exam_prep_diagnostic_periods_safe_v1',tA),
   rpc('get_exam_prep_personal_horizon_safe_v1',tA),
+  rpc('get_exam_prep_shared_study_capacity_safe_v1',tA),
   rpc('get_exam_prep_diagnostic_periods_safe_v1')
  ]);
  assert(owner.ok,'Owner read-only diagnostic period RPC unavailable HTTP '+owner.status);
  assert(personal.ok,'Existing independent actual diagnostic horizon unavailable');
+ assert(capacity.ok,'Existing shared P1/P5 available-study-time projection unavailable');
+ assert.equal(capacity.data.shared_across_both_papers,true);
+ assert.equal(capacity.data.horizon_hours_additive_across_p1_p5,false);
+ assert.equal(capacity.data.capacity_is_access_limit,false);
  assert(!anon.ok,'Anonymous must not access academic timing details');
  assert.equal(owner.data.contract_version,'diagnostic_period_readonly_v1');
  assert.equal(owner.data.period_duration_days,7);
@@ -52,13 +57,15 @@ async function rpc(fn,token){
   // explicitly derived anchors, never fake a historical immutable T0.
   assert.equal(p.calendar_promotes_stage,false);
   assert(p.diagnostic_completed_at && h.diagnostic_completed_at,'Actual diagnostic completion anchor missing');
-  if(p.anchor_immutable){
-    assert(Date.parse(p.diagnostic_completed_at)<=Date.parse(h.diagnostic_completed_at),
-      'Immutable initial diagnostic cannot move after a later horizon recalculation');
-  }else{
-    assert.equal(Date.parse(p.diagnostic_completed_at),Date.parse(h.diagnostic_completed_at),
-      'Legacy derived diagnostic must match current horizon when not frozen');
-  }
+  const c=capacity.data[component];
+  assert.equal(Date.parse(p.diagnostic_completed_at),Date.parse(h.diagnostic_completed_at),
+    'D09-03 actual personal horizon must use single P1/P5 T0 source');
+  assert.equal(Date.parse(p.diagnostic_completed_at),Date.parse(c.diagnostic_completed_at),
+    'D09-03 shared selected-time horizon must use same source, never latest retest');
+  assert.equal(h.diagnostic_anchor_immutable,p.anchor_immutable);
+  assert.equal(c.diagnostic_anchor_immutable,p.anchor_immutable);
+  assert.equal(c.paper_minutes,component==='P1'?110:75);
+  assert.equal(c.paper_minutes_are_daily_study_quota,false);
   assert(Number.isInteger(p.completed_7day_periods)&&p.completed_7day_periods>=0,
    'Negative or invented completed weeks');
   assert.equal(p.current_period_no,p.completed_7day_periods+1);
@@ -91,5 +98,5 @@ async function rpc(fn,token){
    }
   }
  }
- console.log('PASS D09 real signed owner HTTP: immutable new Stage0 T0 or labeled legacy fallback, P1/P5 seven-day periods, anonymous denial, no progress writes');
+ console.log('PASS D09 real signed owner HTTP: immutable new Stage0 T0, matching per-paper horizon and one shared Math capacity, anonymous denial, no progress writes');
 })().catch(err=>{console.error(err);process.exitCode=1});
