@@ -94,7 +94,7 @@ async function main(){
   assert(shortHtml.includes('data-ep-tl-accept'));
   assert(shortHtml.includes('data-ep-tl-keep') && shortHtml.includes('data-ep-tl-other'));
   for(const [loc,keep,other,adopt] of [
-    ['ru','Оставить свой план','Выбрать другое время','Принять рекомендуемое'],
+    ['ru','Оставить моё время','Указать другое время','Принять рекомендуемое'],
     ['uz','O‘z rejamni qoldirish','Boshqa vaqtni tanlash','Tavsiya etilganini qabul qilish'],
     ['en','Keep my plan','Choose another time','Accept suggestion']
   ]) {
