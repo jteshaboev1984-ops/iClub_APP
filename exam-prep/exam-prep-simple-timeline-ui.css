@@ -172,7 +172,8 @@
 }
 #exam-prep-host-root .ep-tl-compare p{margin:0;font-size:12px;line-height:1.5}
 #exam-prep-host-root .ep-tl-compare .ep-tl-enough{color:var(--success,#21825d);font-weight:700}
-#exam-prep-host-root .ep-tl-compare .ep-tl-short strong{font-size:14px;white-space:nowrap}
+#exam-prep-host-root .ep-tl-compare .ep-tl-short strong{font-size:14px;overflow-wrap:anywhere}
+#exam-prep-host-root .ep-tl-compare .ep-tl-extra-hours{font-size:11px;opacity:.72;white-space:nowrap}
 #exam-prep-host-root .ep-tl-compare .ep-tl-total-cap{opacity:.75}
 #exam-prep-host-root .ep-tl-compare .ep-tl-scope{font-size:11px;opacity:.72}
 /* P2-18: one balanced choice group; no hidden automatic change. */

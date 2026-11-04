@@ -33,7 +33,7 @@
       saveError:'Не удалось сохранить даты. Попробуйте снова.',
       saved:'Даты сохранены. План пересчитан.',
       enough:'По текущему ориентиру выделенного времени хватает.',
-      short:'Дополнительно потребуется примерно',
+      short:'Рекомендуемое изменение:',
       impossible:'До выбранной даты расчётное время превышает 168 часов в неделю. Попробуйте выбрать более позднюю дату.',
       within:'в неделю',
       adopt:'Принять рекомендуемое', adoptSuffix:'ч/нед',
@@ -65,7 +65,7 @@
       saveError:'Sanalarni saqlab bo‘lmadi. Qayta urinib ko‘ring.',
       saved:'Sanalar saqlandi. Reja yangilandi.',
       enough:'Hozir ajratgan vaqtingiz taxminiy mo‘ljal uchun yetadi.',
-      short:'Qo‘shimcha kerak:',
+      short:'Tavsiya etilgan o‘zgarish:',
       impossible:'Tanlangan sanagacha taxminiy vaqt haftasiga 168 soatdan oshadi. Keyinroq sanani tanlab ko‘ring.',
       within:'haftasiga',
       adopt:'Tavsiya etilganini qabul qilish', adoptSuffix:'soat/hafta',
@@ -97,7 +97,7 @@
       saveError:'Could not save dates. Please try again.',
       saved:'Dates saved. Study target updated.',
       enough:'Your current study time meets this approximate target.',
-      short:'Additional time needed:',
+      short:'Suggested change:',
       impossible:'The estimated time exceeds 168 hours per week before this exam. Consider a later date.',
       within:'per week',
       adopt:'Accept suggestion', adoptSuffix:'h/week',
@@ -253,7 +253,9 @@
         (gap<=0.04
           ? '<p class="ep-tl-enough">'+esc(w.enough)+'</p>'
           : '<p class="ep-tl-short">'+esc(w.short)+' <strong>'+
-            esc(niceNumber(gap,lang))+' '+esc(w.perWeek)+'</strong></p>'+
+            esc(niceNumber(model.chosen,lang))+' → '+
+            esc(niceNumber(model.suggested,lang))+' '+esc(w.perWeek)+'</strong>'+
+            ' <span class="ep-tl-extra-hours">(+'+esc(niceNumber(gap,lang))+' '+esc(w.perWeek)+')</span></p>'+
             (!model.canAdopt
               ? '<p class="ep-tl-total-cap">'+esc(model.suggested>168?w.impossible:w.tooMuch)+'</p>' : '')+
             choices)+
@@ -286,7 +288,7 @@
       '<div class="ep-tl-bottom">'+sum+pace+current+'</div>'+
       compare+
       editor+
-      '<p class="ep-tl-footnote">'+esc(w.assumption)+' '+esc(w.noChange)+'</p>'+
+      '<p class="ep-tl-footnote">'+esc(w.assumption)+'</p>'+
       '<p class="ep-tl-date-success" data-ep-tl-success role="status" hidden></p>'+
       '</section>';
   }
