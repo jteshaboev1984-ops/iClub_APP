@@ -356,15 +356,6 @@
   }
   async function timedResult(sessionId) { return rpc("get_exam_prep_timed_result_safe_v1", { p_session_id: sessionId }); }
   async function timedReviewPack(sessionId, language = "en") { return rpc("get_exam_prep_timed_review_pack_safe_v1", { p_session_id: sessionId, p_language: language }); }
-  async function submitTimedSelfMark(sessionId, itemOrder, marks, idempotencyKey, reviewNote = null) {
-    return rpc("submit_exam_prep_timed_written_self_mark_safe_v1", {
-      p_session_id: sessionId,
-      p_item_order: Number(itemOrder),
-      p_marks_awarded: Number(marks),
-      p_idempotency_key: String(idempotencyKey || ""),
-      p_review_note: reviewNote || null
-    });
-  }
   async function readiness(componentCode) { return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function readinessSummary(componentCode) { return rpc("get_exam_prep_readiness_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function examOps(componentCode) { return rpc("get_exam_prep_exam_ops_safe_v1", { p_component_code: componentArg(componentCode) }); }
@@ -394,7 +385,7 @@
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
     activePlanSession, weeklyPlan, generateWeeklyPlan, authorizePlanItem,
-    timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
+    timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack,
     readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration
   });
 
