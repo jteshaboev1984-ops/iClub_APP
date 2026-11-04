@@ -7,6 +7,8 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'scripts/p1p5-d09-04-academic-week-label-browser.cjs'
+      - 'scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs'
+      - 'supabase/tests/p1p5_p3_d09_05_evidence_focus_disposable.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package1-real-dates-horizon-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -433,6 +435,26 @@ jobs:
           grep -Fq 'D09-03 PASS: later finalized diagnostic does not shift' /tmp/p1p5-d09-first-t0.log
           grep -Fq 'D09-02 POST-ROLLBACK PASS' /tmp/p1p5-d09-first-t0.log
           echo 'D09-02 PASS: immutable first diagnosis, no learner state mutation'
+
+      - name: D09-05 evidence-based next steps after completed week (real PG17 + RU UZ EN Chromium)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d09_05_evidence_focus_disposable.sql \
+            2>&1 | tee /tmp/p1p5-d09-05-focus-sql.log
+          grep -Fq 'D09-05 PASS: 81 original skills' /tmp/p1p5-d09-05-focus-sql.log
+          node --check scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs
+          node scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs | tee /tmp/p1p5-d09-05-focus-browser.log
+          grep -Fq 'D09-05 UX PASS ru 390px' /tmp/p1p5-d09-05-focus-browser.log
+          grep -Fq 'D09-05 UX PASS uz 1280px' /tmp/p1p5-d09-05-focus-browser.log
+          grep -Fq 'D09-05 UX PASS en 1280px' /tmp/p1p5-d09-05-focus-browser.log
+          echo 'D09-05 PASS: source-grounded next-step projection and native locale layouts; no extra weekly quotas'
 
       - name: Remove local HTTP server
         if: always()
