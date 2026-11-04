@@ -121,3 +121,26 @@ assert(driftDecision.includes('No')||driftDecision.includes('NO_GO'),'scope drif
 assert(driftDecision.includes('program_version_id')&&driftDecision.includes('one-shot'),
   'missing receipt ownership or release epoch review');
 console.log('PASS P0-08 draft-schema drift: two newly proposed per-user tables identified, both outside original 32-table scope, release NO_GO');
+
+// P0-09 disposable epoch model is a negative security test, NEVER a release API.
+const epochFixture=read('supabase/tests/p1p5_v2_package0_epoch_one_shot_disposable_only.sql');
+const p0Workflow=read('.github/workflows/p1p5-v2-package0-cleanup-rehearsal.yml');
+assert(epochFixture.includes('ISOLATED PostgreSQL 17 ONLY'), 'missing disposable fixture warning');
+assert(epochFixture.includes("current_database() <> 'iclub_p1p5_package0_test'"),
+  'P0-09 must refuse every non-disposable database name');
+for(const token of [
+  'BEGIN;', 'ROLLBACK;', 'SAVEPOINT before_simulated_release',
+  'ROLLBACK TO SAVEPOINT before_simulated_release',
+  'REVOKE ALL ON ALL FUNCTIONS IN SCHEMA p0_09_fixture FROM PUBLIC',
+  'SET SESSION AUTHORIZATION p0_mock_release_executor',
+  'SET SESSION AUTHORIZATION p0_mock_learner',
+  'production_backup_restored','explicit_approval','retention_scope_reviewed',
+  'unknown_fk_or_schema_drift','active_attempts','protected_fingerprint',
+  'approved_sha','consumed','stale_or_paused_epoch','p0_09_fixture.test_progress',
+  'p0_09_fixture.protected_data'
+]) assert(epochFixture.includes(token),'P0-09 missing fail-closed gate: '+token);
+assert(!/private\.exam_prep_(sessions|responses|skill_states)\b/.test(epochFixture),
+  'P0-09 must not mutate existing real Math Exam Prep tables');
+assert(p0Workflow.includes('p1p5_v2_package0_epoch_one_shot_disposable_only.sql'),
+  'P0-09 cannot pass without isolated postgres workflow invocation');
+console.log('PASS P0-09 source authorization model isolated from production, role/epoch/replay gates present');
