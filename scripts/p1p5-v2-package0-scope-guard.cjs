@@ -273,6 +273,9 @@ for(const token of [
  "current_setting('request.jwt.claims',true)", 'FOR SHARE',
  'p0_16_old_signed_jwt', 'p0_16_stale_session_epoch',
  'p0_16_stamp_new_session_fixture', 'p0_16_issued_epoch',
+ 'p0_16_stamp_new_authorization_fixture',
+ 'p0_16_require_issued_authorization_epoch_v1',
+ 'p0_16_stale_issued_authorization',
  'v_count<>6', 'refusing RPC source drift', 'anon,authenticated'
 ]) assert(p016sql.includes(token),'P0-16 real RPC shadow risk guard missing: '+token);
 for(const route of [
@@ -294,6 +297,8 @@ for(const marker of [
 assert(p016flow.includes('P0-16 REAL six Math public RPCs') &&
        p016flow.includes('p1p5_v2_package0_actual_rpc_epoch_shadow_disposable.sql') &&
        p016flow.includes('P0_16_OLD_IAT') &&
-       p016flow.includes('P0_16_STALE_SESSION_ID'),
+       p016flow.includes('P0_16_STALE_SESSION_ID') &&
+       p016flow.includes('P0_16_STALE_AUTH_ID') &&
+       p016js.includes('fresh JWT trying stale server-issued authorization'),
        'P0-16 actual full-stack E2E test is not wired');
 console.log('PASS P0-16 isolated six-actual-RPC JWT/session epoch test source bounds; 37+ others still NO_GO');
