@@ -1385,6 +1385,30 @@
     state.returnView = { kind: returnKind, component }; await loadSession(result.data.session_id);
   }
 
+  // Weekly available time is NOT a required task duration or an academic grade.
+  function weekBudgetCopy() {
+    return ({
+      ru:{weekly:'Математика на этой неделе',split:'Распределение времени',
+        slot:'Доступно для приоритета',minutes:'мин',
+        caution:'Ориентир по выбранным часам и текущему прогрессу; не обязательная длительность задания. Заниматься сверх плана можно.',
+        next:'Изменённый режим времени будет учтён в плане следующей недели.',
+        kept:'Решение оставить текущие часы учтено.'},
+      uz:{weekly:'Bu haftada matematikaga vaqt',split:'Vaqt taqsimoti',
+        slot:'Ustuvor vazifa uchun vaqt',minutes:'daq.',
+        caution:'Tanlangan vaqt va hozirgi natijalarga asoslangan mo‘ljal. Bu topshiriqning majburiy davomiyligi emas; ko‘proq o‘qish mumkin.',
+        next:'Vaqt jadvalidagi o‘zgarish kelgusi hafta rejasida hisobga olinadi.',
+        kept:'Hozirgi soatlarni qoldirish tanlovingiz hisobga olindi.'},
+      en:{weekly:'Mathematics time this week',split:'Time allocation',
+        slot:'Time available for this priority',minutes:'min',
+        caution:'Based on your chosen hours and current progress; not a required task duration. You can study beyond the plan.',
+        next:'Your changed schedule will be used for the next weekly plan.',
+        kept:'Your choice to keep current hours was applied.'}
+    })[state.language] || weekBudgetCopyFallback();
+  }
+  function weekBudgetCopyFallback(){return {weekly:'Mathematics time this week',split:'Time allocation',
+    slot:'Time available for this priority',minutes:'min',
+    caution:'Available time, not a required duration or a grade.',
+    next:'Schedule changes apply to the next weekly plan.',kept:'Your current hours were kept.'};}
   function itemTypeLabel(type) {
     const c = copy(); return ({ learning: c.learning, correction: c.correction, retest: c.retest, mixed_transfer: c.mixed, rebaseline: c.rebaseline })[type] || c.learning;
   }
@@ -1413,7 +1437,14 @@
       if (!read?.ok || !read.data?.plan_id || read.data.plan_id !== ensured.data?.plan_id) {
         renderError(); return;
       }
-      renderPlan(component, read.data);
+      // Optional, fail-open presentation. The original stable plan is still
+      // shown when this read-only-for-academics budget snapshot is unavailable.
+      let allocated=null;
+      if(typeof flow.weeklyBudget==='function'){
+        const budget=await flow.weeklyBudget(component,read.data.plan_id);
+        if(budget?.ok) allocated=budget.data;
+      }
+      renderPlan(component, read.data, allocated);
       return;
     }
     let planResult = await internal.api.weeklyPlan(component);
@@ -1428,9 +1459,29 @@
     renderPlan(component, plan);
   }
 
-  function renderPlan(component, plan) {
+  function renderPlan(component, plan, budget=null) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy(); const items = Array.isArray(plan.items) ? plan.items : [];
+    const verifiedBudget=budget &&
+      budget.contract_version==='exam_prep_shared_weekly_available_time_v1' &&
+      budget.plan_id===plan.plan_id && budget.component_code===component &&
+      Array.isArray(budget.priority_slots) &&
+      budget.priority_minutes_are_available_time_not_task_duration===true &&
+      budget.learning_access_capped===false ? budget : null;
+    const bc=weekBudgetCopy();
+    const budgetSummary=verifiedBudget ?
+      `<section class="ep-live-week-budget" data-ep-week-budget>
+        <strong>${esc(bc.weekly)}: ${Number(verifiedBudget.available_math_minutes)} ${esc(bc.minutes)}</strong>
+        <div class="ep-live-week-budget-split" aria-label="${esc(bc.split)}">
+          <span>P1: ${Number(verifiedBudget.p1_reserved_minutes)} ${esc(bc.minutes)}</span>
+          <span>P5: ${Number(verifiedBudget.p5_reserved_minutes)} ${esc(bc.minutes)}</span>
+        </div>
+        ${verifiedBudget.keep_choice_recorded_before_snapshot===true
+          ? `<p class="ep-live-meta">${esc(bc.kept)}</p>` : ""}
+        ${verifiedBudget.profile_changed_after_capture===true
+          ? `<p class="ep-live-meta">${esc(bc.next)}</p>` : ""}
+        <p class="ep-live-meta">${esc(bc.caution)}</p>
+      </section>` : "";
     const rows = items.length ? items.map(item => {
       const dueMs = retestDueTime(item);
       const due = item.item_type === "retest"
@@ -1439,9 +1490,15 @@
       const future = item.item_type === "retest" && !planItemCanStart(item);
       const actionable = ["learning","correction","retest","mixed_transfer"].includes(item.item_type) && item.status === "pending";
       const button = actionable ? `<button class="ep-live-btn" type="button" data-ep-live-plan-item="${Number(item.priority_order)}" ${future ? "disabled" : ""}>${esc(future ? c.notDue : c.startTask)}</button>` : "";
-      return `<div class="ep-live-plan-item"><div><strong>${esc(itemTypeLabel(item.item_type))}</strong>${due ? `<div class="ep-live-due">${esc(formatDateTime(due))}</div>` : ""}</div>${button}</div>`;
+      const minutes=verifiedBudget?.priority_slots?.find(slot=>
+        Number(slot.priority_order)===Number(item.priority_order) &&
+        slot.item_type===item.item_type && slot.status===item.status
+      )?.available_study_minutes;
+      const timeNote=Number.isInteger(minutes)&&minutes>=0
+        ? `<div class="ep-live-week-budget-slot">${esc(bc.slot)}: ${minutes} ${esc(bc.minutes)}</div>` : "";
+      return `<div class="ep-live-plan-item"><div><strong>${esc(itemTypeLabel(item.item_type))}</strong>${due ? `<div class="ep-live-due">${esc(formatDateTime(due))}</div>` : ""}${timeNote}</div>${button}</div>`;
     }).join("") : `<div class="ep-live-notice">${esc(c.noPlan)}</div>`;
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><div><strong>${component} · ${esc(c.plan)}</strong><div class="ep-live-meta">${esc(c.week)} ${Number(plan.active_week_no || 1)}</div></div><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${rows}</div>`);
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><div><strong>${component} · ${esc(c.plan)}</strong><div class="ep-live-meta">${esc(c.week)} ${Number(plan.active_week_no || 1)}</div></div><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${budgetSummary}${rows}</div>`);
     state.notice = null;
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelectorAll('[data-ep-live-plan-item]').forEach(b => b.addEventListener('click', () => launchPlanItem(component, plan.plan_id, Number(b.dataset.epLivePlanItem))));
