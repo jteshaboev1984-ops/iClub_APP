@@ -76,18 +76,19 @@ begin
       'reports','[]'::jsonb,'daily_reminders',false);
   end if;
 
-  -- Weekly periods follow the existing governed 7-day profile/weekly-goal
-  -- clock, not browser midnights. No backlog of multiple old weeks at login.
-  v_week_number:=floor(extract(epoch from (v_now-v_profile.created_at))/604800)::int;
-  -- The canonical 36-week roadmap is a content plan, NOT a reporting cutoff.
-  -- The learner can continue preparing after week 36 without losing summaries.
+  -- D09: weekly reports begin after exactly one completed 7-day period
+  -- from the FIRST genuinely complete paper diagnostic, not profile signup.
+  -- A profile created months earlier cannot shift or pre-emit the summary.
+  -- Keep the existing one-per-(owner,program,anchor,kind,end) receipt and
+  -- no-backlog policy. The independent P1/P5 diagnostic periods are
+  -- projected read-only by get_exam_prep_component_periods_safe_v1.
+  v_week_number:=floor(extract(epoch from (v_now-v_diagnostic_anchor))/604800)::int;
+  -- Week 36 is a curriculum model, not a study-access or reporting limit.
   if v_week_number between 1 and 156 then
     v_kind:='week';
-    v_end:=v_profile.created_at+(v_week_number*interval '7 days');
-    v_start:=greatest(v_end-interval '7 days',v_diagnostic_anchor);
-    -- No "weekly" report until a full seven days have elapsed since the
-    -- first completed diagnostic, even if a legacy profile week ended sooner.
-    if v_end>=v_diagnostic_anchor+interval '7 days' and v_start<v_end then
+    v_end:=v_diagnostic_anchor+(v_week_number*interval '7 days');
+    v_start:=v_end-interval '7 days';
+    if v_end<=v_now and v_start>=v_diagnostic_anchor then
       v_p1_adherence:=null; v_p5_adherence:=null;
       -- Existing verified due-goal proof is optional; don't infer missed hours
       -- from zero app sessions or incorrect/ambiguous historical goal snapshots.
