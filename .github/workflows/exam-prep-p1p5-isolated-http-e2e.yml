@@ -17,6 +17,8 @@ on:
       - 'scripts/p1p5-v2-package0-real-rpc-epoch-http.cjs'
       - 'supabase/tests/p1p5_v2_package0_actual_core_writer_30_shadow_disposable.sql'
       - 'scripts/p1p5-v2-package0-real-core30-epoch-http.cjs'
+      - 'supabase/tests/p1p5_v2_package0_draft469_three_writers_epoch_shadow_disposable.sql'
+      - 'scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs'
       - 'scripts/p1p5-v2-package0-synthetic-backup-restore.sh'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -536,6 +538,43 @@ jobs:
           node --check scripts/p1p5-v2-package0-real-core30-epoch-http.cjs
           node scripts/p1p5-v2-package0-real-core30-epoch-http.cjs
           echo "PASS: thirty existing Core RPCs fenced in disposable schema, not production release-ready"
+      - name: P0-18 fetch PINNED PR469 draft migrations for disposable integration ONLY
+        uses: actions/checkout@v4
+        with:
+          ref: e125c0e43878a3910aaa66b32ee9cb848402a0ec
+          path: ._p0_18_draft469
+          persist-credentials: false
+      - name: P0-18 exact three draft P1 writer RPCs old JWT deny and new schedule allow
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          test "$(git -C ._p0_18_draft469 rev-parse HEAD)" = \
+               "e125c0e43878a3910aaa66b32ee9cb848402a0ec"
+          for base in \
+             20261103023000_exam_prep_p1p5_personal_horizon_v1.sql \
+             20261103024000_exam_prep_p1p5_study_schedule_v1.sql \
+             20261103025000_exam_prep_p1p5_periodic_study_reports_v1.sql
+          do
+            psql -X -v ON_ERROR_STOP=1 -f "._p0_18_draft469/supabase/migrations/$base" \
+              >> /tmp/p018-pr469-pinned-schema-only.log
+          done
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_v2_package0_draft469_three_writers_epoch_shadow_disposable.sql \
+            > /tmp/p018-three-draft-core-writers.log
+          psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
+          sleep 2
+          export P0_18_OLD_IAT="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT min_signed_jwt_iat-1 FROM private.p0_16_academic_epoch_gate
+            WHERE program_key='math_as_p1_p5';")"
+          test "$P0_18_OLD_IAT" -gt 1700000000
+          node --check scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs
+          node scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs
+          echo "PASS: pinned unmerged PR469 actual study-date/report writers fenced in disposable signed HTTP; NO live deployment"
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
