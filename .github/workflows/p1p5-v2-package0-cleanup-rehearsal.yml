@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'supabase/tests/p1p5_v2_package0_*'
+      - 'supabase/tests/p1p5_v2_package0_epoch_one_shot_disposable_only.sql'
       - 'scripts/p1p5-v2-package0-scope-guard.cjs'
       - '.github/workflows/p1p5-v2-package0-cleanup-rehearsal.yml'
   workflow_dispatch:
@@ -41,6 +42,8 @@ jobs:
         run: node scripts/p1p5-v2-package0-scope-guard.cjs
       - name: Run isolated cycle, retained-Mentor blocker and rollback transaction
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_cleanup_isolated_fk_rehearsal.sql
+      - name: P0-09 isolated one-shot epoch authorization and replay/rollback matrix
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_epoch_one_shot_disposable_only.sql
       - name: Prove synthetic schema fully rolled back
         run: |
           test "$(psql -At -c "SELECT count(*) FROM pg_namespace WHERE nspname='p1p5_package0_isolated';")" = "0"
