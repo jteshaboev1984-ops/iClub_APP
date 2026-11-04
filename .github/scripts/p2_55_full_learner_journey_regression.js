@@ -251,7 +251,8 @@ const path = require('path');
   assert(!/objective_state_v1|P1-INTERNAL-|controlled_beta|academic_credit|feedback_deferred|correct_answer/i.test(finalState.allText),'learner DOM exposed internal or protected terms');
 
   const names=finalState.calls.map(x=>x.name);
-  for (const name of ['save_exam_prep_exam_profile_v2','start_exam_prep_next_diagnostic_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_weekly_plan_safe_v2','generate_exam_prep_weekly_plan_safe_v3','authorize_exam_prep_plan_item_safe_v1','get_exam_prep_timed_catalog_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1','get_exam_prep_final_calibration_safe_v1']) assert(names.includes(name),`${name} missing from full learner journey`);
+  for (const name of ['save_exam_prep_exam_profile_v2','start_exam_prep_next_diagnostic_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_weekly_plan_safe_v2','generate_exam_prep_weekly_plan_safe_v3','authorize_exam_prep_plan_item_safe_v1','get_exam_prep_timed_catalog_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1']) assert(names.includes(name),`${name} missing from full learner journey`);
+  assert(!names.includes('get_exam_prep_final_calibration_safe_v1'), 'ungraded writing cannot open Stage6');
   assert(!names.includes('submit_exam_prep_timed_written_self_mark_safe_v1'), 'client must never request written self marks');
   const timedFinalize=finalState.calls.find(x=>x.name==='finalize_exam_prep_timed_safe_v1');
   assert(timedFinalize?.args?.p_completion_reason==='submitted','full paper must finalize as submitted');

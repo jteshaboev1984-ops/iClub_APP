@@ -114,7 +114,8 @@ const path = require('path');
 
   const result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
   const names=result.calls.map(x=>x.name);
-  for(const n of ['get_exam_prep_timed_catalog_safe_v1','get_exam_prep_stage4_consolidation_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1','get_exam_prep_final_calibration_safe_v1'])assert(names.includes(n),`${n} missing`);
+  for(const n of ['get_exam_prep_timed_catalog_safe_v1','get_exam_prep_stage4_consolidation_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1'])assert(names.includes(n),`${n} missing`);
+  assert(!names.includes('get_exam_prep_final_calibration_safe_v1'), 'ungraded writing cannot open Stage6');
   assert(!names.includes('submit_exam_prep_timed_written_self_mark_safe_v1'),'student must not self-score via client');
   const timedFinalize=result.calls.find(x=>x.name==='finalize_exam_prep_timed_safe_v1'); assert(timedFinalize.args.p_completion_reason==='submitted','completed paper must use submitted finalization');
   assert(!/Core beta|Synthetic learner data|P1-QUA-01|P1-FUN-01/.test(result.text),'learner UI must not expose rollout or internal skill terminology');
