@@ -144,3 +144,33 @@ assert(!/private\.exam_prep_(sessions|responses|skill_states)\b/.test(epochFixtu
 assert(p0Workflow.includes('p1p5_v2_package0_epoch_one_shot_disposable_only.sql'),
   'P0-09 cannot pass without isolated postgres workflow invocation');
 console.log('PASS P0-09 source authorization model isolated from production, role/epoch/replay gates present');
+
+
+// P0-10 prospective state overlay uses the UNCHANGED 32-table disposal test.
+const p010Overlay=read('supabase/tests/p1p5_v2_package0_future_state_overlay_disposable.sql');
+const p010Assembler=read('scripts/p1p5-v2-package0-build-combined-probe.cjs');
+const p010Workflow=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+for(const section of ['SETUP','FIRST_DELETE','SECOND_DELETE','POST_ROLLBACK']) {
+  assert(p010Overlay.includes('-- P0-10 SECTION '+section),
+    'P0-10 overlay missing mandatory combined test section '+section);
+}
+for(const token of [
+  'private.exam_prep_learner_exam_dates_v1',
+  'private.exam_prep_periodic_study_report_receipts_v1',
+  'ROLLBACK TO SAVEPOINT p0_unknown_future_fk_probe',
+  'ON DELETE RESTRICT',
+  'p0_future_before',
+  'p0_future_selected_program',
+  'receipts_fingerprint',
+  'receipt retention remains NO_GO'
+]) assert(p010Overlay.includes(token),'P0-10 prospective scope not tested: '+token);
+assert(p010Assembler.includes('P1P5_E2E_ISOLATED') &&
+       p010Assembler.includes("PGDATABASE === 'postgres'") &&
+       p010Assembler.includes("assert.equal(found.length,65") &&
+       p010Assembler.includes('wx'),
+       'P0-10 test assembly must be limited to original isolated full-schema rollback');
+assert(p010Workflow.includes('node scripts/p1p5-v2-package0-build-combined-probe.cjs') &&
+       p010Workflow.includes('P0-10 real-schema 32-table plus future dates scoped reset') &&
+       p010Workflow.includes('PGOPTIONS: -c iclub.e2e_isolated=true'),
+       'P0-10 actual migrated PostgreSQL E2E is absent');
+console.log('PASS P0-10 prospective state overlay and combined real-schema test authorization guard');
