@@ -152,7 +152,8 @@ BEGIN
      AND d.decision_kind='keep'
      AND d.profile_revision=v_snap.profile_revision
      AND d.chosen_math_hours=v_snap.selected_math_hours
-     AND d.created_at<=v_snap.captured_at
+     -- Keep-current-time is meaningful even if acknowledged after the
+     -- week's immutable snapshot: the selected hours did not change.
  ) INTO v_keep;
  RETURN jsonb_build_object(
    'contract_version','exam_prep_shared_weekly_available_time_v1',
