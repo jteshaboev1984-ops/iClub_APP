@@ -339,6 +339,45 @@ async function signedRpc(name, uid, args={}) {
  assert.equal(savedPersonal.data.P1.objectively_covered_skills,objectiveBefore[0]);
  assert.equal(savedPersonal.data.P5.objectively_covered_skills,objectiveBefore[1]);
  assert.equal(savedPersonal.data.recommended_schedule_applied_automatically,false);
+
+ // D11 Keep uses the actual owner's dynamic estimate and signed JWT, without
+ // writing their chosen weekly hours. All changes below occur in fake PG17.
+ const futureDay=days=>new Date(Date.now()+days*86400000).toISOString().slice(0,10);
+ const urgent=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',USER_A,{
+   p_p1_date:futureDay(12),p_p5_date:futureDay(17)
+ });
+ assert(urgent.ok,'Could not construct own real near-exam recommendation');
+ const keepSuggested=urgent.data.estimated_joint_math_hours_per_week;
+ assert(keepSuggested>budgetBefore,'D11 test needs an actual server-calculated shortfall');
+ const keepKey='CI-D11-KEEP-SIGNED-OWNER-0001';
+ const keepArgs={
+   p_expected_current_math_hours:budgetBefore,
+   p_expected_profile_revision:urgent.data.student_budget_profile_revision,
+   p_expected_suggested_math_hours:keepSuggested,
+   p_idempotency_key:keepKey
+ };
+ const kept=await signedRpc('keep_my_exam_prep_timeline_weekly_time_safe_v1',USER_A,keepArgs);
+ assert(kept.ok&&kept.data.decision_recorded===true&&
+   kept.data.hours_changed===false&&kept.data.shortfall_acknowledged===true,
+   'D11 owner Keep was not recorded: '+JSON.stringify(kept.data));
+ assert.equal(kept.data.existing_chosen_math_hours_per_week,budgetBefore,
+   'D11 Keep silently changed Math hours');
+ assert.equal(kept.data.student_budget_profile_revision,urgent.data.student_budget_profile_revision,
+   'D11 Keep silently changed profile revision');
+ const repeatKeep=await signedRpc('keep_my_exam_prep_timeline_weekly_time_safe_v1',USER_A,keepArgs);
+ assert(repeatKeep.ok&&repeatKeep.data.decision_recorded===true&&
+   repeatKeep.data.hours_changed===false,'D11 signed lost-ACK Keep replay failed');
+ const staleKeep=await signedRpc('keep_my_exam_prep_timeline_weekly_time_safe_v1',USER_A,{
+   ...keepArgs,p_expected_profile_revision:keepArgs.p_expected_profile_revision-1,
+   p_idempotency_key:'CI-D11-KEEP-STALE-REV-0002'
+ });
+ assert(!staleKeep.ok,'D11 stale profile revision accepted');
+ const foreignKeep=await signedRpc('keep_my_exam_prep_timeline_weekly_time_safe_v1',USER_B,keepArgs);
+ assert(!foreignKeep.ok,'D11 another learner reused owner recommendation and revision');
+ const revertPersonal=await signedRpc('save_my_exam_prep_timeline_dates_safe_v1',USER_A,{
+   p_p1_date:'2028-02-12',p_p5_date:'2028-02-20'
+ });
+ assert(revertPersonal.ok,'D11 synthetic urgent dates not restored');
  const roundtrip=await signedRpc('get_exam_prep_simple_learning_timeline_with_hours_safe_v2',USER_A);
  assert(roundtrip.ok);
  assert.equal(new Date(roundtrip.data.P1.exam_at).toISOString().slice(0,10),'2028-02-12');
