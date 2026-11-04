@@ -7,6 +7,7 @@ on:
       - 'supabase/tests/p1p5_v2_package0_epoch_one_shot_disposable_only.sql'
       - 'scripts/p1p5-v2-package0-scope-guard.cjs'
       - 'scripts/p1p5-v2-package0-build-combined-probe.cjs'
+      - 'scripts/p1p5-v2-package0-signed-old-epoch-http.cjs'
       - 'supabase/tests/p1p5_v2_package0_future_state_overlay_disposable.sql'
       - '.github/workflows/p1p5-v2-package0-cleanup-rehearsal.yml'
   workflow_dispatch:
