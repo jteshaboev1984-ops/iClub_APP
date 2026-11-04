@@ -15,6 +15,7 @@ on:
       - 'supabase/tests/p1p5_isolated_http_mixed_timed_stage3_prep.sql'
       - 'supabase/tests/p1p5_isolated_http_mixed_timed_cleanup.sql'
       - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
+      - 'supabase/tests/p1p5_timed_session_timing_contract_regression.sql'
       - 'supabase/tests/p1p5_isolated_http_written_browser_allowlist.sql'
       - 'scripts/p1p5-isolated-http-written-criteria-next-browser.cjs'
       - 'scripts/p1p5-isolated-http-stage-c-security-race.cjs'
@@ -33,7 +34,7 @@ permissions:
 jobs:
   real-http-auth:
     name: actual Math UI JWT PostgREST PG17
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
@@ -138,6 +139,10 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
 
 
+      - name: Stage C verify Timed/Paper five-field owner-only clock projection
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_timed_session_timing_contract_regression.sql
       - name: Seed ONLY disposable authenticated learners
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
