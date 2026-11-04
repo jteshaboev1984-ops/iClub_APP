@@ -540,6 +540,29 @@ jobs:
           node --check scripts/p1p5-v2-package0-real-core30-epoch-http.cjs
           node scripts/p1p5-v2-package0-real-core30-epoch-http.cjs
           echo "PASS: thirty existing Core RPCs fenced in disposable schema, not production release-ready"
+      - name: P0-20 three side-effecting getters old JWT deny, real PG17 ONLY
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_v2_package0_getter_rebuild_epoch_shadow_disposable.sql \
+            > /tmp/p020-getter-shadow-disposable.log
+          psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
+          sleep 2
+          export P0_20_OLD_IAT="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT min_signed_jwt_iat-1
+            FROM private.p0_16_academic_epoch_gate
+            WHERE program_key='math_as_p1_p5';")"
+          test "$P0_20_OLD_IAT" -gt 1700000000
+          node --check scripts/p1p5-v2-package0-getter-rebuild-epoch-http.cjs
+          node scripts/p1p5-v2-package0-getter-rebuild-epoch-http.cjs
+          echo "PASS: three real GET-named rebuild RPCs fenced in disposable PG17; never a production migration"
+
       - name: P0-18 fetch PINNED PR469 draft migrations for disposable integration ONLY
         uses: actions/checkout@v4
         with:
