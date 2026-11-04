@@ -16,6 +16,9 @@ on:
       - .github/scripts/p2_78_concurrency_service_regression.js
       - .github/scripts/p2_74_ai_shadow_safety_regression.js
       - .github/workflows/p2-78-concurrency-service-transitions.yml
+      - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
+      - 'supabase/tests/p1p5_v2_package0_*'
+      - 'scripts/p1p5-v2-package0-*'
       - .github/workflows/p1p5-stage-d-consolidated-release-gate.yml
       - scripts/p1p5-stage-d-release-gate.cjs
       - scripts/p1p5-stage-d-release-gate.test.cjs
