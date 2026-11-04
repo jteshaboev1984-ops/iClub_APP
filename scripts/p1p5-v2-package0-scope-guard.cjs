@@ -219,6 +219,8 @@ for(const phrase of [
   'post-cutover stale tab','same key changed payload','foreign learner',
   'anonymous','bad JWT','PT409'
 ]) assert(p013Http.includes(phrase),'P0-13 signed HTTP coverage missing: '+phrase);
+assert(p013Http.includes('P0_13_FIXED_IAT') && p013E2e.includes('export P0_13_FIXED_IAT'),
+  'P0-13 must reuse exact still-valid pre-cutover learner JWT');
 assert(p013E2e.includes('P0-13 signed old-device HTTP epoch') &&
        p013E2e.includes('p1p5_v2_package0_signed_epoch_http_disposable.sql'),
        'P0-13 real PostgREST/PG17 E2E workflow step absent');
