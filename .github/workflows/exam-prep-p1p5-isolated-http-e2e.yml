@@ -10,6 +10,8 @@ on:
       - 'supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql'
       - 'supabase/tests/p1p5_v2_package0_future_state_overlay_disposable.sql'
       - 'scripts/p1p5-v2-package0-build-combined-probe.cjs'
+      - 'supabase/tests/p1p5_v2_package0_signed_epoch_http_disposable.sql'
+      - 'scripts/p1p5-v2-package0-signed-old-epoch-http.cjs'
       - 'scripts/p1p5-v2-package0-synthetic-backup-restore.sh'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -150,6 +152,14 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql > /tmp/p1p5-e2e-seed.log
           echo "Disposable seed applied; no live project, token or account involved"
+      - name: P0-13 prepare DISPOSABLE signed HTTP epoch fixture only
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_signed_epoch_http_disposable.sql >/tmp/p0-13-epoch-setup.log
+          echo "PASS: test-only epoch fixture installed in disposable PostgreSQL"
       - name: Package 0 actual-migrations P1/P5 session/authorization FK rollback
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
@@ -195,6 +205,28 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-isolated-http-auth-e2e.cjs
+      - name: P0-13 signed old-device HTTP epoch, idempotency and maintenance denial
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node --check scripts/p1p5-v2-package0-signed-old-epoch-http.cjs
+          node scripts/p1p5-v2-package0-signed-old-epoch-http.cjs before
+          psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.p0_13_epoch_gate SET paused=true WHERE program='math_as_p1_p5';"
+          node scripts/p1p5-v2-package0-signed-old-epoch-http.cjs during
+          psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.p0_13_epoch_gate SET epoch=2,paused=false WHERE program='math_as_p1_p5';"
+          node scripts/p1p5-v2-package0-signed-old-epoch-http.cjs after
+          psql -X -v ON_ERROR_STOP=1 -c "
+            DO \$\$
+            BEGIN
+              IF (SELECT count(*) FROM private.p0_13_fake_write_events) <> 2 OR
+                 (SELECT count(*) FROM private.p0_13_fake_write_events WHERE epoch=1) <> 1 OR
+                 (SELECT count(*) FROM private.p0_13_fake_write_events WHERE epoch=2) <> 1 OR
+                 (SELECT epoch FROM private.p0_13_epoch_gate WHERE program='economics_as') <> 1
+              THEN RAISE EXCEPTION 'P0-13 fake write count or other program mutated'; END IF;
+              RAISE NOTICE 'PASS P0-13 real signed-JWT fake epoch guard, no other program mutation';
+            END
+            \$\$;"
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
