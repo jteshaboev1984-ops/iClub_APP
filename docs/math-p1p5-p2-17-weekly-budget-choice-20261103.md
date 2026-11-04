@@ -30,3 +30,14 @@
 Ветку main, production Supabase, Vercel, пользовательские данные, Practice/Tours, сертификаты и localStorage не менять. Оставить новый Timeline UI **выключенным по умолчанию** до отдельного решения по выпуску. В CI/тестах использовать только изолированную базу PG17 и синтетические браузерные экраны.
 
 **Статус:** код P2-17 и тесты добавлены в draft; итоговый exact-SHA CI будет внесён после прохождения полного набора, не переносить статус P2-16 автоматически.
+
+
+## Фактическое завершение P2-17 — 2026-11-04
+
+**ПРОВЕРЕНО:** на точном коммите draft PR #470 \`a6c76a8fba6d11aaa4c138bb6212aad11075d45b\` все **46/46 GitHub Actions COMPLETED SUCCESS**, без отменённых и упавших проверок. [Signed JWT/PostgREST/PG17 Mathematics E2E](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41757028286); [Stage D](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41757028317); [визуальная регрессия](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41757028246).
+
+**Подтверждённая причина прежнего «зависания»:** SQL \`40001\` в отказе по устаревшей версии профиля запускал повторные попытки PostgREST как при serialization_failure. Исправлено на стандартный отказ \`PT409\` (HTTP 409 Conflict), правила доступа/оптимистической ревизии не ослаблены. [Описанный Supabase дефект](https://supabase.com/kb/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions).
+
+**Изоляция тестов:** восстановлен неизменённый P2-16 E2E из последнего зелёного коммита, отдельная P2-17 signed-JWT проверка разбита на независимые шаги: выбор дат, подмена часов, stale → **HTTP 409**, анонимный запрос, одно явное сохранение, replay/over-budget, восстановление синтетического профиля. Все они SUCCESS. Ошибка последующей SQL-проверки P2-16 была исключительно из-за порядка — проверка ожидала даты до того, как P2-17 изменил синтетическую фикстуру. Исправлен порядок: P2-16 SQL snapshot → P2-17 сценарии → P2-17 audit. Последний SQL audit истории часов, ревизий, неизменности экзаменационной эпохи и академического прогресса также SUCCESS.
+
+**Граница безопасности:** PR OPEN/DRAFT/UNMERGED, флаг нового timeline OFF по умолчанию. Read-only проверка production: новых owner RPC \`accept_my_exam_prep_timeline_weekly_target_safe_v1\` и \`get_exam_prep_simple_learning_timeline_with_hours_safe_v2\` нет. \`exam-prep-api.js\` остаётся побайтно исходным Git blob \`e51053de286bf4c9f16fa7a608ad32ef55d203c8\`. Нет изменений main, Supabase production, Vercel, локальных данных, реальных попыток, Practice/Tours или сертификатов. Техническая готовность P2-17 подтверждена; **публичный выпуск отдельно не одобрен**. Не смешивать с отдельным Stage C defect countdown.
