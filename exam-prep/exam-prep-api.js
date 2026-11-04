@@ -424,7 +424,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-horizon1-schedule1-periodic1-stagec-clock20261104-d03-written20261104-p3sharedweek20261104");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-horizon1-schedule1-periodic1-stagec-clock20261104-d03-written20261104-p3sharedweek20261104-d09periodbridge20261104");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");
@@ -439,7 +439,7 @@
     // Explicit pre-set true is still supported for preview/tests. In production,
     // controlled-beta capabilities call loadControlledProgressUx() after auth.
     if (window.iClubExamPrepProgressUxEnabled === true) {
-      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1-p3sharedweek");
+      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1-p3sharedweek-d09periodbridge20261104");
     }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
