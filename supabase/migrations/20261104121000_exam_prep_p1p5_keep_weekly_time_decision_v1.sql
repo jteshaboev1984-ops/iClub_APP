@@ -47,7 +47,9 @@ BEGIN
  SELECT * INTO v_profile
  FROM private.exam_prep_exam_profiles
  WHERE user_id=v_uid FOR UPDATE;
- IF v_profile.user_id IS NULL OR v_profile.program_version_id IS NULL THEN
+ IF v_profile.user_id IS NULL OR v_profile.program_version_id IS NULL
+   OR v_profile.mathematics_hours_budget IS NULL
+   OR v_profile.total_student_hours_available IS NULL THEN
    RAISE EXCEPTION 'exam_prep_profile_required' USING ERRCODE='42501';
  END IF;
  IF p_expected_profile_revision IS DISTINCT FROM v_profile.profile_revision
