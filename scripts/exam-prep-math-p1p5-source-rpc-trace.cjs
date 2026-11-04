@@ -78,8 +78,7 @@ const EXPECTED=[
   "start_exam_prep_next_diagnostic_safe_v1",
   "start_exam_prep_plan_session_once_safe_v1",
   "start_exam_prep_session_safe_v1",
-  "submit_exam_prep_response_safe_v1",
-  "submit_exam_prep_timed_written_self_mark_safe_v1"
+  "submit_exam_prep_response_safe_v1"
 ];
 const LIVE='exam-prep/exam-prep-live.js';
 const HOST='exam-prep/exam-prep-host.js';
@@ -112,7 +111,7 @@ const missing=EXPECTED.filter(n=>!found.has(n));
 const added=[...found].filter(n=>!EXPECTED.includes(n)).sort();
 assert.deepEqual(missing,[],'historical RPC removed/renamed; first reconcile actual backend signature');
 assert.deepEqual(added,[],'new untraced RPC; first document path, permissions and invariant');
-assert.equal(EXPECTED.length,66,'P1/P5 source contract count changed without trace review');
+assert.equal(EXPECTED.length,65,'P1/P5 D03 source contract count changed without trace review');
 const api=read(PATHS[0]),weekly=read(PATHS[1]),progress=read(PATHS[2]);
 const live=read(LIVE),host=read(HOST),html=read(HTML);
 for(const n of [
@@ -142,6 +141,12 @@ for(const n of ['get_exam_prep_weekly_progress_safe_v1','get_exam_prep_weekly_go
 assert.match(weekly,/window\.iClubExamPrepWeeklyFlowEnabled\s*!==\s*true/,'weekly fail-closed cutover missing');
 assert.match(host,/state\.subjectKey\s*!==\s*MATHEMATICS_KEY/,'subject isolation missing');
 assert.match(live,/writtenNotAuto/,'non-grading policy label missing');
+for(const [label,src] of [['API',api],['learner UI',live]]) {
+ assert(!src.includes('submitTimedSelfMark') && !src.includes('submit_exam_prep_timed_written_self_mark_safe_v1'),
+   'D03 forbids callable self-mark endpoint: '+label);
+}
+assert(live.includes('writtenNotGraded') && live.includes('data-ep-live-next-written'),
+  'D03 rubric-only review missing');
 assert.match(live,/pendingSubmission/,'answer ACK preservation missing');
 for(const s of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
  'exam-prep/runtime/written-core-controller-v1.js']){
