@@ -151,8 +151,12 @@ begin
    or p_expected_profile_revision<>v_old.profile_revision
    or p_expected_current_math_hours is null
    or p_expected_current_math_hours is distinct from v_old.mathematics_hours_budget then
+   -- SQLSTATE 40001 means serialization_failure and triggers repeated
+   -- transaction retries in PostgREST 14. Stale user input is a normal
+   -- application conflict, not a transient database serialization error.
+   -- PT409 maps to HTTP 409 and fails closed without a retry loop.
    raise exception 'exam_prep_weekly_plan_changed_refresh'
-     using errcode='40001';
+     using errcode='PT409';
  end if;
 
  v_est:=public.get_exam_prep_simple_learning_timeline_with_hours_safe_v2();

@@ -74,6 +74,11 @@ async function main(){
   const test=checks[phase];
   const response=await rpc('accept_my_exam_prep_timeline_weekly_target_safe_v1',test.args,test.uid);
   assert(!response.ok,phase+' must be rejected for '+test.expected);
+  if(phase==='stale'){
+   assert.equal(response.status,409,'Stale user budget is a non-retryable conflict');
+   assert.equal(response.data?.code,'PT409',
+    'Stale profile must never return SQLSTATE 40001 (retry loop)');
+  }
   const after=await timeline();baseline(after);
   assert.equal(after.student_budget_profile_revision,rev);
  }

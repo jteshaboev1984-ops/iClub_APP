@@ -43,6 +43,13 @@ begin
  then
    raise exception 'P2-17 real v2 profile audit or historical grade comparability broken';
  end if;
+ if position('PT409' in
+   pg_get_functiondef('public.accept_my_exam_prep_timeline_weekly_target_safe_v1(numeric,integer,numeric)'::regprocedure))=0
+   or position('40001' in
+   pg_get_functiondef('public.accept_my_exam_prep_timeline_weekly_target_safe_v1(numeric,integer,numeric)'::regprocedure))>0
+ then
+   raise exception 'P2-17 stale profile must raise PT409 and never retry serialization state 40001';
+ end if;
  if has_function_privilege('anon',
    'public.accept_my_exam_prep_timeline_weekly_target_safe_v1(numeric,integer,numeric)','EXECUTE')
    or not has_function_privilege('authenticated',
