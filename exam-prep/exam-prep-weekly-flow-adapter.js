@@ -72,9 +72,23 @@
     if(!result.ok) return result;
     const b=result.data;
     const validNumber=n=>Number.isInteger(n)&&n>=0&&n<=10080;
+    const periodStatuses=new Set(['diagnostic_pending','diagnostic_completion_unknown',
+      'diagnostic_in_future','diagnostic_period_ready']);
+    const validAcademicPeriod=p=>p&&typeof p==='object'&&
+      periodStatuses.has(p.status)&&typeof p.anchor_immutable==='boolean'&&
+      (p.current_period_no===null
+        ? p.status!=='diagnostic_period_ready'&&p.next_period_ends_at===null
+        : p.status==='diagnostic_period_ready'&&Number.isSafeInteger(p.current_period_no)&&
+          p.current_period_no>=1&&typeof p.next_period_ends_at==='string'&&
+          Number.isFinite(Date.parse(p.next_period_ends_at)));
     if(b.contract_version!=='exam_prep_shared_weekly_available_time_v1' ||
        b.plan_id!==planId || b.component_code!==component ||
        !Number.isInteger(b.active_week_no) || b.active_week_no<1 ||
+       b.planner_week_kind!=='legacy_shared_plan_id' ||
+       b.legacy_plan_id_preserved!==true ||
+       b.diagnostic_period_never_rekeys_existing_plan!==true ||
+       !validAcademicPeriod(b.component_diagnostic_periods?.P1) ||
+       !validAcademicPeriod(b.component_diagnostic_periods?.P5) ||
        !validNumber(b.available_math_minutes) ||
        !validNumber(b.p1_reserved_minutes) ||
        !validNumber(b.p5_reserved_minutes) ||
