@@ -58,7 +58,18 @@ const fingerprintSQL=`SELECT jsonb_build_object(
  'beta_consents',(SELECT count(*) FROM private.exam_prep_beta_consents),
  'ai_grants',(SELECT count(*) FROM private.exam_prep_feature_entitlements WHERE ai_assist AND entitlement_status='active'),
  'math_gate',(SELECT epoch::text||':'||paused::text FROM private.p0_16_academic_epoch_gate WHERE program_key='math_as_p1_p5'),
- 'other_gate',(SELECT epoch::text||':'||paused::text FROM private.p0_16_academic_epoch_gate WHERE program_key='economics_as')
+ 'other_gate',(SELECT epoch::text||':'||paused::text FROM private.p0_16_academic_epoch_gate WHERE program_key='economics_as'),
+ 'users_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM public.users x),
+ 'auth_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM auth.users x),
+ 'sessions_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM private.exam_prep_sessions x),
+ 'authorizations_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM private.exam_prep_session_authorizations x),
+ 'responses_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM private.exam_prep_responses x),
+ 'profiles_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM private.exam_prep_exam_profiles x),
+ 'consents_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM private.exam_prep_beta_consents x),
+ 'entitlements_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM private.exam_prep_feature_entitlements x),
+ 'practice_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM public.practice_attempts x),
+ 'tours_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM public.tour_attempts x),
+ 'certificates_digest',(SELECT md5(coalesce(string_agg(to_jsonb(x)::text,'|' ORDER BY to_jsonb(x)::text),'')) FROM public.certificates x)
 )::text`;
 const before=sqlRead(fingerprintSQL);
 const sql= `SELECT COALESCE(jsonb_agg(jsonb_build_object(
