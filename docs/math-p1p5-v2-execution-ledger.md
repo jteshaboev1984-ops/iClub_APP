@@ -2,6 +2,7 @@
 
 **Issue:** [#450](https://github.com/jteshaboev1984-ops/iClub_APP/issues/450)  
 **Last checked:** 2026-11-02 UTC · **Current workflow:** Package 0 IN PROGRESS; Packages 1–8 NOT STARTED under new v2 plan.  
+**Latest P0-08 scope status (2026-11-04):** two new draft learner tables pending review; original 32-table cleanup manifest must not be used for release. See P0-08 below.  
 **Authoritative approved product workplan:** [full v2.0 plan](math-p1p5-release-workplan-v2-20261102.md).  
 **Change-control:** [v2.0 addendum](math-p1p5-v2-governance-addendum-20261102.md).  
 **Existing E2E ledger:** [old integration plan v1.16](math-p1p5-integrated-e2e-release-roadmap-v1.md); preserve all authentic proof from PR #451–#467.  
@@ -452,3 +453,15 @@ Authoritative architect-approved UX: one optional weekly-hours comparison for pe
 **Test discipline:** P2-16 owner E2E restored byte-for-byte from proven green baseline Git blob \`96654279e9bfbe91ad9e8b1226fdc7fdd5f3e718\`. P2-17 test split by phase (dates, tampered, stale, anon, accept, replay, restore), with explicit bounded HTTP requests; real isolated PostgreSQL ledger audit after restoration. All steps passed. Avoid refetching giant GitHub logs; use named steps and exact commit SHA.
 
 **Verified exact source** [PR #470](https://github.com/jteshaboev1984-ops/iClub_APP/pull/470) **SHA \`a6c76a8fba6d11aaa4c138bb6212aad11075d45b\`, 46/46 Actions SUCCESS**, including [real P1/P5 E2E #41757028286](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41757028286), [Stage D #41757028317](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41757028317), [visual #41757028246](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/41757028246). Production checked read-only: draft-only new RPCs absent. Branch remains OPEN, DRAFT, UNMERGED; feature OFF, **NO_GO for public activation without separate explicit architect decision**. No learner data or academic progress migrated, rewritten or reset.
+
+## Checkpoint P0-08 — cross-PR release schema drift held (2026-11-04)
+
+**First unfinished v2 release-safety item:** the original Package 0 32-table/19,794-row isolated reset and PostgreSQL 17 backup rehearsal passed on the 2 November schema, but later [PR #469](https://github.com/jteshaboev1984-ops/iClub_APP/pull/469) and [PR #470](https://github.com/jteshaboev1984-ops/iClub_APP/pull/470) propose TWO new per-user tables outside that allowlist. The former rehearsal is valid for its exact scope, not for the final combined release. PR #471 is an isolated countdown getter/clock change, not a learner table.
+
+**Exact proposed additions:** PR #469 adds private.exam_prep_periodic_study_report_receipts_v1, whose PK is (user_id,period_kind,period_ended_at) and lacks program_version_id. This requires explicit program/epoch-safe retention or reset to prevent stale notification receipts and cross-program deletion. PR #470 adds private.exam_prep_learner_exam_dates_v1 keyed by (user_id,program_version_id,component_code). PR #469 also adds cadence columns to existing candidate exam_prep_exam_profiles. The academic/source registries from PR #470 are protected non-learner governance records.
+
+**Artifacts committed to [draft PR #468](https://github.com/jteshaboev1984-ops/iClub_APP/pull/468):** [P0-08 risk and exact acceptance contract](math-p1p5-v2-package0-draft-schema-drift-20261104.md), [read-only live catalog inspection](../supabase/tests/p1p5_v2_package0_future_tables_readonly.sql), and [fail-closed static inventory guard](../scripts/p1p5-v2-package0-scope-guard.cjs). Last exact commit: fac3d2aa7579a2b250b95080302bee56ae266992. Metadata SQL was ACTUALLY executed SELECT-only against live Supabase on 2026-11-04: both proposed tables ABSENT, 122 broad private exam_prep_* tables (not a reset count). No learner content read, data written, SQL migration applied, production flag, main or Vercel changed. CI for this newest guard should be checked independently; no premature GREEN claim.
+
+**P0-08 verdict: NO_GO / retention HOLD.** Before any approved one-shot reset, rebuild the learner scope from the combined accepted release SHA and independently re-test table/column/FK ownership, scoped program and epoch, old-tab write replay, protected Practice/Tours/AI/other subjects and encrypted production restore. A read-only audit is NOT real release permission. Existing verified P2-17 46/46 and Stage C countdown 50/50 success remain preserved.
+
+**NEXT:** verify exact-head static guard CI; then separately design a versioned fail-closed release epoch / one-shot authorization negative regression on disposable PostgreSQL. Do not deploy/merge any PR, reset live beta, or clear real/local user state without the architect's release GO.
