@@ -471,6 +471,11 @@ jobs:
               AND status='finalized'
             ORDER BY finalized_at DESC NULLS LAST,id LIMIT 1;")"
           test -n "$P0_16_STALE_SESSION_ID"
+          export P0_16_STALE_AUTH_ID="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT authorization_id FROM private.exam_prep_sessions
+            WHERE id='$P0_16_STALE_SESSION_ID'::uuid
+              AND user_id='11111111-1111-4111-8111-111111111191'::uuid;")"
+          test -n "$P0_16_STALE_AUTH_ID"
           psql -X -v ON_ERROR_STOP=1 -c "
             UPDATE private.exam_prep_feature_config
             SET rollout_state='controlled_beta',core_enabled=true,
