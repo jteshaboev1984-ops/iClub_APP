@@ -205,6 +205,7 @@ for(const token of [
   'DISPOSABLE PG17 ONLY','current_database()', 'iclub.e2e_isolated',
   '(SELECT count(*) FROM public.users)<>2','(SELECT count(*) FROM auth.users)<>2',
   'private.p0_13_epoch_gate','private.p0_13_fake_write_events',
+  'private.p0_13_fake_authorizations','issued_attempt_epoch_mismatch',
   'FOR SHARE','stale_or_paused_academic_epoch','PT409',
   'REVOKE ALL ON FUNCTION public.p0_13_submit_signed_epoch_test_v1',
   'GRANT EXECUTE ON FUNCTION public.p0_13_submit_signed_epoch_test_v1'
@@ -219,6 +220,9 @@ for(const phrase of [
   'post-cutover stale tab','same key changed payload','foreign learner',
   'anonymous','bad JWT','PT409'
 ]) assert(p013Http.includes(phrase),'P0-13 signed HTTP coverage missing: '+phrase);
+assert(p013Http.includes('tampered new epoch with old issued session') &&
+       p013E2e.includes('epoch-two-request'),
+  'P0-13 must reject spoofed epoch on an old issued authorization');
 assert(p013Http.includes('P0_13_FIXED_IAT') && p013E2e.includes('export P0_13_FIXED_IAT'),
   'P0-13 must reuse exact still-valid pre-cutover learner JWT');
 assert(p013E2e.includes('P0-13 signed old-device HTTP epoch') &&
