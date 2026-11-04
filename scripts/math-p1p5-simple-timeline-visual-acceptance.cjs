@@ -18,6 +18,7 @@ function data(withDates){
   const future5=withDates?'2027-05-20T09:00:00+05:00':null;
   return {
     contract_version:'exam_prep_one_line_progress_timeline_v2_estimated',
+    numeric_recommendation_enabled:true, // future reviewed-contract mock only, NOT a live approved norm
     factors_are_iclub_planning_assumptions_not_official_cambridge:true,
     source_guided_hours_are_not_private_study_hours:true,
     recommended_schedule_applied_automatically:false,
