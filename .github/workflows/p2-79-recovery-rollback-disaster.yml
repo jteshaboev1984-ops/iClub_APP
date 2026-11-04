@@ -44,7 +44,9 @@ permissions:
 
 jobs:
   recovery-rollback-disaster:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 Chromium does not support GitHub's ubuntu26.04-latest runner.
+    # Pin the isolated test OS; this does not modify deployed app or data.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     services:
