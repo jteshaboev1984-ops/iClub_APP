@@ -372,3 +372,39 @@ assert(p018Http.includes("HOST='http://127.0.0.1:3000'") &&
        p018Http.includes("protected pre/post fingerprint preserved"),
        'P0-18 real signed owner/stale user security matrix missing');
 console.log('PASS P0-18 isolated pinned draft469 three-write + two-read source guard; not production approval');
+
+
+// P0-19 pinned PR470 personal date/weekly-choice testing AFTER pinned PR469.
+// No production migrations, fake user modification only; no official dates.
+const p019Sql=read('supabase/tests/p1p5_v2_package0_draft470_new_dates_weekly_epoch_shadow_disposable.sql');
+const p019Http=read('scripts/p1p5-v2-package0-draft470-old-jwt-http.cjs');
+const p019Flow=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+const p019Sha='a6c76a8fba6d11aaa4c138bb6212aad11075d45b';
+for(const token of [
+ 'DISPOSABLE PostgreSQL 17 ONLY',
+ "current_database()<>'postgres'",
+ 'iclub.e2e_isolated',
+ '(SELECT count(*) FROM public.users)<>2',
+ '(SELECT count(*) FROM auth.users)<>2',
+ 'private.p0_16_require_current_epoch_v1',
+ 'private.exam_prep_learner_exam_dates_v1',
+ 'save_my_exam_prep_timeline_dates_safe_v1',
+ 'accept_my_exam_prep_timeline_weekly_target_safe_v1',
+ 'v_patched<>2',
+ 'get_exam_prep_simple_learning_timeline_safe_v1',
+ 'personal-date/recommendation gate'
+])assert(p019Sql.includes(token),'P0-19 live-source/security scope missing: '+token);
+assert(!/\b(?:DELETE\s+FROM|TRUNCATE|DISABLE\s+TRIGGER|session_replication_role)\b/i.test(p019Sql),
+  'P0-19 may not delete or bypass real learner state');
+assert(p019Flow.includes(p019Sha) &&
+       p019Flow.includes('P0-19 combine pinned PR469 plus PR470') &&
+       p019Flow.includes('20261103042000_exam_prep_learner_chosen_dates_v1.sql') &&
+       p019Flow.includes('20261103043000_exam_prep_student_accept_weekly_study_target_v1.sql') &&
+       p019Flow.includes('p1p5-v2-package0-draft470-old-jwt-http.cjs'),
+       'P0-19 exact source SHA migration/HTTP test absent');
+assert(p019Http.includes("HOST='http://127.0.0.1:3000'") &&
+       p019Http.includes('P0_19_OLD_IAT') &&
+       p019Http.includes('legacy school-confirmed appointments') &&
+       p019Http.includes('exam_prep_learner_exam_dates_v1'),
+       'P0-19 old signed JWT / protected legacy appointment test absent');
+console.log('PASS P0-19 pinned learner-owned dates/weekly target source guard, all fake/local');
