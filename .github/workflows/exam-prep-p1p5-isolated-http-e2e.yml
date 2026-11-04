@@ -367,6 +367,27 @@ jobs:
           node --check exam-prep/exam-prep-live.js
           node --check exam-prep/exam-prep-api.js
           node scripts/p1p5-package1-real-dates-horizon-e2e.cjs
+      - name: P3-03 next 7-day weekly budget rollover and protected history (disposable PG17)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          test "$(psql -X -At -v ON_ERROR_STOP=1 -c 'SHOW server_version_num')" -ge 170000
+          # One real-migration test transaction, forced ROLLBACK even after
+          # simulated 8-day shift. No hosted/live Supabase and no real learner.
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_03_next_week_rollover_disposable.sql \
+            2>&1 | tee /tmp/p1p5-p303-next-week-rollover.log
+          grep -Fq 'P3-03 PASS inside disposable transaction' \
+            /tmp/p1p5-p303-next-week-rollover.log
+          grep -Fq 'P3-03 POST-ROLLBACK PASS' \
+            /tmp/p1p5-p303-next-week-rollover.log
+          echo 'P3-03 PASS: one elected Math budget, 7-day rollover, isolated history and cross-subject preservation'
+
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
