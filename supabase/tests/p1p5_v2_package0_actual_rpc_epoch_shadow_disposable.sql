@@ -52,7 +52,7 @@ DECLARE
  v_session_epoch integer;
 BEGIN
  IF current_database()<>'postgres'
- OR current_setting('iclub.e2e_isolated',true) IS DISTINCT FROM 'true'
+ OR to_regclass('private.p0_16_academic_epoch_gate') IS NULL
  OR (SELECT count(*) FROM public.users)<>2
  OR (SELECT count(*) FROM auth.users)<>2
  THEN RAISE EXCEPTION 'p0_16_disposable_only' USING ERRCODE='42501'; END IF;
