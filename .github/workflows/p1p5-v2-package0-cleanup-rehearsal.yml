@@ -6,6 +6,8 @@ on:
       - 'supabase/tests/p1p5_v2_package0_*'
       - 'supabase/tests/p1p5_v2_package0_epoch_one_shot_disposable_only.sql'
       - 'scripts/p1p5-v2-package0-scope-guard.cjs'
+      - 'scripts/p1p5-v2-package0-build-combined-probe.cjs'
+      - 'supabase/tests/p1p5_v2_package0_future_state_overlay_disposable.sql'
       - '.github/workflows/p1p5-v2-package0-cleanup-rehearsal.yml'
   workflow_dispatch:
 
@@ -40,6 +42,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate readonly production-audit scripts and 32-table provisional scope
         run: node scripts/p1p5-v2-package0-scope-guard.cjs
+      - name: P0-10 static combined SQL dollar-quote and scope integrity
+        env:
+          P1P5_E2E_ISOLATED: 'true'
+          PGDATABASE: postgres # script assembles text only; no DB connection in this step
+        run: |
+          set -euo pipefail
+          dir="$(mktemp -d /tmp/p0-10-XXXXXX)"
+          trap 'rm -rf "$dir"' EXIT
+          node --check scripts/p1p5-v2-package0-build-combined-probe.cjs
+          node scripts/p1p5-v2-package0-build-combined-probe.cjs "$dir/combined.sql"
+          grep -Fq 'DO $' "$dir/combined.sql"
+          ! grep -Eq '^DO \$' "$dir/combined.sql"
+          echo "PASS: original SQL DO dollar quoting preserved and future-state test assembled"
       - name: Run isolated cycle, retained-Mentor blocker and rollback transaction
         run: psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_cleanup_isolated_fk_rehearsal.sql
       - name: P0-09 isolated one-shot epoch authorization and replay/rollback matrix
