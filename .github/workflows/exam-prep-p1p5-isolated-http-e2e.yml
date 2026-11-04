@@ -6,6 +6,22 @@ on:
       - 'exam-prep/**'
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
+      - 'supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql'
+      - 'supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql'
+      - 'supabase/tests/p1p5_v2_package0_future_state_overlay_disposable.sql'
+      - 'scripts/p1p5-v2-package0-build-combined-probe.cjs'
+      - 'supabase/tests/p1p5_v2_package0_signed_epoch_http_disposable.sql'
+      - 'scripts/p1p5-v2-package0-signed-old-epoch-http.cjs'
+      - 'scripts/p1p5-v2-package0-concurrent-epoch-lock.cjs'
+      - 'supabase/tests/p1p5_v2_package0_actual_rpc_epoch_shadow_disposable.sql'
+      - 'scripts/p1p5-v2-package0-real-rpc-epoch-http.cjs'
+      - 'supabase/tests/p1p5_v2_package0_actual_core_writer_30_shadow_disposable.sql'
+      - 'scripts/p1p5-v2-package0-real-core30-epoch-http.cjs'
+      - 'supabase/tests/p1p5_v2_package0_draft469_three_writers_epoch_shadow_disposable.sql'
+      - 'scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs'
+      - 'supabase/tests/p1p5_v2_package0_draft470_new_dates_weekly_epoch_shadow_disposable.sql'
+      - 'scripts/p1p5-v2-package0-draft470-old-jwt-http.cjs'
+      - 'scripts/p1p5-v2-package0-synthetic-backup-restore.sh'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
@@ -33,7 +49,7 @@ permissions:
 jobs:
   real-http-auth:
     name: actual Math UI JWT PostgREST PG17
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
@@ -145,6 +161,22 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql > /tmp/p1p5-e2e-seed.log
           echo "Disposable seed applied; no live project, token or account involved"
+      - name: P0-13 prepare DISPOSABLE signed HTTP epoch fixture only
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_signed_epoch_http_disposable.sql >/tmp/p0-13-epoch-setup.log
+          echo "PASS: test-only epoch fixture installed in disposable PostgreSQL"
+      - name: Package 0 actual-migrations P1/P5 session/authorization FK rollback
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_full_schema_fk_rollback.sql
+          echo "PASS: full migration schema retained and fake FK probe rolled back"
       - name: Generate ephemeral JWT signing key and start local PostgREST
         shell: bash
         run: |
@@ -182,6 +214,47 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-isolated-http-auth-e2e.cjs
+      - name: P0-13 signed old-device HTTP epoch, idempotency and maintenance denial
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          export P0_13_FIXED_IAT="$(date -u +%s)" # same signed JWT reused after epoch transition
+          node --check scripts/p1p5-v2-package0-signed-old-epoch-http.cjs
+          node scripts/p1p5-v2-package0-signed-old-epoch-http.cjs before
+          psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.p0_13_epoch_gate SET paused=true WHERE program='math_as_p1_p5';"
+          node scripts/p1p5-v2-package0-signed-old-epoch-http.cjs during
+          psql -X -v ON_ERROR_STOP=1 -c "
+            BEGIN;
+            UPDATE private.p0_13_epoch_gate SET epoch=2,paused=false WHERE program='math_as_p1_p5';
+            INSERT INTO private.p0_13_fake_authorizations(user_id,program,request_key,issued_epoch)
+              VALUES('11111111-1111-4111-8111-111111111191'::uuid,'math_as_p1_p5','epoch-two-request',2);
+            COMMIT;
+          "
+          node scripts/p1p5-v2-package0-signed-old-epoch-http.cjs after
+          psql -X -v ON_ERROR_STOP=1 -c "
+            DO \$\$
+            BEGIN
+              IF (SELECT count(*) FROM private.p0_13_fake_write_events) <> 2 OR
+                 (SELECT count(*) FROM private.p0_13_fake_write_events WHERE epoch=1) <> 1 OR
+                 (SELECT count(*) FROM private.p0_13_fake_write_events WHERE epoch=2) <> 1 OR
+                 (SELECT count(*) FROM private.p0_13_fake_authorizations WHERE issued_epoch=1) <> 3 OR
+                 (SELECT count(*) FROM private.p0_13_fake_authorizations WHERE issued_epoch=2) <> 1 OR
+                 (SELECT epoch FROM private.p0_13_epoch_gate WHERE program='economics_as') <> 1
+              THEN RAISE EXCEPTION 'P0-13 fake write count or other program mutated'; END IF;
+              RAISE NOTICE 'PASS P0-13 real signed-JWT fake epoch guard, no other program mutation';
+            END
+            \$\$;"
+      - name: P0-14 real two-session PG17 epoch maintenance lock race
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGDATABASE" = "postgres"
+          node --check scripts/p1p5-v2-package0-concurrent-epoch-lock.cjs
+          node scripts/p1p5-v2-package0-concurrent-epoch-lock.cjs
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
@@ -348,6 +421,234 @@ jobs:
           node scripts/p1p5-isolated-http-retired-content-recovery.cjs | tee /tmp/p1p5-stage-c-real-http-stale-content.log
           grep -q 'STAGE C REAL HTTP CONTENT RETIREMENT EXPIRY AND PROTECTED REVIEW PASS' /tmp/p1p5-stage-c-real-http-stale-content.log
           grep -q 'STAGE C REAL HTTP P1 CONTENT RESTORED TWO DISPOSABLE USER BOUNDARY PASS' /tmp/p1p5-stage-c-real-http-stale-content.log
+      - name: Package 0 full 32-table scoped fake-learner cleanup and complete rollback
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_v2_package0_32table_disposable_rollback_only.sql \
+            | tee /tmp/p1p5-v2-package0-32table-rehearsal.log
+          echo "PASS: 32 table fake-user rollback-only rehearsal completed"
+      - name: P0-10 real-schema 32-table plus future dates scoped reset, receipts HOLD, and rollback
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          dir="$(mktemp -d /tmp/p0-10-XXXXXX)"
+          trap 'rm -rf "$dir"' EXIT
+          node --check scripts/p1p5-v2-package0-build-combined-probe.cjs
+          node scripts/p1p5-v2-package0-build-combined-probe.cjs "$dir/combined.sql"
+          psql -X -v ON_ERROR_STOP=1 -f "$dir/combined.sql" > /tmp/p1p5-p0-10-combined-test.log
+          echo "PASS: original 32 learner-state tables plus prospective date+receipt scope verified; full transaction ROLLBACK"
+      - name: Package 0 real PG17 synthetic-only custom backup and independent restore proof
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          bash -n scripts/p1p5-v2-package0-synthetic-backup-restore.sh
+          # GitHub Ubuntu runner ships pg_dump 16 while isolated server is 17.
+          # Run all dump/restore clients INSIDE disposable postgres:17;
+          # never install a client, connect to live DB, or upload archives.
+          docker run --rm --network host --entrypoint bash \
+            -e P1P5_E2E_ISOLATED -e PGHOST -e PGPORT -e PGUSER \
+            -e PGPASSWORD -e PGDATABASE -e PGOPTIONS \
+            -v "$PWD/scripts/p1p5-v2-package0-synthetic-backup-restore.sh:/p0-restore-test.sh:ro" \
+            postgres:17 /p0-restore-test.sh
+      - name: P0-16 REAL six Math public RPCs signed old JWT and session cutover, PG17 ONLY
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          export P0_16_STALE_SESSION_ID="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT id FROM private.exam_prep_sessions
+            WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid
+              AND status='finalized'
+            ORDER BY finalized_at DESC NULLS LAST,id LIMIT 1;")"
+          test -n "$P0_16_STALE_SESSION_ID"
+          export P0_16_STALE_AUTH_ID="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT authorization_id FROM private.exam_prep_sessions
+            WHERE id='$P0_16_STALE_SESSION_ID'::uuid
+              AND user_id='11111111-1111-4111-8111-111111111191'::uuid;")"
+          test -n "$P0_16_STALE_AUTH_ID"
+          psql -X -v ON_ERROR_STOP=1 -c "
+            UPDATE private.exam_prep_feature_config
+            SET rollout_state='controlled_beta',core_enabled=true,
+                qa_open_all_core=true,kill_switch=false,updated_at=now()
+            WHERE id=1;" > /tmp/p016-isolated-core-fixture.log
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_v2_package0_actual_rpc_epoch_shadow_disposable.sql \
+            >/tmp/p016-real-rpc-shadow-install.log
+          export P0_16_OLD_IAT="$(date -u +%s)"
+          node --check scripts/p1p5-v2-package0-real-rpc-epoch-http.cjs
+          node scripts/p1p5-v2-package0-real-rpc-epoch-http.cjs before
+          psql -X -v ON_ERROR_STOP=1 -c "
+            UPDATE private.p0_16_academic_epoch_gate
+            SET paused=true WHERE program_key='math_as_p1_p5';"
+          node scripts/p1p5-v2-package0-real-rpc-epoch-http.cjs paused
+          psql -X -v ON_ERROR_STOP=1 -c "
+            UPDATE private.p0_16_academic_epoch_gate
+            SET epoch=2,paused=false,min_signed_jwt_iat=$((P0_16_OLD_IAT+1))
+            WHERE program_key='math_as_p1_p5';"
+          sleep 2
+          node scripts/p1p5-v2-package0-real-rpc-epoch-http.cjs after
+          psql -X -v ON_ERROR_STOP=1 -c "
+            DO \$\$
+            BEGIN
+              IF (SELECT epoch FROM private.p0_16_academic_epoch_gate
+                WHERE program_key='math_as_p1_p5') <> 2
+              OR (SELECT epoch FROM private.p0_16_academic_epoch_gate
+                WHERE program_key='economics_as') <> 1
+              OR (SELECT count(*) FROM public.users) <> 2
+              OR (SELECT count(*) FROM auth.users) <> 2
+              OR (SELECT count(*) FROM private.exam_prep_sessions
+                WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid
+                  AND p0_16_issued_epoch=1) < 2
+              THEN RAISE EXCEPTION 'P0-16 synthetic epoch/frozen session isolation failed';
+              END IF;
+              RAISE NOTICE 'PASS P0-16 real Math write RPC epoch and protected context';
+            END
+            \$\$;"
+          echo "PASS: real signed JWT and old frozen session denied on SIX existing Math RPCs; remaining routes NOT certified"
+      - name: P0-17 30 Core actual RPC epoch guards and 24 signed old JWT HTTP denies
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_v2_package0_actual_core_writer_30_shadow_disposable.sql \
+            > /tmp/p0-17-test-only-24-writers.log
+          export P0_17_OLD_IAT="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT min_signed_jwt_iat-1 FROM private.p0_16_academic_epoch_gate
+            WHERE program_key='math_as_p1_p5';")"
+          test "$P0_17_OLD_IAT" -gt 1700000000
+          node --check scripts/p1p5-v2-package0-real-core30-epoch-http.cjs
+          node scripts/p1p5-v2-package0-real-core30-epoch-http.cjs
+          echo "PASS: thirty existing Core RPCs fenced in disposable schema, not production release-ready"
+      - name: P0-20 three side-effecting getters old JWT deny, real PG17 ONLY
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_v2_package0_getter_rebuild_epoch_shadow_disposable.sql \
+            > /tmp/p020-getter-shadow-disposable.log
+          psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
+          sleep 2
+          export P0_20_OLD_IAT="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT min_signed_jwt_iat-1
+            FROM private.p0_16_academic_epoch_gate
+            WHERE program_key='math_as_p1_p5';")"
+          test "$P0_20_OLD_IAT" -gt 1700000000
+          node --check scripts/p1p5-v2-package0-getter-rebuild-epoch-http.cjs
+          node scripts/p1p5-v2-package0-getter-rebuild-epoch-http.cjs
+          echo "PASS: three real GET-named rebuild RPCs fenced in disposable PG17; never a production migration"
+
+      - name: P0-18 fetch PINNED PR469 draft migrations for disposable integration ONLY
+        uses: actions/checkout@v4
+        with:
+          ref: e125c0e43878a3910aaa66b32ee9cb848402a0ec
+          path: ._p0_18_draft469
+          persist-credentials: false
+      - name: P0-18 exact three draft P1 writer RPCs old JWT deny and new schedule allow
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          test "$(git -C ._p0_18_draft469 rev-parse HEAD)" = \
+               "e125c0e43878a3910aaa66b32ee9cb848402a0ec"
+          for base in \
+             20261103023000_exam_prep_p1p5_personal_horizon_v1.sql \
+             20261103024000_exam_prep_p1p5_study_schedule_v1.sql \
+             20261103025000_exam_prep_p1p5_periodic_study_reports_v1.sql
+          do
+            psql -X -v ON_ERROR_STOP=1 -f "._p0_18_draft469/supabase/migrations/$base" \
+              >> /tmp/p018-pr469-pinned-schema-only.log
+          done
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_v2_package0_draft469_three_writers_epoch_shadow_disposable.sql \
+            > /tmp/p018-three-draft-core-writers.log
+          psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
+          sleep 2
+          export P0_18_OLD_IAT="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT min_signed_jwt_iat-1 FROM private.p0_16_academic_epoch_gate
+            WHERE program_key='math_as_p1_p5';")"
+          test "$P0_18_OLD_IAT" -gt 1700000000
+          node --check scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs
+          node scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs
+          echo "PASS: pinned unmerged PR469 actual study-date/report writers fenced in disposable signed HTTP; NO live deployment"
+      - name: P0-19 fetch PINNED PR470 P2 workload and chosen dates for test DB ONLY
+        uses: actions/checkout@v4
+        with:
+          ref: a6c76a8fba6d11aaa4c138bb6212aad11075d45b
+          path: ._p0_19_draft470
+          persist-credentials: false
+      - name: P0-19 combine pinned PR469 plus PR470 schemas and sign old-date/weekly HTTP denies
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          test "$(git -C ._p0_19_draft470 rev-parse HEAD)" = \
+               "a6c76a8fba6d11aaa4c138bb6212aad11075d45b"
+          for base in \
+            20261103030000_exam_prep_p1p5_workload_norm_registry_v1.sql \
+            20261103031000_exam_prep_p1p5_historical_topic_teaching_references_v1.sql \
+            20261103032000_exam_prep_p1p5_workload_review_projection_v1.sql \
+            20261103033000_exam_prep_p1p5_workload_academic_review_queue_v1.sql \
+            20261103034000_exam_prep_p1p5_real_content_calibration_inventory_v1.sql \
+            20261103035000_exam_prep_p1p5_shared_study_capacity_v1.sql \
+            20261103036000_exam_prep_p1p5_remaining_work_from_evidence_v1.sql \
+            20261103037000_exam_prep_p1p5_action_time_norm_registry_v1.sql \
+            20261103038000_exam_prep_p1p5_action_calibration_candidates_v1.sql \
+            20261103039000_exam_prep_p1p5_conditional_learning_trajectory_v1.sql \
+            20261103040000_exam_prep_simple_learning_timeline_v1.sql \
+            20261103041000_exam_prep_simple_cambridge_source_time_estimate_v1.sql \
+            20261103042000_exam_prep_learner_chosen_dates_v1.sql \
+            20261103043000_exam_prep_student_accept_weekly_study_target_v1.sql
+          do
+            psql -X -v ON_ERROR_STOP=1 \
+              -f "._p0_19_draft470/supabase/migrations/$base" \
+              >> /tmp/p019-pr470-14-pinned-migrations.log
+          done
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_v2_package0_draft470_new_dates_weekly_epoch_shadow_disposable.sql \
+            > /tmp/p019-chosen-date-2-rpc-epoch-shadow.log
+          psql -X -v ON_ERROR_STOP=1 -c "NOTIFY pgrst, 'reload schema';"
+          sleep 2
+          export P0_19_OLD_IAT="$(psql -X -At -v ON_ERROR_STOP=1 -c "
+            SELECT min_signed_jwt_iat-1 FROM private.p0_16_academic_epoch_gate
+            WHERE program_key='math_as_p1_p5';")"
+          test "$P0_19_OLD_IAT" -gt 1700000000
+          node --check scripts/p1p5-v2-package0-draft470-old-jwt-http.cjs
+          node scripts/p1p5-v2-package0-draft470-old-jwt-http.cjs
+          echo "PASS: pinned unmerged P2 student-owned P1/P5 dates protected over actual JWT/HTTP; production unchanged"
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
