@@ -431,3 +431,35 @@ for(const token of [
   'Chemistry','NO_GO','P0-16B'
 ]) assert(p016Decision.includes(token),'P0-16A disposition missing: '+token);
 console.log('PASS P0-16A expanded source graph READ-ONLY, getter-side effects documented, release remains NO_GO');
+
+
+// P0-20 shadow patch: three GET-named RPCs rebuild placements/stages and
+// are therefore write-reachable. Only disposable PG17 can test the epoch gate.
+const p020Sql=read('supabase/tests/p1p5_v2_package0_getter_rebuild_epoch_shadow_disposable.sql');
+const p020Http=read('scripts/p1p5-v2-package0-getter-rebuild-epoch-http.cjs');
+const p020Workflow=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+for(const token of [
+  'DISPOSABLE PostgreSQL 17 ONLY','current_database()', 'iclub.e2e_isolated',
+  'public.users','auth.users','p0_16_academic_epoch_gate',
+  'get_exam_prep_diagnostic_progress_safe_v1',
+  'get_exam_prep_placement_safe_v1','get_exam_prep_state_safe_v1',
+  'private.rebuild_exam_prep_state_v1','private.rebuild_exam_prep_placement_v1',
+  'p0_16_require_current_epoch_v1','grant_my_exam_prep_chemistry_consent_v1',
+  'grant_my_exam_prep_beta_consent_v1','v_changed<>3'
+]) assert(p020Sql.includes(token),'P0-20 disposable SQL missing '+token);
+assert(!/DISABLE\s+TRIGGER|session_replication_role|TRUNCATE/i.test(p020Sql),
+  'P0-20 must not disable session or legacy protections');
+for(const token of [
+  'P1P5_E2E_ISOLATED','127.0.0.1','PGDATABASE','postgres',
+  'P0_20_OLD_IAT','PT409','p0_16_old_signed_jwt',
+  'get_exam_prep_diagnostic_progress_safe_v1',
+  'get_exam_prep_placement_safe_v1','get_exam_prep_state_safe_v1',
+  'const before=sqlRead(fingerprintSql)','assert.equal(after,before',
+  'Math','Chemistry'
+]) assert(p020Http.includes(token),'P0-20 signed-HTTP source missing '+token);
+for(const token of [
+  'P0-20 three side-effecting getters old JWT deny',
+  'p1p5_v2_package0_getter_rebuild_epoch_shadow_disposable.sql',
+  'p1p5-v2-package0-getter-rebuild-epoch-http.cjs'
+]) assert(p020Workflow.includes(token),'P0-20 E2E workflow missing '+token);
+console.log('PASS P0-20 shadow getter epoch source contract and protected-state fingerprints');
