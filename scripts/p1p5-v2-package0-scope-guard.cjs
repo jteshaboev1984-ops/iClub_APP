@@ -337,3 +337,38 @@ assert(p017E2e.includes('P0-17 30 Core actual RPC epoch guards') &&
        p017E2e.includes('p1p5-v2-package0-real-core30-epoch-http.cjs'),
        'P0-17 genuine PostgreSQL and PostgREST workflow missing');
 console.log('PASS P0-17 30-current-Core scoped epoch shadow guard; seven non-Core and new draft writers remain NO_GO');
+
+
+// P0-18 pinned PR469 integration: exact draft migration snapshot is fetched
+// ONLY into local disposable CI after all previous suites and tested via JWT.
+const p018Sql=read('supabase/tests/p1p5_v2_package0_draft469_three_writers_epoch_shadow_disposable.sql');
+const p018Http=read('scripts/p1p5-v2-package0-draft469-old-jwt-http.cjs');
+const p018Flow=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+const p018Sha='e125c0e43878a3910aaa66b32ee9cb848402a0ec';
+for(const token of [
+ 'ISOLATED PG17 ONLY','current_database()', 'iclub.e2e_isolated',
+ '(SELECT count(*) FROM public.users)<>2',
+ '(SELECT count(*) FROM auth.users)<>2',
+ 'program_version_id','diagnostic_anchor_at',
+ 'private.p0_16_require_current_epoch_v1',
+ 'save_my_exam_prep_exam_appointment_v2',
+ 'save_exam_prep_study_schedule_safe_v1',
+ 'claim_exam_prep_periodic_study_report_safe_v1',
+ 'get_exam_prep_personal_horizon_safe_v1',
+ 'get_exam_prep_study_schedule_safe_v1',
+ 'v_written<>3'
+])assert(p018Sql.includes(token),'P0-18 source drift/permissions gate absent: '+token);
+assert(!/\b(?:DELETE\s+FROM|TRUNCATE|DISABLE\s+TRIGGER|session_replication_role)\b/i.test(p018Sql),
+  'P0-18 snapshot test must not delete any real legacy/account data');
+assert(p018Sql.includes(p018Sha)&&p018Flow.includes(p018Sha),
+  'P0-18 must pin one exact unmerged candidate HEAD and refuse drift');
+assert(p018Flow.includes("NOTIFY pgrst, 'reload schema'") &&
+       p018Flow.includes('P0-18 exact three draft P1 writer RPCs') &&
+       p018Flow.includes('._p0_18_draft469/supabase/migrations/$base'),
+       'P0-18 must run actual 3 draft migrations in local PG17 before HTTP');
+assert(p018Http.includes("HOST='http://127.0.0.1:3000'") &&
+       p018Http.includes('P0_18_OLD_IAT') &&
+       p018Http.includes("P0-18 old valid JWT altered/entered actual draft writer") &&
+       p018Http.includes("protected pre/post fingerprint preserved"),
+       'P0-18 real signed owner/stale user security matrix missing');
+console.log('PASS P0-18 isolated pinned draft469 three-write + two-read source guard; not production approval');
