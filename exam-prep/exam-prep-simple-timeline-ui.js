@@ -8,7 +8,7 @@
   'use strict';
   if (window.iClubExamPrepSimpleTimelineUiEnabled !== true) return;
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = 'p2_17_weekly_choice_ui_v1';
+  const VERSION = 'p2_18_three_explicit_time_choices_v1';
   const ACCEPT_RPC = 'accept_my_exam_prep_timeline_weekly_target_safe_v1';
   const SAVE_RPC = 'save_my_exam_prep_timeline_dates_safe_v1';
   const RPC = 'get_exam_prep_simple_learning_timeline_with_hours_safe_v2';
@@ -35,7 +35,12 @@
       short:'Дополнительно потребуется примерно',
       impossible:'До выбранной даты расчётное время превышает 168 часов в неделю. Попробуйте выбрать более позднюю дату.',
       within:'в неделю',
-      adopt:'Выделить', adoptSuffix:'ч/нед',
+      adopt:'Принять рекомендуемое', adoptSuffix:'ч/нед',
+      choicesTitle:'Как поступить с учебным временем?',
+      keep:'Оставить свой план', other:'Выбрать другое время',
+      kept:'Текущее расписание оставлено без изменений.',
+      otherHint:'Измените минуты и учебные дни ниже, затем нажмите «Сохранить расписание».',
+      settingsUnavailable:'Настройки времени недоступны. Вернитесь к своему учебному плану.',
       tooMuch:'Рекомендуемое время больше вашего общего недельного бюджета. Его можно изменить в настройках Exam Prep.',
       onlyPaper:'Ориентир пока только для',
       updating:'Сохранение…',updated:'Недельный план обновлён.',
@@ -61,7 +66,12 @@
       short:'Qo‘shimcha kerak:',
       impossible:'Tanlangan sanagacha taxminiy vaqt haftasiga 168 soatdan oshadi. Keyinroq sanani tanlab ko‘ring.',
       within:'haftasiga',
-      adopt:'Ajratish', adoptSuffix:'soat/hafta',
+      adopt:'Tavsiya etilganini qabul qilish', adoptSuffix:'soat/hafta',
+      choicesTitle:'O‘qish vaqtini qanday belgilaysiz?',
+      keep:'O‘z rejamni qoldirish', other:'Boshqa vaqtni tanlash',
+      kept:'Hozirgi rejangiz o‘zgartirilmadi.',
+      otherHint:'Quyida daqiqa va o‘qish kunlarini tanlab, «Jadvalni saqlash» tugmasini bosing.',
+      settingsUnavailable:'Vaqt sozlamalari hozir mavjud emas. O‘qish rejangizga qayting.',
       tooMuch:'Tavsiya etilgan vaqt umumiy haftalik budjetingizdan ko‘p. Uni Exam Prep sozlamalarida o‘zgartirishingiz mumkin.',
       onlyPaper:'Hozircha faqat',updating:'Saqlanmoqda…',
       updated:'Haftalik reja yangilandi.',
@@ -87,7 +97,12 @@
       short:'Additional time needed:',
       impossible:'The estimated time exceeds 168 hours per week before this exam. Consider a later date.',
       within:'per week',
-      adopt:'Set', adoptSuffix:'h/week',
+      adopt:'Accept suggestion', adoptSuffix:'h/week',
+      choicesTitle:'How would you like to set your study time?',
+      keep:'Keep my plan', other:'Choose another time',
+      kept:'Your existing study plan was kept unchanged.',
+      otherHint:'Change the minutes and study days below, then select Save schedule.',
+      settingsUnavailable:'Study time settings are unavailable. Return to your study plan.',
       tooMuch:'The suggested time exceeds your total weekly study budget. You can change it in Exam Prep settings.',
       onlyPaper:'Target currently covers only',updating:'Saving…',
       updated:'Weekly plan updated.',
@@ -219,18 +234,27 @@
     const gap=model.suggested===null||model.chosen===null ? null :
       Math.max(0,Math.round((model.suggested-model.chosen)*10)/10);
     const paperOnly=model.onePaper ? '<span class="ep-tl-scope">'+esc(w.onlyPaper+' '+model.onePaper)+'</span>' : '';
+    const choices=gap>0.04
+      ? '<div class="ep-tl-time-choices" role="group" aria-label="'+esc(w.choicesTitle)+'">'+
+        '<button type="button" class="ep-tl-time-choice ep-tl-time-choice-secondary" data-ep-tl-keep>'+esc(w.keep)+'</button>'+
+        (model.canAdopt
+          ? '<button type="button" class="ep-tl-time-choice ep-tl-time-choice-primary" data-ep-tl-accept>'+
+              '<span>'+esc(w.adopt)+'</span><strong>'+
+              esc(niceNumber(model.suggested,lang))+' '+esc(w.adoptSuffix)+'</strong></button>'
+          : '')+
+        '<button type="button" class="ep-tl-time-choice ep-tl-time-choice-secondary" data-ep-tl-other>'+esc(w.other)+'</button>'+
+        '</div>' : '';
     const compare=model.suggested===null||model.chosen===null ? '' :
       '<div class="ep-tl-compare" data-ep-tl-compare>'+
         (gap<=0.04
           ? '<p class="ep-tl-enough">'+esc(w.enough)+'</p>'
           : '<p class="ep-tl-short">'+esc(w.short)+' <strong>'+
             esc(niceNumber(gap,lang))+' '+esc(w.perWeek)+'</strong></p>'+
-            (model.canAdopt
-              ? '<button type="button" data-ep-tl-accept class="ep-tl-accept">'+
-                  esc(w.adopt)+' '+esc(niceNumber(model.suggested,lang))+' '+esc(w.adoptSuffix)+'</button>'
-              : '<p class="ep-tl-total-cap">'+esc(model.suggested>168?w.impossible:w.tooMuch)+'</p>'))+
+            (!model.canAdopt
+              ? '<p class="ep-tl-total-cap">'+esc(model.suggested>168?w.impossible:w.tooMuch)+'</p>' : '')+
+            choices)+
         paperOnly+
-        '<p data-ep-tl-plan-feedback role="status" hidden></p>'+
+        '<p data-ep-tl-plan-feedback role="status" aria-live="polite" hidden></p>'+
       '</div>';
     const bounds=inputBounds();
     const editor='<form class="ep-tl-date-editor" data-ep-tl-date-editor hidden novalidate>'+
@@ -326,9 +350,27 @@
       if (!busy) setError(invalid?w.dateError:'');
     };
     section.addEventListener('click',event=>{
-      const accept=event.target?.closest?.('[data-ep-tl-accept]');
-      if(accept && section.contains(accept)) {
-        void acceptWeekly(section,model,accept);
+      const choice=event.target?.closest?.('[data-ep-tl-keep], [data-ep-tl-accept], [data-ep-tl-other]');
+      if(choice && section.contains(choice)) {
+        if(busy || !canShow(root()) || !root()?.contains(section))return;
+        const feedback=section.querySelector('[data-ep-tl-plan-feedback]');
+        if(choice.hasAttribute('data-ep-tl-accept')) {
+          void acceptWeekly(section,model,choice);
+        } else if(choice.hasAttribute('data-ep-tl-keep')) {
+          // Deliberate choice without any server update.
+          if(feedback){feedback.textContent=w.kept;feedback.hidden=false;}
+        } else {
+          // Reuse existing study schedule editor; only its Save may write.
+          const settings=root()?.querySelector('[data-ep-study-schedule]');
+          const minutes=settings?.querySelector('[data-ep-study-minutes]');
+          if(minutes){
+            settings.scrollIntoView?.({behavior:'smooth',block:'center'});
+            minutes.focus({preventScroll:true});
+            if(feedback){feedback.textContent=w.otherHint;feedback.hidden=false;}
+          } else if(feedback){
+            feedback.textContent=w.settingsUnavailable;feedback.hidden=false;
+          }
+        }
         return;
       }
       const btn=event.target?.closest?.('[data-ep-tl-open-date], [data-ep-tl-clear], [data-ep-tl-cancel]');
