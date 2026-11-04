@@ -424,7 +424,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-horizon1-schedule1-periodic1-stagec-clock20261104-d03-written20261104");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-horizon1-schedule1-periodic1-stagec-clock20261104-d03-written20261104-p3sharedweek20261104");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");
@@ -435,11 +435,11 @@
     load('script[data-exam-prep-profile-completeness]', "examPrepProfileCompleteness", "exam-prep-profile-completeness.js?v=p205profile2");
     load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
     load('script[data-exam-prep-exam-map]', "examPrepExamMap", "exam-prep-exam-map.js?v=p209map2");
-    load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1");
+    load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1-p3budgetcss");
     // Explicit pre-set true is still supported for preview/tests. In production,
     // controlled-beta capabilities call loadControlledProgressUx() after auth.
     if (window.iClubExamPrepProgressUxEnabled === true) {
-      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1");
+      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1-p3sharedweek");
     }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
