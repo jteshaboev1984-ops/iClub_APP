@@ -62,6 +62,55 @@
         result.data.contract_version !== 'stable_weekly_plan_v1') return fail('invalid_plan_contract');
     return result;
   }
+  // An independently owner-bound available-time snapshot for the EXISTING
+  // plan. This does NOT create or alter plan items, academic result or access.
+  async function weeklyBudget(component, planId) {
+    if (!identity(planId)) return fail('invalid_plan_identity');
+    const result=await rpc(component,'ensure_my_exam_prep_weekly_budget_safe_v1',{
+      p_component_code:component,p_plan_id:planId
+    });
+    if(!result.ok) return result;
+    const b=result.data;
+    const validNumber=n=>Number.isInteger(n)&&n>=0&&n<=10080;
+    const periodStatuses=new Set(['diagnostic_pending','diagnostic_completion_unknown',
+      'diagnostic_in_future','diagnostic_period_ready']);
+    const validAcademicPeriod=p=>p&&typeof p==='object'&&
+      periodStatuses.has(p.status)&&typeof p.anchor_immutable==='boolean'&&
+      (p.current_period_no===null
+        ? p.status!=='diagnostic_period_ready'&&p.next_period_ends_at===null
+        : p.status==='diagnostic_period_ready'&&Number.isSafeInteger(p.current_period_no)&&
+          p.current_period_no>=1&&typeof p.next_period_ends_at==='string'&&
+          Number.isFinite(Date.parse(p.next_period_ends_at)));
+    if(b.contract_version!=='exam_prep_shared_weekly_available_time_v1' ||
+       b.plan_id!==planId || b.component_code!==component ||
+       !Number.isInteger(b.active_week_no) || b.active_week_no<1 ||
+       b.planner_week_kind!=='legacy_shared_plan_id' ||
+       b.legacy_plan_id_preserved!==true ||
+       b.diagnostic_period_never_rekeys_existing_plan!==true ||
+       !validAcademicPeriod(b.component_diagnostic_periods?.P1) ||
+       !validAcademicPeriod(b.component_diagnostic_periods?.P5) ||
+       !validNumber(b.available_math_minutes) ||
+       !validNumber(b.p1_reserved_minutes) ||
+       !validNumber(b.p5_reserved_minutes) ||
+       !validNumber(b.component_available_minutes) ||
+       b.available_math_minutes!==b.p1_reserved_minutes+b.p5_reserved_minutes ||
+       b.component_available_minutes!==(component==='P1'?b.p1_reserved_minutes:b.p5_reserved_minutes) ||
+       b.priority_minutes_are_available_time_not_task_duration!==true ||
+       b.learning_access_capped!==false ||
+       b.academic_results_mutated!==false ||
+       !Array.isArray(b.priority_slots) || b.priority_slots.length>3 ||
+       !b.priority_slots.every(x=>Number.isInteger(x.priority_order)&&
+          x.priority_order>=1&&x.priority_order<=3&&validNumber(x.available_study_minutes)) ||
+       !Number.isInteger(b.priority_count) || b.priority_count!==b.priority_slots.length ||
+       b.priority_slots.some(x=>!['learning','correction','retest','mixed_transfer','rebaseline'].includes(x.item_type) ||
+         typeof x.status!=='string' || !x.status) ||
+       new Set(b.priority_slots.map(x=>x.priority_order)).size!==b.priority_slots.length ||
+       (b.priority_slots.length>0 && b.priority_slots.reduce((v,x)=>v+x.available_study_minutes,0)!==b.component_available_minutes) ||
+       (b.priority_slots.length===0 && b.priority_slots.reduce((v,x)=>v+x.available_study_minutes,0)!==0))
+      return fail('invalid_budget_contract');
+    return result;
+  }
+
   async function goal(component, goalId, planId) {
     if (!identity(goalId) || !identity(planId)) return fail('invalid_goal_identity');
     return rpc(component, 'get_exam_prep_goal_action_state_safe_v1', {
@@ -190,5 +239,5 @@
 
   // Exam-series, target and time edits use the existing Exam Plan UI/API.
   // No parallel manual weekly-replan entrypoint is exported.
-  internal.weeklyFlowApi = Object.freeze({ version: CONTRACT, allowed, recover, plan, goal, authorize, start, review, adherence });
+  internal.weeklyFlowApi = Object.freeze({ version: CONTRACT, allowed, recover, plan, weeklyBudget, goal, authorize, start, review, adherence });
 })();

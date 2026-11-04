@@ -1,0 +1,56 @@
+name: P1 P5 workload academic review pack guard
+on:
+  push:
+    branches:
+      - feature/math-p1p5-workload-registry-v1-20261103
+    paths:
+      - 'docs/math-p1p5-package2-81-skill-review-pack-v1.json'
+      - 'docs/math-p1p5-package2-81-skill-review-protocol-v1.md'
+      - 'scripts/math-p1p5-validate-workload-review-pack-v1.cjs'
+      - 'scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs'
+      - 'scripts/math-p1p5-result-led-time-sum-v1.cjs'
+      - 'scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs'
+      - 'scripts/math-p1p5-simple-timeline-ui-smoke-v1.cjs'
+      - 'scripts/math-p1p5-simple-timeline-visual-acceptance.cjs'
+      - 'exam-prep/exam-prep-simple-timeline-ui.js'
+      - 'exam-prep/exam-prep-simple-timeline-ui.css'
+      - 'index.html'
+      - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
+  pull_request:
+    paths:
+      - 'docs/math-p1p5-package2-81-skill-review-pack-v1.json'
+      - 'docs/math-p1p5-package2-81-skill-review-protocol-v1.md'
+      - 'scripts/math-p1p5-validate-workload-review-pack-v1.cjs'
+      - 'scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs'
+      - 'scripts/math-p1p5-result-led-time-sum-v1.cjs'
+      - 'scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs'
+      - 'scripts/math-p1p5-simple-timeline-ui-smoke-v1.cjs'
+      - 'scripts/math-p1p5-simple-timeline-visual-acceptance.cjs'
+      - 'exam-prep/exam-prep-simple-timeline-ui.js'
+      - 'exam-prep/exam-prep-simple-timeline-ui.css'
+      - 'index.html'
+      - '.github/workflows/math-p1p5-workload-review-pack-guard.yml'
+permissions:
+  contents: read
+jobs:
+  source-safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/math-p1p5-validate-workload-review-pack-v1.cjs
+      - run: node scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs --self-test
+      - run: node scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs
+      - run: node scripts/math-p1p5-result-led-time-sum-v1.cjs
+      - run: node scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs --self-test
+      - run: node scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs
+      - run: node scripts/math-p1p5-simple-timeline-ui-smoke-v1.cjs
+      - name: Verify actual 3-choice responsive browser interaction (RU UZ EN)
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node scripts/math-p1p5-simple-timeline-visual-acceptance.cjs
