@@ -26,3 +26,11 @@ The current week is never silently rewritten. Changed chosen hours and profile r
 3. Complete frozen cleanup list including the new snapshot/choice/Extra Hard attempt tables; encrypted backup, independent restore, epoch/JWT guard and separate architect release GO.
 
 **NO_GO.**
+
+
+## P3-02 CI / cross-component contract recheck (2026-11-04)
+
+- Exact earlier candidate `1ec6143c8c11d2eea5113ee5e020b50668624bcf`: **66 of 70 GitHub workflow runs SUCCESS, 4 FAIL**. The full actual Chromium → owner-signed JWT → PostgREST → disposable PostgreSQL 17 integration, including the new shared weekly minutes, **PASSED**. Negative foreign-owner/wrong P1-P5 plan ID and original plan-item preservation checks were added; client now requires exact, nonduplicated per-priority allocations.
+- Four broader CI failures were traced to specific causes and addressed in a newer DRAFT head: two exact audited-source Git blob pins (one for the additive UI live presentation and one for API resource cache-version changes), one synthetic learning-review mock counting an optional budget lookup as a *new assessment start*, and Playwright 1.55 incompatible with GitHub's newer `ubuntu-latest`. The mock now separates optional available-time reads from real session starts **without weakening the zero-new-attempt assertion**; the browser runner is pinned to Ubuntu 24.04.
+- **Do not transfer the 66 previous successes to a new commit.** Exact-head full workflow and Stage D must independently finish GREEN for P3 technical acceptance; a DRAFT branch or missing CI is not evidence of safety.
+- Current behavior remains opt-in, no automatic hours change, no second plan generator, no daily reminders, no study-time learning lock, and no written-grade award. Mathematics Practice/Tours, certificates and live learner progress are unaffected; the entire candidate remains DRAFT and unmerged.
