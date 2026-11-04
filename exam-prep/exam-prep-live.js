@@ -2013,7 +2013,15 @@
   function renderTimedResult(component, result) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy();
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.result)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.inTime)}</span><strong>${Number(result?.marks_in_time || 0)} / ${Number(result?.marks_available || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.afterTime)}</span><strong>${Number(result?.marks_after_time || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.unattempted)}</span><strong>${Number(result?.unattempted_marks || 0)}</strong></div></div><div class="ep-live-notice">${esc(c.comparable)}: <strong>${esc(result?.score_comparable ? c.yes : c.no)}</strong></div><div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-back-timed>${esc(c.backTimed)}</button><button class="ep-live-btn secondary" type="button" data-ep-live-readiness="${component}">${esc(c.openReadiness)}</button></div></div>`);
+    // If the server is older than the D03 objective-only contract, suppress
+    // apparent Paper marks rather than displaying an unverified total.
+    const objectiveOnly = result?.result_scope === "objective_only";
+    const writtenUnknown = !objectiveOnly || result?.written_correctness === "unknown";
+    const inTimeDisplay = !objectiveOnly ? "—"
+      : writtenUnknown ? String(Number(result?.marks_in_time || 0))
+      : `${Number(result?.marks_in_time || 0)} / ${Number(result?.marks_available || 0)}`;
+    const afterTimeDisplay = objectiveOnly ? String(Number(result?.marks_after_time || 0)) : "—";
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.result)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.inTime)}</span><strong>${inTimeDisplay}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.afterTime)}</span><strong>${afterTimeDisplay}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.unattempted)}</span><strong>${Number(result?.unattempted_marks || 0)}</strong></div></div><div class="ep-live-notice">${esc(c.comparable)}: <strong>${esc(objectiveOnly && !writtenUnknown && result?.score_comparable ? c.yes : c.no)}</strong></div>${writtenUnknown ? `<div class="ep-live-notice">${esc(c.writtenNotGraded)}</div>` : ""}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-back-timed>${esc(c.backTimed)}</button><button class="ep-live-btn secondary" type="button" data-ep-live-readiness="${component}">${esc(c.openReadiness)}</button></div></div>`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelector('[data-ep-live-back-timed]')?.addEventListener('click', () => openTimed(component));
     root.querySelector('[data-ep-live-readiness]')?.addEventListener('click', () => openReadiness(component));
