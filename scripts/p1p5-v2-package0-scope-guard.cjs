@@ -158,7 +158,7 @@ for(const token of [
   'private.exam_prep_learner_exam_dates_v1',
   'private.exam_prep_periodic_study_report_receipts_v1',
   'ROLLBACK TO SAVEPOINT p0_unknown_future_fk_probe',
-  'ON DELETE RESTRICT',
+  'on delete restrict',
   'p0_future_before',
   'p0_future_selected_program',
   'receipts_fingerprint',
