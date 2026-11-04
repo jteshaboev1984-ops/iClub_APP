@@ -302,3 +302,38 @@ assert(p016flow.includes('P0-16 REAL six Math public RPCs') &&
        p016js.includes('fresh JWT trying stale server-issued authorization'),
        'P0-16 actual full-stack E2E test is not wired');
 console.log('PASS P0-16 isolated six-actual-RPC JWT/session epoch test source bounds; 37+ others still NO_GO');
+
+
+// P0-17 30 current Core writer roots verified by real signed HTTP only in
+// disposable PG17. Seven protected non-Core mentor/consent routes are excluded.
+const p017Sql=read('supabase/tests/p1p5_v2_package0_actual_core_writer_30_shadow_disposable.sql');
+const p017Http=read('scripts/p1p5-v2-package0-real-core30-epoch-http.cjs');
+const p017E2e=read('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
+for(const token of [
+ 'ABSOLUTELY DISPOSABLE PostgreSQL 17 TEST ONLY',
+ "current_database()<>'postgres'",
+ "current_setting('iclub.e2e_isolated',true)",
+ "(SELECT count(*) FROM public.users)<>2",
+ "(SELECT count(*) FROM auth.users)<>2",
+ 'p0_16_academic_epoch_gate',
+ 'private.p0_16_require_current_epoch_v1',
+ 'v_patched<>24','v_total<>30',
+ 'seven non-Core governance routes untouched',
+ 'claim_my_exam_prep_beta_core_seat_v1',
+ 'raise_exam_prep_safeguarding_safe_v1',
+ 'submit_exam_prep_mentor_review_safe_v1',
+ 'revoke_my_exam_prep_beta_consent_v1'
+])assert(p017Sql.includes(token),'P0-17 source-scope/drift gate absent: '+token);
+assert(!/\b(?:DELETE\s+FROM|TRUNCATE|DISABLE\s+TRIGGER|session_replication_role)\b/i.test(p017Sql),
+  'P0-17 may not clean any real learner/legacy data');
+assert(p017Http.includes("HOST='http://127.0.0.1:3000'") &&
+       p017Http.includes('P0_17_OLD_IAT') &&
+       p017Http.includes('24 additional REAL Core RPCs') &&
+       p017Http.includes("names.length===24") &&
+       p017Http.includes("P0-17 old valid signed JWT did not reach epoch gate"),
+       'P0-17 real signed HTTP deny matrix incomplete');
+assert(p017E2e.includes('P0-17 30 Core actual RPC epoch guards') &&
+       p017E2e.includes('p1p5_v2_package0_actual_core_writer_30_shadow_disposable.sql') &&
+       p017E2e.includes('p1p5-v2-package0-real-core30-epoch-http.cjs'),
+       'P0-17 genuine PostgreSQL and PostgREST workflow missing');
+console.log('PASS P0-17 30-current-Core scoped epoch shadow guard; seven non-Core and new draft writers remain NO_GO');
