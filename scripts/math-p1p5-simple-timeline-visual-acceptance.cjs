@@ -68,10 +68,17 @@ function html(lang){
           coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
         window.__p2DateSaves=[];
         window.__p2HoursAccepted=[];
+        window.__p2KeepDecisions=[];
         window.__latestTimeline=payload;
         window.sb={rpc:async (name,args)=>{
           if(name==='get_exam_prep_simple_learning_timeline_with_hours_safe_v2')
             return {data:window.__latestTimeline,error:null};
+          if(name==='keep_my_exam_prep_timeline_weekly_time_safe_v1') {
+            window.__p2KeepDecisions.push(args);
+            return {data:{...window.__latestTimeline,
+              decision_recorded:true,decision_code:'keep_current_hours',
+              hours_changed:false,shortfall_acknowledged:true},error:null};
+          }
           if(name==='accept_my_exam_prep_timeline_weekly_target_safe_v1') {
             window.__p2HoursAccepted.push(args);
             const next={...window.__latestTimeline,
@@ -149,6 +156,12 @@ function html(lang){
       assert.equal(await page.locator('[data-ep-tl-keep]').count(),1);
       assert.equal(await page.locator('[data-ep-tl-other]').count(),1);
       await page.locator('[data-ep-tl-keep]').click();
+      await page.waitForFunction(()=>document.querySelector('[data-ep-tl-plan-feedback]')?.hidden===false);
+      const keepRecorded=await page.evaluate(()=>window.__p2KeepDecisions);
+      assert.equal(keepRecorded.length,1,'Keep must be persisted as a deliberate server-side decision');
+      assert.equal(keepRecorded[0].p_expected_current_math_hours,4);
+      assert.equal(keepRecorded[0].p_expected_profile_revision,2);
+      assert(keepRecorded[0].p_idempotency_key.length>=12,'Keep retry key absent');
       assert.equal((await page.evaluate(()=>window.__p2HoursAccepted)).length,0,
         'Keep existing plan must not change the budget');
       assert.equal((await page.evaluate(()=>window.__p2DateSaves)).length,1,
