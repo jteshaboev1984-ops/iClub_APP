@@ -19,6 +19,7 @@ DECLARE
  v_new_corrections text;
  v_denied boolean:=false;
  v_view jsonb;
+ v_report_function text;
 BEGIN
  IF current_database()<>'postgres'
     OR current_setting('server_version_num')::integer<170000
@@ -38,6 +39,11 @@ BEGIN
  SELECT * INTO STRICT v_original_p5
  FROM private.exam_prep_diagnostic_t0_snapshots_v1
  WHERE user_id=v_uid AND program_version_id=v_program AND component_code='P5';
+ v_report_function:=pg_get_functiondef(
+   'public.claim_exam_prep_periodic_study_report_safe_v1()'::regprocedure);
+ IF position('coalesce(t0.diagnostic_completed_at,d.completed_at)' in v_report_function)=0
+    OR position('exam_prep_diagnostic_t0_snapshots_v1' in v_report_function)=0
+ THEN RAISE EXCEPTION 'D09-02 periodic reporting still resets T0 after retests'; END IF;
  IF v_original_p1.diagnostic_completed_at IS NULL
     OR v_original_p5.diagnostic_completed_at IS NULL
     OR v_original_p1.capture_source<>'first_verified_stage0_transition'
