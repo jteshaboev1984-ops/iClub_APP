@@ -356,6 +356,29 @@
   }
   async function timedResult(sessionId) { return rpc("get_exam_prep_timed_result_safe_v1", { p_session_id: sessionId }); }
   async function timedReviewPack(sessionId, language = "en") { return rpc("get_exam_prep_timed_review_pack_safe_v1", { p_session_id: sessionId, p_language: language }); }
+  // Extra Hard is an optional NONCREDIT original-work route with a separate
+  // release gate and private answer keys; no diagnosis/Paper/skill credit.
+  async function extraHardCatalog(componentCode, language = "en") {
+    return rpc("get_my_exam_prep_extra_hard_catalog_safe_v1", {
+      p_component_code: componentArg(componentCode), p_language: language
+    });
+  }
+  async function extraHardStart(taskKey, language = "en") {
+    return rpc("start_my_exam_prep_extra_hard_safe_v1", {
+      p_task_key: String(taskKey || ""), p_language: language
+    });
+  }
+  async function extraHardSubmit(attemptId, responseText, key, language = "en") {
+    return rpc("submit_my_exam_prep_extra_hard_safe_v1", {
+      p_attempt_id: attemptId, p_response_text: String(responseText || ""),
+      p_idempotency_key: String(key || ""), p_language: language
+    });
+  }
+  async function extraHardAttempt(attemptId, language = "en") {
+    return rpc("get_my_exam_prep_extra_hard_attempt_safe_v1", {
+      p_attempt_id: attemptId, p_language: language
+    });
+  }
   async function readiness(componentCode) { return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function readinessSummary(componentCode) { return rpc("get_exam_prep_readiness_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function examOps(componentCode) { return rpc("get_exam_prep_exam_ops_safe_v1", { p_component_code: componentArg(componentCode) }); }
@@ -386,6 +409,7 @@
     recovery, recordInterruption, authorizeRevalidationItem,
     activePlanSession, weeklyPlan, generateWeeklyPlan, authorizePlanItem,
     timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack,
+    extraHardCatalog, extraHardStart, extraHardSubmit, extraHardAttempt,
     readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration
   });
 
