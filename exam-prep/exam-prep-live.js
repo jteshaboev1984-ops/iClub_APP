@@ -21,6 +21,7 @@
     itemStartedAt: 0,
     notice: null,
     timerId: null,
+    clockSkewMs: 0,
     pendingWrittenStep: null,
     writtenCriteriaRequest: 0,
     mountToken: 0
@@ -1566,7 +1567,9 @@
 
   function deadlineMs(session) {
     const value = session?.timing_contract?.deadline_at; const ms = value ? new Date(value).getTime() : NaN;
-    return Number.isFinite(ms) ? ms : null;
+    // Countdown follows the server, even when the phone's clock is incorrect.
+    // The authoritative expiration remains enforced by the backend.
+    return Number.isFinite(ms) ? ms - (Number(state.clockSkewMs) || 0) : null;
   }
 
   function startTimer(sessionId) {
@@ -1603,6 +1606,8 @@
       }
     }
     if (!result?.ok) { renderError(); return; }
+    const serverNow = Date.parse(result.data?.timing_contract?.server_now || "");
+    state.clockSkewMs = Number.isFinite(serverNow) ? serverNow - Date.now() : 0;
     state.session = result.data;
     const items = Array.isArray(state.session?.items) ? state.session.items : [], next = items.find(item => item && !itemIsComplete(item));
     const timed = ["timed","paper"].includes(state.session?.session_type);
@@ -2217,7 +2222,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.periodicStudyReports=[]; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.clockSkewMs=0; state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.periodicStudyReports=[]; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
