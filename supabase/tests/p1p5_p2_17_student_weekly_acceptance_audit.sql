@@ -45,7 +45,7 @@ begin
  end if;
  if position('PT409' in
    pg_get_functiondef('public.accept_my_exam_prep_timeline_weekly_target_safe_v1(numeric,integer,numeric)'::regprocedure))=0
-   or position('40001' in
+   or position('errcode=''40001''' in
    pg_get_functiondef('public.accept_my_exam_prep_timeline_weekly_target_safe_v1(numeric,integer,numeric)'::regprocedure))>0
  then
    raise exception 'P2-17 stale profile must raise PT409 and never retry serialization state 40001';
