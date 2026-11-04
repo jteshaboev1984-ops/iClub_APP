@@ -223,12 +223,33 @@ jobs:
           test "$P1P5_E2E_ISOLATED" = "true"
           node --check scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
           node scripts/p1p5-package2-workload-owner-evidence-e2e.cjs
-      - name: P2-17 ONLY signed JWT weekly opt-in owner regression
+      - name: P2-17 verify JS syntax
+        run: node --check scripts/p1p5-p2-17-weekly-owner-e2e.cjs
+      - name: P2-17 dates - select future dates and calculate feasible weekly target
         run: |
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = "true"
-          node --check scripts/p1p5-p2-17-weekly-owner-e2e.cjs
-          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs dates
+      - name: P2-17 denials - reject tampered, stale and anonymous budget edits
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs denials
+      - name: P2-17 accept - apply explicit owner budget using audited v2 profile
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs accept
+      - name: P2-17 replay - reject replay and over-capacity budgets
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs replay
+      - name: P2-17 restore - restore synthetic learner original profile and progress
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node scripts/p1p5-p2-17-weekly-owner-e2e.cjs restore
       - name: P2-16 learner dates safe save RLS, no school verification or legacy modifications
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
