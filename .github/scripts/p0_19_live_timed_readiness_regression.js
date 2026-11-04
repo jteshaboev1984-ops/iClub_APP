@@ -20,11 +20,10 @@ const path = require('path');
       P5:{engine_version:'objective_state_v1',components:[{component_code:'P5',operational_stage:0,coverage_pct:0,levels:{L0:36,L1:0,L2:0,L3:0}}],skills:[]}
     };
     window.__session=null;
-    window.__selfMarks={};
-    window.__result={session_id:'00000000-0000-4000-8000-000000007701',component_code:'P1',attempt_kind:'full_paper',marks_available:10,marks_in_time:0,marks_after_time:0,unattempted_marks:0,score_comparable:false,score_status:'pending_self_review'};
+    window.__result={session_id:'00000000-0000-4000-8000-000000007701',component_code:'P1',attempt_kind:'full_paper',marks_available:10,marks_in_time:0,marks_after_time:0,unattempted_marks:0,score_comparable:false,score_status:'written_ungraded',result_scope:'objective_only',written_correctness:'unknown',objective_marks_in_time:0,objective_marks_after_time:0,pending_review_in_time_marks:10};
     const reviewItems=()=>[
-      {item_order:1,primary_skill_code:'P1-QUA-01',prompt:'Solve x + 2 = 6.',learner_artifact:{text:'x = 4'},max_marks:4,rubric:{max_marks:4,criteria:[{marks:1,rule:'Rearranges correctly.'},{marks:3,rule:'Gets and checks x = 4.'}]},self_review:'Check the rearrangement and final value.',submitted_in_time:true,self_marked:Object.prototype.hasOwnProperty.call(window.__selfMarks,1),self_marks_awarded:window.__selfMarks[1]??null},
-      {item_order:2,primary_skill_code:'P1-FUN-01',prompt:'Explain the transformation.',learner_artifact:{text:'Translate right by 2.'},max_marks:6,rubric:{max_marks:6,criteria:[{marks:2,rule:'Identifies the translation.'},{marks:4,rule:'Explains the mapping correctly.'}]},self_review:'Check direction and scale.',submitted_in_time:true,self_marked:Object.prototype.hasOwnProperty.call(window.__selfMarks,2),self_marks_awarded:window.__selfMarks[2]??null}
+      {item_order:1,primary_skill_code:'P1-QUA-01',prompt:'Solve x + 2 = 6.',learner_artifact:{text:'x = 4'},max_marks:4,rubric:{max_marks:4,criteria:[{marks:1,rule:'Rearranges correctly.'},{marks:3,rule:'Gets and checks x = 4.'}]},self_review:'Check the rearrangement and final value.',submitted_in_time:true,written_correctness:'unknown'},
+      {item_order:2,primary_skill_code:'P1-FUN-01',prompt:'Explain the transformation.',learner_artifact:{text:'Translate right by 2.'},max_marks:6,rubric:{max_marks:6,criteria:[{marks:2,rule:'Identifies the translation.'},{marks:4,rule:'Explains the mapping correctly.'}]},self_review:'Check direction and scale.',submitted_in_time:true,written_correctness:'unknown'}
     ];
     window.sb={rpc:async(name,args={})=>{
       window.__calls.push({name,args});
@@ -49,14 +48,9 @@ const path = require('path');
       }
       if(name==='finalize_exam_prep_timed_safe_v1'){window.__session.status='finalized';return{data:{...window.__result,completion_reason:args.p_completion_reason},error:null};}
       if(name==='get_exam_prep_timed_review_pack_safe_v1')return{data:{session_id:window.__result.session_id,status:'finalized',items:reviewItems()},error:null};
-      if(name==='get_exam_prep_timed_result_safe_v1'){
-        const total=Object.values(window.__selfMarks).reduce((a,b)=>a+Number(b||0),0); const done=Object.keys(window.__selfMarks).length===2;
-        window.__result={...window.__result,marks_in_time:total,score_comparable:done,score_status:done?'provisional_comparable':'pending_self_review'};
-        return{data:window.__result,error:null};
-      }
-      if(name==='submit_exam_prep_timed_written_self_mark_safe_v1'){window.__selfMarks[args.p_item_order]=args.p_marks_awarded;return{data:{...window.__result,replayed:false},error:null};}
-      if(name==='get_exam_prep_readiness_safe_v1')return{data:{ready:true,app_readiness_estimate:'STRONG_OBJECTIVE_EVIDENCE',reason_code:'ready',component_code:'P1',last_three_count:3,below_l3_count:0,unresolved_correction_case_count:0},error:null};
-      if(name==='get_exam_prep_readiness_summary_safe_v1')return{data:{component_code:'P1',ready:true,estimate_code:'STRONG_OBJECTIVE_EVIDENCE',reason_code:'ready',comparable_full_attempts:3,comparable_full_required:3,topics_needing_stability:0,open_corrections:0,score_window_ready:true,unattempted_ready:true,after_time_ready:true,threshold_gate_configured:true,mentor_care_active:false,mentor_verified:false,mentor_verification_state:'not_active',next_action_code:'continue_final_calibration',not_official_cambridge_grade:true,mentor_verification_optional_for_core:true,p1_p5_separate:true},error:null};
+      if(name==='get_exam_prep_timed_result_safe_v1')return{data:window.__result,error:null};
+      if(name==='get_exam_prep_readiness_safe_v1')return{data:{ready:false,app_readiness_estimate:'INSUFFICIENT_EVIDENCE',reason_code:'three_comparable_attempts_incomplete',component_code:'P1',last_three_count:0,below_l3_count:0,unresolved_correction_case_count:0},error:null};
+      if(name==='get_exam_prep_readiness_summary_safe_v1')return{data:{component_code:'P1',ready:false,estimate_code:'INSUFFICIENT_EVIDENCE',reason_code:'three_comparable_attempts_incomplete',comparable_full_attempts:0,comparable_full_required:3,topics_needing_stability:0,open_corrections:0,score_window_ready:false,unattempted_ready:false,after_time_ready:false,threshold_gate_configured:false,mentor_care_active:false,mentor_verified:false,mentor_verification_state:'not_active',next_action_code:'continue_learning',not_official_cambridge_grade:true,mentor_verification_optional_for_core:true,p1_p5_separate:true},error:null};
       if(name==='get_exam_prep_final_calibration_safe_v1')return{data:{available:true,component_code:'P1',operational_stage:6,actions:[{action_code:'short_targeted_work',priority:1},{action_code:'timing_and_logistics',priority:2},{action_code:'taper',priority:3}],new_mastery_allowed:false,mentor_verified_readiness:false},error:null};
       return{data:null,error:{message:`unexpected rpc ${name}`}};
     }};
@@ -92,29 +86,37 @@ const path = require('path');
   await page.fill('textarea[name="ep_live_written_answer"]','x = 4'); await page.click('[data-ep-live-submit]');
   await page.waitForSelector('textarea[name="ep_live_written_answer"]');
   await page.fill('textarea[name="ep_live_written_answer"]','Translate right by 2.'); await page.click('[data-ep-live-submit]');
-  await page.waitForSelector('input[name="ep_live_self_mark"]');
-  text=await page.locator('#exam-prep-host-root').textContent(); assert(text.includes('Review your work')&&text.includes('Marking criteria'),'post-attempt rubric review must render');
+  await page.waitForSelector('[data-ep-live-next-written]');
+  text=await page.locator('#exam-prep-host-root').textContent();
+  assert(text.includes('Review your work')&&text.includes('Marking criteria'),'post-attempt rubric must render');
+  assert(text.includes('correctness is unverified'),'unverified written correctness was hidden');
+  assert(await page.locator('input[name="ep_live_self_mark"]').count()===0,
+    'written marks input is prohibited under D03');
 
-  await page.fill('input[name="ep_live_self_mark"]','4'); await page.click('[data-ep-live-save-self]');
-  await page.waitForSelector('input[name="ep_live_self_mark"]');
-  await page.fill('input[name="ep_live_self_mark"]','5'); await page.click('[data-ep-live-save-self]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('9 / 10'));
-  text=await page.locator('#exam-prep-host-root').textContent(); assert(text.includes('Comparable result')&&text.includes('Yes'),'completed self review must make result comparable in the UI');
+  await page.click('[data-ep-live-next-written]');
+  await page.waitForSelector('[data-ep-live-next-written]');
+  await page.click('[data-ep-live-next-written]');
+  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Comparable result'));
+  text=await page.locator('#exam-prep-host-root').textContent();
+  assert(text.includes('No')&&text.includes('correctness is unverified'),
+    'unverified Paper must not be a comparable full-paper grade');
+  assert(!text.includes('9 / 10'),'written marks incorrectly added to full-paper result');
 
   await page.click('[data-ep-live-readiness="P1"]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Objective evidence is ready'));
+  await page.waitForSelector('[data-ep-live-readiness-summary]');
   const readinessText=await page.locator('#exam-prep-host-root').textContent();
   assert(readinessText.includes('iClub readiness estimate'),'learner readiness estimate label missing');
   assert(readinessText.includes('not an official Cambridge grade'),'non-grade readiness boundary missing');
-  assert(readinessText.includes('3 / 3'),'three comparable full papers progress missing');
+  assert(readinessText.includes('0 / 3'),'unverified written Paper must not satisfy comparable-paper count');
   assert(!readinessText.includes('Mentor verification'),'Core learner must not receive a missing Mentor verification card');
-  await page.click('[data-ep-live-calibration="P1"]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Short targeted practice'));
+  assert(await page.locator('[data-ep-live-calibration]').count()===0,
+    'Stage6 must remain inaccessible without verified comparable Paper');
 
   const result=await page.evaluate(()=>({calls:window.__calls,text:document.querySelector('#exam-prep-host-root').textContent}));
   const names=result.calls.map(x=>x.name);
-  for(const n of ['get_exam_prep_timed_catalog_safe_v1','get_exam_prep_stage4_consolidation_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','submit_exam_prep_timed_written_self_mark_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1','get_exam_prep_final_calibration_safe_v1'])assert(names.includes(n),`${n} missing`);
+  for(const n of ['get_exam_prep_timed_catalog_safe_v1','get_exam_prep_stage4_consolidation_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1','get_exam_prep_final_calibration_safe_v1'])assert(names.includes(n),`${n} missing`);
+  assert(!names.includes('submit_exam_prep_timed_written_self_mark_safe_v1'),'student must not self-score via client');
   const timedFinalize=result.calls.find(x=>x.name==='finalize_exam_prep_timed_safe_v1'); assert(timedFinalize.args.p_completion_reason==='submitted','completed paper must use submitted finalization');
   assert(!/Core beta|Synthetic learner data|P1-QUA-01|P1-FUN-01/.test(result.text),'learner UI must not expose rollout or internal skill terminology');
-  await browser.close(); console.log('P0-19 live timed/readiness/final-calibration flow: PASS');
+  await browser.close(); console.log('P0-19 Timed/Paper rubric-only, unknown written and Stage6 blocked: PASS');
 })().catch(e=>{console.error(e);process.exit(1);});
