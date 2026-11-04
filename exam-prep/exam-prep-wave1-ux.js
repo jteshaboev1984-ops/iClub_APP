@@ -265,7 +265,7 @@
       "weeklyPlan", "timedCatalog", "timedResult", "timedReviewPack", "readiness", "finalCalibration"
     ];
     const idempotentWriteMethods = [
-      "startNextDiagnostic", "startSession", "submitResponse", "finalizeSession", "finalizeTimed", "submitTimedSelfMark"
+      "startNextDiagnostic", "startSession", "submitResponse", "finalizeSession", "finalizeTimed"
     ];
 
     readMethods.forEach(name => {
