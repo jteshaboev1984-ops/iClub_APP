@@ -18,7 +18,7 @@ permissions:
   contents: read
 jobs:
   isolated-answer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
-          test "$(git hash-object exam-prep/exam-prep-live.js)" = '69cd0538fc900c54bb64ff937c83bdee3e86cfcb'
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = '08893b116b3c042d4eac8e1c6177c63285e7af54'
           grep -Fq 'data-ep-result-item-order=' exam-prep/exam-prep-live.js
           grep -Fq 'data-ep-result-session-type=' exam-prep/exam-prep-live.js
           grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js

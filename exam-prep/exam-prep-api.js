@@ -49,7 +49,7 @@
     if (!script) {
       script = document.createElement("script");
       script.dataset.examPrepProgressUxBoot = "true";
-      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux4");
+      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux5-periodic1");
       bootLoad = new Promise(resolve => {
         script.addEventListener("load", () => resolve(true), { once: true });
         script.addEventListener("error", () => resolve(false), { once: true });
@@ -160,6 +160,43 @@
   }
 
   async function examMapStatus() { return rpc("get_exam_prep_exam_map_status_safe_v1"); }
+  // Dates remain learner-confirmed, and the horizon begins only after the
+  // corresponding component's actual completed diagnostic. No grade forecast.
+  async function personalHorizon() {
+    return rpc("get_exam_prep_personal_horizon_safe_v1");
+  }
+  async function studySchedule() {
+    return rpc("get_exam_prep_study_schedule_safe_v1");
+  }
+  // Returns only the newest *completed* plan week / study month, and atomically
+  // claims each report once across devices. No daily notifications.
+  async function claimPeriodicStudyReports() {
+    return rpc("claim_exam_prep_periodic_study_report_safe_v1");
+  }
+
+  // Previous week is audited by the existing server against frozen goals and
+  // finalized academic evidence. It measures completed tasks, NOT minutes.
+  async function previousWeekAdherence(componentCode) {
+    return rpc("get_exam_prep_previous_week_adherence_safe_v1", {
+      p_component_code: componentArg(componentCode)
+    });
+  }
+
+  async function saveStudySchedule(minutesPerDay, daysPerWeek) {
+    return rpc("save_exam_prep_study_schedule_safe_v1", {
+      p_minutes_per_day: Number(minutesPerDay),
+      p_days_per_week: Number(daysPerWeek)
+    });
+  }
+
+  async function confirmExamDate(componentCode, scheduledStartAt) {
+    return rpc("save_my_exam_prep_exam_appointment_v2", {
+      p_component_code: componentArg(componentCode),
+      p_scheduled_start_at: String(scheduledStartAt || ""),
+      p_school_confirmed: true
+    });
+  }
+
 
   const componentArg = componentCode => String(componentCode || "");
 
@@ -348,7 +385,7 @@
 
   root.api = Object.freeze({
     capabilities,
-    examProfile, saveExamProfile, examMapStatus,
+    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate, studySchedule, saveStudySchedule, previousWeekAdherence, claimPeriodicStudyReports,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
@@ -372,7 +409,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-horizon1-schedule1-periodic1");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");

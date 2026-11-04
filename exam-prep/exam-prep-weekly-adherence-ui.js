@@ -36,7 +36,10 @@
   }
   function ready(root) {
     const c = internal.lastCapabilities;
-    return window.iClubExamPrepWeeklyFlowEnabled === true &&
+    // Mathematics now delivers a server-deduplicated weekly/monthly digest.
+    // Never revive the old missed-week notice on every daily card refresh.
+    return internal.periodicStudyReviewMode !== true &&
+      window.iClubExamPrepWeeklyFlowEnabled === true &&
       window.iClubExamPrepProgressUxEnabled === true &&
       internal.weeklyFlowApi?.version === 'weekly_flow_adapter_v1' &&
       typeof internal.weeklyFlowApi.adherence === 'function' &&
