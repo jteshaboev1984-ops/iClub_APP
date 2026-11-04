@@ -688,7 +688,7 @@
     else if (button.matches("[data-ep-live-save-profile], [data-ep-exam-plan-save], [data-ep-profile-completion-save]")) operation = "profile";
     else if (button.matches("[data-ep-live-timed], [data-ep-live-timed-start], [data-ep-live-end], [data-ep-live-back-timed]")) operation = "timed";
     else if (button.matches("[data-ep-live-readiness], [data-ep-live-calibration]")) operation = "readiness";
-    else if (button.matches("[data-ep-live-save-self]")) operation = "result";
+    else if (button.matches("[data-ep-live-next-written]")) operation = "result";
     else if (button.matches("[data-ep-recovery-open], [data-ep-recovery-submit], [data-ep-recovery-check]")) operation = "recovery";
     else operation = null;
 
