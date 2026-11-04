@@ -24,6 +24,8 @@
       hours: 'ч', perWeek: 'ч/нед', skills: 'навыков',
       noDates: 'Выберите дату хотя бы одного экзамена, чтобы увидеть недельный ориентир.',
       assumption: 'Приблизительная оценка iClub по разделам Cambridge и вашим результатам. Фактическое время может отличаться.',
+      pendingTime: 'Учебное время пока не рассчитано',
+      pendingInfo: 'Оценка времени проходит проверку. Задания и расписание доступны.',
       noTime: 'Время пока недоступно', noChange: 'Ваше расписание не изменено.',
       chooseDate:'Выбрать дату', changeDate:'Изменить дату',
       editTitle:'Даты моих экзаменов', saveDates:'Сохранить даты',
@@ -56,6 +58,8 @@
       hours: 'soat', perWeek: 'soat/hafta', skills: 'ko‘nikma',
       noDates: 'Haftalik mo‘ljal uchun kamida bitta imtihon sanasini tanlang.',
       assumption: 'iClub taxmini Cambridge bo‘limlari va natijalaringizga asoslangan. Haqiqiy vaqt farq qilishi mumkin.',
+      pendingTime: 'O‘qish vaqti hali hisoblanmagan',
+      pendingInfo: 'Vaqt bahosi tekshirilmoqda. Topshiriqlar va jadvaldan foydalanishingiz mumkin.',
       noTime: 'Vaqt hozircha mavjud emas', noChange: 'Jadvalingiz o‘zgartirilmadi.',
       chooseDate:'Sanani tanlash', changeDate:'Sanani o‘zgartirish',
       editTitle:'Imtihon sanalarim', saveDates:'Sanalarni saqlash',
@@ -88,6 +92,8 @@
       hours: 'h', perWeek: 'h/week', skills: 'skills',
       noDates: 'Choose at least one exam date to see a weekly target.',
       assumption: 'This is an approximate iClub estimate based on Cambridge topics and your results. Actual study time may vary.',
+      pendingTime: 'Study time not estimated yet',
+      pendingInfo: 'The time estimate is under review. Your tasks and schedule remain available.',
       noTime: 'Estimate unavailable', noChange: 'Your study plan has not changed.',
       chooseDate:'Choose date', changeDate:'Change date',
       editTitle:'My exam dates', saveDates:'Save dates',
@@ -127,11 +133,18 @@
     return typeof x === 'number' && Number.isFinite(x) && x >= min && x <= max;
   }
   function parsePayload(payload) {
-    if (!payload || payload.contract_version !== 'exam_prep_one_line_progress_timeline_v2_estimated' ||
-        payload.factors_are_iclub_planning_assumptions_not_official_cambridge !== true ||
-        payload.source_guided_hours_are_not_private_study_hours !== true ||
-        payload.recommended_schedule_applied_automatically !== false ||
-        payload.learning_evidence_mutated !== false) return null;
+    const timeReviewPending=payload?.contract_version==='exam_prep_one_line_progress_timeline_v2_academic_review_pending';
+    if (!payload || (timeReviewPending
+        ? payload.numeric_recommendation_enabled!==false ||
+          payload.recommendation_accept_enabled!==false ||
+          payload.estimated_remaining_math_hours!==null ||
+          payload.estimated_joint_math_hours_per_week!==null
+        : payload.contract_version!=='exam_prep_one_line_progress_timeline_v2_estimated' ||
+          payload.numeric_recommendation_enabled!==true ||
+          payload.factors_are_iclub_planning_assumptions_not_official_cambridge!==true) ||
+        payload.source_guided_hours_are_not_private_study_hours!==true ||
+        payload.recommended_schedule_applied_automatically!==false ||
+        payload.learning_evidence_mutated!==false) return null;
     const cards = [];
     for (const [code, total, cap] of [['P1',45,90],['P5',36,50]]) {
       const s=payload[code];
@@ -139,7 +152,8 @@
           !Number.isInteger(s.objectively_covered_skills) ||
           !Number.isInteger(s.already_attempted_not_yet_confirmed_skills) ||
           !Number.isInteger(s.not_yet_checked_skills) ||
-          !finite(s.estimated_remaining_study_hours,0,cap)) return null;
+          (timeReviewPending ? s.estimated_remaining_study_hours!==null :
+           !finite(s.estimated_remaining_study_hours,0,cap))) return null;
       const confirmed=s.objectively_covered_skills, attempted=s.already_attempted_not_yet_confirmed_skills,
         unknown=s.not_yet_checked_skills;
       if (confirmed<0 || attempted<0 || unknown<0 || confirmed+attempted+unknown!==total ||
@@ -148,8 +162,8 @@
         examAt:s.exam_date_status==='valid_exam_date' ? s.exam_at : null,
         paperWeekly:finite(s.estimated_component_weekly_hours,0,100000) ? s.estimated_component_weekly_hours : null });
     }
-    if (!finite(payload.estimated_remaining_math_hours,0,140) ||
-        Math.abs(payload.estimated_remaining_math_hours-cards.reduce((t,c)=>t+c.hours,0))>0.12) return null;
+    if (!timeReviewPending && (!finite(payload.estimated_remaining_math_hours,0,140) ||
+        Math.abs(payload.estimated_remaining_math_hours-cards.reduce((t,c)=>t+c.hours,0))>0.12)) return null;
     const weekly=payload.joint_paper_dates_status==='both_paper_dates_confirmed' &&
       finite(payload.estimated_joint_math_hours_per_week,0,100000)
       ? payload.estimated_joint_math_hours_per_week : null;
@@ -166,8 +180,12 @@
       chosen!==null && totalBudget!==null && profileRevision!==null &&
       suggested>chosen+0.04 && suggested<=totalBudget;
     return {startAt:payload.start_at,asOf:payload.as_of,cards,
-      totalHours:payload.estimated_remaining_math_hours,weekly,chosen,
-      suggested,onePaper,canAdopt,totalBudget,profileRevision};
+      timeReviewPending,
+      totalHours:timeReviewPending?null:payload.estimated_remaining_math_hours,
+      weekly:timeReviewPending?null:weekly,chosen,
+      suggested:timeReviewPending?null:suggested,
+      onePaper:timeReviewPending?null:onePaper,
+      canAdopt:timeReviewPending?false:canAdopt,totalBudget,profileRevision};
   }
   function niceNumber(n,lang) {
     return new Intl.NumberFormat(lang==='uz'?'uz-UZ':lang==='en'?'en-GB':'ru-RU', {
@@ -218,7 +236,7 @@
       const attempted=Math.max(0,Math.min(100-finished,100*x.attempted/x.total));
       return '<div class="ep-tl-paper" data-ep-tl-paper="'+x.code+'">'+
         '<div class="ep-tl-paper-top"><strong>'+x.code+'</strong>'+
-        '<span>'+esc(w.remaining)+' <b>'+esc(niceNumber(x.hours,lang))+' '+esc(w.hours)+'</b></span></div>'+
+        '<span>'+esc(w.remaining)+' <b>'+(model.timeReviewPending ? esc(w.pendingTime) : esc(niceNumber(x.hours,lang))+' '+esc(w.hours))+'</b></span></div>'+
         '<div class="ep-tl-bars" role="img" aria-label="'+esc(w.covered)+' '+x.confirmed+'/'+x.total+'">'+
           '<span class="ep-tl-done" style="width:'+finished.toFixed(2)+'%"></span>'+
           '<span class="ep-tl-active" style="width:'+attempted.toFixed(2)+'%"></span></div>'+
@@ -227,9 +245,11 @@
         '<span>'+esc(w.working)+' <b>'+x.attempted+'</b></span>'+
         '<span>'+esc(w.unchecked)+' <b>'+x.unknown+'</b></span></div></div>';
     }).join('');
-    const sum=metric(w.total,niceNumber(model.totalHours,lang)+' '+w.hours);
+    const sum=metric(w.total,model.timeReviewPending?w.pendingTime:niceNumber(model.totalHours,lang)+' '+w.hours);
     const dated=model.cards.filter(x=>x.examAt&&x.paperWeekly!==null);
-    const pace=model.weekly!==null
+    const pace=model.timeReviewPending
+      ? '<p class="ep-tl-guidance">'+esc(w.pendingInfo)+'</p>'
+      : model.weekly!==null
       ? metric(w.weekly,niceNumber(model.weekly,lang)+' '+w.perWeek)
       : dated.length===1
         ? metric(dated[0].code+' · '+w.weekly,niceNumber(dated[0].paperWeekly,lang)+' '+w.perWeek)
@@ -288,7 +308,7 @@
       '<div class="ep-tl-bottom">'+sum+pace+current+'</div>'+
       compare+
       editor+
-      '<p class="ep-tl-footnote">'+esc(w.assumption)+'</p>'+
+      '<p class="ep-tl-footnote">'+esc(model.timeReviewPending?w.pendingInfo:w.assumption)+'</p>'+
       '<p class="ep-tl-date-success" data-ep-tl-success role="status" hidden></p>'+
       '</section>';
   }
