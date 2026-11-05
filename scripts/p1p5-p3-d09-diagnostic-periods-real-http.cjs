@@ -27,11 +27,13 @@ async function rpc(fn,token){
 }
 (async()=>{
  const tA=jwt(A),tB=jwt(B);
- const [owner,personal,capacity,anon]=await Promise.all([
+ const [owner,personal,capacity,anon,timeline,anonTimeline]=await Promise.all([
   rpc('get_exam_prep_diagnostic_periods_safe_v1',tA),
   rpc('get_exam_prep_personal_horizon_safe_v1',tA),
   rpc('get_exam_prep_shared_study_capacity_safe_v1',tA),
-  rpc('get_exam_prep_diagnostic_periods_safe_v1')
+  rpc('get_exam_prep_diagnostic_periods_safe_v1'),
+  rpc('get_exam_prep_simple_learning_timeline_safe_v1',tA),
+  rpc('get_exam_prep_simple_learning_timeline_safe_v1')
  ]);
  assert(owner.ok,'Owner read-only diagnostic period RPC unavailable HTTP '+owner.status);
  assert(personal.ok,'Existing independent actual diagnostic horizon unavailable');
@@ -40,6 +42,11 @@ async function rpc(fn,token){
  assert.equal(capacity.data.horizon_hours_additive_across_p1_p5,false);
  assert.equal(capacity.data.capacity_is_access_limit,false);
  assert(!anon.ok,'Anonymous must not access academic timing details');
+ assert(timeline.ok&&timeline.data?.contract_version==='exam_prep_one_line_progress_timeline_v1',
+   'D09-07 personal timeline must be owner-scoped and readable');
+ assert(!anonTimeline.ok,'Anonymous cannot see personal timeline or diagnostic start dates');
+ assert.equal(timeline.data.start_at_source,'earliest_completed_p1_or_p5_diagnostic');
+ assert(timeline.data.profile_created_at,'Registered-at provenance must remain separately available');
  assert.equal(owner.data.contract_version,'diagnostic_period_readonly_v1');
  assert.equal(owner.data.period_duration_days,7);
  assert.equal(owner.data.account_planner_week_unchanged,true);
@@ -63,6 +70,11 @@ async function rpc(fn,token){
   assert.equal(Date.parse(p.diagnostic_completed_at),Date.parse(c.diagnostic_completed_at),
     'D09-03 shared selected-time horizon must use same source, never latest retest');
   assert.equal(h.diagnostic_anchor_immutable,p.anchor_immutable);
+  assert.equal(timeline.data[component].diagnostic_anchor_immutable,p.anchor_immutable);
+  assert.equal(timeline.data[component].diagnostic_start_status,p.status);
+  assert.equal(Date.parse(timeline.data[component].start_at),
+    Date.parse(p.diagnostic_completed_at),
+    'D09-07 one-line timeline must start from the actual paper diagnostic, never signup');
   assert.equal(c.diagnostic_anchor_immutable,p.anchor_immutable);
   assert.equal(c.paper_minutes,component==='P1'?110:75);
   assert.equal(c.paper_minutes_are_daily_study_quota,false);
@@ -76,6 +88,12 @@ async function rpc(fn,token){
    p.completed_7day_periods*7*86400*1000,
    'Week start shifted from component diagnostic to account profile creation');
  }
+ const earliestT0=Math.min(...['P1','P5'].map(p=>
+   Date.parse(owner.data[p].diagnostic_completed_at)));
+ assert.equal(Date.parse(timeline.data.start_at),earliestT0,
+   'D09-07 displayed first start must be the earliest actually completed P1/P5 diagnosis');
+ assert(Date.parse(timeline.data.profile_created_at)<=earliestT0,
+   'Original profile signup should be provenance only, not the learning start');
  const repeated=await rpc('get_exam_prep_diagnostic_periods_safe_v1',tA);
  assert(repeated.ok,'Read-only repeated opening should work');
  assert.deepEqual(repeated.data,owner.data,'Read-only current period drifted without boundary');
@@ -98,5 +116,5 @@ async function rpc(fn,token){
    }
   }
  }
- console.log('PASS D09 real signed owner HTTP: immutable new Stage0 T0, matching per-paper horizon and one shared Math capacity, anonymous denial, no progress writes');
+ console.log('PASS D09-07 true P1/P5 timeline T0 owner and anon, and D09 real signed owner HTTP: immutable new Stage0 T0, matching per-paper horizon and one shared Math capacity, anonymous denial, no progress writes');
 })().catch(err=>{console.error(err);process.exitCode=1});
