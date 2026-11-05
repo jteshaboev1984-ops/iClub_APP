@@ -15,6 +15,7 @@ on:
       - 'supabase/tests/p1p5_p3_d10_05_weekly_pace_precision_rollback.sql'
       - 'supabase/tests/p1p5_d10_06_curriculum_scope_no_progress_mutation.sql'
       - 'supabase/tests/p1p5_d10_07_integration_scope_source_no_mutation.sql'
+      - 'supabase/tests/p1p5_d10_08_fresh_retest_math_prompt_priority_rollback.sql'
       - 'scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package1-real-dates-horizon-e2e.cjs'
@@ -448,6 +449,12 @@ jobs:
             2>&1 | tee /tmp/p1p5-d10-07-source-qa.log
           grep -Fq 'D10-07 PASS: 45 P1 + 36 P5, 2 exact source descriptions, both 6 published/9 reserve' /tmp/p1p5-d10-07-source-qa.log
           echo 'D10-07 PASS: verified two real integration gaps without bank or learner mutation'
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_d10_08_fresh_retest_math_prompt_priority_rollback.sql \
+            2>&1 | tee /tmp/p1p5-d10-08-retest-novelty.log
+          grep -Fq 'D10-08 PASS: all 5 true duplicates, signs preserved, fresh-retake priority and fallback' /tmp/p1p5-d10-08-retest-novelty.log
+          grep -Fq 'D10-08 ROLLBACK PASS' /tmp/p1p5-d10-08-retest-novelty.log
+          echo 'D10-08 PASS: prefer truly different retest while retaining 100% fallback and learner data'
 
       - name: D09-02 immutable original Stage0 date survives second placement (disposable PG17)
         shell: bash
