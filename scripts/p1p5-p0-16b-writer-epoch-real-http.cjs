@@ -69,6 +69,15 @@ async function main(){
    assert(!r.ok&&JSON.stringify(r.data||{}).includes('exam_prep_writer_epoch_stale'),
     'valid old tab bypassed server epoch on '+label+' '+JSON.stringify(r));
   }
+  const stored=ok(await rpc('get_exam_prep_state_safe_v1',{p_component_code:'P1'},old),
+    'stale browser may read P1 stored progress');
+  assert(stored.components?.length===1 && stored.components[0].component_code==='P1',
+    'old browser lost stored P1 component on cutover');
+  const storedP5=ok(await rpc('get_exam_prep_state_safe_v1',{p_component_code:'P5'},old),
+    'stale browser may read P5 stored progress');
+  assert(storedP5.components?.length===1 && storedP5.components[0].component_code==='P5',
+    'old browser lost stored P5 component on cutover');
+  assert.deepEqual(snapshot(uid),before,'old browser read silently rebuilt state');
   assert.deepEqual(snapshot(uid),before,'old tab changed academic rows');
   for(const paper of [p1,p5]){
    const read=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:paper.id},old),
@@ -86,7 +95,7 @@ async function main(){
   'cutoff disabled compatibility');
  assert(rollback.replayed===true,'disabled cutoff broke old-token normal behavior');
  assert.deepEqual(snapshot(uid),before,'rollback modified progress');
- console.log('P0-16B PASS: real old tab blocked on ten common Core/Paper write RPCs, fresh signed JWT resumes P1/P5, saved scores and progress unchanged, cutoff OFF');
+ console.log('P0-16B PASS: real old tab blocked on ten Core/Paper writes and stale read-rebuild, fresh signed JWT resumes P1/P5, saved scores and progress unchanged, cutoff OFF');
  console.log('P0-16B OPEN: other writers, nested triggers, app-build refresh and release signoff');
 }
 main().catch(e=>{console.error('P0-16B FAIL',e.stack||e.message);process.exitCode=1});

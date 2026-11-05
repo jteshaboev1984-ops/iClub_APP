@@ -38,3 +38,16 @@ guard protects all question types. Tests use the same signed learner/token
 epoch and assert identical P1/P5 persisted row fingerprints before and after
 old-token rejection. Other Core writer functions and server triggers remain
 separate open P0-16B coverage, not an invented complete audit.
+
+## Projection-read writer edge repaired
+
+The ordinary `get_exam_prep_state_safe_v1(text)` response previously invoked
+`private.rebuild_exam_prep_state_v1(uuid,text)`, which deletes/reinserts
+derived skill and stage rows. A stale but signed JWT could therefore write
+via a screen-refresh **read** during the future epoch cutover, even after
+scoping the 10 explicit write RPCs. The new shared epoch predicate skips
+that rebuild only when the opt-in epoch is stale, while returning already
+stored P1/P5 component and skill projections. Genuine signed owner HTTP E2E
+now checks both old-token reads, the unchanged stage/skill-row fingerprints,
+and resumed full Paper idempotency using a newly signed token. The cutoff
+still defaults NULL and remains unset in production.
