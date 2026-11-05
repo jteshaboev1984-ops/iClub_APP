@@ -1,0 +1,31 @@
+name: Mathematics P1 P5 Stage 3-6 written evidence baseline (no release GO)
+
+on:
+  push:
+    branches:
+      - feature/math-p1p5-p4-written-evidence-contract-20261105
+    paths:
+      - 'docs/math-p1p5-v2-1-stage3-6-written-evidence-recovery-plan-20261105.md'
+      - 'scripts/math-p1p5-p4-01-written-evidence-baseline-guard.cjs'
+      - 'supabase/tests/p1p5_p4_01_full_paper_content_inventory_readonly.sql'
+      - '.github/workflows/math-p1p5-p4-written-evidence-baseline.yml'
+  pull_request:
+    paths:
+      - 'docs/math-p1p5-v2-1-stage3-6-written-evidence-recovery-plan-20261105.md'
+      - 'scripts/math-p1p5-p4-01-written-evidence-baseline-guard.cjs'
+      - 'supabase/tests/p1p5_p4_01_full_paper_content_inventory_readonly.sql'
+      - '.github/workflows/math-p1p5-p4-written-evidence-baseline.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  baseline-only-not-feature-acceptance:
+    name: Baseline source evidence and negative mutation checks (no DB secrets)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse exact static audit
+        run: node --check scripts/math-p1p5-p4-01-written-evidence-baseline-guard.cjs
+      - name: Prove written-score problem remains uncorrected and preserve future roadmap
+        run: node scripts/math-p1p5-p4-01-written-evidence-baseline-guard.cjs
