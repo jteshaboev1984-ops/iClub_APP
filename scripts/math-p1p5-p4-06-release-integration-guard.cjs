@@ -48,7 +48,7 @@ requireAll(sync,['finalize_exam_prep_timed_safe_v1','insert into private.exam_pr
  'P4-05 post-ledger state rebuild');
 requireAll(triple,['stage4_full_paper_02','stage4_full_paper_03',
  'stage2_timed_block_02','proveSignedTimedClock','scoreComparable===false',
- 'signedReplaysChecked','three','get_exam_prep_timed_catalog_safe_v1'],
+ 'signedReplaysChecked','assert.equal(used.size,3','get_exam_prep_timed_catalog_safe_v1'],
  'P4-05 real signed full Paper ladder');
 requireAll(blank,['EMPTY SIGNED PAPER NEGATIVE PASS','replay.replayed===true',
  'latest.answered_items===0','evidence?.executed===false',
