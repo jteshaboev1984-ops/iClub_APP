@@ -7,12 +7,14 @@ on:
     paths:
       - 'supabase/tests/p1p5_v2_package0_trigger_*_readonly.sql'
       - 'docs/math-p1p5-p0-16b-trigger-write-reachability-20261105.md'
+      - 'docs/math-p1p5-v2-execution-ledger.md'
       - 'scripts/p1p5-p0-16b-trigger-catalog-static-guard.cjs'
       - '.github/workflows/p1p5-p0-16b-trigger-catalog-readonly.yml'
   pull_request:
     paths:
       - 'supabase/tests/p1p5_v2_package0_trigger_*_readonly.sql'
       - 'docs/math-p1p5-p0-16b-trigger-write-reachability-20261105.md'
+      - 'docs/math-p1p5-v2-execution-ledger.md'
       - 'scripts/p1p5-p0-16b-trigger-catalog-static-guard.cjs'
       - '.github/workflows/p1p5-p0-16b-trigger-catalog-readonly.yml'
 
