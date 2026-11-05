@@ -65,8 +65,16 @@ async function run(){
        const stage=row("SELECT operational_stage stage FROM private.exam_prep_stage_states "+
          "WHERE user_id='"+id.uid+"'::uuid AND component_code='"+comp+
          "' AND engine_version='objective_state_v1'");
+       const details=row("SELECT private.exam_prep_stage4_exit_status_v1("+
+         "p.user_id,p.program_version_id,'"+comp+"') AS gate "+
+         "FROM private.exam_prep_exam_profiles p WHERE p.user_id='"+id.uid+"'::uuid");
+       const gate=details?.gate||{};
        assert(stage?.stage===5,
-         'P4-05 third source Paper must wait for real Stage5; got '+JSON.stringify(stage));
+         'P4-05 third source Paper must wait for real Stage5; got '+
+          JSON.stringify({stage:stage?.stage,reason:gate.reason_code,
+           stage3:gate.stage3_exit_ready,attempts:gate.selected_family_attempt_count,
+           trend:gate.trend_gate_ready,timed:gate.timed_section_gate,
+           timedReady:gate.timed_section_gate_ready,corrections:gate.corrective_plan_gate_ready}));
      }
      const key=comp.toLowerCase()+'_'+tail;
      const paper=catalog.assessments.find(x=>
