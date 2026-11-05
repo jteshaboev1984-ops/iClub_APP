@@ -24,6 +24,10 @@
       hours: 'ч', perWeek: 'ч/нед', skills: 'навыков',
       noDates: 'Выберите дату хотя бы одного экзамена, чтобы увидеть недельный ориентир.',
       assumption: 'Ориентир iClub использует примерные часы преподавания из материалов Cambridge 2020 года и ваши результаты. Это не норма самостоятельной подготовки и не гарантия готовности. Только вы решаете, менять ли учебное время.',
+      tentative:'До завершения диагностики P1 и P5 расчёт часов предварительный. Непроверенные навыки не считаются доказанными пробелами. Вы можете оставить выбранное время.',
+      syllabusLabel:'Программа Cambridge 9709 для экзамена',
+      syllabusCarryover:'Задания iClub сопоставлены с программой 2026–2027. Cambridge сообщает об отсутствии существенных изменений для преподавания в 2028–2030; это не повторная проверка каждого задания.',
+      syllabusFuture:'Для выбранного года официальная редакция программы ещё не сопоставлена с материалами iClub. Это не ограничивает обучение.',
       noTime: 'Время пока недоступно', noChange: 'Ваше расписание не изменено.',
       chooseDate:'Выбрать дату', changeDate:'Изменить дату',
       editTitle:'Даты моих экзаменов', saveDates:'Сохранить даты',
@@ -56,6 +60,10 @@
       hours: 'soat', perWeek: 'soat/hafta', skills: 'ko‘nikma',
       noDates: 'Haftalik mo‘ljal uchun kamida bitta imtihon sanasini tanlang.',
       assumption: 'iClub mo‘ljali Cambridge’ning 2020-yilgi taxminiy dars soatlari va natijalaringizga asoslangan. Bu mustaqil tayyorgarlik me’yori yoki imtihonga tayyorlik kafolati emas. O‘qish vaqtini o‘zgartirishni faqat o‘zingiz hal qilasiz.',
+      tentative:'P1 va P5 diagnostikasi yakunlanmaguncha soat hisobi dastlabki mo‘ljaldir. Tekshirilmagan ko‘nikma isbotlangan kamchilik emas. Tanlagan vaqtingizni saqlab qolishingiz mumkin.',
+      syllabusLabel:'Cambridge 9709 imtihon dasturi',
+      syllabusCarryover:'iClub topshiriqlari 2026–2027 dasturiga moslangan. Cambridge 2028–2030 yillarda o‘qitishga ta’sir qiladigan jiddiy o‘zgarishlar yo‘qligini bildirgan; bu har bir topshiriq qayta tekshirilganini anglatmaydi.',
+      syllabusFuture:'Tanlangan yil uchun rasmiy dastur iClub materiallari bilan hali qayta solishtirilmagan. Bu o‘qishni cheklamaydi.',
       noTime: 'Vaqt hozircha mavjud emas', noChange: 'Jadvalingiz o‘zgartirilmadi.',
       chooseDate:'Sanani tanlash', changeDate:'Sanani o‘zgartirish',
       editTitle:'Imtihon sanalarim', saveDates:'Sanalarni saqlash',
@@ -88,6 +96,10 @@
       hours: 'h', perWeek: 'h/week', skills: 'skills',
       noDates: 'Choose at least one exam date to see a weekly target.',
       assumption: 'This iClub estimate uses suggested teaching hours from Cambridge’s 2020 materials and your results. It is not a measured independent-study requirement or an exam-readiness guarantee. Only you decide whether to change your study time.',
+      tentative:'Until both P1 and P5 diagnostics are complete, the hour estimate is provisional. Untested skills are not proven weaknesses. You can keep your chosen study time.',
+      syllabusLabel:'Cambridge 9709 exam syllabus',
+      syllabusCarryover:'iClub questions are mapped to the 2026–2027 syllabus. Cambridge reports no significant teaching changes for 2028–2030; this is not a new item-by-item verification.',
+      syllabusFuture:'The official syllabus for this exam year has not yet been cross-checked against iClub materials. This does not limit learning.',
       noTime: 'Estimate unavailable', noChange: 'Your study plan has not changed.',
       chooseDate:'Choose date', changeDate:'Change date',
       editTitle:'My exam dates', saveDates:'Save dates',
@@ -214,6 +226,26 @@
     return Number.isFinite(parsed.getTime()) &&
       parsed.toISOString().slice(0,10)===value;
   }
+  // Published Cambridge 9709 source for each EXAM YEAR, not an inferred
+  // official exam date, readiness grade or independent study-time norm.
+  // Future-year sources remain informational; never gate the three choices.
+  const YEAR_SOURCES=Object.freeze({
+    '2026-2027':'https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf',
+    '2028-2030':'https://www.cambridgeinternational.org/Images/744634-2028-2030-syllabus.pdf'
+  });
+  function syllabusSourceForExam(dateString) {
+    if(!dateString) return null;
+    const date=new Date(dateString);
+    if(!Number.isFinite(date.getTime())) return null;
+    const year=Number(new Intl.DateTimeFormat('en-GB',{
+      year:'numeric',timeZone:'Asia/Tashkent'
+    }).format(date));
+    if(year>=2026&&year<=2027)
+      return {edition:'2026–2027',url:YEAR_SOURCES['2026-2027'],carryover:false};
+    if(year>=2028&&year<=2030)
+      return {edition:'2028–2030',url:YEAR_SOURCES['2028-2030'],carryover:true};
+    return year>2030 ? {edition:String(year),url:null,carryover:false} : null;
+  }
   function viewHtml(model,lang='ru') {
     const w=WORDS[lang]||WORDS.ru;
     const date=n=>esc(formatDate(n,lang)||w.unset);
@@ -238,6 +270,26 @@
         '<span>'+esc(w.working)+' <b>'+x.attempted+'</b></span>'+
         '<span>'+esc(w.unchecked)+' <b>'+x.unknown+'</b></span></div></div>';
     }).join('');
+    const sourceRows=model.cards.map(x=>{
+      const source=syllabusSourceForExam(x.examAt);
+      if(!source)return '';
+      const label=esc(x.code+' · '+w.syllabusLabel+': '+source.edition);
+      return source.url
+        ? '<a href="'+esc(source.url)+'" target="_blank" rel="noopener noreferrer">'+label+'</a>'
+        : '<span>'+label+'</span>';
+    }).filter(Boolean);
+    const syllabusProvenance=sourceRows.length
+      ? '<div class="ep-tl-syllabus-provenance">'+sourceRows.join('')+
+        (model.cards.some(x=>syllabusSourceForExam(x.examAt)?.carryover)
+          ? '<p>'+esc(w.syllabusCarryover)+'</p>' : '')+
+        (model.cards.some(x=>{
+          const src=syllabusSourceForExam(x.examAt);
+          return src&&!src.url;
+        }) ? '<p>'+esc(w.syllabusFuture)+'</p>' : '')+
+        '</div>'
+      : '';
+    const diagnosticProvisional=model.cards.some(x=>!x.startAt)
+      ? '<p class="ep-tl-tentative">'+esc(w.tentative)+'</p>' : '';
     const sum=metric(w.total,niceNumber(model.totalHours,lang)+' '+w.hours);
     const dated=model.cards.filter(x=>x.examAt&&x.paperWeekly!==null);
     const pace=model.weekly!==null
@@ -296,10 +348,12 @@
         '<div><span>'+esc(w.today)+'</span><strong>'+date(model.asOf)+'</strong></div>'+
         '<div><span>'+esc(w.exam)+'</span><div class="ep-tl-exams">'+exams+'</div></div></div>'+
       '<div class="ep-tl-papers">'+cards+'</div>'+
-      '<div class="ep-tl-bottom">'+sum+pace+current+'</div>'+
+      diagnosticProvisional+
+      '<div class="ep-tl-bottom">'+sum+pace+current+'</div>'+ 
       compare+
       editor+
       '<p class="ep-tl-footnote">'+esc(w.assumption)+'</p>'+
+      syllabusProvenance+
       '<p class="ep-tl-date-success" data-ep-tl-success role="status" hidden></p>'+
       '</section>';
   }
