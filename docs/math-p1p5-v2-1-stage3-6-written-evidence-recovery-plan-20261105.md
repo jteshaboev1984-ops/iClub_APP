@@ -1,6 +1,12 @@
 # Mathematics P1/P5 — roadmap v2.1 / Stage 3–6 written-evidence recovery
 **2026-11-05 · Issue #450 · architect decision carried forward · IMPLEMENTATION IN PROGRESS · DRAFT / PUBLIC NO_GO**
 
+## 2026-11-05 architect reprioritization (LATEST; supersedes old NEXT P0-16B text)
+
+Real current usage of Exam Prep/iClub is very limited; genuinely identified test records are scheduled for **one-time controlled prelaunch cleanup**, not deleted now. **Pause further speculative P0-16B engineering**, do not turn the optional epoch guard on; favor academic content, original 12 Extra Hard recovery, the 81-skill effort methodology, actual Math Core access and short meaningful E2E before a separately approved release. Existing three time choices and Stage3–6 operational architecture are already delivered; don't repeat them. Protect actual account/Practice/Tours/other-subject data when eventual test-only cleanup is performed.
+
+See [new architect decision and concrete delivery order](math-p1p5-architect-priorities-and-test-data-decision-20261105.md). The historical P0-first checkpoints below remain factual history, **not current work instructions**.
+
 ## Purpose and source precedence
 
 This **versioned addendum** amends the approved [full roadmap v2.0](https://github.com/jteshaboev1984-ops/iClub_APP/blob/docs/math-p1p5-v2-workplan-issue450-20261102/docs/math-p1p5-release-workplan-v2-20261102.md) at **D03 (no student/app/AI written scores), Package 4, Package 7 and Stage 3–6 acceptance**. It does not replace D01–D13 or the master 81-skill P1/P5 map. It records the architect's **2026-11-05** decision to **accept the identified progression defect, reject mandatory Mentor Care, and reject an objective-only percentage for all-written papers**.
