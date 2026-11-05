@@ -28,8 +28,8 @@
       chooseDate:'Выбрать дату', changeDate:'Изменить дату',
       editTitle:'Даты моих экзаменов', saveDates:'Сохранить даты',
       saving:'Сохранение…', cancel:'Отмена', clear:'Очистить',
-      dateHelp:'Выберите даты P1 и P5. Их можно изменить позже.',
-      dateError:'Выберите будущую дату.',
+      dateHelp:'Выберите даты P1 и P5 в пределах четырёх лет. Их можно изменить позже.',
+      dateError:'Выберите будущую дату в пределах четырёх лет.',
       saveError:'Не удалось сохранить даты. Попробуйте снова.',
       saved:'Даты сохранены. План пересчитан.',
       enough:'По текущему ориентиру выделенного времени хватает.',
@@ -60,8 +60,8 @@
       chooseDate:'Sanani tanlash', changeDate:'Sanani o‘zgartirish',
       editTitle:'Imtihon sanalarim', saveDates:'Sanalarni saqlash',
       saving:'Saqlanmoqda…', cancel:'Bekor qilish', clear:'Tozalash',
-      dateHelp:'P1 va P5 sanalarini tanlang. Keyin o‘zgartirish mumkin.',
-      dateError:'Kelajakdagi sanani tanlang.',
+      dateHelp:'P1 va P5 uchun kelgusi to‘rt yil ichidagi sanalarni tanlang. Keyin o‘zgartirishingiz mumkin.',
+      dateError:'Kelgusi to‘rt yil ichidagi sanani tanlang.',
       saveError:'Sanalarni saqlab bo‘lmadi. Qayta urinib ko‘ring.',
       saved:'Sanalar saqlandi. Reja yangilandi.',
       enough:'Hozir ajratgan vaqtingiz taxminiy mo‘ljal uchun yetadi.',
@@ -92,8 +92,8 @@
       chooseDate:'Choose date', changeDate:'Change date',
       editTitle:'My exam dates', saveDates:'Save dates',
       saving:'Saving…', cancel:'Cancel', clear:'Clear',
-      dateHelp:'Choose your P1 and P5 dates. You can change them later.',
-      dateError:'Choose a future date.',
+      dateHelp:'Choose P1 and P5 dates within the next four years. You can change them later.',
+      dateError:'Choose a future date within the next four years.',
       saveError:'Could not save dates. Please try again.',
       saved:'Dates saved. Study target updated.',
       enough:'Your current study time meets this approximate target.',
@@ -198,13 +198,18 @@
   function inputBounds() {
     const today=inputDate(new Date());
     const tomorrow=inputDate(new Date(Date.now()+86400000));
-    return {today,min:tomorrow};
+    const [year,month,day]=today.split('-').map(Number);
+    // Match PostgreSQL date + interval '4 years' exactly at month-end.
+    // For example, 29 February becomes 28 February in a non-leap year.
+    const daysInTargetMonth=new Date(Date.UTC(year+4,month,0)).getUTCDate();
+    const max=new Date(Date.UTC(year+4,month-1,
+      Math.min(day,daysInTargetMonth))).toISOString().slice(0,10);
+    return {today,min:tomorrow,max};
   }
   function validInputDate(value,bounds) {
-    if(value==='') return true;
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(value) || value<bounds.min) return false;
-    // HTML date input is calendar-based; ensure 2030+ is valid without an
-    // arbitrary 3-year ceiling, but never accept February 30 or malformed days.
+    if(value==='') return true; // Explicitly clearing a personal date stays possible.
+    if(!bounds || !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
+      value<bounds.min || value>bounds.max) return false;
     const parsed=new Date(value+'T12:00:00Z');
     return Number.isFinite(parsed.getTime()) &&
       parsed.toISOString().slice(0,10)===value;
@@ -275,7 +280,7 @@
         '<label for="ep-tl-date-'+x.code+'"><strong>'+x.code+'</strong></label>'+
         '<div class="ep-tl-date-input-line"><input id="ep-tl-date-'+x.code+'" type="date"'+
         ' data-ep-tl-date="'+x.code+'" value="'+esc(inputDate(x.examAt))+'"'+
-        ' min="'+bounds.min+'" autocomplete="off" />'+
+        ' min="'+bounds.min+'" max="'+bounds.max+'" autocomplete="off" />'+
         '<button class="ep-tl-clear" type="button" data-ep-tl-clear="'+x.code+'"'+
         ' aria-label="'+esc(w.clear+' '+x.code)+'">'+esc(w.clear)+'</button></div></div>').join('')+
       '</div><p class="ep-tl-date-hint">'+esc(w.dateHelp)+'</p>'+
