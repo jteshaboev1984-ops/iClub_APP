@@ -5,7 +5,7 @@ DO $proof$
 DECLARE
  v_uid uuid;v_program bigint;v_comp text;v_total int;v_distinct int;
  v_exec int;v_scored int;v_saved int;v_writing int;v_op jsonb;
- v_stage4 jsonb;v_ready jsonb;v_stage int;v_mentor boolean;
+ v_stage4 jsonb;v_stage4_exit jsonb;v_ready jsonb;v_stage int;v_mentor boolean;v_estimate text;
 BEGIN
  IF current_database()<>'postgres'
     OR current_setting('iclub.e2e_isolated',true) IS DISTINCT FROM 'true'
@@ -39,9 +39,10 @@ BEGIN
      AND s.session_type='paper' AND s.status='finalized'
      AND t.attempt_kind='full_paper';
    v_stage4:=private.exam_prep_stage4_raw_evidence_v1(v_uid,v_program,v_comp);
+   v_stage4_exit:=private.exam_prep_stage4_exit_status_v1(v_uid,v_program,v_comp);
    v_op:=private.exam_prep_stage5_operational_completion_v1(v_uid,v_program,v_comp);
    v_ready:=private.exam_prep_stage5_readiness_status_v1(v_uid,v_program,v_comp);
-   SELECT operational_stage INTO STRICT v_stage
+   SELECT operational_stage,app_readiness_estimate INTO STRICT v_stage,v_estimate
    FROM private.exam_prep_stage_states WHERE user_id=v_uid
      AND program_version_id=v_program AND component_code=v_comp
      AND engine_version='objective_state_v1';
@@ -50,16 +51,18 @@ BEGIN
       OR v_writing<>v_saved
       OR (v_stage4->>'comparable_full_attempt_count_total')::int<>3
       OR (v_op->>'compatible_execution_papers')::int<3
-      OR coalesce((v_op->>'operational_calibration_access')::boolean,false)
+      OR NOT coalesce((v_op->>'operational_calibration_access')::boolean,false)
+      OR NOT coalesce((v_stage4_exit->>'ready')::boolean,false)
       OR coalesce((v_ready->>'ready')::boolean,false)
       OR coalesce((v_op->>'exam_readiness_claim')::boolean,false)
-      OR v_stage<>4
+      OR v_stage<>6
+      OR v_estimate<>'INSUFFICIENT_EVIDENCE'
    THEN RAISE EXCEPTION
       'P4-05 3 signed written paper evidence/grade firewall failed % attempts % distinct % executed % scored % saved % written % stage4 % op % readiness % current_stage %',
       v_comp,v_total,v_distinct,v_exec,v_scored,v_saved,v_writing,
       v_stage4,v_op,v_ready,v_stage;
    END IF;
-   RAISE NOTICE 'P4-05 PASS %: 3 distinct genuine signed full Papers, all written artifacts, zero grade, Stage6 still gated by actual academic evidence',v_comp;
+   RAISE NOTICE 'P4-05 PASS %: 3 distinct genuine signed full Papers, all written artifacts, zero grade, Stage6 operational access earned without fictitious exam score',v_comp;
  END LOOP;
  IF EXISTS(SELECT 1 FROM private.exam_prep_timed_written_self_marks w
    WHERE w.user_id=v_uid)
@@ -68,5 +71,5 @@ BEGIN
    OR EXISTS(SELECT 1 FROM public.tour_attempts)
    OR EXISTS(SELECT 1 FROM public.certificates)
  THEN RAISE EXCEPTION 'P4-05 protected Practice/Tours/certificate mutation'; END IF;
- RAISE NOTICE 'P4-05 PASS: signed P1/P5 three-Paper real path, written score unknown, no premature stage, no Mentor, no legacy contamination';
+ RAISE NOTICE 'P4-05 PASS: signed P1/P5 three-Paper real path, written score unknown, operational Stage6 only, no Cambridge grade, no Mentor, no legacy contamination';
 END $proof$;
