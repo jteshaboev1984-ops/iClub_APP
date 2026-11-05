@@ -77,7 +77,12 @@ async function run(){
            timedReady:gate.timed_section_gate_ready,corrections:gate.corrective_plan_gate_ready}));
      }
      const key=comp.toLowerCase()+'_'+tail;
-     const paper=catalog.assessments.find(x=>
+     // A Stage5 transition changes the published governed catalog; never use
+     // the cached Stage4 listing for a newly unlocked Paper03.
+     const stageCatalog=ok(await rpc('get_exam_prep_timed_catalog_safe_v1',{
+       p_component_code:comp
+     },owner),'P4-05 refreshed authoritative catalog '+comp+'/'+tail);
+     const paper=stageCatalog.assessments.find(x=>
        x.assessment_key===key && x.attempt_kind==='full_paper'
        && x.comparison_scope==='full' && x.strict_timing===true);
      assert(paper && !used.has(paper.assessment_id),
