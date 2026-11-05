@@ -61,3 +61,11 @@ Do **not** merge the 162-file parent PR or cherry-pick random migrations. Review
 
 - **2026-11-05 P4-01 initial audit:** 16/16 published full-paper assessments are written-only with 0 objective marks; no approved Stage 5 threshold rows. In-progress corrective child branch; **no code or production acceptance asserted yet**.
 - Completed P4-02...P4-06 must be documented with exact implementation SHA and independently executed tests, not old inherited green runs.
+
+
+## P4-02 isolated implementation candidate (2026-11-05; CHECK EXACT CI BEFORE GREEN)
+
+- Added future-only migration `20261105153000_exam_prep_p1p5_timed_execution_comparable_v1.sql`, which introduces a **new** private service-role-only `exam_prep_timed_execution_comparable_v1` helper. Unlike score comparability, it does **not** deny completed but ungraded writing; it preserves time, non-diagnostic status, integrity, paper epoch and exam-series comparisons and requires finalized genuine timed/paper sessions. Existing score comparator, stage evaluator, marks, content and user evidence remain unchanged.
+- Added disposable-only `p1p5_p4_02_execution_without_written_score_disposable.sql`, placed **after** existing genuine signed P1/P5 full-paper HTTP completion and **before** synthetic cleanup in full PG17 E2E. The synthetic acceptance expects two genuine paper attempts, each `execution=true`, `score=false`, `objective_marks=0`, privacy rights intact, non-timed mixed and NULL requests false.
+- The first exploratory CI workflow edit had a YAML colon in an unquoted step title (source syntax error); corrected the title. The P4-01 negative baseline check has **SUCCESS** independent of any Stage3–6 fix.
+- **Do not mark P4-02 accepted until the exact new SHA full PG17 signed E2E completes SUCCESS.** P4-03 through P4-06 remain open. No release GO and no live migration.
