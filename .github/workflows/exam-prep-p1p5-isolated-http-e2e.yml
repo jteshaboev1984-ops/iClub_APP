@@ -31,6 +31,7 @@ on:
       - 'supabase/tests/p1p5_p4_04_operational_calibration_disposable.sql'
       - 'scripts/p1p5-isolated-http-three-full-papers.cjs'
       - 'supabase/tests/p1p5_p4_05_three_full_papers_disposable.sql'
+      - 'supabase/tests/p1p5_p4_05_earn_stage4_from_real_objective_evidence_disposable.sql'
       - 'scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package1-real-dates-horizon-e2e.cjs'
@@ -354,6 +355,23 @@ jobs:
             2>&1 | tee /tmp/p1p5-p4-04-operational-proof.log
           grep -Fq 'P4-04 PASS: ONE signed P1/P5 Paper is not Stage6' \
             /tmp/p1p5-p4-04-operational-proof.log
+      - name: P4-05 complete Stage 3 with actual server-verified objective mastery
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          awk '/^-- Complete a normal non-timed/{copy=1} copy && /^DO /{exit} copy{print}' \
+            supabase/tests/p2_69_full_stage0_6_core_simulation.sql \
+            > /tmp/p1p5-p405-earned-stage4-helpers.sql
+          test "$(wc -c </tmp/p1p5-p405-earned-stage4-helpers.sql)" -gt 8000
+          cat /tmp/p1p5-p405-earned-stage4-helpers.sql \
+            supabase/tests/p1p5_p4_05_earn_stage4_from_real_objective_evidence_disposable.sql \
+            | psql -X -v ON_ERROR_STOP=1 2>&1 | tee /tmp/p1p5-p405-stage4-evidence.log
+          grep -Fq 'P4-05 PASS: completed real objective L3' \
+            /tmp/p1p5-p405-stage4-evidence.log
       - name: P4-05 THREE unique signed full Papers for each P1 and P5
         run: |
           set -euo pipefail

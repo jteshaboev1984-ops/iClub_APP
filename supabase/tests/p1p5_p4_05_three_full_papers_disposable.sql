@@ -53,7 +53,7 @@ BEGIN
       OR coalesce((v_op->>'operational_calibration_access')::boolean,false)
       OR coalesce((v_ready->>'ready')::boolean,false)
       OR coalesce((v_op->>'exam_readiness_claim')::boolean,false)
-      OR v_stage<>3
+      OR v_stage<>4
    THEN RAISE EXCEPTION
       'P4-05 3 signed written paper evidence/grade firewall failed % attempts % distinct % executed % scored % saved % written % stage4 % op % readiness % current_stage %',
       v_comp,v_total,v_distinct,v_exec,v_scored,v_saved,v_writing,
