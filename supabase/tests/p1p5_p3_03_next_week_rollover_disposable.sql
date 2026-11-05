@@ -38,6 +38,7 @@ DECLARE
  v_minutes integer;
  v_week integer;
  v_refused boolean := false;
+ v_p1_resuming boolean := false;
 BEGIN
  IF current_database() <> 'postgres'
    OR current_setting('server_version_num')::int < 170000
@@ -155,14 +156,32 @@ BEGIN
  -- One existing normal academic plan authority, never a new planner.
  v_next_p1:=public.ensure_exam_prep_balanced_weekly_plan_safe_v1('P1');
  v_next_p5:=public.ensure_exam_prep_balanced_weekly_plan_safe_v1('P5');
- IF v_next_p1->>'status'<>'created' OR v_next_p5->>'status'<>'created'
-    OR (v_next_p1->>'plan_id')::uuid=v_old_p1
+ -- Existing incomplete P1 learning after genuine signed HTTP must be resumed,
+ -- not discarded to manufacture a week-two plan for an isolated budget test.
+ v_p1_resuming:=coalesce(v_next_p1->>'status'='resume_first',false);
+ IF (NOT v_p1_resuming AND v_next_p1->>'status'<>'created')
+    OR (v_p1_resuming AND NOT (
+      v_next_p1->'recovery'->>'status'='resume'
+      AND (v_next_p1->'recovery'->>'source_plan_week')::int=1
+      AND (v_next_p1->'recovery'->>'source_plan_id')::uuid=v_old_p1
+      AND (v_next_p1->'recovery'->>'resume_independent_of_current_plan')::boolean IS TRUE
+      AND (v_next_p1->'recovery'->>'first_unanswered_item_order')::int>=1
+    ))
+    OR v_next_p5->>'status'<>'created'
+    OR (NOT v_p1_resuming AND (v_next_p1->>'plan_id')::uuid=v_old_p1)
     OR (v_next_p5->>'plan_id')::uuid=v_old_p5
- THEN RAISE EXCEPTION 'P3-03 next genuine plan not created or previous session still pending, P1=% P5=%',
-  v_next_p1,v_next_p5; END IF;
+ THEN RAISE EXCEPTION 'P3-03 expected week-two P1 plan OR original protected P1 resume, P1=% P5=%',
+    v_next_p1,v_next_p5; END IF;
 
- v_new_p1:=public.ensure_my_exam_prep_weekly_budget_safe_v1('P1',(v_next_p1->>'plan_id')::uuid);
  v_new_p5:=public.ensure_my_exam_prep_weekly_budget_safe_v1('P5',(v_next_p5->>'plan_id')::uuid);
+ IF v_p1_resuming THEN
+   -- The one 210-minute Mathematics snapshot contains BOTH paper allocations.
+   -- P5 new week-two plan proves the shared budget while the genuine P1
+   -- prior-week session remains untouched and resumable.
+   v_new_p1:=v_new_p5;
+ ELSE
+   v_new_p1:=public.ensure_my_exam_prep_weekly_budget_safe_v1('P1',(v_next_p1->>'plan_id')::uuid);
+ END IF;
  v_minutes:=floor(v_profile.mathematics_hours_budget*60)::integer;
  IF v_minutes<>210
     OR (v_new_p1->>'available_math_minutes')::int<>v_minutes
