@@ -4,9 +4,11 @@ on:
     # Isolated verification of the exact DRAFT corrective source. No deploy.
     branches:
       - feature/math-p1p5-p4-written-evidence-contract-20261105
+      - feature/math-p1p5-p6-permanent-core-membership-20261105
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'
+      - 'supabase/tests/p1p5_p6_math_public_core_membership_disposable.sql'
       - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
       - 'scripts/p1p5-isolated-http-three-full-papers.cjs'
       - 'scripts/p1p5-isolated-http-skipped-paper-denial.cjs'
@@ -35,6 +37,7 @@ on:
       - 'supabase/tests/p1p5_p4_05_three_full_papers_disposable.sql'
       - 'supabase/tests/p1p5_p4_05_blank_paper_negative_disposable.sql'
       - 'supabase/tests/p1p5_p4_06_runtime_writer_acl_disposable.sql'
+      - 'supabase/tests/p1p5_p6_math_public_core_membership_disposable.sql'
       - 'supabase/tests/p1p5_p4_05_earn_stage4_from_real_objective_evidence_disposable.sql'
       - 'scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
@@ -628,6 +631,20 @@ jobs:
           grep -Fq 'D09-05 UX PASS uz 1280px' /tmp/p1p5-d09-05-focus-browser.log
           grep -Fq 'D09-05 UX PASS en 1280px' /tmp/p1p5-d09-05-focus-browser.log
           echo 'D09-05 PASS: source-grounded next-step projection and native locale layouts; no extra weekly quotas'
+
+      - name: P6 Mathematics-only public Core path (default OFF, disposable PG17)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p6_math_public_core_membership_disposable.sql 2>&1 | tee /tmp/p1p5-p6-math-public-core.log
+          grep -Fq 'P6 MASS ACCESS PASS:' /tmp/p1p5-p6-math-public-core.log
+          grep -Fq 'P6 MASS ACCESS ROLLBACK PASS' /tmp/p1p5-p6-math-public-core.log
 
       - name: Remove local HTTP server
         if: always()
