@@ -13,7 +13,7 @@
     if (window.iClubExamPrepWeeklyFlowEnabled !== true) return fail('weekly_flow_disabled');
     if (component !== 'P1' && component !== 'P5') return fail('invalid_component');
     const caps = internal.lastCapabilities;
-    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || caps.rolloutState !== 'controlled_beta') {
+    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || !['controlled_beta','mass'].includes(caps.rolloutState)) {
       return fail('core_access_unavailable');
     }
     return null;
