@@ -29,11 +29,14 @@ async function run(){
    const catalog=ok(await rpc('get_exam_prep_timed_catalog_safe_v1',{
      p_component_code:component
    },token),'P4-05 governed negative Paper catalog');
-   const candidate=catalog.assessments.find(x=>
-     x.assessment_key===component.toLowerCase()+'_stage3_full_paper_01'
-     && x.attempt_kind==='full_paper' && x.comparison_scope==='full'
-     && x.strict_timing===true && !used.has(x.assessment_id));
-   assert(candidate,'P4-05 no unused published full Paper version for blank negative');
+   const candidates=catalog.assessments.filter(x=>
+     x.attempt_kind==='full_paper' && x.comparison_scope==='full'
+     && x.strict_timing===true);
+   // A completed, published Paper can be retaken with a NEW real authorization.
+   // Prefer an unused form; never fabricate or activate new source content.
+   const candidate=candidates.find(x=>!used.has(x.assessment_id))
+     || candidates.find(x=>used.has(x.assessment_id));
+   assert(candidate,'P4-05 no governed published full Paper for blank negative');
    const prefix='p405-empty-'+component.toLowerCase();
    const auth=ok(await rpc('authorize_exam_prep_timed_safe_v1',{
      p_assessment_id:candidate.assessment_id
