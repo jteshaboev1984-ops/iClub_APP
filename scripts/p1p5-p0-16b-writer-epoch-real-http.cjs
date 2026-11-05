@@ -28,7 +28,9 @@ function snapshot(uid){
  "(SELECT count(*)::int FROM private.exam_prep_session_authorizations WHERE user_id='"+uid+"'::uuid) auths,"+
  "(SELECT count(*)::int FROM private.exam_prep_timed_attempt_results WHERE user_id='"+uid+"'::uuid) results,"+
  "(SELECT md5(coalesce(string_agg(component_code||':'||xmin::text,'|' ORDER BY component_code),'')) FROM private.exam_prep_stage_states WHERE user_id='"+uid+"'::uuid) stage_fingerprint,"+
- "(SELECT md5(coalesce(string_agg(component_code||':'||skill_code||':'||xmin::text,'|' ORDER BY component_code,skill_code),'')) FROM private.exam_prep_skill_states WHERE user_id='"+uid+"'::uuid) skill_fingerprint");
+ "(SELECT md5(coalesce(string_agg(component_code||':'||skill_code||':'||xmin::text,'|' ORDER BY component_code,skill_code),'')) FROM private.exam_prep_skill_states WHERE user_id='"+uid+"'::uuid) skill_fingerprint,"+
+ "(SELECT md5(coalesce(string_agg(component_code||':'||xmin::text,'|' ORDER BY component_code),'')) FROM private.exam_prep_component_placements WHERE user_id='"+uid+"'::uuid) placement_fingerprint,"+
+ "(SELECT md5(coalesce(string_agg(component_code||':'||xmin::text,'|' ORDER BY component_code),'')) FROM private.exam_prep_component_access_gates WHERE user_id='"+uid+"'::uuid) access_gate_fingerprint");
 }
 async function main(){
  const learner=row("SELECT user_id::text uid FROM private.exam_prep_synthetic_identities "+
@@ -77,6 +79,14 @@ async function main(){
     'stale browser may read P5 stored progress');
   assert(storedP5.components?.length===1 && storedP5.components[0].component_code==='P5',
     'old browser lost stored P5 component on cutover');
+  const placement=ok(await rpc('get_exam_prep_placement_safe_v1',{p_component_code:'P1'},old),
+    'stale tab may read saved placement');
+  assert(placement.components?.length===1 && placement.components[0].component_code==='P1',
+    'old token lost saved placement P1');
+  const diagnostic=ok(await rpc('get_exam_prep_diagnostic_progress_safe_v1',
+    {p_component_code:'P5'},old),'stale tab may read saved diagnostic');
+  assert(diagnostic.component_code==='P5','old token lost diagnostic P5');
+  assert.deepEqual(snapshot(uid),before,'stale reads mutated placement or access gates');
   assert.deepEqual(snapshot(uid),before,'old browser read silently rebuilt state');
   assert.deepEqual(snapshot(uid),before,'old tab changed academic rows');
   for(const paper of [p1,p5]){
@@ -95,7 +105,7 @@ async function main(){
   'cutoff disabled compatibility');
  assert(rollback.replayed===true,'disabled cutoff broke old-token normal behavior');
  assert.deepEqual(snapshot(uid),before,'rollback modified progress');
- console.log('P0-16B PASS: real old tab blocked on ten Core/Paper writes and stale read-rebuild, fresh signed JWT resumes P1/P5, saved scores and progress unchanged, cutoff OFF');
+ console.log('P0-16B PASS: real old tab blocked on ten Core/Paper writes and three old-token read-rebuild paths, fresh signed JWT resumes P1/P5, saved scores and progress unchanged, cutoff OFF');
  console.log('P0-16B OPEN: other writers, nested triggers, app-build refresh and release signoff');
 }
 main().catch(e=>{console.error('P0-16B FAIL',e.stack||e.message);process.exitCode=1});

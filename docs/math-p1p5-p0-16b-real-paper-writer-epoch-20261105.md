@@ -51,3 +51,13 @@ stored P1/P5 component and skill projections. Genuine signed owner HTTP E2E
 now checks both old-token reads, the unchanged stage/skill-row fingerprints,
 and resumed full Paper idempotency using a newly signed token. The cutoff
 still defaults NULL and remains unset in production.
+
+## The actual Stage-0 dashboard also writes on read
+
+Two more normal learner displays, `get_exam_prep_placement_safe_v1` and
+`get_exam_prep_diagnostic_progress_safe_v1`, call the placement rebuild
+which can change stored placement/access-gate projections. The same
+opt-in epoch now skips those writes when the JWT is old while returning
+previously saved P1/P5 placement and diagnostic facts. The genuine signed
+HTTP test checks both endpoints plus the unchanged placement and
+access-gate row identities, in addition to objective stage/skill state.
