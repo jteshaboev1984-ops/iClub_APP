@@ -35,7 +35,7 @@ WITH RECURSIVE routines AS (
   UNION ALL
   SELECT w.trigger_oid,e.target_oid,w.visited||e.target_oid,w.depth+1
   FROM walk w JOIN qualified_edges e ON e.caller_oid=w.routine_oid
-  WHERE w.depth < 7 AND NOT e.target_oid=ANY(w.visited)
+  WHERE w.depth < 12 AND NOT e.target_oid=ANY(w.visited)
 ), reachable AS (
   SELECT w.trigger_oid, count(DISTINCT w.routine_oid) AS reachable_functions,
          max(w.depth) AS max_depth,
@@ -60,7 +60,7 @@ SELECT jsonb_build_object(
      'direct',root_direct_dml_text,'reachable_functions',reachable_functions)
    ORDER BY table_name,trigger_name
  ) FILTER(WHERE reaches_dml_text AND NOT root_direct_dml_text),'[]'::jsonb),
- 'limit','Source-text only, qualified functions only, depth<=7. NOT a complete trigger or release epoch proof.',
+ 'limit','Source-text only, qualified functions only, depth<=12. NOT a complete trigger or release epoch proof.',
  'release_verdict','NO_GO_EXISTING_GATE_UNCHANGED'
 ) AS p0_16b_trigger_transitive_inventory
 FROM report;
