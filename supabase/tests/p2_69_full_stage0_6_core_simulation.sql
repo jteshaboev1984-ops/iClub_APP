@@ -660,6 +660,7 @@ DECLARE
   v_l3_p5 int;
   v_stage_p1 int;
   v_stage_p5 int;
+  v_component text;
 BEGIN
   select count(*) into v_users_before from public.users;
   select jsonb_build_object(
