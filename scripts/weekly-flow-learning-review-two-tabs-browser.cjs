@@ -12,7 +12,7 @@ const texts=['Original question 1','Original question 2','Original question 3','
 const good=data=>({ok:true,data});
 async function scenario(browser,language,width,loss) {
   const model={active:false,finalized:false,answered:[false,false,false,false],
-    starts:0,normalStarts:0,generators:0,writtenSends:0,keys:[],payloads:[],finalizes:0,
+    starts:0,normalStarts:0,budgetRequests:0,generators:0,writtenSends:0,keys:[],payloads:[],finalizes:0,
     getSessionReads:0,componentWrites:[],profileWrites:0,planId:PLAN};
   const errors=[];
   const call=async(name,args={})=>{
@@ -94,6 +94,13 @@ async function scenario(browser,language,width,loss) {
       return rpcOk({status:'started',session_id:SESSION,component_code:'P5',goal_id:GOAL,
         plan_id:PLAN,repeat_learning:true,academic_credit:false,
         prior_progress_retained:true,not_a_new_independent_check:true});
+    }
+    if(name==='ensure_my_exam_prep_weekly_budget_safe_v1') {
+      // P3 optional capacity: older backend has no available-time endpoint.
+      // A rejected budget lookup must not count as a fresh assessment start
+      // and must not prevent the original saved review from resuming.
+      model.budgetRequests++;
+      return {data:null,error:{code:'PGRST202',message:'optional weekly budget not installed'}};
     }
     model.normalStarts++;throw Error(`Unexpected RPC ${name}`);
   };
@@ -182,7 +189,8 @@ async function scenario(browser,language,width,loss) {
       assert.deepEqual(model.payloads[0],model.payloads[1]);
     }
     assert.equal(model.generators,0);
-    assert.equal(model.normalStarts,0);
+    assert(model.budgetRequests>=2,'Both tabs should tolerate the optional P3 budget lookup');
+    assert.equal(model.normalStarts,0,'Neither tab may start a new assessment');
     assert.equal(model.planId,PLAN);
     assert.deepEqual(model.answered,[true,true,true,true]);
     // An old first-tab view must reconcile to the same FINALIZED server state.

@@ -1,0 +1,69 @@
+# Mathematics P1/P5 — P2-07 workload evidence review protocol
+
+**2026-11-03 · Academic review pack · DRAFT · no personal-hour norms approved**
+
+## What was actually established
+
+This package snapshots **81 actual canonical Mathematics skills** (45 P1, 36 P5) from the current production `private.exam_prep_syllabus_nodes`, using **SELECT only**. Each row carries its own component, official syllabus area, skill code and description, prerequisites, textbook chapter/pages and existing mastery-evidence rule. Its accompanying JSON file is `docs/math-p1p5-package2-81-skill-review-pack-v1.json`. It contains **no question texts, protected answer keys, learner responses, reserve IDs or personal records**.
+
+All per-skill learning/revision minutes are **null**. This is not the absence of academic preparation: it records the exact remaining **measurement** obligation rather than converting a syllabus mapping into invented study minutes. Review status is `awaiting_observations`; no skill is approved for a personal-hours recommendation. The separate 2020 Cambridge schemes describe **topic-level guided teaching time**, not 2026–27 learner-specific independent study. The current 2026–27 syllabus's approximately 180 AS guided hours do not validate any of these 81 time ranges.
+
+## Reproducible evidence needed for each one of 81 rows
+
+1. **Baseline and prerequisites.** Identify a defined learner starting point and which prerequisites have already been demonstrated. Mark unknown as **unknown**, not weak. Do not allocate a prerequisite's initial teaching time again to each dependent skill.
+2. **Observed instructional route.** Document original explanation and worked method, representative *released* objective and written-method activities, independent practice, wrong-answer correction, delayed retest and unseen mixed transfer. Record the specific task selection in a secure governed review log; **never copy protected question/answer content into this repository**. The `required_mastery_evidence` field in each JSON row defines the evidence *type*, not its time duration.
+3. **Actual durations and validity.** Gather separately identifiable timings/credible bounded instructional walkthroughs for every phase; note learner prior knowledge, method, pauses, help received, and whether the task was completed. Do not use short beta `elapsed_ms`, question deadline maxima, published-item counts, guided classroom hours or video counts as unassisted study duration. Unobserved phases remain null.
+4. **Interval and uncertainty.** Independently review the lower/upper plausible minutes for **initial/core learning** and **revision**, with rationale for variation (known/unknown prerequisites, correction and delayed retests, written-method understanding). A single point figure without a derivation is insufficient. Do not call an estimate an official Cambridge norm.
+5. **Independent check.** Record named primary reviewer and a different authorized independent approver, dated review, method version, source/evidence identifiers and disputed assumptions. Do not treat an assistant self-check, a CI pass or a syllabus citation as a substitute for independent verification. If evidence is missing, retain `awaiting_observations` and null minutes.
+
+## Component-safe eventual calculation (NOT ENABLED)
+
+P1 and P5 each have independent mastery/evidence and different verified exam dates; they share one Mathematics weekly study budget. A future engine may allocate a reviewed workload once, never sum P1 and P5 *calendar capacity* as independent hours. Only genuinely observed progress can reduce work; diagnostic-unsampled skills are not automatically failures. Corrective, mixed, written-unscored and whole-paper (P1 110 min, P5 75 min) logistics must be accounted for separately without counting the same minutes twice. Paper sitting time cannot be derived by summing per-skill question timers. No method marks are assigned by learners or AI.
+
+No valid recommendation exists until the **81 row-level ranges**, reviewer independence, methodology, missing-data handling and server-side planning policy are signed off and tested. Until then keep the existing numeric recommendation `NULL`, learner choice of hours unchanged, and Core freely usable beyond a chosen study schedule. Future approved recommendations must present exactly: **Оставить моё время / Принять рекомендуемое / Указать другое время**, without changing anything until the student confirms. Reports are weekly/monthly only.
+
+## Coverage and safety checks
+
+| Syllabus section | Canonical skills |
+|---|---:|
+| 1.1 Quadratics | 6 |
+| 1.2 Functions | 8 |
+| 1.3 Coordinate geometry | 6 |
+| 1.4 Circular measure | 3 |
+| 1.5 Trigonometry | 5 |
+| 1.6 Series | 5 |
+| 1.7 Differentiation | 7 |
+| 1.8 Integration | 5 |
+| 5.1 Representation of data | 10 |
+| 5.2 Permutations and combinations | 5 |
+| 5.3 Probability | 6 |
+| 5.4 Discrete random variables | 9 |
+| 5.5 The normal distribution | 6 |
+
+Run `node scripts/math-p1p5-validate-workload-review-pack-v1.cjs`. The guard checks 81/45/36, all 13 syllabus groups, canonical source/evidence presence and strict unapproved/unmeasured status; it also deliberately corrupts a test copy to prove unauthorized approval or a lone numeric value fails. The guard does **not** certify educational duration accuracy. No production data writes, user-facing flags, deployment or cleanup are part of P2-07.
+
+**Source precedence:** current 2026–27 Cambridge syllabus → iClub signed 81-skill map → textbook explanation → internal iClub measurement and independent review. See `docs/math-p1p5-package2-workload-source-register-v1.md` for original source provenance and the historical scheme-of-work caveats. Issue [#450](https://github.com/jteshaboev1984-ops/iClub_APP/issues/450); draft [PR #470](https://github.com/jteshaboev1984-ops/iClub_APP/pull/470).
+
+## 2026-11-05 targeted academic scope cross-check — original books + 2026–2027 syllabus
+
+Verified **three easily misclassified existing canonical skills** against the official Cambridge Mathematics 9709 syllabus, version 4 (2026–2027), and the *actual photographed tables of contents* of both project-supplied source textbooks. This is a **scope verification only**, not a measurement of independent study minutes or a full re-review of all 81 skills:
+
+| Existing iClub skill | Official scope evidence | Textbook reference for reviewer |
+| --- | --- | --- |
+| `P1-INT-03` | Paper 1 §1.8, syllabus printed p.22: definite integration **includes simple improper integrals** | *Complete Pure Mathematics 1*, chapter 10 Integration, printed pp.173–200; contents p.iii |
+| `P1-INT-05` | Paper 1 §1.8, printed p.22: **volume of revolution** about an axis is included | Same chapter 10, printed contents p.iii |
+| `P5-NOR-06` | Paper 5 §5.5, printed p.36: **normal approximation to binomial**, both `np > 5` and `nq > 5`, with **continuity correction** | *Complete Probability & Statistics 1*, chapter 10, printed pp.173–179; contents p.iii |
+
+Official source: [Cambridge 9709 syllabus 2026–2027](https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf#page=22), with Paper 5 §5.5 at [printed p.36](https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf#page=36). The original printed P5 contents name chapter 3 *Representing and analysing data*, whereas some iClub source-map chapter labels use the syllabus topic shorthand *Representation of data*. Treat that as an abbreviated source title, **not** a different chapter or evidence of extra learning hours.
+
+**Result:** retain these three existing skills in their current papers. The check **does not** establish observation samples, primary/independent reviewers, phase-specific study durations, or approval of a 2020 guided-teaching-hour proxy as personal preparation time. The other 78 skills are **not claimed independently verified by this targeted pass**. No learner records, question answers, canonical database map or personal hour recommendations changed. No new release prerequisite was introduced by this reading.
+
+## 2026-11-05 D10-03: syllabus edition provenance for actual 2027–2030 exams
+
+The official [Cambridge Mathematics 9709 subject page](https://www.cambridgeinternational.org/programmes-and-qualifications/cambridge-international-as-and-a-level-mathematics-9709/) publishes two relevant versions: the [2026–2027 syllabus, version 4](https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf) and the [2028–2030 syllabus, version 1](https://www.cambridgeinternational.org/Images/744634-2028-2030-syllabus.pdf). The latter explicitly says on printed page 3 that **there are no significant changes which affect teaching**, and textbooks endorsed for examinations from 2020 remain suitable. Cambridge's [syllabus-year FAQ](https://help.cambridgeinternational.org/hc/en-gb/articles/37189948709522-General-FAQ-Which-syllabus-year-should-I-use) confirms the syllabus depends on the calendar exam year, not the year of registration or diagnostic.
+
+**Source audit performed:** 81 original canonically named P1/P5 skills are still versioned to 2026–2027, across all 13 numbered P1/P5 subject sections (45 + 36) and the original textbook map. A new offline reproducible guard checks precisely these 81 skills, paper/section identity and the absence of approved skill-specific study-minute claims. The two syllabus versions display the same numbering for the selected P1/P5 sections and publisher-declared suitability of textbooks. **This is NOT an individual academic re-mark of 486 published questions, 334 written tasks or 81 source paragraphs; no unverified equivalence is claimed.**
+
+**Narrow opt-in UI improvement:** when a pupil chooses a legitimate 2027 exam date, the timeline links to the 2026–2027 Cambridge syllabus; for an actual 2028–2030 date, it links to the corresponding 2028–2030 official syllabus and clearly states that the iClub bank remains sourced to 2026–2027. No source is represented as an official personal exam appointment or Cambridge-endorsed study duration. If either P1 or P5 Stage0 diagnostic remains unfinished, the existing approximate teaching-hour planning proxy is described as **provisional**: unknown skills are not proven gaps. The existing estimate and all three voluntary choices continue to work; **no gate, automatic schedule change, lesson cap or new release prerequisite**.
+
+The four-calendar-year *personal exam-date selection maximum*, independently completed P1/P5 T0 anchors, selected Mathematics weekly hours, one unified Mathematics budget, existing stage/skill evidence, original question and reserve status, P1/P5 assessment security, weekly reports, localStorage and progress remain unchanged. No numeric 81-skill independent-study norms have been approved or invented. The source edition links are external *information*, not academic proof of individual learning rates.
