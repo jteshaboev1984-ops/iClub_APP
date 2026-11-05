@@ -3,12 +3,17 @@
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
   const VERSION = "p206finalops1";
+  // Replaces the legacy repeatedly-rendered missed-week banner in this Math host.
+  internal.periodicStudyReviewMode = true;
   let attached = false;
 
   const state = {
     language: "ru",
     busy: false,
     profile: null,
+    personalHorizon: null,
+    studySchedule: null,
+    periodicStudyReports: [],
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
     session: null,
@@ -16,6 +21,7 @@
     itemStartedAt: 0,
     notice: null,
     timerId: null,
+    clockSkewMs: 0,
     pendingWrittenStep: null,
     writtenCriteriaRequest: 0,
     mountToken: 0
@@ -52,7 +58,7 @@
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", back: "Orqaga", overview: "Umumiy ko‘rinish", plan: "Haftalik reja", openPlan: "Haftalik rejani ochish", priority: "Ustuvorlik", week: "Hafta",
       learning: "Mavzuni o‘rganish", correction: "Xato ustida ishlash", retest: "Qayta tekshirish", mixed: "Aralash mashq", rebaseline: "Rejani yangilash", startTask: "Boshlash", notDue: "Qayta tekshirish vaqti hali kelmagan", noPlan: "Faol reja yo‘q.", written: "Yechimingizni yozing", completedTask: "Topshiriq tugadi. Reja yangilandi.",
       stageTitle: "Joriy bosqich", coverage: "Tasdiqlangan qamrov", timed: "Vaqtli mashqlar", openTimed: "Vaqtli mashqlarni ochish", noTimed: "Hozircha bu bosqich uchun vaqtli mashq yo‘q.", marks: "ball", minutes: "daq.", startTimed: "Boshlash", timeLeft: "Qolgan vaqt", endAttempt: "Urinishni yakunlash", endConfirm: "Urinishni hozir yakunlaysizmi? Yakunlanmagan qism natijada hisobga olinadi.",
-      timedDone: "Urinish yakunlandi", selfReviewTitle: "Ishingizni tekshiring", selfReviewText: "Mezonlar bo‘yicha o‘zingizga ball bering. Bu baho faqat urinishingiz yakunlangandan keyin saqlanadi.", yourAnswer: "Sizning yechimingiz", rubric: "Baholash mezonlari", rubricUnavailable: "Batafsil baholash mezonlari o‘zbek tilida hali tasdiqlanmagan. Hozircha quyidagi tekshirish eslatmasidan foydalaning.", selfTip: "Tekshirish uchun eslatma", award: "Ball", saveMark: "Ballni saqlash", result: "Natija", inTime: "Vaqt ichidagi ball", afterTime: "Vaqtdan keyingi ball", unattempted: "Bajarilmagan ball", comparable: "Taqqoslash uchun yaroqli", yes: "Ha", no: "Yo‘q", backTimed: "Vaqtli mashqlarga qaytish",
+      timedDone: "Urinish yakunlandi", selfReviewTitle: "Ishingizni tekshiring", selfReviewText: "Yechimingizni mezonlar bilan solishtiring. Yozma ishga ilova ball qo‘ymaydi va uning to‘g‘riligini tasdiqlamaydi.", yourAnswer: "Sizning yechimingiz", rubric: "Baholash mezonlari", rubricUnavailable: "Batafsil baholash mezonlari o‘zbek tilida hali tasdiqlanmagan. Hozircha quyidagi tekshirish eslatmasidan foydalaning.", selfTip: "Tekshirish uchun eslatma", nextWritten: "Davom etish", writtenNotGraded: "Yozma yechim saqlandi, ammo to‘g‘riligi tekshirilmagan. Unga ball hisoblanmaydi.", result: "Natija", inTime: "Vaqtida avtomatik tekshirilgan", afterTime: "Muddatdan keyin avtomatik tekshirilgan", unattempted: "Bajarilmagan ball", comparable: "Taqqoslash uchun yaroqli", yes: "Ha", no: "Yo‘q", backTimed: "Vaqtli mashqlarga qaytish",
       readiness: "Imtihon tayyorgarligi", openReadiness: "Tayyorgarlik holatini ko‘rish", readyStrong: "Obyektiv ko‘rsatkichlar tayyor", readyMore: "Yana dalil kerak", readinessPapers: "Hisobga olingan to‘liq ishlar", readinessSkills: "Barqarorlashtirilishi kerak bo‘lgan ko‘nikmalar", readinessCorrections: "Ochiq tuzatishlar", calibration: "Yakuniy moslashuv", openCalibration: "Yakuniy moslashuvni ochish", calibrationUnavailable: "Yakuniy moslashuv tayyorgarlik mezonlari bajarilgandan keyin ochiladi.",
       stage0: "Kirish tekshiruvi", stage1: "Asoslarni mustahkamlash", stage2: "Dastur bo‘yicha o‘rganish", stage3: "Dastur qamrovini yopish", stage4: "Vaqt ostida mustahkamlash", stage5: "Imtihon tayyorgarligi", stage6: "Yakuniy moslashuv",
       thresholdPending: "Kelajakdagi imtihon seriyangiz uchun tayyorgarlik mezoni hali tasdiqlanmagan. To‘liq variantlar bilan ishlashni davom ettiring; quyidagi rasmiy Cambridge June 2026 ko‘rsatkichi faqat ma’lumot uchun.", threePapers: "Tayyorgarlik holati uchun uchta taqqoslanadigan to‘liq ish kerak.", stage4Incomplete: "Avval vaqt ostida mustahkamlash bosqichini yakunlang.", skillsIncomplete: "Ba’zi mavzularda barqaror natija hali yetarli emas.", correctionsOpen: "Ba’zi xatolar bo‘yicha tuzatish sikli hali yopilmagan.", belowThreshold: "Oxirgi uchta to‘liq ishning hammasi maqsad darajasiga yetmagan.", unattemptedHigh: "Bajarilmay qolayotgan ballar hali ko‘p.", afterTimeHigh: "Natijaning bir qismi hali vaqt tugagandan keyingi ishga tayanmoqda.",
@@ -102,7 +108,7 @@
       error: "The action could not be completed. Try again.", back: "Back", overview: "Overview", plan: "Weekly plan", openPlan: "Open weekly plan", priority: "Priority", week: "Week",
       learning: "Study this topic", correction: "Work on this mistake", retest: "Check again", mixed: "Mixed practice", rebaseline: "Update plan", startTask: "Start", notDue: "This check is not due yet", noPlan: "No active plan yet.", written: "Write your solution", completedTask: "Task complete. Plan updated.",
       stageTitle: "Current phase", coverage: "Confirmed coverage", timed: "Timed practice", openTimed: "Open timed practice", noTimed: "No timed practice is available for this phase yet.", marks: "marks", minutes: "min", startTimed: "Start", timeLeft: "Time left", endAttempt: "End attempt", endConfirm: "End this attempt now? Unfinished work will be counted in the result.",
-      timedDone: "Attempt complete", selfReviewTitle: "Review your work", selfReviewText: "Use the criteria to award your marks. Marks are recorded only after the attempt has ended.", yourAnswer: "Your solution", rubric: "Marking criteria", rubricUnavailable: "Detailed marking criteria are temporarily unavailable in this language.", selfTip: "Review note", award: "Marks", saveMark: "Save marks", result: "Result", inTime: "Marks in time", afterTime: "Marks after time", unattempted: "Unattempted marks", comparable: "Comparable result", yes: "Yes", no: "No", backTimed: "Back to timed practice",
+      timedDone: "Attempt complete", selfReviewTitle: "Review your work", selfReviewText: "Compare your solution with the criteria. Written work is not graded or verified by the app.", yourAnswer: "Your solution", rubric: "Marking criteria", rubricUnavailable: "Detailed marking criteria are temporarily unavailable in this language.", selfTip: "Review note", nextWritten: "Continue", writtenNotGraded: "The written solution was saved, but its correctness is unverified. No written marks are awarded.", result: "Result", inTime: "Automatically checked in time", afterTime: "Automatically checked after time", unattempted: "Unattempted marks", comparable: "Comparable result", yes: "Yes", no: "No", backTimed: "Back to timed practice",
       readiness: "Exam readiness", openReadiness: "View readiness", readyStrong: "Objective evidence is ready", readyMore: "More evidence is needed", readinessPapers: "Comparable full papers counted", readinessSkills: "Skills still needing stability", readinessCorrections: "Open corrections", calibration: "Final calibration", openCalibration: "Open final calibration", calibrationUnavailable: "Final calibration opens after the readiness criteria are met.",
       stage0: "Entry check", stage1: "Foundation", stage2: "Syllabus learning", stage3: "Syllabus closure", stage4: "Timed consolidation", stage5: "Exam readiness", stage6: "Final calibration",
       thresholdPending: "The readiness threshold for your future exam series has not been approved yet. Keep working on full papers; the official Cambridge June 2026 figure below is reference only.", threePapers: "Three comparable full papers are required for the readiness check.", stage4Incomplete: "Complete timed consolidation first.", skillsIncomplete: "Some topics still need stable evidence.", correctionsOpen: "Some corrective work is still open.", belowThreshold: "The latest three full papers do not all meet the target level.", unattemptedHigh: "Too many marks are still being left unattempted.", afterTimeHigh: "Part of the result still depends on work completed after time.",
@@ -152,7 +158,7 @@
       error: "Не удалось выполнить действие. Попробуйте ещё раз.", back: "Назад", overview: "Обзор", plan: "Недельный план", openPlan: "Открыть недельный план", priority: "Приоритет", week: "Неделя",
       learning: "Изучить тему", correction: "Разобрать ошибку", retest: "Проверить ещё раз", mixed: "Смешанная практика", rebaseline: "Обновить план", startTask: "Начать", notDue: "Повторная проверка ещё не наступила", noPlan: "Активного плана пока нет.", written: "Запишите своё решение", completedTask: "Задание завершено. План обновлён.",
       stageTitle: "Текущий этап", coverage: "Подтверждённое покрытие", timed: "Практика на время", openTimed: "Открыть практику на время", noTimed: "Для текущего этапа пока нет доступной практики на время.", marks: "баллов", minutes: "мин", startTimed: "Начать", timeLeft: "Осталось", endAttempt: "Завершить попытку", endConfirm: "Завершить попытку сейчас? Незавершённая часть будет учтена в результате.",
-      timedDone: "Попытка завершена", selfReviewTitle: "Проверьте свою работу", selfReviewText: "Сверьтесь с критериями и выставьте себе баллы. Оценка сохраняется только после завершения попытки.", yourAnswer: "Ваше решение", rubric: "Критерии оценивания", rubricUnavailable: "Подробные критерии оценивания на русском языке пока не утверждены. Пока используйте подсказку для проверки ниже.", selfTip: "Подсказка для проверки", award: "Баллы", saveMark: "Сохранить баллы", result: "Результат", inTime: "Баллы в пределах времени", afterTime: "Баллы после времени", unattempted: "Невыполненные баллы", comparable: "Результат сопоставим", yes: "Да", no: "Нет", backTimed: "Вернуться к практике на время",
+      timedDone: "Попытка завершена", selfReviewTitle: "Проверьте свою работу", selfReviewText: "Сверьте решение с критериями. Приложение не оценивает письменную работу и не подтверждает её правильность.", yourAnswer: "Ваше решение", rubric: "Критерии оценивания", rubricUnavailable: "Подробные критерии оценивания на русском языке пока не утверждены. Пока используйте подсказку для проверки ниже.", selfTip: "Подсказка для проверки", nextWritten: "Продолжить", writtenNotGraded: "Письменное решение сохранено, но его правильность не проверена. Баллы за него не начисляются.", result: "Результат", inTime: "Автоматически проверено в срок", afterTime: "Автоматически проверено после срока", unattempted: "Невыполненные баллы", comparable: "Результат сопоставим", yes: "Да", no: "Нет", backTimed: "Вернуться к практике на время",
       readiness: "Готовность к экзамену", openReadiness: "Посмотреть готовность", readyStrong: "Объективные показатели готовы", readyMore: "Нужно больше подтверждений", readinessPapers: "Учтено полных сопоставимых работ", readinessSkills: "Навыков требуют стабилизации", readinessCorrections: "Открытых исправлений", calibration: "Финальная калибровка", openCalibration: "Открыть финальную калибровку", calibrationUnavailable: "Финальная калибровка откроется после выполнения критериев готовности.",
       stage0: "Входная проверка", stage1: "Фундамент", stage2: "Изучение программы", stage3: "Закрытие программы", stage4: "Закрепление на время", stage5: "Готовность к экзамену", stage6: "Финальная калибровка",
       thresholdPending: "Критерий готовности для вашей будущей экзаменационной сессии ещё не утверждён. Продолжайте работать с полными вариантами; официальный показатель Cambridge June 2026 ниже дан только как ориентир.", threePapers: "Для проверки готовности нужны три сопоставимых полных варианта.", stage4Incomplete: "Сначала завершите этап закрепления на время.", skillsIncomplete: "Некоторые темы ещё требуют стабильного подтверждения.", correctionsOpen: "По части ошибок цикл исправления ещё не закрыт.", belowThreshold: "Не все три последние полные работы достигли целевого уровня.", unattemptedHigh: "Пока остаётся слишком много невыполненных баллов.", afterTimeHigh: "Часть результата всё ещё зависит от работы после окончания времени.",
@@ -778,6 +784,15 @@
     const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
     const readiness = stage >= 5 ? `<button class="ep-component-link" type="button" data-ep-component-link="readiness"><span><strong>${esc(home.readiness)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
+    // Voluntary challenge route is independent of current academic stage.
+    // The server returns no tasks until the approved content release gate opens.
+    const extraHardTitle = state.language === "ru" ? "Задачи повышенной сложности"
+      : state.language === "uz" ? "Qo‘shimcha murakkab masalalar" : "Extra Hard";
+    const extraHardHint = state.language === "ru" ? "Необязательно, без оценки"
+      : state.language === "uz" ? "Ixtiyoriy, bahosiz" : "Optional, not graded";
+    const extraHard = internal.extraHardView?.open
+      ? `<button class="ep-component-link" type="button" data-ep-component-link="extra-hard"><span><strong>${esc(extraHardTitle)}</strong><small>${esc(extraHardHint)}</small></span><span aria-hidden="true">›</span></button>` : "";
+
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
       <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
         <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><button class="ep-route-back" type="button" data-ep-component-back aria-label="${esc(c.overview)}">←</button><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
@@ -791,7 +806,7 @@
           <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
         ${lastResultCard}
         <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
-        <section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}</section></section>`, {compact:true});
+        <section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}${extraHard}</section></section>`, {compact:true});
     state.notice = null;
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
@@ -802,6 +817,8 @@
     root.querySelector('[data-ep-component-link="timed"]')?.addEventListener("click", () => openTimed(component));
     root.querySelector('[data-ep-component-link="readiness"]')?.addEventListener("click", () => openReadiness(component));
     root.querySelector('[data-ep-component-link="materials"]')?.addEventListener("click", () => internal.materialsView?.openMaterials?.(component));
+    root.querySelector('[data-ep-component-link="extra-hard"]')?.addEventListener("click", () =>
+      internal.extraHardView?.open?.(component,state.language,() => openComponentHome(component)));
   }
 
   async function openComponentHome(component) {
@@ -932,6 +949,376 @@
     if (action.kind === "prepare") await prepareAndLaunch(component);
   }
 
+
+  // An exam centre's time in Uzbekistan (UTC+05:00), never the viewer's
+  // travelling-device timezone. Official Cambridge timetable is separate.
+
+  function studyScheduleCopy() {
+    const all = {
+      ru: {
+        title: "Ваш режим занятий", hint: "Укажите время на математику в один учебный день и число учебных дней за неделю. Это ваш ориентир, а не ограничение: если хотите заниматься больше, iClub не остановит занятия. Временные ограничения экзаменационных попыток действуют отдельно.",
+        minutes: "Минут в учебный день", days: "Дней в неделю", preview: "Получится", total: "Общее доступное время",
+        current: "Текущий бюджет математики", save: "Сохранить режим", saved: "Режим занятий сохранён. Выполненные задания не изменились.",
+        error: "Не удалось сохранить режим. Попробуйте ещё раз.", invalid: "Введите от 15 до 240 минут (шаг 5) и от 1 до 7 учебных дней.",
+        exceeds: "Время на математику превышает общее доступное время. Скорректируйте данные профиля.", hours: "ч/нед"
+      },
+      uz: {
+        title: "O‘qish jadvalingiz", hint: "Matematika uchun kunlik vaqt va haftadagi o‘quv kunlarini kiriting. Bu faqat rejangiz: ko‘proq o‘qisangiz, iClub darslarni to‘xtatmaydi. Imtihon urinishlarining vaqti alohida cheklanadi.",
+        minutes: "Kuniga daqiqa", days: "Haftasiga kunlar", preview: "Haftalik jami", total: "Umumiy mavjud vaqt",
+        current: "Matematikaga joriy vaqt", save: "Jadvalni saqlash", saved: "O‘qish jadvali saqlandi. Oldingi natijalar o‘zgarmadi.",
+        error: "Jadval saqlanmadi. Qayta urinib ko‘ring.", invalid: "15–240 daqiqa (5 daqiqalik qadam) va 1–7 kunni kiriting.",
+        exceeds: "Matematikaga ajratilgan vaqt umumiy vaqt chegarasidan oshadi. Profil ma’lumotlarini tekshiring.", hours: "soat/hafta"
+      },
+      en: {
+        title: "Your study schedule", hint: "Choose your daily Mathematics minutes and study days per week. This is a guide, not a learning cap: studying longer never locks your lessons. Timed exam attempts still have their own limits.",
+        minutes: "Minutes per study day", days: "Study days per week", preview: "Weekly Mathematics time", total: "Total available study time",
+        current: "Current Mathematics budget", save: "Save schedule", saved: "Study schedule saved. Previous learning results have not changed.",
+        error: "Could not save this schedule. Try again.", invalid: "Enter 15–240 minutes in steps of 5, and 1–7 study days.",
+        exceeds: "Mathematics time exceeds your total available study time. Review the exam profile.", hours: "h/week"
+      }
+    };
+    return all[state.language] || all.ru;
+  }
+
+
+
+  // All reports are produced server-side only after a FULL week/month. A
+  // persistent per-user delivery receipt prevents daily reappearance across
+  // browser restarts/devices. We do not infer study minutes from session counts.
+  function completedStudyReports() {
+    const reports=Array.isArray(state.periodicStudyReports) ? state.periodicStudyReports : [];
+    return reports.map((entry,index) => ({entry,index})).filter(({entry}) =>
+      entry && (entry.period_kind==="week" || entry.period_kind==="month") &&
+      entry.can_continue_learning===true && entry.access_limit_changed===false &&
+      Number.isFinite(Date.parse(entry.period_ended_at || "")) &&
+      ["P1","P5"].every(component => {
+        const row=entry[component];
+        return row && Number.isInteger(row.finalized_learning_sessions) && row.finalized_learning_sessions>=0 &&
+          Number.isInteger(row.finalized_timed_sessions) && row.finalized_timed_sessions>=0;
+      })
+    );
+  }
+
+  function periodicStudyReportCopy() {
+    const all = {
+      ru: {
+        week:"Итоги недели",month:"Итоги месяца",
+        count:(component,learning,timed)=> `${component}: завершено учебных занятий — ${learning}, пробных экзаменов — ${timed}`,
+        gap:(component,done,total)=> `${component}: выполнено ${done} из ${total} подтверждённых целей`,
+        due:"Есть невыполненные цели прошлого периода. Можно продолжить задания, оставить план или изменить учебное расписание. Доступ к занятиям не ограничивается.",
+        empty:"За этот период в iClub нет завершённых учебных сессий. Это не означает, что вы не занимались вне приложения.",
+        normal:"Продолжайте подготовку в удобном темпе. Занятия сверх плана доступны без ограничений по выбранным часам.",
+        caveat:"Количество сессий не является подсчётом учебных часов. Рекомендации Cambridge по индивидуальной нагрузке пока не рассчитаны.",
+        focusTitle:"Что проверить дальше",sectionLabel:"Раздел",focusAsOf:"По текущим результатам на момент формирования отчёта. Это не изменение учебного плана.",
+        focusActions:{correction:"Исправить выявленную ошибку",delayed_retest:"Пройти назначенную повторную проверку",mixed_transfer:"Применить знания в смешанных задачах",targeted_practice:"Закрепить тему по результатам проверки",targeted_check:"Проверить тему, по которой пока нет результатов",written_work_unscored:"Попрактиковаться в записи решения без автоматической оценки"},
+        keep:"Оставить план",tasks:"Продолжить задания",edit:"Изменить расписание",close:"Закрыть отчёт"
+      },
+      uz: {
+        week:"Haftalik yakun",month:"Oylik yakun",
+        count:(component,learning,timed)=> `${component}: yakunlangan darslar — ${learning}, sinov imtihonlari — ${timed}`,
+        gap:(component,done,total)=> `${component}: ${total} ta tasdiqlangan maqsaddan ${done} tasi bajarilgan`,
+        due:"O‘tgan davrdagi ayrim maqsadlar bajarilmagan. Topshiriqlarni davom ettirish, rejani saqlash yoki jadvalni o‘zgartirish mumkin. Darslar cheklanmaydi.",
+        empty:"Bu davrda iClub’da yakunlangan mashg‘ulot qayd etilmagan. Bu ilovadan tashqarida o‘qimagansiz degani emas.",
+        normal:"Tayyorgarlikni o‘zingizga qulay sur’atda davom ettiring. Rejadan ko‘proq o‘qish cheklanmaydi.",
+        caveat:"Mashg‘ulotlar soni o‘qish soatlarini ko‘rsatmaydi. Cambridge asosidagi shaxsiy vaqt tavsiyasi hali hisoblanmagan.",
+        focusTitle:"Keyin nimalarni tekshirish kerak",sectionLabel:"Bo‘lim",focusAsOf:"Hisobot tuzilgan paytdagi tasdiqlangan natijalarga asoslangan. Bu o‘quv rejasini o‘zgartirmaydi.",
+        focusActions:{correction:"Aniqlangan xatoni tuzatish",delayed_retest:"Belgilangan vaqtda qayta tekshiruvdan o‘tish",mixed_transfer:"Bilimni aralash masalalarda qo‘llash",targeted_practice:"Tekshiruv natijasiga ko‘ra mavzuni mustahkamlash",targeted_check:"Hali tekshirilmagan mavzu bo‘yicha bilimni tekshirish",written_work_unscored:"Yechimni yozib mashq qilish (avtomatik bahosiz)"},
+        keep:"Rejani saqlash",tasks:"Topshiriqlarni davom ettirish",edit:"Jadvalni o‘zgartirish",close:"Hisobotni yopish"
+      },
+      en: {
+        week:"Weekly summary",month:"Monthly summary",
+        count:(component,learning,timed)=> `${component}: completed study sessions — ${learning}, practice exams — ${timed}`,
+        gap:(component,done,total)=> `${component}: ${done} of ${total} verified goals completed`,
+        due:"Some verified goals were not completed this period. Continue tasks, keep your plan, or change your schedule. Study access stays open.",
+        empty:"No completed iClub learning sessions were recorded for this period. This does not imply you did not study elsewhere.",
+        normal:"Keep preparing at your own pace. You can study beyond your schedule without an hours-based cap.",
+        caveat:"Session counts are not a measure of study hours. Personal Cambridge-based workload recommendations are not calculated yet.",
+        focusTitle:"What to check next",sectionLabel:"Section",focusAsOf:"Based on verified results available when this report was prepared. Your study plan has not changed.",
+        focusActions:{correction:"Correct an identified error",delayed_retest:"Complete the scheduled retest",mixed_transfer:"Apply knowledge in mixed problems",targeted_practice:"Practise a topic based on check results",targeted_check:"Check a topic with no recorded results yet",written_work_unscored:"Practise written working without automatic marking"},
+        keep:"Keep current plan",tasks:"Continue tasks",edit:"Change schedule",close:"Close report"
+      }
+    };
+    return all[state.language] || all.ru;
+  }
+
+  function periodicStudyReportPanel() {
+    const reports=completedStudyReports();
+    if (!reports.length) return "";
+    const c=periodicStudyReportCopy();
+    const fmt=new Intl.DateTimeFormat(dateLocale(), {timeZone:"Asia/Tashkent",day:"2-digit",month:"long",year:"numeric"});
+    return reports.map(({entry,index})=>{
+      const gaps=[];
+      const summary=["P1","P5"].map(component=>{
+        const d=entry[component];
+        const a=d.verified_week_goals;
+        if (entry.period_kind==="week" && a && a.status==="missed" && a.can_alert===true &&
+            Number.isInteger(a.scheduled_goals) && a.scheduled_goals>=1 && a.scheduled_goals<=3 &&
+            Number.isInteger(a.completed_now) && a.completed_now>=0 && a.completed_now<a.scheduled_goals) {
+          gaps.push({component,done:a.completed_now,total:a.scheduled_goals});
+        }
+        return `<div class="ep-live-meta">${esc(c.count(component,d.finalized_learning_sessions,d.finalized_timed_sessions))}</div>`;
+      }).join("");
+      const n=["P1","P5"].reduce((total,comp)=>
+        total + entry[comp].finalized_learning_sessions + entry[comp].finalized_timed_sessions,0);
+      const attention=gaps.length>0 || n===0;
+      const extra=gaps.map(g=>`<div class="ep-live-meta">${esc(c.gap(g.component,g.done,g.total))}</div>`).join("");
+      const focus=entry.period_kind==="week" ? entry.evidence_next_steps : null;
+      const allowedActions=c.focusActions||{};
+      const focusItems=focus?.contract_version==="exam_prep_weekly_evidence_focus_v1" &&
+        focus.read_at==="report_claim_time_not_historical_week_end" &&
+        focus.not_additional_weekly_plan===true &&
+        focus.student_selected_math_hours_unchanged===true &&
+        Array.isArray(focus.items) && focus.items.length<=3 &&
+        focus.items.every(item=>["P1","P5"].includes(item?.component_code) &&
+          typeof item?.syllabus_section==="string" &&
+          typeof allowedActions[item?.next_action]==="string") ? focus.items : [];
+      const focusHtml=focusItems.length ?
+        `<div class="ep-live-week-focus" data-ep-weekly-focus><strong>${esc(c.focusTitle)}</strong>
+          ${focusItems.map(item=>`<div class="ep-live-meta">${esc(item.component_code)} ·
+            ${esc(c.sectionLabel)} ${esc(item.syllabus_section)}: ${esc(allowedActions[item.next_action])}</div>`).join("")}
+          <p class="ep-live-meta">${esc(c.focusAsOf)}</p></div>` : "";
+      const reason=gaps.length ? c.due : n===0 ? c.empty : c.normal;
+      const date=fmt.format(new Date(entry.period_ended_at));
+      const target=gaps[0]?.component ||
+        (state.progress.P1?.stage0_complete===true ? "P1" :
+          state.progress.P5?.stage0_complete===true ? "P5" : "");
+      const controls=attention
+        ? `<div class="ep-live-pace-actions">
+          <button class="ep-live-btn secondary" type="button" data-ep-periodic-keep="${index}">${esc(c.keep)}</button>
+          ${target ? `<button class="ep-live-btn secondary" type="button" data-ep-periodic-tasks="${index}" data-ep-periodic-component="${target}">${esc(c.tasks)}</button>` : ""}
+          <button class="ep-live-btn secondary" type="button" data-ep-periodic-edit="${index}">${esc(c.edit)}</button>
+        </div>`
+        : `<button class="ep-live-btn secondary" type="button" data-ep-periodic-keep="${index}">${esc(c.close)}</button>`;
+      return `<section class="ep-live-card ep-live-pace-advisory" data-ep-periodic-report="${index}" role="status" aria-live="polite">
+        <strong>${esc(entry.period_kind==="week" ? c.week : c.month)} · ${esc(date)}</strong>
+        ${summary}${extra}${focusHtml}
+        <p class="ep-live-meta">${esc(reason)}</p>
+        <p class="ep-live-meta">${esc(c.caveat)}</p>
+        ${controls}
+      </section>`;
+    }).join("");
+  }
+
+  function bindPeriodicStudyReportPanel() {
+    const root=rootEl(); if (!root) return;
+    const dismiss=index=>{
+      if (!Number.isInteger(index)||index<0||index>=state.periodicStudyReports.length) return;
+      state.periodicStudyReports[index]=null;
+      root.querySelector(`[data-ep-periodic-report="${index}"]`)?.remove();
+    };
+    root.querySelectorAll("[data-ep-periodic-keep]").forEach(button=>
+      button.addEventListener("click",()=>dismiss(Number(button.dataset.epPeriodicKeep))));
+    root.querySelectorAll("[data-ep-periodic-edit]").forEach(button=>
+      button.addEventListener("click",()=>{
+        dismiss(Number(button.dataset.epPeriodicEdit));
+        const input=root.querySelector("[data-ep-study-minutes]");
+        input?.scrollIntoView?.({block:"center",behavior:"smooth"});
+        input?.focus?.();
+      }));
+    root.querySelectorAll("[data-ep-periodic-tasks]").forEach(button=>
+      button.addEventListener("click",()=>{
+        const component=button.dataset.epPeriodicComponent;
+        dismiss(Number(button.dataset.epPeriodicTasks));
+        if(component==="P1"||component==="P5") void openPlan(component);
+      }));
+  }
+
+  function studySchedulePanel() {
+    const c = studyScheduleCopy();
+    const row = state.studySchedule || {};
+    const minutes = Number(row.study_minutes_per_day || 30);
+    const days = Number(row.study_days_per_week || 5);
+    const math = Number(state.profile?.mathematics_hours_budget || 0);
+    const total = Number(state.profile?.total_student_hours_available || 0);
+    const fmt = n => new Intl.NumberFormat(dateLocale(), { maximumFractionDigits: 2 }).format(n);
+    const options = Array.from({ length: 7 }, (_, i) => {
+      const n = i + 1;
+      return `<option value="${n}" ${n === days ? "selected" : ""}>${n}</option>`;
+    }).join("");
+    return `<section class="ep-live-card ep-live-study-schedule" data-ep-study-schedule>
+      <div class="ep-live-head"><strong>${esc(c.title)}</strong></div>
+      <p class="ep-live-meta">${esc(c.hint)}</p>
+      <div class="ep-live-study-schedule-fields">
+        <label class="ep-live-field"><span>${esc(c.minutes)}</span><input class="ep-live-input" type="number" step="5" min="15" max="240" value="${esc(minutes)}" data-ep-study-minutes></label>
+        <label class="ep-live-field"><span>${esc(c.days)}</span><select class="ep-live-input" data-ep-study-days>${options}</select></label>
+      </div>
+      <div class="ep-live-study-schedule-summary">
+        <strong data-ep-study-preview>${esc(c.preview)}: ${fmt(minutes*days/60)} ${esc(c.hours)}</strong>
+        <span class="ep-live-meta">${esc(c.current)}: ${fmt(math)} ${esc(c.hours)} · ${esc(c.total)}: ${fmt(total)} ${esc(c.hours)}</span>
+      </div>
+      <button class="ep-live-btn secondary" type="button" data-ep-study-save>${esc(c.save)}</button>
+      <div class="ep-live-meta" data-ep-study-feedback role="status" aria-live="polite"></div>
+    </section>`;
+  }
+
+  function bindStudySchedule() {
+    const root = rootEl(); if (!root) return;
+    const c = studyScheduleCopy();
+    const minutesInput = root.querySelector("[data-ep-study-minutes]");
+    const daysInput = root.querySelector("[data-ep-study-days]");
+    const button = root.querySelector("[data-ep-study-save]");
+    const preview = root.querySelector("[data-ep-study-preview]");
+    const feedback = root.querySelector("[data-ep-study-feedback]");
+    if (!minutesInput || !daysInput || !button) return;
+    const fmt = n => new Intl.NumberFormat(dateLocale(), {maximumFractionDigits:2}).format(n);
+    const get = () => {
+      const minutes = Number(minutesInput.value);
+      const days = Number(daysInput.value);
+      const valid = Number.isInteger(minutes) && minutes>=15 && minutes<=240 && minutes%5===0 &&
+        Number.isInteger(days) && days>=1 && days<=7;
+      return {minutes,days,valid,budget:minutes*days/60};
+    };
+    const show = message => { if (feedback) feedback.textContent = message; };
+    const redraw = () => {
+      const v = get();
+      if (preview) preview.textContent = v.valid ? c.preview + ": " + fmt(v.budget) + " " + c.hours : c.invalid;
+      show("");
+    };
+    minutesInput.addEventListener("input", redraw);
+    daysInput.addEventListener("change", redraw);
+    button.addEventListener("click", async () => {
+      if (state.busy) return;
+      const v = get();
+      if (!v.valid) { show(c.invalid); return; }
+      if (v.budget > Number(state.profile?.total_student_hours_available || 0)) { show(c.exceeds); return; }
+      state.busy = true; button.disabled = true; show("");
+      const result = await internal.api.saveStudySchedule(v.minutes, v.days);
+      if (!result?.ok) {
+        state.busy = false; button.disabled = false;
+        const message = String(result.error?.message || "");
+        show(message.includes("exam_prep_study_exceeds_total_weekly_budget") ? c.exceeds : c.error);
+        return;
+      }
+      const [profile, schedule] = await Promise.all([internal.api.examProfile(),internal.api.studySchedule()]);
+      state.busy = false;
+      if (!profile?.ok || !schedule?.ok) { button.disabled = false; show(c.error); return; }
+      state.profile = profile.data;
+      state.studySchedule = schedule.data;
+      state.notice = c.saved;
+      await renderDashboard();
+    });
+  }
+
+  function examCentreLocalValue(value) {
+    const d = value ? new Date(value) : null;
+    if (!d || !Number.isFinite(d.getTime())) return "";
+    return new Date(d.getTime() + 5 * 60 * 60 * 1000).toISOString().slice(0, 16);
+  }
+
+  function examDatesCopy() {
+    const languages = {
+      ru: {
+        title: "Даты экзаменов P1 и P5", hint: "Укажите время начала каждого компонента по информации школы или экзаменационного центра (Узбекистан, UTC+5). iClub не определяет дату экзамена автоматически.",
+        confirmed: "Я сверил(а) эту дату и время со школой или экзаменационным центром",
+        save: "Сохранить дату", missing: "Дата ещё не указана", before: "Срок подготовки станет доступен после входной диагностики",
+        remaining: "Дней до экзамена", initial: "Дней от диагностики до экзамена",
+        verified: "Сверено с официальным расписанием", centre: "Дата указана вами по данным школы/центра. Официальное расписание Cambridge здесь пока не подтверждено.",
+        passed: "Дата прошла. Проверьте актуальную экзаменационную сессию.", error: "Не удалось сохранить дату. Проверьте её и повторите попытку.", seriesMismatch: "Дата не соответствует выбранной экзаменационной сессии. Проверьте год и период экзамена.",
+        invalid: "Укажите будущую дату и время начала экзамена.", acknowledgement: "Сначала подтвердите, что сверили дату с экзаменационным центром.",
+        saved: "Дата экзамена сохранена", forecast: "Расчёт рекомендуемого учебного времени появится после утверждения норм по программе Cambridge.",
+        diagnostic: "Завершение входной диагностики", edit: "Изменить дату",
+        labelP1: "P1 · Pure Mathematics 1", labelP5: "P5 · Probability & Statistics 1"
+      },
+      uz: {
+        title: "P1 va P5 imtihon sanalari", hint: "Har bir komponent boshlanish vaqtini maktab yoki imtihon markazi ma’lumotiga ko‘ra kiriting (O‘zbekiston, UTC+5). iClub sanani taxmin qilmaydi.",
+        confirmed: "Sana va vaqtni maktab yoki imtihon markazida tekshirdim",
+        save: "Sanani saqlash", missing: "Sana hali kiritilmagan", before: "Tayyorgarlik muddati kirish diagnostikasidan keyin aniqlanadi",
+        remaining: "Imtihongacha kunlar", initial: "Diagnostikadan imtihongacha kunlar",
+        verified: "Rasmiy jadval bilan tasdiqlangan", centre: "Sana maktab/markaz ma’lumotiga ko‘ra kiritilgan. Cambridge rasmiy jadvali bu yerda hali tasdiqlanmagan.",
+        passed: "Bu sana o‘tgan. Amaldagi imtihon sessiyasini tekshiring.", error: "Sanani saqlab bo‘lmadi. Tekshirib, qayta urinib ko‘ring.", seriesMismatch: "Sana tanlangan imtihon sessiyasiga mos kelmaydi. Yil va davrni tekshiring.",
+        invalid: "Kelajakdagi imtihon sanasi va boshlanish vaqtini kiriting.", acknowledgement: "Avval sana imtihon markazida tekshirilganini tasdiqlang.",
+        saved: "Imtihon sanasi saqlandi", forecast: "Tavsiya etilgan o‘quv vaqti Cambridge dasturi me’yorlari tasdiqlangach hisoblanadi.",
+        diagnostic: "Kirish diagnostikasi yakunlangan vaqt", edit: "Sanani o‘zgartirish",
+        labelP1: "P1 · Pure Mathematics 1", labelP5: "P5 · Probability & Statistics 1"
+      },
+      en: {
+        title: "P1 and P5 exam dates", hint: "Enter each paper’s start time as confirmed by your school or exam centre (Uzbekistan time, UTC+5). iClub does not guess exam dates.",
+        confirmed: "I checked this date and time with my school or exam centre",
+        save: "Save date", missing: "Date not entered yet", before: "Your study horizon will appear after the entry diagnostic",
+        remaining: "Days until exam", initial: "Days from diagnostic to exam",
+        verified: "Matched to an officially verified timetable", centre: "You entered this date from your school/centre. iClub has not verified the official Cambridge timetable here.",
+        passed: "This date has passed. Check your current exam series.", error: "Date could not be saved. Check it and try again.", seriesMismatch: "The date is outside your selected exam series. Check the year and exam period.",
+        invalid: "Enter a future exam date and start time.", acknowledgement: "Confirm the date with your exam centre first.",
+        saved: "Exam date saved", forecast: "Recommended study time will follow once Cambridge syllabus workload norms are approved.",
+        diagnostic: "Entry diagnostic completed", edit: "Change date",
+        labelP1: "P1 · Pure Mathematics 1", labelP5: "P5 · Probability & Statistics 1"
+      }
+    };
+    return languages[state.language] || languages.ru;
+  }
+
+  function examDatesPanel() {
+    const c = examDatesCopy();
+    const data = state.personalHorizon || {};
+    const nowLocal = examCentreLocalValue(new Date(Date.now() + 60000).toISOString());
+    const parts = ["P1", "P5"].map(component => {
+      const item = data[component] || {};
+      const examStart = item.exam_start_at || "";
+      let status = c.missing;
+      if (item.status === "exam_date_passed" || item.status === "exam_before_diagnostic") status = c.passed;
+      else if (item.status === "horizon_ready") {
+        status = `${c.remaining}: ${Math.max(0, Number(item.days_remaining || 0))} · ${c.initial}: ${Math.max(0, Number(item.days_diagnostic_to_exam || 0))}`;
+      } else if (examStart) status = c.before;
+      const proof = examStart ? (item.official_timetable_verified === true ? c.verified : c.centre) : "";
+      const dateText = examStart ? new Intl.DateTimeFormat(dateLocale(), { timeZone: "Asia/Tashkent", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(examStart)) : "";
+      const value = examCentreLocalValue(examStart);
+      return `<div class="ep-live-exam-date-row" data-ep-exam-date-component="${component}">
+        <div class="ep-live-exam-date-summary">
+          <strong>${esc(component === "P1" ? c.labelP1 : c.labelP5)}</strong>
+          <span class="ep-live-meta">${esc(dateText || c.missing)}</span>
+          <span class="ep-live-meta">${esc(status)}</span>
+          ${proof ? `<span class="ep-live-meta">${esc(proof)}</span>` : ""}
+        </div>
+        <label class="ep-live-field"><span>${esc(c.edit)}</span><input class="ep-live-input" type="datetime-local" data-ep-exam-date-input="${component}" value="${esc(value)}" min="${esc(nowLocal)}" required></label>
+        <label class="ep-live-exam-date-confirm"><input type="checkbox" data-ep-exam-date-confirm="${component}"><span>${esc(c.confirmed)}</span></label>
+        <button type="button" class="ep-live-btn secondary" data-ep-exam-date-save="${component}">${esc(c.save)}</button>
+        <div class="ep-live-meta" data-ep-exam-date-feedback="${component}" role="status" aria-live="polite"></div>
+      </div>`;
+    }).join("");
+    const completed = ["P1", "P5"].some(code => data[code]?.status === "horizon_ready");
+    return `<section class="ep-live-card ep-live-exam-date-panel" data-ep-exam-date-panel>
+      <div class="ep-live-head"><strong>${esc(c.title)}</strong></div>
+      <p class="ep-live-meta">${esc(c.hint)}</p>
+      <div class="ep-live-exam-date-grid">${parts}</div>
+      ${completed ? `<p class="ep-live-meta">${esc(c.forecast)}</p>` : ""}
+    </section>`;
+  }
+
+  function bindExamDatePanel() {
+    const root = rootEl(); if (!root) return;
+    const c = examDatesCopy();
+    root.querySelectorAll("[data-ep-exam-date-save]").forEach(button => button.addEventListener("click", async () => {
+      if (state.busy) return;
+      const component = button.dataset.epExamDateSave;
+      const field = root.querySelector(`[data-ep-exam-date-input="${component}"]`);
+      const check = root.querySelector(`[data-ep-exam-date-confirm="${component}"]`);
+      const feedback = root.querySelector(`[data-ep-exam-date-feedback="${component}"]`);
+      const show = message => { if (feedback) feedback.textContent = message; };
+      const input = String(field?.value || "");
+      const validShape = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(input);
+      const date = validShape ? new Date(input + ":00+05:00") : null;
+      if (!date || !Number.isFinite(date.getTime()) || date.getTime() <= Date.now() ||
+          examCentreLocalValue(date.toISOString()) !== input) { show(c.invalid); return; }
+      if (!check?.checked) { show(c.acknowledgement); return; }
+      state.busy = true;
+      button.disabled = true;
+      show("");
+      const result = await internal.api.confirmExamDate(component, date.toISOString());
+      if (!result?.ok) {
+        state.busy = false;
+        button.disabled = false;
+        const code = String(result.error?.message || result.error?.code || "");
+        show(code.includes("exam_prep_exam_date_series_mismatch") || code.includes("exam_prep_exam_series_unrecognized") ? c.seriesMismatch : c.error);
+        return;
+      }
+      const next = await internal.api.personalHorizon();
+      state.personalHorizon = next?.ok ? next.data : null;
+      state.notice = c.saved;
+      state.busy = false;
+      await renderDashboard();
+    }));
+  }
+
   async function renderDashboard() {
     clearTimer();
     const root = rootEl();
@@ -960,6 +1347,26 @@
     if (!canMount() || token !== state.mountToken) return;
     if (!s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
+    const [horizon, schedule, periodic] = await Promise.all([
+      typeof internal.api.personalHorizon === "function" ? internal.api.personalHorizon() : Promise.resolve(null),
+      typeof internal.api.studySchedule === "function" ? internal.api.studySchedule() : Promise.resolve(null),
+      typeof internal.api.claimPeriodicStudyReports === "function"
+        ? internal.api.claimPeriodicStudyReports().catch(() => null) : Promise.resolve(null)
+    ]);
+    if (!canMount() || token !== state.mountToken) return;
+    state.personalHorizon = horizon?.ok ? horizon.data : null;
+    state.studySchedule = schedule?.ok ? schedule.data : null;
+    if (periodic?.ok && periodic.data?.contract_version === "periodic_study_report_v1" &&
+        Array.isArray(periodic.data.reports)) {
+      // A long-lived SPA must still receive next week's/month's NEW digest.
+      // The server's receipt key prevents daily/repeated delivery.
+      const seen = new Set(state.periodicStudyReports.filter(Boolean).map(r =>
+        String(r.period_kind) + "|" + String(r.period_ended_at)));
+      for (const item of periodic.data.reports) {
+        const key = String(item?.period_kind) + "|" + String(item?.period_ended_at);
+        if (!seen.has(key)) { state.periodicStudyReports.push(item); seen.add(key); }
+      }
+    }
     const c = copy();
     const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
     const profileBits = [
@@ -970,8 +1377,11 @@
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${periodicStudyReportPanel()}${examDatesPanel()}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
     state.notice = null;
+    bindExamDatePanel();
+    bindStudySchedule();
+    bindPeriodicStudyReportPanel();
     root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
       const component = card.dataset.epLiveOpenComponent;
       // The dashboard explicitly says "Start/Continue entry check".
@@ -996,6 +1406,34 @@
     state.returnView = { kind: returnKind, component }; await loadSession(result.data.session_id);
   }
 
+  // Weekly available time is NOT a required task duration or an academic grade.
+  function weekBudgetCopy() {
+    return ({
+      ru:{weekly:'Математика на этой неделе',split:'Распределение времени',
+        slot:'Доступно для приоритета',minutes:'мин',
+        caution:'Ориентир по выбранным часам и текущему прогрессу; не обязательная длительность задания. Заниматься сверх плана можно.',
+        next:'Изменённый режим времени будет учтён в плане следующей недели.',
+        kept:'Решение оставить текущие часы учтено.',
+        planWeek:'Неделя учебного плана',diagnosticWeek:'Неделя с диагностики'},
+      uz:{weekly:'Bu haftada matematikaga vaqt',split:'Vaqt taqsimoti',
+        slot:'Ustuvor vazifa uchun vaqt',minutes:'daq.',
+        caution:'Tanlangan vaqt va hozirgi natijalarga asoslangan mo‘ljal. Bu topshiriqning majburiy davomiyligi emas; ko‘proq o‘qish mumkin.',
+        next:'Vaqt jadvalidagi o‘zgarish kelgusi hafta rejasida hisobga olinadi.',
+        kept:'Hozirgi soatlarni qoldirish tanlovingiz hisobga olindi.',
+        planWeek:'O‘quv rejasi haftasi',diagnosticWeek:'Diagnostikadan keyingi hafta'},
+      en:{weekly:'Mathematics time this week',split:'Time allocation',
+        slot:'Time available for this priority',minutes:'min',
+        caution:'Based on your chosen hours and current progress; not a required task duration. You can study beyond the plan.',
+        next:'Your changed schedule will be used for the next weekly plan.',
+        kept:'Your choice to keep current hours was applied.',
+        planWeek:'Study plan week',diagnosticWeek:'Week since diagnostic'}
+    })[state.language] || weekBudgetCopyFallback();
+  }
+  function weekBudgetCopyFallback(){return {weekly:'Mathematics time this week',split:'Time allocation',
+    slot:'Time available for this priority',minutes:'min',
+    caution:'Available time, not a required duration or a grade.',
+    next:'Schedule changes apply to the next weekly plan.',kept:'Your current hours were kept.',
+    planWeek:'Study plan week',diagnosticWeek:'Week since diagnostic'};}
   function itemTypeLabel(type) {
     const c = copy(); return ({ learning: c.learning, correction: c.correction, retest: c.retest, mixed_transfer: c.mixed, rebaseline: c.rebaseline })[type] || c.learning;
   }
@@ -1024,7 +1462,14 @@
       if (!read?.ok || !read.data?.plan_id || read.data.plan_id !== ensured.data?.plan_id) {
         renderError(); return;
       }
-      renderPlan(component, read.data);
+      // Optional, fail-open presentation. The original stable plan is still
+      // shown when this read-only-for-academics budget snapshot is unavailable.
+      let allocated=null;
+      if(typeof flow.weeklyBudget==='function'){
+        const budget=await flow.weeklyBudget(component,read.data.plan_id);
+        if(budget?.ok) allocated=budget.data;
+      }
+      renderPlan(component, read.data, allocated);
       return;
     }
     let planResult = await internal.api.weeklyPlan(component);
@@ -1039,9 +1484,44 @@
     renderPlan(component, plan);
   }
 
-  function renderPlan(component, plan) {
+  function renderPlan(component, plan, budget=null) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy(); const items = Array.isArray(plan.items) ? plan.items : [];
+    const verifiedBudget=budget &&
+      budget.contract_version==='exam_prep_shared_weekly_available_time_v1' &&
+      budget.plan_id===plan.plan_id && budget.component_code===component &&
+      Array.isArray(budget.priority_slots) &&
+      budget.priority_minutes_are_available_time_not_task_duration===true &&
+      budget.learning_access_capped===false &&
+      budget.planner_week_kind==='legacy_shared_plan_id' &&
+      budget.legacy_plan_id_preserved===true &&
+      budget.diagnostic_period_never_rekeys_existing_plan===true &&
+      budget.active_week_no===plan.active_week_no ? budget : null;
+    const bc=weekBudgetCopy();
+    const activePlanWeek=Number(plan.active_week_no || 1);
+    const academicPeriod=verifiedBudget?.component_diagnostic_periods?.[component];
+    const diagnosticWeek=(academicPeriod?.status==='diagnostic_period_ready' &&
+      Number.isSafeInteger(academicPeriod.current_period_no) &&
+      academicPeriod.current_period_no>=1) ? academicPeriod.current_period_no : null;
+    // Existing protected plan and its historical week number remain intact.
+    // Show P1/P5's separately counted academic week as factual context only.
+    const weekDescription=verifiedBudget
+      ? `${esc(bc.planWeek)} ${activePlanWeek}${diagnosticWeek === null ? '' :
+          ` · ${esc(bc.diagnosticWeek)} ${diagnosticWeek}`}`
+      : `${esc(c.week)} ${activePlanWeek}`;
+    const budgetSummary=verifiedBudget ?
+      `<section class="ep-live-week-budget" data-ep-week-budget>
+        <strong>${esc(bc.weekly)}: ${Number(verifiedBudget.available_math_minutes)} ${esc(bc.minutes)}</strong>
+        <div class="ep-live-week-budget-split" aria-label="${esc(bc.split)}">
+          <span>P1: ${Number(verifiedBudget.p1_reserved_minutes)} ${esc(bc.minutes)}</span>
+          <span>P5: ${Number(verifiedBudget.p5_reserved_minutes)} ${esc(bc.minutes)}</span>
+        </div>
+        ${verifiedBudget.keep_choice_recorded_before_snapshot===true
+          ? `<p class="ep-live-meta">${esc(bc.kept)}</p>` : ""}
+        ${verifiedBudget.profile_changed_after_capture===true
+          ? `<p class="ep-live-meta">${esc(bc.next)}</p>` : ""}
+        <p class="ep-live-meta">${esc(bc.caution)}</p>
+      </section>` : "";
     const rows = items.length ? items.map(item => {
       const dueMs = retestDueTime(item);
       const due = item.item_type === "retest"
@@ -1050,9 +1530,15 @@
       const future = item.item_type === "retest" && !planItemCanStart(item);
       const actionable = ["learning","correction","retest","mixed_transfer"].includes(item.item_type) && item.status === "pending";
       const button = actionable ? `<button class="ep-live-btn" type="button" data-ep-live-plan-item="${Number(item.priority_order)}" ${future ? "disabled" : ""}>${esc(future ? c.notDue : c.startTask)}</button>` : "";
-      return `<div class="ep-live-plan-item"><div><strong>${esc(itemTypeLabel(item.item_type))}</strong>${due ? `<div class="ep-live-due">${esc(formatDateTime(due))}</div>` : ""}</div>${button}</div>`;
+      const minutes=verifiedBudget?.priority_slots?.find(slot=>
+        Number(slot.priority_order)===Number(item.priority_order) &&
+        slot.item_type===item.item_type && slot.status===item.status
+      )?.available_study_minutes;
+      const timeNote=Number.isInteger(minutes)&&minutes>=0
+        ? `<div class="ep-live-week-budget-slot">${esc(bc.slot)}: ${minutes} ${esc(bc.minutes)}</div>` : "";
+      return `<div class="ep-live-plan-item"><div><strong>${esc(itemTypeLabel(item.item_type))}</strong>${due ? `<div class="ep-live-due">${esc(formatDateTime(due))}</div>` : ""}${timeNote}</div>${button}</div>`;
     }).join("") : `<div class="ep-live-notice">${esc(c.noPlan)}</div>`;
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><div><strong>${component} · ${esc(c.plan)}</strong><div class="ep-live-meta">${esc(c.week)} ${Number(plan.active_week_no || 1)}</div></div><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${rows}</div>`);
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<div class="ep-live-card"><div class="ep-live-head"><div><strong>${component} · ${esc(c.plan)}</strong><div class="ep-live-meta" data-ep-plan-period-label>${weekDescription}</div></div><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${budgetSummary}${rows}</div>`);
     state.notice = null;
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelectorAll('[data-ep-live-plan-item]').forEach(b => b.addEventListener('click', () => launchPlanItem(component, plan.plan_id, Number(b.dataset.epLivePlanItem))));
@@ -1189,7 +1675,9 @@
 
   function deadlineMs(session) {
     const value = session?.timing_contract?.deadline_at; const ms = value ? new Date(value).getTime() : NaN;
-    return Number.isFinite(ms) ? ms : null;
+    // Countdown follows the server, even when the phone's clock is incorrect.
+    // The authoritative expiration remains enforced by the backend.
+    return Number.isFinite(ms) ? ms - (Number(state.clockSkewMs) || 0) : null;
   }
 
   function startTimer(sessionId) {
@@ -1226,6 +1714,8 @@
       }
     }
     if (!result?.ok) { renderError(); return; }
+    const serverNow = Date.parse(result.data?.timing_contract?.server_now || "");
+    state.clockSkewMs = Number.isFinite(serverNow) ? serverNow - Date.now() : 0;
     state.session = result.data;
     const items = Array.isArray(state.session?.items) ? state.session.items : [], next = items.find(item => item && !itemIsComplete(item));
     const timed = ["timed","paper"].includes(state.session?.session_type);
@@ -1606,34 +2096,40 @@
     const [review, result] = await Promise.all([internal.api.timedReviewPack(sessionId, state.language), internal.api.timedResult(sessionId)]);
     if (!review?.ok || !result?.ok) { renderError(); return; }
     const items = Array.isArray(review.data?.items) ? review.data.items : [];
-    const next = items.find(item => item && item.self_marked !== true);
-    if (next) renderSelfReview(sessionId, component, next, items.length, result.data);
+    if (items.length) renderWrittenReview(sessionId, component, items, 0, result.data);
     else renderTimedResult(component, result.data);
   }
 
-  function renderSelfReview(sessionId, component, item, total, result) {
+  function renderWrittenReview(sessionId, component, items, index, result) {
     clearTimer();
-    const root = rootEl(); if (!root) return; const c = copy();
+    const root = rootEl(); if (!root) return;
+    const item = items[index];
+    if (!item) { renderTimedResult(component, result); return; }
+    const c = copy();
     const criteria = Array.isArray(item?.rubric?.criteria) ? item.rubric.criteria : [];
     const rubricUnavailable = item?.rubric?.localization_status === "unavailable";
     const rubric = criteria.length
       ? `<div class="ep-live-rubric">${criteria.map(x => `<div class="ep-live-rubric-row">${esc(x.rule || "")} <strong>(${Number(x.marks || 0)})</strong></div>`).join("")}</div>`
       : (rubricUnavailable ? `<div class="ep-live-notice">${esc(c.rubricUnavailable)}</div>` : "");
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><div><strong>${esc(c.selfReviewTitle)}</strong><div class="ep-live-meta">${esc(c.selfReviewText)}</div></div><span>${Number(item.item_order)} / ${total}</span></div><div><strong>${esc(c.question)}</strong><div class="ep-live-qtext">${esc(item.prompt || "")}</div></div><div><strong>${esc(c.yourAnswer)}</strong><div class="ep-live-answer">${esc(artifactText(item.learner_artifact))}</div></div><div><strong>${esc(c.rubric)}</strong>${rubric}</div>${item.self_review ? `<div class="ep-live-notice"><strong>${esc(c.selfTip)}:</strong> ${esc(item.self_review)}</div>` : ""}<label class="ep-live-field"><span>${esc(c.award)} (0–${Number(item.max_marks || 0)})</span><input name="ep_live_self_mark" type="number" min="0" max="${Number(item.max_marks || 0)}" step="1"></label><div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-save-self>${esc(c.saveMark)}</button></div></div>`);
-    root.querySelector('[data-ep-live-save-self]')?.addEventListener('click', async () => {
-      const input = rootEl()?.querySelector('input[name="ep_live_self_mark"]'); const marks = Number(input?.value);
-      if (!Number.isInteger(marks) || marks < 0 || marks > Number(item.max_marks || 0)) return;
-      state.busy = true; renderLoading();
-      const saved = await internal.api.submitTimedSelfMark(sessionId, item.item_order, marks, key("ep-self-mark"), null); state.busy = false;
-      if (!saved?.ok) { renderError(); return; }
-      await openTimedReview(sessionId, component);
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><div><strong>${esc(c.selfReviewTitle)}</strong><div class="ep-live-meta">${esc(c.selfReviewText)}</div></div><span>${index + 1} / ${items.length}</span></div><div><strong>${esc(c.question)}</strong><div class="ep-live-qtext">${esc(item.prompt || "")}</div></div><div><strong>${esc(c.yourAnswer)}</strong><div class="ep-live-answer">${esc(artifactText(item.learner_artifact))}</div></div><div><strong>${esc(c.rubric)}</strong>${rubric}</div>${item.self_review ? `<div class="ep-live-notice"><strong>${esc(c.selfTip)}:</strong> ${esc(item.self_review)}</div>` : ""}<div class="ep-live-notice">${esc(c.writtenNotGraded)}</div><div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-next-written>${esc(c.nextWritten)}</button></div></div>`);
+    root.querySelector('[data-ep-live-next-written]')?.addEventListener('click', () => {
+      if (index + 1 < items.length) renderWrittenReview(sessionId, component, items, index + 1, result);
+      else renderTimedResult(component, result);
     });
   }
 
   function renderTimedResult(component, result) {
     clearTimer();
     const root = rootEl(); if (!root) return; const c = copy();
-    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.result)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.inTime)}</span><strong>${Number(result?.marks_in_time || 0)} / ${Number(result?.marks_available || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.afterTime)}</span><strong>${Number(result?.marks_after_time || 0)}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.unattempted)}</span><strong>${Number(result?.unattempted_marks || 0)}</strong></div></div><div class="ep-live-notice">${esc(c.comparable)}: <strong>${esc(result?.score_comparable ? c.yes : c.no)}</strong></div><div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-back-timed>${esc(c.backTimed)}</button><button class="ep-live-btn secondary" type="button" data-ep-live-readiness="${component}">${esc(c.openReadiness)}</button></div></div>`);
+    // If the server is older than the D03 objective-only contract, suppress
+    // apparent Paper marks rather than displaying an unverified total.
+    const objectiveOnly = result?.result_scope === "objective_only";
+    const writtenUnknown = !objectiveOnly || result?.written_correctness === "unknown";
+    const inTimeDisplay = !objectiveOnly ? "—"
+      : writtenUnknown ? String(Number(result?.marks_in_time || 0))
+      : `${Number(result?.marks_in_time || 0)} / ${Number(result?.marks_available || 0)}`;
+    const afterTimeDisplay = objectiveOnly ? String(Number(result?.marks_after_time || 0)) : "—";
+    root.innerHTML = shell(`<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.result)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div><div class="ep-live-stats"><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.inTime)}</span><strong>${inTimeDisplay}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.afterTime)}</span><strong>${afterTimeDisplay}</strong></div><div class="ep-live-stat"><span class="ep-live-meta">${esc(c.unattempted)}</span><strong>${Number(result?.unattempted_marks || 0)}</strong></div></div><div class="ep-live-notice">${esc(c.comparable)}: <strong>${esc(objectiveOnly && !writtenUnknown && result?.score_comparable ? c.yes : c.no)}</strong></div>${writtenUnknown ? `<div class="ep-live-notice">${esc(c.writtenNotGraded)}</div>` : ""}<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-live-back-timed>${esc(c.backTimed)}</button><button class="ep-live-btn secondary" type="button" data-ep-live-readiness="${component}">${esc(c.openReadiness)}</button></div></div>`);
     root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
     root.querySelector('[data-ep-live-back-timed]')?.addEventListener('click', () => openTimed(component));
     root.querySelector('[data-ep-live-readiness]')?.addEventListener('click', () => openReadiness(component));
@@ -1840,7 +2336,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.clockSkewMs=0; state.busy = false; state.profile = null; state.personalHorizon=null; state.studySchedule=null; state.periodicStudyReports=[]; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;

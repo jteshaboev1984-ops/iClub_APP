@@ -19,7 +19,7 @@ assert(live.includes('data-ep-live-home>${esc(copy().overview)}</button>'), 'cen
 assert(live.includes('type="button" data-ep-live-home'), 'central error recovery action must not submit a surrounding form');
 assert(live.includes('type="button" data-ep-live-plan-item='), 'weekly-plan actions must use explicit button type');
 assert(live.includes('type="button" data-ep-live-timed-start='), 'timed-start actions must use explicit button type');
-assert(live.includes('type="button" data-ep-live-save-self'), 'self-review action must use explicit button type');
+assert(live.includes('type="button" data-ep-live-next-written'), 'written rubric navigation must use explicit button type');
 assert(!/<span class="ep-live-timer"[^>]*aria-live/i.test(live), 'per-second timed countdown must not become a noisy live region');
 
 const renderedButtons = [...live.matchAll(/<button\b[^>]*>/g)].map(match => match[0]);

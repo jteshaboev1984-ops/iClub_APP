@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   learner-locale-copy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate syntax and learner copy boundary
