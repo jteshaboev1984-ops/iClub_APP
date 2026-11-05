@@ -10,9 +10,14 @@ COMMENT ON COLUMN private.exam_prep_feature_config.public_math_core_enabled IS
 'Architect-authorized public Math Core only in MASS rollout; no generic QA-open permission. OFF by default.';
 
 CREATE OR REPLACE FUNCTION private.exam_prep_math_public_access_v1(p_user_id uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO ''
+RETURNS boolean LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path TO ''
 AS $private$
- SELECT p_user_id IS NOT NULL AND EXISTS(
+BEGIN
+ IF p_user_id IS NULL
+    OR to_regclass('public.user_subjects') IS NULL
+    OR to_regclass('public.subjects') IS NULL
+ THEN RETURN false; END IF;
+ RETURN EXISTS(
   SELECT 1
   FROM private.exam_prep_feature_config cfg
   WHERE cfg.program_key='math_as_p1_p5'
@@ -31,6 +36,7 @@ AS $private$
         AND s.is_active IS TRUE
     )
  );
+END;
 $private$;
 REVOKE ALL ON FUNCTION private.exam_prep_math_public_access_v1(uuid)
  FROM PUBLIC,anon,authenticated;

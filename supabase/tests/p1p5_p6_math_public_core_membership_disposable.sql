@@ -18,6 +18,19 @@ BEGIN
     OR (SELECT count(*) FROM auth.users)<>3 THEN
   RAISE EXCEPTION 'P6 REFUSED: not disposable completed 3-user PG17';
  END IF;
+ -- The CI core-only schema intentionally omits app-level subject tables.
+ -- Reproduce their real membership columns ONLY within this ROLLBACK fixture;
+ -- never change production/migration public subject schemas.
+ IF to_regclass('public.subjects') IS NULL THEN
+   EXECUTE 'CREATE TABLE public.subjects(id bigint PRIMARY KEY,subject_key text NOT NULL UNIQUE,is_active boolean NOT NULL DEFAULT true)';
+ END IF;
+ IF to_regclass('public.user_subjects') IS NULL THEN
+   EXECUTE 'CREATE TABLE public.user_subjects(user_id uuid NOT NULL,subject_id bigint NOT NULL,PRIMARY KEY(user_id,subject_id))';
+ END IF;
+ IF NOT EXISTS(SELECT 1 FROM public.subjects WHERE subject_key='mathematics' AND is_active) THEN
+   INSERT INTO public.subjects(id,subject_key,is_active)
+   SELECT coalesce(max(id),0)+100,'mathematics',true FROM public.subjects;
+ END IF;
  SELECT user_id INTO v_math
  FROM private.exam_prep_synthetic_identities
  WHERE identity_kind='learner' AND identity_status='active'
