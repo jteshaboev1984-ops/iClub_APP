@@ -119,7 +119,7 @@ AS $function$
       AND NOT e.kill_switch
       AND e.core_enabled
       AND e.rollout_state<>'off'
-      AND (e.ent_core OR (e.qa_open_all_core AND e.rollout_state<>'mass') OR private.exam_prep_math_public_access_v1(e.user_id)),
+      AND ((e.rollout_state='mass' AND private.exam_prep_math_public_access_v1(e.user_id)) OR (e.rollout_state<>'mass' AND (e.ent_core OR e.qa_open_all_core))),
       false
     ),
     COALESCE(
@@ -202,9 +202,10 @@ BEGIN
       AND c.core_enabled
       AND NOT c.kill_switch
       AND (
-        (c.qa_open_all_core AND c.rollout_state<>'mass')
-        OR private.exam_prep_math_public_access_v1(v_uid)
-        OR EXISTS(
+        (c.rollout_state='mass' AND private.exam_prep_math_public_access_v1(v_uid))
+        OR (c.rollout_state<>'mass' AND (
+          c.qa_open_all_core
+          OR EXISTS(
           SELECT 1
           FROM private.exam_prep_feature_entitlements e
           WHERE e.user_id=v_uid
@@ -213,6 +214,7 @@ BEGIN
             AND (e.valid_from IS NULL OR e.valid_from<=now())
             AND (e.valid_until IS NULL OR e.valid_until>now())
         )
+        ))
       )
   ) THEN
     RAISE EXCEPTION 'exam_prep_core_unavailable' USING errcode='42501';
