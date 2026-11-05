@@ -63,10 +63,13 @@ BEGIN
     RAISE EXCEPTION 'D10-06 existing written-task history missing';
   END IF;
 
-  IF (SELECT count(*) FROM private.exam_prep_exam_profiles)<2
-    OR (SELECT count(*) FROM auth.users)<>2
+  -- This read-only curriculum test does not write profile data. PG17
+  -- tests guarantee two isolated AUTH users but not two exam-prep profiles;
+  -- requiring a second profile was an unrelated false negative.
+  IF (SELECT count(*) FROM auth.users)<>2
+    OR (SELECT count(*) FROM public.users)<>2
   THEN
-    RAISE EXCEPTION 'D10-06 fixture user/profile baseline was modified';
+    RAISE EXCEPTION 'D10-06 fixture two-user isolation changed';
   END IF;
   RAISE NOTICE 'D10-06 PASS: four source-scope corrections, 81 keys, preserved six published/nine reserves and written history';
 END
