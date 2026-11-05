@@ -31,6 +31,8 @@ const OFFICIAL_SCOPE=Object.freeze({
   'P1-DIF-01':['формального','первых принципов'],
   'P1-DIF-03':['нелинейные','g\'(x)'],
   'P1-INT-01':['n = −1'],
+  'P1-INT-03':['бесконечным пределом','конечной границе'],
+  'P1-INT-05':['между двумя кривыми','не прилегающих'],
   'P5-PRO-03':['простых случаях','не обязательна']
 });
 function verify(pack) {
@@ -96,11 +98,22 @@ for(const [code,phrase] of Object.entries({
   'P1-DIF-01':'формальный общий вывод из первых принципов не требуется',
   'P1-DIF-03':'нелинейные внутренние многочлены',
   'P1-INT-01':'рациональном n ≠ −1',
+  'P1-INT-03':'с бесконечным пределом',
+  'P1-INT-05':'включая области между кривыми',
   'P5-PRO-03':'общая формула включений–исключений не обязательна'
 })){
   assert(visibleLabels.includes('"'+code+'": "'+phrase)||
     (visibleLabels.includes('"'+code+'": "')&&visibleLabels.includes(phrase)),
     code+' learner-facing description not corrected');
 }
+const oldImproper=structuredClone(catalog);
+oldImproper.skills.find(x=>x.skill_code==='P1-INT-03').canonical_description=
+  'Вычислять definite integrals, включая простой improper endpoint case из P1.';
+assert.throws(()=>verify(oldImproper),'Infinite upper-bound integration scope regression missed');
+const oldWashers=structuredClone(catalog);
+oldWashers.skills.find(x=>x.skill_code==='P1-INT-05').canonical_description=
+  'Находить volume of revolution около coordinate axis с корректными limits.';
+assert.throws(()=>verify(oldWashers),'Non-axis-bounded washer scope regression missed');
 console.log('D10-06 PASS: four official syllabus description corrections and learner copy align without altering 81 IDs');
+console.log('D10-07 PASS: P1-INT-03 infinity and P1-INT-05 non-axis-bounded annuli source/learner scope, 81 stable codes');
 console.log('D10-03 PASS: 81 genuine source skills (P1=45/P5=36), 13 paper sections, original 2026–27 links, 2028–30 edition reference kept separate, no fake student minutes');
