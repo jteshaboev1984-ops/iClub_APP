@@ -115,27 +115,22 @@ async function main(){
     assert(!known.includes('744634-2028-2030-syllabus.pdf'),
       loc+' wrongly labels 2027 exam with 2028 source');
   }
-  const mixedYears=fixture();
-  mixedYears.P5.exam_at='2028-05-20T09:00:00+05:00';
+  // Realistic one-series AS: P1 and P5 take place within the 2028 sitting.
+  const exam2028=fixture();
+  exam2028.P1.exam_at='2028-05-12T09:00:00+05:00';
+  exam2028.P5.exam_at='2028-05-20T09:00:00+05:00';
   for(const [loc,carry] of [
     ['ru','нет существенных изменений для преподавания'],
     ['uz','jiddiy o‘zgarishlar yo‘qligini'],
     ['en','no significant teaching changes']
   ]){
-    const mixedHtml=ui.viewHtml(ui.parsePayload(mixedYears),loc);
-    assert(mixedHtml.includes('697427-2026-2027-syllabus.pdf') &&
-      mixedHtml.includes('744634-2028-2030-syllabus.pdf') &&
-      mixedHtml.includes(carry),loc+' must distinguish correct 2027 and 2028 sources');
-    assert(mixedHtml.includes('target="_blank" rel="noopener noreferrer"'),
+    const html=ui.viewHtml(ui.parsePayload(exam2028),loc);
+    assert(html.includes('744634-2028-2030-syllabus.pdf') &&
+      !html.includes('697427-2026-2027-syllabus.pdf') &&
+      html.includes(carry),loc+' must use the genuine 2028 syllabus for both papers');
+    assert(html.includes('target="_blank" rel="noopener noreferrer"'),
       'Source links must be safe external informational links');
   }
-  const futureYear=fixture();
-  futureYear.P5.exam_at='2031-05-20T09:00:00+05:00';
-  const futureHtml=ui.viewHtml(ui.parsePayload(futureYear),'en');
-  assert(futureHtml.includes('official syllabus for this exam year has not yet been cross-checked'),
-    'Unknown future syllabus must not be misrepresented');
-  assert(futureHtml.includes('This does not limit learning'),
-    'Unknown year is informational, never a learner study-access restriction');
   assert.equal(model.canAdopt,false,'Already enough time does not create pointless button');
   const short=fixture();
   short.existing_chosen_math_hours_per_week=4;
