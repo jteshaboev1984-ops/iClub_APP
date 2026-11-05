@@ -426,7 +426,7 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 \
             -f supabase/tests/p1p5_p3_d09_07_t0_future_personal_dates_rollback.sql \
             2>&1 | tee /tmp/p1p5-d09-07-date-rollback.log
-          grep -Fq 'D09-07 PASS: owner saved P1/P5 4/8-year future dates' /tmp/p1p5-d09-07-date-rollback.log
+          grep -Fq 'D09-07 PASS: real owner saved 18-month and four-year personal dates' /tmp/p1p5-d09-07-date-rollback.log
           grep -Fq 'D09-07 ROLLBACK PASS' /tmp/p1p5-d09-07-date-rollback.log
           echo 'D09-07 PASS: exact independent diagnostic starts + longer personal dates + original owner data restored'
 
