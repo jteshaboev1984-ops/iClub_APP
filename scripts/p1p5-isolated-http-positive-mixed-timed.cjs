@@ -213,4 +213,8 @@ async function run(){
   mixed,papers,timedSections,stageBefore:before.map(x=>({component:x.component,stage:x.stage})),stageAfter:after
  }));
 }
-run().catch(err=>{console.error('STAGE B MIXED/TIMED HTTP FAILED:',err.message);process.exitCode=1});
+if(require.main===module){
+ run().catch(err=>{console.error('STAGE B MIXED/TIMED HTTP FAILED:',err.message);process.exitCode=1});
+}
+// Pure test helpers: importing this module never starts another learner flow.
+module.exports={RUN,jwt,rpc,ok,sql,row,list,finishSession,proveSignedTimedClock};
