@@ -11,6 +11,7 @@ on:
       - 'scripts/math-p1p5-result-led-time-sum-v1.cjs'
       - 'scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs'
       - 'scripts/math-p1p5-simple-timeline-ui-smoke-v1.cjs'
+      - 'scripts/math-p1p5-d10-03-syllabus-edition-source-audit.cjs'
       - 'scripts/math-p1p5-simple-timeline-visual-acceptance.cjs'
       - 'exam-prep/exam-prep-simple-timeline-ui.js'
       - 'exam-prep/exam-prep-simple-timeline-ui.css'
@@ -25,6 +26,7 @@ on:
       - 'scripts/math-p1p5-result-led-time-sum-v1.cjs'
       - 'scripts/math-p1p5-p2-11-action-observation-audit-v1.cjs'
       - 'scripts/math-p1p5-simple-timeline-ui-smoke-v1.cjs'
+      - 'scripts/math-p1p5-d10-03-syllabus-edition-source-audit.cjs'
       - 'scripts/math-p1p5-simple-timeline-visual-acceptance.cjs'
       - 'exam-prep/exam-prep-simple-timeline-ui.js'
       - 'exam-prep/exam-prep-simple-timeline-ui.css'
@@ -42,6 +44,7 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/math-p1p5-validate-workload-review-pack-v1.cjs
+      - run: node scripts/math-p1p5-d10-03-syllabus-edition-source-audit.cjs
       - run: node scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs --self-test
       - run: node scripts/math-p1p5-workload-measurement-quality-gate-v1.cjs
       - run: node scripts/math-p1p5-result-led-time-sum-v1.cjs
