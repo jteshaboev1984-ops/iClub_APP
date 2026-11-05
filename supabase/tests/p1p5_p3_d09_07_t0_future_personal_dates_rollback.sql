@@ -2,6 +2,21 @@
 -- three-year artificial cutoff, while the genuine Stage0 start stays frozen.
 -- DISPOSABLE PG17 only. Entire fake-user write test rolls back atomically.
 \set ON_ERROR_STOP on
+-- Snapshot exactly the current two synthetic owner date rows OUTSIDE the
+-- rolled-back transaction; never assume an unrelated fixture year or status.
+DO $preflight$
+BEGIN
+ IF current_database()<>'postgres'
+    OR current_setting('server_version_num')::int<170000
+    OR current_setting('iclub.e2e_isolated',true) IS DISTINCT FROM 'true'
+    OR (SELECT count(*) FROM public.users)<>2
+ THEN RAISE EXCEPTION 'D09-07 preflight refused non-disposable PostgreSQL'; END IF;
+END;
+$preflight$;
+CREATE TEMP TABLE d0907_original_dates ON COMMIT PRESERVE ROWS AS
+  SELECT to_jsonb(d) AS original_row
+  FROM private.exam_prep_learner_exam_dates_v1 d
+  WHERE d.user_id='11111111-1111-4111-8111-111111111191'::uuid;
 BEGIN;
 DO $proof$
 DECLARE
@@ -65,11 +80,10 @@ BEGIN
      WHERE user_id=v_user AND component_code='P5') IS DISTINCT FROM v_future_p5
  THEN RAISE EXCEPTION 'D09-07 2030+/2034+ dates not saved as selected'; END IF;
  v_t0:=public.get_exam_prep_diagnostic_periods_safe_v1();
- FOR v_profile IN SELECT * FROM private.exam_prep_exam_profiles
-   WHERE user_id=v_user LOOP
-   IF v_profile.profile_revision IS DISTINCT FROM v_before_profile_revision THEN
-     RAISE EXCEPTION 'D09-07 date save changed profile revision or budget'; END IF;
- END LOOP;
+ SELECT profile_revision INTO STRICT v_after_profile_revision
+ FROM private.exam_prep_exam_profiles WHERE user_id=v_user;
+ IF v_after_profile_revision IS DISTINCT FROM v_before_profile_revision
+ THEN RAISE EXCEPTION 'D09-07 date save changed profile revision or budget'; END IF;
  IF (v_t0->'P1'->>'diagnostic_completed_at')::timestamptz IS DISTINCT FROM
        (v_result->'P1'->>'start_at')::timestamptz
    OR (v_t0->'P5'->>'diagnostic_completed_at')::timestamptz IS DISTINCT FROM
@@ -108,15 +122,20 @@ BEGIN
  OR current_setting('iclub.e2e_isolated',true) IS DISTINCT FROM 'true'
  OR (SELECT count(*) FROM public.users)<>2
  THEN RAISE EXCEPTION 'D09-07 rollback verification refused non-disposable database'; END IF;
- -- P2-16 signed HTTP fixture leaves P1 cleared and P5 day 2028-03-10.
- -- The D09-07 4/8-year save and clear must NOT survive the ROLLBACK.
- IF (SELECT exam_date FROM private.exam_prep_learner_exam_dates_v1
-   WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid
-     AND component_code='P1') IS NOT NULL
-   OR (SELECT exam_date FROM private.exam_prep_learner_exam_dates_v1
-   WHERE user_id='11111111-1111-4111-8111-111111111191'::uuid
-     AND component_code='P5') IS DISTINCT FROM DATE '2028-03-10'
- THEN RAISE EXCEPTION 'D09-07 transaction rollback did not restore original two personal dates'; END IF;
+ -- No coupling to a hard-coded calendar day: compare the exact previously
+ -- saved owner rows including timestamps. Both directions catch extras/deletes.
+ IF EXISTS(
+   SELECT original_row FROM pg_temp.d0907_original_dates
+   EXCEPT ALL
+   SELECT to_jsonb(d) FROM private.exam_prep_learner_exam_dates_v1 d
+   WHERE d.user_id='11111111-1111-4111-8111-111111111191'::uuid
+ ) OR EXISTS(
+   SELECT to_jsonb(d) FROM private.exam_prep_learner_exam_dates_v1 d
+   WHERE d.user_id='11111111-1111-4111-8111-111111111191'::uuid
+   EXCEPT ALL
+   SELECT original_row FROM pg_temp.d0907_original_dates
+ )
+ THEN RAISE EXCEPTION 'D09-07 rollback altered original personal dates'; END IF;
  RAISE NOTICE 'D09-07 ROLLBACK PASS: owner profile, future dates, old learning and test users retained exactly';
 END;
 $postflight$;
