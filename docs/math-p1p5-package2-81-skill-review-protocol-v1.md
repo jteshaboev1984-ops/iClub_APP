@@ -43,3 +43,17 @@ No valid recommendation exists until the **81 row-level ranges**, reviewer indep
 Run `node scripts/math-p1p5-validate-workload-review-pack-v1.cjs`. The guard checks 81/45/36, all 13 syllabus groups, canonical source/evidence presence and strict unapproved/unmeasured status; it also deliberately corrupts a test copy to prove unauthorized approval or a lone numeric value fails. The guard does **not** certify educational duration accuracy. No production data writes, user-facing flags, deployment or cleanup are part of P2-07.
 
 **Source precedence:** current 2026–27 Cambridge syllabus → iClub signed 81-skill map → textbook explanation → internal iClub measurement and independent review. See `docs/math-p1p5-package2-workload-source-register-v1.md` for original source provenance and the historical scheme-of-work caveats. Issue [#450](https://github.com/jteshaboev1984-ops/iClub_APP/issues/450); draft [PR #470](https://github.com/jteshaboev1984-ops/iClub_APP/pull/470).
+
+## 2026-11-05 targeted academic scope cross-check — original books + 2026–2027 syllabus
+
+Verified **three easily misclassified existing canonical skills** against the official Cambridge Mathematics 9709 syllabus, version 4 (2026–2027), and the *actual photographed tables of contents* of both project-supplied source textbooks. This is a **scope verification only**, not a measurement of independent study minutes or a full re-review of all 81 skills:
+
+| Existing iClub skill | Official scope evidence | Textbook reference for reviewer |
+| --- | --- | --- |
+| `P1-INT-03` | Paper 1 §1.8, syllabus printed p.22: definite integration **includes simple improper integrals** | *Complete Pure Mathematics 1*, chapter 10 Integration, printed pp.173–200; contents p.iii |
+| `P1-INT-05` | Paper 1 §1.8, printed p.22: **volume of revolution** about an axis is included | Same chapter 10, printed contents p.iii |
+| `P5-NOR-06` | Paper 5 §5.5, printed p.36: **normal approximation to binomial**, both `np > 5` and `nq > 5`, with **continuity correction** | *Complete Probability & Statistics 1*, chapter 10, printed pp.173–179; contents p.iii |
+
+Official source: [Cambridge 9709 syllabus 2026–2027](https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf#page=22), with Paper 5 §5.5 at [printed p.36](https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf#page=36). The original printed P5 contents name chapter 3 *Representing and analysing data*, whereas some iClub source-map chapter labels use the syllabus topic shorthand *Representation of data*. Treat that as an abbreviated source title, **not** a different chapter or evidence of extra learning hours.
+
+**Result:** retain these three existing skills in their current papers. The check **does not** establish observation samples, primary/independent reviewers, phase-specific study durations, or approval of a 2020 guided-teaching-hour proxy as personal preparation time. The other 78 skills are **not claimed independently verified by this targeted pass**. No learner records, question answers, canonical database map or personal hour recommendations changed. No new release prerequisite was introduced by this reading.
