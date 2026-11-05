@@ -17,8 +17,11 @@ BEGIN
     (SELECT count(*) FROM public.users),(SELECT count(*) FROM auth.users);
   IF current_database()<>'postgres'
      OR current_setting('iclub.e2e_isolated',true)<>'true'
-     OR (SELECT count(*) FROM public.users)<>2
-     OR (SELECT count(*) FROM auth.users)<>2
+     -- The Stage3 preparation starts from two guarded seed actors and then
+     -- creates exactly ONE fresh synthetic learner through the genuine
+     -- private.create_exam_prep_synthetic_identity_v1 RPC (auth + public).
+     OR (SELECT count(*) FROM public.users)<>3
+     OR (SELECT count(*) FROM auth.users)<>3
   THEN
      RAISE EXCEPTION 'P4-02 REFUSED: disposable two-learner PostgreSQL only';
   END IF;
