@@ -83,7 +83,7 @@ requireAll(roadmap,['P4-05','P4-06','NO_GO','P0-16B'],
 requireAll(release,['P4-05','P4-06','NO_GO','P0-16B',
  'not a release','96b974241518bac7c74594734e409c80b9ef5f24'],
  'Release checkpoint');
-assert.throws(()=>requireAll(triple.replace('scoreComparable===false',''),
+assert.throws(()=>requireAll(triple.replaceAll('scoreComparable===false',''),
  ['scoreComparable===false'],'negative regression'),'missing');
 assert.throws(()=>requireAll(blank.replace('latest.answered_items===0',''),
  ['latest.answered_items===0'],'negative regression'),'missing');
