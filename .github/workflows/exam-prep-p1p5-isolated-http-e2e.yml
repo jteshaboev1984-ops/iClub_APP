@@ -1,5 +1,13 @@
 name: Mathematics P1 P5 disposable real HTTP Auth diagnostic E2E
 on:
+  push:
+    # Isolated verification of the exact DRAFT corrective source. No deploy.
+    branches:
+      - feature/math-p1p5-p4-written-evidence-contract-20261105
+    paths:
+      - 'supabase/migrations/*exam_prep*.sql'
+      - 'supabase/tests/p1p5_p4_0*_disposable.sql'
+      - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   pull_request:
     branches: [main]
     paths:
