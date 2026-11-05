@@ -27,6 +27,12 @@ const SECTIONS=Object.freeze([
   ['P5','5.4 Discrete random variables',9],
   ['P5','5.5 The normal distribution',6]
 ]);
+const OFFICIAL_SCOPE=Object.freeze({
+  'P1-DIF-01':['неформального','первых принципов'],
+  'P1-DIF-03':['нелинейные','g\'(x)'],
+  'P1-INT-01':['n = −1'],
+  'P5-PRO-03':['простых случаях','не обязательна']
+});
 function verify(pack) {
   assert.equal(pack.schema_version,'math-p1p5-skill-workload-review-pack-v1');
   assert.equal(pack.program_version_id,1);
@@ -57,6 +63,16 @@ function verify(pack) {
       'Source-map section distribution drift: '+section);
   assert.equal(pack.skills.filter(s=>s.component_code==='P1').length,45);
   assert.equal(pack.skills.filter(s=>s.component_code==='P5').length,36);
+  // Exact published syllabus exclusions/required breadth: no fabricated
+  // mathematical first-principles requirement, nonlinear inner chain rule,
+  // integral n=-1, or mandatory general inclusion-exclusion formula.
+  for(const [skill_code,phrases] of Object.entries(OFFICIAL_SCOPE)){
+    const matches=pack.skills.filter(x=>x.skill_code===skill_code);
+    assert.equal(matches.length,1,'Canonical academic scope skill missing '+skill_code);
+    for(const phrase of phrases)
+      assert(matches[0].canonical_description.includes(phrase),
+        skill_code+' lost official syllabus scope: '+phrase);
+  }
   assert.equal(SOURCE_2028,
     'https://www.cambridgeinternational.org/Images/744634-2028-2030-syllabus.pdf');
   return true;
@@ -70,4 +86,21 @@ assert.throws(()=>verify(wrongPaper),'Mis-mapped Paper 1 skill went unnoticed');
 const fakeMinutes=structuredClone(catalog);
 fakeMinutes.skills[0].review.estimated_core_min_minutes=35;
 assert.throws(()=>verify(fakeMinutes),'Unapproved minutes went unnoticed');
+const wrongScope=structuredClone(catalog);
+wrongScope.skills.find(x=>x.skill_code==='P1-DIF-03').canonical_description=
+  'Только производная (ax+b)^n без нелинейной внутренней функции';
+assert.throws(()=>verify(wrongScope),'Nonlinear chain-rule coverage regression missed');
+const visibleLabels=fs.readFileSync(
+  path.join(__dirname,'../exam-prep/exam-prep-learner-views.js'),'utf8');
+for(const [code,phrase] of Object.entries({
+  'P1-DIF-01':'формальный общий вывод из первых принципов не требуется',
+  'P1-DIF-03':'нелинейные внутренние многочлены',
+  'P1-INT-01':'рациональном n ≠ −1',
+  'P5-PRO-03':'общая формула включений–исключений не обязательна'
+})){
+  assert(visibleLabels.includes('"'+code+'": "'+phrase)||
+    (visibleLabels.includes('"'+code+'": "')&&visibleLabels.includes(phrase)),
+    code+' learner-facing description not corrected');
+}
+console.log('D10-06 PASS: four official syllabus description corrections and learner copy align without altering 81 IDs');
 console.log('D10-03 PASS: 81 genuine source skills (P1=45/P5=36), 13 paper sections, original 2026–27 links, 2028–30 edition reference kept separate, no fake student minutes');
