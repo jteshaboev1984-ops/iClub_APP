@@ -206,6 +206,7 @@ declare
   v_uid uuid;
   v_version bigint;
   v_today date;
+  v_last date;
 begin
   v_uid:=private.exam_prep_require_core_access_v1();
   select p.program_version_id into v_version
@@ -213,13 +214,14 @@ begin
   if v_version is null then raise exception 'exam_prep_profile_required'; end if;
 
   v_today:=(now() at time zone 'Asia/Tashkent')::date;
-  -- No arbitrary 3-year cap on a PERSONAL exam date. Cambridge official
-  -- series verification and confirmed external appointments remain separate.
-  -- Reject only past/today values; keep explicit user action and owner check.
-  if (p_p1_date is not null and p_p1_date<=v_today)
-     or (p_p5_date is not null and p_p5_date<=v_today)
+  -- Architect-approved maximum: four calendar years from the learner's
+  -- current Tashkent day. A personal planning date is not an official
+  -- Cambridge exam appointment. Keep explicit Save and current owner ACL.
+  v_last:=(v_today + interval '4 years')::date;
+  if (p_p1_date is not null and (p_p1_date<=v_today or p_p1_date>v_last))
+     or (p_p5_date is not null and (p_p5_date<=v_today or p_p5_date>v_last))
   then
-    raise exception 'exam_prep_choose_future_date'
+    raise exception 'exam_prep_choose_future_date_within_four_years'
       using errcode='22007';
   end if;
 
@@ -242,6 +244,6 @@ revoke all on function public.save_my_exam_prep_timeline_dates_safe_v1(date,date
 grant execute on function public.save_my_exam_prep_timeline_dates_safe_v1(date,date)
   to authenticated,service_role;
 comment on function public.save_my_exam_prep_timeline_dates_safe_v1(date,date) is
-'Owner-only future P1/P5 personal calendar dates with no artificial 3-year cap, saved only after explicit tap. No appointment or academic-result mutation. Returns refreshed iClub planning estimate.';
+'Owner-only future P1/P5 personal dates within four calendar years, saved only after explicit tap. No official appointment or academic-result mutation. Returns refreshed iClub planning estimate.';
 
 COMMIT;
