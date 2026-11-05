@@ -65,6 +65,23 @@
   grid-column:span 2;align-self:center;margin:0;font-size:12px;line-height:1.45;opacity:.75;
 }
 #exam-prep-host-root .ep-tl-footnote{font-size:11px;line-height:1.5;opacity:.68;margin:0}
+#exam-prep-host-root .ep-tl-tentative{
+  margin:0;padding:9px 11px;border-radius:9px;
+  background:rgba(127,127,127,.055);border:1px solid rgba(127,127,127,.14);
+  font-size:12px;line-height:1.5;overflow-wrap:anywhere;
+}
+#exam-prep-host-root .ep-tl-syllabus-provenance{
+  display:grid;gap:5px;min-width:0;font-size:11px;line-height:1.5;
+  overflow-wrap:anywhere;
+}
+#exam-prep-host-root .ep-tl-syllabus-provenance a{
+  color:inherit;text-decoration:underline;text-underline-offset:2px;
+  width:fit-content;max-width:100%;overflow-wrap:anywhere;
+}
+#exam-prep-host-root .ep-tl-syllabus-provenance p{
+  margin:0;opacity:.72;overflow-wrap:anywhere;
+}
+
 @media (max-width:540px){
   #exam-prep-host-root .ep-tl-card{padding:13px;gap:11px}
   #exam-prep-host-root .ep-tl-papers{grid-template-columns:1fr}
