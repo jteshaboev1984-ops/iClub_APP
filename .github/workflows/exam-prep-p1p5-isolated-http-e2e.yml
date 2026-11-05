@@ -11,6 +11,8 @@ on:
       - 'scripts/p1p5-p3-d09-05-weekly-claim-real-http.cjs'
       - 'supabase/tests/p1p5_p3_d09_05_evidence_focus_disposable.sql'
       - 'supabase/tests/p1p5_p3_d09_05_completed_week_receipt_rollover_disposable.sql'
+      - 'supabase/tests/p1p5_p3_d09_07_t0_future_personal_dates_rollback.sql'
+      - 'scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package1-real-dates-horizon-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
@@ -418,8 +420,15 @@ jobs:
             -f supabase/tests/p1p5_p3_d09_component_diagnostic_period_contract.sql \
             2>&1 | tee /tmp/p1p5-d09-component-period-contract.log
           grep -Fq 'D09 PASS: exact 7-day boundaries' /tmp/p1p5-d09-component-period-contract.log
-          node scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs
-          echo 'D09 PASS: read-only independent P1/P5 periods and actual owner JWT/PG17'
+          node scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs |
+            tee /tmp/p1p5-d09-07-t0-owner-http.log
+          grep -Fq 'PASS D09-07 true P1/P5 timeline T0 owner and anon' /tmp/p1p5-d09-07-t0-owner-http.log
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d09_07_t0_future_personal_dates_rollback.sql \
+            2>&1 | tee /tmp/p1p5-d09-07-date-rollback.log
+          grep -Fq 'D09-07 PASS: owner saved P1/P5 4/8-year future dates' /tmp/p1p5-d09-07-date-rollback.log
+          grep -Fq 'D09-07 ROLLBACK PASS' /tmp/p1p5-d09-07-date-rollback.log
+          echo 'D09-07 PASS: exact independent diagnostic starts + longer personal dates + original owner data restored'
 
       - name: D09-02 immutable original Stage0 date survives second placement (disposable PG17)
         shell: bash
