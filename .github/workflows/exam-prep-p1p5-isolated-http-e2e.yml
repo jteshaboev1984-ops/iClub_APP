@@ -13,6 +13,7 @@ on:
       - 'supabase/tests/p1p5_p3_d09_05_completed_week_receipt_rollover_disposable.sql'
       - 'supabase/tests/p1p5_p3_d09_07_t0_future_personal_dates_rollback.sql'
       - 'supabase/tests/p1p5_p3_d10_05_weekly_pace_precision_rollback.sql'
+      - 'supabase/tests/p1p5_d10_06_curriculum_scope_no_progress_mutation.sql'
       - 'scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-package1-real-dates-horizon-e2e.cjs'
@@ -436,6 +437,11 @@ jobs:
           grep -Fq 'D10-05 PASS: exact P1/P5 clock, ceiling-safe weekly and one-paper rate' /tmp/p1p5-d10-05-pace-proof.log
           grep -Fq 'D10-05 ROLLBACK PASS' /tmp/p1p5-d10-05-pace-proof.log
           echo 'D10-05 PASS: proxy estimate never rounded under its own mathematical weekly target'
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_d10_06_curriculum_scope_no_progress_mutation.sql \
+            2>&1 | tee /tmp/p1p5-d10-06-scope-proof.log
+          grep -Fq 'D10-06 PASS: four source-scope corrections, 81 keys, preserved six published/nine reserves' /tmp/p1p5-d10-06-scope-proof.log
+          echo 'D10-06 PASS: read-only official scope contract and original bank lifecycle preserved'
 
       - name: D09-02 immutable original Stage0 date survives second placement (disposable PG17)
         shell: bash
