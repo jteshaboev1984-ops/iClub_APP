@@ -120,7 +120,7 @@ async function main(){
   exam2028.P1.exam_at='2028-05-12T09:00:00+05:00';
   exam2028.P5.exam_at='2028-05-20T09:00:00+05:00';
   for(const [loc,carry] of [
-    ['ru','нет существенных изменений для преподавания'],
+    ['ru','существенных изменений для преподавания'],
     ['uz','jiddiy o‘zgarishlar yo‘qligini'],
     ['en','no significant teaching changes']
   ]){
