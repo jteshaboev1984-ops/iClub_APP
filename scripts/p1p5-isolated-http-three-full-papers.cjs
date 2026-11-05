@@ -36,6 +36,38 @@ async function run(){
      'P4-05 catalog mismatch');
    const used=new Set(first.filter(x=>x.component===comp).map(x=>x.id));
    for(const tail of testKeys){
+     // Paper03 is correctly gated behind Stage5. Complete the SECOND
+     // distinct published timed section after Paper02 to earn the genuine
+     // Stage4 exit, never modify stage rows or bypass public authorization.
+     if(tail==='stage4_full_paper_03'){
+       const sections=ok(await rpc('get_exam_prep_timed_catalog_safe_v1',{
+         p_component_code:comp
+       },owner),'P4-05 timed section 02 published catalog '+comp);
+       const section=sections.assessments.find(x=>
+         x.assessment_key===comp.toLowerCase()+'_stage2_timed_block_02'
+         && x.attempt_kind==='timed_section' && x.comparison_scope==='section'
+         && x.strict_timing===true);
+       assert(section,'P4-05 requires second independent timed section '+comp);
+       const prefix= 'p405-'+comp.toLowerCase()+'-section02';
+       const auth=ok(await rpc('authorize_exam_prep_timed_safe_v1',{
+         p_assessment_id:section.assessment_id
+       },owner),'P4-05 stage4 second timed-section authorization '+comp);
+       assert(auth.purpose==='timed' && auth.attempt_kind==='timed_section',
+         'P4-05 timed section not server-authorized');
+       const started=ok(await rpc('start_exam_prep_session_safe_v1',{
+         p_authorization_id:auth.authorization_id,p_idempotency_key:prefix+'-start'
+       },owner),'P4-05 start second timed-section '+comp);
+       await proveSignedTimedClock(started.session_id,owner,foreign,comp,'timed');
+       const done=await finishSession(started.session_id,owner,prefix,true);
+       assert(!done.paper && done.written===done.total && done.objective===0 &&
+         done.scoreComparable===false && done.timingComparable===true,
+         'P4-05 timed-section 02 must be actual executed noncredit work');
+       const stage=row("SELECT operational_stage stage FROM private.exam_prep_stage_states "+
+         "WHERE user_id='"+id.uid+"'::uuid AND component_code='"+comp+
+         "' AND engine_version='objective_state_v1'");
+       assert(stage?.stage===5,
+         'P4-05 third source Paper must wait for real Stage5; got '+JSON.stringify(stage));
+     }
      const key=comp.toLowerCase()+'_'+tail;
      const paper=catalog.assessments.find(x=>
        x.assessment_key===key && x.attempt_kind==='full_paper'
