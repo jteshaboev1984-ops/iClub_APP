@@ -61,3 +61,32 @@ opt-in epoch now skips those writes when the JWT is old while returning
 previously saved P1/P5 placement and diagnostic facts. The genuine signed
 HTTP test checks both endpoints plus the unchanged placement and
 access-gate row identities, in addition to objective stage/skill state.
+
+## 2026-11-05 — Actual student settings / report / resumption writers
+
+The open-tab token cutover must also cover ordinary user-controlled actions
+that were still writable through distinct legacy or current endpoints. The
+new guarded additive migration covers **12 additional public RPCs**: both
+exam-profile versions, learner study schedule, own P1/P5 date selection,
+legacy exam appointment, periodic study report claim, both recorded
+absence/resumption versions, revalidation authorization, optional Extra Hard
+start/submit and exam-operations confirmation.
+
+No change to study hours, personal four-year calendar, three opt-in study
+choices, exam score or learner access. It deliberately does **not** block
+protected-session anti-cheat integrity events as an accidental side effect:
+retaining the actual audit signal is essential until a combined cutover
+design accounts for in-flight protected sessions. The guard stays NULL/OFF.
+
+Authentic isolated signed HTTP test reuses the existing learner's actual
+P1/P5 completed Papers, an unexpired token issued before the prospective
+cutover, and a freshly issued same-user token. It directly exercises
+everyday exam-profile changes, the voluntary study schedule, periodic report
+receipt, P1/P5 dates, original exam appointment and recorded absence through
+both current and original RPC versions. Full migration loading fails
+closed if any one of the other optional/conditional RPC signatures or
+ownership/ACL anchors has drifted. No unobserved endpoint is claimed safe.
+
+**Not complete security sign-off:** caller-to-trigger graph, any other
+public server write, dynamic SQL/Edge and cached-JavaScript version changes
+remain explicitly open. No production activation or beta cleanup.

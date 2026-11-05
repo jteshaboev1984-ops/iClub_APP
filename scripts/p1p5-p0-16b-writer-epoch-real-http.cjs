@@ -64,7 +64,15 @@ async function main(){
    ['finish written','finalize_exam_prep_session_written_v1',{p_session_id:p1.id,p_idempotency_key:'p016b-oldtab-written'}],
    ['advance written','advance_exam_prep_written_step_safe_v1',{p_session_id:p1.id,p_item_order:1,p_idempotency_key:'p016b-oldtab-step'}],
    ['weekly action','authorize_exam_prep_plan_item_safe_v1',{p_plan_id:'00000000-0000-4000-8000-000000000001',p_priority_order:1}],
-   ['weekly plan','generate_exam_prep_weekly_plan_safe_v3',{p_component_code:'P1'}]
+   ['weekly plan','generate_exam_prep_weekly_plan_safe_v3',{p_component_code:'P1'}],
+   ['save current profile','save_exam_prep_exam_profile_v2',{p_exam_series:'May/June 2027',p_target_grade:null,p_total_student_hours_available:12,p_mathematics_hours_budget:5}],
+   ['old profile client','save_exam_prep_exam_profile_v1',{p_exam_series:'May/June 2027',p_target_grade:null,p_total_student_hours_available:12,p_mathematics_hours_budget:5}],
+   ['study schedule','save_exam_prep_study_schedule_safe_v1',{p_minutes_per_day:60,p_days_per_week:5}],
+   ['study report','claim_exam_prep_periodic_study_report_safe_v1',{}],
+   ['personal P1 P5 dates','save_my_exam_prep_timeline_dates_safe_v1',{p_p1_date:'2027-05-10',p_p5_date:'2027-06-10'}],
+   ['older exam date','save_my_exam_prep_exam_appointment_v1',{p_component_code:'P1',p_scheduled_start_at:'2027-05-10T09:00:00Z'}],
+   ['interruption','record_my_exam_prep_interruption_v2',{p_interruption_started_on:'2026-10-01',p_resumed_on:'2026-10-05',p_interruption_kind:'absence'}],
+   ['old interruption client','record_my_exam_prep_interruption_v1',{p_interruption_started_on:'2026-10-01',p_resumed_on:'2026-10-05',p_interruption_kind:'absence'}]
   ];
   for(const [label,name,args] of cases){
    const r=await rpc(name,args,old);
@@ -105,7 +113,7 @@ async function main(){
   'cutoff disabled compatibility');
  assert(rollback.replayed===true,'disabled cutoff broke old-token normal behavior');
  assert.deepEqual(snapshot(uid),before,'rollback modified progress');
- console.log('P0-16B PASS: real old tab blocked on ten Core/Paper writes and three old-token read-rebuild paths, fresh signed JWT resumes P1/P5, saved scores and progress unchanged, cutoff OFF');
+ console.log('P0-16B PASS: real old tab blocked on Core/Paper plus profile, study schedule, dates and history writers and three old-token read-rebuild paths, fresh signed JWT resumes P1/P5, saved scores and progress unchanged, cutoff OFF');
  console.log('P0-16B OPEN: other writers, nested triggers, app-build refresh and release signoff');
 }
 main().catch(e=>{console.error('P0-16B FAIL',e.stack||e.message);process.exitCode=1});
