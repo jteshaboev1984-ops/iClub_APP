@@ -20,6 +20,7 @@ const triple=source('scripts/p1p5-isolated-http-three-full-papers.cjs');
 const blank=source('scripts/p1p5-isolated-http-skipped-paper-denial.cjs');
 const sqlThree=source('supabase/tests/p1p5_p4_05_three_full_papers_disposable.sql');
 const sqlBlank=source('supabase/tests/p1p5_p4_05_blank_paper_negative_disposable.sql');
+const runtime=source('supabase/tests/p1p5_p4_06_runtime_writer_acl_disposable.sql');
 const workflow=source('.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml');
 const roadmap=source('docs/math-p1p5-v2-1-stage3-6-written-evidence-recovery-plan-20261105.md');
 const release=source('docs/math-p1p5-p4-06-release-integration-checkpoint-20261105.md');
@@ -78,6 +79,20 @@ assert(workflow.includes("test \"$PGHOST\" = \"127.0.0.1\""),
 assert(!/\b(?:CREATE\s+TABLE|ALTER\s+TABLE|DROP\s+TABLE|TRUNCATE\s+TABLE)\b/i.test(
  paths.map(source).join('\n').replace(/--[^\n]*/g,'')),
  'P4 corrective migration unexpectedly alters shared table schema');
+requireAll(runtime,[
+ 'current_setting(\'iclub.e2e_isolated\'',
+ 'has_function_privilege',
+ 'authenticated',
+ 'anon',
+ 'SECURITY DEFINER',
+ 'private.exam_prep_timed_score_comparable_v1',
+ 'exam_prep_stage5_operational_completion_v1',
+ 'INSUFFICIENT_EVIDENCE',
+ 'P4-06 PASS: five private ACLs',
+ 'P0-16B'
+],'P4-06 independent real runtime ACL/grade/source writer proof');
+assert(workflow.includes('supabase/tests/p1p5_p4_06_runtime_writer_acl_disposable.sql') && workflow.includes('P4-06 exact runtime service-role'),
+ 'P4-06 runtime writer guard not scheduled before synthetic cleanup');
 requireAll(roadmap,['P4-05','P4-06','NO_GO','P0-16B'],
  'Canonical roadmap');
 requireAll(release,['P4-05','P4-06','NO_GO','P0-16B',

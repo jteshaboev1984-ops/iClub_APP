@@ -34,6 +34,7 @@ on:
       - 'scripts/p1p5-isolated-http-skipped-paper-denial.cjs'
       - 'supabase/tests/p1p5_p4_05_three_full_papers_disposable.sql'
       - 'supabase/tests/p1p5_p4_05_blank_paper_negative_disposable.sql'
+      - 'supabase/tests/p1p5_p4_06_runtime_writer_acl_disposable.sql'
       - 'supabase/tests/p1p5_p4_05_earn_stage4_from_real_objective_evidence_disposable.sql'
       - 'scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
@@ -412,6 +413,19 @@ jobs:
             2>&1 | tee /tmp/p1p5-p4-05-blank-paper-negative.log
           grep -Fq 'P4-05 PASS: blank and skipped full Paper' \
             /tmp/p1p5-p4-05-blank-paper-negative.log
+      - name: P4-06 exact runtime service-role and finalizer writer boundary
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p4_06_runtime_writer_acl_disposable.sql \
+            2>&1 | tee /tmp/p1p5-p4-06-writer-acl.log
+          grep -Fq 'P4-06 PASS: five private ACLs' \
+            /tmp/p1p5-p4-06-writer-acl.log
       - name: Complete and cleanup canonical mixed/full-paper synthetic learner
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
