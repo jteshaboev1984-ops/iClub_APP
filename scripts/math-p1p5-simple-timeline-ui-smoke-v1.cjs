@@ -97,6 +97,45 @@ async function main(){
     assert(ui.viewHtml(ui.parsePayload(pendingStart),loc).includes(expected),
       'No unverified signup date presented as the diagnostic start: '+loc);
   }
+  // D10-03: The hour proxy must be described as provisional before both
+  // real P1/P5 diagnostics. This is informative ONLY: never remove a choice.
+  const sourceCases=[
+    ['ru','До завершения диагностики','Программа Cambridge 9709 для экзамена'],
+    ['uz','diagnostikasi yakunlanmaguncha','Cambridge 9709 imtihon dasturi'],
+    ['en','Until both P1 and P5 diagnostics','Cambridge 9709 exam syllabus']
+  ];
+  for(const [loc,tentative,sourceLabel] of sourceCases){
+    const pending=ui.viewHtml(ui.parsePayload(pendingStart),loc);
+    assert(pending.includes(tentative),loc+' missing pre-diagnostic uncertainty');
+    const known=ui.viewHtml(model,loc);
+    assert(!known.includes(tentative),loc+' shows stale uncertainty after Stage0');
+    assert(known.includes(sourceLabel)&&
+      known.includes('697427-2026-2027-syllabus.pdf'),
+      loc+' missing matching official exam-year syllabus link');
+    assert(!known.includes('744634-2028-2030-syllabus.pdf'),
+      loc+' wrongly labels 2027 exam with 2028 source');
+  }
+  const mixedYears=fixture();
+  mixedYears.P5.exam_at='2028-05-20T09:00:00+05:00';
+  for(const [loc,carry] of [
+    ['ru','нет существенных изменений для преподавания'],
+    ['uz','jiddiy o‘zgarishlar yo‘qligini'],
+    ['en','no significant teaching changes']
+  ]){
+    const mixedHtml=ui.viewHtml(ui.parsePayload(mixedYears),loc);
+    assert(mixedHtml.includes('697427-2026-2027-syllabus.pdf') &&
+      mixedHtml.includes('744634-2028-2030-syllabus.pdf') &&
+      mixedHtml.includes(carry),loc+' must distinguish correct 2027 and 2028 sources');
+    assert(mixedHtml.includes('target="_blank" rel="noopener noreferrer"'),
+      'Source links must be safe external informational links');
+  }
+  const futureYear=fixture();
+  futureYear.P5.exam_at='2031-05-20T09:00:00+05:00';
+  const futureHtml=ui.viewHtml(ui.parsePayload(futureYear),'en');
+  assert(futureHtml.includes('official syllabus for this exam year has not yet been cross-checked'),
+    'Unknown future syllabus must not be misrepresented');
+  assert(futureHtml.includes('This does not limit learning'),
+    'Unknown year is informational, never a learner study-access restriction');
   assert.equal(model.canAdopt,false,'Already enough time does not create pointless button');
   const short=fixture();
   short.existing_chosen_math_hours_per_week=4;
@@ -104,6 +143,15 @@ async function main(){
   assert.equal(shortModel.canAdopt,true);
   assert.equal(shortModel.profileRevision,2);
   const shortHtml=ui.viewHtml(shortModel,'ru');
+  const shortPending=fixture();
+  shortPending.existing_chosen_math_hours_per_week=4;
+  shortPending.start_at=null;shortPending.P1.start_at=null;shortPending.P5.start_at=null;
+  for(const loc of ['ru','uz','en']){
+    const pending=ui.viewHtml(ui.parsePayload(shortPending),loc);
+    assert(pending.includes('data-ep-tl-keep')&&
+      pending.includes('data-ep-tl-accept')&&pending.includes('data-ep-tl-other'),
+      'Unmeasured pre-diagnostic source must NEVER impose a new time-choice gate: '+loc);
+  }
   assert(shortHtml.includes('data-ep-tl-accept'));
   assert(shortHtml.includes('data-ep-tl-keep') && shortHtml.includes('data-ep-tl-other'));
   for(const [loc,keep,other,adopt] of [
