@@ -474,6 +474,7 @@ declare
   v_time int;
   v_items int;
   v_virtual timestamptz;
+  v_item record;
 begin
   perform set_config('request.jwt.claim.sub',p_user_id::text,true);
   perform set_config('request.jwt.claim.role','authenticated',true);
@@ -501,6 +502,35 @@ begin
 
   v_virtual:=private.exam_prep_effective_academic_now_v1(p_user_id);
 
+  -- The source P1/P5 full Papers AND timed sections are 100% written.
+  -- Create real persisted, noncredit learner artifacts through the public
+  -- authenticated submission RPC rather than manufacturing exam grades.
+  for v_item in
+    select item_order,item_kind
+    from private.exam_prep_session_items
+    where session_id=v_session order by item_order
+  loop
+    if v_item.item_kind<>'written' then
+      raise exception 'P2-69 cannot manufacture objective paper scores for item kind %',v_item.item_kind;
+    end if;
+    perform public.submit_exam_prep_response_safe_v1(
+      v_session,v_item.item_order,
+      jsonb_build_object('artifact',jsonb_build_object(
+        'working','Isolated P2-69 learner practice artifact',
+        'method','noncredit working only',
+        'conclusion','ungraded; not an externally marked answer'
+      )),
+      'p269-timed-'||p_tag||'-item-'||v_item.item_order,
+      1200,'en'
+    );
+  end loop;
+
+  if (select count(*) from private.exam_prep_responses r
+      where r.session_id=v_session and r.user_id=p_user_id
+        and r.response_kind='written'
+        and r.learner_artifact IS NOT NULL)<>v_items
+  then raise exception 'P2-69 genuine noncredit written responses missing'; end if;
+
   update private.exam_prep_sessions
   set status='finalized',finalized_at=clock_timestamp(),last_activity_at=clock_timestamp(),
       finalize_idempotency_key='p269-timed-'||p_tag||'-final'
@@ -515,11 +545,15 @@ begin
   ) values(
     v_session,p_user_id,v_component,p_assessment_id,v_kind,v_rule,v_scope,v_key,
     v_strict,v_marks,v_time,greatest(1,least(v_time-1,round(v_time*0.85)::int)),v_items,0,
-    v_marks,0,0,0,0,0,0,'submitted',true,true,v_virtual
+    0,0,0,0,v_marks,0,0,'submitted',true,false,v_virtual
   );
 
-  if not private.exam_prep_timed_score_comparable_v1(v_session) then
-    raise exception 'P2-69 timed fixture was not comparable assessment=% session=%',p_assessment_id,v_session;
+  if not private.exam_prep_timed_execution_comparable_v1(v_session) then
+    raise exception 'P2-69 persisted noncredit written work was not execution-comparable assessment=% session=%',
+      p_assessment_id,v_session;
+  end if;
+  if private.exam_prep_timed_score_comparable_v1(v_session) then
+    raise exception 'P2-69 fabricated a scored paper from ungraded written work assessment=%',p_assessment_id;
   end if;
 
   return v_session;
@@ -1019,15 +1053,10 @@ BEGIN
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',5,'two comparable P1 papers');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',5,'two comparable P5 papers');
 
-  -- Synthetic target thresholds exist only inside this rollback transaction.
-  insert into private.exam_prep_stage5_thresholds(
-    threshold_version,program_version_id,component_code,exam_series_key,target_grade,
-    min_in_time_score_pct,max_unattempted_share,max_after_time_share,status,source_ref,policy_note,approved_at
-  ) values
-    ('p269_ci_p1_v1',v_program,'P1','CI_P269_STAGE06','A',80,0,0,'approved',
-     'P2-69 rollback-only synthetic threshold','Engineering fixture only; not a Cambridge threshold.',clock_timestamp()),
-    ('p269_ci_p5_v1',v_program,'P5','CI_P269_STAGE06','A',80,0,0,'approved',
-     'P2-69 rollback-only synthetic threshold','Engineering fixture only; not a Cambridge threshold.',clock_timestamp());
+  -- No synthetic Cambridge/target score threshold is created, even in CI.
+  -- Full Papers have written artifacts but ZERO independently awarded marks.
+  if exists(select 1 from private.exam_prep_stage5_thresholds where status='approved')
+  then raise exception 'P2-69 must not invent score thresholds'; end if;
 
   -- Simulate the rest of the academic year. Calendar movement alone must keep Stage 5.
   perform pg_temp.p269_advance_days_v1(v_run,182,'P2-69 accelerate to final calibration window');
@@ -1036,27 +1065,39 @@ BEGIN
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',5,'calendar-only Stage5 P1 hold');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',5,'calendar-only Stage5 P5 hold');
 
-  -- Third comparable full paper + stable L3/corrections closed => App Readiness => Stage 6.
+  -- Third real written practice Paper + stable objective L3/corrections closed
+  -- unlocks only operational Stage 6 (Final Calibration), NOT exam-score readiness.
   perform pg_temp.p269_complete_timed_assessment_v1(v_uid,v_p1_paper3,'p1-paper03');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P1',6,'third P1 paper readiness');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',5,'P5 cannot inherit P1 readiness');
   perform pg_temp.p269_complete_timed_assessment_v1(v_uid,v_p5_paper3,'p5-paper03');
   perform pg_temp.p269_assert_stage_v1(v_uid,v_program,'P5',6,'third P5 paper readiness');
 
-  v_status:=private.exam_prep_stage5_readiness_status_v1(v_uid,v_program,'P1');
-  if coalesce((v_status->>'ready')::boolean,false) is not true
-     or (v_status->>'last_three_count')::int<>3
-     or (v_status->>'below_l3_count')::int<>0
-     or (v_status->>'unresolved_correction_case_count')::int<>0 then
-    raise exception 'P2-69 final P1 readiness invalid: %',v_status;
-  end if;
-  v_status:=private.exam_prep_stage5_readiness_status_v1(v_uid,v_program,'P5');
-  if coalesce((v_status->>'ready')::boolean,false) is not true
-     or (v_status->>'last_three_count')::int<>3
-     or (v_status->>'below_l3_count')::int<>0
-     or (v_status->>'unresolved_correction_case_count')::int<>0 then
-    raise exception 'P2-69 final P5 readiness invalid: %',v_status;
-  end if;
+  -- App readiness is deliberately NOT confirmed without human-graded
+  -- written methods. Operational Final Calibration stays independent.
+  foreach v_component in array array['P1','P5'] loop
+    v_status:=private.exam_prep_stage5_readiness_status_v1(v_uid,v_program,v_component);
+    if coalesce((v_status->>'ready')::boolean,false)
+       or (v_status->>'last_three_count')::int<>0
+       or (v_status->>'below_l3_count')::int<>0
+       or (v_status->>'unresolved_correction_case_count')::int<>0
+       or v_status->>'reason_code'<>'three_comparable_attempts_incomplete'
+       or coalesce((v_status->>'mentor_verified_readiness')::boolean,false)
+    then raise exception 'P2-69 ungraded written Paper falsely confirmed exam readiness %: %',v_component,v_status;
+    end if;
+    v_status:=private.exam_prep_stage5_operational_completion_v1(v_uid,v_program,v_component);
+    if not coalesce((v_status->>'operational_calibration_access')::boolean,false)
+       or (v_status->>'compatible_execution_papers')::int<3
+       or (v_status->>'below_l3_count')::int<>0
+       or (v_status->>'open_correction_count')::int<>0
+    then raise exception 'P2-69 governed Stage6 operational access missing %: %',v_component,v_status;
+    end if;
+    if not exists(select 1 from private.exam_prep_stage_states s
+      where s.user_id=v_uid and s.component_code=v_component
+        and s.operational_stage=6 and s.app_readiness_estimate='INSUFFICIENT_EVIDENCE')
+    then raise exception 'P2-69 Stage6 operational must NOT manufacture exam readiness %',v_component;
+    end if;
+  end loop;
 
   if exists(select 1 from private.exam_prep_beta_members where user_id=v_uid)
      or exists(select 1 from private.exam_prep_beta_consents where user_id=v_uid)
@@ -1072,7 +1113,7 @@ BEGIN
 
   v_complete:=private.complete_exam_prep_synthetic_run_v1(
     v_run,1,jsonb_build_object(
-      'p2_69','stage0-6-green',
+      'p2_69','stage0-6-operational-noncredit',
       'p1_stage',6,'p5_stage',6,
       'p1_skills',45,'p5_skills',36,
       'active_week',v_week
