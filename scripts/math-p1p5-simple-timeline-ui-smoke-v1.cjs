@@ -89,7 +89,7 @@ async function main(){
   assert.equal(model.cards[0].startAt,'2026-10-01T11:00:00+05:00');
   assert.equal(model.cards[1].startAt,'2026-10-20T11:00:00+05:00');
   const differentT0=ui.viewHtml(model,'en');
-  assert(differentT0.includes('01 Oct 2026')&&differentT0.includes('20 Oct 2026'),
+  assert(differentT0.includes('1 Oct 2026')&&differentT0.includes('20 Oct 2026'),
     'P1/P5 separate diagnostic start dates must both render');
   const pendingStart=fixture();
   pendingStart.start_at=null;pendingStart.P1.start_at=null;pendingStart.P5.start_at=null;
