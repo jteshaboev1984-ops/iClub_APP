@@ -163,11 +163,18 @@ async function main(){
   assert.equal(ui.parsePayload(staleProfile).canAdopt,false,
     'One-click update requires real current owner profile revision');
   assert.equal(ui.inputDate('2027-05-12T07:00:00Z'),'2027-05-12');
-  assert.equal(ui.validInputDate('2028-05-12',{min:'2027-01-01'}),true);
-  assert.equal(ui.validInputDate('2024-01-01',{min:'2027-01-01'}),false);
-  assert.equal(ui.validInputDate('2032-01-01',{min:'2027-01-01'}),true);
-  assert.equal(ui.validInputDate('2036-05-12',{min:'2027-01-01'}),true);
-  assert.equal(ui.validInputDate('2028-02-30',{min:'2027-01-01'}),false);
+  // Four calendar years is the architect-approved upper bound; use
+  // realistic near-term dates and both inclusivity/overflow boundaries.
+  const bounds={min:'2026-11-06',max:'2030-11-05'};
+  assert.equal(ui.validInputDate('2027-05-12',bounds),true);
+  assert.equal(ui.validInputDate('2028-05-12',bounds),true);
+  assert.equal(ui.validInputDate('2030-11-05',bounds),true,
+    'Exactly four years remains selectable');
+  assert.equal(ui.validInputDate('2030-11-06',bounds),false,
+    'Beyond four years is no longer selectable');
+  assert.equal(ui.validInputDate('2024-01-01',bounds),false);
+  assert.equal(ui.validInputDate('2028-02-30',bounds),false);
+  assert.equal(ui.validInputDate('',bounds),true,'Explicit clear remains available');
   for(const [lang,label] of [['ru','Мой путь к экзамену'],['uz','Imtihongacha yo‘lim'],['en','My exam timeline']]){
     const markup=ui.viewHtml(model,lang);
     assert(markup.includes(label),lang);
@@ -175,7 +182,8 @@ async function main(){
       markup.includes('data-ep-tl-paper="P5"'));
     assert(markup.includes('data-ep-simple-timeline'));
     assert(markup.includes('data-ep-tl-date-editor') && markup.includes('type="date"'));
-    assert(!markup.includes(' max="'),'Personal exam dates must not be capped at three years');
+    assert(markup.includes(' max="'),'Personal dates must have approved four-year limit');
+    assert(markup.includes(' min="'),'Only future personal dates can be selected');
     assert(markup.includes('data-ep-tl-open-date="P1"') && markup.includes('data-ep-tl-open-date="P5"'));
     assert(markup.includes('data-ep-tl-save disabled'),'One-save control must start disabled');
     assert(!/school|школ|maktab/i.test(markup),'No school confirmation UI');
