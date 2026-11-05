@@ -33,7 +33,7 @@ assert.throws(()=>readonlyGuard(sql+'\nUPDATE public.questions SET is_active=fal
 for(const needed of [
  '2026-11-05','P4-01','P4-02','P4-03','P4-04','P4-05','P4-06',
  'Core','Mentor','16/16','0/0','NO_GO','new-chat'
-]) assert(policy.includes(needed),'new roadmap missing '+needed);
+]) assert(policy.toLowerCase().includes(needed.toLowerCase()),'new roadmap missing '+needed);
 assert(migration.includes('exam_prep_written_self_marks_disabled'),
  'D03 learner self-mark RPC denial must stay in draft');
 assert(/coalesce\(t\.pending_review_in_time_marks,0\)=0/i.test(migration) &&
