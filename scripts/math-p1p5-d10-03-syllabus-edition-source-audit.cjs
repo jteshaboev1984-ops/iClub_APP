@@ -28,7 +28,7 @@ const SECTIONS=Object.freeze([
   ['P5','5.5 The normal distribution',6]
 ]);
 const OFFICIAL_SCOPE=Object.freeze({
-  'P1-DIF-01':['неформального','первых принципов'],
+  'P1-DIF-01':['формального','первых принципов'],
   'P1-DIF-03':['нелинейные','g\'(x)'],
   'P1-INT-01':['n = −1'],
   'P5-PRO-03':['простых случаях','не обязательна']
