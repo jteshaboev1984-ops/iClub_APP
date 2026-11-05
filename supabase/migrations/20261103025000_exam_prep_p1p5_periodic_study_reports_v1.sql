@@ -84,7 +84,10 @@ begin
   -- projected read-only by get_exam_prep_component_periods_safe_v1.
   v_week_number:=floor(extract(epoch from (v_now-v_diagnostic_anchor))/604800)::int;
   -- Week 36 is a curriculum model, not a study-access or reporting limit.
-  if v_week_number between 1 and 156 then
+  -- No 156-week ceiling: a curriculum roadmap is not the end of the
+  -- learner's voluntary preparation. Continue one nonduplicated completed-week
+  -- report at a time beyond three years, without changing learning access.
+  if v_week_number >= 1 then
     v_kind:='week';
     v_end:=v_diagnostic_anchor+(v_week_number*interval '7 days');
     v_start:=v_end-interval '7 days';
