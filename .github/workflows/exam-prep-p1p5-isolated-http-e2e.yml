@@ -6,7 +6,16 @@ on:
       - 'exam-prep/**'
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
+      - 'scripts/p1p5-d09-04-academic-week-label-browser.cjs'
+      - 'scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs'
+      - 'scripts/p1p5-p3-d09-05-weekly-claim-real-http.cjs'
+      - 'supabase/tests/p1p5_p3_d09_05_evidence_focus_disposable.sql'
+      - 'supabase/tests/p1p5_p3_d09_05_completed_week_receipt_rollover_disposable.sql'
+      - 'supabase/tests/p1p5_p3_d09_07_t0_future_personal_dates_rollback.sql'
+      - 'supabase/tests/p1p5_p3_d10_05_weekly_pace_precision_rollback.sql'
+      - 'scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
+      - 'scripts/p1p5-package1-real-dates-horizon-e2e.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
@@ -17,6 +26,9 @@ on:
       - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
       - 'supabase/tests/p1p5_isolated_http_written_browser_allowlist.sql'
       - 'scripts/p1p5-isolated-http-written-criteria-next-browser.cjs'
+      - 'scripts/p1p5-extra-hard-real-http.cjs'
+      - 'supabase/tests/p1p5_extra_hard_disposable_real_http_*.sql'
+      - 'exam-prep/exam-prep-extra-hard-ui.js'
       - 'scripts/p1p5-isolated-http-stage-c-security-race.cjs'
       - 'supabase/tests/p1p5_stage_c_33_independent_stage0_rollbacks.sql'
       - 'supabase/tests/p1p5_stage_c_asymmetric_learning_correction_rollback.sql'
@@ -33,7 +45,9 @@ permissions:
 jobs:
   real-http-auth:
     name: actual Math UI JWT PostgREST PG17
-    runs-on: ubuntu-latest
+    # Playwright 1.55 supports Ubuntu 24.04, not ubuntu-latest's 26.04.
+    # Fixed OS only for disposable CI, no production hosting change.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
@@ -182,6 +196,22 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-isolated-http-auth-e2e.cjs
+      - name: D09-04 original plan week plus independent P1 P5 diagnostic weeks (RU UZ EN Chromium)
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node --check exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-weekly-flow-adapter.js
+          node --check scripts/p1p5-d09-04-academic-week-label-browser.cjs
+          node scripts/p1p5-d09-04-academic-week-label-browser.cjs | tee /tmp/p1p5-d09-04-week-label.log
+          grep -Fq 'PASS D09-04 native ru 390px' /tmp/p1p5-d09-04-week-label.log
+          grep -Fq 'PASS D09-04 native uz 1280px' /tmp/p1p5-d09-04-week-label.log
+          grep -Fq 'PASS D09-04 native en 1280px' /tmp/p1p5-d09-04-week-label.log
+      - name: Extra Hard owner-only noncredit protected-key HTTP with disposable example
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-extra-hard-real-http.cjs
+          node scripts/p1p5-extra-hard-real-http.cjs
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
@@ -348,6 +378,112 @@ jobs:
           node scripts/p1p5-isolated-http-retired-content-recovery.cjs | tee /tmp/p1p5-stage-c-real-http-stale-content.log
           grep -q 'STAGE C REAL HTTP CONTENT RETIREMENT EXPIRY AND PROTECTED REVIEW PASS' /tmp/p1p5-stage-c-real-http-stale-content.log
           grep -q 'STAGE C REAL HTTP P1 CONTENT RESTORED TWO DISPOSABLE USER BOUNDARY PASS' /tmp/p1p5-stage-c-real-http-stale-content.log
+      - name: Package 1 real learner centre-confirmed P1 P5 dates and diagnostic horizon
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          node --check scripts/p1p5-package1-real-dates-horizon-e2e.cjs
+          node --check exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-api.js
+          node scripts/p1p5-package1-real-dates-horizon-e2e.cjs
+      - name: P3-03 next 7-day weekly budget rollover and protected history (disposable PG17)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          test "$(psql -X -At -v ON_ERROR_STOP=1 -c 'SHOW server_version_num')" -ge 170000
+          # One real-migration test transaction, forced ROLLBACK even after
+          # simulated 8-day shift. No hosted/live Supabase and no real learner.
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_03_next_week_rollover_disposable.sql \
+            2>&1 | tee /tmp/p1p5-p303-next-week-rollover.log
+          grep -Fq 'P3-03 PASS inside disposable transaction' \
+            /tmp/p1p5-p303-next-week-rollover.log
+          grep -Fq 'P3-03 POST-ROLLBACK PASS' \
+            /tmp/p1p5-p303-next-week-rollover.log
+          echo 'P3-03 PASS: one elected Math budget, 7-day rollover, isolated history and cross-subject preservation'
+
+      - name: D09 diagnostic-anchored independent P1 P5 seven-day periods (real HTTP + PG17)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          node --check scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d09_component_diagnostic_period_contract.sql \
+            2>&1 | tee /tmp/p1p5-d09-component-period-contract.log
+          grep -Fq 'D09 PASS: exact 7-day boundaries' /tmp/p1p5-d09-component-period-contract.log
+          node scripts/p1p5-p3-d09-diagnostic-periods-real-http.cjs |
+            tee /tmp/p1p5-d09-07-t0-owner-http.log
+          grep -Fq 'PASS D09-07 true P1/P5 timeline T0 owner and anon' /tmp/p1p5-d09-07-t0-owner-http.log
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d09_07_t0_future_personal_dates_rollback.sql \
+            2>&1 | tee /tmp/p1p5-d09-07-date-rollback.log
+          grep -Fq 'D09-07 PASS: real owner saved 18-month and four-year personal dates' /tmp/p1p5-d09-07-date-rollback.log
+          grep -Fq 'D09-07 ROLLBACK PASS' /tmp/p1p5-d09-07-date-rollback.log
+          echo 'D09-07 PASS: exact independent diagnostic starts + longer personal dates + original owner data restored'
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d10_05_weekly_pace_precision_rollback.sql \
+            2>&1 | tee /tmp/p1p5-d10-05-pace-proof.log
+          grep -Fq 'D10-05 PASS: exact P1/P5 clock, ceiling-safe weekly and one-paper rate' /tmp/p1p5-d10-05-pace-proof.log
+          grep -Fq 'D10-05 ROLLBACK PASS' /tmp/p1p5-d10-05-pace-proof.log
+          echo 'D10-05 PASS: proxy estimate never rounded under its own mathematical weekly target'
+
+      - name: D09-02 immutable original Stage0 date survives second placement (disposable PG17)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d09_immutable_t0_disposable.sql \
+            2>&1 | tee /tmp/p1p5-d09-first-t0.log
+          grep -Fq 'D09-02 PASS: actual first Stage0 T0 frozen' /tmp/p1p5-d09-first-t0.log
+          grep -Fq 'D09-03 PASS: later finalized diagnostic does not shift' /tmp/p1p5-d09-first-t0.log
+          grep -Fq 'D09-02 POST-ROLLBACK PASS' /tmp/p1p5-d09-first-t0.log
+          echo 'D09-02 PASS: immutable first diagnosis, no learner state mutation'
+
+      - name: D09-05 evidence-based next steps after completed week (real PG17 + RU UZ EN Chromium)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d09_05_evidence_focus_disposable.sql \
+            2>&1 | tee /tmp/p1p5-d09-05-focus-sql.log
+          grep -Fq 'D09-05 PASS: 81 original skills' /tmp/p1p5-d09-05-focus-sql.log
+          node --check scripts/p1p5-p3-d09-05-weekly-claim-real-http.cjs
+          node scripts/p1p5-p3-d09-05-weekly-claim-real-http.cjs | tee /tmp/p1p5-d09-05-real-http.log
+          grep -Fq 'D09-05 HTTP PASS' /tmp/p1p5-d09-05-real-http.log
+          # Exactly one week is simulated by a transaction-local academic
+          # clock override. The original function and receipt are ROLLBACK'ed.
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p3_d09_05_completed_week_receipt_rollover_disposable.sql \
+            2>&1 | tee /tmp/p1p5-d09-05-week-rollover.log
+          grep -Fq 'D09-05 ROLLOVER PASS' /tmp/p1p5-d09-05-week-rollover.log
+          grep -Fq 'D09-05 ROLLBACK PASS' /tmp/p1p5-d09-05-week-rollover.log
+          node --check scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs
+          node scripts/p1p5-p3-d09-05-weekly-focus-browser.cjs | tee /tmp/p1p5-d09-05-focus-browser.log
+          grep -Fq 'D09-05 UX PASS ru 390px' /tmp/p1p5-d09-05-focus-browser.log
+          grep -Fq 'D09-05 UX PASS uz 1280px' /tmp/p1p5-d09-05-focus-browser.log
+          grep -Fq 'D09-05 UX PASS en 1280px' /tmp/p1p5-d09-05-focus-browser.log
+          echo 'D09-05 PASS: source-grounded next-step projection and native locale layouts; no extra weekly quotas'
+
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true

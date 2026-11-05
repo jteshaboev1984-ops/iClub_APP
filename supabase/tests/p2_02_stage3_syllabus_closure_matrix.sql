@@ -161,8 +161,9 @@ begin
     end if;
   end loop;
 
-  -- Create one fully reviewed comparable full-paper baseline for each component.
-  -- After P1 completes, P5 must remain independently blocked.
+  -- Create written full-paper artifacts for each component. Under D03 these
+  -- cannot be a comparable, graded baseline without independent marking.
+  -- P1 must never unblock P5, even with historical self-mark rows.
   for r in
     select *
     from (values
@@ -256,19 +257,20 @@ begin
     from private.exam_prep_timed_assessment_items ti
     where ti.assessment_id=v_ass;
 
-    if not private.exam_prep_timed_score_comparable_v1(v_session) then
-      raise exception 'P2-02 completed written review not comparable component=%',r.component_code;
+    -- Old saved self-mark rows must NEVER count as verified written scores.
+    if private.exam_prep_timed_score_comparable_v1(v_session) then
+      raise exception 'P2-02 historic self-marks falsely created comparable Paper component=%',r.component_code;
     end if;
 
     v_status:=private.exam_prep_stage3_exit_status_v1(
       v_user,v_program,r.component_code
     );
-    if not (v_status->>'ready')::boolean
-       or v_status->>'reason_code'<>'ready'
-       or (v_status->>'comparable_full_baseline_count')::int<>1
+    if (v_status->>'ready')::boolean
+       or v_status->>'reason_code'<>'full_baseline_missing'
+       or (v_status->>'comparable_full_baseline_count')::int<>0
        or (v_status->>'stage4_unlocked')::boolean
     then
-      raise exception 'P2-02 component did not meet Stage-3 closure after baseline component=% payload=%',
+      raise exception 'P2-02 self-marked writing wrongly closed Stage-3 component=% payload=%',
         r.component_code,v_status;
     end if;
 
@@ -282,14 +284,17 @@ begin
     end if;
   end loop;
 
-  -- Both components can now independently satisfy the closure evaluator.
+  -- Each component remains independently blocked pending truly verified Paper.
   v_status:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P1');
   v_other:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P5');
-  if not (v_status->>'ready')::boolean or not (v_other->>'ready')::boolean then
-    raise exception 'P2-02 symmetric P1/P5 closure failed P1=% P5=%',v_status,v_other;
+  if (v_status->>'ready')::boolean or (v_other->>'ready')::boolean
+     or v_status->>'reason_code'<>'full_baseline_missing'
+     or v_other->>'reason_code'<>'full_baseline_missing'
+  then
+    raise exception 'P2-02 unverified P1/P5 written baselines incorrectly qualified P1=% P5=%',v_status,v_other;
   end if;
 
-  -- Reopen one governed P1 key skill: P1 must fail, P5 must remain ready.
+  -- Reopen one governed P1 key skill: P1 must fail L3, P5 remains ungraded.
   select k.skill_code into v_key
   from private.exam_prep_stage3_key_skills k
   where k.rule_version=v_rule and k.program_version_id=v_program and k.component_code='P1'
@@ -304,7 +309,8 @@ begin
   v_other:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P5');
   if (v_status->>'ready')::boolean
      or v_status->>'reason_code'<>'key_l3_incomplete'
-     or not (v_other->>'ready')::boolean
+     or (v_other->>'ready')::boolean
+     or v_other->>'reason_code'<>'full_baseline_missing'
   then
     raise exception 'P2-02 key L3/component firewall failed P1=% P5=%',v_status,v_other;
   end if;
@@ -314,7 +320,7 @@ begin
   where user_id=v_user and program_version_id=v_program
     and component_code='P1' and skill_code=v_key and engine_version=v_engine;
 
-  -- Reopen one non-key P5 skill to L1: P5 must fail L2, P1 must remain ready.
+  -- Reopen one non-key P5 skill to L1: P5 must fail L2, P1 remains ungraded.
   select n.skill_code into v_key
   from private.exam_prep_syllabus_nodes n
   where n.program_version_id=v_program and n.component_code='P5'
@@ -334,7 +340,8 @@ begin
   v_other:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P1');
   if (v_status->>'ready')::boolean
      or v_status->>'reason_code'<>'l2_incomplete'
-     or not (v_other->>'ready')::boolean
+     or (v_other->>'ready')::boolean
+     or v_other->>'reason_code'<>'full_baseline_missing'
   then
     raise exception 'P2-02 all-skills L2/component firewall failed P5=% P1=%',v_status,v_other;
   end if;

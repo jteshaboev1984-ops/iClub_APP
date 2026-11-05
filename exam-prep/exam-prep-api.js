@@ -49,7 +49,7 @@
     if (!script) {
       script = document.createElement("script");
       script.dataset.examPrepProgressUxBoot = "true";
-      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux4");
+      script.src = API_SCRIPT_SRC.replace(/exam-prep-api\.js(?:\?.*)?$/, "exam-prep-progress-ux-boot.js?v=progressux5-periodic1");
       bootLoad = new Promise(resolve => {
         script.addEventListener("load", () => resolve(true), { once: true });
         script.addEventListener("error", () => resolve(false), { once: true });
@@ -160,6 +160,43 @@
   }
 
   async function examMapStatus() { return rpc("get_exam_prep_exam_map_status_safe_v1"); }
+  // Dates remain learner-confirmed, and the horizon begins only after the
+  // corresponding component's actual completed diagnostic. No grade forecast.
+  async function personalHorizon() {
+    return rpc("get_exam_prep_personal_horizon_safe_v1");
+  }
+  async function studySchedule() {
+    return rpc("get_exam_prep_study_schedule_safe_v1");
+  }
+  // Returns only the newest *completed* plan week / study month, and atomically
+  // claims each report once across devices. No daily notifications.
+  async function claimPeriodicStudyReports() {
+    return rpc("claim_exam_prep_periodic_study_report_safe_v1");
+  }
+
+  // Previous week is audited by the existing server against frozen goals and
+  // finalized academic evidence. It measures completed tasks, NOT minutes.
+  async function previousWeekAdherence(componentCode) {
+    return rpc("get_exam_prep_previous_week_adherence_safe_v1", {
+      p_component_code: componentArg(componentCode)
+    });
+  }
+
+  async function saveStudySchedule(minutesPerDay, daysPerWeek) {
+    return rpc("save_exam_prep_study_schedule_safe_v1", {
+      p_minutes_per_day: Number(minutesPerDay),
+      p_days_per_week: Number(daysPerWeek)
+    });
+  }
+
+  async function confirmExamDate(componentCode, scheduledStartAt) {
+    return rpc("save_my_exam_prep_exam_appointment_v2", {
+      p_component_code: componentArg(componentCode),
+      p_scheduled_start_at: String(scheduledStartAt || ""),
+      p_school_confirmed: true
+    });
+  }
+
 
   const componentArg = componentCode => String(componentCode || "");
 
@@ -319,13 +356,27 @@
   }
   async function timedResult(sessionId) { return rpc("get_exam_prep_timed_result_safe_v1", { p_session_id: sessionId }); }
   async function timedReviewPack(sessionId, language = "en") { return rpc("get_exam_prep_timed_review_pack_safe_v1", { p_session_id: sessionId, p_language: language }); }
-  async function submitTimedSelfMark(sessionId, itemOrder, marks, idempotencyKey, reviewNote = null) {
-    return rpc("submit_exam_prep_timed_written_self_mark_safe_v1", {
-      p_session_id: sessionId,
-      p_item_order: Number(itemOrder),
-      p_marks_awarded: Number(marks),
-      p_idempotency_key: String(idempotencyKey || ""),
-      p_review_note: reviewNote || null
+  // Extra Hard is an optional NONCREDIT original-work route with a separate
+  // release gate and private answer keys; no diagnosis/Paper/skill credit.
+  async function extraHardCatalog(componentCode, language = "en") {
+    return rpc("get_my_exam_prep_extra_hard_catalog_safe_v1", {
+      p_component_code: componentArg(componentCode), p_language: language
+    });
+  }
+  async function extraHardStart(taskKey, language = "en") {
+    return rpc("start_my_exam_prep_extra_hard_safe_v1", {
+      p_task_key: String(taskKey || ""), p_language: language
+    });
+  }
+  async function extraHardSubmit(attemptId, responseText, key, language = "en") {
+    return rpc("submit_my_exam_prep_extra_hard_safe_v1", {
+      p_attempt_id: attemptId, p_response_text: String(responseText || ""),
+      p_idempotency_key: String(key || ""), p_language: language
+    });
+  }
+  async function extraHardAttempt(attemptId, language = "en") {
+    return rpc("get_my_exam_prep_extra_hard_attempt_safe_v1", {
+      p_attempt_id: attemptId, p_language: language
     });
   }
   async function readiness(componentCode) { return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: componentArg(componentCode) }); }
@@ -348,7 +399,7 @@
 
   root.api = Object.freeze({
     capabilities,
-    examProfile, saveExamProfile, examMapStatus,
+    examProfile, saveExamProfile, examMapStatus, personalHorizon, confirmExamDate, studySchedule, saveStudySchedule, previousWeekAdherence, claimPeriodicStudyReports,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
@@ -357,7 +408,8 @@
     integrityStatus, recordIntegrityEvent,
     recovery, recordInterruption, authorizeRevalidationItem,
     activePlanSession, weeklyPlan, generateWeeklyPlan, authorizePlanItem,
-    timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack, submitTimedSelfMark,
+    timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack,
+    extraHardCatalog, extraHardStart, extraHardSubmit, extraHardAttempt,
     readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration
   });
 
@@ -372,7 +424,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-horizon1-schedule1-periodic1-stagec-clock20261104-d03-written20261104-p3sharedweek20261104-d09periodbridge20261104-d09evidencefocus20261104");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");
@@ -383,11 +435,11 @@
     load('script[data-exam-prep-profile-completeness]', "examPrepProfileCompleteness", "exam-prep-profile-completeness.js?v=p205profile2");
     load('script[data-exam-prep-recovery]', "examPrepRecovery", "exam-prep-recovery.js?v=p208preserve1");
     load('script[data-exam-prep-exam-map]', "examPrepExamMap", "exam-prep-exam-map.js?v=p209map2");
-    load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1");
+    load('script[data-exam-prep-materials]', "examPrepMaterials", "exam-prep-materials.js?v=p210materials1-p3budgetcss");
     // Explicit pre-set true is still supported for preview/tests. In production,
     // controlled-beta capabilities call loadControlledProgressUx() after auth.
     if (window.iClubExamPrepProgressUxEnabled === true) {
-      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1");
+      load('script[data-exam-prep-progress-ux-boot]', "examPrepProgressUxBoot", "exam-prep-progress-ux-boot.js?v=progressux1-p3sharedweek-d09periodbridge20261104");
     }
   } catch (_) {
     // Fail closed: the host access shell still works without optional learner layers.
