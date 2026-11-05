@@ -14,6 +14,7 @@ AS $function$
   SELECT coalesce((
     SELECT t.timing_comparable
        AND t.server_elapsed_sec>0
+       AND t.answered_items>0  -- a blank or entirely skipped paper cannot satisfy execution evidence
        AND t.attempt_kind<>'diagnostic_full'
        AND s.status='finalized'
        AND s.session_type IN ('timed','paper')
