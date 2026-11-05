@@ -15,6 +15,25 @@ AS $function$
     SELECT t.timing_comparable
        AND t.server_elapsed_sec>0
        AND t.answered_items>0  -- a blank or entirely skipped paper cannot satisfy execution evidence
+       -- Independent saved-response proof: a claimed answered_items counter,
+       -- historical self-awarded marks or a fabricated finalized row alone
+       -- must NEVER qualify as a completed written Paper.
+       AND t.answered_items = (
+         SELECT count(*)::int
+         FROM private.exam_prep_responses r
+         JOIN private.exam_prep_session_items i
+           ON i.session_id=r.session_id AND i.item_order=r.item_order
+         WHERE r.session_id=t.session_id
+           AND r.user_id=t.user_id
+           AND (
+             (i.item_kind='written' AND r.response_kind='written'
+               AND r.learner_artifact IS NOT NULL
+               AND r.learner_artifact NOT IN ('null'::jsonb,'{}'::jsonb,'[]'::jsonb))
+             OR
+             (i.item_kind='question' AND r.response_kind='machine'
+               AND r.is_correct IS NOT NULL)
+           )
+       )
        AND t.attempt_kind<>'diagnostic_full'
        AND s.status='finalized'
        AND s.session_type IN ('timed','paper')
