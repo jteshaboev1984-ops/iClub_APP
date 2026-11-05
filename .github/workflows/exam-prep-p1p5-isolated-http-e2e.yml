@@ -301,7 +301,7 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-isolated-http-positive-mixed-timed.cjs
           node scripts/p1p5-isolated-http-positive-mixed-timed.cjs
-      - name: P4-02 genuine signed written papers: execution comparison is not a score
+      - name: P4-02 signed written papers execution-vs-score proof
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
         run: |
