@@ -17,7 +17,7 @@
   let observer = null, pending = false, requestId = 0, currentIntro = null;
   const WORDS = Object.freeze({
     ru: {
-      title: 'Мой путь к экзамену', start: 'Начало', today: 'Сегодня', exam: 'Экзамены',
+      title: 'Мой путь к экзамену', start: 'Начало', startPending:'После диагностики', today: 'Сегодня', exam: 'Экзамены',
       unset: 'Дата не указана', covered: 'Подтверждено', working: 'В работе',
       unchecked: 'Не проверено', remaining: 'Осталось примерно',
       total: 'Общий остаток', weekly: 'Ориентир в неделю', chosen: 'Сейчас выделено',
@@ -29,7 +29,7 @@
       editTitle:'Даты моих экзаменов', saveDates:'Сохранить даты',
       saving:'Сохранение…', cancel:'Отмена', clear:'Очистить',
       dateHelp:'Выберите даты P1 и P5. Их можно изменить позже.',
-      dateError:'Выберите будущую дату в пределах трёх лет.',
+      dateError:'Выберите будущую дату.',
       saveError:'Не удалось сохранить даты. Попробуйте снова.',
       saved:'Даты сохранены. План пересчитан.',
       enough:'По текущему ориентиру выделенного времени хватает.',
@@ -49,7 +49,7 @@
       acceptFailed:'Не удалось изменить время. Откройте план заново и попробуйте ещё раз.'
     },
     uz: {
-      title: 'Imtihongacha yo‘lim', start: 'Boshlanishi', today: 'Bugun', exam: 'Imtihonlar',
+      title: 'Imtihongacha yo‘lim', start: 'Boshlanishi', startPending:'Diagnostikadan so‘ng', today: 'Bugun', exam: 'Imtihonlar',
       unset: 'Sana kiritilmagan', covered: 'Tasdiqlangan', working: 'O‘rganilmoqda',
       unchecked: 'Tekshirilmagan', remaining: 'Taxminan qoldi',
       total: 'Jami qolgan vaqt', weekly: 'Haftalik mo‘ljal', chosen: 'Hozir ajratilgan',
@@ -61,7 +61,7 @@
       editTitle:'Imtihon sanalarim', saveDates:'Sanalarni saqlash',
       saving:'Saqlanmoqda…', cancel:'Bekor qilish', clear:'Tozalash',
       dateHelp:'P1 va P5 sanalarini tanlang. Keyin o‘zgartirish mumkin.',
-      dateError:'Kelgusi uch yil ichidagi sanani tanlang.',
+      dateError:'Kelajakdagi sanani tanlang.',
       saveError:'Sanalarni saqlab bo‘lmadi. Qayta urinib ko‘ring.',
       saved:'Sanalar saqlandi. Reja yangilandi.',
       enough:'Hozir ajratgan vaqtingiz taxminiy mo‘ljal uchun yetadi.',
@@ -81,7 +81,7 @@
       acceptFailed:'Vaqt o‘zgarmadi. Rejani yangilab, qayta urinib ko‘ring.'
     },
     en: {
-      title: 'My exam timeline', start: 'Started', today: 'Today', exam: 'Exams',
+      title: 'My exam timeline', start: 'Start', startPending:'After diagnostic', today: 'Today', exam: 'Exams',
       unset: 'Date not selected', covered: 'Confirmed', working: 'In progress',
       unchecked: 'Not yet checked', remaining: 'About',
       total: 'Estimated time left', weekly: 'Weekly target', chosen: 'Your current plan',
@@ -93,7 +93,7 @@
       editTitle:'My exam dates', saveDates:'Save dates',
       saving:'Saving…', cancel:'Cancel', clear:'Clear',
       dateHelp:'Choose your P1 and P5 dates. You can change them later.',
-      dateError:'Choose a future date within the next three years.',
+      dateError:'Choose a future date.',
       saveError:'Could not save dates. Please try again.',
       saved:'Dates saved. Study target updated.',
       enough:'Your current study time meets this approximate target.',
@@ -145,6 +145,7 @@
       if (confirmed<0 || attempted<0 || unknown<0 || confirmed+attempted+unknown!==total ||
           s.skills_not_yet_objectively_covered!==total-confirmed) return null;
       cards.push({ code,total,confirmed,attempted,unknown,hours:s.estimated_remaining_study_hours,
+        startAt:s.start_at||null,
         examAt:s.exam_date_status==='valid_exam_date' ? s.exam_at : null,
         paperWeekly:finite(s.estimated_component_weekly_hours,0,100000) ? s.estimated_component_weekly_hours : null });
     }
@@ -195,14 +196,18 @@
     return p.year+'-'+p.month+'-'+p.day;
   }
   function inputBounds() {
-    const day=inputDate(new Date());
-    const limit=inputDate(new Date(Date.now()+Math.floor(365.0*3)*86400000));
+    const today=inputDate(new Date());
     const tomorrow=inputDate(new Date(Date.now()+86400000));
-    return {today:day,min:tomorrow,max:limit};
+    return {today,min:tomorrow};
   }
   function validInputDate(value,bounds) {
-    return value==='' || (/^\d{4}-\d{2}-\d{2}$/.test(value)
-      && value>=bounds.min && value<=bounds.max);
+    if(value==='') return true;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(value) || value<bounds.min) return false;
+    // HTML date input is calendar-based; ensure 2030+ is valid without an
+    // arbitrary 3-year ceiling, but never accept February 30 or malformed days.
+    const parsed=new Date(value+'T12:00:00Z');
+    return Number.isFinite(parsed.getTime()) &&
+      parsed.toISOString().slice(0,10)===value;
   }
   function viewHtml(model,lang='ru') {
     const w=WORDS[lang]||WORDS.ru;
@@ -219,6 +224,7 @@
       return '<div class="ep-tl-paper" data-ep-tl-paper="'+x.code+'">'+
         '<div class="ep-tl-paper-top"><strong>'+x.code+'</strong>'+
         '<span>'+esc(w.remaining)+' <b>'+esc(niceNumber(x.hours,lang))+' '+esc(w.hours)+'</b></span></div>'+
+        '<p class="ep-tl-paper-start">'+esc(w.start)+': '+esc(formatDate(x.startAt,lang)||w.startPending)+'</p>'+
         '<div class="ep-tl-bars" role="img" aria-label="'+esc(w.covered)+' '+x.confirmed+'/'+x.total+'">'+
           '<span class="ep-tl-done" style="width:'+finished.toFixed(2)+'%"></span>'+
           '<span class="ep-tl-active" style="width:'+attempted.toFixed(2)+'%"></span></div>'+
@@ -269,7 +275,7 @@
         '<label for="ep-tl-date-'+x.code+'"><strong>'+x.code+'</strong></label>'+
         '<div class="ep-tl-date-input-line"><input id="ep-tl-date-'+x.code+'" type="date"'+
         ' data-ep-tl-date="'+x.code+'" value="'+esc(inputDate(x.examAt))+'"'+
-        ' min="'+bounds.min+'" max="'+bounds.max+'" autocomplete="off" />'+
+        ' min="'+bounds.min+'" autocomplete="off" />'+
         '<button class="ep-tl-clear" type="button" data-ep-tl-clear="'+x.code+'"'+
         ' aria-label="'+esc(w.clear+' '+x.code)+'">'+esc(w.clear)+'</button></div></div>').join('')+
       '</div><p class="ep-tl-date-hint">'+esc(w.dateHelp)+'</p>'+
@@ -281,7 +287,7 @@
       '<h3 class="ep-tl-title">'+esc(w.title)+'</h3>'+
       '<div class="ep-tl-rail" aria-hidden="true"><span></span><span></span><span></span></div>'+
       '<div class="ep-tl-milestones">'+
-        '<div><span>'+esc(w.start)+'</span><strong>'+date(model.startAt)+'</strong></div>'+
+        '<div><span>'+esc(w.start)+'</span><strong>'+esc(formatDate(model.startAt,lang)||w.startPending)+'</strong></div>'+
         '<div><span>'+esc(w.today)+'</span><strong>'+date(model.asOf)+'</strong></div>'+
         '<div><span>'+esc(w.exam)+'</span><div class="ep-tl-exams">'+exams+'</div></div></div>'+
       '<div class="ep-tl-papers">'+cards+'</div>'+
