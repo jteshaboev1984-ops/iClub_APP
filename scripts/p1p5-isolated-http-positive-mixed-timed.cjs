@@ -18,8 +18,12 @@ assert(process.env.CI==='true'&&process.env.P1P5_E2E_ISOLATED==='true'&&
  process.env.PGDATABASE==='postgres','REFUSED: not ephemeral local GitHub PG');
 assert(SIGNING_KEY?.length>=32,'REFUSED: unsigned test auth');
 const e=o=>Buffer.from(JSON.stringify(o)).toString('base64url');
-function jwt(uid){
- const h=e({alg:'HS256',typ:'JWT'})+'.'+e({role:'authenticated',aud:'authenticated',sub:uid,iat:Math.floor(Date.now()/1000),exp:Math.floor(Date.now()/1000)+3600});
+function jwt(uid,claimOverrides={}){
+ const h=e({alg:'HS256',typ:'JWT'})+'.'+e({
+   role:'authenticated',aud:'authenticated',sub:uid,
+   iat:Math.floor(Date.now()/1000),exp:Math.floor(Date.now()/1000)+3600,
+   ...claimOverrides
+ });
  return h+'.'+crypto.createHmac('sha256',SIGNING_KEY).update(h).digest('base64url');
 }
 function sql(statement){
