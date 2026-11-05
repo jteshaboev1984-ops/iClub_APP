@@ -67,8 +67,8 @@ function fixture(){
 async function main(){
   assert(JS.includes("window.iClubExamPrepSimpleTimelineUiEnabled !== true"),
     'Module must remain opt-in and fail-closed');
-  assert(INDEX.includes('exam-prep-simple-timeline-ui.js?v=d09-07-t0dates-4y'));
-  assert(INDEX.includes('exam-prep-simple-timeline-ui.css?v=d09-07-t0dates'));
+  assert(INDEX.includes('exam-prep-simple-timeline-ui.js?v=d10-03-examyear-source1'));
+  assert(INDEX.includes('exam-prep-simple-timeline-ui.css?v=d10-03-source1'));
   assert(CSS.includes('@media (max-width:540px)'));
   assert(CSS.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
   assert(!CSS.includes('!important'));
