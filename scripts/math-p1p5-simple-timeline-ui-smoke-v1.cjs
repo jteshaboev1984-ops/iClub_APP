@@ -49,16 +49,16 @@ function fixture(){
     factors_are_iclub_planning_assumptions_not_official_cambridge:true,
     source_guided_hours_are_not_private_study_hours:true,
     recommended_schedule_applied_automatically:false,learning_evidence_mutated:false,
-    start_at:'2026-09-15T00:00:00+05:00',as_of:'2026-11-03T10:00:00+05:00',
+    start_at:'2026-10-01T11:00:00+05:00',as_of:'2026-11-03T10:00:00+05:00',
     existing_chosen_math_hours_per_week:10,
     student_total_hours_per_week:12,student_budget_profile_revision:2,
     joint_paper_dates_status:'both_paper_dates_confirmed',
     estimated_joint_math_hours_per_week:8.9,estimated_remaining_math_hours:111.7,
-    P1:{component_code:'P1',total_syllabus_skills:45,objectively_covered_skills:5,
+    P1:{component_code:'P1',start_at:'2026-10-01T11:00:00+05:00',total_syllabus_skills:45,objectively_covered_skills:5,
       already_attempted_not_yet_confirmed_skills:10,not_yet_checked_skills:30,
       skills_not_yet_objectively_covered:40,estimated_remaining_study_hours:63.5,
       exam_date_status:'valid_exam_date',exam_at:'2027-05-12T09:00:00+05:00'},
-    P5:{component_code:'P5',total_syllabus_skills:36,objectively_covered_skills:0,
+    P5:{component_code:'P5',start_at:'2026-10-20T11:00:00+05:00',total_syllabus_skills:36,objectively_covered_skills:0,
       already_attempted_not_yet_confirmed_skills:3,not_yet_checked_skills:33,
       skills_not_yet_objectively_covered:36,estimated_remaining_study_hours:48.2,
       exam_date_status:'valid_exam_date',exam_at:'2027-05-20T09:00:00+05:00'}
@@ -84,6 +84,19 @@ async function main(){
   assert.equal(model.weekly,8.9);
   assert.equal(model.cards[0].confirmed,5);
   assert.equal(model.cards[1].unknown,33);
+  assert.equal(model.startAt,'2026-10-01T11:00:00+05:00',
+    'Timeline starts at completed Stage0, not profile signup');
+  assert.equal(model.cards[0].startAt,'2026-10-01T11:00:00+05:00');
+  assert.equal(model.cards[1].startAt,'2026-10-20T11:00:00+05:00');
+  const differentT0=ui.viewHtml(model,'en');
+  assert(differentT0.includes('01 Oct 2026')&&differentT0.includes('20 Oct 2026'),
+    'P1/P5 separate diagnostic start dates must both render');
+  const pendingStart=fixture();
+  pendingStart.start_at=null;pendingStart.P1.start_at=null;pendingStart.P5.start_at=null;
+  for(const [loc,expected] of [['ru','После диагностики'],['uz','Diagnostikadan so‘ng'],['en','After diagnostic']]){
+    assert(ui.viewHtml(ui.parsePayload(pendingStart),loc).includes(expected),
+      'No unverified signup date presented as the diagnostic start: '+loc);
+  }
   assert.equal(model.canAdopt,false,'Already enough time does not create pointless button');
   const short=fixture();
   short.existing_chosen_math_hours_per_week=4;
@@ -150,9 +163,11 @@ async function main(){
   assert.equal(ui.parsePayload(staleProfile).canAdopt,false,
     'One-click update requires real current owner profile revision');
   assert.equal(ui.inputDate('2027-05-12T07:00:00Z'),'2027-05-12');
-  assert.equal(ui.validInputDate('2028-05-12',{min:'2027-01-01',max:'2029-12-31'}),true);
-  assert.equal(ui.validInputDate('2024-01-01',{min:'2027-01-01',max:'2029-12-31'}),false);
-  assert.equal(ui.validInputDate('2032-01-01',{min:'2027-01-01',max:'2029-12-31'}),false);
+  assert.equal(ui.validInputDate('2028-05-12',{min:'2027-01-01'}),true);
+  assert.equal(ui.validInputDate('2024-01-01',{min:'2027-01-01'}),false);
+  assert.equal(ui.validInputDate('2032-01-01',{min:'2027-01-01'}),true);
+  assert.equal(ui.validInputDate('2036-05-12',{min:'2027-01-01'}),true);
+  assert.equal(ui.validInputDate('2028-02-30',{min:'2027-01-01'}),false);
   for(const [lang,label] of [['ru','Мой путь к экзамену'],['uz','Imtihongacha yo‘lim'],['en','My exam timeline']]){
     const markup=ui.viewHtml(model,lang);
     assert(markup.includes(label),lang);
@@ -160,6 +175,7 @@ async function main(){
       markup.includes('data-ep-tl-paper="P5"'));
     assert(markup.includes('data-ep-simple-timeline'));
     assert(markup.includes('data-ep-tl-date-editor') && markup.includes('type="date"'));
+    assert(!markup.includes(' max="'),'Personal exam dates must not be capped at three years');
     assert(markup.includes('data-ep-tl-open-date="P1"') && markup.includes('data-ep-tl-open-date="P5"'));
     assert(markup.includes('data-ep-tl-save disabled'),'One-save control must start disabled');
     assert(!/school|школ|maktab/i.test(markup),'No school confirmation UI');
