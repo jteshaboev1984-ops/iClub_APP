@@ -108,9 +108,10 @@ BEGIN
      or position('t.comparison_scope=''full''' in v_def)=0
      or position('and t.strict_timing' in v_def)=0
      or position('and t.timing_comparable' in v_def)=0
-     or position('private.exam_prep_timed_score_comparable_v1(t.session_id)' in v_def)=0
+     or position('private.exam_prep_timed_execution_comparable_v1(t.session_id)' in v_def)=0
+     or position('private.exam_prep_timed_score_comparable_v1(t.session_id)' in v_def)<>0
   then
-    raise exception 'P2-04 comparable-full definition drifted';
+    raise exception 'P2-04 strict full-paper execution-comparable definition drifted';
   end if;
 
   select pg_get_functiondef('private.exam_prep_stage4_exit_status_v1(uuid,bigint,text)'::regprocedure)

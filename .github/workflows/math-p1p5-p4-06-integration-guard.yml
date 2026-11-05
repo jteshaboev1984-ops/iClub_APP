@@ -1,0 +1,33 @@
+name: Mathematics P1 P5 P4-06 source-only integration guard
+
+on:
+  push:
+    branches:
+      - feature/math-p1p5-p4-written-evidence-contract-20261105
+    paths:
+      - 'supabase/migrations/20261105*exam_prep_p1p5*.sql'
+      - 'supabase/tests/p1p5_p4_05_*.sql'
+      - 'scripts/p1p5-isolated-http-*.cjs'
+      - 'scripts/math-p1p5-p4-06-release-integration-guard.cjs'
+      - 'docs/math-p1p5-p4-06-release-integration-checkpoint-20261105.md'
+      - 'docs/math-p1p5-v2-1-stage3-6-written-evidence-recovery-plan-20261105.md'
+      - '.github/workflows/math-p1p5-p4-06-integration-guard.yml'
+  pull_request:
+    paths:
+      - 'supabase/migrations/20261105*exam_prep_p1p5*.sql'
+      - 'supabase/tests/p1p5_p4_05_*.sql'
+      - 'scripts/p1p5-isolated-http-*.cjs'
+      - 'scripts/math-p1p5-p4-06-release-integration-guard.cjs'
+      - 'docs/math-p1p5-p4-06-release-integration-checkpoint-20261105.md'
+      - '.github/workflows/math-p1p5-p4-06-integration-guard.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fail-closed-source-only:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check scripts/math-p1p5-p4-06-release-integration-guard.cjs
+      - run: node scripts/math-p1p5-p4-06-release-integration-guard.cjs

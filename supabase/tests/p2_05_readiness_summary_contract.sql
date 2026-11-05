@@ -142,15 +142,24 @@ BEGIN
     raise exception 'P2-05 learner summary RPC privilege boundary drift';
   end if;
 
-  -- Mentor verification must be optional service value, not a Core progression dependency.
-  -- Automatic Stage 5 -> 6 progression is driven only by deterministic App Readiness.
+  -- Mentor verification is optional service value, NEVER a Core stage gate.
+  -- P4-04 explicitly separates Stage6 *operational* Final Calibration
+  -- from still-ungraded Stage5 App Readiness. Do not revert to the
+  -- all-written/zero-marks score gate or make mentor a prerequisite.
   select pg_get_functiondef('private.exam_prep_apply_stage0_gate_v1()'::regprocedure)
   into v_def;
-  if position('private.exam_prep_stage5_readiness_status_v1' in v_def)=0
+  if position('private.exam_prep_stage5_operational_completion_v1(new.user_id,new.program_version_id,new.component_code)' in v_def)=0
+     or position('operational_calibration_access' in v_def)=0
+     or position('private.exam_prep_stage5_readiness_status_v1(new.user_id' in v_def)>0
      or position('mentor_verified' in lower(v_def))>0
      or position('exam_prep_mentor_verified_readiness_status_v1' in lower(v_def))>0 then
-    raise exception 'P2-05 Mentor Verified leaked into automatic stage progression';
+    raise exception 'P2-05 Core operational calibration/Mentor firewall drifted';
   end if;
+  select pg_get_functiondef('private.exam_prep_apply_readiness_projection_v1()'::regprocedure)
+  into v_def;
+  if position('private.exam_prep_stage5_readiness_status_v1' in v_def)=0
+     or position('private.exam_prep_stage5_operational_completion_v1' in v_def)>0
+  then raise exception 'P2-05 ungraded exam readiness was conflated with operational Stage6'; end if;
 END
 $$;
 
