@@ -14,9 +14,21 @@ BEGIN
  IF current_database()<>'postgres'
     OR current_setting('iclub.e2e_isolated',true) IS DISTINCT FROM 'true'
     OR current_setting('server_version_num')::int < 170000
-    OR (SELECT count(*) FROM public.users)<>3
-    OR (SELECT count(*) FROM auth.users)<>3 THEN
-  RAISE EXCEPTION 'P6 REFUSED: not disposable completed 3-user PG17';
+    -- The canonical 3rd learner is deliberately deleted by the earlier
+    -- successful P4-05 synthetic cleanup. The two login fixtures remain.
+    OR (SELECT count(*) FROM public.users)<>2
+    OR (SELECT count(*) FROM auth.users)<>2
+    OR NOT EXISTS(
+      SELECT 1 FROM auth.users
+      WHERE id='11111111-1111-4111-8111-111111111191'::uuid
+        AND email='math-e2e-a@localhost.invalid'
+    )
+    OR NOT EXISTS(
+      SELECT 1 FROM auth.users
+      WHERE id='22222222-2222-4222-8222-222222222292'::uuid
+        AND email='math-e2e-b@localhost.invalid'
+    ) THEN
+  RAISE EXCEPTION 'P6 REFUSED: not disposable post-cleanup 2-user PG17';
  END IF;
  -- The CI core-only schema intentionally omits app-level subject tables.
  -- Reproduce their real membership columns ONLY within this ROLLBACK fixture;
@@ -31,12 +43,13 @@ BEGIN
    INSERT INTO public.subjects(id,subject_key,is_active)
    SELECT coalesce(max(id),0)+100,'mathematics',true FROM public.subjects;
  END IF;
- SELECT user_id INTO v_math
- FROM private.exam_prep_synthetic_identities
- WHERE identity_kind='learner' AND identity_status='active'
- ORDER BY created_at DESC LIMIT 1;
+ -- Real seeded signed learners survive prior academic run cleanup.
+ -- Use their canonical IDs rather than the *deliberately retired*
+ -- temporary P4 learner registry.
+ SELECT id INTO v_math FROM public.users
+ WHERE id='11111111-1111-4111-8111-111111111191'::uuid;
  SELECT id INTO v_foreign FROM public.users
- WHERE id<>v_math ORDER BY id LIMIT 1;
+ WHERE id='22222222-2222-4222-8222-222222222292'::uuid;
  SELECT id INTO v_math_subject FROM public.subjects
  WHERE subject_key='mathematics' AND is_active IS TRUE ORDER BY id LIMIT 1;
  IF v_math IS NULL OR v_foreign IS NULL OR v_math_subject IS NULL
