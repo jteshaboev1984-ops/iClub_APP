@@ -1,5 +1,5 @@
--- D09-07: owner-only future personal dates can extend beyond the old
--- three-year artificial cutoff, while the genuine Stage0 start stays frozen.
+-- D09-07: architect-approved four-year personal date ceiling; keep
+-- real separate P1/P5 Stage0 start frozen and independent.
 -- DISPOSABLE PG17 only. Entire fake-user write test rolls back atomically.
 \set ON_ERROR_STOP on
 -- Snapshot exactly the current two synthetic owner date rows OUTSIDE the
@@ -25,6 +25,7 @@ DECLARE
  v_today date;
  v_future_p1 date;
  v_future_p5 date;
+ v_too_late date;
  v_before_other jsonb;
  v_after_other jsonb;
  v_before_session_count integer;
@@ -34,6 +35,7 @@ DECLARE
  v_result jsonb;
  v_t0 jsonb;
  v_rejected boolean:=false;
+ v_rejected_too_late boolean:=false;
 BEGIN
  IF current_database()<>'postgres'
     OR current_setting('server_version_num')::int<170000
@@ -53,8 +55,9 @@ BEGIN
  WHERE user_id=v_user;
  v_before_profile_revision:=v_profile.profile_revision;
  v_today:=(now() at time zone 'Asia/Tashkent')::date;
- v_future_p1:=(v_today+interval '4 years')::date;
- v_future_p5:=(v_today+interval '8 years')::date;
+ v_future_p1:=(v_today+interval '18 months')::date;
+ v_future_p5:=(v_today+interval '4 years')::date;
+ v_too_late:=(v_today+interval '4 years 1 day')::date;
  SELECT count(*) INTO v_before_session_count FROM private.exam_prep_sessions
  WHERE user_id=v_user;
  SELECT count(*) INTO v_before_plan_count FROM private.exam_prep_weekly_plans
@@ -78,7 +81,7 @@ BEGIN
      WHERE user_id=v_user AND component_code='P1') IS DISTINCT FROM v_future_p1
    OR (SELECT exam_date FROM private.exam_prep_learner_exam_dates_v1
      WHERE user_id=v_user AND component_code='P5') IS DISTINCT FROM v_future_p5
- THEN RAISE EXCEPTION 'D09-07 2030+/2034+ dates not saved as selected'; END IF;
+ THEN RAISE EXCEPTION 'D09-07 18-month and exact four-year personal dates not saved'; END IF;
  v_t0:=public.get_exam_prep_diagnostic_periods_safe_v1();
  SELECT profile_revision INTO STRICT v_after_profile_revision
  FROM private.exam_prep_exam_profiles WHERE user_id=v_user;
@@ -90,8 +93,20 @@ BEGIN
        (v_result->'P5'->>'start_at')::timestamptz
  THEN RAISE EXCEPTION 'D09-07 exam date changed the independent genuine diagnostic start'; END IF;
 
- -- Ordinary past/today values remain invalid; clearing is a separate,
- -- deliberate owner action. Neither is an education-access restriction.
+ -- A date one day beyond the agreed four-year limit must be rejected
+ -- by the real owner RPC without changing the previously saved dates.
+ BEGIN
+   PERFORM public.save_my_exam_prep_timeline_dates_safe_v1(v_future_p1,v_too_late);
+ EXCEPTION WHEN SQLSTATE '22007' THEN
+   v_rejected_too_late:=true;
+ END;
+ IF NOT v_rejected_too_late
+ THEN RAISE EXCEPTION 'D09-07 accepted date beyond four years'; END IF;
+ IF (SELECT exam_date FROM private.exam_prep_learner_exam_dates_v1
+     WHERE user_id=v_user AND component_code='P5') IS DISTINCT FROM v_future_p5
+ THEN RAISE EXCEPTION 'D09-07 rejected overflow changed saved date'; END IF;
+
+ -- Past/today remains invalid and a deliberate clear remains possible.
  BEGIN
    PERFORM public.save_my_exam_prep_timeline_dates_safe_v1(v_today,v_future_p5);
  EXCEPTION WHEN SQLSTATE '22007' THEN
@@ -112,7 +127,7 @@ BEGIN
  WHERE d.user_id<>v_user;
  IF v_after_other IS DISTINCT FROM v_before_other
  THEN RAISE EXCEPTION 'D09-07 foreign learner date records changed'; END IF;
- RAISE NOTICE 'D09-07 PASS: owner saved P1/P5 4/8-year future dates, preserved independent Stage0, accepted deliberate clear, rejected past, kept plans and foreign users';
+ RAISE NOTICE 'D09-07 PASS: real owner saved 18-month and four-year personal dates, rejected overflow and past, preserved Stage0, plans and foreign users';
 END;
 $proof$;
 ROLLBACK;
