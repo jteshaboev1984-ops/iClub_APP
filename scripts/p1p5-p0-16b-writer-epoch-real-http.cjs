@@ -56,7 +56,13 @@ async function main(){
    ['start','start_exam_prep_session_safe_v1',{p_authorization_id:'00000000-0000-4000-8000-000000000001',p_idempotency_key:'p016b-oldtab-start'}],
    ['answer','submit_exam_prep_response_safe_v1',{p_session_id:p1.id,p_item_order:1,p_payload:{answer:'A'},p_idempotency_key:'p016b-oldtab-answer',p_elapsed_ms:1200,p_language:'en'}],
    ['finish P1','finalize_exam_prep_timed_safe_v1',{p_session_id:p1.id,p_idempotency_key:'p016b-oldtab-paper1',p_completion_reason:'submitted'}],
-   ['finish P5','finalize_exam_prep_timed_safe_v1',{p_session_id:p5.id,p_idempotency_key:'p016b-oldtab-paper5',p_completion_reason:'submitted'}]
+   ['finish P5','finalize_exam_prep_timed_safe_v1',{p_session_id:p5.id,p_idempotency_key:'p016b-oldtab-paper5',p_completion_reason:'submitted'}],
+   ['next diagnostic','start_exam_prep_next_diagnostic_safe_v1',{p_component_code:'P1',p_idempotency_key:'p016b-oldtab-diagnostic'}],
+   ['finish learning','finalize_exam_prep_session_safe_v1',{p_session_id:p1.id,p_idempotency_key:'p016b-oldtab-learning'}],
+   ['finish written','finalize_exam_prep_session_written_v1',{p_session_id:p1.id,p_idempotency_key:'p016b-oldtab-written'}],
+   ['advance written','advance_exam_prep_written_step_safe_v1',{p_session_id:p1.id,p_item_order:1,p_idempotency_key:'p016b-oldtab-step'}],
+   ['weekly action','authorize_exam_prep_plan_item_safe_v1',{p_plan_id:'00000000-0000-4000-8000-000000000001',p_priority_order:1}],
+   ['weekly plan','generate_exam_prep_weekly_plan_safe_v3',{p_component_code:'P1'}]
   ];
   for(const [label,name,args] of cases){
    const r=await rpc(name,args,old);
@@ -80,7 +86,7 @@ async function main(){
   'cutoff disabled compatibility');
  assert(rollback.replayed===true,'disabled cutoff broke old-token normal behavior');
  assert.deepEqual(snapshot(uid),before,'rollback modified progress');
- console.log('P0-16B PASS: real old tab blocked on four Paper write RPCs, fresh signed JWT resumes P1/P5, saved scores and progress unchanged, cutoff OFF');
+ console.log('P0-16B PASS: real old tab blocked on ten common Core/Paper write RPCs, fresh signed JWT resumes P1/P5, saved scores and progress unchanged, cutoff OFF');
  console.log('P0-16B OPEN: other writers, nested triggers, app-build refresh and release signoff');
 }
 main().catch(e=>{console.error('P0-16B FAIL',e.stack||e.message);process.exitCode=1});

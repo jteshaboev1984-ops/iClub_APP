@@ -27,3 +27,14 @@ or a permission for a rollout.
 No production SQL, main merge, Vercel deploy, feature/cutoff activation,
 beta cleanup, learner-data deletion, Practice, Tours, certificates or other
 subjects are authorized. DRAFT PR #493 is a separate partial metadata audit.
+
+## 2026-11-05 practical Core continuation
+
+The same OFF-by-default guard now covers **six additional everyday
+learner-side write entry points**: next diagnostic, ordinary session finalize,
+governed written-step finalize, written Next, weekly action authorization,
+and weekly plan regeneration. The existing common session-start/response
+guard protects all question types. Tests use the same signed learner/token
+epoch and assert identical P1/P5 persisted row fingerprints before and after
+old-token rejection. Other Core writer functions and server triggers remain
+separate open P0-16B coverage, not an invented complete audit.
