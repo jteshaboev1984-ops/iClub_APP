@@ -44,7 +44,7 @@ requireAll(calibration,['exam_prep_stage5_operational_completion_v1',
  'P4-04 Core graduation independent from verified grades');
 requireAll(sync,['finalize_exam_prep_timed_safe_v1','insert into private.exam_prep_timed_attempt_results',
  'v_answered>0','perform private.rebuild_exam_prep_state_v1(v_uid,v_s.component_code)',
- 'v_hits<>1','security','REVOKE ALL','FROM PUBLIC,anon'],
+ 'v_hits<>1','SECURITY DEFINER','search_path TO','REVOKE ALL','FROM PUBLIC,anon'],
  'P4-05 post-ledger state rebuild');
 requireAll(triple,['stage4_full_paper_02','stage4_full_paper_03',
  'stage2_timed_block_02','proveSignedTimedClock','scoreComparable===false',
