@@ -629,6 +629,20 @@ jobs:
           grep -Fq 'D09-05 UX PASS en 1280px' /tmp/p1p5-d09-05-focus-browser.log
           echo 'D09-05 PASS: source-grounded next-step projection and native locale layouts; no extra weekly quotas'
 
+      - name: P6 Mathematics-only public Core path (default OFF, disposable PG17)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_p6_math_public_core_membership_disposable.sql 2>&1 | tee /tmp/p1p5-p6-math-public-core.log
+          grep -Fq 'P6 MASS ACCESS PASS:' /tmp/p1p5-p6-math-public-core.log
+          grep -Fq 'P6 MASS ACCESS ROLLBACK PASS' /tmp/p1p5-p6-math-public-core.log
+
       - name: Remove local HTTP server
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
