@@ -1,0 +1,212 @@
+/* Optional iClub Mathematics timeline; selector scoped to Exam Prep only. */
+#exam-prep-host-root .ep-tl-card {
+  display:grid;
+  gap:12px;
+  padding:16px;
+  margin:0 0 14px;
+  border:1px solid rgba(47,111,214,.23);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(47,111,214,.075),rgba(47,111,214,.025) 55%,transparent);
+  color:inherit;
+  box-sizing:border-box;
+  min-width:0;
+}
+#exam-prep-host-root .ep-tl-title {margin:0;font-size:16px;font-weight:800;letter-spacing:-.015em;line-height:1.3}
+#exam-prep-host-root .ep-tl-rail {
+  display:flex;align-items:center;justify-content:space-between;
+  height:12px;position:relative;margin:2px 9px -6px;
+}
+#exam-prep-host-root .ep-tl-rail::before {
+  content:"";position:absolute;left:0;right:0;top:5px;height:2px;
+  background:linear-gradient(90deg,rgba(47,111,214,.82),rgba(47,111,214,.35));
+}
+#exam-prep-host-root .ep-tl-rail span {
+  width:10px;height:10px;z-index:1;border-radius:50%;
+  background:var(--primary,#2f6fd6);
+  box-shadow:0 0 0 3px var(--ep-timeline-dot-halo,rgba(47,111,214,.12));
+}
+#exam-prep-host-root .ep-tl-rail span:last-child{background:transparent;border:2px solid var(--primary,#2f6fd6);box-sizing:border-box}
+#exam-prep-host-root .ep-tl-milestones{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:9px;min-width:0}
+#exam-prep-host-root .ep-tl-milestones>div{display:grid;align-content:start;gap:4px;min-width:0}
+#exam-prep-host-root .ep-tl-milestones>div:nth-child(2){text-align:center}
+#exam-prep-host-root .ep-tl-milestones>div:last-child{text-align:right}
+#exam-prep-host-root .ep-tl-milestones>div>span{font-size:11px;opacity:.65}
+#exam-prep-host-root .ep-tl-milestones strong{font-size:12px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+#exam-prep-host-root .ep-tl-exams{display:grid;gap:3px;font-size:11px;line-height:1.4}
+#exam-prep-host-root .ep-tl-exams strong{font-size:11px}
+#exam-prep-host-root .ep-tl-papers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#exam-prep-host-root .ep-tl-paper{
+  min-width:0;padding:12px;border:1px solid rgba(127,127,127,.18);
+  border-radius:12px;background:rgba(127,127,127,.035);display:grid;gap:9px;
+}
+#exam-prep-host-root .ep-tl-paper-top{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0}
+#exam-prep-host-root .ep-tl-paper-top>strong{font-size:15px}
+#exam-prep-host-root .ep-tl-paper-top>span{font-size:11px;opacity:.8;text-align:right;overflow-wrap:anywhere}
+#exam-prep-host-root .ep-tl-paper-top b{font-size:13px;white-space:nowrap}
+#exam-prep-host-root .ep-tl-bars{display:flex;width:100%;height:7px;border-radius:99px;overflow:hidden;background:rgba(127,127,127,.17)}
+#exam-prep-host-root .ep-tl-bars span{display:block;height:100%;flex:none;max-width:100%}
+#exam-prep-host-root .ep-tl-done{background:#21986d}
+#exam-prep-host-root .ep-tl-active{background:#d5a449}
+#exam-prep-host-root .ep-tl-paper-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#exam-prep-host-root .ep-tl-paper-details span{display:grid;gap:2px;min-width:0;font-size:10px;opacity:.78;overflow-wrap:anywhere}
+#exam-prep-host-root .ep-tl-paper-details b{font-size:12px;opacity:1}
+#exam-prep-host-root .ep-tl-bottom{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:stretch}
+#exam-prep-host-root .ep-tl-stat{
+  display:grid;align-content:center;gap:5px;padding:10px;
+  background:rgba(47,111,214,.055);border-radius:10px;min-width:0;
+}
+#exam-prep-host-root .ep-tl-stat span{font-size:11px;line-height:1.3;opacity:.7}
+#exam-prep-host-root .ep-tl-stat strong{font-size:17px;line-height:1.2;font-weight:800;overflow-wrap:anywhere}
+#exam-prep-host-root .ep-tl-guidance{
+  grid-column:span 2;align-self:center;margin:0;font-size:12px;line-height:1.45;opacity:.75;
+}
+#exam-prep-host-root .ep-tl-footnote{font-size:11px;line-height:1.5;opacity:.68;margin:0}
+@media (max-width:540px){
+  #exam-prep-host-root .ep-tl-card{padding:13px;gap:11px}
+  #exam-prep-host-root .ep-tl-papers{grid-template-columns:1fr}
+  #exam-prep-host-root .ep-tl-bottom{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #exam-prep-host-root .ep-tl-stat{padding:9px}
+  #exam-prep-host-root .ep-tl-stat strong{font-size:16px}
+  #exam-prep-host-root .ep-tl-guidance{grid-column:span 2}
+}
+@media (max-width:350px){
+  #exam-prep-host-root .ep-tl-bottom{grid-template-columns:1fr}
+  #exam-prep-host-root .ep-tl-guidance{grid-column:span 1}
+  #exam-prep-host-root .ep-tl-milestones{gap:5px}
+}
+
+/* P2-16 — Native mobile date pickers with one clear Save action. */
+#exam-prep-host-root .ep-tl-exams{width:100%;justify-items:stretch;gap:5px}
+#exam-prep-host-root .ep-tl-exam-chip{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;gap:6px;width:100%;max-width:240px;margin-left:auto;
+  border:1px solid rgba(47,111,214,.24);border-radius:9px;
+  padding:6px 8px;background:rgba(47,111,214,.06);color:inherit;
+  font:inherit;text-align:left;cursor:pointer;min-height:32px;
+  box-sizing:border-box;
+}
+#exam-prep-host-root .ep-tl-exam-chip>span{
+  font-size:11px;text-align:right;min-width:0;overflow-wrap:anywhere;
+}
+#exam-prep-host-root .ep-tl-exam-chip svg{flex:none;opacity:.75}
+#exam-prep-host-root .ep-tl-exam-chip:focus-visible,
+#exam-prep-host-root .ep-tl-date-editor button:focus-visible,
+#exam-prep-host-root .ep-tl-date-editor input:focus-visible{
+  outline:2px solid var(--primary,#2f6fd6);outline-offset:2px;
+}
+#exam-prep-host-root .ep-tl-date-editor:not([hidden]){
+  display:grid;gap:12px;padding:13px;
+  border:1px solid rgba(47,111,214,.25);border-radius:12px;
+  background:rgba(47,111,214,.035);min-width:0;
+}
+#exam-prep-host-root .ep-tl-date-editor h4{margin:0;font-size:14px;font-weight:800}
+#exam-prep-host-root .ep-tl-date-fields{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;
+}
+#exam-prep-host-root .ep-tl-date-field{min-width:0;display:grid;gap:6px}
+#exam-prep-host-root .ep-tl-date-field label{font-size:12px;line-height:1.4}
+#exam-prep-host-root .ep-tl-date-input-line{
+  display:flex;align-items:center;gap:5px;min-width:0;
+}
+#exam-prep-host-root .ep-tl-date-input-line input{
+  display:block;min-width:0;width:100%;flex:1;
+  border:1px solid rgba(127,127,127,.3);border-radius:9px;
+  color:inherit;background:var(--surface,#fff);
+  padding:10px 7px;font:inherit;font-size:14px;
+  min-height:43px;box-sizing:border-box;
+  color-scheme:light dark;
+}
+#exam-prep-host-root .ep-tl-clear{
+  flex:none;align-self:stretch;padding:0 7px;border:0;
+  background:transparent;color:inherit;font-size:11px;
+  opacity:.72;text-decoration:underline;text-underline-offset:2px;
+  cursor:pointer;
+}
+#exam-prep-host-root .ep-tl-date-hint{
+  font-size:11px;line-height:1.4;opacity:.75;margin:0;
+}
+#exam-prep-host-root .ep-tl-date-error:not([hidden]){
+  margin:0;padding:8px;border-radius:8px;font-size:12px;
+  background:rgba(190,35,50,.08);
+}
+#exam-prep-host-root .ep-tl-date-actions{
+  display:grid;grid-template-columns:1fr 1fr;gap:9px;
+}
+#exam-prep-host-root .ep-tl-date-actions>button{
+  display:flex;align-items:center;justify-content:center;min-height:44px;
+  border-radius:10px;padding:9px;font:inherit;font-size:13px;
+  font-weight:750;cursor:pointer;box-sizing:border-box;
+}
+#exam-prep-host-root .ep-tl-date-actions>[data-ep-tl-cancel]{
+  border:1px solid rgba(127,127,127,.3);background:transparent;color:inherit;
+}
+#exam-prep-host-root .ep-tl-date-save{
+  border:1px solid var(--primary,#2f6fd6);
+  background:var(--primary,#2f6fd6);color:#fff;
+}
+#exam-prep-host-root .ep-tl-date-save:disabled{cursor:default;opacity:.45}
+#exam-prep-host-root .ep-tl-date-success:not([hidden]){
+  margin:0;color:var(--success,#198c64);font-size:12px;
+  font-weight:700;line-height:1.45;
+}
+@media(max-width:540px){
+  #exam-prep-host-root .ep-tl-date-fields{grid-template-columns:1fr}
+  #exam-prep-host-root .ep-tl-exam-chip{
+    max-width:180px;gap:4px;padding:6px;
+  }
+}
+@media(max-width:350px){
+  #exam-prep-host-root .ep-tl-date-actions{grid-template-columns:1fr 1fr}
+  #exam-prep-host-root .ep-tl-exam-chip{
+    grid-template-columns:auto minmax(0,1fr);
+  }
+  #exam-prep-host-root .ep-tl-exam-chip svg{display:none}
+}
+
+/* P2-17: learner-friendly comparison; never a study restriction. */
+#exam-prep-host-root .ep-tl-compare{
+  display:grid;gap:8px;padding:11px 12px;border-radius:11px;
+  background:rgba(47,111,214,.045);
+  border:1px solid rgba(47,111,214,.13);
+  min-width:0;box-sizing:border-box;
+}
+#exam-prep-host-root .ep-tl-compare p{margin:0;font-size:12px;line-height:1.5}
+#exam-prep-host-root .ep-tl-compare .ep-tl-enough{color:var(--success,#21825d);font-weight:700}
+#exam-prep-host-root .ep-tl-compare .ep-tl-short strong{font-size:14px;overflow-wrap:anywhere}
+#exam-prep-host-root .ep-tl-compare .ep-tl-extra-hours{font-size:11px;opacity:.72;white-space:nowrap}
+#exam-prep-host-root .ep-tl-compare .ep-tl-total-cap{opacity:.75}
+#exam-prep-host-root .ep-tl-compare .ep-tl-scope{font-size:11px;opacity:.72}
+/* P2-18: one balanced choice group; no hidden automatic change. */
+#exam-prep-host-root .ep-tl-time-choices{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;align-items:stretch;min-width:0;
+}
+#exam-prep-host-root .ep-tl-time-choice{
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:3px;min-width:0;min-height:56px;padding:10px 9px;
+  border:1px solid rgba(47,111,214,.32);border-radius:10px;
+  font:inherit;font-weight:700;font-size:12px;line-height:1.35;
+  text-align:center;overflow-wrap:anywhere;cursor:pointer;box-sizing:border-box;
+}
+#exam-prep-host-root .ep-tl-time-choice-secondary{
+  color:inherit;background:transparent;
+}
+#exam-prep-host-root .ep-tl-time-choice-primary{
+  border-color:var(--primary,#2f6fd6);
+  background:var(--primary,#2f6fd6);color:#fff;
+}
+#exam-prep-host-root .ep-tl-time-choice strong{
+  display:block;font-size:12px;font-weight:800;
+}
+#exam-prep-host-root .ep-tl-time-choice:disabled{opacity:.55;cursor:default}
+#exam-prep-host-root .ep-tl-time-choice:focus-visible,
+#exam-prep-host-root .ep-live-study-schedule:focus-within{
+  outline:2px solid var(--primary,#2f6fd6);outline-offset:2px;
+}
+#exam-prep-host-root [data-ep-tl-plan-feedback]:not([hidden]){
+  font-weight:700;font-size:12px;line-height:1.4;
+}
+@media(max-width:540px){
+  #exam-prep-host-root .ep-tl-time-choices{grid-template-columns:1fr}
+  #exam-prep-host-root .ep-tl-time-choice{min-height:44px}
+}
