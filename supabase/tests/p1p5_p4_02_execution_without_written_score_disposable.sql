@@ -12,6 +12,9 @@ DECLARE
   v_false_old int;
   v_mixed_bad int;
 BEGIN
+  RAISE NOTICE 'P4-02 isolated source guard: db %, test_flag %, public_accounts %, auth_accounts %',
+    current_database(),current_setting('iclub.e2e_isolated',true),
+    (SELECT count(*) FROM public.users),(SELECT count(*) FROM auth.users);
   IF current_database()<>'postgres'
      OR current_setting('iclub.e2e_isolated',true)<>'true'
      OR (SELECT count(*) FROM public.users)<>2
