@@ -1,0 +1,107 @@
+# Mathematics P1/P5 — Extra Hard full-course target: 42 optional challenges
+
+**2026-11-06 · architect product decision · Issue #450 · DRAFT / no live release**
+
+## Decision grounded in the actual program
+
+The existing Extra Hard runtime allows **one durable attempt per student per task** and
+is explicitly **optional, not graded and not part of exam/mastery scores**.
+The original newly authored private bank contained **6 P1 + 6 P5 = 12 tasks**:
+enough to check the feature during a short limited-use pilot, but a learner
+could exhaust each component after only six challenges. Two P1 official
+syllabus areas had **no independent dedicated task** (1.5 Trigonometry and
+1.8 Integration); a composite differentiation/integration challenge does
+not substitute for a dedicated integration task.
+
+**Product target for the first fully developed course: 42 tasks**, not an
+official Cambridge number, and not a mandatory 81-skill item bank.
+Exactly three distinct, multistep optional challenges per academic strand:
+
+| Course strand (mapped to 2026/27 approved canonical syllabus) | Target | Prepared as of 2026-11-06 |
+|---|---:|---:|
+| P1 1.1 Quadratics | 3 | 1 |
+| P1 1.2 Functions | 3 | 1 |
+| P1 1.3 Coordinate geometry | 3 | 1 |
+| P1 1.4 Circular measure | 3 | 1 |
+| P1 1.5 Trigonometry | 3 | 3 |
+| P1 1.6 Series (including binomial) | 3 | 1 |
+| P1 1.7 Differentiation | 3 | 1 |
+| P1 1.8 Integration | 3 | 3 |
+| **P1 subtotal** | **24** | **12** |
+| P5 5.1 Data representation | 3 | 2 |
+| P5 5.2 Permutations and combinations | 3 | 2 |
+| P5 5.3 Probability | 3 | 2 |
+| P5 5.4 Geometric distribution | 3 | 2 |
+| P5 5.4 Binomial distribution | 3 | 2 |
+| P5 5.5 Normal distribution | 3 | 2 |
+| **P5 subtotal** | **18** | **12** |
+| **TOTAL** | **42** | **24** |
+
+**Remaining to author: 18** unique challenges: **12 P1 + 6 P5**. Do not
+infer a 42-item quota from Cambridge, mandate challenges for learners, or
+delay the existing accessible Mathematics Core because of optional work.
+
+## Wave 1 (existing and separately held)
+
+- 12 original, full EN/RU/UZ solutions: 6 P1, 6 P5
+- Bank metadata: `math-extra-hard-2026-11-original-v2`; database stays EMPTY
+  until a separate owner-approved import.
+- Protected source in private Library:
+  `/iClub_APP/Mathematics_P1_P5/Private_Question_Candidates/ExtraHard/iClub_Math_P1P5_ExtraHard_12_NEW_PRIVATE_20261106.zip`.
+- Original 12-task importer still validates **exactly 12** and must never
+  be tricked into accepting 24 by modifying a single constant.
+
+## Wave 2 (new original protected candidates, not imported)
+
+- 12 additional original multistep tasks, six each P1/P5, all EN/RU/UZ.
+- P1: 3 distinct trigonometry tasks (equations, identities and transformed
+  graphs); 3 distinct integration tasks (curve recovery, enclosed area,
+  volume of revolution), filling the two previous dedicated-topic gaps.
+- P5: an additional task each on pooled data, restricted committees,
+  conditional probability/trees, geometric waiting time, binomial
+  conditional tails, and normal approximation with continuity corrections.
+- Original task keys and source scope checked against the original private
+  bank and current 81 canonical skill codes. **12/12 programmatic
+  symbolic/numeric results verified.** Language editorial review is
+  **still PENDING**: the private package correctly leaves `qa_languages=pending`
+  and `lifecycle_status=draft`, not a fabricated approved publication.
+- Protected source Library path:
+  `/iClub_APP/Mathematics_P1_P5/Private_Question_Candidates/ExtraHard/iClub_Math_P1P5_ExtraHard_12_EXPANSION_private_20261106.zip`.
+  Source JSON SHA256:
+  `f24f9965b9f842ea551a335b91769b16fd82ea920db9dd7367b8eba85420e916`.
+  Answer keys/solutions must never be committed to public Git, static bundles
+  or CI logs.
+
+## Runtime/product change for 42
+
+A flat list of 42 options is cumbersome and does not show progress.
+This DRAFT package extends the existing **owner-authenticated**
+`get_my_exam_prep_extra_hard_catalog_safe_v1` to return only public
+catalog metadata: official section, per-owner status
+(`not_started`, `started`, `submitted`) and counts. The server still
+returns protected prompts **only** on explicitly started attempts, and
+worked solutions **only after durable submission**. Frontend groups
+catalog entries into collapsible topical sections with RU/UZ/EN names
+and shows **“Submitted N / total”** (never “correct”/exam grade).
+The first unfinished topic opens by default; 390px and 1280px
+Chromium acceptance is included.
+
+No release, bank version, student attempt, AI, Mentor, grading or other
+subject mutation is part of the catalog change. When the private bank
+is OFF the original `content_preparing` experience remains unchanged.
+
+## What is NOT done
+
+The 12 expansion tasks are **private academic draft candidates**: not
+staged, not published or externally edited. The current 12-task importer
+is intentionally unchanged. Before a full 42-task release:
+complete the remaining 18 unique tasks, review all 42 in EN/RU/UZ,
+assemble a single immutable source-versioned protected 42-item bundle,
+replace the old importer contract with a **separate tested 42-row version**,
+then obtain owner authorization for the restricted import and publication.
+There must be no live DML/DDL, backup wipe, production deploy or `main`
+merge in this DRAFT.
+
+**Do not erase any old genuine learner attempt:** a bank version change
+must preserve prior answers if real rows ever exist. The previously
+decided one-time **identified test-data-only** cleanup is independent.
