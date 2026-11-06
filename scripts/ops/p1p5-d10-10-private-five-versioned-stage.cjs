@@ -100,7 +100,7 @@ BEGIN
  IF to_regclass('private.exam_prep_question_content_meta') IS NULL
    OR (SELECT count(*) FROM _p1p5_d1010_candidates)<>5
    OR (SELECT count(*) FROM _p1p5_d1010_old_assess)<>6
- THEN RAISE EXCEPTION 'D10-10 refused: protected five sources or six assessments missing'; END IF;
+ THEN RAISE EXCEPTION 'D10-10 source drift: candidates=%, published_assessments=%', (SELECT count(*) FROM _p1p5_d1010_candidates), (SELECT count(*) FROM _p1p5_d1010_old_assess); END IF;
  SELECT count(*) INTO n FROM _p1p5_d1010_candidates c
  JOIN private.exam_prep_question_content_meta m
   ON m.question_id=c.old_id AND m.content_key=c.item->>'supersedes_content_key'
