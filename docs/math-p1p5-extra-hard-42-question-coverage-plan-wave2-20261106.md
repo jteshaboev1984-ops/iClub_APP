@@ -1,5 +1,36 @@
 # Mathematics P1/P5 — Extra Hard full-course target: 42 optional challenges
 
+## LATEST 2026-11-06 — complete protected authored corpus (42 of 42)
+
+**The former 24/42 checkpoint below is historical.** A complete 42-task
+owner-private source bank now exists: **P1=24, P5=18**, exactly three
+different challenges in each of the eight P1 and six P5 strands.
+The last 18 original tasks (12 P1/6 P5) were prepared EN/RU/UZ and
+independently checked against symbolic, combinatorial and numerical mathematics
+calculations (**18/18 passed**). Distinct source IDs, English question wording,
+component allocation and official skill mapping were checked across all 42.
+One ambiguous condition about sequential sampling was corrected in all
+three languages before final hashing.
+
+**Protected FULL42 source file** is stored in the owner's private Library:
+`/iClub_APP/Mathematics_P1_P5/Private_Question_Candidates/ExtraHard/iClub_Math_P1P5_ExtraHard_FULL42_PRIVATE_20261106.zip`.
+Its canonical protected JSON SHA-256 is
+`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`;
+do not commit/upload question text, answer keys or worked solutions to public Git.
+
+**CRITICAL STATUS:** 42 authored and computationally checked, but only the
+previous first 12 have internally approved trilingual and technical QA flags.
+For the other 30, translations/technical review **remain PENDING** and
+`lifecycle_status=draft`. No honest claim of external-expert review,
+published content, exam grades or user access. The current original 12-only
+importer MUST NOT be expanded by changing a count constant; it belongs to
+the earlier v2 bank. Full 42 requires a **new versioned private importer**
+and one controlled QA/publish decision, leaving learner data untouched.
+The present PR only corrects the live-candidate catalog grouping of
+geometric vs binomial distributions under syllabus section 5.4.
+No current Supabase, user, localStorage or production deployment is changed.
+
+
 **2026-11-06 · architect product decision · Issue #450 · DRAFT / no live release**
 
 ## Decision grounded in the actual program
@@ -71,6 +102,22 @@ delay the existing accessible Mathematics Core because of optional work.
   `f24f9965b9f842ea551a335b91769b16fd82ea920db9dd7367b8eba85420e916`.
   Answer keys/solutions must never be committed to public Git, static bundles
   or CI logs.
+
+## New full 42 protected source checker (read-only, safe for local use)
+
+`scripts/ops/p1p5-extra-hard-private-full42-check-v3.cjs` checks the
+**exact owner-private full42 source checksum**, each of the 42 individual
+SHA256 checks, precisely 24 P1 + 18 P5 tasks, 14 groups of three, unique
+IDs and English source conditions, EN/RU/UZ presence and the honest
+12 approved + 30 draft QA-state distribution. It does NOT stage/import
+anything and does not reveal protected prompts, keys or solutions.
+
+**Actual local owner-private check PASS** for SHA256
+`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`.
+A tampered source was rejected. Public CI only parses this script with
+`node --check` and tests synthetic UI; the private JSON is NEVER sent
+to GitHub/Actions. This is not approval to publish the 30 unreviewed drafts.
+Future 42-row PostgreSQL staging is a separately gated follow-on.
 
 ## Runtime/product change for 42
 

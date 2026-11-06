@@ -9,6 +9,18 @@
 - Real user records, if any, remain protected until explicit one-time cleanup scope and GO. The separation between verified disposable/test rows and real user accounts/Tours/Practice v3/certificates/other subjects is still mandatory. The previous permission to **prepare** cleanup does not mean executing live DML right now.
 - Minimal, meaningful deterministic acceptance and one genuine end-to-end pass are preferred over endlessly retesting identical code or artificially constructed usage.
 
+## LATEST 2026-11-06 — Extra Hard complete authored bank
+
+The target **42/42** original protected challenges are now authored privately:
+24 P1 and 18 P5, three per each of 14 syllabus strands. 18 final new
+calculations independently verified. 30 recently authored tasks require
+final language/technical editorial QA and stay DRAFT; do not publish them
+or run any live import. Protected unified v3 source checksum
+`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`.
+The old 24/42 point below is historical only. Next real task is the
+separately versioned **42-row protected importer** and content QA, not
+more task creation.
+
 ## Accepted implementation state, not to be restarted
 
 1. P4-01 through P4-06 written-Paper **operational** Stage3–6 architecture is already engineering accepted on isolated signed PG17. Six genuine P1/P5 full Papers were executed (three per component), writing was correctly **ungraded**, and grade/readiness remained `INSUFFICIENT_EVIDENCE`. Do not restart P4 audits.

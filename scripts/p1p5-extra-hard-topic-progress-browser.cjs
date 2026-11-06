@@ -50,8 +50,30 @@ assert(process.env.CI==='true'&&process.env.P1P5_E2E_ISOLATED==='true',
    await page.locator('[data-ep-extra-hard-other]').click();
    await page.waitForSelector('[data-ep-extra-hard-list]');
    assert((await page.locator('.ep-extra-progress').innerText()).includes('2 / 3'));
+   // The P5 official syllabus has a shared 5.4 prefix: protect the two
+   // independent iClub challenge tracks (geometric vs binomial).
+   await page.evaluate(()=>{
+     const p5=[
+       {task_key:"CI-P5-GEO",title:"Synthetic geometric",official_section:"5.4 Discrete random variables",
+         primary_skill_code:"P5-GEO-01",attempt_status:"not_started"},
+       {task_key:"CI-P5-BIN",title:"Synthetic binomial",official_section:"5.4 Discrete random variables",
+         primary_skill_code:"P5-BIN-02",attempt_status:"submitted"}
+     ];
+     window.iClubExamPrepHostInternal.api.extraHardCatalog=async()=>({
+       ok:true,data:{component_code:"P5",available:true,noncredit:true,items:p5}
+     });
+   });
+   assert(await page.evaluate(lang=>window.iClubExamPrepHostInternal.extraHardView.open('P5',lang,()=>{}),language));
+   await page.waitForSelector('[data-ep-extra-hard-list]');
+   assert.equal(await page.locator('.ep-extra-topic').count(),2,
+     "P5 geometric and binomial must stay separate within syllabus 5.4");
+   const heading=await page.locator('.ep-extra-topic summary').allInnerTexts();
+   assert(heading.some(x=>x.includes(language==="ru"?"Геометрическое":language==="uz"?"Geometrik":"Geometric")));
+   assert(heading.some(x=>x.includes(language==="ru"?"Биномиальное":language==="uz"?"Binomial":"Binomial")));
+   assert((await page.evaluate(()=>document.documentElement.scrollWidth))<=width+2,
+     "P5 grouping must not overflow mobile screen");
    await page.close();
   }
-  console.log('EXTRA HARD TOPIC PROGRESS BROWSER PASS: EN RU UZ, 390/1280, grouping and owner progress');
+  console.log('EXTRA HARD TOPIC PROGRESS BROWSER PASS: EN RU UZ, 390/1280, separate P5 geometric/binomial topics and owner progress');
  } finally{await browser.close();}
 })().catch(e=>{console.error('EXTRA HARD TOPIC PROGRESS FAILED:',e.message);process.exitCode=1});
