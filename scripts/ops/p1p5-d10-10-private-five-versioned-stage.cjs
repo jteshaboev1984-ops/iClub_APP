@@ -38,8 +38,9 @@ function validate(){
  assert.equal(byKey.size,5,'Repeated original source question');
  for(const [old,id,skill,role,next] of TARGETS){
   const q=byKey.get(old);
-  assert(q && q.existing_question_id===id && q.candidate_content_key===next
-   && q.primary_skill_code===skill && q.reserve_role===role,`Source metadata mismatch for ${old}`);
+  assert(q && (mode==='dry-run-isolated' ? Number.isInteger(q.existing_question_id) && q.existing_question_id>0 : q.existing_question_id===id)
+   && q.candidate_content_key===next && q.primary_skill_code===skill
+   && q.reserve_role===role,`Source metadata mismatch for ${old}`);
   assert(['easy','medium','hard'].includes(q.difficulty) && Number.isInteger(q.time_limit_sec)
    && q.time_limit_sec>=20&&q.time_limit_sec<=300);
   assert(/^[A-D]$/.test(q.correct_answer),'MCQ key invalid');

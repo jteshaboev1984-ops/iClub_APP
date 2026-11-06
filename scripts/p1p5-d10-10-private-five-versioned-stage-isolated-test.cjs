@@ -13,13 +13,35 @@ assert(process.env.CI==='true' && process.env.P1P5_E2E_ISOLATED==='true'
 const env={...process.env,PGOPTIONS:'-c iclub.e2e_isolated=true'};
 const sql=s=>execFileSync('psql',['-X','-A','-t','-v','ON_ERROR_STOP=1','-c',s],
   {env,encoding:'utf8',maxBuffer:200000}).trim();
-const oldSpecs=[
- ['P1DIF05-M01',6711,'P1-DIF-05','mixed','P1DIF05-M01-V02','medium',40],
- ['P1INT03-R04',7435,'P1-INT-03','retest','P1INT03-R04-V02','hard',60],
- ['P1QUA03-D01',6289,'P1-QUA-03','diagnostic','P1QUA03-D01-V02','medium',70],
- ['P1INT03-D03',7414,'P1-INT-03','diagnostic','P1INT03-D03-V02','medium',55],
- ['P1INT04-R04',7405,'P1-INT-04','retest','P1INT04-R04-V02','hard',60]
+const canonicalSpecs=[
+ ['P1DIF05-M01','P1-DIF-05','mixed','P1DIF05-M01-V02'],
+ ['P1INT03-R04','P1-INT-03','retest','P1INT03-R04-V02'],
+ ['P1QUA03-D01','P1-QUA-03','diagnostic','P1QUA03-D01-V02'],
+ ['P1INT03-D03','P1-INT-03','diagnostic','P1INT03-D03-V02'],
+ ['P1INT04-R04','P1-INT-04','retest','P1INT04-R04-V02']
 ];
+// Disposable schema seeds the same content keys but Postgres identities
+// are not required to match the LIVE original question IDs. Use the actual
+// CI source key→question link, not guessed numeric values. LIVE protected
+// stage still requires the exact original checksum plus five known live IDs.
+const oldSpecs=canonicalSpecs.map(([key,skill,role,next])=>{
+ const v=sql(`SELECT m.question_id::text||'|'||q.difficulty||'|'||q.time_limit_sec::text
+ FROM private.exam_prep_question_content_meta m
+ JOIN public.questions q ON q.id=m.question_id
+ WHERE m.content_key='${key}' AND m.primary_skill_code='${skill}'
+   AND m.reserve_role='${role}' AND q.qtype='mcq' AND q.is_active=false`);
+ const parts=v.split('|');
+ assert.equal(parts.length,3,'CI canonical original key/skill/role unavailable');
+ const [id,difficulty,sec]=parts;
+ return [key,Number(id),skill,role,next,difficulty,Number(sec)];
+});
+const nPublished=sql(`SELECT count(DISTINCT a.id)::text
+ FROM private.exam_prep_assessments a
+ JOIN private.exam_prep_assessment_items i ON i.assessment_id=a.id
+ JOIN private.exam_prep_question_content_meta m ON m.question_id=i.question_id
+ WHERE a.status='published' AND a.component_code='P1'
+   AND m.content_key IN ('P1DIF05-M01','P1INT03-R04','P1QUA03-D01','P1INT03-D03','P1INT04-R04')`);
+assert.equal(nPublished,'6',`Disposable source must include six published P1 assessment routes, found ${nPublished}`);
 const clean=sql(`SELECT CASE WHEN current_database()='postgres'
  AND current_setting('iclub.e2e_isolated',true)='true'
  AND (SELECT count(*) FROM auth.users)=2
