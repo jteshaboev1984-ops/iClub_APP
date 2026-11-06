@@ -9,6 +9,7 @@ on:
       - feature/math-p1p5-extra-hard-new-12-original-bank-v2-20261106
       - feature/math-p1p5-d10-10-five-private-versioned-assessment-drafts-20261106
       - feature/math-p1p5-extra-hard-42-topic-progress-wave2-20261106
+      - feature/math-p1p5-extra-hard-full42-final-content-governance-20261106
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'

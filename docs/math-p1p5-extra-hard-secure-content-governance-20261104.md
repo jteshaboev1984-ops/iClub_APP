@@ -1,6 +1,17 @@
 # Mathematics P1/P5 Extra Hard — governed original bank v2
 
-## LATEST 2026-11-06 — full-course scale decision
+## LATEST 2026-11-06 — COMPLETE 42/42 authored, not published
+
+The full 42-problem protected JSON is privately archived and independently
+mathematically checked; source SHA256
+`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`.
+All 8 P1 and 6 P5 syllabus strands now have 3 distinct tasks. Original
+12 internal QA statuses are retained; 30 additional tasks still require
+language/technical editorial signoff, so private release remains OFF.
+The 12-only v2 importer must not be reused for 42. See
+[complete bank checkpoint](math-p1p5-extra-hard-42-question-coverage-plan-wave2-20261106.md).
+
+## HISTORICAL 2026-11-06 — full-course scale decision
 
 The first private **12 original tasks** remain the unchanged limited-use
 pilot cohort (6 P1 + 6 P5); the architect requested a sufficient sustained

@@ -1,5 +1,36 @@
 # Mathematics P1/P5 — Extra Hard full-course target: 42 optional challenges
 
+## LATEST 2026-11-06 — complete protected authored corpus (42 of 42)
+
+**The former 24/42 checkpoint below is historical.** A complete 42-task
+owner-private source bank now exists: **P1=24, P5=18**, exactly three
+different challenges in each of the eight P1 and six P5 strands.
+The last 18 original tasks (12 P1/6 P5) were prepared EN/RU/UZ and
+independently checked against symbolic, combinatorial and numerical mathematics
+calculations (**18/18 passed**). Distinct source IDs, English question wording,
+component allocation and official skill mapping were checked across all 42.
+One ambiguous condition about sequential sampling was corrected in all
+three languages before final hashing.
+
+**Protected FULL42 source file** is stored in the owner's private Library:
+`/iClub_APP/Mathematics_P1_P5/Private_Question_Candidates/ExtraHard/iClub_Math_P1P5_ExtraHard_FULL42_PRIVATE_20261106.zip`.
+Its canonical protected JSON SHA-256 is
+`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`;
+do not commit/upload question text, answer keys or worked solutions to public Git.
+
+**CRITICAL STATUS:** 42 authored and computationally checked, but only the
+previous first 12 have internally approved trilingual and technical QA flags.
+For the other 30, translations/technical review **remain PENDING** and
+`lifecycle_status=draft`. No honest claim of external-expert review,
+published content, exam grades or user access. The current original 12-only
+importer MUST NOT be expanded by changing a count constant; it belongs to
+the earlier v2 bank. Full 42 requires a **new versioned private importer**
+and one controlled QA/publish decision, leaving learner data untouched.
+The present PR only corrects the live-candidate catalog grouping of
+geometric vs binomial distributions under syllabus section 5.4.
+No current Supabase, user, localStorage or production deployment is changed.
+
+
 **2026-11-06 · architect product decision · Issue #450 · DRAFT / no live release**
 
 ## Decision grounded in the actual program

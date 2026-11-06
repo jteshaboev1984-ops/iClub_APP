@@ -57,6 +57,8 @@
     "5.2":{en:"Permutations and combinations",ru:"Перестановки и сочетания",uz:"O‘rin almashtirish va kombinatsiyalar"},
     "5.3":{en:"Probability",ru:"Вероятность",uz:"Ehtimollik"},
     "5.4":{en:"Discrete distributions",ru:"Дискретные распределения",uz:"Diskret taqsimotlar"},
+    "5.4B":{en:"Binomial distribution",ru:"Биномиальное распределение",uz:"Binomial taqsimot"},
+    "5.4G":{en:"Geometric distribution",ru:"Геометрическое распределение",uz:"Geometrik taqsimot"},
     "5.5":{en:"Normal distribution",ru:"Нормальное распределение",uz:"Normal taqsimot"}
   });
   const progressText=Object.freeze({
@@ -67,7 +69,10 @@
   function catalogMarkup(items,language){
     const g=new Map(),t=progressText[language];
     for(const item of items){
-      const k=String(item.official_section||"").match(/^([15]\.\d)\b/)?.[1]||"other";
+      const section=String(item.official_section||"").match(/^([15]\.\d)\b/)?.[1]||"other";
+      const skill=String(item.primary_skill_code||"");
+      const k=section==="5.4"&&skill.startsWith("P5-BIN-")?"5.4B"
+             :section==="5.4"&&skill.startsWith("P5-GEO-")?"5.4G":section;
       if(!g.has(k))g.set(k,[]);
       g.get(k).push(item);
     }
@@ -84,8 +89,9 @@
           +esc(item.task_key)+'"><span><strong>'+esc(item.title)+'</strong><small>'
           +esc(t[status])+'</small></span><span aria-hidden="true">›</span></button>';
       }).join("");
+      const label=(k==="5.4B"||k==="5.4G")?"5.4":k;
       return '<details class="ep-extra-topic" '+(k===first?"open":"")
-        +'><summary><span>'+esc(k==="other"?"":k+" · ")+esc(name)
+        +'><summary><span>'+esc(k==="other"?"":label+" · ")+esc(name)
         +'</span><span class="ep-extra-topic-count">'+groupDone+' / '+itemsInTopic.length+'</span></summary>'
         +'<div class="ep-component-links ep-extra-topic-list">'+rows+'</div></details>';
     }).join("");
