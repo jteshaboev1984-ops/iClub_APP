@@ -21,6 +21,7 @@ on:
       - 'exam-prep/exam-prep-host.css'
       - 'scripts/p1p5-extra-hard-real-http.cjs'
       - 'scripts/p1p5-extra-hard-topic-progress-browser.cjs'
+      - 'scripts/ops/p1p5-extra-hard-private-full42-check-v3.cjs'
       - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
       - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
@@ -268,6 +269,7 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-extra-hard-real-http.cjs
           node scripts/p1p5-extra-hard-real-http.cjs
+          node --check scripts/ops/p1p5-extra-hard-private-full42-check-v3.cjs
           node --check scripts/p1p5-extra-hard-topic-progress-browser.cjs
           node scripts/p1p5-extra-hard-topic-progress-browser.cjs | tee /tmp/extra-hard-topic-ui.log
           grep -Fq 'EXTRA HARD TOPIC PROGRESS BROWSER PASS:' /tmp/extra-hard-topic-ui.log

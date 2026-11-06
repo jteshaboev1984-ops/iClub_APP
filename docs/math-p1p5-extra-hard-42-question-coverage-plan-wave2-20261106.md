@@ -103,6 +103,22 @@ delay the existing accessible Mathematics Core because of optional work.
   Answer keys/solutions must never be committed to public Git, static bundles
   or CI logs.
 
+## New full 42 protected source checker (read-only, safe for local use)
+
+`scripts/ops/p1p5-extra-hard-private-full42-check-v3.cjs` checks the
+**exact owner-private full42 source checksum**, each of the 42 individual
+SHA256 checks, precisely 24 P1 + 18 P5 tasks, 14 groups of three, unique
+IDs and English source conditions, EN/RU/UZ presence and the honest
+12 approved + 30 draft QA-state distribution. It does NOT stage/import
+anything and does not reveal protected prompts, keys or solutions.
+
+**Actual local owner-private check PASS** for SHA256
+`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`.
+A tampered source was rejected. Public CI only parses this script with
+`node --check` and tests synthetic UI; the private JSON is NEVER sent
+to GitHub/Actions. This is not approval to publish the 30 unreviewed drafts.
+Future 42-row PostgreSQL staging is a separately gated follow-on.
+
 ## Runtime/product change for 42
 
 A flat list of 42 options is cumbersome and does not show progress.
