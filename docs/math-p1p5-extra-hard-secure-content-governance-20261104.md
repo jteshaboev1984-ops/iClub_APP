@@ -1,10 +1,34 @@
 # Mathematics P1/P5 Extra Hard — governed original bank v2
 
+## LATEST 2026-11-06 — protected Full42 v3 staging implementation (DRAFT)
+
+**Exact owner-private source is now pinned to JSON SHA-256 `28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78`.**
+Editorial review identified and corrected **two ambiguous Russian math
+notations** in the P5 binomial→normal approximation task, where decimal
+commas could be misread as function-argument separators. This changes
+neither mathematical answers nor skill coverage, no learner data, and
+does **not** imply that all 30 additional problems are language-approved.
+
+**Actual next code milestone delivered:** a new `v3` protected 42-row importer
+`scripts/ops/p1p5-extra-hard-private-full42-stage-v3.cjs`,
+which requires exact private content SHA, 14×3 syllabus strands, 24 P1/18 P5,
+12 reviewed + 30 unpublished draft tasks and separate owner GO for staging.
+A separate CI-only synthetic data mode exercises the same PostgreSQL
+`COPY` + verification path under a transaction and **ROLLBACK**.
+The current v2 public release pointer stays **OFF**; it is intentionally
+**not switched to v3** and the first 12-task importer remains untouched.
+No protected text or worked solution is committed or logged in public GitHub.
+
+Staging and publishing are different decisions. The 30 drafts remain withheld.
+The full release will require explicit 30-task editorial acceptance and a
+separate version switch. No current production SQL or data change.
+
+
 ## LATEST 2026-11-06 — COMPLETE 42/42 authored, not published
 
 The full 42-problem protected JSON is privately archived and independently
 mathematically checked; source SHA256
-`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`.
+`28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78`.
 All 8 P1 and 6 P5 syllabus strands now have 3 distinct tasks. Original
 12 internal QA statuses are retained; 30 additional tasks still require
 language/technical editorial signoff, so private release remains OFF.
