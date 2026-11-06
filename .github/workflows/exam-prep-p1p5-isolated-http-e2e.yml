@@ -244,7 +244,7 @@ jobs:
           node --check scripts/p1p5-extra-hard-real-http.cjs
           node scripts/p1p5-extra-hard-real-http.cjs
           node --check scripts/ops/p1p5-extra-hard-private-bank-v2.cjs
-          psql -X -v ON_ERROR_STOP=1 \
+          PGOPTIONS="-c iclub.e2e_isolated=true" psql -X -v ON_ERROR_STOP=1 \
             -f supabase/tests/p1p5_extra_hard_new_bank_v2_disposable.sql \
             2>&1 | tee /tmp/extra-hard-new-bank-v2.log
           grep -Fq 'EXTRA HARD NEW BANK V2 PASS:' /tmp/extra-hard-new-bank-v2.log
