@@ -7,6 +7,7 @@ on:
       - feature/math-p1p5-p6-permanent-core-membership-20261105
       - feature/math-p1p5-d10-09-diagnostic-prompt-novelty-20261106
       - feature/math-p1p5-extra-hard-new-12-original-bank-v2-20261106
+      - feature/math-p1p5-d10-10-five-private-versioned-assessment-drafts-20261106
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'
@@ -14,6 +15,8 @@ on:
       - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
       - 'scripts/p1p5-isolated-http-three-full-papers.cjs'
       - 'scripts/p1p5-isolated-http-skipped-paper-denial.cjs'
+      - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
+      - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   pull_request:
     branches: [main]
@@ -60,6 +63,8 @@ on:
       - 'supabase/tests/p1p5_extra_hard_new_bank_v2_disposable.sql'
       - 'scripts/ops/p1p5-extra-hard-private-bank-v2.cjs'
       - 'scripts/p1p5-extra-hard-private-stage-v2-isolated-test.cjs'
+      - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
+      - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
       - 'exam-prep/exam-prep-extra-hard-ui.js'
       - 'scripts/p1p5-isolated-http-stage-c-security-race.cjs'
       - 'supabase/tests/p1p5_stage_c_33_independent_stage0_rollbacks.sql'
@@ -191,6 +196,19 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql > /tmp/p1p5-e2e-seed.log
           echo "Disposable seed applied; no live project, token or account involved"
+      - name: D10-10 versioned 5 protected P1 drafts and 6 assessments (CI synthetic-only ROLLBACK)
+        shell: bash
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGDATABASE" = "postgres"
+          node --check scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs
+          node --check scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs
+          node scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs | tee /tmp/d10-10-versioned-private-five.log
+          grep -Fq 'D10-10 SOURCE VERSIONED FIVE PASS:' /tmp/d10-10-versioned-private-five.log
+
       - name: Generate ephemeral JWT signing key and start local PostgREST
         shell: bash
         run: |
