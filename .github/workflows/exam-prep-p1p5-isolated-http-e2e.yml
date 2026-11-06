@@ -5,6 +5,7 @@ on:
     branches:
       - feature/math-p1p5-p4-written-evidence-contract-20261105
       - feature/math-p1p5-p6-permanent-core-membership-20261105
+      - feature/math-p1p5-d10-09-diagnostic-prompt-novelty-20261106
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'
@@ -29,6 +30,7 @@ on:
       - 'supabase/tests/p1p5_d10_06_curriculum_scope_no_progress_mutation.sql'
       - 'supabase/tests/p1p5_d10_07_integration_scope_source_no_mutation.sql'
       - 'supabase/tests/p1p5_d10_08_fresh_retest_math_prompt_priority_rollback.sql'
+      - 'supabase/tests/p1p5_d10_09_diagnostic_prompt_novelty_source.sql'
       - 'supabase/tests/p1p5_p4_02_execution_without_written_score_disposable.sql'
       - 'supabase/tests/p1p5_p4_03_stage3_stage4_execution_evidence_disposable.sql'
       - 'supabase/tests/p1p5_p4_04_operational_calibration_disposable.sql'
@@ -584,6 +586,11 @@ jobs:
           grep -Fq 'D10-08 PASS: all 5 true duplicates, signs preserved, fresh-retake priority and fallback' /tmp/p1p5-d10-08-retest-novelty.log
           grep -Fq 'D10-08 ROLLBACK PASS' /tmp/p1p5-d10-08-retest-novelty.log
           echo 'D10-08 PASS: prefer truly different retest while retaining 100% fallback and learner data'
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_d10_09_diagnostic_prompt_novelty_source.sql \
+            2>&1 | tee /tmp/p1p5-d10-09-diagnostic-novelty.log
+          grep -Fq 'D10-09 PASS: actual 5 repeated prompts' /tmp/p1p5-d10-09-diagnostic-novelty.log
+          echo 'D10-09 PASS: existing Math-only Stage0 diagnoses prefer unseen problems after official area priorities'
 
       - name: D09-02 immutable original Stage0 date survives second placement (disposable PG17)
         shell: bash
