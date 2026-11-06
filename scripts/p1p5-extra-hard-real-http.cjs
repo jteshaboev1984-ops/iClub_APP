@@ -65,6 +65,10 @@ function sqlRead(statement){
    {p_component_code:"P1",p_language:"en"},tokenA);
   assert(catalog.ok&&catalog.data?.available===true&&catalog.data.items?.length===1,
    "Approved private synthetic catalog unavailable");
+  assert(catalog.data.total_count===1&&catalog.data.completed_count===0&&
+   catalog.data.in_progress_count===0&&catalog.data.items[0].official_section==="1.1 Quadratics"&&
+   catalog.data.items[0].attempt_status==="not_started",
+   "Per-owner initial catalog state missing");
   const p5=await rpc("get_my_exam_prep_extra_hard_catalog_safe_v1",
    {p_component_code:"P5",p_language:"ru"},tokenA);
   assert(p5.ok&&p5.data?.available===false&&p5.data.items?.length===0,
@@ -75,6 +79,16 @@ function sqlRead(statement){
    task.data.noncredit===true&&task.data.status==="started",
    "Worked solution leaked before submission or owner start failed");
   const id=task.data.attempt_id;
+  const begun=await rpc("get_my_exam_prep_extra_hard_catalog_safe_v1",
+   {p_component_code:"P1",p_language:"ru"},tokenA);
+  assert(begun.ok&&begun.data.completed_count===0&&begun.data.in_progress_count===1&&
+   begun.data.items[0].attempt_status==="started",
+   "Started owner task absent from catalog");
+  const bCatalog=await rpc("get_my_exam_prep_extra_hard_catalog_safe_v1",
+   {p_component_code:"P1",p_language:"uz"},tokenB);
+  assert(bCatalog.ok&&bCatalog.data.items[0].attempt_status==="not_started"&&
+   bCatalog.data.completed_count===0,
+   "Foreign learner catalog leaked owner's attempt");
   const replayStart=await rpc("start_my_exam_prep_extra_hard_safe_v1",
    {p_task_key:"CI-EXTRA-HARD-TEST-01",p_language:"en"},tokenA);
   assert(replayStart.ok&&replayStart.data?.attempt_id===id,
@@ -92,6 +106,13 @@ function sqlRead(statement){
    saved.data.solution==="1 + 1 = 2."&&saved.data.noncredit===true&&
    saved.data.written_correctness==="unknown",
    "Owner submission failed to durably unlock only an ungraded example");
+  const submittedCatalog=await rpc("get_my_exam_prep_extra_hard_catalog_safe_v1",
+   {p_component_code:"P1",p_language:"en"},tokenA);
+  assert(submittedCatalog.ok&&submittedCatalog.data.completed_count===1&&
+   submittedCatalog.data.in_progress_count===0&&
+   submittedCatalog.data.items[0].attempt_status==="submitted"&&
+   !JSON.stringify(submittedCatalog.data).includes("1 + 1 = 2."),
+   "Submitted status or worked-solution privacy regressed");
   const lostAck=await rpc("submit_my_exam_prep_extra_hard_safe_v1",
    {p_attempt_id:id,p_response_text:"1 + 1 = 2",p_idempotency_key:key,p_language:"en"},tokenA);
   assert(lostAck.ok&&lostAck.data.replayed===true,"Lost ACK produced duplicate");

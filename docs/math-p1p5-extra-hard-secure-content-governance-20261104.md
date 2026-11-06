@@ -1,5 +1,19 @@
 # Mathematics P1/P5 Extra Hard — governed original bank v2
 
+## LATEST 2026-11-06 — full-course scale decision
+
+The first private **12 original tasks** remain the unchanged limited-use
+pilot cohort (6 P1 + 6 P5); the architect requested a sufficient sustained
+course bank. The new **full-course target is 42** (24 P1/18 P5), giving
+3 distinct optional challenges per 8 P1 syllabus strands and 6 P5
+statistical strands, with geometric/binomial counted separately.
+**12 additional tasks** are now authored privately, so **24 prepared / 18
+still missing**. Wave 2 translation editorial QA is pending, and its
+protected JSON must not be imported by the existing exactly-12 CLI.
+See [the governing scope and QA plan](math-p1p5-extra-hard-42-question-coverage-plan-wave2-20261106.md).
+The existing bank version, import gate and live release flags stay OFF.
+
+
 **Architect decision: 2026-11-06 (CURRENT, supersedes the 2026-11-04 source-recovery instruction).**
 
 Earlier 12 missing Extra Hard drafts are **retired as a source requirement**.

@@ -19,6 +19,15 @@
 ## Actual remaining delivery order
 
 **A — Academic content/product completion first.**
+- **2026-11-06 Extra Hard volume decision:** 12 is a pilot only; full course
+  target **42** (24 P1/18 P5). 12 new trilingual challenge candidates
+  authored and 12/12 maths calculations checked; 24 total now prepared,
+  **18 remain**. Complete trilingual academic review, 42-item private
+  importer and source-controlled release before claiming full bank.
+  Dedicated P1 trigonometry/integration gaps are now addressed in private
+  draft. Topic-grouped, owner-progress UI is a separate DRAFT change,
+  not a live feature.
+
 - Use the **newly authored** 12 original P1/P5 Extra Hard questions (6+6) and their checked EN/RU/UZ solutions in the owner's private bundle; stop searching for the superseded lost drafts. Finish controlled private versioned import, academic/noncredit and release-QA, then publish ONLY after separate GO. Never place answer text or keys in public GitHub.
 - **D10-10 2026-11-06:** the five original EN/RU/UZ replacement questions are ready privately, and a **six-assessment draft versioning** mechanism (24 items) is now prepared for their protected import, not applied to production. Retain old 71 QUA diagnostic sessions and existing fallback. Publish only after separate content/release GO.
 - Improve P1/P5 81-skill time estimate methodology based on actual content and observable work, and reflect uncertainty in the existing voluntary timeline. No fictitious independent-study norms, Cambridge grades or mandatory weekly quota.
