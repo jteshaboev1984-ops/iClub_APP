@@ -1,5 +1,7 @@
 -- Mathematics P1/P5 Extra Hard v1: PRIVATE, OPTIONAL, NONCREDIT.
--- DRAFT ONLY: first 12 original source-mapped questions remain NOT PUBLISHED.
+-- DRAFT ONLY: protected task table starts EMPTY; earlier lost draft tasks were
+-- replaced by newly authored 12 on 2026-11-06. The v2 migration updates only
+-- the bank version metadata, never private question contents or learner history.
 -- Without explicit release control + academic approval + content checksum,
 -- no authenticated learner receives task prompts or protected solution keys.
 -- No shared public.questions, existing Paper/diagnostic reserve or mastery writes.

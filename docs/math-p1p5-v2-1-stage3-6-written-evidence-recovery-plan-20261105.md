@@ -55,7 +55,7 @@ Do **not** merge the 162-file parent PR or cherry-pick random migrations. Review
 
 - D10-08: five known mathematical prompt repeats; soft retest preference tested, 5 private versioned candidate replacements **not** published; original IDs/71-session historical diagnostic remain immutable. Validate multilingual mathematical equivalence before versioned import, never modify shared published question rows.
 - P2 per-skill independent-study minute estimates for all 81 canonical skills remain unapproved/unobserved; no invented personal Cambridge norms or forced learner schedule.
-- The original 12 architect-designed Extra Hard remain unrecovered exact source; do not create claimed substitutions.
+- **LATEST architect 2026-11-06:** prior source-recovery requirement cancelled; 12 **newly original** Extra Hard tasks (6 P1 / 6 P5, trilingual) created, 12/12 math checks PASS, protected in personal Library, not yet imported or published. Use governed v2 private bank, don't search lost old drafts.
 - D09: two distinct diagnostic T0 anchors, one shared Math week budget, weekly/monthly-only reports and exactly three voluntary time choices remain unchanged.
 - P0-16B: trigger-mediated nested writer findings in DRAFT PR #493 remain **partially** open; final old-token/epoch coverage and release-time backup/cleanup are separately governed.
 

@@ -6,6 +6,7 @@ on:
       - feature/math-p1p5-p4-written-evidence-contract-20261105
       - feature/math-p1p5-p6-permanent-core-membership-20261105
       - feature/math-p1p5-d10-09-diagnostic-prompt-novelty-20261106
+      - feature/math-p1p5-extra-hard-new-12-original-bank-v2-20261106
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'
@@ -56,6 +57,9 @@ on:
       - 'scripts/p1p5-isolated-http-written-criteria-next-browser.cjs'
       - 'scripts/p1p5-extra-hard-real-http.cjs'
       - 'supabase/tests/p1p5_extra_hard_disposable_real_http_*.sql'
+      - 'supabase/tests/p1p5_extra_hard_new_bank_v2_disposable.sql'
+      - 'scripts/ops/p1p5-extra-hard-private-bank-v2.cjs'
+      - 'scripts/p1p5-extra-hard-private-stage-v2-isolated-test.cjs'
       - 'exam-prep/exam-prep-extra-hard-ui.js'
       - 'scripts/p1p5-isolated-http-stage-c-security-race.cjs'
       - 'supabase/tests/p1p5_stage_c_33_independent_stage0_rollbacks.sql'
@@ -240,6 +244,15 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-extra-hard-real-http.cjs
           node scripts/p1p5-extra-hard-real-http.cjs
+          node --check scripts/ops/p1p5-extra-hard-private-bank-v2.cjs
+          PGOPTIONS="-c iclub.e2e_isolated=true" psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/p1p5_extra_hard_new_bank_v2_disposable.sql \
+            2>&1 | tee /tmp/extra-hard-new-bank-v2.log
+          grep -Fq 'EXTRA HARD NEW BANK V2 PASS:' /tmp/extra-hard-new-bank-v2.log
+          node --check scripts/p1p5-extra-hard-private-stage-v2-isolated-test.cjs
+          node scripts/p1p5-extra-hard-private-stage-v2-isolated-test.cjs | tee /tmp/extra-hard-v2-private-staging.log
+          grep -Fq 'EXTRA HARD V2 PRIVATE STAGING PASS:' /tmp/extra-hard-v2-private-staging.log
+          grep -Fq 'EXTRA HARD V2 SYNTHETIC CLEANUP PASS:' /tmp/extra-hard-v2-private-staging.log
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
