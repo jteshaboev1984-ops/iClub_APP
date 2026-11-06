@@ -44,6 +44,55 @@
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   }[c]));
+  const topics = Object.freeze({
+    "1.1":{en:"Quadratics",ru:"Квадратные выражения",uz:"Kvadrat ifodalar"},
+    "1.2":{en:"Functions",ru:"Функции",uz:"Funksiyalar"},
+    "1.3":{en:"Coordinate geometry",ru:"Координатная геометрия",uz:"Koordinata geometriyasi"},
+    "1.4":{en:"Circular measure",ru:"Радианная мера",uz:"Radian o‘lchov"},
+    "1.5":{en:"Trigonometry",ru:"Тригонометрия",uz:"Trigonometriya"},
+    "1.6":{en:"Series",ru:"Последовательности и ряды",uz:"Ketma-ketlik va qatorlar"},
+    "1.7":{en:"Differentiation",ru:"Дифференцирование",uz:"Differensiallash"},
+    "1.8":{en:"Integration",ru:"Интегрирование",uz:"Integrallash"},
+    "5.1":{en:"Data representation",ru:"Данные и статистика",uz:"Ma’lumotlar va statistika"},
+    "5.2":{en:"Permutations and combinations",ru:"Перестановки и сочетания",uz:"O‘rin almashtirish va kombinatsiyalar"},
+    "5.3":{en:"Probability",ru:"Вероятность",uz:"Ehtimollik"},
+    "5.4":{en:"Discrete distributions",ru:"Дискретные распределения",uz:"Diskret taqsimotlar"},
+    "5.5":{en:"Normal distribution",ru:"Нормальное распределение",uz:"Normal taqsimot"}
+  });
+  const progressText=Object.freeze({
+    en:{done:"Submitted",submitted:"Submitted",started:"In progress",not_started:"New",other:"Other topics"},
+    ru:{done:"Отправлено",submitted:"Отправлено",started:"Начато",not_started:"Новое",other:"Другие темы"},
+    uz:{done:"Yuborilgan",submitted:"Yuborilgan",started:"Boshlangan",not_started:"Yangi",other:"Boshqa mavzular"}
+  });
+  function catalogMarkup(items,language){
+    const g=new Map(),t=progressText[language];
+    for(const item of items){
+      const k=String(item.official_section||"").match(/^([15]\.\d)\b/)?.[1]||"other";
+      if(!g.has(k))g.set(k,[]);
+      g.get(k).push(item);
+    }
+    const keys=[...g.keys()].sort((a,b)=>a.localeCompare(b,"en",{numeric:true}));
+    const first=keys.find(k=>g.get(k).some(x=>x.attempt_status!=="submitted"))||keys[0];
+    const done=items.filter(x=>x.attempt_status==="submitted").length;
+    const groups=keys.map(k=>{
+      const itemsInTopic=g.get(k);
+      const groupDone=itemsInTopic.filter(x=>x.attempt_status==="submitted").length;
+      const name=topics[k]?.[language]||t.other;
+      const rows=itemsInTopic.map(item=>{
+        const status=["submitted","started"].includes(item.attempt_status)?item.attempt_status:"not_started";
+        return '<button class="ep-component-link ep-extra-task" type="button" data-ep-extra-hard-task="'
+          +esc(item.task_key)+'"><span><strong>'+esc(item.title)+'</strong><small>'
+          +esc(t[status])+'</small></span><span aria-hidden="true">›</span></button>';
+      }).join("");
+      return '<details class="ep-extra-topic" '+(k===first?"open":"")
+        +'><summary><span>'+esc(k==="other"?"":k+" · ")+esc(name)
+        +'</span><span class="ep-extra-topic-count">'+groupDone+' / '+itemsInTopic.length+'</span></summary>'
+        +'<div class="ep-component-links ep-extra-topic-list">'+rows+'</div></details>';
+    }).join("");
+    return '<div class="ep-extra-catalog" data-ep-extra-hard-list>'
+      +'<p class="ep-extra-progress" role="status">'+esc(t.done)+": "+done+" / "+items.length+"</p>"+groups+'</div>';
+  }
+
   const pickLanguage = language => ["uz","en","ru"].includes(String(language).toLowerCase())
     ? String(language).toLowerCase() : "en";
   let context = null;
@@ -89,8 +138,7 @@
         frame('<div class="ep-live-notice" role="status">'+esc(c.preparing)+'</div>');
         return;
       }
-      const rows=context.items.map(item=>'<button class="ep-component-link" type="button" data-ep-extra-hard-task="'+esc(item.task_key)+'"><span><strong>'+esc(item.title)+'</strong></span><span aria-hidden="true">›</span></button>').join("");
-      frame('<div class="ep-component-links" data-ep-extra-hard-list>'+rows+'</div>');
+      frame(catalogMarkup(context.items,context.language));
       root()?.querySelectorAll('[data-ep-extra-hard-task]').forEach(btn=>
         btn.addEventListener("click",()=>openTask(btn.dataset.epExtraHardTask)));
     } catch (_) {
