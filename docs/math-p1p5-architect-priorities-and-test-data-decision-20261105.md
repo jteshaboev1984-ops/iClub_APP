@@ -11,12 +11,36 @@
 
 ## LATEST 2026-11-06 — Extra Hard complete authored bank
 
+## LATEST 2026-11-06 — protected Full42 v3 staging implementation (DRAFT)
+
+**Exact owner-private source is now pinned to JSON SHA-256 `28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78`.**
+Editorial review identified and corrected **two ambiguous Russian math
+notations** in the P5 binomial→normal approximation task, where decimal
+commas could be misread as function-argument separators. This changes
+neither mathematical answers nor skill coverage, no learner data, and
+does **not** imply that all 30 additional problems are language-approved.
+
+**Actual next code milestone delivered:** a new `v3` protected 42-row importer
+`scripts/ops/p1p5-extra-hard-private-full42-stage-v3.cjs`,
+which requires exact private content SHA, 14×3 syllabus strands, 24 P1/18 P5,
+12 reviewed + 30 unpublished draft tasks and separate owner GO for staging.
+A separate CI-only synthetic data mode exercises the same PostgreSQL
+`COPY` + verification path under a transaction and **ROLLBACK**.
+The current v2 public release pointer stays **OFF**; it is intentionally
+**not switched to v3** and the first 12-task importer remains untouched.
+No protected text or worked solution is committed or logged in public GitHub.
+
+Staging and publishing are different decisions. The 30 drafts remain withheld.
+The full release will require explicit 30-task editorial acceptance and a
+separate version switch. No current production SQL or data change.
+
+
 The target **42/42** original protected challenges are now authored privately:
 24 P1 and 18 P5, three per each of 14 syllabus strands. 18 final new
 calculations independently verified. 30 recently authored tasks require
 final language/technical editorial QA and stay DRAFT; do not publish them
 or run any live import. Protected unified v3 source checksum
-`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`.
+`28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78`.
 The old 24/42 point below is historical only. Next real task is the
 separately versioned **42-row protected importer** and content QA, not
 more task creation.

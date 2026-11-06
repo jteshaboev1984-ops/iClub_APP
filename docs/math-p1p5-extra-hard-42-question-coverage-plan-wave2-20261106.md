@@ -1,5 +1,29 @@
 # Mathematics P1/P5 — Extra Hard full-course target: 42 optional challenges
 
+## LATEST 2026-11-06 — protected Full42 v3 staging implementation (DRAFT)
+
+**Exact owner-private source is now pinned to JSON SHA-256 `28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78`.**
+Editorial review identified and corrected **two ambiguous Russian math
+notations** in the P5 binomial→normal approximation task, where decimal
+commas could be misread as function-argument separators. This changes
+neither mathematical answers nor skill coverage, no learner data, and
+does **not** imply that all 30 additional problems are language-approved.
+
+**Actual next code milestone delivered:** a new `v3` protected 42-row importer
+`scripts/ops/p1p5-extra-hard-private-full42-stage-v3.cjs`,
+which requires exact private content SHA, 14×3 syllabus strands, 24 P1/18 P5,
+12 reviewed + 30 unpublished draft tasks and separate owner GO for staging.
+A separate CI-only synthetic data mode exercises the same PostgreSQL
+`COPY` + verification path under a transaction and **ROLLBACK**.
+The current v2 public release pointer stays **OFF**; it is intentionally
+**not switched to v3** and the first 12-task importer remains untouched.
+No protected text or worked solution is committed or logged in public GitHub.
+
+Staging and publishing are different decisions. The 30 drafts remain withheld.
+The full release will require explicit 30-task editorial acceptance and a
+separate version switch. No current production SQL or data change.
+
+
 ## LATEST 2026-11-06 — complete protected authored corpus (42 of 42)
 
 **The former 24/42 checkpoint below is historical.** A complete 42-task
@@ -15,7 +39,7 @@ three languages before final hashing.
 **Protected FULL42 source file** is stored in the owner's private Library:
 `/iClub_APP/Mathematics_P1_P5/Private_Question_Candidates/ExtraHard/iClub_Math_P1P5_ExtraHard_FULL42_PRIVATE_20261106.zip`.
 Its canonical protected JSON SHA-256 is
-`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`;
+`28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78`;
 do not commit/upload question text, answer keys or worked solutions to public Git.
 
 **CRITICAL STATUS:** 42 authored and computationally checked, but only the
@@ -113,7 +137,7 @@ IDs and English source conditions, EN/RU/UZ presence and the honest
 anything and does not reveal protected prompts, keys or solutions.
 
 **Actual local owner-private check PASS** for SHA256
-`c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58`.
+`28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78`.
 A tampered source was rejected. Public CI only parses this script with
 `node --check` and tests synthetic UI; the private JSON is NEVER sent
 to GitHub/Actions. This is not approval to publish the 30 unreviewed drafts.
