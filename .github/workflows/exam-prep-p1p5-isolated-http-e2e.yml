@@ -15,6 +15,8 @@ on:
       - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
       - 'scripts/p1p5-isolated-http-three-full-papers.cjs'
       - 'scripts/p1p5-isolated-http-skipped-paper-denial.cjs'
+      - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
+      - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
   pull_request:
     branches: [main]
