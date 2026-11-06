@@ -33,9 +33,10 @@ still exist in protected content. When the academic priorities leave
 no alternative, a duplicate can still be presented. Actual five-item
 permanent **versioned content replacements remain OPEN** and require
 independently checked original conditions, EN/RU/UZ, answers, provenance
-and restricted protected import. The exact original 12 Extra Hard
-questions were not recovered from public Git history or prior work;
-no replacements are invented for those 12.
+and restricted protected import. The architect changed the Extra Hard rule on 2026-11-06: the lost
+12 drafts are superseded by 12 newly authored, private P1/P5 Extra Hard
+tasks (6+6), not yet imported or published. This change is separate
+from the five versioned diagnostic/retest/mixed replacements.
 
 Test target: existing signed two-learner P1/P5 HTTP/PG17/Chromium
 journey plus one read-only SQL contract on the genuine five pairs.

@@ -1,4 +1,4 @@
-# Issue #450 — D09 first diagnostic T0 freeze + architect's original 12 Extra Hard decision
+# Issue #450 — D09 first diagnostic T0 freeze (historic Extra Hard source rule superseded)
 
 **2026-11-04 — DRAFT/NO_GO.** Builds only on [DRAFT PR #479](https://github.com/jteshaboev1984-ops/iClub_APP/pull/479), exactly 70/70 GREEN source SHA `86f335e9363ef4ffd97beed38be4784c35152a3a`. This change needs its **own exact-head CI** before engineering acceptance.
 
@@ -13,10 +13,14 @@ The previous [D09 read-only projection](math-p1p5-p3-d09-diagnostic-periods-2026
 - The canonical legacy `private.exam_prep_effective_active_week_v1` and original plan IDs still use the profile week for compatibility. Freezing individual diagnostic epochs **does not** change this old planning identity; revising the shared plan-week clock would require separate safe historical-plan migration and rollback proof.
 - The test asserts actual P1/P5 first-diagnostic records in **disposable** PG17 after signed HTTP diagnostic, attempts a forbidden direct T0 update, toggles only synthetic placement within `BEGIN…ROLLBACK`, tests no session/correction/other-user drift and verifies report source. Signed HTTP test proves authorized RPC and honest fallback; all new SQL is DRAFT, not applied to production.
 
-## Extra Hard — decision unchanged from architect
+## Extra Hard — historical 2026-11-04 decision explicitly superseded
 
-**Use the SAME 12 earlier-authored problems**: six P1 and six P5, with existing RU/UZ/EN text, original answers and worked solutions. Do not create replacement questions, change answer keys, assign fictitious QA approvals, or introduce a new competing bank. This decision is recorded in [Extra Hard governance](math-p1p5-extra-hard-secure-content-governance-20261104.md).
-
-Those exact question bodies are **not present** in the currently rebuilt public PR branch or attached files examined so far; no exact recovery has yet been established. The planned safe import consumes the **original payload only** once recovered; it does not generate substitutes. The existing server Extra Hard shell remains disabled with an empty protected bank until source fidelity, math/locale checks and actual import. Publishing the shell without any questions or marking the originals imported is not done.
+**CURRENT as of 2026-11-06:** the architect discontinued recovery of the lost
+12 originals and approved a fresh, newly authored **6 P1 + 6 P5** trilingual
+Extra Hard bank. The 12 new tasks are complete and private, 12/12 math QA,
+bank `math-extra-hard-2026-11-original-v2`, not published/imported. The prior “same original 12”
+constraint is **withdrawn**; do not attempt lost-source recovery or restore
+obsolete bank placeholders. See
+[the governing current document](math-p1p5-extra-hard-secure-content-governance-20261104.md).
 
 **No production changes, no deletion of user data, no reset, no main merge or live migration, no Vercel.** All changes remain draft, public launch NO_GO.

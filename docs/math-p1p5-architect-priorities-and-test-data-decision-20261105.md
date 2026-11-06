@@ -13,13 +13,13 @@
 
 1. P4-01 through P4-06 written-Paper **operational** Stage3–6 architecture is already engineering accepted on isolated signed PG17. Six genuine P1/P5 full Papers were executed (three per component), writing was correctly **ungraded**, and grade/readiness remained `INSUFFICIENT_EVIDENCE`. Do not restart P4 audits.
 2. The study timeline, learner-chosen P1/P5 dates, weekly/monthly-only reports and all **three opt-in study-time choices** already exist in draft code. Do not falsely mark these missing or generate replacement flows.
-3. The Extra Hard noncredit, owner-only UI/database shell exists but its protected source bank is EMPTY and release OFF. The **original architect-designed 12 items** (6 P1, 6 P5) with their exact three-language wording, answers and solutions have **not been source-recovered**. Do not invent replacement questions, leak keys into GitHub, or claim publication.
+3. The Extra Hard noncredit, owner-only UI/database shell exists but its protected source bank is EMPTY and release OFF. The architect superseded the old lost 12 on **2026-11-06**. Exactly **12 new original Extra Hard tasks** (6 P1, 6 P5) with EN/RU/UZ solutions are authored and privately archived. All 12 computational mathematics checks passed. Do not recover old missing drafts, expose keys in GitHub or claim that new tasks are imported/published.
 4. The independent evidence-based estimates for each of the 81 skills remain unapproved. Existing 2020 Cambridge topic-guided hours are a **historical reference**, not measured personal learning minutes. The already implemented voluntary approximate planning aid does not represent Cambridge's individual prescription.
 
 ## Actual remaining delivery order
 
 **A — Academic content/product completion first.**
-- Recover the **same** original 12 Extra Hard source questions (no public key dump), then perform one mathematical/translation/technical/IP review and import via restricted private channel; publish the first P1/P5 batch ONLY if it passes. If exact source cannot be recovered, record the blocker transparently and proceed with the other tasks; do not fabricate originals.
+- Use the **newly authored** 12 original P1/P5 Extra Hard questions (6+6) and their checked EN/RU/UZ solutions in the owner's private bundle; stop searching for the superseded lost drafts. Finish controlled private versioned import, academic/noncredit and release-QA, then publish ONLY after separate GO. Never place answer text or keys in public GitHub.
 - Resolve 5 known duplicate mathematical retest/diagnostic prompts by immutable/versioned reviewed replacements where genuinely needed; preserve the 71 historical QUA sessions and already acceptable retest fallback.
 - Improve P1/P5 81-skill time estimate methodology based on actual content and observable work, and reflect uncertainty in the existing voluntary timeline. No fictitious independent-study norms, Cambridge grades or mandatory weekly quota.
 - Finish the remaining product-level integration of the existing **three choices** only if an actual user-flow defect is found, rather than recreating already delivered UI/RPCs.
