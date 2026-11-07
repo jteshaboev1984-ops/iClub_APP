@@ -1,5 +1,37 @@
 # Full42 Extra Hard: protected importer v3 and actual editorial correction
 
+## LATEST 2026-11-07 — 42/42 internal academic/editorial QA complete (NOT PUBLISHED)
+
+The protected source was reviewed for all **30 previously pending** original
+multistep challenges. A fresh **independent SymPy/SciPy second-pass**
+recalculated all 30 reported results (**30/30 PASS**). English/Russian/Uzbek
+problem conditions and worked solutions were compared directly; printed math
+values, parameter domains, units, interval endpoints, and answer semantics
+were checked. Owner's **internal AI editorial review**, not independent
+human or Cambridge examiner certification.
+
+The **new separately archived source** includes exact per-task QA evidence:
+`/iClub_APP/Mathematics_P1_P5/Private_Question_Candidates/ExtraHard/iClub_Math_P1P5_ExtraHard_FULL42_INTERNAL_QA_20261107.zip`.
+Its canonical protected JSON SHA256 is
+`2283f0a35697349dac6825accd199e85fc72bb61d4ac5f8b4aca9e5adaeea77b`.
+**No 42 question texts, worked solutions, mathematical answers or
+individual content hashes have changed** from the previous private source:
+only QA statuses and review-evidence metadata. The 12 existing approvals
+remained intact; **30 changed from internal draft to internal approved**.
+Every task has `qa_math=qa_languages=qa_technical=approved` and
+`lifecycle_status=approved` in the **private source file ONLY**.
+There are still **0 published tasks**, no staging, and the live v2 bank
+release remains OFF. The old `28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78` SHA is a
+historical pre-review snapshot, not a currently authorized staging source.
+
+The new DRAFT code updates the read-only local validator, strictly scoped
+full42 owner-GO private importer and disposable CI synthetic proof to
+expect **42 approved/0 draft without publishing**. Any old 12-approved
+file or tampered problem remains rejected by the new exact SHA check.
+No production SQL, Vercel deployment, user records, mastery, Practice,
+Tours, certs, AI, Mentor, or localStorage changed.
+
+
 **2026-11-06 · Issue #450 · DRAFT · NO LIVE DATABASE OR PUBLIC GO**
 
 ## Source state

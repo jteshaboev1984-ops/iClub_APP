@@ -6,7 +6,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
-const EXPECTED_SHA='28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78';
+const EXPECTED_SHA='2283f0a35697349dac6825accd199e85fc72bb61d4ac5f8b4aca9e5adaeea77b';
 const BANK='math-extra-hard-2026-11-full-v3';
 const FIELDS=['task_key','bank_version','component_code','primary_skill_code',
  'official_section','book_map','title_i18n','prompt_i18n','solution_i18n','exact_answer'];
@@ -75,10 +75,10 @@ function check(filename){
   const group=category(t); assert(expected.includes(group),'Unknown official syllabus strand');
   groups.set(group,(groups.get(group)||0)+1);
  }
- assert.equal(p1,24);assert.equal(p5,18);assert.equal(drafts,30);assert.equal(approvals,12);
+ assert.equal(p1,24);assert.equal(p5,18);assert.equal(drafts,0);assert.equal(approvals,42);
  assert.equal(groups.size,14);
  for(const k of expected)assert.equal(groups.get(k),3,'Incorrect strand group count');
- console.log('EXTRA HARD PRIVATE FULL42 CHECK PASS: 42 unique content hashes; P1=24 P5=18; 14 strands x3; math QA approved; language/technical pending for 30; release OFF.');
+ console.log('EXTRA HARD PRIVATE FULL42 CHECK PASS: 42 unique content hashes; P1=24 P5=18; 14 strands x3; math QA approved; language/technical reviewed internally 42/42; NO external examiner; release OFF.');
  return bank;
 }
 if(process.argv.length!==3){
