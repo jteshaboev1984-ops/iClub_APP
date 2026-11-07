@@ -62,3 +62,29 @@ distinct explicit architect GO. Future public rollout stays **NO_GO**.
 
 DRAFT **isolated integration candidate** only. Exact-head SHA and signed
 GitHub CI results to be recorded in Issue #450 after execution.
+
+## 2026-11-07 — P4-11 source-verified controlled-beta boundary repair
+
+The first temporary whole-stack `main` comparison surfaced two global
+CI failures in the guarded-answer and preserved-profile browser workflows,
+each of which checked a source SHA. This was **not merely stale CI text**:
+inspection of actual `#508` vs accepted `#507` files proved the entire
+difference consists of expanding the Core client from `controlled_beta`
+to `controlled_beta OR mass`:
+- `exam-prep/exam-prep-live.js`, one gate; previous accepted blob
+  `5c9f635bd84541b0221a5fbc4c348cd3f494b5a2`.
+- `exam-prep/exam-prep-api.js`, two gates including the fail-closed
+  negated Progress UX check; previous accepted blob
+  `285d6892440ebd0866e1d46e0ad7d14266c635dd`.
+
+The PUBLIC NO_GO and production controlled-beta boundary were never
+authorized for expansion. On this **isolated integration draft only**, both
+files are restored **byte-for-byte** from already tested DRAFT #507.
+Programmatic comparison confirmed that normalization of ONLY the three
+`mass` clauses produced exactly those original accepted files. Their
+independent browser/recovery tests and actual ungraded written Core remain
+unchanged. No server rollout flag, API privilege, learner data or main
+branch is modified. Do not override generic SHA checks to make CI green;
+the corrected code must satisfy them honestly in full exact-SHA tests.
+
+No architect GO for public mass release has been inferred or issued.
