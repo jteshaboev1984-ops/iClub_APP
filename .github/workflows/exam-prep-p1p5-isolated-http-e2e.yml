@@ -12,6 +12,7 @@ on:
       - feature/math-p1p5-extra-hard-full42-final-content-governance-20261106
       - feature/math-p1p5-extra-hard-v3-42-protected-import-qa-20261106
       - feature/math-p1p5-extra-hard-full42-internal-qa-20261107
+      - feature/math-p1p5-extra-hard-v3-gated-release-20261107
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'
@@ -25,6 +26,7 @@ on:
       - 'scripts/p1p5-extra-hard-topic-progress-browser.cjs'
       - 'scripts/ops/p1p5-extra-hard-private-full42-check-v3.cjs'
       - 'scripts/ops/p1p5-extra-hard-private-full42-stage-v3.cjs'
+      - 'scripts/ops/p1p5-extra-hard-v3-release-gate.cjs'
       - 'scripts/p1p5-extra-hard-full42-stage-v3-isolated-test.cjs'
       - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
       - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
@@ -290,6 +292,9 @@ jobs:
           node --check scripts/p1p5-extra-hard-full42-stage-v3-isolated-test.cjs
           node scripts/p1p5-extra-hard-full42-stage-v3-isolated-test.cjs | tee /tmp/extra-hard-v3-42-staging.log
           grep -Fq 'EXTRA HARD V3 42-ROW PRIVATE COPY ROLLBACK PASS:' /tmp/extra-hard-v3-42-staging.log
+          node --check scripts/ops/p1p5-extra-hard-v3-release-gate.cjs
+          node scripts/ops/p1p5-extra-hard-v3-release-gate.cjs dry-run-isolated | tee /tmp/extra-hard-full42-release-dryrun.log
+          grep -Fq 'EXTRA HARD FULL42 PUBLIC RELEASE GATE ROLLBACK PASS:' /tmp/extra-hard-full42-release-dryrun.log
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
