@@ -105,7 +105,7 @@ async function reachWritten(page,sessionId) {
  }
  throw Error('did not reach a written external step before 16 questions');
 }
-async function criteriaFor(page,id,component,lang) {
+async function criteriaFor(page,id,component,lang,openCriteria=true) {
  const next=page.locator('[data-ep-written-next]');
  assert(await next.count()===1,'Next action not shown '+component+'/'+lang);
  assert(await page.locator('textarea[name="ep_live_written_answer"]').count()===0,
@@ -122,6 +122,18 @@ async function criteriaFor(page,id,component,lang) {
  assert(recorded.ok,'owner lost current written session');
  const item=recorded.data.items.find(x=>x.item_kind==='written'&&x.is_complete!==true);
  assert(item?.written_external===true,'real RPC has no external written flag');
+ if (!openCriteria) {
+  // P4-08: optional criteria are never needed for independently solved work.
+  const hidden=page.locator('[data-ep-written-criteria-panel]');
+  assert(await hidden.count()===1 && await hidden.isHidden(),'criteria must start collapsed');
+  assert.equal(await toggle.getAttribute('aria-expanded'),'false');
+  const reads=await page.evaluate(()=>(window.__realWrittenTrace||[])
+    .filter(x=>x.name==='get_exam_prep_written_criteria_safe_v1').length);
+  assert.equal(reads,0,'criteria fetched before learner requested them');
+  assert.equal(count('exam_prep_written_step_advances_v1',id),before,
+    'unopened criteria changed academic progress');
+  return {itemOrder:item.item_order,available:null,lang,criteriaOpened:false};
+ }
  await toggle.click();
  const panel=page.locator('[data-ep-written-criteria-panel]');
  await panel.waitFor({state:'visible',timeout:15000});
@@ -232,7 +244,9 @@ async function main(){
      }
      assert(/^[a-f0-9-]{36}$/.test(id||''),'server did not issue/resolve learner session');
      await reachWritten(opening.page,id);
-     const snapshot=await criteriaFor(opening.page,id,component,lang);
+     // Final locale/viewport proves signed Next without ever opening criteria.
+     const skipCriteria=lang==='uz'&&width===1280;
+     const snapshot=await criteriaFor(opening.page,id,component,lang,!skipCriteria);
      if(lastItem!=null)assert.equal(snapshot.itemOrder,lastItem,'reopened a different written step');
      lastItem=snapshot.itemOrder;
      const horizontalOverflow=await opening.page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
@@ -242,6 +256,11 @@ async function main(){
       const before=count('exam_prep_responses',id,' AND item_order='+lastItem);
       assert(before===0,'written Core received stored essay/answer before Next');
       const stageC=await firstCommitOfflineRace(opening.page,id,lastItem,component);
+      const criteriaReads=await opening.page.evaluate(()=>
+       (window.__realWrittenTrace||[]).filter(x=>
+         x.name==='get_exam_prep_written_criteria_safe_v1').length);
+      assert.equal(criteriaReads,0,
+        'P4-08 Core must continue without opening marking criteria');
       const advanced=await rpc('get_exam_prep_written_step_status_safe_v1',{p_session_id:id,p_item_order:lastItem});
       assert(advanced.ok&&advanced.data.status==='advanced','real Next not persisted after lost ACK');
       assert.equal(count('exam_prep_written_step_advances_v1',id,' AND item_order='+lastItem),1,
@@ -254,7 +273,7 @@ async function main(){
        (()=>{const h2=enc({alg:'HS256',typ:'JWT'})+'.'+enc({role:'authenticated',aud:'authenticated',sub:'22222222-2222-4222-8222-222222222292',iat:Math.floor(Date.now()/1000),exp:Math.floor(Date.now()/1000)+600});return h2+'.'+crypto.createHmac('sha256',SECRET).update(h2).digest('base64url')})()
       );
       assert(!badUser.ok,'foreign user read written Next status');
-      result.push({component,languages:preAdvanceAnswers,oneRealNext:true,duplicateWrittenResponses:false,
+      result.push({component,languages:preAdvanceAnswers,oneRealNext:true,criteriaOptionalNext:true,duplicateWrittenResponses:false,
        unreadWrittenMarkNotAwarded:true,foreignDenied:true,firstCommitRace:stageC});
      }
      assert.equal(opening.errors.length,0,'browser JS errors '+component+'/'+lang+': '+opening.errors.join('|'));
@@ -263,6 +282,9 @@ async function main(){
   }
   assert(result.length===2,'written e2e did not cover both P1/P5');
   console.log('STAGE B TRUE MATH UI HTTP WRITTEN CRITERIA NEXT RELOAD PASS',JSON.stringify(result));
+  console.log('P4-08 OPTIONAL CRITERIA REAL HTTP NEXT PASS',
+   JSON.stringify(result.map(r=>({component:r.component,
+    criteriaOptionalNext:r.criteriaOptionalNext,writtenGradingCredit:0}))));
   console.log('STAGE C FIRST-COMMIT OFFLINE + CONCURRENT UI HTTP PASS',
    JSON.stringify(result.map(r=>r.firstCommitRace)));
  }finally{await browser.close()}
