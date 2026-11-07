@@ -40,8 +40,11 @@ async function run(){
     const used=new Set(existing.map(x=>x.id));
     const candidates=catalog.assessments.filter(x=>
       x.attempt_kind==='full_paper' && x.comparison_scope==='full' && x.strict_timing===true);
-    const candidate=candidates.find(x=>!used.has(x.assessment_id));
-    assert(candidate,'P4-07 must use a distinct published Paper, no source fabrication');
+    // Stage6 may offer the same four published forms again under a NEW
+    // signed authorization. Never require an unavailable fifth form.
+    const candidate=candidates.find(x=>!used.has(x.assessment_id))
+      || candidates.find(x=>used.has(x.assessment_id));
+    assert(candidate,'P4-07 requires a real published Paper, no source fabrication');
 
     const prefix='p407-whitespace-'+component.toLowerCase();
     const auth=ok(await rpc('authorize_exam_prep_timed_safe_v1',{
@@ -107,7 +110,7 @@ async function run(){
     JSON.stringify({P1:true,P5:true,realJwt:true,postgrest:true,
       persistedNoncredit:true,executionFalse:true,scoredFalse:true,
       genuinePaperCount:3,readiness:'INSUFFICIENT_EVIDENCE',
-      differentPaperForms:true,ownerOnly:true}));
+      serverAuthorizedPaper:true,ownerOnly:true}));
 }
 run().catch(error=>{
   console.error('P4-07 SIGNED WHITESPACE PAPER NEGATIVE FAILED:',error.message);
