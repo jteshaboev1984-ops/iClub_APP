@@ -20,6 +20,7 @@ on:
       - 'scripts/p1p5-isolated-http-positive-mixed-timed.cjs'
       - 'scripts/p1p5-isolated-http-three-full-papers.cjs'
       - 'scripts/p1p5-isolated-http-skipped-paper-denial.cjs'
+      - 'scripts/p1p5-isolated-http-whitespace-paper-denial.cjs'
       - 'exam-prep/exam-prep-extra-hard-ui.js'
       - 'exam-prep/exam-prep-host.css'
       - 'scripts/p1p5-extra-hard-real-http.cjs'
@@ -53,6 +54,7 @@ on:
       - 'supabase/tests/p1p5_p4_04_operational_calibration_disposable.sql'
       - 'scripts/p1p5-isolated-http-three-full-papers.cjs'
       - 'scripts/p1p5-isolated-http-skipped-paper-denial.cjs'
+      - 'scripts/p1p5-isolated-http-whitespace-paper-denial.cjs'
       - 'supabase/tests/p1p5_p4_05_three_full_papers_disposable.sql'
       - 'supabase/tests/p1p5_p4_05_blank_paper_negative_disposable.sql'
       - 'supabase/tests/p1p5_p4_06_runtime_writer_acl_disposable.sql'
@@ -490,6 +492,17 @@ jobs:
             2>&1 | tee /tmp/p1p5-p4-06-writer-acl.log
           grep -Fq 'P4-06 PASS: five private ACLs' \
             /tmp/p1p5-p4-06-writer-acl.log
+      - name: P4-07 signed P1 P5 whitespace-only Paper cannot earn execution or marks
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = "true"
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          node --check scripts/p1p5-isolated-http-whitespace-paper-denial.cjs
+          node scripts/p1p5-isolated-http-whitespace-paper-denial.cjs \
+            | tee /tmp/p1p5-p407-whitespace-paper-negative.log
+          grep -Fq 'P4-07 SIGNED WHITESPACE PAPER NEGATIVE PASS' \
+            /tmp/p1p5-p407-whitespace-paper-negative.log
       - name: Complete and cleanup canonical mixed/full-paper synthetic learner
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
