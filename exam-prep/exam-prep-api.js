@@ -39,7 +39,7 @@
   async function loadControlledProgressUx() {
     if (window.iClubExamPrepProgressUxEnabled === false) return false;
     const caps = root.lastCapabilities;
-    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || !(caps.rolloutState === "controlled_beta" || caps.rolloutState === "mass")) return false;
+    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || caps.rolloutState !== "controlled_beta") return false;
     if (!/^https?:/i.test(API_SCRIPT_SRC) || !/exam-prep-api\.js(?:\?|$)/.test(API_SCRIPT_SRC)) return false;
 
     window.iClubExamPrepProgressUxEnabled = true;
@@ -108,7 +108,7 @@
         killSwitch: row.kill_switch !== false
       });
 
-      if (data.coreAccess === true && data.killSwitch === false && (data.rolloutState === "controlled_beta" || data.rolloutState === "mass")) {
+      if (data.coreAccess === true && data.killSwitch === false && data.rolloutState === "controlled_beta") {
         const weekly = await rpc("get_my_exam_prep_weekly_flow_status_v1");
         const weeklyRow = weekly.ok
           ? (Array.isArray(weekly.data) ? weekly.data[0] : weekly.data)
