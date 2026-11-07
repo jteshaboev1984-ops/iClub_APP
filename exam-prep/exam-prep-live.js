@@ -230,7 +230,7 @@
     // Legacy isolated Core test harnesses have no subject-hub identity at all.
     return Boolean((!hubSubject || hubSubject === "mathematics") && requestedSubject === "mathematics" &&
       root && !root.hidden && caps && caps.coreAccess === true &&
-      caps.killSwitch === false && (caps.rolloutState === "controlled_beta" || caps.rolloutState === "mass"));
+      caps.killSwitch === false && caps.rolloutState === "controlled_beta");
   }
   function clearTimer() { if (state.timerId) clearInterval(state.timerId); state.timerId = null; }
   function stageLabel(value) { const c = copy(); return c[`stage${Math.max(0, Math.min(6, Number(value) || 0))}`]; }
