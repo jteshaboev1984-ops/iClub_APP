@@ -6,7 +6,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
-const EXPECTED_SHA='c28ce95658c2237754179bc6e67b141f4c023b25d639dea393065aa21f656c58';
+const EXPECTED_SHA='28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78';
 const BANK='math-extra-hard-2026-11-full-v3';
 const FIELDS=['task_key','bank_version','component_code','primary_skill_code',
  'official_section','book_map','title_i18n','prompt_i18n','solution_i18n','exact_answer'];
