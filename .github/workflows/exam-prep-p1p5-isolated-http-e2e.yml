@@ -34,6 +34,7 @@ on:
       - 'scripts/p1p5-isolated-http-three-full-papers.cjs'
       - 'scripts/p1p5-isolated-http-skipped-paper-denial.cjs'
       - 'scripts/p1p5-isolated-http-whitespace-paper-denial.cjs'
+      - 'scripts/p1p5-isolated-http-written-criteria-next-browser.cjs'
       - 'supabase/tests/p1p5_p4_05_three_full_papers_disposable.sql'
       - 'supabase/tests/p1p5_p4_05_blank_paper_negative_disposable.sql'
       - 'supabase/tests/p1p5_p4_06_runtime_writer_acl_disposable.sql'
