@@ -6,6 +6,7 @@ const assert=require("node:assert/strict");
 const fs=require("node:fs");
 const crypto=require("node:crypto");
 const path=require("node:path");
+const os=require("node:os");
 const {spawnSync,execFileSync}=require("node:child_process");
 const MODE=process.argv[2];
 const BANK="math-extra-hard-2026-11-full-v3";
@@ -46,7 +47,7 @@ function privateExpected(filename){
     t.primary_skill_code.startsWith("P5-GEO-")?"5.4G":
     t.primary_skill_code.startsWith("P5-BIN-")?"5.4B":String(t.official_section).slice(0,3);
   groups.set(g,(groups.get(g)||0)+1);count[t.component_code]++;
-  result.push({id:t.task_key,sha:t.content_sha256,component:t.component_code});
+  result.push({id:t.task_key,sha:t.content_sha256,component:t.component_code,fields:item});
  }
  assert(count.P1===24&&count.P5===18&&groups.size===14&&[...groups.values()].every(n=>n===3));
  return result;
@@ -58,14 +59,21 @@ function syntheticExpected(){
   "CI release rehearsal refuses other databases");
  const arr=[];for(const c of ["P1","P5"]){for(let i=0;i<(c==="P1"?24:18);i++){
   const id="CI-EH-PUB-"+c+"-"+String(i+1).padStart(2,"0");
-  arr.push({id,component:c,sha:hash(Buffer.from("CI TEST ONLY "+id))});
+  const fields={task_key:id,bank_version:BANK,component_code:c,
+   primary_skill_code:c==="P1"?"P1-QUA-01":"P5-GEO-01",
+   official_section:"CI TEST",book_map:"CI TEST",
+   title_i18n:{en:"CI TEST",ru:"CI TEST",uz:"CI TEST"},
+   prompt_i18n:{en:"CI TEST 1+1",ru:"CI TEST 1+1",uz:"CI TEST 1+1"},
+   solution_i18n:{en:"CI TEST 1+1=2",ru:"CI TEST 1+1=2",uz:"CI TEST 1+1=2"},
+   exact_answer:"CI TEST 2"};
+  arr.push({id,component:c,sha:hash(Buffer.from("CI TEST ONLY "+id)),fields});
  }}
  return arr;
 }
 function sqlRead(sql,env){
  return execFileSync("psql",["-X","-At","-v","ON_ERROR_STOP=1","-c",sql],{env,encoding:"utf8"}).trim();
 }
-function publish(expected,synthetic){
+function publish(expected,synthetic,injectTamper=false){
  const safe=x=>{assert(/^[A-Za-z0-9_.-]+$/.test(x));return x;};
  const values=expected.map(x=>"('"+safe(x.id)+"','"+safe(x.sha)+"','"+safe(x.component)+"')").join(",");
  assert(expected.length===42);
@@ -74,6 +82,16 @@ function publish(expected,synthetic){
  const before=synthetic?sqlRead(snapSql,env):null;
  if(synthetic)assert(before.includes(PRIOR+":false:false")&&before.startsWith("0|0|"),
   "Synthetic release expected zero existing private tasks or attempts");
+ // Authoritative source content reaches only this process, a mode-0600 CSV,
+ // and the local psql COPY. No protected answers enter Git or CI logs.
+ assert(expected.every(e=>e.fields && sourceFields.every(k=>
+  Object.prototype.hasOwnProperty.call(e.fields,k))),"Authoritative task fields missing");
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),"iclub-eh-release-proof-"));
+ const proof=path.join(temp,"approved-source.csv");
+ const lines=expected.map(e=>'"'+JSON.stringify(e.fields).replace(/"/g,'""')+'"');
+ fs.writeFileSync(proof,lines.join("\n")+"\n",{mode:0o600,encoding:"utf8"});
+ const copyPath=proof.replace(/'/g,"''");
+ try{
  const sql=[
   "BEGIN;","SET LOCAL lock_timeout='3s';","SET LOCAL statement_timeout='30s';",
   "DO $pre$ BEGIN",
@@ -85,7 +103,9 @@ function publish(expected,synthetic){
   synthetic?"IF current_database()<>'postgres' OR current_setting('iclub.e2e_isolated',true) IS DISTINCT FROM 'true' OR (SELECT count(*) FROM auth.users)<>2 OR (SELECT count(*) FROM public.users)<>2 THEN RAISE EXCEPTION 'Not a disposable CI source'; END IF;":"",
   "END $pre$;",
   "CREATE TEMP TABLE _eh_release_proof(id text PRIMARY KEY,sha text NOT NULL,component text NOT NULL) ON COMMIT DROP;",
-  "INSERT INTO pg_temp._eh_release_proof VALUES "+values+";"
+  "INSERT INTO pg_temp._eh_release_proof VALUES "+values+";",
+  "CREATE TEMP TABLE _eh_release_expected(raw text NOT NULL) ON COMMIT DROP;",
+  "\\copy pg_temp._eh_release_expected(raw) FROM '"+copyPath+"' WITH (FORMAT csv)"
  ];
  if(synthetic)sql.push(
   "INSERT INTO private.exam_prep_extra_hard_tasks_v1(task_key,program_version_id,bank_version,component_code,primary_skill_code,official_section,book_map,title_i18n,prompt_i18n,solution_i18n,exact_answer,source_kind,qa_math,qa_languages,qa_technical,lifecycle_status,content_sha256)",
@@ -97,9 +117,20 @@ function publish(expected,synthetic){
   "FROM pg_temp._eh_release_proof e CROSS JOIN private.exam_prep_program_versions p",
   "WHERE p.program_key='math_as_p1_p5' AND p.version_key='p1_p5_canonical_v1_0' AND p.status='active';"
  );
+ // Hold row-level locks until the same transaction publishes or rolls back.
+ sql.push("DO $lock$ DECLARE k text; BEGIN",
+  "PERFORM 1 FROM private.exam_prep_extra_hard_release_v1 WHERE program_key='math_as_p1_p5' FOR UPDATE;",
+  "FOR k IN SELECT task_key FROM private.exam_prep_extra_hard_tasks_v1 WHERE bank_version='"+BANK+"' FOR UPDATE LOOP NULL; END LOOP;",
+  "END $lock$;");
+ if(synthetic&&injectTamper){
+  // Mutate a real DB prompt while keeping its stored hash unchanged.
+  sql.push("UPDATE private.exam_prep_extra_hard_tasks_v1 SET prompt_i18n=jsonb_set(prompt_i18n,'{en}',to_jsonb('CI TEST: changed in database'::text)) "+
+   "WHERE task_key='"+safe(expected[0].id)+"';");
+ }
  sql.push(
   "DO $verify$ BEGIN",
   "IF (SELECT count(*) FROM pg_temp._eh_release_proof)<>42",
+  "OR (SELECT count(*) FROM pg_temp._eh_release_expected)<>42",
   "OR (SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1 WHERE bank_version='"+BANK+"')<>42",
   "OR (SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1 WHERE bank_version='"+BANK+"' AND component_code='P1')<>24",
   "OR (SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1 WHERE bank_version='"+BANK+"' AND component_code='P5')<>18",
@@ -108,8 +139,23 @@ function publish(expected,synthetic){
   " OR t.component_code IS DISTINCT FROM e.component OR t.lifecycle_status IS DISTINCT FROM 'approved'",
   " OR t.qa_math IS DISTINCT FROM 'approved' OR t.qa_languages IS DISTINCT FROM 'approved' OR t.qa_technical IS DISTINCT FROM 'approved'",
   " OR t.published_at IS NOT NULL)",
+  // The cached SHA field alone is not proof the ACTUAL DB content matches.
+  "OR EXISTS(SELECT 1 FROM pg_temp._eh_release_expected src",
+  " LEFT JOIN private.exam_prep_extra_hard_tasks_v1 t ON t.task_key=(src.raw::jsonb)->>'task_key'",
+  " WHERE t.task_key IS NULL OR t.bank_version IS DISTINCT FROM (src.raw::jsonb)->>'bank_version'",
+  " OR t.component_code IS DISTINCT FROM (src.raw::jsonb)->>'component_code'",
+  " OR t.primary_skill_code IS DISTINCT FROM (src.raw::jsonb)->>'primary_skill_code'",
+  " OR t.official_section IS DISTINCT FROM (src.raw::jsonb)->>'official_section'",
+  " OR t.book_map IS DISTINCT FROM (src.raw::jsonb)->>'book_map'",
+  " OR t.title_i18n IS DISTINCT FROM (src.raw::jsonb)->'title_i18n'",
+  " OR t.prompt_i18n IS DISTINCT FROM (src.raw::jsonb)->'prompt_i18n'",
+  " OR t.solution_i18n IS DISTINCT FROM (src.raw::jsonb)->'solution_i18n'",
+  " OR t.exact_answer IS DISTINCT FROM (src.raw::jsonb)->>'exact_answer'",
+  " OR t.source_kind IS DISTINCT FROM 'iclub_original'",
+  " OR NOT EXISTS(SELECT 1 FROM private.exam_prep_program_versions p WHERE p.id=t.program_version_id",
+  "  AND p.program_key='math_as_p1_p5' AND p.version_key='p1_p5_canonical_v1_0' AND p.status='active'))",
   "OR EXISTS(SELECT 1 FROM private.exam_prep_extra_hard_attempts_v1 a JOIN private.exam_prep_extra_hard_tasks_v1 t ON t.task_key=a.task_key WHERE t.bank_version<>'"+BANK+"')",
-  "THEN RAISE EXCEPTION 'Extra Hard release: source, content QA, or prior history drift'; END IF;",
+  "THEN RAISE EXCEPTION 'Extra Hard release: staged source content mismatch or prior history drift'; END IF;",
   "END $verify$;",
   "UPDATE private.exam_prep_extra_hard_tasks_v1 SET lifecycle_status='published',published_at=now() WHERE bank_version='"+BANK+"' AND lifecycle_status='approved';",
   "UPDATE private.exam_prep_extra_hard_release_v1 SET bank_version='"+BANK+"',academic_approved=true,enabled=true,updated_at=now() WHERE program_key='math_as_p1_p5' AND bank_version='"+PRIOR+"' AND enabled=false AND academic_approved=false;",
@@ -123,6 +169,16 @@ function publish(expected,synthetic){
  );
  const run=spawnSync("psql",["-X","-q","-t","-A","-v","ON_ERROR_STOP=1"],{env,encoding:"utf8",input:sql.join("\n"),maxBuffer:1500000});
  if(run.error)throw run.error;
+ if(synthetic&&injectTamper){
+  assert(run.status!==0&&!String(run.stdout).includes("CI_RELEASE_ROLLBACK_PASS"),
+   "Mutated staged content incorrectly published in disposable test");
+  assert(String(run.stderr).includes("Extra Hard release: staged source content mismatch"),
+   "Expected source-fidelity guard did not reject mutated DB content");
+  assert.equal(sqlRead(snapSql,env),before,
+   "Failed synthetic tamper test did not roll back");
+  console.log("EXTRA HARD FULL42 DB CONTENT TAMPER DENIED: stale hash rejected, all rows ROLLED BACK");
+  return;
+ }
  const witness=synthetic?"CI_RELEASE_ROLLBACK_PASS":"PRIVATE_FULL42_RELEASE_COMMITTED";
  if(run.status!==0||!String(run.stdout).includes(witness))
   throw new Error("Extra Hard release conditions failed; SQL transaction not approved (protected source not printed)");
@@ -131,10 +187,15 @@ function publish(expected,synthetic){
   assert.equal(after,before,"Synthetic release altered learner/private bank state");
   console.log("EXTRA HARD FULL42 PUBLIC RELEASE GATE ROLLBACK PASS: 42 CI-only tasks, switch and publish reverted, no progress writes");
  }else console.log("Extra Hard Full42 release completed only after explicit owner GO and verified private source.");
+ }finally{
+  fs.rmSync(temp,{recursive:true,force:true});
+ }
 }
 try{
- assert(["publish","dry-run-isolated"].includes(MODE),"Usage: publish /absolute/private/full42.json or dry-run-isolated");
- if(MODE==="dry-run-isolated")publish(syntheticExpected(),true);
+ assert(["publish","dry-run-isolated","dry-run-tampered-isolated"].includes(MODE),
+  "Usage: publish /absolute/private/full42.json or dry-run-isolated");
+ if(MODE==="dry-run-isolated"||MODE==="dry-run-tampered-isolated")
+  publish(syntheticExpected(),true,MODE==="dry-run-tampered-isolated");
  else{
   assert(process.env.ICLUB_EXTRAHARD_V3_PUBLISH_GO==="OWNER_APPROVED_PUBLIC_MATH_EXTRA_HARD_42",
    "Distinct architect PUBLIC GO required; staging GO alone never publishes");

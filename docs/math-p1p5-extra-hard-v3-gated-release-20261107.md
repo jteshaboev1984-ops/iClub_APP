@@ -33,3 +33,38 @@ real Math-only smoke test.
 **Review provenance:** 42 tasks have internal mathematical and EN/RU/UZ
 editorial acceptance, 30 of them after an additional 30/30 independent
 SymPy/SciPy second pass. This is not an external Cambridge examiner review.
+
+## 2026-11-07 — Exact stored-content fidelity before any guarded release
+
+The earlier release gate compared each approved owner's source `content_sha256` with a
+**stored `content_sha256` column**. That cached column is not proof that the
+actual database prompt or solution still matches the privately reviewed source:
+a database row could change without updating the cached digest.
+
+The stacked isolated P4-09 fix in DRAFT PR (linked from Issue #450) makes
+the **same atomic release transaction** copy the exact owner-approved source
+fields into a temporary source table, with a local client-only mode-0600 CSV
+deleted after use. Before it is allowed to publish, it locks the candidate
+task rows and release selector, then checks each of the 42 stored rows for
+exact equality on task key, bank, component, skill, syllabus section, book
+reference, all three titles, prompts and solutions, exact answer and original
+source kind, plus an active canonical program version. The existing cached
+SHA, QA and 24/18-count checks remain additive and fail closed.
+
+The content is **not** embedded in GitHub SQL, workflow logs or stdout.
+An independent **synthetic-only** PostgreSQL 17 adversarial test changes
+one stored `prompt_i18n` but deliberately retains the same saved hash,
+then proves publication refuses the modified row and rolls back all dummy
+data. The normal 42-task synthetic publish+switch continues to require
+its transaction rollback and unchanged snapshot. Both modes run with
+CI-only self-generated tasks, not the real protected bank.
+
+This is an engineering correction, not a request to publish content,
+approve a Cambridge grade, require a Mentor, or alter P1/P5 Core.
+**All release flags remain OFF, all real questions remain private.**
+Separate, explicit owner authorization for protected 42-row staging and
+for live release still applies, as does the independent unfinished
+P0-16B security work and deferred test-only beta cleanup. P4-08's
+written-work contract remains authoritative: the app never grades a
+learner's independently solved written Mathematics exercises; criteria
+disclosure is optional and Core may continue without it.
