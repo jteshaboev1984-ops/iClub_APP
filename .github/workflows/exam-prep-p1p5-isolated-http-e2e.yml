@@ -295,6 +295,10 @@ jobs:
           node --check scripts/ops/p1p5-extra-hard-v3-release-gate.cjs
           node scripts/ops/p1p5-extra-hard-v3-release-gate.cjs dry-run-isolated | tee /tmp/extra-hard-full42-release-dryrun.log
           grep -Fq 'EXTRA HARD FULL42 PUBLIC RELEASE GATE ROLLBACK PASS:' /tmp/extra-hard-full42-release-dryrun.log
+          # Attack the actual synthetic stored prompt while leaving its hash
+          # untouched: the source-fidelity check must refuse publication.
+          node scripts/ops/p1p5-extra-hard-v3-release-gate.cjs dry-run-tampered-isolated | tee /tmp/extra-hard-full42-stale-hash-negative.log
+          grep -Fq 'EXTRA HARD FULL42 DB CONTENT TAMPER DENIED:' /tmp/extra-hard-full42-stale-hash-negative.log
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
