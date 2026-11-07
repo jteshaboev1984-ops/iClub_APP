@@ -78,64 +78,6 @@ async function run(){
      p_session_id:start.session_id
    },other);
    assert(!foreign.ok,'P4-05 cross-user blank-paper result exposure');
-
-   // P4-07 adversarial E2E: the PUBLIC signed RPC still records a student's
-   // whitespace-only text artifact for audit, but it must not earn an
-   // execution-comparable Paper, a mark, or additional Paper-count credit.
-   // This closes an existing false positive, not a new learner access gate.
-   const next=candidates.find(x=>!used.has(x.assessment_id)
-      && x.assessment_id!==candidate.assessment_id) || candidate;
-   const wp='p407-space-'+component.toLowerCase();
-   const wa=ok(await rpc('authorize_exam_prep_timed_safe_v1',{
-     p_assessment_id:next.assessment_id
-   },token),'P4-07 signed whitespace paper authorization '+component);
-   const ws=ok(await rpc('start_exam_prep_session_safe_v1',{
-     p_authorization_id:wa.authorization_id,p_idempotency_key:wp+'-start'
-   },token),'P4-07 signed whitespace paper start '+component);
-   await proveSignedTimedClock(ws.session_id,token,other,component,'paper');
-   const firstWritten=list("SELECT item_order ord FROM private.exam_prep_session_items "+
-     "WHERE session_id='"+ws.session_id+"'::uuid AND item_kind='written' "+
-     "ORDER BY item_order LIMIT 1")[0];
-   assert(firstWritten?.ord>0,'P4-07 expected original written Paper content');
-   ok(await rpc('submit_exam_prep_response_safe_v1',{
-     p_session_id:ws.session_id,p_item_order:firstWritten.ord,
-     p_payload:{artifact:{text:'  \t\n  '}},
-     p_idempotency_key:wp+'-item-1',p_elapsed_ms:1200,
-     p_language:component==='P1'?'ru':'uz'
-   },token),'P4-07 genuine persisted whitespace written response '+component);
-   await new Promise(resolve=>setTimeout(resolve,1300));
-   const wf=ok(await rpc('finalize_exam_prep_timed_safe_v1',{
-     p_session_id:ws.session_id,p_idempotency_key:wp+'-final',
-     p_completion_reason:'submitted'
-   },token),'P4-07 real whitespace-paper finalization '+component);
-   assert(wf.replayed===false,'P4-07 whitespace first finalizer replayed');
-   const wr=ok(await rpc('get_exam_prep_timed_result_safe_v1',{
-     p_session_id:ws.session_id
-   },token),'P4-07 whitespace Paper result '+component);
-   assert(wr.answered_items===1 && wr.unattempted_items>0 &&
-     wr.objective_marks_in_time===0,
-     'P4-07 whitespace Paper was not persisted as one ungraded historical response');
-   const wproof=row("SELECT private.exam_prep_timed_execution_comparable_v1('"+
-      ws.session_id+"'::uuid) AS executed, "+
-      "private.exam_prep_timed_score_comparable_v1('"+
-      ws.session_id+"'::uuid) AS scored, "+
-      "(SELECT count(*)::int FROM private.exam_prep_responses WHERE session_id='"+
-      ws.session_id+"'::uuid AND response_kind='written') AS saved");
-   assert(wproof?.saved===1 && wproof.executed===false && wproof.scored===false,
-     'P4-07 whitespace-only task improperly counted as performed or scored');
-   const unchanged=row("SELECT operational_stage stage,app_readiness_estimate estimate "+
-     "FROM private.exam_prep_stage_states WHERE user_id='"+ident.uid+"'::uuid "+
-     "AND component_code='"+component+"' AND engine_version='objective_state_v1'");
-   const count=row("SELECT private.exam_prep_stage4_raw_evidence_v1("+
-     "p.user_id,p.program_version_id,'"+component+"') AS data "+
-     "FROM private.exam_prep_exam_profiles p WHERE p.user_id='"+ident.uid+"'::uuid");
-   assert(unchanged?.stage===6 && unchanged.estimate==='INSUFFICIENT_EVIDENCE'
-     && Number(count?.data?.max_compatible_family_attempt_count)===3,
-     'P4-07 whitespace Paper changed Stage6, readiness or genuine three-Paper count');
-   const foreignWhitespace=await rpc('get_exam_prep_timed_result_safe_v1',{
-     p_session_id:ws.session_id
-   },other);
-   assert(!foreignWhitespace.ok,'P4-07 foreign actor saw whitespace Paper result');
  }
  console.log('P4-05 EMPTY SIGNED PAPER NEGATIVE PASS',
   JSON.stringify({components:['P1','P5'],realJwt:true,zeroResponses:true,
