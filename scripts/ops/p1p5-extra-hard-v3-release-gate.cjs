@@ -6,6 +6,7 @@ const assert=require("node:assert/strict");
 const fs=require("node:fs");
 const crypto=require("node:crypto");
 const path=require("node:path");
+const os=require("node:os");
 const {spawnSync,execFileSync}=require("node:child_process");
 const MODE=process.argv[2];
 const BANK="math-extra-hard-2026-11-full-v3";
@@ -46,7 +47,7 @@ function privateExpected(filename){
     t.primary_skill_code.startsWith("P5-GEO-")?"5.4G":
     t.primary_skill_code.startsWith("P5-BIN-")?"5.4B":String(t.official_section).slice(0,3);
   groups.set(g,(groups.get(g)||0)+1);count[t.component_code]++;
-  result.push({id:t.task_key,sha:t.content_sha256,component:t.component_code});
+  result.push({id:t.task_key,sha:t.content_sha256,component:t.component_code,fields:item});
  }
  assert(count.P1===24&&count.P5===18&&groups.size===14&&[...groups.values()].every(n=>n===3));
  return result;
@@ -58,14 +59,21 @@ function syntheticExpected(){
   "CI release rehearsal refuses other databases");
  const arr=[];for(const c of ["P1","P5"]){for(let i=0;i<(c==="P1"?24:18);i++){
   const id="CI-EH-PUB-"+c+"-"+String(i+1).padStart(2,"0");
-  arr.push({id,component:c,sha:hash(Buffer.from("CI TEST ONLY "+id))});
+  const fields={task_key:id,bank_version:BANK,component_code:c,
+   primary_skill_code:c==="P1"?"P1-QUA-01":"P5-GEO-01",
+   official_section:"CI TEST",book_map:"CI TEST",
+   title_i18n:{en:"CI TEST",ru:"CI TEST",uz:"CI TEST"},
+   prompt_i18n:{en:"CI TEST 1+1",ru:"CI TEST 1+1",uz:"CI TEST 1+1"},
+   solution_i18n:{en:"CI TEST 1+1=2",ru:"CI TEST 1+1=2",uz:"CI TEST 1+1=2"},
+   exact_answer:"CI TEST 2"};
+  arr.push({id,component:c,sha:hash(Buffer.from("CI TEST ONLY "+id)),fields});
  }}
  return arr;
 }
 function sqlRead(sql,env){
  return execFileSync("psql",["-X","-At","-v","ON_ERROR_STOP=1","-c",sql],{env,encoding:"utf8"}).trim();
 }
-function publish(expected,synthetic){
+function publish(expected,synthetic,injectTamper=false){
  const safe=x=>{assert(/^[A-Za-z0-9_.-]+$/.test(x));return x;};
  const values=expected.map(x=>"('"+safe(x.id)+"','"+safe(x.sha)+"','"+safe(x.component)+"')").join(",");
  assert(expected.length===42);
