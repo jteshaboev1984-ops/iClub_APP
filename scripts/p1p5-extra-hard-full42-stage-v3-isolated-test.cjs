@@ -38,7 +38,7 @@ for(const [component,short,section] of groups){
   const t={task_key:id,bank_version:BANK,component_code:component,
    primary_skill_code:`${component}-${short}-01`,official_section:section+' CI original syllabus',
    book_map:'CI disposable local only',
-   title_i18n:{en:`CI synthetic ${i}`,ru:`CI тестовая ${i}`,uz:`CI test ${i}`},
+   title_i18n:{en:`CI synthetic ${i}`,ru:`CI тестовая ${i}`,uz:`CI sinov masalasi ${i}`},
    prompt_i18n:{en:`CI TEST: 1 + 1 challenge ${i}`,ru:`CI TEST: 1 + 1 sinov ${i}`,uz:`CI TEST: 1 + 1 masala ${i}`},
    solution_i18n:{en:`CI TEST: 1 + 1 = 2, problem ${i}`,ru:`CI TEST: 1 + 1 = 2 misol ${i}`,uz:`CI TEST: 1 + 1 = 2 masala ${i}`},
    exact_answer:'CI TEST answer 2',source_kind:'iclub_original',qa_math:'approved',
