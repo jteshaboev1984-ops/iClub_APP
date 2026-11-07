@@ -11,6 +11,7 @@ on:
       - feature/math-p1p5-extra-hard-42-topic-progress-wave2-20261106
       - feature/math-p1p5-extra-hard-full42-final-content-governance-20261106
       - feature/math-p1p5-extra-hard-v3-42-protected-import-qa-20261106
+      - feature/math-p1p5-extra-hard-full42-internal-qa-20261107
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'

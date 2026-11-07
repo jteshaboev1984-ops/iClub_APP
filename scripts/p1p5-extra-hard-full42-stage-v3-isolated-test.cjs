@@ -34,7 +34,7 @@ for(const [component,short,section] of groups){
  for(let n=1;n<=3;n++){
   i++;
   const id=`EH-CI-${component}-${short}-${String(i).padStart(2,'0')}`;
-  const status=i<=12?'approved':'draft';
+  const status='approved';
   const t={task_key:id,bank_version:BANK,component_code:component,
    primary_skill_code:`${component}-${short}-01`,official_section:section+' CI original syllabus',
    book_map:'CI disposable local only',
@@ -73,5 +73,5 @@ try{
  assert.match(valid.stdout,/EXTRA HARD V3 DRY-RUN: 42 dummy inserts verified and ROLLED BACK/);
  const after=sql("SELECT (SELECT count(*) FROM private.exam_prep_sessions)||'|'||(SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1)||'|'||(SELECT count(*) FROM private.exam_prep_extra_hard_attempts_v1)||'|'||(SELECT bank_version||':'||enabled::text||':'||academic_approved::text FROM private.exam_prep_extra_hard_release_v1 WHERE program_key='math_as_p1_p5')");
  assert.equal(after,snapshot,'Isolated 42-row stage failed to restore preflight snapshot');
- console.log('EXTRA HARD V3 42-ROW PRIVATE COPY ROLLBACK PASS: 42, P1 24/P5 18, 12 approved/30 draft, tamper and no-GO denied, release OFF, no learner writes');
+ console.log('EXTRA HARD V3 42-ROW PRIVATE COPY ROLLBACK PASS: 42, P1 24/P5 18, 42 internally approved/0 draft, tamper and no-GO denied, release OFF, no learner writes');
 }finally{fs.rmSync(temp,{recursive:true,force:true});}

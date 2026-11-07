@@ -11,7 +11,7 @@ const {spawnSync}=require('node:child_process');
 const MODE=process.argv[2],INPUT=process.argv[3];
 const BANK='math-extra-hard-2026-11-full-v3';
 const PREVIOUS='math-extra-hard-2026-11-original-v2';
-const SOURCE_SHA='28b8872f499b8f2a79d680675a5fb7083b5f0b734bc05fd4b13dd41ca6c79a78';
+const SOURCE_SHA='2283f0a35697349dac6825accd199e85fc72bb61d4ac5f8b4aca9e5adaeea77b';
 const FIELDS=['task_key','bank_version','component_code','primary_skill_code','official_section',
  'book_map','title_i18n','prompt_i18n','solution_i18n','exact_answer'];
 const hash=(x)=>crypto.createHash('sha256').update(x).digest('hex');
@@ -74,7 +74,7 @@ function validate(raw,synthetic){
   groups.set(g,(groups.get(g)||0)+1);
  }
  assert.equal(p1,24);assert.equal(p5,18);
- assert.equal(approved,12);assert.equal(draft,30);
+ assert.equal(approved,42);assert.equal(draft,0);
  assert.equal(groups.size,14);
  for(const g of EXPECTED)assert.equal(groups.get(g),3,'Missing syllabus strand '+g);
  return actual;
@@ -90,7 +90,7 @@ function source(){
  if(MODE!=='dry-run-isolated')assert.equal(hash(raw),SOURCE_SHA,
   'Owner-private bank SHA mismatch; staged source must be reviewed/pinned');
  const bank=validate(raw,MODE==='dry-run-isolated');
- console.log('FULL42 SOURCE VALID: 24 P1, 18 P5, 14 strands x3; 12 approved/30 draft; release OFF.');
+ console.log('FULL42 SOURCE VALID: 24 P1, 18 P5, 14 strands x3; 42 internally approved, 0 draft; release OFF.');
  return bank;
 }
 function stage(bank,synthetic){
@@ -164,7 +164,7 @@ DECLARE v_approved int;v_draft int;BEGIN
  count(*) FILTER(WHERE lifecycle_status='draft')
  INTO v_approved,v_draft FROM private.exam_prep_extra_hard_tasks_v1
  WHERE bank_version='${BANK}';
- IF v_approved<>12 OR v_draft<>30
+ IF v_approved<>42 OR v_draft<>0
   OR (SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1 WHERE bank_version='${BANK}')<>42
   OR EXISTS (SELECT 1 FROM pg_temp._eh_v3_payload src
     LEFT JOIN private.exam_prep_extra_hard_tasks_v1 dst
@@ -195,7 +195,7 @@ ${actual};
    throw new Error('Protected V3 stage/dry-run failed (no contents printed); inspect restricted local logs only');
   }
   console.log(synthetic?'EXTRA HARD V3 DRY-RUN: 42 dummy inserts verified and ROLLED BACK; 0 release/progress writes.':
-   'EXTRA HARD V3 PRIVATE STAGE: 42 protected rows stored (12 approved, 30 draft), release OFF.');
+   'EXTRA HARD V3 PRIVATE STAGE: 42 protected rows stored (42 internally approved, none published), release OFF.');
  } finally{
   fs.rmSync(temp,{recursive:true,force:true});
  }
