@@ -115,6 +115,21 @@ BEGIN
  IF v_p.user_id IS NULL OR v_p.program_version_id IS NULL
    OR v_p.total_student_hours_available IS NULL THEN
   RAISE EXCEPTION 'exam_prep_profile_required'; END IF;
+ -- A parallel retry may have arrived before the first writer committed.
+ -- After locking the owner profile, re-check the key and return its immutable
+ -- result instead of raising an unrelated stale-revision error.
+ SELECT * INTO v_old FROM private.exam_prep_weekly_choices_s3_v1
+  WHERE user_id=v_uid AND idempotency_key=p_idempotency_key;
+ IF v_old.id IS NOT NULL THEN
+  IF v_old.request_payload IS DISTINCT FROM v_payload THEN
+   RAISE EXCEPTION 'exam_prep_s3_idempotency_conflict' USING ERRCODE='22023';
+  END IF;
+  RETURN jsonb_build_object('saved',true,'replayed',true,
+    'choice_code',v_old.choice_code,'chosen_math_minutes',v_old.chosen_math_minutes,
+    'p1_minutes',v_old.p1_minutes,'p5_minutes',v_old.p5_minutes,
+    'profile_revision',v_old.profile_revision,'schedule_revision',v_old.schedule_revision,
+    'no_study_cap',true,'academic_marks_changed',false);
+ END IF;
  IF p_expected_schedule_revision IS DISTINCT FROM v_p.study_schedule_revision THEN
   RAISE EXCEPTION 'exam_prep_s3_stale_schedule' USING ERRCODE='PT409'; END IF;
  IF now()<v_p.created_at THEN RAISE EXCEPTION 'exam_prep_s3_invalid_profile_clock'; END IF;
