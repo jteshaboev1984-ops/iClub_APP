@@ -73,8 +73,7 @@ const EXPECTED=[
   "start_exam_prep_next_diagnostic_safe_v1",
   "start_exam_prep_plan_session_once_safe_v1",
   "start_exam_prep_session_safe_v1",
-  "submit_exam_prep_response_safe_v1",
-  "submit_exam_prep_timed_written_self_mark_safe_v1"
+  "submit_exam_prep_response_safe_v1"
 ];
 const LIVE='exam-prep/exam-prep-live.js';
 const HOST='exam-prep/exam-prep-host.js';
@@ -109,9 +108,29 @@ assert(extra.includes("data-ep-extra-hard-next")&&!extra.includes("localStorage.
 
 assert.deepEqual(missing,[],'historical RPC removed/renamed; first reconcile actual backend signature');
 assert.deepEqual(added,[],'new untraced RPC; first document path, permissions and invariant');
-assert.equal(EXPECTED.length,61,'P1/P5 source contract count changed without trace review');
+assert.equal(EXPECTED.length,60,'D03 core source trace: legacy learner self-mark RPC MUST stay removed');
 const api=read(PATHS[0]),weekly=read(PATHS[1]),progress=read(PATHS[2]);
 const live=read(LIVE),host=read(HOST),html=read(HTML);
+// D03: archived legacy self-mark scores are NOT a new learner write path.
+const d03=read('supabase/migrations/20261109110000_exam_prep_p1p5_d03_written_selfmark_firewall_v1.sql');
+for(const token of [
+  "RAISE EXCEPTION 'exam_prep_written_self_marks_disabled'",
+  "REVOKE ALL ON FUNCTION public.submit_exam_prep_timed_written_self_mark_safe_v1",
+  "'result_scope','objective_only'",
+  "v_earned_in:=v_b.objective_marks_in_time",
+  "v_earned_after:=v_b.objective_marks_after_time",
+  "v_score_comp:=private.exam_prep_timed_score_comparable_v1"
+]) assert(d03.includes(token), 'D03 SQL core release safeguard missing: '+token);
+assert(!/\b(?:DELETE\s+FROM|TRUNCATE\s+TABLE|UPDATE\s+public\.users)\b/i.test(d03),
+  'D03 candidate must not delete or rewrite learner rows');
+assert(!api.includes('submitTimedSelfMark') && !api.includes('submit_exam_prep_timed_written_self_mark_safe_v1'),
+  'learner self-mark API must remain removed');
+assert(!live.includes('data-ep-live-save-self') && !live.includes('ep_live_self_mark'),
+  'learner written self-score controls must remain removed');
+assert(live.includes('renderWrittenReview(') && live.includes('writtenNotGraded:'),
+  'read-only ungraded written criteria and trilingual copy required');
+assert(api.includes('extraHardCatalog, extraHardStart, extraHardSubmit, extraHardAttempt'),
+  'already-published Extra Hard optional RPC adapters must stay on current main');
 for(const n of [
  'startNextDiagnostic','getSession','startSession','submitResponse','finalizeSession',
  'weeklyPlan','generateWeeklyPlan','authorizePlanItem','timedCatalog','authorizeTimed',
@@ -145,5 +164,5 @@ for(const s of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
  assert(html.includes(s),'production index is not loading '+s);
 }
 assert(html.includes('id="exam-prep-host-root"'),'learner host root missing');
-console.log('Stage A source RPC trace GREEN: 61/61 named RPCs; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
+console.log('Stage A source RPC trace GREEN: 60/60 core named RPCs + 4 Extra Hard; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
 console.log('NOTE: source-only regression; real authenticated HTTP→PostgREST→DB and actual device journeys are Stage B/C, NOT implied by GREEN.');
