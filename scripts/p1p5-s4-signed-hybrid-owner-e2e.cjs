@@ -138,7 +138,7 @@ async function main(){
   "source_content_md5,"+
   "expected_numeric,absolute_tolerance,review_state,academic_review_ref,approved_at) "+
   "VALUES("+stageId+",1,'test','"+taskId+"','"+cleanVer+
-  "'"+taskHash+"',0.5,0,'approved','synthetic-local-only',now())");
+  "','"+taskHash+"',0.5,0,'approved','synthetic-local-only',now())");
  // An approved checkpoint with broad tolerance could accept a wrong answer.
  // The database must fail closed, even when a mistaken human reviewer sets it.
  let invalidApprovalDenied=false;
@@ -148,7 +148,7 @@ async function main(){
   "source_content_md5,"+
      "expected_numeric,absolute_tolerance,review_state,academic_review_ref,approved_at) "+
      "VALUES("+stageId+",1,'unsafe-tolerance',"+taskId+",'"+cleanVer+
-     "'"+taskHash+"',0.5,0.1,'approved','synthetic-local-only',now())");
+     "','"+taskHash+"',0.5,0.1,'approved','synthetic-local-only',now())");
  } catch (e) {
    invalidApprovalDenied=/check constraint/i.test(String(e.stderr||e.message));
  }
@@ -234,7 +234,7 @@ async function main(){
    "expected_numeric,accepted_numeric_alternates,absolute_tolerance,"+
    "review_state,academic_review_ref,approved_at) "+
    "VALUES("+stageId+",2,'alternate',"+taskId2+",'"+realVer2+
-   "'"+taskHash2+"',0.75,ARRAY[0.7499]::numeric[],0,'approved','synthetic-local-only',now())");
+   "','"+taskHash2+"',0.75,ARRAY[0.7499]::numeric[],0,'approved','synthetic-local-only',now())");
  const closedRepeat=ok(await rpc('finish_exam_prep_hybrid_s4_paper_safe_v1',{
    p_session_id:other.session_id,p_reason:'early_exit',
    p_idempotency_key:key('repeat-early-finish')
