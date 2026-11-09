@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-// V4.1 ALREADY STAGED: publish only after specific review and owner PUBLIC GO.
+// V4.2 ALREADY STAGED: publish only after specific review and owner PUBLIC GO.
 // Synthetic CI uses fully disposable data and always rolls back.
 // Protected question prompts, worked solutions and answer keys never enter Git.
 const assert=require("node:assert/strict");
@@ -12,7 +12,7 @@ const {spawnSync,execFileSync}=require("node:child_process");
 const MODE=process.argv[2];
 const BANK="math-extra-hard-2026-11-full-v4";
 const PRIOR="math-extra-hard-2026-11-original-v2";
-const SOURCE_SHA="2bfcfc8b5f961a4905788cc8cb3e33c6c72f663230c2681149bec5a3d0e56666";
+const SOURCE_SHA="41ba89c74dd57f540a2601d9287042a984d2ad1522779ccdb45a4a667e0758b3";
 const sourceFields=["task_key","bank_version","component_code","primary_skill_code",
  "official_section","book_map","title_i18n","prompt_i18n","solution_i18n","exact_answer"];
 const hash=x=>crypto.createHash("sha256").update(x).digest("hex");
@@ -53,13 +53,13 @@ function privateExpected(filename){
  assert(count.P1===24&&count.P5===18&&groups.size===14&&[...groups.values()].every(n=>n===3));
  return result;
 }
-// Current owner-private V4.1 review is on HOLD. This format is deliberately
+// Current owner-private V4.2 review is on HOLD. This format is deliberately
 // distinct from the existing pending report; never fabricate 42 approvals.
 function confirmReview(file,expected){
- assert(file,"42-item reviewed V4.1 manifest missing");
+ assert(file,"42-item reviewed V4.2 manifest missing");
  const abs=path.resolve(file),repo=path.resolve(__dirname,"..","..")+path.sep;
  assert(!abs.startsWith(repo),"Review document must be owner-private");
- const bytes=fs.readFileSync(abs),pin=String(process.env.ICLUB_EXTRAHARD_V41_REVIEW_SHA256||"");
+ const bytes=fs.readFileSync(abs),pin=String(process.env.ICLUB_EXTRAHARD_V42_REVIEW_SHA256||"");
  assert(/^[a-f0-9]{64}$/.test(pin)&&hash(bytes)===pin,"Review source SHA mismatch");
  const r=JSON.parse(bytes.toString("utf8"));
  assert(r.bank_version===BANK&&r.source_sha256===SOURCE_SHA&&r.decision==="approve");
@@ -128,7 +128,7 @@ function publish(expected,synthetic,injectTamper=false,injectPartial=false){
   "OR position('''attempt_status''' in pg_get_functiondef('public.get_my_exam_prep_extra_hard_catalog_safe_v1(text,text)'::regprocedure))=0",
   "OR position('''total_count''' in pg_get_functiondef('public.get_my_exam_prep_extra_hard_catalog_safe_v1(text,text)'::regprocedure))=0",
   "OR has_function_privilege('anon','public.get_my_exam_prep_extra_hard_catalog_safe_v1(text,text)','EXECUTE')",
-  "THEN RAISE EXCEPTION 'V4.1 catalog topic/progress migration missing or unsafe'; END IF;",
+  "THEN RAISE EXCEPTION 'V4.2 catalog topic/progress migration missing or unsafe'; END IF;",
   synthetic?"IF current_database()<>'postgres' OR current_setting('iclub.e2e_isolated',true) IS DISTINCT FROM 'true' OR (SELECT count(*) FROM auth.users)<>2 OR (SELECT count(*) FROM public.users)<>2 THEN RAISE EXCEPTION 'Not a disposable CI source'; END IF;":"",
   "END $pre$;",
   "CREATE TEMP TABLE _eh_release_proof(id text PRIMARY KEY,sha text NOT NULL,component text NOT NULL) ON COMMIT DROP;",
@@ -206,7 +206,7 @@ function publish(expected,synthetic,injectTamper=false,injectPartial=false){
   assert(String(run.stderr).includes("Extra Hard release: staged source content mismatch"),
    "Partial approval guard did not fire");
   assert.equal(sqlRead(snapSql,env),before,"Partial QA rollback changed records");
-  console.log("EXTRA HARD V4.1 PARTIAL QA DENIED: no release, no student writes");
+  console.log("EXTRA HARD V4.2 PARTIAL QA DENIED: no release, no student writes");
   return;
  }
  if(synthetic&&injectTamper){
@@ -219,7 +219,7 @@ function publish(expected,synthetic,injectTamper=false,injectPartial=false){
   console.log("EXTRA HARD FULL42 DB CONTENT TAMPER DENIED: stale hash rejected, all rows ROLLED BACK");
   return;
  }
- const witness=synthetic?"CI_RELEASE_ROLLBACK_PASS":"PRIVATE_V41_RELEASE_COMMITTED";
+ const witness=synthetic?"CI_RELEASE_ROLLBACK_PASS":"PRIVATE_V42_RELEASE_COMMITTED";
  if(run.status!==0||!String(run.stdout).includes(witness))
   throw new Error("Extra Hard release conditions failed; SQL transaction not approved (protected source not printed)");
  if(synthetic){
@@ -233,24 +233,24 @@ function publish(expected,synthetic,injectTamper=false,injectPartial=false){
 }
 try{
  assert(["publish","check-private","dry-run-isolated","dry-run-tampered-isolated","dry-run-partial-qa-isolated"].includes(MODE),
-  "Expected check-private V4.1.json, dry-run-isolated or publish V4.1.json reviewed.json");
+  "Expected check-private V4.2.json, dry-run-isolated or publish V4.2.json reviewed.json");
  if(MODE==="dry-run-isolated"||MODE==="dry-run-tampered-isolated"||MODE==="dry-run-partial-qa-isolated")
   publish(syntheticExpected(),true,MODE==="dry-run-tampered-isolated",MODE==="dry-run-partial-qa-isolated");
  else if(MODE==="check-private"){
   privateExpected(process.argv[3]);
-  console.log("EXTRA HARD V4.1 PRIVATE SOURCE PASS: 42 pending tasks, 24 P1/18 P5");
+  console.log("EXTRA HARD V4.2 PRIVATE SOURCE PASS: 42 pending tasks, 24 P1/18 P5");
  }else{
-  assert(process.env.ICLUB_EXTRAHARD_V41_PUBLISH_GO==="OWNER_APPROVED_PUBLIC_MATH_V41_42",
+  assert(process.env.ICLUB_EXTRAHARD_V42_PUBLISH_GO==="OWNER_APPROVED_PUBLIC_MATH_V42_42",
    "Distinct owner PUBLIC GO missing");
   const ref="mmmduffgpvwjdpruzikw";
-  assert(process.env.ICLUB_EXTRAHARD_V41_PROJECT_REF===ref&&
+  assert(process.env.ICLUB_EXTRAHARD_V42_PROJECT_REF===ref&&
    process.env.PGHOST==="db."+ref+".supabase.co"&&
    process.env.PGDATABASE==="postgres"&&process.env.PGUSER==="postgres"&&process.env.PGPORT==="5432"&&
-   process.env.ICLUB_EXTRAHARD_V41_TARGET===ref+"/postgres"&&
-   process.env.ICLUB_EXTRAHARD_V41_RELEASE_CONFIRM==="PUBLISH_REVIEWED_42_MATH_V41",
+   process.env.ICLUB_EXTRAHARD_V42_TARGET===ref+"/postgres"&&
+   process.env.ICLUB_EXTRAHARD_V42_RELEASE_CONFIRM==="PUBLISH_REVIEWED_42_MATH_V42",
    "Owner-confirmed existing iClub release target mismatch");
   const expected=privateExpected(process.argv[3]);
   confirmReview(process.argv[4],expected);
   publish(expected,false);
  }
-}catch(e){console.error("V4.1 release gate refused:",e.message);process.exitCode=1;}
+}catch(e){console.error("V4.2 release gate refused:",e.message);process.exitCode=1;}

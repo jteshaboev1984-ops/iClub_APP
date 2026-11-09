@@ -35,8 +35,8 @@ on:
       - 'scripts/p1p5-extra-hard-full42-stage-v3-isolated-test.cjs'
       - 'scripts/ops/p1p5-extra-hard-private-full42-stage-v4.cjs'
       - 'scripts/p1p5-extra-hard-full42-stage-v4-isolated-test.cjs'
-      - 'scripts/p1p5-v41-source-pin-regression.cjs'
-      - 'scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs'
+      - 'scripts/p1p5-v42-source-pin-regression.cjs'
+      - 'scripts/ops/p1p5-extra-hard-v42-reviewed-release-gate.cjs'
       - 'docs/math-p1p5-v41-editorial-source-fidelity-checkpoint-20261109.md'
       - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
       - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
@@ -304,9 +304,9 @@ jobs:
           node scripts/p1p5-extra-hard-full42-stage-v3-isolated-test.cjs | tee /tmp/extra-hard-v3-42-staging.log
           grep -Fq 'EXTRA HARD V3 42-ROW PRIVATE COPY ROLLBACK PASS:' /tmp/extra-hard-v3-42-staging.log
           node --check scripts/ops/p1p5-extra-hard-private-full42-stage-v4.cjs
-          node --check scripts/p1p5-v41-source-pin-regression.cjs
-          node scripts/p1p5-v41-source-pin-regression.cjs | tee /tmp/math-v41-source-pin.log
-          grep -Fq 'V4.1 SOURCE-PIN REGRESSION PASS:' /tmp/math-v41-source-pin.log
+          node --check scripts/p1p5-v42-source-pin-regression.cjs
+          node scripts/p1p5-v42-source-pin-regression.cjs | tee /tmp/math-v42-source-pin.log
+          grep -Fq 'V4.2 SOURCE-PIN REGRESSION PASS:' /tmp/math-v42-source-pin.log
           node --check scripts/p1p5-extra-hard-full42-stage-v4-isolated-test.cjs
           node scripts/p1p5-extra-hard-full42-stage-v4-isolated-test.cjs | tee /tmp/extra-hard-v4-42-pending-stage.log
           grep -Fq 'EXTRA HARD V4 42-ROW PRIVATE DRAFT COPY ROLLBACK PASS:' /tmp/extra-hard-v4-42-pending-stage.log
@@ -317,22 +317,22 @@ jobs:
           # untouched: the source-fidelity check must refuse publication.
           node scripts/ops/p1p5-extra-hard-v3-release-gate.cjs dry-run-tampered-isolated | tee /tmp/extra-hard-full42-stale-hash-negative.log
           grep -Fq 'EXTRA HARD FULL42 DB CONTENT TAMPER DENIED:' /tmp/extra-hard-full42-stale-hash-negative.log
-          # P4-14: V4.1 is a DIFFERENT source from historical V3; the staged
+          # P4-15: V4.2 differs from historical V3 and V4.1; the staged
           # live rows remain draft/pending. Exercise ONLY synthetic 42 records.
-          node --check scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs
-          if node scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs publish; then
-            echo 'UNSAFE: V4.1 release accepted without separate owner GO' >&2
+          node --check scripts/ops/p1p5-extra-hard-v42-reviewed-release-gate.cjs
+          if node scripts/ops/p1p5-extra-hard-v42-reviewed-release-gate.cjs publish; then
+            echo 'UNSAFE: V4.2 release accepted without separate owner GO' >&2
             exit 1
           fi
-          node scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs dry-run-isolated |
-            tee /tmp/extra-hard-v41-release-rollback.log
-          grep -Fq 'EXTRA HARD FULL42 PUBLIC RELEASE GATE ROLLBACK PASS:' /tmp/extra-hard-v41-release-rollback.log
-          node scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs dry-run-tampered-isolated |
-            tee /tmp/extra-hard-v41-content-tamper.log
-          grep -Fq 'EXTRA HARD FULL42 DB CONTENT TAMPER DENIED:' /tmp/extra-hard-v41-content-tamper.log
-          node scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs dry-run-partial-qa-isolated |
-            tee /tmp/extra-hard-v41-partial-qa.log
-          grep -Fq 'EXTRA HARD V4.1 PARTIAL QA DENIED:' /tmp/extra-hard-v41-partial-qa.log
+          node scripts/ops/p1p5-extra-hard-v42-reviewed-release-gate.cjs dry-run-isolated |
+            tee /tmp/extra-hard-v42-release-rollback.log
+          grep -Fq 'EXTRA HARD FULL42 PUBLIC RELEASE GATE ROLLBACK PASS:' /tmp/extra-hard-v42-release-rollback.log
+          node scripts/ops/p1p5-extra-hard-v42-reviewed-release-gate.cjs dry-run-tampered-isolated |
+            tee /tmp/extra-hard-v42-content-tamper.log
+          grep -Fq 'EXTRA HARD FULL42 DB CONTENT TAMPER DENIED:' /tmp/extra-hard-v42-content-tamper.log
+          node scripts/ops/p1p5-extra-hard-v42-reviewed-release-gate.cjs dry-run-partial-qa-isolated |
+            tee /tmp/extra-hard-v42-partial-qa.log
+          grep -Fq 'EXTRA HARD V4.2 PARTIAL QA DENIED:' /tmp/extra-hard-v42-partial-qa.log
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
