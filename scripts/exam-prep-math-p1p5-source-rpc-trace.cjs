@@ -119,7 +119,7 @@ assert.equal(EXPECTED.length,60,'D03 core source trace: legacy learner self-mark
 const api=read(PATHS[0]),weekly=read(PATHS[1]),progress=read(PATHS[2]);
 const live=read(LIVE),host=read(HOST),html=read(HTML);
 // D03: archived legacy self-mark scores are NOT a new learner write path.
-const d03=read('supabase/migrations/20261109110000_exam_prep_p1p5_d03_written_selfmark_firewall_v1.sql');
+const d03=read('supabase/migrations/20261109110109_exam_prep_p1p5_d03_written_selfmark_firewall_v1_20261109.sql');
 for(const token of [
   "RAISE EXCEPTION 'exam_prep_written_self_marks_disabled'",
   "REVOKE ALL ON FUNCTION public.submit_exam_prep_timed_written_self_mark_safe_v1",
