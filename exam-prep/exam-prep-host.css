@@ -2267,3 +2267,36 @@ body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidd
 @media(max-width:620px) {
   #exam-prep-host-root .ep-live-study-schedule-fields { grid-template-columns:minmax(0,1fr); }
 }
+
+
+/* Mathematics S3 — voluntary weekly choices and factual two-paper reports */
+.ep-live-s3 { display:grid; gap:12px; margin:14px 0; padding:16px;
+  border:1px solid var(--border-color,rgba(85,104,124,.24)); border-radius:16px;
+  background:var(--surface-color,rgba(127,149,166,.05)); }
+.ep-live-s3 h3,.ep-live-s3 p {margin:0}
+.ep-live-s3 h3 {font-size:1.06rem;line-height:1.4}
+.ep-live-s3 p {font-size:.9rem;line-height:1.5}
+.ep-live-s3-budget {padding:9px 12px;border-radius:10px;
+  background:var(--surface-alt,rgba(125,144,164,.09));font-size:.9rem}
+.ep-live-s3-options {display:grid;gap:7px}
+.ep-live-s3-options label {display:flex;align-items:center;gap:10px;
+  min-height:42px;padding:9px 12px;border:1px solid rgba(115,136,157,.22);
+  border-radius:10px;cursor:pointer;font-size:.93rem}
+.ep-live-s3-options input {width:16px;height:16px;flex:0 0 16px;accent-color:#248a74}
+.ep-live-s3-split {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ep-live-s3-split[hidden] {display:none!important}
+.ep-live-s3-split label {display:grid;gap:6px;min-width:0;font-size:.85rem}
+.ep-live-s3-split input {min-width:0;width:100%;box-sizing:border-box;
+  padding:10px 12px;border-radius:10px;border:1px solid rgba(115,136,157,.34);
+  font:inherit;color:inherit;background:var(--surface-color,transparent)}
+.ep-live-s3 .ep-live-btn {width:100%;margin:0}
+.ep-live-s3-report-title {margin-top:6px!important}
+.ep-live-s3-report {padding:11px 12px;border:1px solid rgba(115,136,157,.20);border-radius:12px}
+.ep-live-s3-report>strong {display:block;margin-bottom:9px;font-size:.91rem}
+.ep-live-s3-report-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ep-live-s3-report-cell {display:grid;gap:4px;min-width:0;font-size:.81rem;line-height:1.5}
+.ep-live-s3-report-cell strong {font-size:.87rem}
+@media(max-width:480px) {.ep-live-s3 {padding:12px;gap:10px}
+  .ep-live-s3-split,.ep-live-s3-report-grid {grid-template-columns:1fr}
+  .ep-live-s3-options label {min-height:44px}
+}
