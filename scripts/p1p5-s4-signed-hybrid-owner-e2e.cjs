@@ -130,20 +130,25 @@ async function main(){
  // We test exact numeric fraction/rounding plumbing using a deliberately FAKE
  // private fixture, NOT an academic-approved real student-facing question key.
  const cleanVer=taskVer.replaceAll("'","''");
+ const taskHash=sql("SELECT md5(prompt_en || chr(10) || rubric_json::text) "+
+   "FROM private.exam_prep_written_tasks WHERE id="+taskId);
+ assert(/^[a-f0-9]{32}$/.test(taskHash),'original paper content fingerprint required');
  sql("INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1 "+
   "(assessment_id,item_order,part_label,written_task_id,source_task_version,"+
+  "source_content_md5,"+
   "expected_numeric,absolute_tolerance,review_state,academic_review_ref,approved_at) "+
   "VALUES("+stageId+",1,'test','"+taskId+"','"+cleanVer+
-  "',0.5,0,'approved','synthetic-local-only',now())");
+  "'"+taskHash+"',0.5,0,'approved','synthetic-local-only',now())");
  // An approved checkpoint with broad tolerance could accept a wrong answer.
  // The database must fail closed, even when a mistaken human reviewer sets it.
  let invalidApprovalDenied=false;
  try {
    sql("INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1 "+
      "(assessment_id,item_order,part_label,written_task_id,source_task_version,"+
+  "source_content_md5,"+
      "expected_numeric,absolute_tolerance,review_state,academic_review_ref,approved_at) "+
      "VALUES("+stageId+",1,'unsafe-tolerance',"+taskId+",'"+cleanVer+
-     "',0.5,0.1,'approved','synthetic-local-only',now())");
+     "'"+taskHash+"',0.5,0.1,'approved','synthetic-local-only',now())");
  } catch (e) {
    invalidApprovalDenied=/check constraint/i.test(String(e.stderr||e.message));
  }
@@ -151,11 +156,15 @@ async function main(){
  // A stale answer key for a different task revision must never be shown.
  const taskId2=sql("SELECT written_task_id FROM private.exam_prep_assessment_items "+
    "WHERE assessment_id="+stageId+" AND item_order=2");
+ const taskHash2=sql("SELECT md5(prompt_en || chr(10) || rubric_json::text) "+
+   "FROM private.exam_prep_written_tasks WHERE id="+taskId2);
+ assert(/^[a-f0-9]{32}$/.test(taskHash2));
  sql("INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1 "+
    "(assessment_id,item_order,part_label,written_task_id,source_task_version,"+
+  "source_content_md5,"+
    "expected_numeric,absolute_tolerance,review_state,academic_review_ref,approved_at) "+
    "VALUES("+stageId+",2,'stale',"+taskId2+
-   ",'not-the-current-task-version',0.5,0,'approved','synthetic-local-only',now())");
+   ",'not-the-current-task-version','"+taskHash2+"',0.5,0,'approved','synthetic-local-only',now())");
  const ended=ok(await rpc('finish_exam_prep_hybrid_s4_paper_safe_v1',{
   p_session_id:first.session_id,p_reason:'finish',p_idempotency_key:key('p1-finish')
  }),'P1 paper finish with ZERO written artifacts');
@@ -221,10 +230,11 @@ async function main(){
  const realVer2=sql("SELECT task_version FROM private.exam_prep_written_tasks WHERE id="+taskId2).replaceAll("'","''");
  sql("INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1 "+
    "(assessment_id,item_order,part_label,written_task_id,source_task_version,"+
+  "source_content_md5,"+
    "expected_numeric,accepted_numeric_alternates,absolute_tolerance,"+
    "review_state,academic_review_ref,approved_at) "+
    "VALUES("+stageId+",2,'alternate',"+taskId2+",'"+realVer2+
-   "',0.75,ARRAY[0.7499]::numeric[],0,'approved','synthetic-local-only',now())");
+   "'"+taskHash2+"',0.75,ARRAY[0.7499]::numeric[],0,'approved','synthetic-local-only',now())");
  const closedRepeat=ok(await rpc('finish_exam_prep_hybrid_s4_paper_safe_v1',{
    p_session_id:other.session_id,p_reason:'early_exit',
    p_idempotency_key:key('repeat-early-finish')
