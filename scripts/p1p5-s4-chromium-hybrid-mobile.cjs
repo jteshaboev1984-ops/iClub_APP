@@ -56,7 +56,18 @@ async function run(){
     },lang);
     assert(opened.sync&&opened.open,'Math host did not start');
     await page.locator('[data-ep-live-component="'+component+'"]').click();
-    await page.locator('[data-ep-component-link="timed"]').click();
+    const timedLink=page.locator('[data-ep-component-link="timed"]');
+    try {await timedLink.waitFor({timeout:7000,state:'visible'});}
+    catch(err) {
+      const probe=await page.evaluate(()=>({
+        text:(document.querySelector('#exam-prep-host-root')?.innerText||'').slice(0,2400),
+        route:(document.querySelector('#exam-prep-host-root')?.innerHTML||'').slice(0,1400),
+        rpc:window.__hybridTrace||[]
+      }));
+      console.error('S4 COMPONENT NAV DIAGNOSTIC',lang,component,JSON.stringify(probe));
+      throw err;
+    }
+    await timedLink.click();
     const catalog=page.locator('[data-ep-hybrid-s4-catalog]');
     await catalog.waitFor({timeout:20000});
     const tt=await catalog.textContent();
