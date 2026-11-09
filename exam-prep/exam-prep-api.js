@@ -388,6 +388,39 @@
       p_attempt_id:attemptId,p_language:language
     });
   }
+  // S4 HYBRID Paper: server-disabled by default, no handwritten upload or student grading.
+  async function hybridS4Catalog(componentCode) {
+    return rpc("get_exam_prep_hybrid_s4_papers_safe_v1",{p_component_code:componentArg(componentCode)});
+  }
+  async function hybridS4History(componentCode) {
+    return rpc("get_exam_prep_hybrid_s4_history_safe_v1",{p_component_code:componentArg(componentCode)});
+  }
+  async function hybridS4StageStatus(componentCode) {
+    return rpc("get_exam_prep_hybrid_s4_stage_status_safe_v1",{p_component_code:componentArg(componentCode)});
+  }
+  async function hybridS4Start(assessmentId,token) {
+    return rpc("start_exam_prep_hybrid_s4_paper_safe_v1",
+      {p_assessment_id:Number(assessmentId),p_idempotency_key:String(token||"")});
+  }
+  async function hybridS4Session(sessionId,language="en") {
+    return rpc("get_exam_prep_hybrid_s4_session_safe_v1",{p_session_id:sessionId,p_language:language});
+  }
+  async function hybridS4Finish(sessionId,reason,token) {
+    return rpc("finish_exam_prep_hybrid_s4_paper_safe_v1",
+      {p_session_id:sessionId,p_reason:String(reason||"finish"),p_idempotency_key:String(token||"")});
+  }
+  async function hybridS4Check(sessionId,itemOrder,partLabel,answer,token) {
+    return rpc("check_exam_prep_hybrid_s4_final_safe_v1",{
+      p_session_id:sessionId,p_item_order:Number(itemOrder),
+      p_part_label:String(partLabel||""),p_answer:String(answer||""),
+      p_idempotency_key:String(token||"")
+    });
+  }
+  async function hybridS4Reveal(sessionId,language="en") {
+    return rpc("reveal_exam_prep_hybrid_s4_review_safe_v1",
+      {p_session_id:sessionId,p_language:language});
+  }
+
   async function readiness(componentCode) { return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function readinessSummary(componentCode) { return rpc("get_exam_prep_readiness_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function examOps(componentCode) { return rpc("get_exam_prep_exam_ops_safe_v1", { p_component_code: componentArg(componentCode) }); }
@@ -421,6 +454,8 @@
     activePlanSession, weeklyPlan, generateWeeklyPlan, authorizePlanItem,
     timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack,
     extraHardCatalog, extraHardStart, extraHardSubmit, extraHardAttempt,
+    hybridS4Catalog, hybridS4History, hybridS4StageStatus, hybridS4Start,
+    hybridS4Session, hybridS4Finish, hybridS4Check, hybridS4Reveal,
     readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration
   });
 
