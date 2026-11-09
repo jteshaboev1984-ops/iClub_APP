@@ -161,6 +161,30 @@
 
   async function examMapStatus() { return rpc("get_exam_prep_exam_map_status_safe_v1"); }
 
+  async function personalHorizon() {
+    return rpc("get_exam_prep_personal_horizon_safe_v1");
+  }
+
+  async function studySchedule() {
+    return rpc("get_exam_prep_study_schedule_safe_v1");
+  }
+
+  async function saveStudySchedule(minutesPerDay, daysPerWeek) {
+    return rpc("save_exam_prep_study_schedule_safe_v1", {
+      p_minutes_per_day: Number(minutesPerDay),
+      p_days_per_week: Number(daysPerWeek)
+    });
+  }
+
+  async function confirmExamDate(componentCode, scheduledStartAt) {
+    return rpc("save_my_exam_prep_exam_appointment_v2", {
+      p_component_code: componentArg(componentCode),
+      p_scheduled_start_at: String(scheduledStartAt || ""),
+      p_school_confirmed: true
+    });
+  }
+
+
   const componentArg = componentCode => String(componentCode || "");
 
   async function diagnosticProgress(componentCode) {
@@ -364,6 +388,7 @@
   root.api = Object.freeze({
     capabilities,
     examProfile, saveExamProfile, examMapStatus,
+    personalHorizon, studySchedule, saveStudySchedule, confirmExamDate,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
@@ -388,7 +413,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-extrahard-v43-d03-noselfmark-20261109");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-extrahard-v43-d03-noselfmark-20261109-s2-calendar-workload");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");
