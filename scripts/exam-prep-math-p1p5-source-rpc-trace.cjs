@@ -93,7 +93,20 @@ for(const [i,p] of PATHS.entries()){
  for(const n of namesFromSource(code,i===2))found.add(n);
 }
 const missing=EXPECTED.filter(n=>!found.has(n));
-const added=[...found].filter(n=>!EXPECTED.includes(n)).sort();
+// Additional owner-bound, optional Math-only Extra Hard RPCs are separately
+// traced; the historical 61 core interfaces must not be renumbered or changed.
+const EXTRA_HARD_RPC=[
+  "get_my_exam_prep_extra_hard_catalog_safe_v1",
+  "get_my_exam_prep_extra_hard_attempt_safe_v1",
+  "start_my_exam_prep_extra_hard_safe_v1",
+  "submit_my_exam_prep_extra_hard_safe_v1"
+];
+const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)).sort();
+assert(EXTRA_HARD_RPC.every(n=>found.has(n)),"Math Extra Hard owner-only RPC missing");
+const extra=read("exam-prep/exam-prep-extra-hard-ui.js");
+assert(extra.includes('internal.extraHardView=Object.freeze({open})'),"Optional Extra Hard controller not mounted");
+assert(extra.includes("data-ep-extra-hard-next")&&!extra.includes("localStorage.setItem"),"Extra Hard optional paper-first route missing");
+
 assert.deepEqual(missing,[],'historical RPC removed/renamed; first reconcile actual backend signature');
 assert.deepEqual(added,[],'new untraced RPC; first document path, permissions and invariant');
 assert.equal(EXPECTED.length,61,'P1/P5 source contract count changed without trace review');
