@@ -512,4 +512,9 @@ jobs:
           npx playwright install --with-deps chromium
           node scripts/p1p5-isolated-http-auth-e2e.cjs
           echo 'D03: signed P1/P5 host Chromium and no-selfmark old-client deny PASS'
+      - name: S2 signed exam-centre dates and 81 unreviewed workload source
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s2-signed-calendar-81-source.cjs
+          node scripts/p1p5-s2-signed-calendar-81-source.cjs
 
