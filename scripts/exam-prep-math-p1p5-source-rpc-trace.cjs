@@ -112,6 +112,17 @@ assert.equal(EXPECTED.length,60,'D03 core source trace: legacy learner self-mark
 const api=read(PATHS[0]),weekly=read(PATHS[1]),progress=read(PATHS[2]);
 const live=read(LIVE),host=read(HOST),html=read(HTML);
 // D03: archived legacy self-mark scores are NOT a new learner write path.
+const d03=read('supabase/migrations/20261109110000_exam_prep_p1p5_d03_written_selfmark_firewall_v1.sql');
+for(const token of [
+  "RAISE EXCEPTION 'exam_prep_written_self_marks_disabled'",
+  "REVOKE ALL ON FUNCTION public.submit_exam_prep_timed_written_self_mark_safe_v1",
+  "'result_scope','objective_only'",
+  "v_earned_in:=v_b.objective_marks_in_time",
+  "v_earned_after:=v_b.objective_marks_after_time",
+  "v_score_comp:=private.exam_prep_timed_score_comparable_v1"
+]) assert(d03.includes(token), 'D03 SQL core release safeguard missing: '+token);
+assert(!/\b(?:DELETE\s+FROM|TRUNCATE\s+TABLE|UPDATE\s+public\.users)\b/i.test(d03),
+  'D03 candidate must not delete or rewrite learner rows');
 assert(!api.includes('submitTimedSelfMark') && !api.includes('submit_exam_prep_timed_written_self_mark_safe_v1'),
   'learner self-mark API must remain removed');
 assert(!live.includes('data-ep-live-save-self') && !live.includes('ep_live_self_mark'),
