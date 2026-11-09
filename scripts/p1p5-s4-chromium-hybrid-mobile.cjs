@@ -55,19 +55,19 @@ async function run(){
       return{sync,open};
     },lang);
     assert(opened.sync&&opened.open,'Math host did not start');
-    await page.locator('[data-ep-live-component="'+component+'"]').click();
-    const timedLink=page.locator('[data-ep-component-link="timed"]');
-    try {await timedLink.waitFor({timeout:7000,state:'visible'});}
+    // Stage0 component cards correctly start diagnosis; Paper pilot is an
+    // independent server-gated voluntary entry and must not change that flow.
+    const pilot=page.locator('[data-ep-hybrid-s4-dashboard-open="'+component+'"]');
+    try {await pilot.waitFor({timeout:12000,state:'visible'});}
     catch(err) {
-      const probe=await page.evaluate(()=>({
+      const diagnostics=await page.evaluate(()=>({
         text:(document.querySelector('#exam-prep-host-root')?.innerText||'').slice(0,2400),
-        route:(document.querySelector('#exam-prep-host-root')?.innerHTML||'').slice(0,1400),
         rpc:window.__hybridTrace||[]
       }));
-      console.error('S4 COMPONENT NAV DIAGNOSTIC',lang,component,JSON.stringify(probe));
+      console.error('S4 PILOT ENTRY DIAGNOSTIC',lang,component,JSON.stringify(diagnostics));
       throw err;
     }
-    await timedLink.click();
+    await pilot.click();
     const catalog=page.locator('[data-ep-hybrid-s4-catalog]');
     await catalog.waitFor({timeout:20000});
     const tt=await catalog.textContent();
