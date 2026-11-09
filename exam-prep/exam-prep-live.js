@@ -13,6 +13,7 @@
     studySchedule: null,
     weeklyChoice: null,
     weeklyReports: null,
+    s3Retry: null,
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
     session: null,
@@ -1302,9 +1303,15 @@
       state.busy=true; button.disabled=true; show("");
       const args = {choice,p1Minutes:p1,p5Minutes:p5,minutesPerDay:day,
         daysPerWeek:days,scheduleRevision:row.schedule_revision};
-      const saved = await internal.api.saveWeeklyChoiceS3(args,key("ep-s3-choice"));
+      const signature = JSON.stringify(args);
+      // Reuse the same request key after a lost response, not a second decision.
+      if (state.s3Retry?.signature !== signature) {
+        state.s3Retry = { signature, id: key("ep-s3-choice") };
+      }
+      const saved = await internal.api.saveWeeklyChoiceS3(args,state.s3Retry.id);
       state.busy=false; button.disabled=false;
       if (!saved?.ok) { show(c.error); return; }
+      state.s3Retry = null;
       const profile = await internal.api.examProfile();
       if(profile?.ok) state.profile=profile.data;
       state.notice=c.saved;
@@ -2243,7 +2250,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.s3Retry = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
