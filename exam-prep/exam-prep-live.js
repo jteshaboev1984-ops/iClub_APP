@@ -14,6 +14,8 @@
     weeklyChoice: null,
     weeklyReports: null,
     s3Retry: null,
+    hybridS4: null,
+    hybridS4Active: false,
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
     session: null,
@@ -1510,6 +1512,18 @@
   }
 
   async function openTimed(component) {
+    // The HYBRID route is doubly gated: explicit client pilot flag AND server
+    // owner-controlled default-OFF feature config. Old timed Paper is unchanged.
+    if (window.iClubExamPrepHybridPaperS4Enabled === true &&
+        typeof internal.api?.hybridS4Catalog === "function") {
+      const candidate = await internal.api.hybridS4Catalog(component).catch(() => null);
+      if (candidate?.ok && candidate.data?.enabled === true) {
+        state.hybridS4Active = true;
+        await renderHybridS4Catalog(component, candidate.data);
+        return;
+      }
+    }
+    state.hybridS4Active = false;
     clearTimer(); renderLoading();
     const [result, stage4Result] = await Promise.all([
       internal.api.timedCatalog(component),
@@ -1520,6 +1534,274 @@
     if (!result?.ok) { renderError(); return; }
     renderTimedCatalog(component, result.data, stage4Result?.ok ? stage4Result.data : null);
   }
+
+
+  // ---------------- S4 HYBRID PAPER (OFF until separate beta GO) ----------------
+  // Written work stays in the learner's notebook. Neither app nor learner
+  // awards Cambridge marks. Only optional approved final-answer checkpoints.
+  function hybridS4Copy() {
+    return ({
+      ru:{
+        title:"Тренировочный Paper",start:"Начать тренировку",history:"Мои тренировки",
+        time:"Осталось",available:"Максимум по условиям",back:"К вариантам",
+        noPapers:"Доступных вариантов пока нет.",paperNotice:"Решайте задания на бумаге. Записывать подробное решение в приложение не нужно.",
+        ref:"Используйте разрешённые для экзамена материалы MF19, включая статистические таблицы.",
+        finish:"Завершить тренировку",finishConfirm:"Завершить тренировку и перейти к разбору?",
+        early:"Завершить досрочно",earlyConfirm:"Завершить досрочно? Непроверенные ответы не станут оценкой.",
+        noScore:"Письменные решения не проверены. Баллы за Paper не определены.",
+        mark:"Возможные баллы",close:"Тренировка завершена",expired:"Время вышло",
+        optional:"Необязательная проверка конечных ответов",quickHint:"Проверяются только выбранные конечные ответы, а не способ решения. Баллы за работу не начисляются.",
+        noKeys:"Для этого Paper цифровая проверка конечных ответов пока недоступна.",
+        submit:"Сверить ответ",checked:"Ответ сверён",matched:"Совпало",mismatch:"Не совпало",
+        notMarks:"Это не экзаменационные баллы и не проверка метода.",review:"Открыть критерии и рекомендации",
+        requirements:"Критерии",hint:"Подсказка для разбора",noWorked:"Полные пошаговые решения для всех заданий пока не подтверждены.",
+        noReview:"Разбор ещё не открыт",beforeReview:"После открытия критериев проверка конечных ответов закрывается.",
+        previous:"Этот вариант уже разбирался ранее; повтор не является независимой проверкой.",
+        failed:"Не удалось подтвердить действие. Повторно откройте попытку из истории.",
+        reviewAgain:"Посмотреть разбор",notFinished:"В процессе",finished:"Завершена",
+        earlyEnded:"Завершена досрочно",timeEnded:"Время закончилось",repeat:"Вернуться к Paper",
+        skill:"Тема",emptyHistory:"Тренировок пока нет",unknown:"Не проверено"
+      },
+      uz:{
+        title:"Sinov Paper",start:"Mashqni boshlash",history:"Mashqlarim",
+        time:"Qolgan vaqt",available:"Mumkin bo‘lgan jami ball",back:"Variantlarga",
+        noPapers:"Hozircha variantlar mavjud emas.",paperNotice:"Masalalarni qog‘ozda yeching. To‘liq yechimni ilovaga kiritish shart emas.",
+        ref:"Imtihonda ruxsat etilgan MF19 formulalar va statistik jadvallardan foydalaning.",
+        finish:"Mashqni yakunlash",finishConfirm:"Mashqni yakunlab tahlilga o‘tasizmi?",
+        early:"Ertaroq yakunlash",earlyConfirm:"Ertaroq yakunlaysizmi? Yozma ish baholanmaydi.",
+        noScore:"Yozma yechim tekshirilmagan. Paper uchun baho aniqlanmagan.",
+        mark:"Mumkin bo‘lgan ball",close:"Mashq yakunlandi",expired:"Vaqt tugadi",
+        optional:"Ixtiyoriy yakuniy javob tekshiruvi",quickHint:"Faqat ayrim yakuniy javoblar tekshiriladi, yechish usuli emas. Paper baholanmaydi.",
+        noKeys:"Ushbu Paper uchun raqamli javob tekshiruvi hali mavjud emas.",
+        submit:"Javobni tekshirish",checked:"Javob tekshirildi",matched:"Mos",mismatch:"Mos emas",
+        notMarks:"Bu imtihon bahosi yoki yechish usulining bahosi emas.",review:"Mezonlar va tavsiyalar",
+        requirements:"Mezonlar",hint:"Tahlil uchun maslahat",noWorked:"Barcha masalalar uchun to‘liq bosqichli yechimlar tasdiqlanmagan.",
+        noReview:"Tahlil ochilmagan",beforeReview:"Mezonlar ochilgach, yakuniy javoblarni tekshirish yopiladi.",
+        previous:"Bu variant avval tahlil qilingan; takror mustaqil sinov hisoblanmaydi.",
+        failed:"Amal tasdiqlanmadi. Mashqni tarixdan qayta oching.",
+        reviewAgain:"Tahlilga qaytish",notFinished:"Davom etmoqda",finished:"Yakunlandi",
+        earlyEnded:"Ertaroq yakunlandi",timeEnded:"Vaqt tugadi",repeat:"Paperga qaytish",
+        skill:"Mavzu",emptyHistory:"Hali mashqlar yo‘q",unknown:"Tekshirilmagan"
+      },
+      en:{
+        title:"Practice Paper",start:"Start Paper",history:"My practice sessions",
+        time:"Time remaining",available:"Marks available",back:"Back to papers",
+        noPapers:"No Papers available yet.",paperNotice:"Solve on paper. You do not need to type your working into the app.",
+        ref:"Use the permitted MF19 list of formulae and statistical tables.",
+        finish:"Finish practice",finishConfirm:"Finish this Paper rehearsal and continue to review?",
+        early:"End early",earlyConfirm:"End early? Your written work will remain ungraded.",
+        noScore:"Written methods have not been checked. Full Paper mark is unknown.",
+        mark:"Marks available",close:"Practice ended",expired:"Time expired",
+        optional:"Optional final-answer check",quickHint:"Only selected final answers are checked, not working or method marks. No Paper grade is awarded.",
+        noKeys:"No digital final-answer checks are available for this Paper yet.",
+        submit:"Check final answer",checked:"Answer checked",matched:"Matches",mismatch:"Does not match",
+        notMarks:"This is not a Cambridge mark or a checked method.",review:"View criteria and review tips",
+        requirements:"Criteria",hint:"Review hint",noWorked:"Complete worked solutions have not been confirmed for every task.",
+        noReview:"Review not opened",beforeReview:"Revealing the criteria closes the optional final-answer check.",
+        previous:"You have previously revealed this Paper; repetition is not a fresh unseen test.",
+        failed:"Could not confirm the action. Reopen this session from your history.",
+        reviewAgain:"Open review again",notFinished:"In progress",finished:"Ended",
+        earlyEnded:"Ended early",timeEnded:"Time expired",repeat:"Back to Paper",
+        skill:"Topic",emptyHistory:"No past Paper sessions yet",unknown:"Not assessed"
+      }
+    })[state.language] || hybridS4CopyFallback();
+  }
+  function hybridS4CopyFallback() {
+    return {title:"Practice Paper",back:"Back",failed:"Please retry from history.",noScore:"Written method not assessed."};
+  }
+  function hybridS4MarkState(code) {
+    const c=hybridS4Copy();
+    return code==="time_expired"?c.timeEnded:
+      code==="ended_early"?c.earlyEnded:
+        code==="ended_by_learner"?c.finished:c.notFinished;
+  }
+  function hybridS4Clock(sessionId,deadline) {
+    clearTimer();
+    const absolute=new Date(deadline).getTime();
+    if(!Number.isFinite(absolute)) return;
+    const tick=()=>{
+      if(state.hybridS4?.session_id!==sessionId || state.hybridS4?.closed_at) {
+        clearTimer();return;
+      }
+      const sec=Math.max(0,Math.ceil((absolute-Date.now())/1000));
+      const node=rootEl()?.querySelector("[data-ep-hybrid-s4-clock]");
+      if(node) node.textContent=hybridS4Copy().time+": "+
+        String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0");
+      if(sec===0) {
+        clearTimer();
+        if(!state.busy) void hybridS4Finish(sessionId,"time_expired");
+      }
+    };
+    tick();state.timerId=setInterval(tick,1000);
+  }
+  async function renderHybridS4Catalog(component,payload=null) {
+    clearTimer();renderLoading();
+    const c=hybridS4Copy();
+    let list=payload;
+    if(!list) {
+      const res=await internal.api.hybridS4Catalog(component);
+      if(!res?.ok || res.data?.enabled!==true){renderError();return;}
+      list=res.data;
+    }
+    const h=await internal.api.hybridS4History(component);
+    const history=h?.ok && Array.isArray(h.data?.sessions)?h.data.sessions:[];
+    const papers=Array.isArray(list.papers)?list.papers:[];
+    const rows=papers.map(p=>'<div class="ep-live-timed-row"><div><strong>'+
+      esc(p.title||p.paper_key)+'</strong><div class="ep-live-meta">'+
+      esc(c.mark)+': '+Number(p.available_marks||0)+' · '+
+      minutes(p.time_limit_sec)+' '+esc(copy().minutes)+'</div></div>'+
+      '<button type="button" class="ep-live-btn" data-ep-hybrid-s4-start="'+
+      Number(p.assessment_id)+'">'+esc(c.start)+'</button></div>').join("");
+    const past=history.slice(0,12).map(h=>
+      '<div class="ep-live-timed-row"><div><strong>'+esc(h.paper_key)+'</strong>'+
+      '<div class="ep-live-meta">'+esc(hybridS4MarkState(h.closure_code))+
+      ' · '+esc(formatDateTime(h.started_at))+'</div></div>'+
+      '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-resume="'+
+      esc(h.session_id)+'">'+esc(h.closure_code?c.reviewAgain:c.repeat)+'</button></div>').join("");
+    const root=rootEl();if(!root)return;
+    root.innerHTML=shell('<section class="ep-live-card" data-ep-hybrid-s4-catalog>'+
+      '<div class="ep-live-head"><strong>'+component+' · '+esc(c.title)+'</strong>'+
+      '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-home>'+
+      esc(c.back)+'</button></div>'+
+      '<p class="ep-live-meta">'+esc(c.paperNotice)+'</p>'+
+      (rows||'<p class="ep-live-notice">'+esc(c.noPapers)+'</p>')+
+      '</section><section class="ep-live-card"><strong>'+esc(c.history)+'</strong>'+
+      (past||'<p class="ep-live-meta">'+esc(c.emptyHistory)+'</p>')+'</section>');
+    root.querySelector('[data-ep-hybrid-s4-home]')?.addEventListener("click",renderDashboard);
+    root.querySelectorAll('[data-ep-hybrid-s4-start]').forEach(b=>
+      b.addEventListener("click",()=>void hybridS4Start(component,Number(b.dataset.epHybridS4Start))));
+    root.querySelectorAll('[data-ep-hybrid-s4-resume]').forEach(b=>
+      b.addEventListener("click",()=>void hybridS4Load(b.dataset.epHybridS4Resume,component)));
+  }
+  async function hybridS4Start(component,assessmentId) {
+    if(state.busy)return;state.busy=true;renderLoading();
+    const res=await internal.api.hybridS4Start(assessmentId,key("ep-hybrid-s4-start"));
+    state.busy=false;
+    if(!res?.ok || !res.data?.session_id){renderError();return;}
+    await hybridS4Load(res.data.session_id,component);
+  }
+  async function hybridS4Load(sessionId,component) {
+    clearTimer();renderLoading();
+    const res=await internal.api.hybridS4Session(sessionId,state.language);
+    if(!res?.ok || res.data?.session_id!==sessionId ||
+      res.data?.component_code!==component){renderError();return;}
+    state.hybridS4=res.data;
+    if(res.data.closed_at && res.data.review_revealed) {
+      await hybridS4Reveal(sessionId,component);return;
+    }
+    if(res.data.closed_at){renderHybridS4Checks(res.data,component);return;}
+    if(Date.now()>=new Date(res.data.deadline_at).getTime()){
+      await hybridS4Finish(sessionId,"time_expired");return;
+    }
+    const c=hybridS4Copy();
+    const items=Array.isArray(res.data.items)?res.data.items:[];
+    const body=items.map(item=>'<section class="ep-live-card ep-live-question-card"'+
+      ' data-ep-hybrid-s4-item="'+Number(item.item_order)+'">'+
+      '<div class="ep-live-head"><strong>'+esc(copy().question)+' '+
+      Number(item.item_order)+' / '+items.length+'</strong>'+
+      '<span class="ep-live-meta">'+esc(c.mark)+': '+
+      Number(item.max_available_marks||0)+'</span></div>'+
+      '<div class="ep-live-qtext">'+uxMath(item.prompt||"")+'</div></section>').join("");
+    const root=rootEl();if(!root)return;
+    root.innerHTML=shell('<div data-ep-hybrid-s4-paper>'+
+      '<section class="ep-live-card"><div class="ep-live-head"><strong>'+
+      component+' · '+esc(c.title)+'</strong><span data-ep-hybrid-s4-clock></span></div>'+
+      '<p class="ep-live-meta">'+esc(c.paperNotice)+'</p>'+
+      '<p class="ep-live-meta">'+esc(c.ref)+'</p>'+
+      (res.data.prior_review_seen?'<p class="ep-live-notice">'+esc(c.previous)+'</p>':"")+
+      '</section>'+body+'<section class="ep-live-card"><div class="ep-live-actions">'+
+      '<button type="button" class="ep-live-btn" data-ep-hybrid-s4-finish>'+
+      esc(c.finish)+'</button><button type="button" class="ep-live-btn secondary"'+
+      ' data-ep-hybrid-s4-early>'+esc(c.early)+'</button></div></section></div>');
+    root.querySelector('[data-ep-hybrid-s4-finish]')?.addEventListener("click",()=>{
+      if(window.confirm(c.finishConfirm))void hybridS4Finish(sessionId,"finish");
+    });
+    root.querySelector('[data-ep-hybrid-s4-early]')?.addEventListener("click",()=>{
+      if(window.confirm(c.earlyConfirm))void hybridS4Finish(sessionId,"early_exit");
+    });
+    hybridS4Clock(sessionId,res.data.deadline_at);
+  }
+  async function hybridS4Finish(sessionId,reason) {
+    if(state.busy || state.hybridS4?.session_id!==sessionId)return;
+    state.busy=true;clearTimer();
+    const res=await internal.api.hybridS4Finish(sessionId,reason,key("ep-hybrid-s4-finish"));
+    state.busy=false;
+    if(!res?.ok){renderError();return;}
+    await hybridS4Load(sessionId,state.hybridS4.component_code);
+  }
+  function renderHybridS4Checks(data,component) {
+    clearTimer();state.hybridS4=data;
+    const c=hybridS4Copy(),keys=Array.isArray(data.checkpoints)?data.checkpoints:[];
+    const controls=keys.map((k,index)=>'<div class="ep-live-card" data-ep-hybrid-s4-check-row="'+index+'">'+
+      '<label class="ep-live-field"><span>'+esc(copy().question)+' '+Number(k.item_order)+
+      ', '+esc(k.part_label)+'</span><input type="text" class="ep-live-input"'+
+      ' data-ep-hybrid-s4-answer="'+index+'" autocomplete="off" maxlength="80" '+
+      (k.checked?'disabled':"")+' /></label>'+
+      '<div class="ep-live-actions"><button type="button" class="ep-live-btn secondary" '+
+      ' data-ep-hybrid-s4-check="'+index+'" '+(k.checked?'disabled':"")+'>'+
+      esc(k.checked?(k.matched?c.matched:c.mismatch):c.submit)+'</button></div></div>').join("");
+    const root=rootEl();if(!root)return;
+    root.innerHTML=shell('<div data-ep-hybrid-s4-checks>'+
+      '<section class="ep-live-card"><strong>'+component+' · '+esc(c.close)+'</strong>'+
+      '<p class="ep-live-meta">'+esc(hybridS4MarkState(data.closure_code))+'</p>'+
+      '<p class="ep-live-notice">'+esc(c.noScore)+'</p><strong>'+esc(c.optional)+'</strong>'+
+      '<p class="ep-live-meta">'+esc(c.quickHint)+'</p>'+
+      (data.prior_review_seen?'<p class="ep-live-meta">'+esc(c.previous)+'</p>':"")+
+      '</section>'+(controls||'<section class="ep-live-card">'+esc(c.noKeys)+'</section>')+
+      '<section class="ep-live-card"><p class="ep-live-meta">'+esc(c.beforeReview)+'</p>'+
+      '<button type="button" class="ep-live-btn" data-ep-hybrid-s4-reveal>'+
+      esc(c.review)+'</button></section></div>');
+    root.querySelectorAll('[data-ep-hybrid-s4-check]').forEach(button=>{
+      button.addEventListener("click",async()=>{
+        if(state.busy)return;
+        const i=Number(button.dataset.epHybridS4Check), k=keys[i],
+          input=root.querySelector('[data-ep-hybrid-s4-answer="'+i+'"]');
+        if(!k || !input || !input.value.trim())return;
+        state.busy=true;button.disabled=true;
+        const answer=input.value.trim();
+        const response=await internal.api.hybridS4Check(data.session_id,
+          k.item_order,k.part_label,answer,key("ep-hybrid-s4-check"));
+        state.busy=false;
+        if(!response?.ok){button.disabled=false;input.setCustomValidity(c.failed);input.reportValidity();return;}
+        input.setCustomValidity("");input.disabled=true;
+        button.textContent=response.data?.matched?c.matched:c.mismatch;
+        const note=document.createElement("p");note.className="ep-live-meta";
+        note.textContent=c.notMarks;button.parentNode?.appendChild(note);
+      });
+    });
+    root.querySelector('[data-ep-hybrid-s4-reveal]')?.addEventListener("click",
+      ()=>void hybridS4Reveal(data.session_id,component));
+  }
+  async function hybridS4Reveal(sessionId,component) {
+    if(state.busy)return;
+    state.busy=true;clearTimer();renderLoading();
+    const res=await internal.api.hybridS4Reveal(sessionId,state.language);
+    state.busy=false;
+    if(!res?.ok || res.data?.session_id!==sessionId){renderError();return;}
+    const c=hybridS4Copy(),items=Array.isArray(res.data.items)?res.data.items:[];
+    const body=items.map(item=>
+      '<section class="ep-live-card ep-live-question-card">'+
+      '<div class="ep-live-head"><strong>'+esc(copy().question)+' '+Number(item.item_order)+
+      '</strong><span class="ep-live-meta">'+esc(c.skill)+': '+esc(item.skill_code||"")+'</span></div>'+
+      '<div class="ep-live-qtext">'+uxMath(item.prompt||"")+'</div>'+
+      '<strong>'+esc(c.requirements)+'</strong>'+
+      '<ol class="ep-live-rubric">'+(Array.isArray(item.requirements)?
+        item.requirements.map(rule=>'<li>'+uxMath(rule||"")+'</li>').join(""):"")+'</ol>'+
+      (item.review_hint?'<p class="ep-live-notice"><strong>'+esc(c.hint)+
+        ':</strong> '+esc(item.review_hint)+'</p>':"")+
+      '</section>').join("");
+    const root=rootEl();if(!root)return;
+    root.innerHTML=shell('<div data-ep-hybrid-s4-review>'+
+      '<section class="ep-live-card"><div class="ep-live-head"><strong>'+component+
+      ' · '+esc(c.review)+'</strong></div><p class="ep-live-notice">'+esc(c.noScore)+'</p>'+
+      '<p class="ep-live-meta">'+esc(c.noWorked)+'</p></section>'+body+
+      '<section class="ep-live-card"><button type="button" class="ep-live-btn secondary"'+
+      ' data-ep-hybrid-s4-back>'+esc(c.back)+'</button></section></div>');
+    root.querySelector('[data-ep-hybrid-s4-back]')?.addEventListener("click",()=>{
+      state.hybridS4=null;void renderHybridS4Catalog(component);
+    });
+  }
+  // ---------------- END S4 HYBRID ---------------------------------------
 
   function percentShare(value) {
     if (value === null || value === undefined || value === "") return null;
@@ -2250,7 +2532,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.s3Retry = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.s3Retry = null; state.hybridS4 = null; state.hybridS4Active = false; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
