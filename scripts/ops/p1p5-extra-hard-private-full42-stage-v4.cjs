@@ -11,7 +11,7 @@ const {spawnSync}=require('node:child_process');
 const MODE=process.argv[2],INPUT=process.argv[3];
 const BANK='math-extra-hard-2026-11-full-v4';
 const PREVIOUS='math-extra-hard-2026-11-original-v2';
-const SOURCE_SHA='41ba89c74dd57f540a2601d9287042a984d2ad1522779ccdb45a4a667e0758b3';
+const SOURCE_SHA='42c16a0d81cad35576b927e0f8c412650b045c25c1cfbcb71d86e20dfda2e090';
 const FIELDS=['task_key','bank_version','component_code','primary_skill_code','official_section',
  'book_map','title_i18n','prompt_i18n','solution_i18n','exact_answer'];
 const hash=(x)=>crypto.createHash('sha256').update(x).digest('hex');
