@@ -172,6 +172,19 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-s4-signed-hybrid-owner-e2e.cjs
+      - name: S4 live signed Chromium phone RU UZ and desktop EN for Paper-first UI
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          # The prior real signed test deliberately disabled S4 again; ONLY
+          # re-enable it on this disposable PostgreSQL17 runner for Chromium.
+          psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.exam_prep_hybrid_s4_config_v1 SET paper_enabled=true,stage_gates_enabled=true WHERE singleton"
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+          node --check scripts/p1p5-s4-chromium-hybrid-mobile.cjs
+          node scripts/p1p5-s4-chromium-hybrid-mobile.cjs
       - name: Clean disposable PostgREST
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
