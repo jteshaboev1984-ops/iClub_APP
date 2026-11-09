@@ -9,6 +9,7 @@ on:
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
       - 'scripts/p1p5-s3-signed-virtual-periods.cjs'
+      - 'scripts/p1p5-s3-chromium-mobile-three-language.cjs'
       - 'supabase/tests/p1p5_s3_virtual_clock_periods.sql'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
@@ -525,6 +526,11 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
           node scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+      - name: S3 real signed Chromium UI phone RU UZ and desktop EN
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s3-chromium-mobile-three-language.cjs
+          node scripts/p1p5-s3-chromium-mobile-three-language.cjs
       - name: S3 real completed periods using a guarded disposable-only clock
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
