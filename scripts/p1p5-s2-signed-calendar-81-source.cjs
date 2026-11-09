@@ -49,8 +49,12 @@ function accept(x,label){assert(x.ok,label+' HTTP '+x.status+' '+JSON.stringify(
  assert.notEqual(horizon.P1.exam_start_at,horizon.P5.exam_start_at,
   'P1 and P5 exam dates unexpectedly merged');
  const norms=accept(await rpc('get_exam_prep_workload_norm_status_safe_v1'),'81 skill source registry');
- assert.equal(Number(norms.norm_rows),81,'no full 45+36 syllabus mapping');
- assert.equal(Number(norms.approved_norms),0,'unreviewed minutes were falsely approved');
+ assert.equal(Number(norms.P1?.norm_rows),45,'missing 45 P1 source rows');
+ assert.equal(Number(norms.P5?.norm_rows),36,'missing 36 P5 source rows');
+ assert.equal(Number(norms.P1?.approved_norms)+Number(norms.P5?.approved_norms),0,
+   'unreviewed minutes were falsely approved');
+ assert.equal(norms.numeric_recommendation_enabled,false,
+   'source registry must not enable a personal Cambridge minute recommendation');
  const actions=accept(await rpc('get_exam_prep_action_time_calibration_status_safe_v1'),'time calibration source');
  assert(actions.recommended_weekly_hours==null,
   'unapproved source unexpectedly displayed a personal Cambridge weekly hour target');
