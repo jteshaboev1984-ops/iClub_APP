@@ -525,7 +525,9 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
           node scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
-      - name: S3 real completed period boundaries using disposable synthetic clock only
+      - name: S3 real completed periods using a guarded disposable-only clock
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
         run: |
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = 'true'
