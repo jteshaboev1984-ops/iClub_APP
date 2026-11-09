@@ -1,8 +1,28 @@
+SET LOCAL lock_timeout='3500ms';
+SET LOCAL statement_timeout='30000ms';
+
+DO $d03_pre$
+DECLARE fp text;
+BEGIN
+ SELECT string_agg(md5(pg_get_functiondef(to_regprocedure(sig))),':' ORDER BY ord) INTO fp
+ FROM (VALUES (1,'private.exam_prep_timed_score_comparable_v1(uuid)'),
+ (2,'public.get_exam_prep_timed_review_pack_safe_v1(uuid,text)'),
+ (3,'public.get_exam_prep_timed_result_safe_v1(uuid)'),
+ (4,'private.exam_prep_stage5_readiness_status_v1(uuid,bigint,text)'),
+ (5,'public.submit_exam_prep_timed_written_self_mark_safe_v1(uuid,integer,integer,text,text)')) t(ord,sig);
+ IF fp<>'5fcabb8c2aeaf1452563f714b7bbf0bc:6e839a688d8aa60c2ab73487a1afb075:18dcd760573d1f24f3eb8a31afbd1a6a:06c2a6a9e3f4737e36fd020e56785eae:351b929454a8026bd84f2e93a5fdedc9'
+ OR (SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1
+   WHERE bank_version='math-extra-hard-2026-11-full-v4' AND lifecycle_status='published')<>42
+ OR NOT EXISTS(SELECT 1 FROM private.exam_prep_extra_hard_release_v1
+   WHERE program_key='math_as_p1_p5' AND bank_version='math-extra-hard-2026-11-full-v4'
+   AND enabled=true AND academic_approved=true)
+ THEN RAISE EXCEPTION 'D03 production source or Extra Hard hash drift'; END IF;
+END $d03_pre$;
 -- Main-based v2.2 selective port of the EXISTING reviewed D03 migration.
 -- Original draft: 20261104110000_exam_prep_p1p5_disable_written_self_marks_v1.sql.
 -- NOT APPLIED to production by this PR; only deploy after isolated signed E2E and explicit Core GO.
 -- Preserve history. This sets the old direct self-mark RPC to fail closed for stale clients.
-BEGIN;
+
 
 -- Approved Mathematics P1/P5 v2 D03 / Package4: completed writing is NOT graded.
 
@@ -334,5 +354,20 @@ REVOKE ALL ON FUNCTION private.exam_prep_timed_score_comparable_v1(uuid) FROM PU
 
 REVOKE ALL ON FUNCTION private.exam_prep_stage5_readiness_status_v1(uuid,bigint,text) FROM PUBLIC,anon,authenticated;
 
-COMMIT;
 
+
+
+
+DO $d03_after$
+BEGIN
+ IF has_function_privilege('authenticated','public.submit_exam_prep_timed_written_self_mark_safe_v1(uuid,integer,integer,text,text)','EXECUTE')
+ OR has_function_privilege('anon','public.submit_exam_prep_timed_written_self_mark_safe_v1(uuid,integer,integer,text,text)','EXECUTE')
+ OR position('exam_prep_written_self_marks_disabled' IN pg_get_functiondef('public.submit_exam_prep_timed_written_self_mark_safe_v1(uuid,integer,integer,text,text)'::regprocedure))=0
+ OR position('objective_only' IN pg_get_functiondef('public.get_exam_prep_timed_result_safe_v1(uuid)'::regprocedure))=0
+ OR (SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1
+     WHERE bank_version='math-extra-hard-2026-11-full-v4' AND lifecycle_status='published')<>42
+ OR NOT EXISTS(SELECT 1 FROM private.exam_prep_extra_hard_release_v1
+     WHERE program_key='math_as_p1_p5' AND bank_version='math-extra-hard-2026-11-full-v4'
+     AND enabled=true AND academic_approved=true)
+ THEN RAISE EXCEPTION 'D03 production postflight refused'; END IF;
+END $d03_after$;
