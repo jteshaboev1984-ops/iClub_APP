@@ -15,6 +15,7 @@ on:
       - feature/math-p1p5-extra-hard-v3-gated-release-20261107
       - feature/math-p1p5-v4-private-stage-readiness-20261109
       - feature/math-p1p5-v4-extra-hard-optional-criteria-next-20261109
+      - feature/math-p1p5-v41-source-fidelity-editorial-readiness-20261109
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'
@@ -33,6 +34,8 @@ on:
       - 'scripts/p1p5-extra-hard-full42-stage-v3-isolated-test.cjs'
       - 'scripts/ops/p1p5-extra-hard-private-full42-stage-v4.cjs'
       - 'scripts/p1p5-extra-hard-full42-stage-v4-isolated-test.cjs'
+      - 'scripts/p1p5-v41-source-pin-regression.cjs'
+      - 'docs/math-p1p5-v41-editorial-source-fidelity-checkpoint-20261109.md'
       - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
       - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
@@ -299,6 +302,9 @@ jobs:
           node scripts/p1p5-extra-hard-full42-stage-v3-isolated-test.cjs | tee /tmp/extra-hard-v3-42-staging.log
           grep -Fq 'EXTRA HARD V3 42-ROW PRIVATE COPY ROLLBACK PASS:' /tmp/extra-hard-v3-42-staging.log
           node --check scripts/ops/p1p5-extra-hard-private-full42-stage-v4.cjs
+          node --check scripts/p1p5-v41-source-pin-regression.cjs
+          node scripts/p1p5-v41-source-pin-regression.cjs | tee /tmp/math-v41-source-pin.log
+          grep -Fq 'V4.1 SOURCE-PIN REGRESSION PASS:' /tmp/math-v41-source-pin.log
           node --check scripts/p1p5-extra-hard-full42-stage-v4-isolated-test.cjs
           node scripts/p1p5-extra-hard-full42-stage-v4-isolated-test.cjs | tee /tmp/extra-hard-v4-42-pending-stage.log
           grep -Fq 'EXTRA HARD V4 42-ROW PRIVATE DRAFT COPY ROLLBACK PASS:' /tmp/extra-hard-v4-42-pending-stage.log
