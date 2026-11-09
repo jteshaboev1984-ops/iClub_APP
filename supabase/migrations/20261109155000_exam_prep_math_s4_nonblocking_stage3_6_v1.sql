@@ -196,16 +196,21 @@ BEGIN
  IF position(v_old IN v_body)=0 THEN RAISE EXCEPTION 'S4 stage5 source guard mismatch'; END IF;
  v_body:=replace(v_body,v_old,v_new);
 
- -- Future UI must use new owner readout; the legacy old stage reason strings
- -- are not valid when HYBRID gate is enabled. Render new, accurate reasons.
- v_old:='Stage 4 requires complete component closure, governed key-skill evidence and the first comparable full-paper baseline.';
- v_new:='Stage 4 requires confirmed syllabus coverage and key-skill evidence; Paper rehearsal is recommended, not required.';
+ -- Preserve old user-facing stage-hold reasons WHEN the feature is OFF.
+ -- Only switch those strings if owner later explicitly enables hybrid gates.
+ v_old:='new.stage_hold_reason:=''Stage 3 Syllabus Closure active. Stage 4 requires complete component closure, governed key-skill evidence and the first comparable full-paper baseline.'';';
+ v_new:='new.stage_hold_reason:=case when coalesce((select stage_gates_enabled from private.exam_prep_hybrid_s4_config_v1 where singleton),false) then ''Stage 3 Syllabus Closure active. Stage 4 requires verified L2 syllabus and key L3 skills; Paper practice is optional.'' else ''Stage 3 Syllabus Closure active. Stage 4 requires complete component closure, governed key-skill evidence and the first comparable full-paper baseline.'' end;';
+ IF position(v_old IN v_body)=0 THEN RAISE EXCEPTION 'S4 stage3 reason source guard mismatch'; END IF;
  v_body:=replace(v_body,v_old,v_new);
- v_old:='Stage 5 requires two compatible strict full papers, stable timing/unattempted evidence and resolved corrective work.';
- v_new:='Stage 5 requires the existing governed skill-correction evidence; two Paper rehearsals are recommendations.';
+
+ v_old:='new.stage_hold_reason:=''Stage 4 Timed Consolidation active. Stage 5 requires two compatible strict full papers, stable timing/unattempted evidence and resolved corrective work.'';';
+ v_new:='new.stage_hold_reason:=case when coalesce((select stage_gates_enabled from private.exam_prep_hybrid_s4_config_v1 where singleton),false) then ''Stage 4 Timed Consolidation active. Stage 5 requires governed skills and correction evidence; Paper practice is optional.'' else ''Stage 4 Timed Consolidation active. Stage 5 requires two compatible strict full papers, stable timing/unattempted evidence and resolved corrective work.'' end;';
+ IF position(v_old IN v_body)=0 THEN RAISE EXCEPTION 'S4 stage4 reason source guard mismatch'; END IF;
  v_body:=replace(v_body,v_old,v_new);
- v_old:='Stage 6 requires the component-specific App Readiness evidence gate; no date or weighted average can promote it.';
- v_new:='Stage 6 operational calibration requires confirmed all-skill L3 and closed corrections; Paper grades remain unverified.';
+
+ v_old:='new.stage_hold_reason:=''Stage 5 Exam Readiness active. Stage 6 requires the component-specific App Readiness evidence gate; no date or weighted average can promote it.'';';
+ v_new:='new.stage_hold_reason:=case when coalesce((select stage_gates_enabled from private.exam_prep_hybrid_s4_config_v1 where singleton),false) then ''Stage 5 active. Stage 6 operational access requires objectively verified L3 for all skills and closed corrections; exam method marks remain unknown.'' else ''Stage 5 Exam Readiness active. Stage 6 requires the component-specific App Readiness evidence gate; no date or weighted average can promote it.'' end;';
+ IF position(v_old IN v_body)=0 THEN RAISE EXCEPTION 'S4 stage5 reason source guard mismatch'; END IF;
  v_body:=replace(v_body,v_old,v_new);
 
  EXECUTE v_body;
