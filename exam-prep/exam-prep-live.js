@@ -778,6 +778,13 @@
     const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
     const readiness = stage >= 5 ? `<button class="ep-component-link" type="button" data-ep-component-link="readiness"><span><strong>${esc(home.readiness)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
+    // Optional Math original challenges; no dependency on current Stage or marks.
+    const extraHardTitle = state.language === "ru" ? "Задачи повышенной сложности"
+      : state.language === "uz" ? "Qo‘shimcha murakkab masalalar" : "Extra Hard";
+    const extraHardHint = state.language === "ru" ? "Необязательно, без оценки"
+      : state.language === "uz" ? "Ixtiyoriy, bahosiz" : "Optional, not graded";
+    const extraHard = internal.extraHardView?.open
+      ? `<button class="ep-component-link" type="button" data-ep-component-link="extra-hard"><span><strong>${esc(extraHardTitle)}</strong><small>${esc(extraHardHint)}</small></span><span aria-hidden="true">›</span></button>` : "";
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
       <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
         <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><button class="ep-route-back" type="button" data-ep-component-back aria-label="${esc(c.overview)}">←</button><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
@@ -791,7 +798,7 @@
           <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
         ${lastResultCard}
         <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
-        <section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}</section></section>`, {compact:true});
+        <section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}${extraHard}</section></section>`, {compact:true});
     state.notice = null;
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
@@ -802,6 +809,8 @@
     root.querySelector('[data-ep-component-link="timed"]')?.addEventListener("click", () => openTimed(component));
     root.querySelector('[data-ep-component-link="readiness"]')?.addEventListener("click", () => openReadiness(component));
     root.querySelector('[data-ep-component-link="materials"]')?.addEventListener("click", () => internal.materialsView?.openMaterials?.(component));
+    root.querySelector('[data-ep-component-link="extra-hard"]')?.addEventListener("click", () =>
+      internal.extraHardView?.open?.(component,state.language,() => openComponentHome(component)));
   }
 
   async function openComponentHome(component) {
