@@ -54,13 +54,21 @@ CREATE TABLE IF NOT EXISTS private.exam_prep_hybrid_s4_checkpoint_keys_v1 (
   written_task_id bigint NOT NULL REFERENCES private.exam_prep_written_tasks(id) ON DELETE RESTRICT,
   source_task_version text NOT NULL,
   expected_numeric numeric,
+  -- Accepted alternate numbers are academically approved individually,
+  -- e.g. an exact fraction and an explicitly requested rounded decimal.
+  -- No broad +/- tolerance that could accept mathematically wrong answers.
+  accepted_numeric_alternates numeric[] NOT NULL DEFAULT '{}'::numeric[]
+    CHECK(cardinality(accepted_numeric_alternates) <= 12),
   absolute_tolerance numeric NOT NULL DEFAULT 0 CHECK(absolute_tolerance >= 0 AND absolute_tolerance <= 1),
   review_state text NOT NULL DEFAULT 'candidate' CHECK(review_state IN('candidate','approved','disabled')),
   academic_review_ref text,
   approved_at timestamptz,
   PRIMARY KEY(assessment_id,item_order,part_label),
   CHECK(review_state<>'approved' OR
-    (expected_numeric IS NOT NULL AND academic_review_ref IS NOT NULL AND
+    (expected_numeric IS NOT NULL AND abs(expected_numeric)<=1000000000000
+      AND absolute_tolerance=0
+      AND array_position(accepted_numeric_alternates,NULL) IS NULL
+      AND academic_review_ref IS NOT NULL AND
       length(trim(academic_review_ref))>=8 AND approved_at IS NOT NULL))
 );
 ALTER TABLE private.exam_prep_hybrid_s4_checkpoint_keys_v1 ENABLE ROW LEVEL SECURITY;
@@ -262,6 +270,11 @@ BEGIN
  LEFT JOIN private.exam_prep_hybrid_s4_checks_v1 ck
    ON ck.session_id=v_s.id AND ck.assessment_id=k.assessment_id
      AND ck.item_order=k.item_order AND ck.part_label=k.part_label
+ JOIN private.exam_prep_assessment_items ai
+   ON ai.assessment_id=k.assessment_id AND ai.item_order=k.item_order
+    AND ai.written_task_id=k.written_task_id
+ JOIN private.exam_prep_written_tasks w
+   ON w.id=k.written_task_id AND w.task_version=k.source_task_version
  WHERE k.assessment_id=v_s.assessment_id AND k.review_state='approved'
   AND v_s.closed_at IS NOT NULL;
  RETURN jsonb_build_object('contract','hybrid_s4_paper_v1',
@@ -342,14 +355,23 @@ BEGIN
  END IF;
  IF v_s.closed_at IS NULL OR v_s.review_revealed_at IS NOT NULL THEN
   RAISE EXCEPTION 'exam_prep_s4_check_only_after_end_before_reveal'; END IF;
- SELECT * INTO v_k FROM private.exam_prep_hybrid_s4_checkpoint_keys_v1
- WHERE assessment_id=v_s.assessment_id AND item_order=p_item_order
-   AND part_label=p_part_label AND review_state='approved'
-   AND expected_numeric IS NOT NULL AND approved_at IS NOT NULL;
+ SELECT k.* INTO v_k FROM private.exam_prep_hybrid_s4_checkpoint_keys_v1 k
+ JOIN private.exam_prep_assessment_items ai
+   ON ai.assessment_id=k.assessment_id AND ai.item_order=k.item_order
+    AND ai.written_task_id=k.written_task_id
+ JOIN private.exam_prep_written_tasks w
+   ON w.id=k.written_task_id AND w.task_version=k.source_task_version
+ WHERE k.assessment_id=v_s.assessment_id AND k.item_order=p_item_order
+   AND k.part_label=p_part_label AND k.review_state='approved'
+   AND k.absolute_tolerance=0
+   AND k.expected_numeric IS NOT NULL AND k.approved_at IS NOT NULL;
  IF v_k.assessment_id IS NULL THEN RAISE EXCEPTION 'exam_prep_s4_checkpoint_not_approved'; END IF;
  v_value:=private.exam_prep_hybrid_s4_parse_numeric_v1(p_answer);
  IF v_value IS NULL THEN RAISE EXCEPTION 'exam_prep_s4_unrecognized_numeric_format'; END IF;
- v_matched:=abs(v_value-v_k.expected_numeric)<=v_k.absolute_tolerance;
+ -- Exact rational/decimal equivalence; alternates must be independently
+ -- reviewed. Never accept an unreviewed fuzzy tolerance.
+ v_matched:=(v_value=v_k.expected_numeric
+   OR v_value=ANY(v_k.accepted_numeric_alternates));
  INSERT INTO private.exam_prep_hybrid_s4_checks_v1(
   session_id,user_id,assessment_id,item_order,part_label,input_text,matched,client_request_key)
  VALUES(v_s.id,v_uid,v_s.assessment_id,p_item_order,p_part_label,trim(p_answer),v_matched,p_idempotency_key);
