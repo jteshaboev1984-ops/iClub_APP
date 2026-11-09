@@ -14,6 +14,7 @@ on:
       - feature/math-p1p5-extra-hard-full42-internal-qa-20261107
       - feature/math-p1p5-extra-hard-v3-gated-release-20261107
       - feature/math-p1p5-v4-private-stage-readiness-20261109
+      - feature/math-p1p5-v4-extra-hard-optional-criteria-next-20261109
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'
