@@ -1364,6 +1364,29 @@
       if (!canMount() || token !== state.mountToken) return;
       state.weeklyReports = reportResult?.ok ? reportResult.data : null;
     }
+    // The entry-check card MUST continue starting Stage 0. Pilot hybrid
+    // rehearsal is a separate optional path; never repurpose diagnosis.
+    let hybridS4Dashboard = "";
+    if (window.iClubExamPrepHybridPaperS4Enabled === true &&
+        typeof internal.api?.hybridS4Catalog === "function") {
+      const [hp1,hp5] = await Promise.all([
+        internal.api.hybridS4Catalog("P1").catch(() => null),
+        internal.api.hybridS4Catalog("P5").catch(() => null)
+      ]);
+      if (!canMount() || token !== state.mountToken) return;
+      const ready = [["P1",hp1],["P5",hp5]]
+        .filter(([,v]) => v?.ok && v.data?.enabled === true &&
+          Array.isArray(v.data.papers) && v.data.papers.length > 0);
+      if (ready.length) {
+        const h=hybridS4Copy();
+        hybridS4Dashboard = '<section class="ep-live-card" data-ep-hybrid-s4-dashboard>'+
+          '<div class="ep-live-head"><strong>'+esc(h.title)+'</strong></div>'+
+          '<p class="ep-live-meta">'+esc(h.paperNotice)+'</p>'+
+          '<div class="ep-live-actions">'+ready.map(([code])=>
+            '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-dashboard-open="'+
+              code+'">'+code+' · '+esc(h.start)+'</button>').join("")+'</div></section>';
+      }
+    }
     const c = copy();
     const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
     const profileBits = [
@@ -1374,11 +1397,13 @@
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${examDatesPanel()}${weeklyS3Panel()}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${examDatesPanel()}${weeklyS3Panel()}${hybridS4Dashboard}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
     state.notice = null;
     bindStudySchedule();
     bindExamDatePanel();
     bindWeeklyS3();
+    root.querySelectorAll("[data-ep-hybrid-s4-dashboard-open]").forEach(button =>
+      button.addEventListener("click", () => void openTimed(button.dataset.epHybridS4DashboardOpen)));
     root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
       const component = card.dataset.epLiveOpenComponent;
       // The dashboard explicitly says "Start/Continue entry check".
