@@ -41,7 +41,7 @@ BEGIN
  IF v_p.user_id IS NULL OR v_p.program_version_id IS NULL THEN
   RAISE EXCEPTION 'exam_prep_profile_required';
  END IF;
- v_begin:=v_p.created_at+make_interval(secs=greatest(0,floor(extract(epoch FROM (now()-v_p.created_at))/604800)::int)*604800);
+ v_begin:=v_p.created_at+make_interval(secs => greatest(0,floor(extract(epoch FROM (now()-v_p.created_at))/604800)::int)*604800);
  SELECT * INTO v_choice FROM private.exam_prep_weekly_choices_s3_v1 c
  WHERE c.user_id=v_uid AND c.program_version_id=v_p.program_version_id
   AND c.week_started_at=v_begin
@@ -133,7 +133,7 @@ BEGIN
  IF p_expected_schedule_revision IS DISTINCT FROM v_p.study_schedule_revision THEN
   RAISE EXCEPTION 'exam_prep_s3_stale_schedule' USING ERRCODE='PT409'; END IF;
  IF now()<v_p.created_at THEN RAISE EXCEPTION 'exam_prep_s3_invalid_profile_clock'; END IF;
- v_week:=v_p.created_at+make_interval(secs=floor(extract(epoch FROM (now()-v_p.created_at))/604800)::int*604800);
+ v_week:=v_p.created_at+make_interval(secs => floor(extract(epoch FROM (now()-v_p.created_at))/604800)::int*604800);
  v_budget:=COALESCE(v_p.study_minutes_per_day*v_p.study_days_per_week,
     round(v_p.mathematics_hours_budget*60)::int);
  IF v_budget IS NULL OR v_budget<0 THEN RAISE EXCEPTION 'exam_prep_s3_missing_time_choice'; END IF;
