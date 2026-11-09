@@ -11,6 +11,8 @@
     profile: null,
     personalHorizon: null,
     studySchedule: null,
+    weeklyChoice: null,
+    weeklyReports: null,
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
     session: null,
@@ -1173,6 +1175,143 @@
   }
 
 
+
+  function weeklyS3Copy() {
+    const words = {
+      ru: {
+        title:"Недельный план", intro:"Выберите подходящий вариант. Это ваш план, а не ограничение занятий.",
+        keep:"Оставить текущий режим", split:"Перераспределить время между P1 и P5",
+        change:"Выбрать другое время занятий", p1:"Минут в неделю для P1",
+        p5:"Минут в неделю для P5", daily:"Минут в учебный день", days:"Дней в неделю",
+        total:"Ваш недельный ориентир", save:"Сохранить выбор",
+        saved:"Выбор сохранён. Результаты и выполненные задания не изменились.",
+        error:"Не удалось сохранить. Обновите данные и повторите.",
+        invalid:"Сумма минут P1 и P5 должна точно соответствовать выбранному недельному времени.",
+        report:"Итоги занятий", empty:"Первый отчёт появится после семи дней с завершённой вводной диагностики.",
+        week:"7 дней", month:"Месяц", learning:"Завершено учебных занятий",
+        timed:"Завершено проверочных работ",
+        minutes:"Фактические минуты занятий не подсчитаны: одного открытия экрана недостаточно для их подтверждения."
+      },
+      uz: {
+        title:"Haftalik reja", intro:"O‘zingizga mos variantni tanlang. Bu o‘qishni cheklamaydi.",
+        keep:"Joriy rejani saqlash", split:"Vaqtni P1 va P5 o‘rtasida qayta taqsimlash",
+        change:"Yangi o‘qish vaqtini tanlash", p1:"P1 uchun haftalik daqiqa",
+        p5:"P5 uchun haftalik daqiqa", daily:"O‘qish kunidagi daqiqalar", days:"Haftadagi kunlar",
+        total:"Haftalik rejangiz", save:"Tanlovni saqlash",
+        saved:"Tanlov saqlandi. Avvalgi natijalar o‘zgarmadi.",
+        error:"Saqlab bo‘lmadi. Ma’lumotni yangilang va qayta urinib ko‘ring.",
+        invalid:"P1 va P5 daqiqalari yig‘indisi haftalik reja bilan teng bo‘lishi kerak.",
+        report:"O‘qish yakunlari", empty:"Birinchi hisobot boshlang‘ich diagnostikadan keyingi yetti kun yakunida chiqadi.",
+        week:"7 kun", month:"Oy", learning:"Yakunlangan o‘quv mashg‘ulotlari",
+        timed:"Yakunlangan sinov ishlari",
+        minutes:"Haqiqiy o‘qish daqiqalari hisoblanmadi: sahifani ochish yetarli dalil emas."
+      },
+      en: {
+        title:"Weekly plan", intro:"Choose what works for you. This plan never limits additional studying.",
+        keep:"Keep my current schedule", split:"Redistribute time between P1 and P5",
+        change:"Choose a different study schedule", p1:"P1 minutes per week",
+        p5:"P5 minutes per week", daily:"Minutes per study day", days:"Study days per week",
+        total:"My weekly target", save:"Save my choice",
+        saved:"Choice saved. Earlier learning results remain unchanged.",
+        error:"Could not save. Refresh your schedule and try again.",
+        invalid:"P1 and P5 minutes must add up to your chosen weekly time.",
+        report:"Study summaries", empty:"Your first summary appears after seven days following a completed entry diagnostic.",
+        week:"7 days", month:"Month", learning:"Completed learning sessions",
+        timed:"Completed timed sessions",
+        minutes:"Actual study minutes are not measured: opening the app is not evidence of time studied."
+      }
+    };
+    return words[state.language] || words.ru;
+  }
+
+  function weeklyS3Panel() {
+    const d = state.weeklyChoice;
+    if (!d || d.contract_version !== "voluntary_weekly_choice_s3_v1") return "";
+    const c = weeklyS3Copy();
+    const budget = Number(d.chosen_math_minutes || 0);
+    const choice = ["keep","redistribute","change"].includes(d.choice_code) ? d.choice_code : "keep";
+    const checked = k => choice === k ? " checked" : "";
+    const savedP1 = d.p1_minutes == null ? "" : String(d.p1_minutes);
+    const savedP5 = d.p5_minutes == null ? "" : String(d.p5_minutes);
+    const reports = Array.isArray(state.weeklyReports?.reports) ? state.weeklyReports.reports : [];
+    const date = value => {
+      const parsed = new Date(value);
+      return Number.isFinite(parsed.getTime())
+        ? new Intl.DateTimeFormat(dateLocale(),{day:"numeric",month:"short",year:"numeric",timeZone:"Asia/Tashkent"}).format(parsed) : "";
+    };
+    const lines = reports.slice(0,4).map(report => {
+      const p1 = report.P1 || {}, p5 = report.P5 || {};
+      const cell = (label,row) => "<div class='ep-live-s3-report-cell'><strong>" + label +
+        "</strong><span>" + esc(c.learning) + ": " + Number(row.finalized_learning_sessions || 0) +
+        "</span><span>" + esc(c.timed) + ": " + Number(row.finalized_timed_sessions || 0) + "</span></div>";
+      return "<div class='ep-live-s3-report'><strong>" +
+        esc(report.period_kind === "week" ? c.week : c.month) + " · " +
+        esc(date(report.period_ended_at)) + "</strong><div class='ep-live-s3-report-grid'>" +
+        cell("P1",p1) + cell("P5",p5) + "</div></div>";
+    }).join("");
+    return "<section class='ep-live-s3' data-ep-s3>" +
+      "<h3>" + esc(c.title) + "</h3><p>" + esc(c.intro) + "</p>" +
+      "<div class='ep-live-s3-budget'>" + esc(c.total) + ": <strong>" + budget + " min</strong></div>" +
+      "<div class='ep-live-s3-options'>" +
+      "<label><input type='radio' name='ep-s3-choice' value='keep'" + checked("keep") + "> " + esc(c.keep) + "</label>" +
+      "<label><input type='radio' name='ep-s3-choice' value='redistribute'" + checked("redistribute") + "> " + esc(c.split) + "</label>" +
+      "<label><input type='radio' name='ep-s3-choice' value='change'" + checked("change") + "> " + esc(c.change) + "</label></div>" +
+      "<div class='ep-live-s3-split' data-ep-s3-split hidden>" +
+        "<label>" + esc(c.p1) + "<input type='number' data-ep-s3-p1 min='0' step='5' value='" + esc(savedP1) + "'></label>" +
+        "<label>" + esc(c.p5) + "<input type='number' data-ep-s3-p5 min='0' step='5' value='" + esc(savedP5) + "'></label>" +
+      "</div><div class='ep-live-s3-split' data-ep-s3-newtime hidden>" +
+        "<label>" + esc(c.daily) + "<input type='number' data-ep-s3-daily min='15' max='240' step='5' value='" + Number(d.study_minutes_per_day || 30) + "'></label>" +
+        "<label>" + esc(c.days) + "<input type='number' data-ep-s3-days min='1' max='7' value='" + Number(d.study_days_per_week || 5) + "'></label>" +
+      "</div><button class='ep-live-btn secondary' data-ep-s3-save type='button'>" + esc(c.save) + "</button>" +
+      "<div class='ep-live-meta' data-ep-s3-feedback role='status' aria-live='polite'></div>" +
+      "<h3 class='ep-live-s3-report-title'>" + esc(c.report) + "</h3>" +
+      (lines || "<p class='ep-live-meta'>" + esc(c.empty) + "</p>") +
+      "<p class='ep-live-meta'>" + esc(c.minutes) + "</p></section>";
+  }
+
+  function bindWeeklyS3() {
+    const root = rootEl(), panel = root?.querySelector("[data-ep-s3]");
+    if (!panel) return;
+    const c = weeklyS3Copy(), button = panel.querySelector("[data-ep-s3-save]");
+    const selected = () => panel.querySelector("input[name=ep-s3-choice]:checked")?.value || "keep";
+    const update = () => {
+      const choice = selected();
+      panel.querySelector("[data-ep-s3-split]").hidden = choice === "keep";
+      panel.querySelector("[data-ep-s3-newtime]").hidden = choice !== "change";
+    };
+    panel.querySelectorAll("input").forEach(el => el.addEventListener("change",update));
+    update();
+    button?.addEventListener("click",async () => {
+      if (state.busy) return;
+      const feedback = panel.querySelector("[data-ep-s3-feedback]");
+      const show = text => {if(feedback) feedback.textContent = text;};
+      const choice = selected(), row = state.weeklyChoice || {};
+      const value = selector => Number(panel.querySelector(selector)?.value);
+      const p1 = choice === "keep" ? null : value("[data-ep-s3-p1]");
+      const p5 = choice === "keep" ? null : value("[data-ep-s3-p5]");
+      const day = choice === "change" ? value("[data-ep-s3-daily]") : null;
+      const days = choice === "change" ? value("[data-ep-s3-days]") : null;
+      const sum = choice === "change" ? day * days : Number(row.chosen_math_minutes);
+      if (choice !== "keep" && (!Number.isInteger(p1) || !Number.isInteger(p5) ||
+        p1 < 0 || p5 < 0 || p1 + p5 !== sum || p1 % 5 !== 0 || p5 % 5 !== 0)) {
+        show(c.invalid); return;
+      }
+      if (choice === "change" && (!Number.isInteger(day) || day<15 || day>240 ||
+        day%5!==0 || !Number.isInteger(days) || days<1 || days>7 ||
+        sum>Number(row.total_available_minutes))) { show(c.invalid); return; }
+      state.busy=true; button.disabled=true; show("");
+      const args = {choice,p1Minutes:p1,p5Minutes:p5,minutesPerDay:day,
+        daysPerWeek:days,scheduleRevision:row.schedule_revision};
+      const saved = await internal.api.saveWeeklyChoiceS3(args,key("ep-s3-choice"));
+      state.busy=false; button.disabled=false;
+      if (!saved?.ok) { show(c.error); return; }
+      const profile = await internal.api.examProfile();
+      if(profile?.ok) state.profile=profile.data;
+      state.notice=c.saved;
+      await renderDashboard();
+    });
+  }
+
   async function renderDashboard() {
     clearTimer();
     const root = rootEl();
@@ -1201,12 +1340,20 @@
     if (!canMount() || token !== state.mountToken) return;
     if (!s5?.ok) { renderError(); return; }
     state.progress.P1 = p1.data; state.progress.P5 = p5.data; state.componentState.P1 = s1.data; state.componentState.P5 = s5.data;
-    const [horizon,schedule] = await Promise.all([
-      internal.api.personalHorizon(),internal.api.studySchedule()
+    const [horizon,schedule,weekly] = await Promise.all([
+      internal.api.personalHorizon(),internal.api.studySchedule(),internal.api.weeklyChoiceS3()
     ]);
     if (!canMount() || token !== state.mountToken) return;
     state.personalHorizon = horizon?.ok ? horizon.data : null;
     state.studySchedule = schedule?.ok ? schedule.data : null;
+    state.weeklyChoice = weekly?.ok ? weekly.data : null;
+    state.weeklyReports = null;
+    if (state.weeklyChoice) {
+      await internal.api.claimPeriodReportsS3();
+      const reportResult = await internal.api.periodReportsS3();
+      if (!canMount() || token !== state.mountToken) return;
+      state.weeklyReports = reportResult?.ok ? reportResult.data : null;
+    }
     const c = copy();
     const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
     const profileBits = [
@@ -1217,10 +1364,11 @@
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${examDatesPanel()}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${examDatesPanel()}${weeklyS3Panel()}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
     state.notice = null;
     bindStudySchedule();
     bindExamDatePanel();
+    bindWeeklyS3();
     root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
       const component = card.dataset.epLiveOpenComponent;
       // The dashboard explicitly says "Start/Continue entry check".
@@ -2095,7 +2243,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
