@@ -1,5 +1,7 @@
 /* Mathematics P1/P5 — optional original Extra Hard; no grade or mastery.
- * Private server authorizes list/start/submission; answers unlock after commit.
+ * Private server authorizes list/start/submission. Learner-controlled Next is
+ * noncredit navigation; it never calls submit or invents written marks.
+ * Optional criteria are requirements, never a solution/grade.
  * Never stores a student solution in localStorage or invents a scored result.
  */
 (() => {
@@ -11,8 +13,15 @@
       title:"Extra Hard",back:"Back to my learning",loading:"Opening extra challenges…",
       preparing:"These challenges are being prepared. You can continue your regular learning.",
       intro:"Optional challenge. Your method is not graded, and no exam or mastery marks are awarded.",
-      start:"Try challenge",your:"Your written solution",submit:"Submit and compare",
-      textRequired:"Write your solution before submitting.",
+      start:"Try challenge",your:"Your written solution",submit:"Save and compare (optional)",
+      textRequired:"Enter a solution only if you choose to save and compare it.",
+      paper:"Solve independently on paper. You can continue without typing an answer.",
+      criteria:"What to check in your solution (optional)",criteriaNote:"These are checking points, not an answer key or a score.",
+      criteriaParts:"Address each requested part and the additional challenge, where present.",
+      criteriaLogic:"Show the reasoning, calculations, and important conditions or restrictions.",
+      criteriaResult:"Check requested exact values, units and rounding before moving on.",
+      optionalInput:"Optional: type and save your solution for comparison",
+      next:"Next task",nextNote:"Next does not submit an answer or award a mark.",
       saved:"Your solution was saved. Compare it with the worked example. It is not a grade.",
       model:"Worked example",review:"My saved solution",returnList:"Other challenges",
       error:"The request was not confirmed. Your text is still on this screen; please retry.",
@@ -22,8 +31,15 @@
       title:"Задачи повышенной сложности",back:"К моему обучению",loading:"Открываем задания…",
       preparing:"Задания ещё готовятся. Основное обучение доступно без ограничений.",
       intro:"Необязательное задание. Метод решения не оценивается, баллы экзамена и мастерства не начисляются.",
-      start:"Попробовать",your:"Ваше письменное решение",submit:"Сохранить и сверить",
-      textRequired:"Сначала запишите решение.",
+      start:"Попробовать",your:"Ваше письменное решение",submit:"Сохранить и сверить (необязательно)",
+      textRequired:"Введите решение, только если хотите его сохранить и сравнить.",
+      paper:"Решайте самостоятельно на бумаге. Для перехода дальше вводить ответ не нужно.",
+      criteria:"Что проверить в решении (необязательно)",criteriaNote:"Это ориентиры для проверки, а не готовый ответ или оценка.",
+      criteriaParts:"Решите все части задания, включая дополнительную, если она есть.",
+      criteriaLogic:"Покажите рассуждения, вычисления и существенные условия или ограничения.",
+      criteriaResult:"Проверьте точность ответа, единицы измерения и требуемое округление.",
+      optionalInput:"Необязательно: ввести и сохранить решение для сравнения",
+      next:"Следующая задача",nextNote:"Переход не отправляет ответ и не начисляет баллы.",
       saved:"Решение сохранено. Сверьтесь с примером — это не оценка.",
       model:"Пример решения",review:"Ваше сохранённое решение",returnList:"Другие задания",
       error:"Сервер не подтвердил действие. Ваш текст остался на экране. Повторите отправку.",
@@ -33,8 +49,15 @@
       title:"Qo‘shimcha murakkab masalalar",back:"O‘qishga qaytish",loading:"Masalalar ochilmoqda…",
       preparing:"Masalalar tayyorlanmoqda. Asosiy o‘qishni odatdagidek davom ettirishingiz mumkin.",
       intro:"Ixtiyoriy masala. Yozma yechim baholanmaydi, imtihon yoki o‘zlashtirish bali berilmaydi.",
-      start:"Masalani yechish",your:"Yozma yechimingiz",submit:"Saqlash va solishtirish",
-      textRequired:"Avval yechimingizni yozing.",
+      start:"Masalani yechish",your:"Yozma yechimingiz",submit:"Saqlash va solishtirish (ixtiyoriy)",
+      textRequired:"Yechimni faqat saqlab solishtirmoqchi bo‘lsangiz kiriting.",
+      paper:"Masalani mustaqil ravishda qog‘ozda yeching. Davom etish uchun javob kiritish shart emas.",
+      criteria:"Yechimda tekshiriladigan jihatlar (ixtiyoriy)",criteriaNote:"Bular tayyor javob ham, baho ham emas.",
+      criteriaParts:"Barcha qismlarni, mavjud bo‘lsa, qo‘shimcha masalani ham bajaring.",
+      criteriaLogic:"Mulohazalar, hisoblashlar va muhim shart hamda cheklovlarni ko‘rsating.",
+      criteriaResult:"Aniq natijalar, o‘lchov birliklari va so‘ralgan yaxlitlashni tekshiring.",
+      optionalInput:"Ixtiyoriy: solishtirish uchun yechimni yozib saqlash",
+      next:"Keyingi masala",nextNote:"O‘tish javobni yubormaydi va ball qo‘shmaydi.",
       saved:"Yechim saqlandi. Uni namuna bilan solishtiring. Bu baho emas.",
       model:"Yechim namunasi",review:"Saqlangan yechimingiz",returnList:"Boshqa masalalar",
       error:"Server tasdiqlamadi. Matningiz shu ekranda saqlandi; qayta yuboring.",
@@ -162,29 +185,64 @@
       if(!r?.ok || !r.data?.attempt_id || r.data.component_code!==context.component
          || r.data.noncredit!==true) {error();return;}
       context.attempt=r.data;
+      context.currentTaskKey=taskKey;
       renderTask();
     }catch(_){if(context?.sequence===seq){context.busy=false;error();}}
+  }
+  function criteriaMarkup(c) {
+    // Deliberately answer-free: the existing authenticated task prompt already
+    // tells the learner what to solve; reading these requirements is read-only.
+    return '<details class="ep-extra-criteria" data-ep-extra-hard-criteria>'
+      +'<summary>'+esc(c.criteria)+'</summary>'
+      +'<div class="ep-extra-criteria-body"><p>'+esc(c.criteriaNote)+'</p>'
+      +'<ul><li>'+esc(c.criteriaParts)+'</li><li>'+esc(c.criteriaLogic)
+      +'</li><li>'+esc(c.criteriaResult)+'</li></ul></div></details>';
+  }
+  function nextTask() {
+    if(!context || context.busy || !context.attempt) return;
+    // Preserve an optional unsubmitted draft for this open browser session only.
+    // No localStorage, server-side answer write, score, or completion claim.
+    const field=root()?.querySelector('[name="ep_extra_hard_answer"]');
+    if(field && context.currentTaskKey) context.drafts.set(context.currentTaskKey,field.value);
+    const pos=context.items.findIndex(t=>t.task_key===context.currentTaskKey);
+    const next=pos>=0?context.items[pos+1]:null;
+    if(next) openTask(next.task_key);
+    else loadCatalog();
+  }
+  function wireNext() {
+    root()?.querySelector('[data-ep-extra-hard-next]')?.addEventListener("click",nextTask);
   }
   function renderTask() {
     if(!context?.attempt) return;
     const a=context.attempt,c=copy[context.language];
+    const rubric=criteriaMarkup(c);
     if(a.status==="submitted"){
       const submitted='<div class="ep-live-notice" role="status">'+esc(c.saved)+'</div>'
        +'<div class="ep-live-meta">'+esc(c.review)+'</div><div class="ep-live-answer">'+esc(a.response_text)+'</div>'
        +'<div class="ep-live-meta">'+esc(c.model)+'</div><div class="ep-live-answer">'+esc(a.solution || "")+'</div>'
        +'<div class="ep-live-notice">'+esc(c.noScore)+'</div>'
-       +'<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-extra-hard-other>'+esc(c.returnList)+'</button></div>';
-      frame('<div class="ep-live-qtext">'+esc(a.prompt)+'</div>'+submitted);
+       +'<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-extra-hard-next>'+esc(c.next)+'</button>'
+       +'<button class="ep-live-btn secondary" type="button" data-ep-extra-hard-other>'+esc(c.returnList)+'</button></div>';
+      frame('<div class="ep-live-qtext">'+esc(a.prompt)+'</div>'+rubric+submitted);
       root()?.querySelector('[data-ep-extra-hard-other]')?.addEventListener("click",loadCatalog);
+      wireNext();
       return;
     }
     frame('<div class="ep-live-qtext">'+esc(a.prompt)+'</div>'
+      +'<div class="ep-live-meta">'+esc(c.paper)+'</div>'
+      +rubric
+      +'<details class="ep-extra-typed" data-ep-extra-hard-optional-input>'
+      +'<summary>'+esc(c.optionalInput)+'</summary>'
       +'<label class="ep-live-field"><span>'+esc(c.your)+'</span>'
       +'<textarea name="ep_extra_hard_answer" rows="7" maxlength="10000" placeholder="'+esc(c.your)+'"></textarea></label>'
-      +'<div class="ep-live-notice">'+esc(c.noScore)+'</div>'
       +'<div class="ep-live-notice" role="status" data-ep-extra-hard-message hidden></div>'
-      +'<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-extra-hard-submit>'+esc(c.submit)+'</button></div>');
+      +'<div class="ep-live-actions"><button class="ep-live-btn secondary" type="button" data-ep-extra-hard-submit>'+esc(c.submit)+'</button></div></details>'
+      +'<div class="ep-live-meta">'+esc(c.nextNote)+'</div>'
+      +'<div class="ep-live-actions"><button class="ep-live-btn" type="button" data-ep-extra-hard-next>'+esc(c.next)+'</button></div>');
+    const field=root()?.querySelector('[name="ep_extra_hard_answer"]');
+    if(field)field.value=context.drafts.get(context.currentTaskKey)||"";
     root()?.querySelector('[data-ep-extra-hard-submit]')?.addEventListener("click",submit);
+    wireNext();
   }
   async function submit() {
     if(!context?.attempt || context.busy || context.attempt.status==="submitted")return;
@@ -207,6 +265,7 @@
       if(!res?.ok || res.data?.saved!==true || res.data?.noncredit!==true
          || !res.data?.solution){if(button)button.disabled=false;if(message){message.hidden=false;message.textContent=c.error;}return;}
       context.attempt={...context.attempt,...res.data,status:"submitted"};
+      context.drafts.delete(context.currentTaskKey);
       renderTask();
     }catch(_){
       if(context?.sequence!==seq)return;
@@ -218,7 +277,8 @@
   function open(component,language,onBack) {
     if(!["P1","P5"].includes(component) || typeof onBack!=="function"
        || typeof internal.api?.extraHardCatalog!=="function") return false;
-    context={component,language:pickLanguage(language),onBack,items:[],attempt:null,busy:false,sequence:(context?.sequence||0)+1};
+    context={component,language:pickLanguage(language),onBack,items:[],attempt:null,
+      currentTaskKey:null,drafts:new Map(),busy:false,sequence:(context?.sequence||0)+1};
     loadCatalog();
     return true;
   }
