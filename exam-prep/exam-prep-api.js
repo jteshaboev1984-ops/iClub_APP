@@ -176,6 +176,27 @@
     });
   }
 
+  async function weeklyChoiceS3() {
+    return rpc("get_my_exam_prep_weekly_choice_s3_safe_v1");
+  }
+  async function saveWeeklyChoiceS3(input, idempotencyKey) {
+    return rpc("save_my_exam_prep_weekly_choice_s3_safe_v1", {
+      p_choice_code: String(input.choice || ""),
+      p_p1_minutes: input.p1Minutes == null ? null : Number(input.p1Minutes),
+      p_p5_minutes: input.p5Minutes == null ? null : Number(input.p5Minutes),
+      p_minutes_per_day: input.minutesPerDay == null ? null : Number(input.minutesPerDay),
+      p_days_per_week: input.daysPerWeek == null ? null : Number(input.daysPerWeek),
+      p_expected_schedule_revision: Number(input.scheduleRevision),
+      p_idempotency_key: String(idempotencyKey)
+    });
+  }
+  async function claimPeriodReportsS3() {
+    return rpc("claim_exam_prep_periodic_study_report_safe_v1");
+  }
+  async function periodReportsS3() {
+    return rpc("get_exam_prep_periodic_study_reports_safe_v1");
+  }
+
   async function confirmExamDate(componentCode, scheduledStartAt) {
     return rpc("save_my_exam_prep_exam_appointment_v2", {
       p_component_code: componentArg(componentCode),
@@ -389,6 +410,7 @@
     capabilities,
     examProfile, saveExamProfile, examMapStatus,
     personalHorizon, studySchedule, saveStudySchedule, confirmExamDate,
+    weeklyChoiceS3, saveWeeklyChoiceS3, claimPeriodReportsS3, periodReportsS3,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
@@ -413,7 +435,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-extrahard-v43-d03-noselfmark-20261109-s2-calendar-workload");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-extrahard-v43-d03-noselfmark-20261109-s3-weekly-report-choice");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");
