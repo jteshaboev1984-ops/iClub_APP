@@ -16,6 +16,7 @@ on:
       - feature/math-p1p5-v4-private-stage-readiness-20261109
       - feature/math-p1p5-v4-extra-hard-optional-criteria-next-20261109
       - feature/math-p1p5-v41-source-fidelity-editorial-readiness-20261109
+      - feature/math-p1p5-v41-source-locked-release-gate-20261109
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_p4_0*_disposable.sql'
@@ -35,6 +36,7 @@ on:
       - 'scripts/ops/p1p5-extra-hard-private-full42-stage-v4.cjs'
       - 'scripts/p1p5-extra-hard-full42-stage-v4-isolated-test.cjs'
       - 'scripts/p1p5-v41-source-pin-regression.cjs'
+      - 'scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs'
       - 'docs/math-p1p5-v41-editorial-source-fidelity-checkpoint-20261109.md'
       - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
       - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
@@ -315,6 +317,22 @@ jobs:
           # untouched: the source-fidelity check must refuse publication.
           node scripts/ops/p1p5-extra-hard-v3-release-gate.cjs dry-run-tampered-isolated | tee /tmp/extra-hard-full42-stale-hash-negative.log
           grep -Fq 'EXTRA HARD FULL42 DB CONTENT TAMPER DENIED:' /tmp/extra-hard-full42-stale-hash-negative.log
+          # P4-14: V4.1 is a DIFFERENT source from historical V3; the staged
+          # live rows remain draft/pending. Exercise ONLY synthetic 42 records.
+          node --check scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs
+          if node scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs publish; then
+            echo 'UNSAFE: V4.1 release accepted without separate owner GO' >&2
+            exit 1
+          fi
+          node scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs dry-run-isolated |
+            tee /tmp/extra-hard-v41-release-rollback.log
+          grep -Fq 'EXTRA HARD FULL42 PUBLIC RELEASE GATE ROLLBACK PASS:' /tmp/extra-hard-v41-release-rollback.log
+          node scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs dry-run-tampered-isolated |
+            tee /tmp/extra-hard-v41-content-tamper.log
+          grep -Fq 'EXTRA HARD FULL42 DB CONTENT TAMPER DENIED:' /tmp/extra-hard-v41-content-tamper.log
+          node scripts/ops/p1p5-extra-hard-v41-reviewed-release-gate.cjs dry-run-partial-qa-isolated |
+            tee /tmp/extra-hard-v41-partial-qa.log
+          grep -Fq 'EXTRA HARD V4.1 PARTIAL QA DENIED:' /tmp/extra-hard-v41-partial-qa.log
       - name: Assert correction, retry boundary, delayed retest and timed stage deny over REAL HTTP
         run: |
           set -euo pipefail
