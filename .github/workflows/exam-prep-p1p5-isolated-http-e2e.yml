@@ -8,6 +8,8 @@ on:
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
+      - 'scripts/p1p5-s3-signed-virtual-periods.cjs'
+      - 'supabase/tests/p1p5_s3_virtual_clock_periods.sql'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
@@ -523,4 +525,14 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
           node scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+      - name: S3 real completed period boundaries using disposable synthetic clock only
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -v candidate_sha="$CANDIDATE_SHA" \
+            -f supabase/tests/p1p5_s3_virtual_clock_periods.sql
+          node --check scripts/p1p5-s3-signed-virtual-periods.cjs
+          node scripts/p1p5-s3-signed-virtual-periods.cjs
 
