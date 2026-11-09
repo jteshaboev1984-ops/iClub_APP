@@ -163,6 +163,7 @@ jobs:
           node --check exam-prep/exam-prep-api.js
           node --check exam-prep/exam-prep-live.js
           node --check scripts/p1p5-s4-signed-hybrid-owner-e2e.cjs
+          node --check scripts/p1p5-s4-twelve-source-checkpoints-pg17.cjs
           psql -v ON_ERROR_STOP=1 -At -c "SELECT
             (SELECT count(*) FROM private.exam_prep_hybrid_s4_config_v1 WHERE paper_enabled=false AND stage_gates_enabled=false)=1
             AND to_regprocedure('private.exam_prep_stage3_hybrid_operational_v1(uuid,bigint,text)') IS NOT NULL
@@ -185,6 +186,13 @@ jobs:
           npx playwright install --with-deps chromium
           node --check scripts/p1p5-s4-chromium-hybrid-mobile.cjs
           node scripts/p1p5-s4-chromium-hybrid-mobile.cjs
+      - name: S4 12 real source-Paper final-answer cases signed JWT positive and negative (CI private keys only)
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          node scripts/p1p5-s4-twelve-source-checkpoints-pg17.cjs
       - name: Clean disposable PostgREST
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
