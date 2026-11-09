@@ -47,10 +47,10 @@ BEGIN
   )
   INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1(
     assessment_id,item_order,part_label,written_task_id,source_task_version,
-    review_state,academic_review_ref
+    source_content_md5,review_state,academic_review_ref
   )
   SELECT assessment_id,item_order,part_label,written_task_id,task_version,
-    'candidate','s4-source-fingerprint-audit-20261109'
+    source_md5,'candidate','s4-source-fingerprint-audit-20261109'
   FROM checked
   ON CONFLICT(assessment_id,item_order,part_label) DO NOTHING;
 
@@ -81,6 +81,7 @@ BEGIN
     AND md5(w.prompt_en || E'\n' || w.rubric_json::text)=e.source_md5
   WHERE k.written_task_id=e.written_task_id
     AND k.source_task_version=e.task_version
+    AND k.source_content_md5=e.source_md5
     AND k.review_state='candidate'
     AND k.expected_numeric IS NULL;
   IF v_verified<>12 THEN
