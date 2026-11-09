@@ -1,22 +1,8 @@
-SET LOCAL lock_timeout='3500ms';
-SET LOCAL statement_timeout='45000ms';
-
-DO $guard$
-DECLARE active_id bigint;
-BEGIN
- SELECT id INTO active_id FROM private.exam_prep_program_versions WHERE program_key='math_as_p1_p5' AND status='active';
- IF active_id IS NULL
- OR (SELECT count(*) FROM private.exam_prep_skill_contracts WHERE program_version_id=active_id AND component_code='P1')<>45
- OR (SELECT count(*) FROM private.exam_prep_skill_contracts WHERE program_version_id=active_id AND component_code='P5')<>36
- OR to_regclass('private.exam_prep_skill_workload_norms_v1') IS NOT NULL
- OR to_regclass('private.exam_prep_skill_action_time_norms_v1') IS NOT NULL
- OR to_regprocedure('public.get_exam_prep_personal_horizon_safe_v1()') IS NOT NULL
- OR has_function_privilege('authenticated','public.submit_exam_prep_timed_written_self_mark_safe_v1(uuid,integer,integer,text,text)','EXECUTE')
- OR (SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1 WHERE bank_version='math-extra-hard-2026-11-full-v4' AND lifecycle_status='published')<>42
- OR NOT EXISTS(SELECT 1 FROM private.exam_prep_extra_hard_release_v1 WHERE program_key='math_as_p1_p5' AND bank_version='math-extra-hard-2026-11-full-v4' AND enabled=true AND academic_approved=true)
- OR (SELECT md5(string_agg(content_sha256,'' ORDER BY task_key)) FROM private.exam_prep_extra_hard_tasks_v1 WHERE bank_version='math-extra-hard-2026-11-full-v4')<>'17dcea35cb50de348f62394d49be1f64'
- THEN RAISE EXCEPTION 'S2 live preconditions reject: D03, 81-skill registry, old source, or Extra Hard state drift'; END IF;
-END $guard$;
+-- Supabase applied migration version 20261109111900: calendar, schedules and 81 UNREVIEWED skill norm sources.
+-- Live release originally passed stricter bank/source guarded preflight and immutable postflight.
+-- This logically equivalent portable source is for fresh test stacks; NO write to existing student attempts.
+BEGIN;
+-- Original source 20261103023000_exam_prep_p1p5_personal_horizon_v1.sql
 -- Mathematics Exam Prep P1/P5: personal exam-date/diagnostic horizon.
 -- Additive only. Production application data, legacy appointments and stage rules untouched.
 -- A learner-entered school/centre-confirmed start time is NOT an official Cambridge timetable.
@@ -227,6 +213,7 @@ comment on function public.get_exam_prep_personal_horizon_safe_v1() is
 'Owner-only planning horizon from completed component diagnostic to learner-confirmed paper start; never grades, predicts A or invents workload norms.';
 
 
+-- Original source 20261103024000_exam_prep_p1p5_study_schedule_v1.sql
 -- Mathematics P1/P5 daily study cadence, additive and owner-only.
 -- Explicit learner choice. Do not silently change chosen total weekly hours.
 -- No Cambridge per-skill hours, grade forecast or plan generator in this migration.
@@ -366,6 +353,7 @@ comment on function public.save_exam_prep_study_schedule_safe_v1(integer,integer
 'Explicit owner-confirmed Math study cadence: minutes/day multiplied by days/week; never a forecast or implicit total-hours change.';
 
 
+-- Original source 20261103030000_exam_prep_p1p5_workload_norm_registry_v1.sql
 -- Mathematics P1/P5 Package 2, 2026-11-03.
 -- Curriculum-grounded *source register*, NOT invented official Cambridge hours.
 -- Stage 0: one draft row per existing 81 canonical skills; all numeric norm
@@ -540,6 +528,7 @@ grant execute on function public.get_exam_prep_workload_norm_status_safe_v1()
   to authenticated,service_role;
 
 
+-- Original source 20261103031000_exam_prep_p1p5_historical_topic_teaching_references_v1.sql
 -- Cambridge-authored 9709 Scheme of Work (for examination from 2020).
 -- Historical suggested GUIDED TEACHING time PER TOPIC, NOT private self-study
 -- hours or 2026-27 verified per-skill norms. Never use as an automatic
@@ -638,6 +627,7 @@ begin
 end $$;
 
 
+-- Original source 20261103032000_exam_prep_p1p5_workload_review_projection_v1.sql
 -- Mathematics 9709 P1/P5: owner-scoped workload REVIEW projection.
 -- Uses real syllabus, objective evidence, verified component diagnostics and
 -- confirmed appointment records. NEVER infers personalized Cambridge hours.
@@ -832,6 +822,7 @@ comment on function public.get_exam_prep_workload_review_projection_safe_v1() is
 'Read-only owner P1/P5 evidence and exact Cambridge paper-duration source. Unknown objective skill evidence is NOT graded as weak; no invented 81-skill study-hour forecast, no grade predictions or study caps.';
 
 
+-- Original source 20261103033000_exam_prep_p1p5_workload_academic_review_queue_v1.sql
 -- Internal academic workload review queue: every current P1/P5 canonical
 -- skill with its real syllabus/book evidence and historical 2020 topic contact
 -- hours shown ONLY as contextual teaching reference.
@@ -892,6 +883,7 @@ comment on view private.exam_prep_workload_academic_review_queue_v1 is
 'Private academic audit of 81 true P1/P5 source skills. Historical Cambridge 2020 topic contact hours shown as separate context, never learner estimates.';
 
 
+-- Original source 20261103034000_exam_prep_p1p5_real_content_calibration_inventory_v1.sql
 -- Package 2 real academic calibration inventory, read-only, private.
 -- Uses the actual current 9709 P1/P5 syllabus, published content QA,
 -- quarantined reserve pools, question-specific timer ceilings and published
@@ -1044,6 +1036,7 @@ comment on view private.exam_prep_skill_content_calibration_inventory_v1 is
 'Internal 81-skill P1/P5 content QA inventory and objective item timer ceilings. No learner data, no invented personal-study minutes, no public exposure of reserved items.';
 
 
+-- Original source 20261103035000_exam_prep_p1p5_shared_study_capacity_v1.sql
 -- P1/P5 source-backed planning: real student-CHOSEN weekly Mathematics
 -- availability + own school-confirmed paper dates. NO required-study-hour
 -- estimate, recommendation, grades, learning caps, or auto profile edits.
@@ -1227,6 +1220,7 @@ comment on function public.get_exam_prep_shared_study_capacity_safe_v1() is
 'Owner-only, read-only total elective Mathematics capacity to confirmed P1/P5 exam dates; shared P1/P5 (never doubled), no invented required hours, no study cap or notifications.';
 
 
+-- Original source 20261103036000_exam_prep_p1p5_remaining_work_from_evidence_v1.sql
 -- Internal SQL computation, read-only. No numeric-hour recommendations.
 create or replace function private.exam_prep_remaining_work_internal_v1(p_uid uuid,p_version bigint,p_component text)
 returns jsonb language sql stable security invoker set search_path to '' as $q$
@@ -1350,6 +1344,7 @@ revoke all on function public.get_exam_prep_remaining_work_by_skill_safe_v1() fr
 grant execute on function public.get_exam_prep_remaining_work_by_skill_safe_v1() to authenticated,service_role;
 
 
+-- Original source 20261103037000_exam_prep_p1p5_action_time_norm_registry_v1.sql
 -- P2-10 | iClub Mathematics 9709 P1/P5 | DRAFT / isolated PG17 only.
 -- Source-bound pending skill actions are study units. Wrong answers do not
 -- multiply a full learning course. No invented per-action time values.
@@ -1551,6 +1546,7 @@ comment on function public.get_exam_prep_action_time_calibration_status_safe_v1(
 'Owner-only aggregated P1/P5 action coverage; ALWAYS withholds targeted hour totals and numeric recommendation pending independent full calendar/paper/academic approval.';
 
 
+-- Original source 20261103038000_exam_prep_p1p5_action_calibration_candidates_v1.sql
 -- P2-11: source-backed calibration CANDIDATES. This is not a study-time estimate.
 -- All task metadata stays in private schema; published QA task counts are NOT
 -- observation evidence or personal-hour recommendations.
@@ -1638,6 +1634,7 @@ comment on view private.exam_prep_action_calibration_candidates_v1 is
 'Internal 486 source-bound action calibration CANDIDATES; published QA content is not time evidence. Corrections require directly observed workflow. No learner ID, question key, reserve identifier, personal-minute recommendation or public grant.';
 
 
+-- Original source 20261103039000_exam_prep_p1p5_conditional_learning_trajectory_v1.sql
 -- P2-12 | Conditional remaining-work trajectory.
 -- CURRENT verified action is not the same as FUTURE possible work.
 -- Additive private projection only, no student UI, changes to academic
@@ -1845,6 +1842,7 @@ comment on function public.get_exam_prep_conditional_trajectory_status_safe_v1()
 'Owner-only current-action count separate from contingent future work. No estimates, no grade, no user study schedule modification.';
 
 
+-- Original source 20261103040000_exam_prep_simple_learning_timeline_v1.sql
 -- P2-13 architect simplification: ONE timeline at present.
 -- Start -> today -> selected exam date. What is proven, what is still
 -- unproven, how much student-elected Mathematics calendar time remains.
@@ -1990,6 +1988,7 @@ comment on function public.get_exam_prep_simple_learning_timeline_safe_v1() is
 'Simple current snapshot: start-now-exam line, proven vs unproven skills, student chosen available calendar hours; no false learning-hour forecasts, no writes.';
 
 
+-- Original source 20261103041000_exam_prep_simple_cambridge_source_time_estimate_v1.sql
 -- iClub P2-14: practical time estimate from Cambridge Scheme of Work,
 -- source-mapped current 9709 P1/P5 skill evidence. Architect requested a
 -- useful number without waiting for empirical personal timing research.
@@ -2188,6 +2187,7 @@ comment on function public.get_exam_prep_simple_learning_timeline_with_hours_saf
 'iClub approximate 9709 P1/P5 source-weighted remaining hours and joint deadline pace. Historical Cambridge teacher-guided hours are an explicit unvalidated student planning proxy, not official independent-study guidance. Strict owner-only, read-only, no automatic plan edits.';
 
 
+-- Original source 20261103042000_exam_prep_learner_chosen_dates_v1.sql
 -- P2-16: student calendar day is THEIR own exam date in iClub.
 -- No school approval, no false official Cambridge exam clock, no series gating
 -- for personal dates, no reads/writes to legacy appointments or exam results.
@@ -2431,16 +2431,4 @@ grant execute on function public.save_my_exam_prep_timeline_dates_safe_v1(date,d
 comment on function public.save_my_exam_prep_timeline_dates_safe_v1(date,date) is
 'Owner-only P1/P5 personal calendar dates saved on explicit tap. No school approval, no historical appointment or learning-result mutation. Returns renewed approximate iClub study plan.';
 
-DO $post$
-BEGIN
- IF (SELECT count(*) FROM private.exam_prep_skill_workload_norms_v1)<>81
- OR (SELECT count(*) FROM private.exam_prep_skill_action_time_norms_v1)<>486
- OR EXISTS(SELECT 1 FROM private.exam_prep_skill_workload_norms_v1 WHERE estimate_status='approved' OR estimated_core_min_minutes IS NOT NULL OR estimated_core_max_minutes IS NOT NULL)
- OR EXISTS(SELECT 1 FROM private.exam_prep_skill_action_time_norms_v1 WHERE review_status='approved' OR min_active_minutes IS NOT NULL OR max_active_minutes IS NOT NULL)
- OR to_regprocedure('public.save_my_exam_prep_exam_appointment_v2(text,timestamp with time zone,boolean)') IS NULL
- OR to_regprocedure('public.get_exam_prep_personal_horizon_safe_v1()') IS NULL
- OR to_regprocedure('public.get_exam_prep_study_schedule_safe_v1()') IS NULL
- OR has_function_privilege('anon','public.get_exam_prep_study_schedule_safe_v1()','EXECUTE')
- OR (SELECT count(*) FROM private.exam_prep_extra_hard_tasks_v1 WHERE bank_version='math-extra-hard-2026-11-full-v4' AND lifecycle_status='published')<>42
- THEN RAISE EXCEPTION 'S2 live postflight reject: numeric source, owner permission or protected bank failed'; END IF;
-END $post$;
+COMMIT;
