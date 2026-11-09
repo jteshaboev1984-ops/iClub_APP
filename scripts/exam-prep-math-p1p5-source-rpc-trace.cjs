@@ -106,9 +106,25 @@ const S2_CALENDAR_RPC=[
   "save_exam_prep_study_schedule_safe_v1",
   "save_my_exam_prep_exam_appointment_v2"
 ];
-const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)&&!S2_CALENDAR_RPC.includes(n)).sort();
+const S3_VOLUNTARY_RPC=[
+  "get_my_exam_prep_weekly_choice_s3_safe_v1",
+  "save_my_exam_prep_weekly_choice_s3_safe_v1",
+  "claim_exam_prep_periodic_study_report_safe_v1",
+  "get_exam_prep_periodic_study_reports_safe_v1"
+];
+const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)&&!S2_CALENDAR_RPC.includes(n)&&!S3_VOLUNTARY_RPC.includes(n)).sort();
+assert(S3_VOLUNTARY_RPC.every(n=>found.has(n)),"S3 owner-only weekly decision / period RPC missing");
 assert(S2_CALENDAR_RPC.every(n=>found.has(n)),"Math P1/P2 owner-only calendar RPC missing");
 assert(EXTRA_HARD_RPC.every(n=>found.has(n)),"Math Extra Hard owner-only RPC missing");
+const s3a=read("supabase/migrations/20261109132000_exam_prep_p1p5_s3_real_periodic_study_reports_v1.sql");
+const s3b=read("supabase/migrations/20261109132100_exam_prep_p1p5_s3_explicit_weekly_choices_v1.sql");
+for(const rpcName of S3_VOLUNTARY_RPC) {
+  assert((s3a+s3b).includes(rpcName),"S3 versioned SQL misses "+rpcName);
+}
+assert(!/\\b(?:TRUNCATE\\s+TABLE|DELETE\\s+FROM|UPDATE\\s+public\\.users)\\b/i.test(s3a+s3b),"S3 must preserve user state");
+for(const name of ['weeklyS3Panel','bindWeeklyS3','weeklyS3Copy']) assert(read(LIVE).includes(name),"S3 trilingual client missing "+name);
+assert(s3a.includes("'learning_minutes',null"),"S3 must not infer learner study hours from sessions");
+assert(s3b.includes("no_study_cap"),"S3 must never limit optional study time");
 const extra=read("exam-prep/exam-prep-extra-hard-ui.js");
 assert(extra.includes('internal.extraHardView=Object.freeze({open})'),"Optional Extra Hard controller not mounted");
 assert(extra.includes("data-ep-extra-hard-next")&&!extra.includes("localStorage.setItem"),"Extra Hard optional paper-first route missing");
@@ -171,5 +187,5 @@ for(const s of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
  assert(html.includes(s),'production index is not loading '+s);
 }
 assert(html.includes('id="exam-prep-host-root"'),'learner host root missing');
-console.log('Stage A source RPC trace GREEN: 60/60 existing core named RPCs + 4 Extra Hard + 4 S2 calendar; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
+console.log('Stage A source RPC trace GREEN: 60/60 existing core named RPCs + 4 Extra Hard + 4 S2 calendar + 4 S3 weekly/report; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
 console.log('NOTE: source-only regression; real authenticated HTTP→PostgREST→DB and actual device journeys are Stage B/C, NOT implied by GREEN.');
