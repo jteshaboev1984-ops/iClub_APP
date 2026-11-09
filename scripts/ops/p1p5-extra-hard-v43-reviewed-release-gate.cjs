@@ -13,6 +13,8 @@ const MODE=process.argv[2];
 const BANK="math-extra-hard-2026-11-full-v4";
 const PRIOR="math-extra-hard-2026-11-original-v2";
 const SOURCE_SHA="42c16a0d81cad35576b927e0f8c412650b045c25c1cfbcb71d86e20dfda2e090";
+// Exact internal AI academic review evidence; no external examiner is claimed.
+const REVIEW_SHA='b579411f8297ba73f481b35424dc7da0b9241e2039e33e19ca1a3e4b9724441d';
 const sourceFields=["task_key","bank_version","component_code","primary_skill_code",
  "official_section","book_map","title_i18n","prompt_i18n","solution_i18n","exact_answer"];
 const hash=x=>crypto.createHash("sha256").update(x).digest("hex");
@@ -60,7 +62,8 @@ function confirmReview(file,expected){
  const abs=path.resolve(file),repo=path.resolve(__dirname,"..","..")+path.sep;
  assert(!abs.startsWith(repo),"Review document must be owner-private");
  const bytes=fs.readFileSync(abs),pin=String(process.env.ICLUB_EXTRAHARD_V43_REVIEW_SHA256||"");
- assert(/^[a-f0-9]{64}$/.test(pin)&&hash(bytes)===pin,"Review source SHA mismatch");
+ assert(/^[a-f0-9]{64}$/.test(pin)&&pin===REVIEW_SHA&&hash(bytes)===REVIEW_SHA,
+  "Review source SHA is not the exact academically evaluated V4.3 manifest");
  const r=JSON.parse(bytes.toString("utf8"));
  assert(r.bank_version===BANK&&r.source_sha256===SOURCE_SHA&&r.decision==="approve");
  assert(typeof r.reviewed_by==="string"&&r.reviewed_by.length>=3);
