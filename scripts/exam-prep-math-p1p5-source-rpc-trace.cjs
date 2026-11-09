@@ -100,7 +100,14 @@ const EXTRA_HARD_RPC=[
   "start_my_exam_prep_extra_hard_safe_v1",
   "submit_my_exam_prep_extra_hard_safe_v1"
 ];
-const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)).sort();
+const S2_CALENDAR_RPC=[
+  "get_exam_prep_personal_horizon_safe_v1",
+  "get_exam_prep_study_schedule_safe_v1",
+  "save_exam_prep_study_schedule_safe_v1",
+  "save_my_exam_prep_exam_appointment_v2"
+];
+const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)&&!S2_CALENDAR_RPC.includes(n)).sort();
+assert(S2_CALENDAR_RPC.every(n=>found.has(n)),"Math P1/P2 owner-only calendar RPC missing");
 assert(EXTRA_HARD_RPC.every(n=>found.has(n)),"Math Extra Hard owner-only RPC missing");
 const extra=read("exam-prep/exam-prep-extra-hard-ui.js");
 assert(extra.includes('internal.extraHardView=Object.freeze({open})'),"Optional Extra Hard controller not mounted");
@@ -164,5 +171,5 @@ for(const s of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
  assert(html.includes(s),'production index is not loading '+s);
 }
 assert(html.includes('id="exam-prep-host-root"'),'learner host root missing');
-console.log('Stage A source RPC trace GREEN: 60/60 core named RPCs + 4 Extra Hard; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
+console.log('Stage A source RPC trace GREEN: 60/60 existing core named RPCs + 4 Extra Hard + 4 S2 calendar; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
 console.log('NOTE: source-only regression; real authenticated HTTP→PostgREST→DB and actual device journeys are Stage B/C, NOT implied by GREEN.');
