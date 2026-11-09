@@ -7,6 +7,7 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
+      - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
@@ -517,4 +518,9 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-s2-signed-calendar-81-source.cjs
           node scripts/p1p5-s2-signed-calendar-81-source.cjs
+      - name: S3 signed owner weekly choices and real 7-day/month reports (no learner write)
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+          node scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
 
