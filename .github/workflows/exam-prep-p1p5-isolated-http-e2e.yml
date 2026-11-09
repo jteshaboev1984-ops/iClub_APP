@@ -35,6 +35,7 @@ on:
       - 'scripts/ops/p1p5-extra-hard-private-full42-stage-v4.cjs'
       - 'scripts/p1p5-extra-hard-full42-stage-v4-isolated-test.cjs'
       - 'scripts/p1p5-v41-source-pin-regression.cjs'
+      - 'docs/math-p1p5-v41-editorial-source-fidelity-checkpoint-20261109.md'
       - 'scripts/ops/p1p5-d10-10-private-five-versioned-stage.cjs'
       - 'scripts/p1p5-d10-10-private-five-versioned-stage-isolated-test.cjs'
       - '.github/workflows/exam-prep-p1p5-isolated-http-e2e.yml'
