@@ -87,6 +87,34 @@ async function run(){
     assert(await paper.locator('[data-ep-hybrid-s4-clock]').textContent(),
       'real server-based deadline should display countdown');
     assert(!(await paper.textContent()).includes('0 / 75'),'do not present fake Paper mark');
+    // Cambridge MF19 remains a link to the OFFICIAL syllabus, not a mirrored
+    // copyrighted asset; the normal table deep-link appears only for P5.
+    const mf19=paper.locator('[data-ep-hybrid-s4-mf19]');
+    assert.equal(await mf19.count(),1,'official MF19 link is required');
+    assert((await mf19.getAttribute('href')).includes(
+      'cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf#page=43'));
+    assert.equal(await paper.locator('[data-ep-hybrid-s4-normal]').count(),
+      component==='P5'?1:0,'P5 normal distribution reference');
+    if(component==='P5') assert((await paper.locator('[data-ep-hybrid-s4-normal]').getAttribute('href')).endsWith('#page=51'));
+    const printButton=paper.locator('[data-ep-hybrid-s4-print]');
+    assert.equal(await printButton.count(),1,'question-only browser print should be available');
+    await page.evaluate(()=>{window.__s4PrintCalls=0;window.print=()=>{window.__s4PrintCalls++};});
+    await printButton.click();
+    assert.equal(await page.evaluate(()=>window.__s4PrintCalls),1,'native browser print invoked once');
+    assert((await page.locator('style[data-ep-hybrid-s4-print-style]').textContent()).includes('@media print'));
+    await page.emulateMedia({media:'print'});
+    const printSafety=await page.evaluate(()=>({
+      refHidden:getComputedStyle(document.querySelector('[data-ep-hybrid-s4-reference]')).display,
+      actionsHidden:getComputedStyle(document.querySelector('[data-ep-hybrid-s4-finish]').closest('[data-ep-hybrid-s4-controls]')).display,
+      taskVisible:getComputedStyle(document.querySelector('[data-ep-hybrid-s4-item]')).visibility
+    }));
+    assert.equal(printSafety.refHidden,'none','printed paper must omit external links');
+    assert.equal(printSafety.actionsHidden,'none','printed paper must omit action buttons');
+    assert.equal(printSafety.taskVisible,'visible','printed questions must remain visible');
+    const printed=await page.pdf({format:'A4',printBackground:true});
+    assert(printed.byteLength>3000&&printed.subarray(0,4).toString()==='%PDF',
+      'browser produced a usable PDF without server file storage');
+    await page.emulateMedia({media:'screen'});
     const layout=await page.evaluate(()=>({
      screen:document.documentElement.clientWidth,
      body:document.documentElement.scrollWidth
