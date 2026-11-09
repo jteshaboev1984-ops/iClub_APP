@@ -45,6 +45,14 @@ function counts(){
 }
 const key=(name)=>'s4-hybrid-disposable-'+name+'-abcdefghijklmnop';
 async function main(){
+ // Seed real owner Math profile through the same signed RPC as the actual
+ // learner form. The disposable basic identity fixture deliberately has NO
+ // profile until a learner selects exam series and study hours.
+ const profileFields={
+  p_exam_series:'May/June 2027',p_target_grade:'A',
+  p_total_student_hours_available:12,p_mathematics_hours_budget:6
+ };
+ ok(await rpc('save_exam_prep_exam_profile_v2',profileFields),'authentic P1/P5 owner profile');
  const original=counts();
  const disabled=ok(await rpc('get_exam_prep_hybrid_s4_papers_safe_v1',{p_component_code:'P1'}),'S4 OFF catalog');
  assert.equal(disabled.enabled,false,'S4 must be default OFF');
