@@ -2171,3 +2171,99 @@ body:has(#courses-subject-hub.exam-prep-host-open #exam-prep-host-root:not([hidd
 @media(max-width:620px){
  #exam-prep-host-root [data-ep-extra-hard-root] .ep-live-actions button{flex:1 1 100%;}
 }
+
+/* Mathematics P1/P5 personal exam calendar. Scoped to the existing Exam Prep host. */
+#exam-prep-host-root .ep-live-exam-date-panel {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+  min-width: 0;
+}
+#exam-prep-host-root .ep-live-exam-date-panel > p { margin: 0; line-height: 1.45; }
+#exam-prep-host-root .ep-live-exam-date-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+#exam-prep-host-root .ep-live-exam-date-row {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--ep-border, rgba(110, 126, 152, .25));
+  border-radius: 14px;
+  min-width: 0;
+}
+#exam-prep-host-root .ep-live-exam-date-summary {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#exam-prep-host-root .ep-live-exam-date-summary > strong { font-size: .95rem; line-height: 1.4; }
+#exam-prep-host-root .ep-live-exam-date-row .ep-live-field { min-width: 0; }
+#exam-prep-host-root .ep-live-exam-date-row .ep-live-input {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+#exam-prep-host-root .ep-live-exam-date-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  line-height: 1.5;
+  font-size: .82rem;
+  cursor: pointer;
+}
+#exam-prep-host-root .ep-live-exam-date-confirm input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+#exam-prep-host-root .ep-live-exam-date-row > button { width: 100%; }
+#exam-prep-host-root [data-ep-exam-date-feedback] { min-height: 1em; }
+@media(max-width: 620px) {
+  #exam-prep-host-root .ep-live-exam-date-grid { grid-template-columns: minmax(0, 1fr); }
+  #exam-prep-host-root .ep-live-exam-date-row { padding: 12px; }
+}
+
+
+/* Mathematics P1/P5 voluntary daily study cadence. */
+#exam-prep-host-root .ep-live-study-schedule {
+  display:grid;
+  gap:12px;
+  min-width:0;
+  margin:14px 0;
+}
+#exam-prep-host-root .ep-live-study-schedule p { margin:0; line-height:1.55; }
+#exam-prep-host-root .ep-live-study-schedule-fields {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  align-items:end;
+}
+#exam-prep-host-root .ep-live-study-schedule-fields .ep-live-field {
+  min-width:0;
+  display:grid;
+  gap:6px;
+}
+#exam-prep-host-root .ep-live-study-schedule-fields .ep-live-input {
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+}
+#exam-prep-host-root .ep-live-study-schedule-summary {
+  display:grid;
+  gap:6px;
+  line-height:1.55;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+#exam-prep-host-root .ep-live-study-schedule-summary strong { font-size:.95rem; }
+#exam-prep-host-root .ep-live-study-schedule > button { width:100%; }
+#exam-prep-host-root [data-ep-study-feedback] { min-height:1em; }
+@media(max-width:620px) {
+  #exam-prep-host-root .ep-live-study-schedule-fields { grid-template-columns:minmax(0,1fr); }
+}
