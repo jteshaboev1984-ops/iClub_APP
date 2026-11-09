@@ -1571,7 +1571,7 @@
         title:"Тренировочный Paper",start:"Начать тренировку",history:"Мои тренировки",
         time:"Осталось",available:"Максимум по условиям",back:"К вариантам",
         noPapers:"Доступных вариантов пока нет.",paperNotice:"Решайте задания на бумаге. Записывать подробное решение в приложение не нужно.",
-        ref:"Используйте разрешённые для экзамена материалы MF19, включая статистические таблицы.",
+        ref:"Справочные материалы MF19 (официальный Cambridge 9709, 2026–2027)", normalTable:"Таблица нормального распределения", print:"Печать / сохранить PDF", printHint:"Печать содержит только задания — без ответов и критериев.",
         finish:"Завершить тренировку",finishConfirm:"Завершить тренировку и перейти к разбору?",
         early:"Завершить досрочно",earlyConfirm:"Завершить досрочно? Непроверенные ответы не станут оценкой.",
         noScore:"Письменные решения не проверены. Баллы за Paper не определены.",
@@ -1592,7 +1592,7 @@
         title:"Sinov Paper",start:"Mashqni boshlash",history:"Mashqlarim",
         time:"Qolgan vaqt",available:"Mumkin bo‘lgan jami ball",back:"Variantlarga",
         noPapers:"Hozircha variantlar mavjud emas.",paperNotice:"Masalalarni qog‘ozda yeching. To‘liq yechimni ilovaga kiritish shart emas.",
-        ref:"Imtihonda ruxsat etilgan MF19 formulalar va statistik jadvallardan foydalaning.",
+        ref:"MF19: rasmiy Cambridge 9709 formulalar va jadvallar (2026–2027)", normalTable:"Normal taqsimot jadvali", print:"Chop etish / PDF sifatida saqlash", printHint:"Chop etiladigan nusxada faqat savollar bor — javoblar va mezonlarsiz.",
         finish:"Mashqni yakunlash",finishConfirm:"Mashqni yakunlab tahlilga o‘tasizmi?",
         early:"Ertaroq yakunlash",earlyConfirm:"Ertaroq yakunlaysizmi? Yozma ish baholanmaydi.",
         noScore:"Yozma yechim tekshirilmagan. Paper uchun baho aniqlanmagan.",
@@ -1613,7 +1613,7 @@
         title:"Practice Paper",start:"Start Paper",history:"My practice sessions",
         time:"Time remaining",available:"Marks available",back:"Back to papers",
         noPapers:"No Papers available yet.",paperNotice:"Solve on paper. You do not need to type your working into the app.",
-        ref:"Use the permitted MF19 list of formulae and statistical tables.",
+        ref:"Official Cambridge 9709 MF19 formulae and tables (2026–2027)", normalTable:"Normal distribution table", print:"Print / save as PDF", printHint:"Print view includes questions only — no answers or marking criteria.",
         finish:"Finish practice",finishConfirm:"Finish this Paper rehearsal and continue to review?",
         early:"End early",earlyConfirm:"End early? Your written work will remain ungraded.",
         noScore:"Written methods have not been checked. Full Paper mark is unknown.",
@@ -1720,6 +1720,35 @@
       await hybridS4Finish(sessionId,"time_expired");return;
     }
     const c=hybridS4Copy();
+    // Keep Cambridge reference on its OFFICIAL host; never copy/rehost MF19.
+    const officialMF19="https://www.cambridgeinternational.org/Images/697427-2026-2027-syllabus.pdf";
+    const references='<div class="ep-live-actions" data-ep-hybrid-s4-reference>'+
+      '<a class="ep-live-btn secondary" data-ep-hybrid-s4-mf19 href="'+
+      officialMF19+'#page=43" target="_blank" rel="noopener noreferrer">'+esc(c.ref)+'</a>'+
+      (component==="P5"?'<a class="ep-live-btn secondary" data-ep-hybrid-s4-normal '+
+        'href="'+officialMF19+'#page=51" target="_blank" rel="noopener noreferrer">'+
+        esc(c.normalTable)+'</a>':"")+'</div>';
+    // Browser-native printing produces a local student-controlled PDF; no
+    // uploaded file, server storage or rights claim over Cambridge materials.
+    const canPrint=typeof window.print==="function" && !window.Telegram?.WebApp;
+    const printAction=canPrint?'<div class="ep-live-actions" data-ep-hybrid-s4-controls>'+
+      '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-print>'+
+      esc(c.print)+'</button><span class="ep-live-meta">'+esc(c.printHint)+
+      '</span></div>':"";
+    const printCss='<style data-ep-hybrid-s4-print-style>'+
+      '@media print{@page{size:A4;margin:14mm;}' +
+      'body *{visibility:hidden!important;}' +
+      '[data-ep-hybrid-s4-paper],[data-ep-hybrid-s4-paper] *{visibility:visible!important;}' +
+      '[data-ep-hybrid-s4-paper]{position:absolute!important;left:0!important;top:0!important;'+
+        'width:100%!important;max-width:100%!important;background:#fff!important;color:#000!important;}' +
+      '[data-ep-hybrid-s4-paper] .ep-live-card{background:#fff!important;color:#000!important;'+
+        'box-shadow:none!important;border:0!important;padding:4mm!important;'+
+        'margin:0 0 6mm!important;break-inside:avoid;}' +
+      '[data-ep-hybrid-s4-paper] [data-ep-hybrid-s4-controls],'+
+      '[data-ep-hybrid-s4-paper] [data-ep-hybrid-s4-clock],'+
+      '[data-ep-hybrid-s4-paper] [data-ep-hybrid-s4-reference]'+
+        '{display:none!important;}' +
+      '}</style>';
     const items=Array.isArray(res.data.items)?res.data.items:[];
     const body=items.map(item=>'<section class="ep-live-card ep-live-question-card"'+
       ' data-ep-hybrid-s4-item="'+Number(item.item_order)+'">'+
@@ -1729,16 +1758,19 @@
       Number(item.max_available_marks||0)+'</span></div>'+
       '<div class="ep-live-qtext">'+uxMath(item.prompt||"")+'</div></section>').join("");
     const root=rootEl();if(!root)return;
-    root.innerHTML=shell('<div data-ep-hybrid-s4-paper>'+
+    root.innerHTML=shell(printCss+'<div data-ep-hybrid-s4-paper>'+
       '<section class="ep-live-card"><div class="ep-live-head"><strong>'+
       component+' · '+esc(c.title)+'</strong><span data-ep-hybrid-s4-clock></span></div>'+
       '<p class="ep-live-meta">'+esc(c.paperNotice)+'</p>'+
-      '<p class="ep-live-meta">'+esc(c.ref)+'</p>'+
+      references+printAction+
       (res.data.prior_review_seen?'<p class="ep-live-notice">'+esc(c.previous)+'</p>':"")+
-      '</section>'+body+'<section class="ep-live-card"><div class="ep-live-actions">'+
+      '</section>'+body+'<section class="ep-live-card"><div class="ep-live-actions" data-ep-hybrid-s4-controls>'+
       '<button type="button" class="ep-live-btn" data-ep-hybrid-s4-finish>'+
       esc(c.finish)+'</button><button type="button" class="ep-live-btn secondary"'+
       ' data-ep-hybrid-s4-early>'+esc(c.early)+'</button></div></section></div>');
+    root.querySelector('[data-ep-hybrid-s4-print]')?.addEventListener("click",()=>{
+      if (root.querySelector('[data-ep-hybrid-s4-paper]')) window.print();
+    });
     root.querySelector('[data-ep-hybrid-s4-finish]')?.addEventListener("click",()=>{
       if(window.confirm(c.finishConfirm))void hybridS4Finish(sessionId,"finish");
     });
