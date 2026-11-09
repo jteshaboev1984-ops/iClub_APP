@@ -68,6 +68,8 @@ async function main(){
      await panel.locator('[data-ep-s3-p1]').fill('100');
      await panel.locator('[data-ep-s3-p5]').fill('75');
      await panel.locator('[data-ep-s3-save]').click();
+     await page.waitForFunction(()=>(window.__s3Requests||[]).some(x=>
+       x.name==='save_my_exam_prep_weekly_choice_s3_safe_v1'&&x.ok),null,{timeout:20000});
      await page.locator('[data-ep-s3]').waitFor({timeout:20000});
      const events=await page.evaluate(()=>window.__s3Requests);
      assert(events.some(x=>x.name==='save_my_exam_prep_weekly_choice_s3_safe_v1'&&x.ok),
