@@ -135,6 +135,27 @@ async function main(){
   "expected_numeric,absolute_tolerance,review_state,academic_review_ref,approved_at) "+
   "VALUES("+stageId+",1,'test','"+taskId+"','"+cleanVer+
   "',0.5,0,'approved','synthetic-local-only',now())");
+ // An approved checkpoint with broad tolerance could accept a wrong answer.
+ // The database must fail closed, even when a mistaken human reviewer sets it.
+ let invalidApprovalDenied=false;
+ try {
+   sql("INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1 "+
+     "(assessment_id,item_order,part_label,written_task_id,source_task_version,"+
+     "expected_numeric,absolute_tolerance,review_state,academic_review_ref,approved_at) "+
+     "VALUES("+stageId+",1,'unsafe-tolerance',"+taskId+",'"+cleanVer+
+     "',0.5,0.1,'approved','synthetic-local-only',now())");
+ } catch (e) {
+   invalidApprovalDenied=/check constraint/i.test(String(e.stderr||e.message));
+ }
+ assert(invalidApprovalDenied,'broad tolerance must not be an approved key');
+ // A stale answer key for a different task revision must never be shown.
+ const taskId2=sql("SELECT written_task_id FROM private.exam_prep_assessment_items "+
+   "WHERE assessment_id="+stageId+" AND item_order=2");
+ sql("INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1 "+
+   "(assessment_id,item_order,part_label,written_task_id,source_task_version,"+
+   "expected_numeric,absolute_tolerance,review_state,academic_review_ref,approved_at) "+
+   "VALUES("+stageId+",2,'stale',"+taskId2+
+   ",'not-the-current-task-version',0.5,0,'approved','synthetic-local-only',now())");
  const ended=ok(await rpc('finish_exam_prep_hybrid_s4_paper_safe_v1',{
   p_session_id:first.session_id,p_reason:'finish',p_idempotency_key:key('p1-finish')
  }),'P1 paper finish with ZERO written artifacts');
@@ -151,6 +172,10 @@ async function main(){
  assert.equal(post.checkpoints.length,1);
  assert.equal(post.review_revealed,false);
  assert.equal(post.checkpoints[0].item_order,1);
+ deny(await rpc('check_exam_prep_hybrid_s4_final_safe_v1',{
+   p_session_id:first.session_id,p_item_order:2,p_part_label:'stale',
+   p_answer:'1/2',p_idempotency_key:key('stale-check')
+ }),'source-version-mismatched key denied');
  deny(await rpc('check_exam_prep_hybrid_s4_final_safe_v1',{
   p_session_id:first.session_id,p_item_order:1,p_part_label:'test',
   p_answer:'1/0',p_idempotency_key:key('bad-fraction')
@@ -191,6 +216,26 @@ async function main(){
   p_assessment_id:A1,p_idempotency_key:key('p1-repeat')
  }),'repeat same paper');
  assert.equal(other.prior_review_seen,true);
+ // Synthetic alternate-value validation: exact target vs explicitly approved
+ // rounded display, without a fuzzy interval. No real Paper key leaked.
+ const realVer2=sql("SELECT task_version FROM private.exam_prep_written_tasks WHERE id="+taskId2).replaceAll("'","''");
+ sql("INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1 "+
+   "(assessment_id,item_order,part_label,written_task_id,source_task_version,"+
+   "expected_numeric,accepted_numeric_alternates,absolute_tolerance,"+
+   "review_state,academic_review_ref,approved_at) "+
+   "VALUES("+stageId+",2,'alternate',"+taskId2+",'"+realVer2+
+   "',0.75,ARRAY[0.7499]::numeric[],0,'approved','synthetic-local-only',now())");
+ const closedRepeat=ok(await rpc('finish_exam_prep_hybrid_s4_paper_safe_v1',{
+   p_session_id:other.session_id,p_reason:'early_exit',
+   p_idempotency_key:key('repeat-early-finish')
+ }),'repeat paper closed without marks');
+ assert.equal(closedRepeat.paper_marks,null);
+ const alt=ok(await rpc('check_exam_prep_hybrid_s4_final_safe_v1',{
+   p_session_id:other.session_id,p_item_order:2,p_part_label:'alternate',
+   p_answer:'0,7499',p_idempotency_key:key('approved-alternate')
+ }),'approved decimal comma alternate');
+ assert.equal(alt.matched,true);
+ assert.equal(alt.independent_pre_reveal,false,'reviewed repeated Paper is not blind evidence');
  const second=ok(await rpc('start_exam_prep_hybrid_s4_paper_safe_v1',{
   p_assessment_id:A5,p_idempotency_key:key('p5-start')
  }),'P5 start no student score');
