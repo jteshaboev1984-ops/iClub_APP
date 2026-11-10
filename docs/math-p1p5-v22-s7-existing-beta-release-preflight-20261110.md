@@ -1,0 +1,48 @@
+# iClub Mathematics P1/P5 — S7 release preflight (existing beta → selected-subject users)
+
+**Date:** 2026-11-10 · **Status:** READY FOR OWNER REVIEW, **NO PRODUCTION GO** · **Tracking:** [Issue #450](https://github.com/jteshaboev1984-ops/iClub_APP/issues/450).
+
+## Binding architect decision — do not invent access layers
+
+- A learner chooses **Mathematics** at registration or later. This choice is the **subject access**.
+- While new Mathematics Exam Prep is in beta, its features are visible through **the existing beta cohort/feature visibility**.
+- After the architect approves release, **the same features** become available through the **existing subject choice** to **all learners who selected Mathematics**.
+- Withdrawn [#524](https://github.com/jteshaboev1984-ops/iClub_APP/pull/524) and [#525](https://github.com/jteshaboev1984-ops/iClub_APP/pull/525) were never merged and are **FORBIDDEN** as dependencies: no extra `public_math_core_enabled`, no second subject entitlement, owner-GO DB table, independent kill switch or new Mathematics role/gate.
+- Existing beta-user progress, data, original Core access, old attempts and old rights must survive. No beta-data purge or automatic language/progress reset.
+
+## Exact observed release facts — do not infer from earlier report
+
+1. **GitHub repository main:** `23ea8e31814f4e8c659f9bc50a3078e9d2392e14` at 2026-11-10 compare; S4 source branch ahead by **75** historical commits / **25** changed files, behind **0** at inspection. **Do NOT bulk merge those 75 commits.** Select and reconcile focused S2/S3/S4 changes against current main, including the D03 migration renamed relative to main.
+2. **S1:** written self-mark ban [PR #518](https://github.com/jteshaboev1984-ops/iClub_APP/pull/518) merged. No student-awarded written marks are authorized.
+3. **S2:** [DRAFT #519](https://github.com/jteshaboev1984-ops/iClub_APP/pull/519) source, already inherited by [S3 DRAFT #520](https://github.com/jteshaboev1984-ops/iClub_APP/pull/520). Live production migration register **ALREADY HAS** `20261109111900` (S2) and `20261109110109` (D03); any deploy must confirm source equivalence and **MUST NOT reapply** these two migration versions.
+4. **S3:** `20261109132000` real weekly reports and `20261109132100` voluntary choices **NOT IN live migration register** at last SELECT-only check. S3 code is in #520 and inherited into #523; don't duplicate #519.
+5. **S4:** private hybrid Paper `20261109154000` and Stage3–6 operational readers `20261109155000` **NOT IN live migration register**. Actual S4 sessions/keys tables also absent from production by read-only schema inspection. S4 is strictly **OFF by default**. Earlier `20261109156000` 12-answer candidate import was **REMOVED** from the current source branch after real PG17 CI failed on a mandatory 12-row drift; do not deploy or restore it. Those 12 final answers had appeared in PUBLIC Git history, so they must never be represented as secret blind-check keys. The optional answer checker may show zero eligible keys.
+6. **EXACT source-tested code SHA:** `a66a729367af32f2d3ae04199c97d50743a29f6f`; [dedicated GitHub Actions run #42795620057](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/42795620057) **SUCCESS**, logs inspected: disposable PG17 full current Exam Prep migration chain (including S2+S3+S4), signed owner/anonymous/foreign JWT/PostgREST and Chromium **RU P1 390px / UZ P5 375px / EN P1 1280px**. Confirms S4 no-written-upload/no-mark workflow, source criteria review, pre-reveal boundary and history preservation; **does NOT claim every S2/S3 page and actual real-user beta release was exercised**. Subsequent edits to this preflight are **documentation-only**; they must not be misreported as a newly tested code SHA.
+7. **Live Exam Prep existing beta** (SELECT-only at inspection): `rollout_state=controlled_beta`, `core_enabled=true`, `kill_switch=false`, `mentor_enabled=false`. Do not turn it off or alter existing access to accommodate a new gate. Existing tutor AI flag is separate from future, unapproved AI marking of handwriting.
+8. **P0-16B security review:** separate OPEN item, not silently completed. Must remain visible in release assessment. No blanket audit of unrelated subjects.
+
+## Remaining work before owner can authorize production
+
+| Priority | Concrete action | Acceptance evidence |
+|---|---|---|
+| P1 | Reconcile **current main** and **actual live migration register**, not a historical branch snapshot; avoid S2/D03 migration replay | Exact base SHA, ordered list of **only missing** S3/S4 migrations, no reset/DML to real learners |
+| P1 | Inspect release wiring for the **existing Mathematics subject choice and existing beta visibility**, not a new access mechanism | Registration/change-subject → Mathematics selected → existing beta participant sees active features; ordinary Mathematics student after GO sees the same features; other subjects unchanged |
+| P1 | Retain D03 and old attempts; ensure S4 optional Paper session and Stage gate flags start OFF, with normal diagnostics still opening | Database + client safe flags, no forced file upload, zero student self-mark, old Paper result preserved |
+| P2 | One **targeted** gap check for S2/S3 UI that was not exercised by the exact S4 green run; no 53-step historical repeat | Real owner-bound voluntary time decisions, weekly reports, no mandatory changes, RU/UZ/EN layout as needed |
+| P2 | S7 rollback and device smoke instructions using existing beta/release mechanism | Revert feature visibility/presentation if rollout causes issues; NEVER erase or revert learner progress or delete already applied migrations |
+| Release | Separate **architect GO** for selective merge/deploy and for beta → all Mathematics users | Written approval linked in #450; actual main+deployment SHA, production migration receipts and smoke evidence |
+
+## Exact safe-release sequence (PLANNING, not permission)
+
+1. **Freeze the source candidate only when all participating chats are finished**, then refresh main, Supabase migration register, and Vercel production SHA. Never infer that branches remained static.
+2. Reconcile source changes in small ordered PR slices (S2 UI compatibility where already-applied S2 migration exists; S3; S4) without carrying withdrawn #524/#525 or old parent #492 bulk.
+3. Check intended migration ordering with one disposable accepted stack; identify live-existing D03/S2 and pending S3/S4. **Do not run live SQL here**.
+4. Obtain architect's explicit GO and deployment scope; preserve current beta and other subjects. After GO only, selectively merge/deploy and activate through existing beta/subject-selection visibility, with no added registration/access requirement.
+5. Observe a tiny real-device smoke around auth/selected Mathematics/P1/P5, session resume, stage logic and safe rollback; record exact deployed source/DB receipts. Never delete attempts or local user state.
+6. P0-16B remains separately open; beta test data cleanup explicitly deferred.
+
+## Work that is NOT a precondition invented by engineering
+
+No extra Mathematics authorization, mandatory mentor, paid AI, video lesson, full written solution upload, learner self-awarded marks, compulsory three Paper rehearsals, secret-key final-answer match for every part, artificial minimum study minutes or Cambridge grade prediction. The existing source criteria + short hint review is the S4 approved learner review; full step-by-step solutions can be improved separately, not falsely presented as verified today.
+
+**Next:** complete the precise existing-beta route and S2/S3 UI integration boundary, then present the release-readiness decision with exact current SHA to the architect. Do not change production until explicit GO.
