@@ -17,6 +17,10 @@ Existing legacy `private.exam_prep_feature_config` is `controlled_beta`, `core_e
 ## What this does NOT do
 It does **not** enable public Core, change the already active controlled beta, alter AI subscription tiers, add mandatory Mentor, affect Economics/Chemistry/Biology/CS, reset local/Tours/Practice/certificates, or merge/ship anything. It also does **not** automatically splice a new authorizer into every existing Exam Prep RPC. Such wiring can introduce silent public access and must be part of the **ONE planned source-stable S6 integration** with explicit tests and a separate S7 GO. An eligible student can have a public preview status of **false** today; that is the correct safe default.
 
+## Exact source inheritance — avoid applying S2 twice
+
+GitHub PR file inventories inspected on 2026-11-10: **[S3 PR #520](https://github.com/jteshaboev1984-ops/iClub_APP/pull/520) already includes the entire 10-file S2 PR #519 change set** (profile/calendar/81-skill source migration, UI, host CSS and tests), plus S3 weekly source; this S5 branch derives from S4 #523, which derives from S3 #520. **Do not cherry-pick #519 onto this S5 branch, copy its S2 migration again, or treat #519 as an additional additive migration dependency.** S6 should reconcile the actual current main delta and apply each real not-yet-live migration **exactly once**, accounting for D03 #518 already merged.
+
 ## S6 acceptance targets, to execute ONCE when workflows can start
 - Signed JWT+PostgREST positive cases: registered student with Mathematics id 5 in either study/competitive mode; verify the future public access grants only after independent owner-GO state in a **disposable** DB.
 - Denials: anon role, registered user without Mathematics enrollment, other-subject-only student, expired token, spoofed `user_id`, stale beta entitlement, controlled-beta tenant without subject 5 on the **strict public** path, independent public kill switch and existing programme kill switch.
