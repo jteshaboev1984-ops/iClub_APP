@@ -55,7 +55,11 @@ CREATE TABLE IF NOT EXISTS private.exam_prep_hybrid_s4_checkpoint_keys_v1 (
   source_task_version text NOT NULL,
   -- Guards the actual EN task prompt AND all marking rules, even if an
   -- in-place source edit incorrectly leaves task_version unchanged.
-  source_content_md5 text CHECK(source_content_md5 ~ '^[0-9a-f]{32}
+  source_content_md5 text CHECK(source_content_md5 ~ '^[0-9a-f]{32}$'),
+  -- Questions whose numeric answers were included in a public Git test
+  -- MUST NOT be activated as independent secret checkpoints.
+  source_answer_public boolean NOT NULL DEFAULT false,
+  expected_numeric numeric,
   -- Accepted alternate numbers are academically approved individually,
   -- e.g. an exact fraction and an explicitly requested rounded decimal.
   -- No broad +/- tolerance that could accept mathematically wrong answers.
@@ -66,6 +70,7 @@ CREATE TABLE IF NOT EXISTS private.exam_prep_hybrid_s4_checkpoint_keys_v1 (
   academic_review_ref text,
   approved_at timestamptz,
   PRIMARY KEY(assessment_id,item_order,part_label),
+  CHECK(NOT source_answer_public OR review_state<>'approved'),
   CHECK(review_state<>'approved' OR
     (expected_numeric IS NOT NULL AND abs(expected_numeric)<=1000000000000
       AND source_content_md5 IS NOT NULL
