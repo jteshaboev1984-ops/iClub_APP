@@ -1,0 +1,211 @@
+name: Mathematics P1 P5 S4 hybrid Paper isolated acceptance
+on:
+  pull_request:
+    branches:
+      - main
+      - docs/math-p1p5-s4-hybrid-paper-owner-decision-20261109
+    paths:
+      - 'supabase/migrations/*exam_prep_math_s4*.sql'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-live.js'
+      - 'scripts/p1p5-s4-*.cjs'
+      - 'scripts/p1p5-s2-signed-calendar-81-source.cjs'
+      - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
+      - 'scripts/p1p5-s3-chromium-mobile-three-language.cjs'
+      - '.github/workflows/math-p1p5-s4-hybrid-psql-jwt.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  s4-isolated:
+    name: S4 hybrid P1/P5 signed owner, no paper marks, no prior data loss
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      P1P5_E2E_ISOLATED: 'true'
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert only exact current candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test -f supabase/tests/p0_15_contract_bootstrap.sql
+      - name: Bootstrap isolated legacy and Supabase contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p0_15_contract_bootstrap.sql 2>&1 | tee -a p273-rehearsal.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_03_ephemeral_legacy_helpers.sql 2>&1 | tee -a p273-rehearsal.log
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1_05_ephemeral_legacy_fixture.sql 2>&1 | tee -a p273-rehearsal.log
+
+      - name: Apply complete current Exam Prep migration stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find supabase/migrations -maxdepth 1 -type f -name '*exam_prep*.sql' | sort)
+          test "${#files[@]}" -ge 1
+
+          apply_one() {
+            local f="$1"
+            local b
+            b="$(basename "$f")"
+            if [[ "$b" == '20260907061000_exam_prep_stage3_key_registry_v1.sql' ]]; then
+              echo '=== Replaying production Core-only controlled-beta boundary ===' | tee -a p273-rehearsal.log
+              psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='controlled_beta',core_enabled=true,ai_enabled=false,mentor_enabled=false,kill_switch=false,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
+            fi
+            if [[ "$b" == '20260911114829_exam_prep_p2_34_stage4_timed_section_majority_gate_v1.sql' ]]; then
+              echo '=== Normalizing historical Stage-4 patch anchors in isolated CI only ===' | tee -a p273-rehearsal.log
+              psql -v ON_ERROR_STOP=1 -f supabase/tests/p2_36_current_schema_replay_compat.sql >>p273-rehearsal.log 2>&1
+            fi
+            if [[ "$b" == '20260911121959_exam_prep_p2_36_real_expansion_governance_gate_v1.sql' ]]; then
+              echo '=== Seeding isolated production-shaped cohort dependency ===' | tee -a p273-rehearsal.log
+              psql -v ON_ERROR_STOP=1 -c "insert into private.exam_prep_beta_cohorts(cohort_key,program_key,cohort_status,planned_size,current_wave,monitoring_hours,notes) values('p236-ci-cohort','math_as_p1_p5','draft',12,0,72,'isolated P2-73 rehearsal dependency') on conflict(cohort_key) do nothing" >>p273-rehearsal.log 2>&1
+            fi
+            echo "=== Applying $f ===" | tee -a p273-rehearsal.log
+            psql -v ON_ERROR_STOP=1 -f "$f" >>p273-rehearsal.log 2>&1
+          }
+
+          recent=(
+            '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'
+            '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'
+            '20260910162000_exam_prep_retention_authorizer_reconcile.sql'
+            '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'
+            '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'
+            '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql'
+          )
+
+          for f in "${files[@]}"; do
+            b="$(basename "$f")"
+            case "$b" in
+              '20260910121500_exam_prep_p2_17_preserve_learning_priority_v1.sql'|\
+              '20260910160000_exam_prep_mixed_same_section_transfer_fix.sql'|\
+              '20260910162000_exam_prep_retention_authorizer_reconcile.sql'|\
+              '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql'|\
+              '20260910121001_exam_prep_p2_19_fresh_retest_and_plan_binding_v1.sql'|\
+              '20260910130529_exam_prep_p2_20_mixed_mastery_area_guard_v1.sql')
+                if [[ "$b" == '20260910164500_exam_prep_p2_18_weekly_plan_actionability_v1.sql' ]]; then
+                  echo '=== Replaying P2-17..P2-20 in production migration order ===' | tee -a p273-rehearsal.log
+                  for rb in "${recent[@]}"; do
+                    apply_one "supabase/migrations/$rb"
+                  done
+                fi
+                continue
+                ;;
+            esac
+            apply_one "$f"
+          done
+
+          echo '=== Reset isolated harness to fail-closed baseline ===' | tee -a p273-rehearsal.log
+          psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
+
+
+      - name: Seed ONLY disposable authenticated learners
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql > /tmp/p1p5-e2e-seed.log
+          echo "Disposable seed applied; no live project, token or account involved"
+      - name: Generate ephemeral JWT signing key and start local PostgREST
+        shell: bash
+        run: |
+          set -euo pipefail
+          disposable_jwt_secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$disposable_jwt_secret"
+          echo "P1P5_E2E_JWT_SECRET=$disposable_jwt_secret" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+      - name: Start disposable HTTP API
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --rm --name iclub-p1p5-local-postgrest --network host \
+            -e PGRST_DB_URI="postgres://postgres:postgres@127.0.0.1:5432/postgres" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$P1P5_E2E_JWT_SECRET" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 45); do
+            status="$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then
+              echo "Local PostgREST responding with HTTP $status"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs --tail 30 iclub-p1p5-local-postgrest
+          exit 1
+
+
+      - name: S4 verify runtime JavaScript syntax and migration owner-only assumptions
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-live.js
+          node --check scripts/p1p5-s4-signed-hybrid-owner-e2e.cjs
+          psql -v ON_ERROR_STOP=1 -At -c "SELECT
+            (SELECT count(*) FROM private.exam_prep_hybrid_s4_config_v1 WHERE paper_enabled=false AND stage_gates_enabled=false)=1
+            AND to_regprocedure('private.exam_prep_stage3_hybrid_operational_v1(uuid,bigint,text)') IS NOT NULL
+            AND to_regprocedure('private.exam_prep_stage4_hybrid_operational_v1(uuid,bigint,text)') IS NOT NULL
+            AND to_regprocedure('private.exam_prep_stage5_hybrid_operational_v1(uuid,bigint,text)') IS NOT NULL" | grep -qx t
+      - name: S4 actual owner and negative signed P1/P5 full Paper without typing, grades or mentor
+        run: |
+          set -euo pipefail
+          node scripts/p1p5-s4-signed-hybrid-owner-e2e.cjs
+      - name: S2 calendar and 81 source norms through same signed disposable HTTP owner
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s2-signed-calendar-81-source.cjs
+          node scripts/p1p5-s2-signed-calendar-81-source.cjs
+
+      - name: S3 optional weekly choices and factual reports through same signed disposable HTTP owner
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+          node scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+
+      - name: S4 live signed Chromium phone RU UZ and desktop EN for Paper-first UI
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          # The prior real signed test deliberately disabled S4 again; ONLY
+          # re-enable it on this disposable PostgreSQL17 runner for Chromium.
+          psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.exam_prep_hybrid_s4_config_v1 SET paper_enabled=true,stage_gates_enabled=true WHERE singleton"
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+          node --check scripts/p1p5-s4-chromium-hybrid-mobile.cjs
+          node scripts/p1p5-s4-chromium-hybrid-mobile.cjs
+      - name: S3 Chromium actual weekly decisions, RU UZ mobile and EN desktop
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s3-chromium-mobile-three-language.cjs
+          node scripts/p1p5-s3-chromium-mobile-three-language.cjs
+
+      - name: Clean disposable PostgREST
+        if: always()
+        run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true

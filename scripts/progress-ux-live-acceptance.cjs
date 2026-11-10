@@ -83,6 +83,11 @@ const html = language => `<!doctype html><html lang="${language}"><head><meta na
             getState:async component=>({ok:true,data:{components:[{component_code:component,
               operational_stage:2,coverage_pct:component==='P1'?18:6}]}}),
             weeklyPlan:async component=>({ok:true,data:structuredClone(window.__plans[component])}),
+            // S2/S3 are optional on the source-only visual fixture. Return the
+            // same valid empty contract when those feature modules are OFF.
+            personalHorizon:async()=>({ok:true,data:{}}),
+            studySchedule:async()=>({ok:true,data:{study_minutes_per_day:30,study_days_per_week:5}}),
+            weeklyChoiceS3:async()=>({ok:false,reason:'feature_not_deployed'}),
             syllabusTracker:async component=>({ok:true,data:tracker(component)}),
             authorizePlanItem:async(planId,order)=>{
               window.__authorizations.push({planId,order});
