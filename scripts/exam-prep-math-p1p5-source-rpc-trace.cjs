@@ -112,7 +112,26 @@ const S3_VOLUNTARY_RPC=[
   "claim_exam_prep_periodic_study_report_safe_v1",
   "get_exam_prep_periodic_study_reports_safe_v1"
 ];
-const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)&&!S2_CALENDAR_RPC.includes(n)&&!S3_VOLUNTARY_RPC.includes(n)).sort();
+const S4_HYBRID_RPC=[
+  "get_exam_prep_hybrid_s4_papers_safe_v1",
+  "get_exam_prep_hybrid_s4_history_safe_v1",
+  "get_exam_prep_hybrid_s4_stage_status_safe_v1",
+  "start_exam_prep_hybrid_s4_paper_safe_v1",
+  "get_exam_prep_hybrid_s4_session_safe_v1",
+  "finish_exam_prep_hybrid_s4_paper_safe_v1",
+  "check_exam_prep_hybrid_s4_final_safe_v1",
+  "reveal_exam_prep_hybrid_s4_review_safe_v1"
+];
+// S4 is optional and OFF by default in SQL. This source-only allowlist
+// names exactly the 8 owner-scoped versioned Paper RPCs; it grants nothing.
+const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)&&!S2_CALENDAR_RPC.includes(n)&&!S3_VOLUNTARY_RPC.includes(n)&&!S4_HYBRID_RPC.includes(n)).sort();
+const s4migration=read("supabase/migrations/20261109154000_exam_prep_math_s4_hybrid_paper_sessions_v1.sql");
+for(const name of S4_HYBRID_RPC) {
+  assert(found.has(name),"S4 owner-only Paper RPC missing from client: "+name);
+  assert(s4migration.includes(name),"S4 versioned SQL missing Paper RPC: "+name);
+}
+assert(s4migration.includes("paper_enabled boolean NOT NULL DEFAULT false"),
+  "S4 optional Paper feature must default OFF");
 assert(S3_VOLUNTARY_RPC.every(n=>found.has(n)),"S3 owner-only weekly decision / period RPC missing");
 assert(S2_CALENDAR_RPC.every(n=>found.has(n)),"Math P1/P2 owner-only calendar RPC missing");
 assert(EXTRA_HARD_RPC.every(n=>found.has(n)),"Math Extra Hard owner-only RPC missing");
@@ -187,5 +206,5 @@ for(const s of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
  assert(html.includes(s),'production index is not loading '+s);
 }
 assert(html.includes('id="exam-prep-host-root"'),'learner host root missing');
-console.log('Stage A source RPC trace GREEN: 60/60 existing core named RPCs + 4 Extra Hard + 4 S2 calendar + 4 S3 weekly/report; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
+console.log('Stage A source RPC trace GREEN: 60/60 existing core named RPCs + 4 Extra Hard + 4 S2 calendar + 4 S3 weekly/report + 8 S4 optional Paper; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
 console.log('NOTE: source-only regression; real authenticated HTTP→PostgREST→DB and actual device journeys are Stage B/C, NOT implied by GREEN.');
