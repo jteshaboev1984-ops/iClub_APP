@@ -4,8 +4,8 @@
 // Server-graded evidence has ALREADY prepared Stage 3 from published academic
 // content in isolated PostgreSQL; neither client nor fixture assigns mastery.
 // The result of all scored timed attempts originates in the public finalizer.
-// Written responses are learner artifacts, and self-marks are explicit 0,
-// NEVER machine/examiner-verified marks or an artificial readiness claim.
+// Written responses are learner artifacts, NOT self-graded examination marks.
+// D03: the retired self-mark RPC must never be called, even with 0 marks.
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
 const {execFileSync}=require('node:child_process');
@@ -74,20 +74,20 @@ async function finishSession(id,token,prefix,timed=false){
    p_session_id:id,p_idempotency_key:prefix+'-final',p_completion_reason:'submitted'
  },token),'idempotent finalizer replay');
  assert(replay.replayed===true,'timed duplicate finalization not idempotent');
- const selfChecks=frozen.filter(i=>i.kind==='written');
- const reviewBefore=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed before self review');
- if(selfChecks.length)assert(reviewBefore.score_status==='pending_self_review',
-  'unreviewed written content was incorrectly treated as machine-scored');
- for(const i of selfChecks){
-  const marked=ok(await rpc('submit_exam_prep_timed_written_self_mark_safe_v1',{
-   p_session_id:id,p_item_order:i.ord,p_marks_awarded:0,
-   p_idempotency_key:prefix+'-selfmark-'+i.ord,
-   p_review_note:'CI synthetic learner self review; deliberately no verified marks'
-  },token),'explicit self-review '+i.ord);
-  assert(marked.readiness_claim!==true,'self-mark cannot award readiness');
+ const writtenItems=frozen.filter(i=>i.kind==='written');
+ const reviewBefore=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed objective-only result');
+ if(writtenItems.length) {
+  assert.equal(reviewBefore.result_scope,'objective_only',
+   'D03 must only report objectively verified results');
+  assert.equal(reviewBefore.written_correctness,'unknown',
+   'unverified written content must remain unknown, not self-graded');
+  assert(reviewBefore.score_comparable!==true,
+   'written marks cannot make an objective-only result exam-score comparable');
  }
- const after=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed result after self review');
+ // Read the same immutable owner-bound result again: NO retired self-mark RPC.
+ const after=ok(await rpc('get_exam_prep_timed_result_safe_v1',{p_session_id:id},token),'timed stable objective-only review');
  assert(after.readiness_claim!==true,'test result promoted to human-certified readiness');
+ assert.equal(after.result_scope,'objective_only','D03 objective-only result drifted');
  assert(after.answered_items===frozen.length,'timed server did not count all submitted answers');
  assert(after.unattempted_items===0,'timed server lost answered item');
  const db=row("SELECT status,session_type,component_code FROM private.exam_prep_sessions WHERE id='"+id+"'::uuid");
