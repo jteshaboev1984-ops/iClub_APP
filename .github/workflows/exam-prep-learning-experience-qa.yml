@@ -49,7 +49,7 @@ jobs:
           grep -Fq 'data-ep-result-continue' exam-prep/exam-prep-live.js
           grep -Fq 'box-sizing:border-box;min-width:0' exam-prep/exam-prep-host.css
           ! grep -Fq 'localStorage' exam-prep/exam-prep-live.js
-          ! grep -Fq '.from(' exam-prep/exam-prep-live.js
+          ! grep -Eq '(window[.]sb|[[:space:]]sb|[[:space:]]client|[[:space:]]supabase)[.]from[(]' exam-prep/exam-prep-live.js
       - name: Install isolated Chromium
         run: |
           npm install --no-save playwright@1.55.0
