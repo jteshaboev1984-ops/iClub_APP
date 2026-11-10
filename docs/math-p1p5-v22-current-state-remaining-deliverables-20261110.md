@@ -1,0 +1,66 @@
+# iClub Mathematics P1/P5 — v2.2: accurate remaining work, not a test-repeat plan
+
+**Status date:** 2026-11-10 (Tashkent) · **Tracking:** [Issue #450](https://github.com/jteshaboev1984-ops/iClub_APP/issues/450) · **Source:** [roadmap v2.2](math-p1p5-v22-main-integration-roadmap-20261109.md), approved [S4 hybrid decision](math-p1p5-v22-s4-hybrid-paper-product-decision-20261109.md), [S4 academic source audit](math-p1p5-v22-s4-current-paper-source-audit-stage-gate-proposal-20261109.md).
+
+**Rule of engagement:** implement **remaining product capabilities**, not cyclic checks. At a meaningful source-stable checkpoint run ONE isolated signed PostgreSQL17/PostgREST/Chromium E2E, then fix only proven defects; stop rerunning unchanged historical packages. **Do not merge main, change production, user history, existing Practice, Tours, certificates, local progress or other subjects.** P0-16B security is separate and OPEN; beta-data cleanup requires distinct architect authorization.
+
+## 0. Correction to older status reports: live Exam Prep is NOT globally OFF
+
+Read-only live PostgreSQL on 2026-11-10, `private.exam_prep_feature_config`: **`rollout_state=controlled_beta`, `core_enabled=true`, `ai_enabled=true`, `mentor_enabled=false`, `kill_switch=false`, `qa_open_all_core=true`, `qa_open_all_weekly=true`**. These are the EXISTING controlled beta and AI tutor/availability flags; **they do NOT mean future tariff-based AI marking of handwriting is available** and **do NOT authorize permanent public Mathematics access**. No instruction here changes or disables those existing features.
+
+Separately: **the NEW S4 hybrid tables/config/checkpoint RPC were NOT DEPLOYED to live PostgreSQL** at the same SELECT-only inspection (all `to_regclass`/`to_regprocedure` returned NULL). They exist only in DRAFT source and default to OFF when first applied. Do not confuse legacy controlled beta with the new S4 launch.
+
+## 1. Where the roadmap really stands
+
+| Stage | Actual current state | What remains, without duplicate work |
+|---|---|---|
+| S0 — secure source/Extra Hard | Earlier academic 42/42 and source workflows completed per historical #450; separate from S4 | **Do not reimport or repeat**; only preserve regression invariants at final integration |
+| S1 — D03 learner self-mark removal | **DONE / PR #518 MERGED** to main | Keep firewall and old-client denial; never restore student-awarded written marks |
+| S2 — profile, calendar, 81 skills and workload | Source developed in **DRAFT #519** (`5a67f4d4044696e7b64996ec49cc163c83dbd0a7`), **not merged** | Reconcile dependencies with current main during controlled integration; do not redo workload academic inventory |
+| S3 — voluntary 7-day choices and real reports | Source developed in **DRAFT #520** (`fb25689525658030a1d34f622eabf05363e40fa8`), **not merged** | Integrate once with S2; no mandatory hours, planning or Mentor |
+| S4 — HYBRID Paper (approved product policy) | Product rule in **DRAFT #522**; paper-first server/UI, noncredit stage-reader prototype, source QA in **DRAFT #523**. Previous distinct SHA `3b79f596...` passed signed PG17/PostgREST/Chromium; latest security/schema changes NOT yet accepted by executable CI | Finish S4 actual content and one end-to-end integrated acceptance (below); keep default OFF |
+| S5 — P6 safe permanent public Mathematics Core access | **NOT developed/approved for public launch**; legacy `controlled_beta/core_enabled` is separate | Add source-only `public_math_core_enabled=false` owned-student eligibility contract, allow study OR competition access, guest/non-Math denial, AI existing-tariff isolation and independent kill switch. No mass public enable without owner GO |
+| S6 — one complete assembled E2E / focused P0 | **NOT DONE** for assembled current S2+S3+S4+S5 SHA | Assemble source once, check exact SHA on disposable PostgreSQL17 + signed JWT/PostgREST + Chromium RU/UZ/EN, old-session history/rollbacks, cross-subject denial. P0-16B stays separate |
+| S7 — selective merge, guarded release | **NO GO** (not authorized) | Rebase/reconcile small compatible commits onto actual main, review live migration order, data-preservation preflight, source+deployment SHA, release rollback, then separate architect GO for gradual S4/Core enablement; **no beta purge** |
+
+**Dependency chain:** #518 already merged → #519 source → #520 source → #522 owner decision → #523 S4 source → **S5 OFF source** → **S6 one integrated proof** → **S7 only after owner decision**. Do not bulk merge parent PR #492 or #516 or replay Extra Hard staging merely because the names are in historical roadmaps.
+
+## 2. S4: deliver actual useful Paper feedback, not another testing loop
+
+**Done in source:** paper-first P1/P5 forms (3 current distinct Paper keys per component, P1 10 written questions/75 marks/110 minutes; P5 7/50/75 minutes), no compulsory typed solving/upload/mentor, owner-only server journal, clock, separated training and noncredit answers, RU/UZ/EN, optional pre-reveal numeric comparison mechanism, original criteria and short hints; references to **official** MF19/Cambridge syllabus and normal distribution table (verified: pages 43 and 51 of 2026–27 syllabus), browser printing questions to PDF without copying a Cambridge document. No grades and no paper-derived L2/L3.
+
+**Academic gap:** 51/51 current tasks have criteria and short review tips but **full step-by-step worked solutions have NOT been source-verified**; those are different things. Finish a useful post-Paper review experience based on genuinely approved/licensed material. Do NOT label the short hints as full worked solutions or claim full-method marking.
+
+**Checkpoint gap and SECURITY CORRECTION:** the iClub Git repository has **PUBLIC visibility**. A previous S4 CI test committed explicit answer values/calculations for 12 real question subparts. Even though that CI script was removed from the current branch, **Git commit history remains accessible**; deletion alone cannot restore secrecy. Therefore these exact 12 subparts have been **QUARANTINED (`review_state=disabled`, `source_answer_public=true`, zero stored answer keys, and SQL denies `approved` for exposed rows)**. They remain usable as ordinary written learning tasks and noncredit criteria review, but cannot represent a fresh **independent secret-key checkpoint**. Do not silently restore their approval, force-push/rewrite public Git history, change repository visibility/Vercel integration or mutate production.
+
+**Actual next checkpoint work, not an invented quota:** choose a SMALL set of **different, not-publicly-exposed** numeric subparts (ideally spread across P1 and P5); independently source-verify exact/rounded equivalence; store the answer values in **private, owner-authorized key governance**, NOT Git, CI YAML, JS scripts, HTML, response body before reveal, public docs or analytics. Run one private-key signed E2E after implementation. If no safe keys are ready, leave optional checker empty and let learners skip directly to source-approved review; **do not delay Core solely to fabricate matches**. No value of a final answer is a full-paper mark. Teacher/Mentor marking and tariff-entitled AI method marking are **future-only** separate projects requiring approval and safeguards.
+
+**Remaining operational detail:** clarify the learner-visible label of elapsed time versus expiration, old-client session resume and print accessibility. Review existing preserved source route; no compulsory lesson/goal, time minimum or uploading.
+
+## 3. Current CI issue: one external startup blocker, not 15 unrelated code bugs
+
+At SHA `d3009c85c160b501a5a1b1b7cf2a06373d755795`, all 15 associated workflows reported `failure`; first 8 checked runs including the S4 dedicated workflow had **0 jobs**, with no runner checkout, SQL, Chromium or logs, and rerun was rejected with GitHub 403. Such jobs have **NOT tested the new code**. This pattern is consistent with a repository/account/Actions startup issue; its exact cause **cannot be inferred from a zero-job API response alone** (possible Actions policy/limits/billing/workflow registration). Don't create empty commits or keep rerunning to consume time and access limits.
+
+**Bounded recovery:** repository administrator should inspect the GitHub Actions run page error banner, account Actions/billing/spending and org/repo workflow policy if available; if no job can start, raise GitHub Support with the 0-job run IDs. Once Actions schedules jobs again, test ONE stable **final assembled SHA** and address only real failures. Earlier S4 pass [run #42670160269](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/42670160269) is real evidence only for its historical exact SHA, not current code. P0-16B is a separate security task, not fixed by a green S4 run.
+
+## 4. Quality/release goals and decision boundaries
+
+- **Academic learning:** learner can work all 10/7 questions on paper; training session status is an observation, never an assessment of handwritten success. Review tells the truth: requirements/hints vs full solutions. Topic recommendations remain noncredit. End of rehearsal allows a skip directly to review.
+- **Protected server/data:** all new calls require server owner identity, version, proof of scope, private keys, strict reveal order, default OFF. No new photos/files/AI prompts, no raw answer leakage, and no rewrite of old digital Paper attempts or old stage achievements.
+- **Operational stages:** Stage3 → 4 retains all verified-skill L2 and key L3; Stage4 → 5 retains genuine correction-plan governance; Stage5 → 6 retains all-skill L3 and closed corrections. One/two/three Paper trainings are **recommendations**, not blocked study/promotion; full-paper method/readiness remains UNKNOWN without actual marking.
+- **One practical voluntary beta pilot** may be arranged for a small group, e.g. 8–12 people if recruitment/consent available. Measure session completion, friction, optional match adoption, review usage and actual learning follow-through; **never invent real-user pilot results or make a fixed pilot duration/participant count a compulsory student gate**.
+- **Public release:** no changes to main, production, rollout flags, existing subscription/access tiers, AI tutor, user data or other subjects without separately approved owner GO. P0-16B remains OPEN and beta cleanup deferred.
+
+## 5. Clear NEXT execution order (priority, not microchecks)
+
+**NEXT A — S4 core content closure:** finish truthful after-Paper review, ensure alternative private candidate keys and protected-key governance; recheck only genuine newly changed logic. Key confidentiality from public Git is the highest product trust fix; current 12 exposed tasks stay disabled.
+
+**NEXT B — S5 public access source design, still OFF:** reconcile existing controlled-beta flags with a separate `public_math_core_enabled` switch so no accidental public unlock. Preserve users who are already enrolled and old records.
+
+**NEXT C — S6 once stable + infrastructure restored:** assemble exact source chain #519→#520→#522→#523→S5 and run one meaningful signed PG17/PostgREST/Chromium acceptance. Do not re-run the prior 53-step matrix solely for appearance.
+
+**NEXT D — S7 release proposal for architect:** concise go/no-go matrix, protected migration/release order, device smoke, per-feature kill switch and rollback; explicit GO needed before ANY public access or main/prod change. No mandatory Mentor, self-scoring, student-written uploads or paid AI as Core prerequisites.
+
+### Hand-off prompt
+
+> Continue iClub Mathematics P1/P5 Issue #450 from this v2.2 **remaining-deliverables status**, not old 12-key or CI replay instructions. Keep current S4 source-only DRAFT, default OFF and student-no-self-score policy. **Public Git history exposed the previously calculated 12 answers; these twelve source-pinned checkpoints are quarantined and must never count as independent or be approved.** Focus on learner review completeness and genuinely private new keys, then S5 public access default OFF, then one S6 assembled PG17/JWT/PostgREST/Chromium and S7 owner GO. GitHub Actions last 15 runs failed before creating jobs: inspect account/runner startup rather than blindly changing SQL. Existing live exam prep is controlled_beta with Core and ordinary AI enabled; NEW S4 is not deployed. Do not touch main, live state, user progress, Practice/Tours/certificates/other subjects or beta cleanup. P0-16B separate OPEN. Post exact SHA + actual CI + next task to Issue #450 after meaningful packages.
