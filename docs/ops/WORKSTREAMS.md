@@ -8,7 +8,7 @@ Project chat behavior: docs/ops/CHAT_PROTOCOL.md
 | Command / chat | Canonical source pointers | Scope / special constraints |
 | --- | --- | --- |
 | СТАРТ ICLUB / 00 Architecture | docs/ai-rollout-working-canon.md; issues/119 and 412 (verify temporary tracker relevance) | Product decisions, system design, priorities, approved release plans; direct requests still valid |
-| СТАРТ MATH / 01 Mathematics | docs/math-p1p5-v22-main-integration-roadmap-20261109.md; issues/450; inspect live related PRs including 519 and 520 | P1/P5 v2.2 dependency order and D03 execution-versus-marks firewall; preserve published Extra Hard V4.3 and learner attempts; do not replay already applied DB migrations |
+| СТАРТ MATH / 01 Mathematics | docs/math-p1p5-v22-main-integration-roadmap-20261109.md; issues/450; search CURRENT related PRs and dependencies (historical #519/#520 only if still applicable) | P1/P5 v2.2 dependency order and D03 execution-versus-marks firewall; preserve published Extra Hard V4.3 and learner attempts; do not replay already applied DB migrations |
 | СТАРТ ECON / 02 Economics | docs/exam-prep-economics-working-plan.md; issues/435 and 432; later academic/source checkpoints under docs/exam-prep-economics-* | 9708 distinct P1–P4 academic gates, independent unseen retests, no fabricated written scores, separate learner release |
 | СТАРТ CHEM / 03 Chemistry | latest appropriate docs/exam-prep-chemistry-j*.md; e.g., j21 and j22 source/backup gates; inspect recent PRs and Issues | Do not infer release approval from integration QA or an older document; preserve Chemistry scope |
 | СТАРТ BIO / future Biology | docs/biology-source-audit.txt, existing Biology specs and actual open work | Create a dedicated chat only when active work warrants it |
