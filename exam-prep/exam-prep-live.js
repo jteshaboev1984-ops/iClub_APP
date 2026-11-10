@@ -1586,7 +1586,12 @@
         failed:"Не удалось подтвердить действие. Повторно откройте попытку из истории.",
         reviewAgain:"Посмотреть разбор",notFinished:"В процессе",finished:"Завершена",
         earlyEnded:"Завершена досрочно",timeEnded:"Время закончилось",repeat:"Вернуться к Paper",
-        skill:"Тема",emptyHistory:"Тренировок пока нет",unknown:"Не проверено"
+        skill:"Тема",emptyHistory:"Тренировок пока нет",unknown:"Не проверено",
+        reviewIntro:"Сопоставьте своё решение в тетради с требованиями к каждому вопросу. Это ориентир для повторения, а не проверка вашей работы.",
+        reviewSteps:"На что обратить внимание в решении",reviewStepHelp:"Критерии показывают необходимые шаги и результаты. Они не являются полным образцом решения.",
+        revisitTopic:"Тема для повторения",reviewAll:"Разбор вопросов",reviewQuestion:"Открыть разбор вопроса",
+        reviewNoGrade:"Не ставьте себе баллы: приложение не проверяло ход письменного решения.",
+        reviewEmpty:"Для этого вопроса утверждённые критерии ещё не предоставлены."
       },
       uz:{
         title:"Sinov Paper",start:"Mashqni boshlash",history:"Mashqlarim",
@@ -1607,7 +1612,12 @@
         failed:"Amal tasdiqlanmadi. Mashqni tarixdan qayta oching.",
         reviewAgain:"Tahlilga qaytish",notFinished:"Davom etmoqda",finished:"Yakunlandi",
         earlyEnded:"Ertaroq yakunlandi",timeEnded:"Vaqt tugadi",repeat:"Paperga qaytish",
-        skill:"Mavzu",emptyHistory:"Hali mashqlar yo‘q",unknown:"Tekshirilmagan"
+        skill:"Mavzu",emptyHistory:"Hali mashqlar yo‘q",unknown:"Tekshirilmagan",
+        reviewIntro:"Daftardagi yechimingizni har bir savol mezonlari bilan taqqoslang. Bu takrorlash uchun yo‘riqnoma, ishni baholash emas.",
+        reviewSteps:"Yechimdagi muhim bosqichlar",reviewStepHelp:"Mezonlar kerakli bosqich va natijalarni ko‘rsatadi, ammo to‘liq namuna yechim emas.",
+        revisitTopic:"Takrorlash mavzusi",reviewAll:"Savollar tahlili",reviewQuestion:"Savol tahlilini ochish",
+        reviewNoGrade:"O‘zingizga ball qo‘ymang: yozma yechish usuli ilovada tekshirilmagan.",
+        reviewEmpty:"Bu savol uchun tasdiqlangan mezonlar hali mavjud emas."
       },
       en:{
         title:"Practice Paper",start:"Start Paper",history:"My practice sessions",
@@ -1628,7 +1638,12 @@
         failed:"Could not confirm the action. Reopen this session from your history.",
         reviewAgain:"Open review again",notFinished:"In progress",finished:"Ended",
         earlyEnded:"Ended early",timeEnded:"Time expired",repeat:"Back to Paper",
-        skill:"Topic",emptyHistory:"No past Paper sessions yet",unknown:"Not assessed"
+        skill:"Topic",emptyHistory:"No past Paper sessions yet",unknown:"Not assessed",
+        reviewIntro:"Compare your notebook working with each question's approved criteria. This guides revision; your written work was not graded.",
+        reviewSteps:"Steps to look for in your working",reviewStepHelp:"Criteria identify expected methods and outcomes; they are not a complete worked solution.",
+        revisitTopic:"Topic to revisit",reviewAll:"Question-by-question review",reviewQuestion:"Open this question's review",
+        reviewNoGrade:"Do not award yourself marks: the app has not checked your written method.",
+        reviewEmpty:"Approved criteria are not available for this question."
       }
     })[state.language] || hybridS4CopyFallback();
   }
@@ -1837,22 +1852,36 @@
     state.busy=false;
     if(!res?.ok || res.data?.session_id!==sessionId){renderError();return;}
     const c=hybridS4Copy(),items=Array.isArray(res.data.items)?res.data.items:[];
-    const body=items.map(item=>
-      '<section class="ep-live-card ep-live-question-card">'+
-      '<div class="ep-live-head"><strong>'+esc(copy().question)+' '+Number(item.item_order)+
-      '</strong><span class="ep-live-meta">'+esc(c.skill)+': '+esc(item.skill_code||"")+'</span></div>'+
-      '<div class="ep-live-qtext">'+uxMath(item.prompt||"")+'</div>'+
-      '<strong>'+esc(c.requirements)+'</strong>'+
-      '<ol class="ep-live-rubric">'+(Array.isArray(item.requirements)?
-        item.requirements.map(rule=>'<li>'+uxMath(rule||"")+'</li>').join(""):"")+'</ol>'+
-      (item.review_hint?'<p class="ep-live-notice"><strong>'+esc(c.hint)+
-        ':</strong> '+esc(item.review_hint)+'</p>':"")+
-      '</section>').join("");
+    // The source contains approved criteria + brief review hints only.
+    // Do not manufacture a worked solution, Cambridge result or student marks.
+    const body=items.map((item,index)=>{
+      const steps=Array.isArray(item.requirements)?item.requirements.filter(x=>
+        typeof x==="string"&&x.trim().length>0):[];
+      return '<details class="ep-live-card ep-live-question-card" data-ep-hybrid-s4-review-item="'+
+        Number(item.item_order)+'"'+(index===0?' open':'')+'>'+
+        '<summary class="ep-live-head"><strong>'+esc(copy().question)+' '+
+        Number(item.item_order)+'</strong><span class="ep-live-meta">'+
+        esc(c.reviewQuestion)+'</span></summary>'+
+        '<div class="ep-live-qtext">'+uxMath(item.prompt||"")+'</div>'+
+        '<p class="ep-live-meta"><strong>'+esc(c.revisitTopic)+':</strong> '+
+        esc(item.skill_code||c.unknown)+'</p>'+
+        '<strong>'+esc(c.reviewSteps)+'</strong>'+
+        '<p class="ep-live-meta">'+esc(c.reviewStepHelp)+'</p>'+
+        (steps.length?'<ol class="ep-live-rubric" data-ep-hybrid-s4-criteria>'+
+          steps.map(rule=>'<li>'+uxMath(rule)+'</li>').join("")+'</ol>':
+          '<p class="ep-live-meta">'+esc(c.reviewEmpty)+'</p>')+
+        (item.review_hint?'<p class="ep-live-notice"><strong>'+esc(c.hint)+
+          ':</strong> '+esc(item.review_hint)+'</p>':"")+
+        '</details>';
+    }).join("");
     const root=rootEl();if(!root)return;
     root.innerHTML=shell('<div data-ep-hybrid-s4-review>'+
       '<section class="ep-live-card"><div class="ep-live-head"><strong>'+component+
       ' · '+esc(c.review)+'</strong></div><p class="ep-live-notice">'+esc(c.noScore)+'</p>'+
-      '<p class="ep-live-meta">'+esc(c.noWorked)+'</p></section>'+body+
+      '<p class="ep-live-meta">'+esc(c.noWorked)+'</p>'+
+      '<p class="ep-live-meta">'+esc(c.reviewIntro)+'</p>'+
+      '<p class="ep-live-meta">'+esc(c.reviewNoGrade)+'</p>'+
+      '<strong>'+esc(c.reviewAll)+'</strong></section>'+body+
       '<section class="ep-live-card"><button type="button" class="ep-live-btn secondary"'+
       ' data-ep-hybrid-s4-back>'+esc(c.back)+'</button></section></div>');
     root.querySelector('[data-ep-hybrid-s4-back]')?.addEventListener("click",()=>{
