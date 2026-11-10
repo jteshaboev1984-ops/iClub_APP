@@ -1,7 +1,10 @@
 -- Issue #450 S4: 12 real academically re-derived written final-answer CHECKPOINT CANDIDATES.
 -- Source fingerprints were obtained via live READ-ONLY SELECT on 2026-11-09.
 -- This migration does NOT publish any student-facing answer key.
--- All 12 rows remain review_state='candidate' with expected_numeric=NULL.
+-- PUBLIC GIT history included values for these 12 subparts in a superseded CI
+-- script. They are therefore QUARANTINED, NOT blind or independently graded:
+-- review_state='disabled', source_answer_public=true, expected_numeric=NULL.
+-- Use new unexposed questions with privately stored keys for future checking.
 -- Default S4 flags remain OFF and no stage/legacy data are changed.
 -- Exact numeric keys can be approved ONLY in a later private, owner-reviewed
 -- and cryptographically version-pinned operation after 12-case signed tests.
@@ -47,10 +50,10 @@ BEGIN
   )
   INSERT INTO private.exam_prep_hybrid_s4_checkpoint_keys_v1(
     assessment_id,item_order,part_label,written_task_id,source_task_version,
-    source_content_md5,review_state,academic_review_ref
+    source_content_md5,source_answer_public,review_state,academic_review_ref
   )
   SELECT assessment_id,item_order,part_label,written_task_id,task_version,
-    source_md5,'candidate','s4-source-fingerprint-audit-20261109'
+    source_md5,true,'disabled','s4-public-answer-history-quarantine-20261110'
   FROM checked
   ON CONFLICT(assessment_id,item_order,part_label) DO NOTHING;
 
@@ -82,7 +85,7 @@ BEGIN
   WHERE k.written_task_id=e.written_task_id
     AND k.source_task_version=e.task_version
     AND k.source_content_md5=e.source_md5
-    AND k.review_state='candidate'
+    AND k.source_answer_public=true AND k.review_state='disabled'
     AND k.expected_numeric IS NULL;
   IF v_verified<>12 THEN
     RAISE EXCEPTION 'S4 checkpoint candidate catalog drift: expected 12 pinned, found %', v_verified
