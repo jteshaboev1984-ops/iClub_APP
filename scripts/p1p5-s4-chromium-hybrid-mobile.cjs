@@ -20,7 +20,9 @@ const token=part+'.'+crypto.createHmac('sha256',SECRET).update(part).digest('bas
 async function run(){
  const browser=await chromium.launch({headless:true});
  try{
-  for(const [lang,component,width] of [['ru','P1',390],['uz','P5',375],['en','P1',1280]]){
+  for(const [lang,component,width,clientRollout] of [
+   ['ru','P1',390,'controlled_beta'],['uz','P5',375,'controlled_beta'],
+   ['en','P1',1280,'mass']]){
    const page=await browser.newPage({viewport:{width,height:850},timezoneId:'Asia/Tashkent'});
    const errors=[],trace=[];page.on('pageerror',e=>errors.push(e.message));
    page.on('dialog',d=>d.accept());
@@ -30,7 +32,7 @@ async function run(){
     }));
     await page.goto(HOST+'/');
     await page.addStyleTag({path:path.resolve('exam-prep/exam-prep-host.css')});
-    await page.evaluate(({token,lang})=>{
+    await page.evaluate(({token,lang,clientRollout})=>{
      window.iClubExamPrepHybridPaperS4Enabled=true;
      window.__hybridTrace=[];
      window.sb={rpc:async(name,args={})=>{
@@ -38,13 +40,21 @@ async function run(){
          'Content-Type':'application/json','Authorization':'Bearer '+token
        },body:JSON.stringify(args)});
        let value=null;try{value=await res.json()}catch{}
+       // For the EN desktop case, emulate ONLY the existing capability
+       // rollout label 'mass' at the browser boundary. The real signed API
+       // remains isolated controlled_beta and enforces the same owner auth.
+       if(res.ok && name==='get_exam_prep_capabilities_v1' && clientRollout==='mass'){
+         value=Array.isArray(value)
+           ?value.map(row=>({...row,rollout_state:'mass'}))
+           :{...value,rollout_state:'mass'};
+       }
        window.__hybridTrace.push({name,ok:res.ok,status:res.status});
        return res.ok?{data:value,error:null}:{data:null,error:{
          code:value?.code||String(res.status),message:value?.message||'error'
        }};
      }};
      window.i18n={getLang:()=>lang};
-    },{token,lang});
+    },{token,lang,clientRollout});
     for(const file of ['exam-prep/exam-prep-api.js',
       'exam-prep/exam-prep-host.js','exam-prep/exam-prep-live.js',
       'exam-prep/exam-prep-written-understanding-ui.js'])
@@ -54,7 +64,11 @@ async function run(){
       const open=await window.iClubExamPrep.open({subjectKey:'mathematics',language:lang});
       return{sync,open};
     },lang);
-    assert(opened.sync&&opened.open,'Math host did not start');
+    assert(opened.sync&&opened.open,'Math host did not start in '+clientRollout);
+    const effectiveRollout=await page.evaluate(()=>
+      window.iClubExamPrepHostInternal.lastCapabilities?.rolloutState);
+    assert.equal(effectiveRollout,clientRollout,
+      'client view of existing rollout must match the simulated release state');
     // Stage0 component cards correctly start diagnosis; Paper pilot is an
     // independent server-gated voluntary entry and must not change that flow.
     const pilot=page.locator('[data-ep-hybrid-s4-dashboard-open="'+component+'"]');
