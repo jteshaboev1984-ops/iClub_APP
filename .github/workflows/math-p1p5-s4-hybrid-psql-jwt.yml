@@ -9,6 +9,9 @@ on:
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-live.js'
       - 'scripts/p1p5-s4-*.cjs'
+      - 'scripts/p1p5-s2-signed-calendar-81-source.cjs'
+      - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
+      - 'scripts/p1p5-s3-chromium-mobile-three-language.cjs'
       - '.github/workflows/math-p1p5-s4-hybrid-psql-jwt.yml'
   workflow_dispatch:
 permissions:
@@ -172,6 +175,18 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/p1p5-s4-signed-hybrid-owner-e2e.cjs
+      - name: S2 calendar and 81 source norms through same signed disposable HTTP owner
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s2-signed-calendar-81-source.cjs
+          node scripts/p1p5-s2-signed-calendar-81-source.cjs
+
+      - name: S3 optional weekly choices and factual reports through same signed disposable HTTP owner
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+          node scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+
       - name: S4 live signed Chromium phone RU UZ and desktop EN for Paper-first UI
         run: |
           set -euo pipefail
@@ -185,6 +200,12 @@ jobs:
           npx playwright install --with-deps chromium
           node --check scripts/p1p5-s4-chromium-hybrid-mobile.cjs
           node scripts/p1p5-s4-chromium-hybrid-mobile.cjs
+      - name: S3 Chromium actual weekly decisions, RU UZ mobile and EN desktop
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s3-chromium-mobile-three-language.cjs
+          node scripts/p1p5-s3-chromium-mobile-three-language.cjs
+
       - name: Clean disposable PostgREST
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
