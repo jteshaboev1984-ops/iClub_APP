@@ -1,0 +1,296 @@
+{
+  "manifest": {
+    "version": "economics_partial_gap_batch5_v0_2026_10_09",
+    "source": "Official Cambridge Economics 9708 2026-2028 v2; supplied Economics fourth edition, chapters 2,3,13,14",
+    "editorial_status": "DRAFT ONLY; teacher and language review pending",
+    "assessment_keys_included": false,
+    "live": false
+  },
+  "cards": [
+    {
+      "syllabus_point": "1.2.1",
+      "skill_key": "ECON-9708-1.2.1-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 2,
+      "locale": "en",
+      "title": "Economics as a social science",
+      "explanations": {
+        "main": "Economics studies how people, firms and governments decide how to use scarce resources. It is a social science because its subject is human behaviour and institutions. Economists use models, evidence and hypotheses, but their predictions depend on assumptions and changing conditions. An observed correlation does not by itself prove causation.",
+        "simple": "Economics looks at human choices under scarcity. Data and models help explain those choices but cannot perfectly predict everyone.",
+        "alternative": "Places with more public transport may also have higher incomes. That alone does not prove transport caused income growth: business activity or population may affect both.",
+        "focus": "Does a correlation always prove one factor caused another? No. Why do economists state assumptions? Human behaviour and circumstances vary."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "1.2.1",
+      "skill_key": "ECON-9708-1.2.1-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 2,
+      "locale": "ru",
+      "title": "Экономика как общественная наука",
+      "explanations": {
+        "main": "Экономика изучает, как люди, фирмы и государство используют ограниченные ресурсы. Это общественная наука, поскольку она исследует поведение людей и работу общественных институтов. Экономисты применяют модели, гипотезы и данные, но результаты зависят от допущений и обстоятельств. Наблюдаемая корреляция сама по себе не доказывает причинную связь.",
+        "simple": "Экономика изучает выбор людей в условиях ограниченности ресурсов. Данные и модели помогают, но не гарантируют идеального прогноза.",
+        "alternative": "В городах с развитым общественным транспортом доходы могут быть выше. Но это не доказывает, что транспорт вызвал рост доходов: на оба показателя могла повлиять деловая активность.",
+        "focus": "Всегда ли корреляция доказывает причину? Нет. Зачем нужны допущения? Поведение людей и условия меняются."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "1.2.1",
+      "skill_key": "ECON-9708-1.2.1-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 2,
+      "locale": "uz",
+      "title": "Iqtisodiyot ijtimoiy fan sifatida",
+      "explanations": {
+        "main": "Iqtisodiyot odamlar, firmalar va davlat taqchil resurslardan qanday foydalanishini o‘rganadi. U ijtimoiy fan, chunki inson xatti-harakati va institutlarni tadqiq qiladi. Iqtisodchilar model, dalil va farazlardan foydalanadi, ammo natija sharoit va taxminlarga bog‘liq. Kuzatilgan korrelyatsiya bir hodisa ikkinchisiga sabab bo‘lganini o‘zi isbotlamaydi.",
+        "simple": "Iqtisodiyot taqchillik sharoitidagi inson tanlovini o‘rganadi. Ma’lumot va modellar foydali, lekin har bir odamni aniq bashorat qila olmaydi.",
+        "alternative": "Jamoat transporti yaxshi rivojlangan shaharlarda daromad ham yuqori bo‘lishi mumkin. Bu aynan transport daromadni oshirganini isbotlamaydi: biznes faoliyati ikkisini ham o‘zgartirishi mumkin.",
+        "focus": "Korrelyatsiya har doim sababiyatni isbotlaydimi? Yo‘q. Nega farazlar kerak? Sharoit va inson xulqi o‘zgaradi."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "1.3.1",
+      "skill_key": "ECON-9708-1.3.1-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 3,
+      "locale": "en",
+      "title": "Four factors of production",
+      "explanations": {
+        "main": "Land includes all natural resources such as soil, water and mineral reserves. Labour means people's physical and mental work. Capital is human-made productive equipment and buildings, rather than merely the money used to purchase them. Enterprise is the organisation of the other factors and the bearing of entrepreneurial risk. A bakery combines natural inputs, bakers, ovens and an entrepreneur's decisions.",
+        "simple": "Land is nature. Labour is human work. Capital is productive equipment. Enterprise is organisation and risk-taking.",
+        "alternative": "On a farm, soil and water are land, workers provide labour, irrigation machines are capital, and the organiser who bears the business risk supplies enterprise.",
+        "focus": "Are cash savings automatically physical capital? No. A bakery oven is capital; its risk-taking owner provides enterprise."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "1.3.1",
+      "skill_key": "ECON-9708-1.3.1-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 3,
+      "locale": "ru",
+      "title": "Четыре фактора производства",
+      "explanations": {
+        "main": "Земля как фактор производства включает природные ресурсы: почву, воду и полезные ископаемые. Труд означает физические и умственные усилия работников. Капитал — созданные человеком средства производства, включая оборудование и здания, а не просто деньги для их покупки. Предпринимательство объединяет остальные факторы и предполагает принятие коммерческого риска. Пекарня использует природные ресурсы, труд пекарей, печи и решения предпринимателя.",
+        "simple": "Земля — природные ресурсы. Труд — работа людей. Капитал — производственное оборудование. Предпринимательство — организация и риск.",
+        "alternative": "На ферме почва — земля, сельскохозяйственный работник — труд, поливочная техника — капитал, организующий производство владелец — предпринимательство.",
+        "focus": "Денежные сбережения сами по себе физический капитал? Нет. Печь — капитал, а принятие риска владельцем — предпринимательство."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "1.3.1",
+      "skill_key": "ECON-9708-1.3.1-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 3,
+      "locale": "uz",
+      "title": "Ishlab chiqarishning to‘rt omili",
+      "explanations": {
+        "main": "Yer omili tuproq, suv va foydali qazilmalar kabi tabiiy resurslarni o‘z ichiga oladi. Mehnat insonning jismoniy va aqliy faoliyatidir. Kapital ishlab chiqarishda ishlatiladigan inson yaratgan uskuna va binolardir; ularni sotib olishga sarflangan pulning o‘zi jismoniy kapital emas. Tadbirkorlik boshqa omillarni birlashtirish, ishlab chiqarishni boshqarish va tijorat xavfini olishni anglatadi. Nonvoyxona tabiiy resurslar, novvoylar mehnati, pechlar va tadbirkorning qarorlarini birlashtiradi.",
+        "simple": "Yer — tabiiy resurslar, mehnat — odamlar ishi, kapital — ishlab chiqarish uskunalari, tadbirkorlik — boshqarish va tavakkal.",
+        "alternative": "Fermada tuproq yer omili, ishchi mehnat, sug‘orish uskunasi kapital va loyihani boshqaruvchi tavakkal qilgan tadbirkor enterprise omilidir.",
+        "focus": "Pul jamg‘armasi avtomatik ravishda jismoniy kapitalmi? Yo‘q. Pech kapital, tijorat xavfini oladigan tashkilotchi esa tadbirkor."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "1.3.2",
+      "skill_key": "ECON-9708-1.3.2-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 3,
+      "locale": "en",
+      "title": "Human and physical capital",
+      "explanations": {
+        "main": "Human capital is the skills, knowledge, health and experience embodied in people that contribute to productivity. Physical capital is human-made productive machinery, equipment and buildings. Worker training expands human capital, while a new machine adds physical capital. Both may complement each other: skilled workers can use advanced equipment more effectively. Unlike a machine, human capital remains linked to the person who possesses it.",
+        "simple": "Human capital is what workers know and can do. Physical capital is the equipment they use.",
+        "alternative": "A clinic trains a nurse in a new procedure: human capital increases. It buys a scanner: physical capital increases. Together they may raise productivity.",
+        "focus": "Does a new robot add human capital? No. Does professional training increase human capital? Yes."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "1.3.2",
+      "skill_key": "ECON-9708-1.3.2-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 3,
+      "locale": "ru",
+      "title": "Человеческий и физический капитал",
+      "explanations": {
+        "main": "Человеческий капитал — знания, навыки, здоровье и опыт людей, которые повышают производительность. Физический капитал — созданные человеком производственные машины, оборудование и здания. Обучение работников увеличивает человеческий капитал, покупка станка — физический. Оба могут дополнять друг друга: подготовленные сотрудники эффективнее используют современные технологии. В отличие от станка, человеческий капитал связан с человеком, который им обладает.",
+        "simple": "Человеческий капитал — умения людей. Физический капитал — машины и оборудование, которые помогают им работать.",
+        "alternative": "Клиника обучила медсестру новой процедуре: вырос человеческий капитал. Купила сканер: вырос физический. В сочетании оба могут повысить производительность.",
+        "focus": "Новый робот увеличивает человеческий капитал? Нет. Повышение квалификации увеличивает? Да."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "1.3.2",
+      "skill_key": "ECON-9708-1.3.2-BASE",
+      "level": "AS",
+      "tour": 1,
+      "book_chapter": 3,
+      "locale": "uz",
+      "title": "Inson va jismoniy kapital",
+      "explanations": {
+        "main": "Inson kapitali odamlarning bilimlari, ko‘nikmalari, sog‘lig‘i va tajribasidan iborat bo‘lib, unumdorlikni oshiradi. Jismoniy kapital — ishlab chiqarishda ishlatiladigan inson yaratgan mashinalar, uskunalar va binolardir. Xodimni o‘qitish inson kapitalini, yangi uskuna olish jismoniy kapitalni oshiradi. Ular bir-birini to‘ldirishi mumkin: malakali mutaxassis zamonaviy qurilmadan samaraliroq foydalanadi. Uskunadan farqli ravishda inson kapitali uni egallagan shaxsga bog‘liq.",
+        "simple": "Inson kapitali — ishchining bilimi va mahorati. Jismoniy kapital — u ishlatadigan uskuna.",
+        "alternative": "Klinika hamshiraga yangi muolajani o‘rgatdi — inson kapitali oshdi. Yangi skaner sotib oldi — jismoniy kapital oshdi. Ikkalasi birga unumdorlikni yaxshilaydi.",
+        "focus": "Yangi robot inson kapitalimi? Yo‘q. Kasbiy tayyorgarlik inson kapitalini oshiradimi? Ha."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "3.2.2",
+      "skill_key": "ECON-9708-3.2.2-BASE",
+      "level": "AS",
+      "tour": 2,
+      "book_chapter": 13,
+      "locale": "en",
+      "title": "Subsidy incidence and market effects",
+      "explanations": {
+        "main": "A per-unit subsidy to producers effectively shifts supply downward. Buyers may pay a lower price and sellers receive the buyer price plus the subsidy. Who benefits more depends on relative demand and supply elasticities: the less price-responsive side usually receives more of the benefit. A $4 subsidy creates a $4 wedge between the buyer and seller prices, not necessarily a $4 reduction for customers. If 150 eligible units receive $4 each, direct government spending is $600, ignoring administration.",
+        "simple": "Subsidies can reduce buyer prices and increase seller receipts. Their benefits depend on elasticities, and they cost the budget.",
+        "alternative": "A product initially costs $10. After a $4 subsidy, buyers pay $8 and sellers receive $12. Both benefit by $2 per unit relative to the old price; another demand or supply shape could produce a different split.",
+        "focus": "Does a $4 subsidy always lower the buyer price by $4? No. At 150 units, budget cost is 4×150=$600."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "3.2.2",
+      "skill_key": "ECON-9708-3.2.2-BASE",
+      "level": "AS",
+      "tour": 2,
+      "book_chapter": 13,
+      "locale": "ru",
+      "title": "Распределение выгоды от субсидии",
+      "explanations": {
+        "main": "Субсидия производителям на единицу товара эффективно сдвигает предложение вниз. Покупатели могут платить меньше, а производители получают уплаченную покупателем цену плюс субсидию. Распределение выгоды зависит от относительной эластичности спроса и предложения: менее чувствительная к цене сторона обычно получает большую долю. Субсидия $4 создаёт разрыв $4 между ценой покупателя и поступлением продавца, но не обязательно снижает розничную цену на $4. При 150 субсидируемых единицах прямые расходы бюджета равны $600 без административных затрат.",
+        "simple": "Субсидия может снизить цену для покупателя и повысить поступления продавца. Выгода распределяется в зависимости от эластичности и оплачивается бюджетом.",
+        "alternative": "Изначально цена $10. После субсидии $4 покупатели платят $8, а продавцы получают $12. Относительно исходной цены обе стороны выигрывают по $2 на единицу; при других эластичностях доли изменятся.",
+        "focus": "Обязательно ли субсидия $4 снижает цену покупателя на $4? Нет. При 150 единицах расходы бюджета 4×150=$600."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "3.2.2",
+      "skill_key": "ECON-9708-3.2.2-BASE",
+      "level": "AS",
+      "tour": 2,
+      "book_chapter": 13,
+      "locale": "uz",
+      "title": "Subsidiya foydasining taqsimlanishi",
+      "explanations": {
+        "main": "Ishlab chiqaruvchiga birlik uchun subsidiya berilishi taklif egri chizig‘ini samarali ravishda pastga siljitadi. Xaridor kamroq to‘lashi, sotuvchi esa xaridor narxiga subsidiyani qo‘shgan summani olishi mumkin. Kim ko‘proq foyda olishi talab va taklifning nisbiy elastikligiga bog‘liq: odatda narxga kamroq moslashadigan tomon ko‘proq foyda oladi. $4 subsidiya xaridor to‘lagan narx bilan sotuvchi olgan summa orasida $4 farq yaratadi, ammo chakana narx albatta $4 ga tushmaydi. 150 birlik uchun to‘g‘ridan-to‘g‘ri budjet sarfi, boshqaruv xarajatlarisiz, $600 bo‘ladi.",
+        "simple": "Subsidiya xaridor uchun narxni pasaytirishi va sotuvchi oladigan summani oshirishi mumkin. Foyda elastiklikka bog‘liq; xarajatni budjet qoplaydi.",
+        "alternative": "Avvalgi narx $10. $4 subsidiyadan keyin xaridor $8 to‘laydi, sotuvchi $12 oladi. Ikkalasi ham oldingi narxga nisbatan $2 dan foyda oladi; boshqa elastiklikda ulushlar o‘zgaradi.",
+        "focus": "$4 subsidiya xaridor narxini doimo $4 ga tushiradimi? Yo‘q. 150 birlik uchun budjet 4×150=$600 sarflaydi."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "3.3.3",
+      "skill_key": "ECON-9708-3.3.3-BASE",
+      "level": "AS",
+      "tour": 2,
+      "book_chapter": 14,
+      "locale": "en",
+      "title": "Economic causes of income and wealth inequality",
+      "explanations": {
+        "main": "Income inequality reflects differences in wages, self-employment profits, property income and transfers. Wage differences can arise from skills, education, labour demand, bargaining power or discrimination. Wealth inequality depends on accumulated assets: saving histories, inheritance, ownership of land or shares and changes in asset prices. Two families with equal wages may have unequal wealth if one inherited property that produces rent. Distinguish income as a flow over time from wealth as the stock of assets at a date.",
+        "simple": "People earn different amounts because of skills, jobs and opportunities. Wealth also depends on inherited and accumulated assets.",
+        "alternative": "Two households each earn $25,000 from work, but one owns a rented flat inherited from relatives. Their wages are equal, but their total income and wealth can differ.",
+        "focus": "Does wealth mean a year's salary? No. Can rising property values widen wealth inequality without changing salaries? Yes."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "3.3.3",
+      "skill_key": "ECON-9708-3.3.3-BASE",
+      "level": "AS",
+      "tour": 2,
+      "book_chapter": 14,
+      "locale": "ru",
+      "title": "Причины неравенства доходов и богатства",
+      "explanations": {
+        "main": "Неравенство доходов отражает различия зарплат, прибыли, доходов от собственности и трансфертов. Оплата труда зависит от квалификации, образования, спроса на профессии, переговорной силы и дискриминации. Неравенство богатства связано с накопленными активами: сбережениями, наследством, владением землёй и акциями, изменением цен на имущество. Две семьи с равными зарплатами могут иметь разное богатство, если одна унаследовала квартиру и получает арендный доход. Доход — поток за период, богатство — запас активов на дату.",
+        "simple": "Зарплаты различаются из-за образования, профессий и возможностей. На богатство также влияют собственность и наследство.",
+        "alternative": "Две семьи получают по $25 000 от работы, но одна владеет унаследованной квартирой, которую сдаёт. Зарплаты равны, а богатство и общий доход могут различаться.",
+        "focus": "Богатство означает годовую зарплату? Нет. Может ли рост цен на жильё увеличить неравенство богатства без роста зарплат? Да."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    },
+    {
+      "syllabus_point": "3.3.3",
+      "skill_key": "ECON-9708-3.3.3-BASE",
+      "level": "AS",
+      "tour": 2,
+      "book_chapter": 14,
+      "locale": "uz",
+      "title": "Daromad va boylik tengsizligi sabablari",
+      "explanations": {
+        "main": "Daromad tengsizligi ish haqi, tadbirkorlik foydasi, mulk daromadi va transfertlarning farqini aks ettiradi. Ish haqi malaka, ta’lim, kasbga talab, muzokara kuchi va kamsitishga bog‘liq bo‘lishi mumkin. Boylik tengsizligi jamg‘arilgan aktivlar: o‘tgan jamg‘armalar, meros, yer yoki aksiya egaligi va aktivlar narxining o‘zgarishiga bog‘liq. Ish haqi bir xil bo‘lgan ikki oilaning boyligi farq qilishi mumkin, agar biri ijaraga beradigan uy meros olgan bo‘lsa. Daromad — davr davomida oqim, boylik — ma’lum kundagi aktivlar zaxirasi.",
+        "simple": "Odamlar malaka, kasb va imkoniyatlar farqi sabab har xil daromad oladi. Boylikka meros va mulk ham ta’sir qiladi.",
+        "alternative": "Ikki oila ishidan $25 000 dan oladi, ammo biriga ijaraga beriladigan uy meros qolgan. Ularning maoshi teng, jami daromadi va boyligi turlicha bo‘lishi mumkin.",
+        "focus": "Boylik bir yillik maoshmi? Yo‘q. Uy narxi oshishi maosh o‘zgarmaganda ham boylik tengsizligini oshirishi mumkinmi? Ha."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "question_to_skill_verification": "NONE_VERIFIED",
+      "runtime_allowed": false
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "manifest": {
+    "id": "economics_9708_remaining_batch3a_v0",
+    "basis": "Cambridge 9708 syllabus 2026–2028 v2, supplied Economics 4th edition",
+    "no_protected_question_data": true,
+    "approval": false,
+    "release": false,
+    "notes": "Standalone original draft. Graphs are textual blueprints, not production diagrams; validate before publishing.",
+    "qa_note_2026_10_09": "Cambridge AS learner readability: mathematical derivative notation replaced by straight-line gradient/percentage method for 2.2.5 across EN RU UZ, with identical numerical examples."
+  },
+  "cards": [
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.2.5",
+      "skill": "ECON-9708-2.2.5-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 8,
+      "locale": "en",
+      "title": "PED along one straight demand curve",
+      "explanations": {
+        "main": "For a straight-line demand curve, its slope is constant but its price elasticity is not. PED compares the percentage change in quantity demanded with the percentage change in price. On a straight line, its local value can be found as the constant gradient (change in Q divided by change in P), multiplied by P/Q. Near the top, P/Q is large and demand is elastic. At the midpoint its absolute elasticity is one; near the bottom it is inelastic. Do not confuse the numerical slope of a curve with its elasticity.",
+        "simple": "High on a straight demand line: elastic. Middle: unit elastic. Low: inelastic. The line has not changed shape; the percentage responsiveness changes.",
+        "alternative": "Take Q=10−P. At P=8 and Q=2, PED is −4. At P=5 and Q=5 it is −1. At P=2 and Q=8 it is −0.25. The absolute elasticity falls as we move down the line.",
+        "focus": "Where is PED equal to one on a straight demand curve? At its midpoint. Does a constant slope mean constant PED? No."
+      },
+      "worked_example": "For the line Q=10−P, the gradient ΔQ/ΔP=−1. At P=8,Q=2, PED=−1×8/2=−4; at P=2,Q=8, PED=−1×2/8=−0.25.",
+      "diagram_blueprint": "P vertical, Q horizontal. Straight-line D from (Q=0,P=10) to (Q=10,P=0). Upper section |PED|>1; midpoint |PED|=1; lower section |PED|<1. These classifications are along ONE unchanged straight line.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    },
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.2.5",
+      "skill": "ECON-9708-2.2.5-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 8,
+      "locale": "ru",
+      "title": "Ценовая эластичность вдоль прямой спроса",
+      "explanations": {
+        "main": "На прямолинейной кривой спроса наклон постоянный, а ценовая эластичность меняется. PED сравнивает процентное изменение объёма спроса с процентным изменением цены. На прямой её значение в точке можно найти, умножив постоянный наклон (изменение Q, делённое на изменение P) на отношение P/Q. В верхней части прямой отношение P/Q велико, поэтому спрос эластичен. В середине абсолютная эластичность равна единице, а в нижней части она меньше единицы. Не путай наклон и эластичность.",
+        "simple": "Верхняя часть прямой спроса — эластичный спрос. Середина — единичная эластичность. Нижняя часть — неэластичный спрос. Сама прямая не изменилась.",
+        "alternative": "Возьми Q=10−P. При P=8,Q=2 эластичность равна −4. При P=5,Q=5 — −1. При P=2,Q=8 — −0,25. Вниз по кривой абсолютная эластичность уменьшается.",
+        "focus": "Где абсолютная PED равна единице? В середине прямой. Означает ли постоянный наклон постоянную эластичность? Нет."
+      },
+      "worked_example": "Для прямой Q=10−P наклон ΔQ/ΔP=−1. При P=8,Q=2 получаем −1×8/2=−4; при P=2,Q=8 получаем −1×2/8=−0,25.",
+      "diagram_blueprint": "P vertical, Q horizontal. Straight-line D from (Q=0,P=10) to (Q=10,P=0). Upper section |PED|>1; midpoint |PED|=1; lower section |PED|<1. These classifications are along ONE unchanged straight line.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    },
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.2.5",
+      "skill": "ECON-9708-2.2.5-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 8,
+      "locale": "uz",
+      "title": "To‘g‘ri chiziqli talab egri chizig‘ida PED",
+      "explanations": {
+        "main": "To‘g‘ri chiziqli talab egri chizig‘ining qiyaligi o‘zgarmaydi, ammo narx bo‘yicha talab elastikligi o‘zgaradi. PED talab miqdorining foiz o‘zgarishini narxning foiz o‘zgarishi bilan solishtiradi. To‘g‘ri chiziqda nuqtadagi qiymatni doimiy qiyalikni (Q o‘zgarishini P o‘zgarishiga bo‘lib) P/Q nisbatiga ko‘paytirib topish mumkin. Chiziqning yuqori qismida P/Q katta bo‘lgani uchun talab elastik; o‘rtasida mutlaq qiymati bir; pastki qismida esa birdan kichik bo‘ladi. Qiyalik bilan elastiklikni adashtirma.",
+        "simple": "Talab chizig‘ining yuqori qismi elastik, o‘rtasi birlik elastik, pastki qismi noelastik. Chiziqning o‘zi o‘zgarmaydi.",
+        "alternative": "Q=10−P bo‘lsin. P=8,Q=2 da PED −4; P=5,Q=5 da −1; P=2,Q=8 da −0,25. Chiziq bo‘ylab pastga tushganda mutlaq elastiklik kamayadi.",
+        "focus": "To‘g‘ri talab chizig‘ida |PED| qayerda birga teng? O‘rtada. O‘zgarmas qiyalik o‘zgarmas PED deganimi? Yo‘q."
+      },
+      "worked_example": "Q=10−P chizig‘ida qiyalik ΔQ/ΔP=−1. P=8,Q=2 bo‘lganda PED=−1×8/2=−4; P=2,Q=8 bo‘lganda −1×2/8=−0,25.",
+      "diagram_blueprint": "P vertical, Q horizontal. Straight-line D from (Q=0,P=10) to (Q=10,P=0). Upper section |PED|>1; midpoint |PED|=1; lower section |PED|<1. These classifications are along ONE unchanged straight line.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    },
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.2.6",
+      "skill": "ECON-9708-2.2.6-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 8,
+      "locale": "en",
+      "title": "What determines PED, YED and XED?",
+      "explanations": {
+        "main": "PED depends on how readily buyers can respond to a price change: close substitutes, time to adjust, the share of income spent and whether a good is a necessity affect its size. YED reflects the good's relationship to income: an inferior good has negative YED; a normal necessity often has a smaller positive YED than a luxury. XED reflects the relationship between two goods: close substitutes tend to have a stronger positive XED; strong complements a more negative XED. These are tendencies, not universal numerical rules.",
+        "simple": "PED asks: can buyers switch when price changes? YED asks: what happens when income changes? XED asks: what happens to demand for one good when another good's price changes? Each has different drivers.",
+        "alternative": "Over several years buyers can replace petrol equipment, making long-run PED different from short-run PED. A basic staple may see demand rise slowly with income (small positive YED). Two almost identical brands may show a relatively large positive XED.",
+        "focus": "A pair of goods has strongly negative XED. Are they more likely complements or substitutes? Complements. Can a necessity have positive YED? Yes."
+      },
+      "worked_example": "Illustrative reading: YED=−0.4 implies an inferior good. XED=+1.8 suggests substitutes. Compare PED across products only with matched time periods and context.",
+      "diagram_blueprint": "Three separate causal comparison mini-panels PED, YED, XED. Do not plot arbitrary curves purporting to prove exact coefficients.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    },
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.2.6",
+      "skill": "ECON-9708-2.2.6-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 8,
+      "locale": "ru",
+      "title": "От чего зависят PED, YED и XED?",
+      "explanations": {
+        "main": "PED зависит от возможности покупателей реагировать на изменение цены: наличия близких заменителей, времени на адаптацию, доли расходов в доходе и степени необходимости товара. YED определяется реакцией спроса на доход: у низшего блага коэффициент отрицателен, у обычного необходимого товара часто небольшой положительный, у предмета роскоши — более высокий. XED зависит от связи между товарами: у близких заменителей обычно более высокое положительное значение, у сильных дополнений — более отрицательное. Это тенденции, а не универсальные численные правила.",
+        "simple": "PED — реакция на цену самого товара. YED — реакция на изменение дохода. XED — реакция на изменение цены другого товара. Поэтому факторы для трёх коэффициентов различаются.",
+        "alternative": "За несколько лет потребитель легче заменит оборудование, использующее бензин, поэтому PED может отличаться в кратком и долгом периодах. Спрос на базовый продукт может слабо расти вместе с доходом. Близкие марки могут иметь высокую положительную XED.",
+        "focus": "Если XED сильно отрицательна, товары скорее дополняют или заменяют друг друга? Дополняют. Может ли у необходимого товара YED быть положительной? Да."
+      },
+      "worked_example": "Пример интерпретации: YED=−0,4 указывает на низшее благо; XED=+1,8 — на товары-заменители. Сравнивая PED, учитывай период времени и условия.",
+      "diagram_blueprint": "Three separate causal comparison mini-panels PED, YED, XED. Do not plot arbitrary curves purporting to prove exact coefficients.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    },
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.2.6",
+      "skill": "ECON-9708-2.2.6-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 8,
+      "locale": "uz",
+      "title": "PED, YED va XED nimaga bog‘liq?",
+      "explanations": {
+        "main": "PED xaridorlarning narx o‘zgarishiga moslashishiga bog‘liq: yaqin o‘rinbosarlar, moslashish vaqti, tovar xarajatining daromaddagi ulushi va uning zarurligi muhim. YED talabning daromadga munosabatini ko‘rsatadi: past sifatli ne’mat uchun YED manfiy, normal zaruriy ne’mat uchun ko‘pincha kichik musbat, hashamatli ne’mat uchun kattaroq bo‘ladi. XED ikki tovar munosabatiga bog‘liq: yaqin o‘rinbosarlar uchun musbat va kattaroq, kuchli to‘ldiruvchi tovarlar uchun manfiyroq bo‘lishi mumkin. Bu doimiy raqamli qonun emas.",
+        "simple": "PED o‘z narxiga, YED daromadga, XED boshqa tovar narxiga javobni o‘lchaydi. Har birining omillari boshqacha.",
+        "alternative": "Vaqt o‘tishi bilan benzin ishlatadigan uskunani almashtirish osonlashishi mumkin, shuning uchun uzoq muddatdagi PED farq qiladi. Oddiy oziq-ovqat uchun YED kichik musbat, o‘xshash brendlar uchun XED katta musbat bo‘lishi mumkin.",
+        "focus": "XED kuchli manfiy bo‘lsa, tovarlar ko‘proq to‘ldiruvchimi yoki o‘rinbosarmi? To‘ldiruvchi. Zaruriy tovar YEDsi musbat bo‘lishi mumkinmi? Ha."
+      },
+      "worked_example": "YED=−0,4 past sifatli ne’matni, XED=+1,8 esa o‘rinbosar tovarlarni ko‘rsatadi. PEDni taqqoslashda vaqt va sharoitni bir xil ol.",
+      "diagram_blueprint": "Three separate causal comparison mini-panels PED, YED, XED. Do not plot arbitrary curves purporting to prove exact coefficients.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    },
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.5.4",
+      "skill": "ECON-9708-2.5.4-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 11,
+      "locale": "en",
+      "title": "Elasticities and changes in consumer/producer surplus",
+      "explanations": {
+        "main": "Consumer surplus is the area below demand and above market price; producer surplus is the area above supply and below market price, up to quantity traded. When demand or supply shifts, both price and quantity may change and so can these areas. Elasticities affect how much of the adjustment occurs through price rather than quantity. After an equal outward shift in demand, a steep (inelastic) supply curve usually gives a bigger rise in price than a flatter supply curve, while quantity adjusts less. Therefore the changes in the two surplus areas depend on both curves, the shift and initial conditions; never conclude that one group always gains a fixed amount.",
+        "simple": "Elasticity controls whether a market responds mostly with a price movement or a quantity movement. Because surplus is an area on a graph, elasticity affects its change.",
+        "alternative": "Draw an outward shift D0→D1 twice. Hold the shift similar; use a steep S in the first panel and a flat S in the second. Label both new equilibria. The steep S shows a larger price rise. Shade consumer and producer surplus separately instead of guessing from the price alone.",
+        "focus": "Can you calculate a surplus change using only whether PED is elastic? No. What else is needed? Demand and supply positions, shift size and equilibrium prices/quantities."
+      },
+      "worked_example": "Graph method: initial CS is area under D0 above P0, initial PS area above S below P0. Recalculate areas with D1 and new P1,Q1; compare, with properly scaled axes.",
+      "diagram_blueprint": "P vertical, Q horizontal with D and S. Compare same outward D-shift under relatively steep S versus relatively flat S; mark old/new equilibria and consumer/producer surplus areas. No claim of universally fixed surplus change ordering.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    },
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.5.4",
+      "skill": "ECON-9708-2.5.4-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 11,
+      "locale": "ru",
+      "title": "Эластичность и изменение излишков покупателей и продавцов",
+      "explanations": {
+        "main": "Потребительский излишек — площадь под кривой спроса и над рыночной ценой до проданного количества; излишек производителя — площадь над кривой предложения и под рыночной ценой. Сдвиг спроса или предложения меняет равновесные цену, количество и эти площади. Эластичности определяют, какая часть изменения проявится через цену, а какая — через объём. При одинаковом сдвиге спроса вправо крутая, неэластичная кривая предложения обычно даёт больший рост цены и меньший рост количества, чем пологая. Поэтому изменение излишков зависит от обеих кривых, размера сдвига и исходного равновесия; универсальной фиксированной величины нет.",
+        "simple": "Эластичность помогает понять, сильнее изменится цена или количество. Излишек — площадь на графике, поэтому одного показателя эластичности недостаточно.",
+        "alternative": "Нарисуй одинаковый сдвиг D0→D1 на двух графиках. На первом S крутая, на втором пологая. Отметь прежнее и новое равновесие: при крутой S цена обычно растёт сильнее. Затем отдельно закрась площади двух излишков.",
+        "focus": "Можно ли узнать изменение излишка только по слову «эластичный спрос»? Нет. Нужны кривые, размер сдвига и новые цена с количеством."
+      },
+      "worked_example": "Сначала найди площади CS и PS при P0,Q0, потом при P1,Q1. Для CS используй область под спросом над ценой, для PS — над предложением под ценой.",
+      "diagram_blueprint": "P vertical, Q horizontal with D and S. Compare same outward D-shift under relatively steep S versus relatively flat S; mark old/new equilibria and consumer/producer surplus areas. No claim of universally fixed surplus change ordering.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    },
+    {
+      "subject_key": "economics",
+      "syllabus_point": "2.5.4",
+      "skill": "ECON-9708-2.5.4-BASE",
+      "level": "AS",
+      "tour": 1,
+      "source_chapter": 11,
+      "locale": "uz",
+      "title": "Elastiklik va iste’molchi hamda ishlab chiqaruvchi ortiqchaligi",
+      "explanations": {
+        "main": "Iste’molchi ortiqchaligi talab egri chizig‘i ostida va bozor narxi ustida, ishlab chiqaruvchi ortiqchaligi esa taklif chizig‘i ustida va bozor narxi ostida joylashgan yuzadir. Talab yoki taklif siljiganda muvozanat narxi, miqdor va bu yuzalar o‘zgaradi. Elastiklik o‘zgarishning qanchasi narxda, qanchasi miqdorda namoyon bo‘lishiga ta’sir qiladi. Talab bir xil miqdorda o‘ngga siljisa, tikroq, noelastik taklif odatda narxning kattaroq, miqdorning kichikroq oshishiga olib keladi. Shu sababli ortiqchalik o‘zgarishi har ikki egri chiziq, siljish va boshlang‘ich muvozanatga bog‘liq; doimiy natijani taxmin qilma.",
+        "simple": "Elastiklik narx va miqdor qanchalik o‘zgarishini ko‘rsatadi. Ortiqchalik grafikdagi yuza bo‘lgani uchun faqat bitta elastiklikni bilish yetarli emas.",
+        "alternative": "Ikki grafik chiz: har ikkisida D0→D1. Birida S tik, ikkinchisida yotiq. Yangi muvozanatlarni belgila. Tik S holatida narx ko‘proq ko‘tariladi. So‘ng har bir ortiqchalik yuzasini alohida ko‘rsat.",
+        "focus": "Faqat “talab elastik” degan ma’lumot bilan ortiqchalik o‘zgarishini hisoblash mumkinmi? Yo‘q. Egri chiziqlar va muvozanat ma’lumotlari ham kerak."
+      },
+      "worked_example": "Avval P0,Q0 dagi, keyin P1,Q1 dagi ortiqchalik yuzalarini top. Iste’molchi ortiqchaligi talab chizig‘i ostida, ishlab chiqaruvchi ortiqchaligi taklif chizig‘i ustida bo‘ladi.",
+      "diagram_blueprint": "P vertical, Q horizontal with D and S. Compare same outward D-shift under relatively steep S versus relatively flat S; mark old/new equilibria and consumer/producer surplus areas. No claim of universally fixed surplus change ordering.",
+      "qa_status": "ACADEMIC_AND_LOCALE_REVIEW_REQUIRED",
+      "rights_status": "ORIGINAL_TEXT_REVIEW_REQUIRED",
+      "approved": false,
+      "runtime_allowed": false,
+      "verification": "NOT_A_MARK_SCHEME"
+    }
+  ]
+}

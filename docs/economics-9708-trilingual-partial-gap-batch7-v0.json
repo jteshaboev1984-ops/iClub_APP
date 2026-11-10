@@ -1,0 +1,243 @@
+{
+  "manifest": {
+    "version": "economics_partial_gap_batch7_v0_2026_10_09",
+    "authoritative_source": "Official Cambridge Economics 9708 2026-2028 v2",
+    "secondary_source": "Economics 4e Ch43,Ch51,Ch53 supplied textbook",
+    "independent_academic_approval": false,
+    "published": false,
+    "arithmetic_checks": {
+      "birthRate": 12,
+      "infantMortality": 12.5
+    }
+  },
+  "cards": [
+    {
+      "point": "9.3.1",
+      "skill_key": "ECON-9708-9.3.1-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 43,
+      "locale": "en",
+      "title": "What full employment means",
+      "explanations": {
+        "main": "Full employment does not mean that the measured unemployment rate is exactly zero. In standard macroeconomic analysis, an economy is near full employment when those willing and able to work at prevailing conditions can generally find jobs and demand-deficient cyclical unemployment is absent. Some frictional unemployment persists as workers change jobs, and structural unemployment may persist where skills or locations do not match vacancies. Full employment therefore relates to the natural or sustainable unemployment rate and potential output, not to every person working every day.",
+        "simple": "At full employment there can still be people between jobs or looking for work matching their skills. The economy is not suffering widespread demand-deficient unemployment.",
+        "alternative": "A growing economy has vacancies and firms are hiring, but workers moving between cities need time to find new positions. That frictional unemployment does not automatically mean the economy is below full employment.",
+        "focus": "Does full employment mean 0% unemployment? No. Which type is generally absent at full employment? Demand-deficient cyclical unemployment."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "9.3.1",
+      "skill_key": "ECON-9708-9.3.1-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 43,
+      "locale": "ru",
+      "title": "Что означает полная занятость",
+      "explanations": {
+        "main": "Полная занятость не означает строго нулевую зарегистрированную безработицу. В стандартном макроэкономическом анализе экономика близка к полной занятости, когда желающие и способные работать при действующих условиях обычно могут найти рабочие места, а циклическая безработица из-за недостатка спроса отсутствует. Фрикционная безработица сохраняется во время смены работы; структурная может существовать при несовпадении навыков или мест проживания с вакансиями. Поэтому полная занятость связана с естественным уровнем безработицы и потенциальным выпуском, а не с работой каждого человека без перерыва.",
+        "simple": "Полная занятость допускает людей, временно ищущих новую работу или сталкивающихся с несоответствием навыков. Главное — отсутствие массовой безработицы из-за нехватки спроса.",
+        "alternative": "Фирмы активно нанимают персонал, но работники после переезда ещё ищут подходящую вакансию. Такая фрикционная безработица не обязательно означает отсутствие полной занятости.",
+        "focus": "Полная занятость равна нулевой безработице? Нет. Какой вид безработицы в ней обычно отсутствует? Циклическая из-за недостатка спроса."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "9.3.1",
+      "skill_key": "ECON-9708-9.3.1-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 43,
+      "locale": "uz",
+      "title": "To‘liq bandlik nimani anglatadi?",
+      "explanations": {
+        "main": "To‘liq bandlik ishsizlik darajasi aynan nol degani emas. Standart makroiqtisodiy tahlilda iqtisodiyot to‘liq bandlikka yaqin bo‘lsa, amaldagi sharoitda ishlashni xohlagan va qodir odamlar odatda ish topa oladi hamda talab yetishmasligidan keladigan davriy ishsizlik bo‘lmaydi. Ish o‘zgartirish davrida friksion ishsizlik, ko‘nikma yoki joylashuv nomuvofiqligida tarkibiy ishsizlik saqlanishi mumkin. Shuning uchun to‘liq bandlik tabiiy ishsizlik darajasi va potensial ishlab chiqarish bilan bog‘liq, har bir odamning uzluksiz ishda bo‘lishi bilan emas.",
+        "simple": "To‘liq bandlikda ham ishini almashtirayotgan yoki mos ish izlayotganlar bo‘lishi mumkin. Talab yetishmasligidan ommaviy ishsizlik bo‘lmasligi muhim.",
+        "alternative": "Firmalar xodim izlayapti, ammo boshqa shaharga ko‘chgan ishchilar mos ish topishga vaqt sarflaydi. Bunday friksion ishsizlik to‘liq bandlikka zid bo‘lishi shart emas.",
+        "focus": "To‘liq bandlik ishsizlik nol deganimi? Yo‘q. Odatda qaysi ishsizlik yo‘q bo‘ladi? Talab yetishmasligidan keladigan davriy ishsizlik."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "9.3.2",
+      "skill_key": "ECON-9708-9.3.2-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 43,
+      "locale": "en",
+      "title": "Equilibrium unemployment, disequilibrium and hysteresis",
+      "explanations": {
+        "main": "Equilibrium unemployment can persist even when real wages adjust to balance labour demand and supply, because job matching, mobility and skill changes take time. Disequilibrium unemployment arises when the number seeking work exceeds jobs offered at the prevailing wage, for example when wages remain above a market-clearing level or aggregate demand is too weak. Hysteresis means a period of high unemployment can make later unemployment persist by eroding skills, weakening work connections or creating long-term detachment from the labour market. These concepts overlap with frictional, structural and cyclical unemployment but classify a different aspect.",
+        "simple": "Equilibrium unemployment is compatible with a labour market that broadly clears. Disequilibrium means excess labour supply persists. Hysteresis means unemployment today can increase unemployment in the future.",
+        "alternative": "A long recession leaves skilled workers out of jobs. Over time their skills become outdated and job search becomes harder; even after demand improves, more people remain unemployed. This persistence illustrates hysteresis.",
+        "focus": "Does hysteres​​is mean unemployment always returns immediately to its old level after a recession? No. Can unemployment persist despite a broadly clearing labour market? Yes."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "9.3.2",
+      "skill_key": "ECON-9708-9.3.2-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 43,
+      "locale": "ru",
+      "title": "Равновесная, неравновесная безработица и гистерезис",
+      "explanations": {
+        "main": "Равновесная безработица может существовать даже при приспособлении реальных зарплат к спросу и предложению труда: поиск подходящих работников, мобильность и освоение навыков требуют времени. Неравновесная безработица возникает, когда при действующей зарплате число желающих работать превышает число вакансий, например из-за негибкой оплаты выше равновесной или недостаточного совокупного спроса. Гистерезис означает, что длительная безработица способна повысить её устойчивый уровень: люди теряют навыки, деловые связи и мотивацию к поиску. Эти категории связаны с фрикционной, структурной и циклической безработицей, но подчёркивают другой аспект.",
+        "simple": "Равновесная безработица может сохраняться при работающем механизме рынка труда. Неравновесная означает избыток желающих работать. Гистерезис — долговременное наследие периода высокой безработицы.",
+        "alternative": "После длительного спада часть работников теряет актуальные навыки. Даже когда спрос восстанавливается, им трудно трудоустроиться. Это пример гистерезиса.",
+        "focus": "Означает ли гистерезис мгновенное возвращение безработицы к прежнему уровню? Нет. Может ли безработица сохраняться в близком к равновесию рынке труда? Да."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "9.3.2",
+      "skill_key": "ECON-9708-9.3.2-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 6,
+      "book_chapter": 43,
+      "locale": "uz",
+      "title": "Muvozanatli va nomuvozanatli ishsizlik, gisterezis",
+      "explanations": {
+        "main": "Muvozanatli ishsizlik real ish haqi mehnat talabi va taklifiga moslashganda ham saqlanishi mumkin, chunki ish qidirish, ko‘chish va yangi ko‘nikma egallash vaqt talab qiladi. Nomuvozanatli ishsizlik amaldagi ish haqida ishlamoqchi bo‘lganlar soni mavjud ish joylaridan ortiq bo‘lganda, masalan, ish haqi bozorni muvozanatlashtiruvchi darajadan yuqori qotib qolganida yoki yalpi talab sust bo‘lganida yuz berishi mumkin. Gisterezis uzoq davom etgan ishsizlik kelajakdagi ishsizlikni ham kuchaytirishini anglatadi: malaka eskirishi, ish aloqalari yo‘qolishi yoki mehnat bozoridan uzoqlashish bunga sabab bo‘ladi.",
+        "simple": "Muvozanatli ishsizlik ish qidirish sabab saqlanishi mumkin. Nomuvozanatli holatda ishchi taklifi ish o‘rinlaridan ortiq. Gisterezis — eski ishsizlikning uzoq muddatli ta’siri.",
+        "alternative": "Uzoq tanazzulda ishchilar kasbiy ko‘nikmalarini yo‘qotadi. Talab tiklanganda ham ular ish topishda qiynaladi. Bu gisterezisga misol.",
+        "focus": "Gisterezis tanazzuldan keyin ishsizlik darhol eski holatga qaytadi deganimi? Yo‘q. Muvozanatga yaqin bozorda ham ayrimlar ishsiz bo‘lishi mumkinmi? Ha."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "11.4.1",
+      "skill_key": "ECON-9708-11.4.1-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 7,
+      "book_chapter": 51,
+      "locale": "en",
+      "title": "Population structure and development",
+      "explanations": {
+        "main": "Demographic measures help explain differences in development. Crude birth rate is annual live births per 1,000 people, crude death rate is annual deaths per 1,000 people, and infant mortality is deaths of children under one year per 1,000 live births. Net migration equals immigration minus emigration. A dependency ratio relates the population outside conventionally defined working ages to that within working ages; it is an age-based approximation, not a count of everyone actually earning or depending. Urbanisation is the share of people living in urban areas. The concept of optimum population examines the population size associated with the highest real output per head under given technology and resources, so it can change over time.",
+        "simple": "Population structure matters for health services, schools, labour supply and public finances. Compare birth rates, death rates, migration, age groups and the share living in cities.",
+        "alternative": "If population is 100,000 and there are 1,200 live births in a year, the crude birth rate is 12 per 1,000 people. If 15 infants die before age one out of 1,200 live births, the infant mortality rate is 12.5 per 1,000 live births.",
+        "focus": "Birth rate uses total population or births as denominator? Total population. Infant mortality rate uses what denominator? Live births. Is optimum population fixed forever? No."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "11.4.1",
+      "skill_key": "ECON-9708-11.4.1-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 7,
+      "book_chapter": 51,
+      "locale": "ru",
+      "title": "Население, его структура и экономическое развитие",
+      "explanations": {
+        "main": "Демографические показатели помогают объяснять различия в развитии стран. Общий коэффициент рождаемости — число живорождений за год на 1 000 жителей, смертности — число смертей на 1 000 жителей; младенческая смертность — число смертей детей до одного года на 1 000 живорождений. Чистая миграция равна иммиграции минус эмиграция. Коэффициент демографической нагрузки сопоставляет население вне условного трудоспособного возраста с населением трудоспособного возраста; это приближение по возрасту, а не точный подсчёт всех работающих и иждивенцев. Урбанизация — доля городского населения. Оптимальная численность населения связана с максимальным реальным выпуском на человека при данных ресурсах и технологиях и со временем может меняться.",
+        "simple": "Возрастная структура и миграция влияют на школы, больницы, рынок труда и бюджет. Следи за рождаемостью, смертностью, долей городского населения и возрастными группами.",
+        "alternative": "При населении 100 000 и 1 200 живорождений за год коэффициент рождаемости равен 12 на тысячу. Если умерло 15 младенцев из 1 200 живорождений, младенческая смертность равна 12,5 на тысячу живорождений.",
+        "focus": "В знаменателе коэффициента рождаемости всё население или только рождённые? Всё население. Младенческая смертность рассчитывается на сколько живорождений? На 1 000. Оптимальное население постоянно? Нет."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "11.4.1",
+      "skill_key": "ECON-9708-11.4.1-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 7,
+      "book_chapter": 51,
+      "locale": "uz",
+      "title": "Aholi tuzilishi va iqtisodiy rivojlanish",
+      "explanations": {
+        "main": "Demografik ko‘rsatkichlar rivojlanishdagi farqlarni tushuntirishga yordam beradi. Umumiy tug‘ilish koeffitsiyenti bir yildagi tirik tug‘ilishlar sonining har 1 000 aholiga nisbati, o‘lim koeffitsiyenti esa o‘limlarning har 1 000 aholiga nisbati. Go‘daklar o‘limi bir yoshga to‘lmagan bolalar o‘limining har 1 000 tirik tug‘ilishga nisbati. Sof migratsiya immigratsiyadan emigratsiyani ayirish orqali topiladi. Demografik yuklama nisbati odatda mehnat yoshidan tashqaridagilarni mehnat yoshidagilar bilan solishtiradi; bu haqiqiy bandlikning emas, yosh tuzilishining taxminiy o‘lchovidir. Urbanizatsiya shaharda yashovchilar ulushidir. Optimal aholi soni mavjud resurs va texnologiyada jon boshiga real ishlab chiqarish eng yuqori bo‘ladigan son bilan bog‘liq va vaqt o‘tib o‘zgarishi mumkin.",
+        "simple": "Aholining yoshi, tug‘ilishi, o‘limi va migratsiyasi ta’lim, sog‘liqni saqlash, ish kuchi va budjetga ta’sir qiladi. Shaharlashuv ulushini ham bahola.",
+        "alternative": "Aholi 100 000 va bir yilda 1 200 tirik tug‘ilish bo‘lsa, tug‘ilish koeffitsiyenti har ming kishiga 12. Shu tug‘ilishlardan 15 chaqaloq bir yoshgacha vafot etsa, go‘daklar o‘limi har ming tirik tug‘ilishga 12,5.",
+        "focus": "Tug‘ilish koeffitsiyenti jami aholiga nisbatanmi? Ha. Go‘daklar o‘limi nimaga nisbatan? Tirik tug‘ilishlarga. Optimal aholi soni doimiymi? Yo‘q."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "11.6.2",
+      "skill_key": "ECON-9708-11.6.2-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 7,
+      "book_chapter": 53,
+      "locale": "en",
+      "title": "Free trade area, customs union, monetary union and economic union",
+      "explanations": {
+        "main": "A free trade area removes tariffs or other agreed internal trade barriers among member economies while members retain their own external trade policies. A customs union also adopts a common external tariff towards non-members. A monetary union has a shared currency or common monetary arrangements managed by a common monetary authority; shared money alone does not define a customs union. A full economic union involves much deeper integration of goods, services, labour, capital and economic policy, usually building on a common market and shared institutions. Each step sacrifices some national policy independence in exchange for integration benefits; members can integrate in different sequences, so do not assume all monetary unions are automatically full economic unions.",
+        "simple": "Free trade area: lower barriers inside. Customs union: also common tariff against outsiders. Monetary union: shared monetary system. Full economic union: deeper joint markets and policies.",
+        "alternative": "Two countries remove bilateral tariffs but choose separate tariffs on imports from third countries: free trade area. Add a common external tariff: customs union. Adopt a common currency: monetary integration, which does not by itself guarantee full economic union.",
+        "focus": "Do free trade area members always set the same tariff on non-members? No. What makes a customs union different? A common external tariff. Does one currency alone prove full economic union? No."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "11.6.2",
+      "skill_key": "ECON-9708-11.6.2-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 7,
+      "book_chapter": 53,
+      "locale": "ru",
+      "title": "Зона свободной торговли, таможенный, валютный и экономический союзы",
+      "explanations": {
+        "main": "В зоне свободной торговли участники убирают согласованные тарифы или другие барьеры во взаимной торговле, но сохраняют собственную внешнеторговую политику. Таможенный союз дополнительно устанавливает общий внешний тариф для товаров из третьих стран. Валютный союз предполагает общую валюту или общие денежные механизмы под управлением совместных денежных институтов; единая валюта сама по себе не означает таможенный союз. Полный экономический союз предусматривает гораздо более глубокое объединение рынков товаров, услуг, труда и капитала и согласование экономической политики. Интеграция даёт выгоды, но ограничивает самостоятельность отдельных государств.",
+        "simple": "Зона свободной торговли уменьшает барьеры между участниками. Таможенный союз вводит единый внешний тариф. Валютный союз объединяет денежную систему. Полный экономический союз объединяет рынки и политику шире.",
+        "alternative": "Две страны убрали тарифы между собой, но устанавливают разные тарифы на импорт из других стран: зона свободной торговли. Общий внешний тариф превращает её в таможенный союз. Общая валюта означает отдельную форму интеграции.",
+        "focus": "У членов зоны свободной торговли всегда общий тариф для третьих стран? Нет. Что отличает таможенный союз? Общий внешний тариф. Единая валюта автоматически означает полный экономический союз? Нет."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    },
+    {
+      "point": "11.6.2",
+      "skill_key": "ECON-9708-11.6.2-BASE",
+      "qualification": "A_LEVEL_ADDITION",
+      "tour": 7,
+      "book_chapter": 53,
+      "locale": "uz",
+      "title": "Erkin savdo hududi, bojxona, valyuta va iqtisodiy ittifoqlar",
+      "explanations": {
+        "main": "Erkin savdo hududida a’zolar o‘zaro savdodagi kelishilgan tariflar va boshqa to‘siqlarni kamaytiradi yoki bekor qiladi, ammo tashqi savdo siyosatini alohida belgilaydi. Bojxona ittifoqi bunga qo‘shimcha ravishda a’zo bo‘lmagan mamlakatlarga umumiy tashqi tarifni qo‘llaydi. Valyuta ittifoqi umumiy valyuta yoki birgalikda boshqariladigan monetar tizimni bildiradi; yagona valyutaning o‘zi bojxona ittifoqini anglatmaydi. To‘liq iqtisodiy ittifoq tovar, xizmat, mehnat va kapital bozorlarini hamda iqtisodiy siyosatni chuqur birlashtiradi. Bunday integratsiya foyda berishi mumkin, lekin milliy siyosat mustaqilligini cheklaydi.",
+        "simple": "Erkin savdo hududi ichki to‘siqlarni kamaytiradi. Bojxona ittifoqida umumiy tashqi tarif bor. Valyuta ittifoqida pul tizimi umumiy. To‘liq iqtisodiy ittifoq bozorlar va siyosatni kengroq birlashtiradi.",
+        "alternative": "Ikki davlat o‘zaro bojlarni bekor qildi, ammo uchinchi davlatlarga har xil tarif qo‘llaydi — erkin savdo hududi. Tashqi tarifni ham birlashtirsa — bojxona ittifoqi. Umumiy valyuta alohida monetar integratsiyadir.",
+        "focus": "Erkin savdo hududining hamma a’zosi uchinchi davlatga bir xil boj qo‘llaydimi? Yo‘q. Bojxona ittifoqida nima qo‘shiladi? Umumiy tashqi tarif. Bitta valyuta avtomatik to‘liq iqtisodiy ittifoqmi? Yo‘q."
+      },
+      "academic_approved": false,
+      "language_approved": false,
+      "runtime_allowed": false,
+      "verified_question_ids": []
+    }
+  ]
+}
