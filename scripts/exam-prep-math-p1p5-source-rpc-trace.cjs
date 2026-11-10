@@ -100,8 +100,52 @@ const EXTRA_HARD_RPC=[
   "start_my_exam_prep_extra_hard_safe_v1",
   "submit_my_exam_prep_extra_hard_safe_v1"
 ];
-const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)).sort();
+const S2_CALENDAR_RPC=[
+  "get_exam_prep_personal_horizon_safe_v1",
+  "get_exam_prep_study_schedule_safe_v1",
+  "save_exam_prep_study_schedule_safe_v1",
+  "save_my_exam_prep_exam_appointment_v2"
+];
+const S3_VOLUNTARY_RPC=[
+  "get_my_exam_prep_weekly_choice_s3_safe_v1",
+  "save_my_exam_prep_weekly_choice_s3_safe_v1",
+  "claim_exam_prep_periodic_study_report_safe_v1",
+  "get_exam_prep_periodic_study_reports_safe_v1"
+];
+const S4_HYBRID_RPC=[
+  "get_exam_prep_hybrid_s4_papers_safe_v1",
+  "get_exam_prep_hybrid_s4_history_safe_v1",
+  "get_exam_prep_hybrid_s4_stage_status_safe_v1",
+  "start_exam_prep_hybrid_s4_paper_safe_v1",
+  "get_exam_prep_hybrid_s4_session_safe_v1",
+  "finish_exam_prep_hybrid_s4_paper_safe_v1",
+  "check_exam_prep_hybrid_s4_final_safe_v1",
+  "reveal_exam_prep_hybrid_s4_review_safe_v1"
+];
+// S4 is optional and OFF by default in SQL. This source-only allowlist
+// names exactly the 8 owner-scoped versioned Paper RPCs; it grants nothing.
+const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)&&!S2_CALENDAR_RPC.includes(n)&&!S3_VOLUNTARY_RPC.includes(n)&&!S4_HYBRID_RPC.includes(n)).sort();
+const s4migration=read("supabase/migrations/20261109154000_exam_prep_math_s4_hybrid_paper_sessions_v1.sql");
+const s4stageMigration=read("supabase/migrations/20261109155000_exam_prep_math_s4_nonblocking_stage3_6_v1.sql");
+for(const name of S4_HYBRID_RPC) {
+  assert(found.has(name),"S4 owner-only Paper RPC missing from client: "+name);
+  assert((s4migration+s4stageMigration).includes(name),
+    "S4 versioned SQL missing Paper RPC: "+name);
+}
+assert(s4migration.includes("paper_enabled boolean NOT NULL DEFAULT false"),
+  "S4 optional Paper feature must default OFF");
+assert(S3_VOLUNTARY_RPC.every(n=>found.has(n)),"S3 owner-only weekly decision / period RPC missing");
+assert(S2_CALENDAR_RPC.every(n=>found.has(n)),"Math P1/P2 owner-only calendar RPC missing");
 assert(EXTRA_HARD_RPC.every(n=>found.has(n)),"Math Extra Hard owner-only RPC missing");
+const s3a=read("supabase/migrations/20261109132000_exam_prep_p1p5_s3_real_periodic_study_reports_v1.sql");
+const s3b=read("supabase/migrations/20261109132100_exam_prep_p1p5_s3_explicit_weekly_choices_v1.sql");
+for(const rpcName of S3_VOLUNTARY_RPC) {
+  assert((s3a+s3b).includes(rpcName),"S3 versioned SQL misses "+rpcName);
+}
+assert(!/\\b(?:TRUNCATE\\s+TABLE|DELETE\\s+FROM|UPDATE\\s+public\\.users)\\b/i.test(s3a+s3b),"S3 must preserve user state");
+for(const name of ['weeklyS3Panel','bindWeeklyS3','weeklyS3Copy']) assert(read(LIVE).includes(name),"S3 trilingual client missing "+name);
+assert(s3a.includes("'learning_minutes',null"),"S3 must not infer learner study hours from sessions");
+assert(s3b.includes("no_study_cap"),"S3 must never limit optional study time");
 const extra=read("exam-prep/exam-prep-extra-hard-ui.js");
 assert(extra.includes('internal.extraHardView=Object.freeze({open})'),"Optional Extra Hard controller not mounted");
 assert(extra.includes("data-ep-extra-hard-next")&&!extra.includes("localStorage.setItem"),"Extra Hard optional paper-first route missing");
@@ -112,7 +156,7 @@ assert.equal(EXPECTED.length,60,'D03 core source trace: legacy learner self-mark
 const api=read(PATHS[0]),weekly=read(PATHS[1]),progress=read(PATHS[2]);
 const live=read(LIVE),host=read(HOST),html=read(HTML);
 // D03: archived legacy self-mark scores are NOT a new learner write path.
-const d03=read('supabase/migrations/20261109110000_exam_prep_p1p5_d03_written_selfmark_firewall_v1.sql');
+const d03=read('supabase/migrations/20261109110109_exam_prep_p1p5_d03_written_selfmark_firewall_v1_20261109.sql');
 for(const token of [
   "RAISE EXCEPTION 'exam_prep_written_self_marks_disabled'",
   "REVOKE ALL ON FUNCTION public.submit_exam_prep_timed_written_self_mark_safe_v1",
@@ -164,5 +208,5 @@ for(const s of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
  assert(html.includes(s),'production index is not loading '+s);
 }
 assert(html.includes('id="exam-prep-host-root"'),'learner host root missing');
-console.log('Stage A source RPC trace GREEN: 60/60 core named RPCs + 4 Extra Hard; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
+console.log('Stage A source RPC trace GREEN: 60/60 existing core named RPCs + 4 Extra Hard + 4 S2 calendar + 4 S3 weekly/report + 8 S4 optional Paper; 3 transports; Math live API wiring, access, non-grading, retry and host bootstrapping present.');
 console.log('NOTE: source-only regression; real authenticated HTTP→PostgREST→DB and actual device journeys are Stage B/C, NOT implied by GREEN.');
