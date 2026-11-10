@@ -126,9 +126,11 @@ const S4_HYBRID_RPC=[
 // names exactly the 8 owner-scoped versioned Paper RPCs; it grants nothing.
 const added=[...found].filter(n=>!EXPECTED.includes(n)&&!EXTRA_HARD_RPC.includes(n)&&!S2_CALENDAR_RPC.includes(n)&&!S3_VOLUNTARY_RPC.includes(n)&&!S4_HYBRID_RPC.includes(n)).sort();
 const s4migration=read("supabase/migrations/20261109154000_exam_prep_math_s4_hybrid_paper_sessions_v1.sql");
+const s4stageMigration=read("supabase/migrations/20261109155000_exam_prep_math_s4_nonblocking_stage3_6_v1.sql");
 for(const name of S4_HYBRID_RPC) {
   assert(found.has(name),"S4 owner-only Paper RPC missing from client: "+name);
-  assert(s4migration.includes(name),"S4 versioned SQL missing Paper RPC: "+name);
+  assert((s4migration+s4stageMigration).includes(name),
+    "S4 versioned SQL missing Paper RPC: "+name);
 }
 assert(s4migration.includes("paper_enabled boolean NOT NULL DEFAULT false"),
   "S4 optional Paper feature must default OFF");
