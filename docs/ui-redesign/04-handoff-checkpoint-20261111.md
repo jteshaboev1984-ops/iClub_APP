@@ -1,5 +1,12 @@
 # LATEST CHECKPOINT — UI-REDESIGN #531
 
+## LATEST CHECKPOINT — B01 STITCH v1 ZIP RECEIVED, REVIEWED, REQUIRE FULL-SIZE DESIGN v2 (11.11.2026)
+
+User uploaded `stitch_iclub_registration_visual_redesign (2).zip`, despite inherited ZIP title it is **B01 Global Navigation / App Shell**. Inspected exact contents: one 495×1600 `screen.png` composite design board (a very small phone preview + 12 miniature state cards + a long CSS-code panel), `code.html` with independent Tailwind+inline JS state harness, and `DESIGN.md`. NO separate full-size 390×844 / 320 mobile mockups. Correct: 4 original tabs/order and main RU labels, Home bell, Profile gear/Back, registration/splash boundaries. **NOT ACCEPTED AS FINAL DESIGN**: visually underwhelming compared with architect's required 'wow', screenshot too small to inspect touch targets/semantic wraps, fake `ic` logo, CSS guide incompatible with source grid structure (uses `#topbar/#tabbar display:flex` and non-existent `.tab-indicator`/`.tab-label`), wrong 'Tour In Progress — Back Paused' (only eligible Practice pauses), insufficient full-sized RU/UZ/EN/responsive proof. Actual source uses `.tab-ico`/`.tab-txt`, `#tabbar` 4-column grid, `#topbar` grid with `.is-no-left`, exact UZ tab label **O‘qish** not Fanlar.
+
+Full source-backed review + complete same-project correction prompt in **`docs/ui-redesign/14-B01-stitch-v1-review-and-correction-v2-20261111.md`**. Next: architect pastes correction prompt into SAME Stitch project, returns separate full-width screens; assistant reviews visual fidelity/semantic-wrapping and source parity; only after owner accepts design may CSS-first isolated draft B01 implementation start. **No B01 app code, no merge, no production writes**. B00 remains separate unmerged [Draft PR #534](https://github.com/jteshaboev1984-ops/iClub_APP/pull/534), last passed SHA `8a1aab29a5cb8924efdbe660f364d3846d864ff2` / CI #43017056709; Math #450 and Issue #528 untouched.
+
+
 ## LATEST CHECKPOINT — B01 GLOBAL SHELL SOURCE VERIFIED / STITCH PROMPT READY, SEMANTIC-WRAP QA LOCKED (2026-11-11)
 
 Architect instructed to **continue redesign** and specifically enforce semantically correct text wraps on future screens. B00 remains in isolated, unmerged [Draft PR #534](https://github.com/jteshaboev1984-ops/iClub_APP/pull/534), last validated SHA `8a1aab29a5cb8924efdbe660f364d3846d864ff2` and [CI #43017056709 SUCCESS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/43017056709): parenthetical " (для рейтинга)" never splits at 320/390px. **No production or backend changes**.
