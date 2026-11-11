@@ -1221,7 +1221,7 @@
         keep:"Оставить текущий режим", split:"Перераспределить время между P1 и P5",
         change:"Выбрать другое время занятий", p1:"Минут в неделю для P1",
         p5:"Минут в неделю для P5", daily:"Минут в учебный день", days:"Дней в неделю",
-        total:"Ваш недельный ориентир", save:"Сохранить выбор",
+        total:"Ваш недельный ориентир", noBudget:"Недельное время пока не выбрано. Можно заниматься без графика. Чтобы составить план P1 и P5, укажите время выше.", save:"Сохранить выбор",
         saved:"Выбор сохранён. Результаты и выполненные задания не изменились.",
         alreadySaved:"Этот вариант уже сохранён. Повторная запись не нужна.",
         error:"Не удалось сохранить. Обновите данные и повторите.",
@@ -1239,7 +1239,7 @@
         keep:"Joriy rejani saqlash", split:"Vaqtni P1 va P5 o‘rtasida qayta taqsimlash",
         change:"Yangi o‘qish vaqtini tanlash", p1:"P1 uchun haftalik daqiqa",
         p5:"P5 uchun haftalik daqiqa", daily:"O‘qish kunidagi daqiqalar", days:"Haftadagi kunlar",
-        total:"Haftalik rejangiz", save:"Tanlovni saqlash",
+        total:"Haftalik rejangiz", noBudget:"Haftalik vaqt hali tanlanmagan. Jadvalsiz ham o‘qish mumkin. P1 va P5 rejasini tuzish uchun yuqorida vaqtni belgilang.", save:"Tanlovni saqlash",
         saved:"Tanlov saqlandi. Avvalgi natijalar o‘zgarmadi.",
         alreadySaved:"Bu reja allaqachon saqlangan. Qayta yozish shart emas.",
         error:"Saqlab bo‘lmadi. Ma’lumotni yangilang va qayta urinib ko‘ring.",
@@ -1257,7 +1257,7 @@
         keep:"Keep my current schedule", split:"Redistribute time between P1 and P5",
         change:"Choose a different study schedule", p1:"P1 minutes per week",
         p5:"P5 minutes per week", daily:"Minutes per study day", days:"Study days per week",
-        total:"My weekly target", save:"Save my choice",
+        total:"My weekly target", noBudget:"No weekly time has been chosen. You can study without a schedule. To plan P1 and P5, choose your time above.", save:"Save my choice",
         saved:"Choice saved. Earlier learning results remain unchanged.",
         alreadySaved:"This choice is already saved. No new record is needed.",
         error:"Could not save. Refresh your schedule and try again.",
@@ -1278,7 +1278,7 @@
     const d = state.weeklyChoice;
     if (!d || d.contract_version !== "voluntary_weekly_choice_s3_v1") return "";
     const c = weeklyS3Copy();
-    const budget = Number(d.chosen_math_minutes || 0);
+    const budget = d.chosen_math_minutes == null ? null : Number(d.chosen_math_minutes);
     const choice = ["keep","redistribute","change"].includes(d.choice_code) ? d.choice_code : "keep";
     const checked = k => choice === k ? " checked" : "";
     const savedP1 = d.p1_minutes == null ? "" : String(d.p1_minutes);
@@ -1299,6 +1299,13 @@
         esc(date(report.period_ended_at)) + "</strong><div class='ep-live-s3-report-grid'>" +
         cell("P1",p1) + cell("P5",p5) + "</div></div>";
     }).join("");
+    if (budget == null || !Number.isFinite(budget)) {
+      return "<section class='ep-live-s3'><h3>" + esc(c.title) + "</h3>" +
+        "<p class='ep-live-meta'>" + esc(c.noBudget) + "</p>" +
+        "<h3 class='ep-live-s3-report-title'>" + esc(c.report) + "</h3>" +
+        (lines || "<p class='ep-live-meta'>" + esc(c.empty) + "</p>") +
+        "<p class='ep-live-meta'>" + esc(c.minutes) + "</p></section>";
+    }
     return "<section class='ep-live-s3' data-ep-s3>" +
       "<h3>" + esc(c.title) + "</h3><p>" + esc(c.intro) + "</p>" +
       "<div class='ep-live-s3-budget'>" + esc(c.total) + ": <strong>" + budget + " min</strong></div>" +
@@ -1310,8 +1317,8 @@
         "<label>" + esc(c.p1) + "<input type='number' data-ep-s3-p1 min='0' step='5' value='" + esc(savedP1) + "'></label>" +
         "<label>" + esc(c.p5) + "<input type='number' data-ep-s3-p5 min='0' step='5' value='" + esc(savedP5) + "'></label>" +
       "</div><div class='ep-live-s3-split' data-ep-s3-newtime hidden>" +
-        "<label>" + esc(c.daily) + "<input type='number' data-ep-s3-daily min='15' max='240' step='5' value='" + Number(d.study_minutes_per_day || 30) + "'></label>" +
-        "<label>" + esc(c.days) + "<input type='number' data-ep-s3-days min='1' max='7' value='" + Number(d.study_days_per_week || 5) + "'></label>" +
+        "<label>" + esc(c.daily) + "<input type='number' data-ep-s3-daily min='15' max='240' step='5' value='" + (d.study_minutes_per_day == null ? "" : Number(d.study_minutes_per_day)) + "' placeholder='40'></label>" +
+        "<label>" + esc(c.days) + "<input type='number' data-ep-s3-days min='1' max='7' value='" + (d.study_days_per_week == null ? "" : Number(d.study_days_per_week)) + "' placeholder='5'></label>" +
       "</div><button class='ep-live-btn secondary' data-ep-s3-save type='button'>" + esc(c.save) + "</button>" +
       "<div class='ep-live-meta' data-ep-s3-feedback role='status' aria-live='polite'></div>" +
       "<h3 class='ep-live-s3-report-title'>" + esc(c.report) + "</h3>" +
@@ -1354,7 +1361,8 @@
         show(c.invalidSplitStep); return;
       }
       if (choice !== "keep" && p1 + p5 !== sum) { show(c.invalid); return; }
-      if (choice === "change" && sum > Number(row.total_available_minutes)) {
+      if (choice === "change" && row.total_available_minutes != null &&
+          sum > Number(row.total_available_minutes)) {
         show(c.exceedsAvailable); return;
       }
       // Avoid a duplicate decision after success in the SAME active week.
