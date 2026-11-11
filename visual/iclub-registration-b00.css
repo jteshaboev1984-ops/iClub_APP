@@ -393,9 +393,9 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
 }
 .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-fields-card,
 .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card,
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card,
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-nonstudent-card,
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-consent {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
   border: 1px solid rgba(26,47,82,.035);
   border-radius: 19px;
   background: #FFFFFF;
@@ -583,11 +583,11 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   background-position: 11px center;
   background-size: 19px 19px;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card,
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-nonstudent-card {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card {
   padding: 20px;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .card-title {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .card-title {
   font-size: 16px;
   line-height: 1.35;
   font-weight: 770;
@@ -595,7 +595,7 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   align-items: center;
   gap: 9px;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .card-title::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .card-title::before {
   content: "";
   display: inline-block;
   width: 9px;
@@ -604,13 +604,13 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   border-radius: 50%;
   background: #2F6FD6;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card > .muted {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card > .muted {
   color: #516078;
   font-size: 13px;
   line-height: 1.55;
   margin: 8px 0 17px;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-group {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-group {
   display: flex;
   flex-wrap: wrap;
   grid-template-columns: none;
@@ -618,7 +618,7 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   gap: 9px;
   margin: 0;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn {
   display: inline-flex;
   flex: 0 1 auto;
   align-items: center;
@@ -640,7 +640,7 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   overflow-wrap: anywhere;
   box-shadow: none;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn::before {
   content: "";
   display: block;
   width: 19px;
@@ -654,17 +654,17 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn.is-active,
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn[aria-pressed="true"] {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn.is-active,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[aria-pressed="true"] {
   border-color: #2F6FD6;
   background: #DBE6FF;
   color: #124A9B;
   box-shadow: 0 0 0 1px rgba(47,111,214,.12) inset;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn.is-active::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn.is-active::before {
   background-color: #195DCA;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn.is-active::after {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn.is-active::after {
   content: "✓";
   display: inline-block;
   margin-left: 1px;
@@ -672,8 +672,8 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   font-weight: 800;
   color: #195DCA;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-selected-count,
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-summary {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-selected-count,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-summary {
   background: #EBEEFF;
   border: 0;
   color: #21304A;
@@ -698,14 +698,14 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   font-size: 19px;
   font-weight: 850;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-summary {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-summary {
   margin: 0;
   padding: 1px 12px 13px 40px;
   border-radius: 0 0 12px 12px;
   font-size: 12px;
   line-height: 1.55;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-change-note {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-change-note {
   position: relative;
   margin-top: 13px;
   padding-left: 26px;
@@ -713,7 +713,7 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   font-size: 12px;
   line-height: 1.57;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-change-note::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-change-note::before {
   content: "↻";
   position: absolute;
   top: 0;
@@ -722,24 +722,24 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   line-height: 1;
   color: #6A7D9F;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-nonstudent-card .card-title {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card .card-title {
   color: #14233B;
   font-size: 17px;
   font-weight: 760;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-nonstudent-card .muted {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card .muted {
   font-size: 13px;
   line-height: 1.57;
   color: #516078;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-consent {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
   padding: 18px 18px;
   gap: 13px;
   font-size: 13px;
   line-height: 1.55;
   color: #233149;
 }
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-consent input {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent input {
   width: 20px;
   height: 20px;
   flex-basis: 20px;
@@ -774,11 +774,11 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
     gap: 23px;
   }
   .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card,
-  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card,
-  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-nonstudent-card {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card {
     padding: 16px;
   }
-  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn {
     padding: 10px 11px;
     gap: 7px;
     font-size: 12px;
@@ -786,7 +786,7 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-selected-count {
     padding-left: 33px;
   }
-  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-summary {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-summary {
     padding-left: 33px;
   }
 }
@@ -800,27 +800,27 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   }
 }
 
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn[data-subject-key="informatics"]::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="informatics"]::before {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222.5%22%20y%3D%224%22%20width%3D%2219%22%20height%3D%2216%22%20rx%3D%222.5%22%2F%3E%3Cpath%20d%3D%22m6.5%209%203%203-3%203M12%2016h5%22%2F%3E%3C%2Fsvg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222.5%22%20y%3D%224%22%20width%3D%2219%22%20height%3D%2216%22%20rx%3D%222.5%22%2F%3E%3Cpath%20d%3D%22m6.5%209%203%203-3%203M12%2016h5%22%2F%3E%3C%2Fsvg%3E");
 }
 
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn[data-subject-key="economics"]::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="economics"]::before {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%2017%206-6%204%204%208-9M15%206h6v6%22%2F%3E%3C%2Fsvg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%2017%206-6%204%204%208-9M15%206h6v6%22%2F%3E%3C%2Fsvg%3E");
 }
 
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn[data-subject-key="biology"]::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="biology"]::before {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%203c9%203%209%2015%200%2018M16%203C7%206%207%2018%2016%2021M8.5%207h7M8%2012h8M8.5%2017h7%22%2F%3E%3C%2Fsvg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%203c9%203%209%2015%200%2018M16%203C7%206%207%2018%2016%2021M8.5%207h7M8%2012h8M8.5%2017h7%22%2F%3E%3C%2Fsvg%3E");
 }
 
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn[data-subject-key="chemistry"]::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="chemistry"]::before {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%203h8M10%203v8L4.5%2020h15L14%2011V3M8%2015h8%22%2F%3E%3C%2Fsvg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%203h8M10%203v8L4.5%2020h15L14%2011V3M8%2015h8%22%2F%3E%3C%2Fsvg%3E");
 }
 
-.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-subject-card .chip-btn[data-subject-key="mathematics"]::before {
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="mathematics"]::before {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%222.5%22%20width%3D%2216%22%20height%3D%2219%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%208h8M12%205v6M8%2015h3M14%2014l3%203m0-3-3%203%22%2F%3E%3C%2Fsvg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%222.5%22%20width%3D%2216%22%20height%3D%2219%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%208h8M12%205v6M8%2015h3M14%2014l3%203m0-3-3%203%22%2F%3E%3C%2Fsvg%3E");
 }
