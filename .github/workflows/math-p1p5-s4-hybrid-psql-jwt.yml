@@ -191,17 +191,21 @@ jobs:
           node --check scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
           node scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
 
-      - name: S4 live signed Chromium phone RU UZ and desktop EN for Paper-first UI
+      - name: S4 beta OFF then Paper ON signed Chromium RU UZ EN
         run: |
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = 'true'
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
-          # The prior real signed test deliberately disabled S4 again; ONLY
-          # re-enable it on this disposable PostgreSQL17 runner for Chromium.
-          psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.exam_prep_hybrid_s4_config_v1 SET paper_enabled=true,stage_gates_enabled=true WHERE singleton"
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
+          # The prior signed test left both switches OFF. Test the actual
+          # signed beta interface WITHOUT a JavaScript-only enable flag.
+          node --check scripts/p1p5-s4-chromium-beta-off-regression.cjs
+          node scripts/p1p5-s4-chromium-beta-off-regression.cjs
+          # Only on this disposable PG17 runner: beta Paper ON, academic
+          # stage-gate modifications remain OFF as required for the beta.
+          psql -X -v ON_ERROR_STOP=1 -c "UPDATE private.exam_prep_hybrid_s4_config_v1 SET paper_enabled=true,stage_gates_enabled=false WHERE singleton"
           node --check scripts/p1p5-s4-chromium-hybrid-mobile.cjs
           node scripts/p1p5-s4-chromium-hybrid-mobile.cjs
       - name: S3 Chromium actual weekly decisions, RU UZ mobile and EN desktop

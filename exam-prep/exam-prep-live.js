@@ -16,6 +16,7 @@
     s3Retry: null,
     hybridS4: null,
     hybridS4Active: false,
+    hybridS4Available: { P1: false, P5: false },
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
     session: null,
@@ -799,8 +800,12 @@
     const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections} ${esc(home.focusNow)}${deferredCorrections > 0 ? ` · +${deferredCorrections} ${esc(home.later)}` : ""}</small></span><span aria-hidden="true">›</span></button>` : "";
     const lastResultCard = lastResult ? `<section class="ep-component-last-result"><div><span class="ep-component-section-label">${esc(home.lastResult)}</span><strong>${esc(resultTypeLabel(lastResult.session_type))}</strong><small>${lastResult.machine_total > 0 ? `${Number(lastResult.machine_correct || 0)} / ${Number(lastResult.machine_total || 0)} ${esc(c.correctOf)}` : esc(c.writtenPart)}</small></div><button class="ep-live-btn secondary" type="button" data-ep-component-last-result="${esc(lastResult.session_id)}">${esc(c.viewResults)}</button></section>` : "";
     const history = lastResult ? `<button class="ep-component-link" type="button" data-ep-component-link="history"><span><strong>${esc(home.history)}</strong></span><span aria-hidden="true">›</span></button>` : "";
-    const hybridPilot = window.iClubExamPrepHybridPaperS4Enabled === true;
-    const timed = (stage >= 2 || hybridPilot) ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(hybridPilot ? hybridS4Copy().title : home.timed)}</strong><small>${esc(hybridPilot ? hybridS4Copy().paperNotice : stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
+    // The original timed route remains intact. An approved beta Paper is
+    // separately listed only after the existing server confirms availability.
+    const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
+    const hybrid = state.hybridS4Available?.[component] === true
+      ? `<button class="ep-component-link" type="button" data-ep-component-link="hybrid-paper"><span><strong>${esc(hybridS4Copy().title)}</strong><small>${esc(hybridS4Copy().paperNotice)}</small></span><span aria-hidden="true">›</span></button>`
+      : "";
     const readiness = stage >= 5 ? `<button class="ep-component-link" type="button" data-ep-component-link="readiness"><span><strong>${esc(home.readiness)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     // Optional Math original challenges; no dependency on current Stage or marks.
@@ -823,7 +828,7 @@
           <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
         ${lastResultCard}
         <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
-        <section class="ep-component-links">${attention}${history}${timed}${readiness}${materials}${extraHard}</section></section>`, {compact:true});
+        <section class="ep-component-links">${attention}${history}${timed}${hybrid}${readiness}${materials}${extraHard}</section></section>`, {compact:true});
     state.notice = null;
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
@@ -832,6 +837,7 @@
     root.querySelector('[data-ep-component-last-result]')?.addEventListener("click", button => openSessionResult(button.currentTarget.dataset.epComponentLastResult,component,"component"));
     root.querySelector('[data-ep-component-link="history"]')?.addEventListener("click", () => openRecentResults(component));
     root.querySelector('[data-ep-component-link="timed"]')?.addEventListener("click", () => openTimed(component));
+    root.querySelector('[data-ep-component-link="hybrid-paper"]')?.addEventListener("click", () => openHybridS4(component));
     root.querySelector('[data-ep-component-link="readiness"]')?.addEventListener("click", () => openReadiness(component));
     root.querySelector('[data-ep-component-link="materials"]')?.addEventListener("click", () => internal.materialsView?.openMaterials?.(component));
     root.querySelector('[data-ep-component-link="extra-hard"]')?.addEventListener("click", () =>
@@ -1415,11 +1421,11 @@
       if (!canMount() || token !== state.mountToken) return;
       state.weeklyReports = reportResult?.ok ? reportResult.data : null;
     }
-    // The entry-check card MUST continue starting Stage 0. Pilot hybrid
-    // rehearsal is a separate optional path; never repurpose diagnosis.
+    // No hidden browser flag: the EXISTING signed owner RPC alone decides
+    // whether beta Paper is available. Stage 0 entry remains independent.
     let hybridS4Dashboard = "";
-    if (window.iClubExamPrepHybridPaperS4Enabled === true &&
-        typeof internal.api?.hybridS4Catalog === "function") {
+    state.hybridS4Available = { P1: false, P5: false };
+    if (typeof internal.api?.hybridS4Catalog === "function") {
       const [hp1,hp5] = await Promise.all([
         internal.api.hybridS4Catalog("P1").catch(() => null),
         internal.api.hybridS4Catalog("P5").catch(() => null)
@@ -1428,6 +1434,7 @@
       const ready = [["P1",hp1],["P5",hp5]]
         .filter(([,v]) => v?.ok && v.data?.enabled === true &&
           Array.isArray(v.data.papers) && v.data.papers.length > 0);
+      for (const [code] of ready) state.hybridS4Available[code] = true;
       if (ready.length) {
         const h=hybridS4Copy();
         hybridS4Dashboard = '<section class="ep-live-card" data-ep-hybrid-s4-dashboard>'+
@@ -1454,7 +1461,7 @@
     bindExamDatePanel();
     bindWeeklyS3();
     root.querySelectorAll("[data-ep-hybrid-s4-dashboard-open]").forEach(button =>
-      button.addEventListener("click", () => void openTimed(button.dataset.epHybridS4DashboardOpen)));
+      button.addEventListener("click", () => void openHybridS4(button.dataset.epHybridS4DashboardOpen)));
     root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
       const component = card.dataset.epLiveOpenComponent;
       // The dashboard explicitly says "Start/Continue entry check".
@@ -1588,18 +1595,21 @@
     state.returnView = { kind: returnKind, component }; await loadSession(started.data.session_id);
   }
 
-  async function openTimed(component) {
-    // The HYBRID route is doubly gated: explicit client pilot flag AND server
-    // owner-controlled default-OFF feature config. Old timed Paper is unchanged.
-    if (window.iClubExamPrepHybridPaperS4Enabled === true &&
-        typeof internal.api?.hybridS4Catalog === "function") {
-      const candidate = await internal.api.hybridS4Catalog(component).catch(() => null);
-      if (candidate?.ok && candidate.data?.enabled === true) {
-        state.hybridS4Active = true;
-        await renderHybridS4Catalog(component, candidate.data);
-        return;
-      }
+  async function openHybridS4(component) {
+    // Recheck the server on click: a stale visible button is never permission
+    // to start a Paper when the existing backend switch is OFF.
+    if (typeof internal.api?.hybridS4Catalog !== "function") { renderError(); return; }
+    const candidate = await internal.api.hybridS4Catalog(component).catch(() => null);
+    if (!candidate?.ok || candidate.data?.enabled !== true ||
+        !Array.isArray(candidate.data.papers) || candidate.data.papers.length === 0) {
+      state.hybridS4Active = false; renderError(); return;
     }
+    state.hybridS4Active = true;
+    await renderHybridS4Catalog(component,candidate.data);
+  }
+
+  async function openTimed(component) {
+    // Preserve the original academically gated timed route unchanged.
     state.hybridS4Active = false;
     clearTimer(); renderLoading();
     const [result, stage4Result] = await Promise.all([
@@ -2670,7 +2680,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.s3Retry = null; state.hybridS4 = null; state.hybridS4Active = false; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.s3Retry = null; state.hybridS4 = null; state.hybridS4Active = false; state.hybridS4Available = { P1: false, P5: false }; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
