@@ -92,7 +92,8 @@ const { chromium } = require("playwright");
         const metrics = await page.evaluate(() => ({
           viewport: window.innerWidth,
           content: document.documentElement.scrollWidth,
-          subjectColumns: getComputedStyle(document.getElementById("reg-subject-chips")).gridTemplateColumns,
+          subjectDisplay: getComputedStyle(document.getElementById("reg-subject-chips")).display,
+          iconWidth: parseFloat(getComputedStyle(document.querySelector("#reg-subject-chips .chip-btn"), "::before").width) || 0,
           offending: Array.from(document.querySelectorAll("body *")).map(el => {
             const r = el.getBoundingClientRect();
             return { tag: el.tagName, id: el.id, className: typeof el.className === "string" ? el.className.slice(0, 90) : "", left: Math.round(r.left), right: Math.round(r.right), scrollWidth: el.scrollWidth };
@@ -100,8 +101,14 @@ const { chromium } = require("playwright");
         }));
         assert.ok(metrics.content <= metrics.viewport + 1,
           `Horizontal overflow at ${width}px: ${JSON.stringify(metrics)}`);
-        assert.ok(metrics.subjectColumns.split(" ").length >= 2,
-          `Selected/unselected chips use a stable two-column grid at ${width}px`);
+        assert.equal(metrics.subjectDisplay, "flex",
+          `Subject chips use the SAME wrapping Stitch-style layout at ${width}px`);
+        assert.ok(metrics.iconWidth >= 16,
+          `Each subject chip has a visible decorative icon at ${width}px`);
+        assert.equal(await page.locator(".reg-b00-fields-card > label.field").count(), 4);
+        assert.equal(await page.locator("#reg-b00-step-one > .reg-b00-next").count(), 1);
+        assert.equal(await page.locator(".reg-b00-school-card > .reg-toggle").count(), 1);
+        assert.equal(await page.locator(".reg-b00-school-card > #reg-school-block").count(), 1);
 
         if (width === 390) {
           await page.screenshot({ path: path.join(root, "b00-qa-step2-390.png"), fullPage: true });
