@@ -43,9 +43,15 @@ const { chromium } = require("playwright");
           const region = document.getElementById("reg-region");
           const district = document.getElementById("reg-district");
           region.add(new Option("Example region", "1"));
+          region.value = "1";
+        });
+        // A selected region cannot bypass a still-disabled district picker.
+        await page.locator(".reg-b00-next").click();
+        assert.equal(await page.locator("#reg-b00-step-one").isVisible(), true);
+        await page.evaluate(() => {
+          const district = document.getElementById("reg-district");
           district.add(new Option("Example district", "2"));
           district.disabled = false;
-          region.value = "1";
           district.value = "2";
         });
         await page.locator(".reg-b00-next").click();
