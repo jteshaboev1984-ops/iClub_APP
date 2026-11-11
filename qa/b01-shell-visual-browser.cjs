@@ -127,7 +127,20 @@ async function run(browser,base,s,after){
  }
  if(s.view==="home")assert.equal(result.badgeHidden,false);
  if(s.view==="home-zero")assert.equal(result.badgeHidden,true);
- if(s.view==="profile")assert.notEqual(result.gear,"none");
+ if(s.view==="profile"){
+   assert.notEqual(result.gear,"none");
+   const originalDots=await page.locator("#topbar-action").evaluate(el=>{
+     const svg=el.querySelector("svg.v3-shell-icon");
+     return {
+       circles:svg?.querySelectorAll("circle").length,
+       svgDisplay:svg?getComputedStyle(svg).display:"missing",
+       decoration:getComputedStyle(el,"::before").content
+     };
+   });
+   assert.equal(originalDots.circles,3,"original three-dot source SVG intact");
+   assert.notEqual(originalDots.svgDisplay,"none","original dots not hidden by B01");
+   assert.ok(["none","normal"].includes(originalDots.decoration),"no Unicode pseudo-icon / mojibake");
+ }
  if(["study-nested","notifications","registration"].includes(s.view))assert.equal(result.back,"visible");
  assert.deepEqual(offsite,[]);
  assert.deepEqual(errors,[]);
