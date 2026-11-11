@@ -1,0 +1,290 @@
+/* B00 conditional visual refresh — isolated to actual iClub registration.
+   No changed domain logic, selector IDs, fields, data or auth contracts. */
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .content.reg {
+  width: 100%;
+  max-width: 540px;
+  padding: 12px 0 calc(42px + var(--safe-bottom));
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress {
+  margin: 0 0 18px;
+  color: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-counter {
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: .018em;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-title {
+  color: #64748B;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 650;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 9px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track span {
+  height: 5px;
+  border-radius: 999px;
+  background: #E2E8F0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track span.is-done {
+  background: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .h1 {
+  margin-bottom: 7px;
+  font-size: clamp(22px, 5.6vw, 27px);
+  line-height: 1.18;
+  font-weight: 800;
+  letter-spacing: -.026em;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .content.reg > .muted {
+  max-width: 500px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.52;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-form {
+  gap: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step[hidden] {
+  display: none !important;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step-one {
+  padding: 17px 16px 16px;
+  border-radius: 16px;
+  background: #FFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, .045);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field {
+  min-width: 0;
+  gap: 7px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .label {
+  color: #0F172A;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 735;
+  overflow-wrap: anywhere;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input {
+  width: 100%;
+  min-width: 0;
+  min-height: 47px;
+  height: auto;
+  padding: 12px 13px;
+  border: 1px solid #DFE5EF;
+  border-radius: 11px;
+  background: #FFF;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #0F172A;
+  box-shadow: none;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input:focus-visible,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .chip-btn:focus-visible,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-action:focus-visible {
+  outline: 2px solid #2F6FD6;
+  outline-offset: 2px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input:disabled {
+  background: #F2F5FB;
+  border-color: #E3E8F2;
+  color: #718096;
+  opacity: 1;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field-hint {
+  color: #64748B;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field-note {
+  padding: 10px 12px;
+  background: #F3F7FF;
+  border: 1px solid #E1EAFE;
+  border-radius: 10px;
+  color: #31588A;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-school-block,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
+  padding: 15px 14px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, .035);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle {
+  min-height: 76px;
+  gap: 14px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle > div {
+  min-width: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle .muted {
+  margin-top: 3px;
+  line-height: 1.42;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-school-block {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .card-title,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card .card-title {
+  color: #0F172A;
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1.4;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card > .muted,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card .muted {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.54;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 13px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn {
+  min-height: 44px;
+  min-width: 0;
+  padding: 9px 7px;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  color: #273449;
+  background: #F8FAFE;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700;
+  box-shadow: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn.is-active {
+  border-color: #2F6FD6;
+  background: #2F6FD6;
+  color: #FFF;
+  box-shadow: 0 3px 10px rgba(47, 111, 214, .15);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-summary {
+  padding: 11px 12px;
+  border: 1px solid #E2EAFE;
+  border-radius: 11px;
+  background: #F3F7FF;
+  color: #31588A;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-line {
+  gap: 12px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #334155;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-top: 1px;
+  accent-color: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-action,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit {
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  border-radius: 11px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 750;
+  cursor: pointer;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-next,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit {
+  border: 1px solid #2F6FD6;
+  background: #2F6FD6;
+  color: #FFF;
+  box-shadow: 0 7px 17px rgba(47, 111, 214, .16);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-prev {
+  background: #FFF;
+  border: 1px solid #DFE5EF;
+  color: #31588A;
+  box-shadow: none;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-action:disabled,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit:disabled {
+  opacity: .6;
+  cursor: progress;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit {
+  margin-top: 2px;
+}
+.iclub-visual-v3 #view-splash .logo-wrap {
+  background: linear-gradient(160deg, #F5F8FF, #EAF1FF);
+  border-color: #DFE8FA;
+  border-radius: 26px;
+}
+.iclub-visual-v3 #view-splash .splash-title {
+  font-size: 25px;
+  letter-spacing: -.025em;
+}
+@media (min-width: 780px) {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .content.reg {
+    max-width: 520px;
+    padding-top: 20px;
+  }
+}
+@media (max-width: 359px) {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step-one {
+    padding: 14px 12px;
+  }
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-school-block,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
+    padding: 12px 11px;
+  }
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn {
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
