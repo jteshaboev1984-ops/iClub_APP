@@ -81,6 +81,8 @@ async function run(browser,base,s,after){
  await page.goto(base,{waitUntil:"domcontentloaded"});
  await page.setContent(fixture(base,after,s.view),{waitUntil:"load"});
  await page.evaluate(setup,{view:s.view,labels:labels[s.lang]});
+ // Settle 160ms CSS transitions before inspecting the visual state/screenshot.
+ await page.waitForTimeout(260);
  const result=await page.evaluate(()=>{
    const tabs=document.getElementById("tabbar"),bar=document.getElementById("topbar");
    const rb=x=>{let r=x.getBoundingClientRect();return{l:r.left,r:r.right,t:r.top,b:r.bottom,w:r.width,h:r.height}};
