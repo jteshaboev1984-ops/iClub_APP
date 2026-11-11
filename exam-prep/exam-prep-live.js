@@ -982,6 +982,7 @@
         current: "Текущий бюджет математики", save: "Сохранить режим", saved: "Режим занятий сохранён. Выполненные задания не изменились.",
         error: "Не удалось сохранить режим. Попробуйте ещё раз.", invalid: "Введите от 15 до 240 минут (шаг 5) и от 1 до 7 учебных дней.",
         exceeds: "Время на математику превышает общее доступное время. Скорректируйте данные профиля.", hours: "ч/нед",
+        notChosen: "Пока не выбрано", chooseDays: "Выберите дни",
         rounding: "Время показано с округлением до ближайшей минуты."
       },
       uz: {
@@ -990,6 +991,7 @@
         current: "Matematikaga joriy vaqt", save: "Jadvalni saqlash", saved: "O‘qish jadvali saqlandi. Oldingi natijalar o‘zgarmadi.",
         error: "Jadval saqlanmadi. Qayta urinib ko‘ring.", invalid: "15–240 daqiqa (5 daqiqalik qadam) va 1–7 kunni kiriting.",
         exceeds: "Matematikaga ajratilgan vaqt umumiy vaqt chegarasidan oshadi. Profil ma’lumotlarini tekshiring.", hours: "soat/hafta",
+        notChosen: "Hali tanlanmagan", chooseDays: "Kunlarni tanlang",
         rounding: "Vaqt eng yaqin daqiqagacha yaxlitlab ko‘rsatiladi."
       },
       en: {
@@ -998,6 +1000,7 @@
         current: "Current Mathematics budget", save: "Save schedule", saved: "Study schedule saved. Previous learning results have not changed.",
         error: "Could not save this schedule. Try again.", invalid: "Enter 15–240 minutes in steps of 5, and 1–7 study days.",
         exceeds: "Mathematics time exceeds your total available study time. Review the exam profile.", hours: "h/week",
+        notChosen: "Not chosen yet", chooseDays: "Choose days",
         rounding: "Time is displayed rounded to the nearest minute."
       }
     };
@@ -1008,24 +1011,26 @@
   function studySchedulePanel() {
     const c = studyScheduleCopy();
     const row = state.studySchedule || {};
-    const minutes = Number(row.study_minutes_per_day || 30);
-    const days = Number(row.study_days_per_week || 5);
-    const math = Number(state.profile?.mathematics_hours_budget || 0);
-    const total = Number(state.profile?.total_student_hours_available || 0);
-    const options = Array.from({ length: 7 }, (_, i) => {
+    const minutes = row.study_minutes_per_day == null ? null : Number(row.study_minutes_per_day);
+    const days = row.study_days_per_week == null ? null : Number(row.study_days_per_week);
+    const math = state.profile?.mathematics_hours_budget;
+    const total = state.profile?.total_student_hours_available;
+    const chosen = Number.isInteger(minutes) && Number.isInteger(days);
+    const options = ['<option value="" disabled' + (days == null ? ' selected' : '') +
+      '>' + esc(c.chooseDays) + '</option>'].concat(Array.from({ length: 7 }, (_, i) => {
       const n = i + 1;
       return `<option value="${n}" ${n === days ? "selected" : ""}>${n}</option>`;
-    }).join("");
+    })).join("");
     return `<section class="ep-live-card ep-live-study-schedule" data-ep-study-schedule>
       <div class="ep-live-head"><strong>${esc(c.title)}</strong></div>
       <p class="ep-live-meta">${esc(c.hint)}</p>
       <div class="ep-live-study-schedule-fields">
-        <label class="ep-live-field"><span>${esc(c.minutes)}</span><input class="ep-live-input" type="number" step="5" min="15" max="240" value="${esc(minutes)}" data-ep-study-minutes></label>
+        <label class="ep-live-field"><span>${esc(c.minutes)}</span><input class="ep-live-input" type="number" step="5" min="15" max="240" value="${minutes == null ? "" : esc(minutes)}" placeholder="40" data-ep-study-minutes></label>
         <label class="ep-live-field"><span>${esc(c.days)}</span><select class="ep-live-input" data-ep-study-days>${options}</select></label>
       </div>
       <div class="ep-live-study-schedule-summary">
-        <strong data-ep-study-preview>${esc(c.preview)}: ${esc(formatWeeklyDurationFromMinutes(minutes*days))}</strong>
-        <span class="ep-live-meta">${esc(c.current)}: ${esc(formatWeeklyHours(math))} · ${esc(c.total)}: ${esc(formatWeeklyHours(total))}</span>
+        <strong data-ep-study-preview>${esc(c.preview)}: ${esc(chosen ? formatWeeklyDurationFromMinutes(minutes*days) : c.notChosen)}</strong>
+        <span class="ep-live-meta">${esc(c.current)}: ${esc(math == null ? c.notChosen : formatWeeklyHours(math))} · ${esc(c.total)}: ${esc(total == null ? c.notChosen : formatWeeklyHours(total))}</span>
         <small class="ep-live-meta">${esc(c.rounding)}</small>
       </div>
       <button class="ep-live-btn secondary" type="button" data-ep-study-save>${esc(c.save)}</button>
@@ -1063,7 +1068,8 @@
       if (state.busy) return;
       const v = get();
       if (!v.valid) { show(c.invalid); return; }
-      if (v.budget > Number(state.profile?.total_student_hours_available || 0)) { show(c.exceeds); return; }
+      if (state.profile?.total_student_hours_available != null &&
+          v.budget > Number(state.profile.total_student_hours_available)) { show(c.exceeds); return; }
       state.busy = true; button.disabled = true; show("");
       const result = await internal.api.saveStudySchedule(v.minutes, v.days);
       if (!result?.ok) {
