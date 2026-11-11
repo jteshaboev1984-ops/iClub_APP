@@ -107,9 +107,9 @@
   }
 
   function profileComplete(profile) {
+    // Exam series and target identify the plan; weekly hours remain optional.
     return Boolean(
-      profile && String(profile.exam_series || "").trim() && String(profile.target_grade || "").trim() //
-      // Voluntary hours never determine exam-plan completeness.
+      profile && String(profile.exam_series || "").trim() && String(profile.target_grade || "").trim()
     );
   }
 
