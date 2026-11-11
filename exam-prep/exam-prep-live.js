@@ -39,6 +39,23 @@
     return "ru-RU";
   }
 
+  // Weekly study time is stored as fractional hours for legacy RPCs,
+  // but learners should see hours and whole minutes (never 3.33 h).
+  // Only the display rounds to the nearest minute; source values are unchanged.
+  function formatWeeklyDurationFromMinutes(value) {
+    if (value == null || !Number.isFinite(Number(value)) || Number(value) < 0) return "";
+    const all = Math.round(Number(value));
+    const hours = Math.floor(all / 60), minutes = all % 60;
+    const units = state.language === "uz" ? ["soat","daq"] :
+      (state.language === "en" ? ["h","min"] : ["ч","мин"]);
+    return [hours ? hours + " " + units[0] : "",
+      minutes || !hours ? minutes + " " + units[1] : ""].filter(Boolean).join(" ");
+  }
+  function formatWeeklyHours(value) {
+    return value == null || !Number.isFinite(Number(value)) || Number(value) < 0
+      ? "" : formatWeeklyDurationFromMinutes(Number(value) * 60);
+  }
+
   function formatDateTime(value) {
     if (!value) return "";
     const date = value instanceof Date ? value : new Date(value);
@@ -956,21 +973,24 @@
         minutes: "Минут в учебный день", days: "Дней в неделю", preview: "Получится", total: "Общее доступное время",
         current: "Текущий бюджет математики", save: "Сохранить режим", saved: "Режим занятий сохранён. Выполненные задания не изменились.",
         error: "Не удалось сохранить режим. Попробуйте ещё раз.", invalid: "Введите от 15 до 240 минут (шаг 5) и от 1 до 7 учебных дней.",
-        exceeds: "Время на математику превышает общее доступное время. Скорректируйте данные профиля.", hours: "ч/нед"
+        exceeds: "Время на математику превышает общее доступное время. Скорректируйте данные профиля.", hours: "ч/нед",
+        rounding: "Время показано с округлением до ближайшей минуты."
       },
       uz: {
         title: "O‘qish jadvalingiz", hint: "Matematika uchun kunlik vaqt va haftadagi o‘quv kunlarini kiriting. Bu faqat rejangiz: ko‘proq o‘qisangiz, iClub darslarni to‘xtatmaydi. Imtihon urinishlarining vaqti alohida cheklanadi.",
         minutes: "Kuniga daqiqa", days: "Haftasiga kunlar", preview: "Haftalik jami", total: "Umumiy mavjud vaqt",
         current: "Matematikaga joriy vaqt", save: "Jadvalni saqlash", saved: "O‘qish jadvali saqlandi. Oldingi natijalar o‘zgarmadi.",
         error: "Jadval saqlanmadi. Qayta urinib ko‘ring.", invalid: "15–240 daqiqa (5 daqiqalik qadam) va 1–7 kunni kiriting.",
-        exceeds: "Matematikaga ajratilgan vaqt umumiy vaqt chegarasidan oshadi. Profil ma’lumotlarini tekshiring.", hours: "soat/hafta"
+        exceeds: "Matematikaga ajratilgan vaqt umumiy vaqt chegarasidan oshadi. Profil ma’lumotlarini tekshiring.", hours: "soat/hafta",
+        rounding: "Vaqt eng yaqin daqiqagacha yaxlitlab ko‘rsatiladi."
       },
       en: {
         title: "Your study schedule", hint: "Choose your daily Mathematics minutes and study days per week. This is a guide, not a learning cap: studying longer never locks your lessons. Timed exam attempts still have their own limits.",
         minutes: "Minutes per study day", days: "Study days per week", preview: "Weekly Mathematics time", total: "Total available study time",
         current: "Current Mathematics budget", save: "Save schedule", saved: "Study schedule saved. Previous learning results have not changed.",
         error: "Could not save this schedule. Try again.", invalid: "Enter 15–240 minutes in steps of 5, and 1–7 study days.",
-        exceeds: "Mathematics time exceeds your total available study time. Review the exam profile.", hours: "h/week"
+        exceeds: "Mathematics time exceeds your total available study time. Review the exam profile.", hours: "h/week",
+        rounding: "Time is displayed rounded to the nearest minute."
       }
     };
     return all[state.language] || all.ru;
@@ -984,7 +1004,6 @@
     const days = Number(row.study_days_per_week || 5);
     const math = Number(state.profile?.mathematics_hours_budget || 0);
     const total = Number(state.profile?.total_student_hours_available || 0);
-    const fmt = n => new Intl.NumberFormat(dateLocale(), { maximumFractionDigits: 2 }).format(n);
     const options = Array.from({ length: 7 }, (_, i) => {
       const n = i + 1;
       return `<option value="${n}" ${n === days ? "selected" : ""}>${n}</option>`;
@@ -997,8 +1016,9 @@
         <label class="ep-live-field"><span>${esc(c.days)}</span><select class="ep-live-input" data-ep-study-days>${options}</select></label>
       </div>
       <div class="ep-live-study-schedule-summary">
-        <strong data-ep-study-preview>${esc(c.preview)}: ${fmt(minutes*days/60)} ${esc(c.hours)}</strong>
-        <span class="ep-live-meta">${esc(c.current)}: ${fmt(math)} ${esc(c.hours)} · ${esc(c.total)}: ${fmt(total)} ${esc(c.hours)}</span>
+        <strong data-ep-study-preview>${esc(c.preview)}: ${esc(formatWeeklyDurationFromMinutes(minutes*days))}</strong>
+        <span class="ep-live-meta">${esc(c.current)}: ${esc(formatWeeklyHours(math))} · ${esc(c.total)}: ${esc(formatWeeklyHours(total))}</span>
+        <small class="ep-live-meta">${esc(c.rounding)}</small>
       </div>
       <button class="ep-live-btn secondary" type="button" data-ep-study-save>${esc(c.save)}</button>
       <div class="ep-live-meta" data-ep-study-feedback role="status" aria-live="polite"></div>
@@ -1015,7 +1035,6 @@
     const preview = root.querySelector("[data-ep-study-preview]");
     const feedback = root.querySelector("[data-ep-study-feedback]");
     if (!minutesInput || !daysInput || !button) return;
-    const fmt = n => new Intl.NumberFormat(dateLocale(), {maximumFractionDigits:2}).format(n);
     const get = () => {
       const minutes = Number(minutesInput.value);
       const days = Number(daysInput.value);
@@ -1026,7 +1045,8 @@
     const show = message => { if (feedback) feedback.textContent = message; };
     const redraw = () => {
       const v = get();
-      if (preview) preview.textContent = v.valid ? c.preview + ": " + fmt(v.budget) + " " + c.hours : c.invalid;
+      if (preview) preview.textContent = v.valid
+        ? c.preview + ": " + formatWeeklyDurationFromMinutes(v.minutes * v.days) : c.invalid;
       show("");
     };
     minutesInput.addEventListener("input", redraw);
@@ -1423,8 +1443,8 @@
     const profileBits = [
       state.profile?.exam_series || "",
       state.profile?.target_grade ? `${c.targetShort}: ${state.profile.target_grade}` : "",
-      totalHours > 0 ? `${c.totalShort}: ${totalHours} ${c.hoursShort}` : "",
-      mathHours > 0 ? `${c.mathShort}: ${mathHours} ${c.hoursShort}` : ""
+      totalHours > 0 ? `${c.totalShort}: ${formatWeeklyHours(totalHours)}` : "",
+      mathHours > 0 ? `${c.mathShort}: ${formatWeeklyHours(mathHours)}` : ""
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
