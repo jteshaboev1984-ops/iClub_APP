@@ -1,6 +1,15 @@
 # iClub APP — Stitch handoff, дизайн-контракт и шаблоны промптов
 UI-STITCH-CONTRACT v1.0 · 11.11.2026 · Owner: архитектор iClub · Tracker Issue #531
 
+## НЕИЗМЕНЯЕМЫЙ КОНТРАКТ — ТОЛЬКО ВИЗУАЛ (решение архитектора 2026-11-11)
+
+Это **не UX-реинжиниринг, не redesign функционала и не разработка новых экранов**. На протяжении всех блоков B00–B14 действующий код iClub определяет экранный состав, наличие полей/кнопок, события, последовательность, переходы, права доступа, тексты и поведение. Google Stitch может менять **только внешний вид** существующих UI-компонентов.
+
+Обязательная строка во **всех** отправляемых промптах Stitch:
+> Strict visual redesign only. Preserve the exact existing screens, controls, fields, actions, labels, navigation, hierarchy of user steps, permissions and app behavior defined by the supplied source/screenshots. Do not invent, remove, merge or rename features, inputs, buttons or screens. Only propose styling, spacing, typography, color, icons, layout within each existing screen and responsive appearance. Mockup code is not implementation authority.
+
+Правила для реализации: CSS-first; не менять event listeners/IDs/data-* selectors, JS-обработчики, access controls, маршруты, API, Supabase, алгоритмы, scoring, timers, assets with functional contracts, localStorage и любой пользовательский прогресс. При необходимости внести структурное изменение HTML — **сначала доказать нулевое изменение поведения и отдельно согласовать**, иначе оставить DOM нетронутым. Любой функциональный дефект/нелогичный оригинальный текст документировать отдельно и не чинить в PR с визуальными изменениями.
+
 ## 1. Способ связи без MCP
 **Architect → ChatGPT → готовый prompt → Architect копирует в Google Stitch → Architect присылает ответ/экспорт/скриншот → ChatGPT проверяет → Architect утверждает → отдельный кодовый PR → QA → отдельное разрешение на публикацию.**
 
