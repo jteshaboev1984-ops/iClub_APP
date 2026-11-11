@@ -460,6 +460,18 @@
     box-shadow: 0 24px 50px -28px rgba(23,46,99,.35), 0 8px 25px rgba(23,46,99,.07);
   }
 }
+/* At mobile widths a full-width pinned row keeps long RU/UZ subject names
+   whole and avoids forcing words into narrow 2-column cells. */
+@media (max-width: 439px) {
+  .iclub-visual-v3 #view-home #home-study-list {
+    grid-template-columns: minmax(0,1fr);
+  }
+  .iclub-visual-v3 #view-home .home-pinned-tile .home-pinned-title {
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+  }
+}
 @media (min-width: 650px) {
   .iclub-visual-v3 #view-home #home-competitive-list {
     grid-template-columns: repeat(2,minmax(0,1fr));
