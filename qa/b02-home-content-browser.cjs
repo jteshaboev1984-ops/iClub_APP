@@ -27,13 +27,23 @@ const navLabels={
  uz:["Bosh sahifa","O‘qish","Reyting","Profil"],
  en:["Home","Study","Ratings","Profile"]
 };
+const extraStrings={
+ ru:["О проекте","Правила и организаторы","Новости","Telegram-канал","Сообщество","Telegram-чат"],
+ uz:["Loyiha haqida","Qoidalar va tashkilotchilar","Yangiliklar","Telegram kanal","Hamjamiyat","Telegram chat"],
+ en:["About project","Rules and organizers","News","Telegram channel","Community","Telegram chat"]
+};
+const otherSubjects={
+ ru:["Биология","Информатика"],
+ uz:["Biologiya","Informatika"],
+ en:["Biology","Computer Science"]
+};
 const emptyStrings={
  ru:["Пока нет предметов в соревновательном режиме.","Здесь появятся ваши учебные предметы. Откройте раздел «Предметы» и закрепите нужные для быстрого доступа."],
  uz:["Hozircha musobaqa rejimida fanlar yo‘q.","Bu yerda sizning o‘quv fanlaringiz ko‘rinadi. Kerakli fanlarga tezkor kirish uchun «Fanlar» bo‘limida biriktiring."],
  en:["No subjects in competitive mode yet.","Your study subjects will appear here. Open Courses and pin the ones you want for quick access."]
 };
 for(const l of Object.keys(navLabels)){
- for(const value of navLabels[l].concat(emptyStrings[l]))assert.ok(i18n.includes(value),"Source translation missing: "+value);
+ for(const value of navLabels[l].concat(emptyStrings[l],extraStrings[l]))assert.ok(i18n.includes(value),"Source translation missing: "+value);
 }
 const allow=p=>p==="/"||p==="/logo.png"||p==="/style.css"||p==="/visual/iclub-visual-v3.css"||p==="/visual/iclub-premium-v3.css"||p==="/visual/iclub-home-b02.css"||/^\/asset\/[A-Za-z0-9._-]+$/.test(p);
 const server=http.createServer((req,res)=>{
@@ -99,7 +109,7 @@ async function run(browser,base,s,after){
  await page.goto(base,{waitUntil:"domcontentloaded"});
  await page.setContent(content(base,after),{waitUntil:"load"});
  const t=labels[s.lang];
- await page.evaluate(({s,t,competitive,pinnedCards,tabs,emptyText})=>{
+ await page.evaluate(({s,t,competitive,pinnedCards,tabs,emptyText,extras})=>{
   const q=x=>document.querySelector(x);
   q('[data-i18n="home_competitive_mode"]').textContent=t[0];
   q('[data-i18n="home_competitive_mode_subtitle"]').textContent=t[1];
@@ -108,6 +118,13 @@ async function run(browser,base,s,after){
   q("#home-competitive-list").innerHTML=s.c?competitive.slice(0,s.c).join(""):'<div class="empty muted">'+emptyText[0]+'</div>';
   q("#home-study-list").innerHTML=s.p?pinnedCards.slice(0,s.p).join(""):'<div class="empty muted">'+emptyText[1]+'</div>';
   q("#home-extra-card").classList.toggle("is-open",s.expanded);
+  const keys=["profile_settings_about","profile_settings_about_sub",
+    "profile_settings_news_title","profile_settings_news_sub",
+    "profile_settings_community_title","profile_settings_community_sub"];
+  keys.forEach((key,i)=>{
+    const el=document.querySelector('#home-extra-card [data-i18n="'+key+'"]');
+    if(el)el.textContent=extras[i];
+  });
   q("#topbar").style.display="grid";q("#topbar").classList.add("is-no-left");
   q("#topbar-back").style.visibility="hidden";
   q("#topbar-notifications").style.display="inline-flex";q("#topbar-notifications").style.visibility="visible";
@@ -117,8 +134,8 @@ async function run(browser,base,s,after){
   document.documentElement.lang=s.lang;
   [...document.querySelectorAll("#tabbar .tab-txt")].forEach((el,i)=>el.textContent=tabs[i]);
  },{s,t,competitive:[card("mathematics",t[4],t),card("economics",t[5],t)],
- pinnedCards:[pinned(t[4],t),pinned(t[5],t),pinned("Biology",t),pinned("Computer Science",t)],
- tabs:navLabels[s.lang],emptyText:emptyStrings[s.lang]});
+ pinnedCards:[pinned(t[4],t),pinned(t[5],t),pinned(otherSubjects[s.lang][0],t),pinned(otherSubjects[s.lang][1],t)],
+ tabs:navLabels[s.lang],emptyText:emptyStrings[s.lang],extras:extraStrings[s.lang]});
  await page.waitForTimeout(260);
  const result=await page.evaluate(()=>{
   function wordWrapChecks(el){
