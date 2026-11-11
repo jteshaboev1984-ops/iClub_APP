@@ -21,8 +21,8 @@ const durationCode = between(
 function checkDuration(locale, input, expected) {
   const ctx={state:{language:locale}};
   vm.runInNewContext(durationCode +
-    "\\nglobalThis.__formatMinutes=formatWeeklyDurationFromMinutes;" +
-    "\\nglobalThis.__formatHours=formatWeeklyHours;",ctx);
+    "\nglobalThis.__formatMinutes=formatWeeklyDurationFromMinutes;" +
+    "\nglobalThis.__formatHours=formatWeeklyHours;",ctx);
   assert.equal(ctx.__formatHours(input),expected,
     "weekly hours display "+locale+" for "+input);
   return ctx;
