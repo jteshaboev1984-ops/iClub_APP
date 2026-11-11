@@ -1,5 +1,14 @@
 # LATEST CHECKPOINT — UI-REDESIGN #531
 
+## LATEST — B01 BEFORE/AFTER SOURCE-EXACT SHELL IN ISOLATED DRAFT PR #535 (11.11.2026)
+
+Architect accepted conditionally the **visual shell direction** of Stitch v2 and requested same "Было → Стало" comparison as B00. Source-safe B01 CSS now in [DRAFT PR #535](https://github.com/jteshaboev1984-ops/iClub_APP/pull/535), branch `draft/b01-sapphire-shell-visual-20261111`, **verified HEAD `74a89a81c62833fb4f93bc21d491d82aefe3a342`** based on unchanged `main` `85297150a347e98deb8f1e1c58cfbfa2236aea03`. Exactly four paths (new isolated CSS, two-line index CSS include, Chromium source-markup QA script, CI workflow); **no app.js/i18n/Supabase/DB/Practice/Tours changes**. CSS uses original grid `#topbar/#tabbar`, original real `logo.png`, original 4 tabs and JS-controlled buttons, and excludes registration/splash/certificate verify.
+
+[CI run #43028031391 SUCCESS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/43028031391), same SHA. Before/after Chromium screenshots use EXACT existing `index.html` #topbar/#tabbar nodes and actual baseline CSS; neutral unchanged central content expressly avoids inventing B02/B03. Tested RU/UZ/EN, 320/375/390/1440, 4 aligned tabs with non-clipped labels, zero unread badge, profile gear, back/splash/registration visual bounds, zero horizontal overflow. Screenshot run artifact `b01-shell-before-after-chromium` includes 7 PNG. Fixed screenshot capture to await 260ms style transitions; intermediate dark border photos were misleading and are not the final design. User shown full Home comparison and topbar/dock detail images in conversation; further Study/Profile comparisons available. Canonical report `docs/ui-redesign/16-B01-before-after-isolated-draft-review-20261111.md`.
+
+**Status:** B01 visual draft constructed and displayed but NOT yet finally accepted by owner, NOT merged/deployed. Full JS-runtime safe staging regression still pending. NEXT: architect comments on real before-after images; if approved, safe isolated runtime QA, separate release GO. Proceed to B02 Home only as separate block after architect's direction. B00 remains unmerged Draft PR #534 at `8a1aab29a5cb8924efdbe660f364d3846d864ff2`. Issue #450 / #528 untouched.
+
+
 ## LATEST B01 STATUS — STITCH v2 ZIP WITH FOUR FULL-SIZE-LENGTH MOCKUPS REVIEWED (2026-11-11, 17:45 +05)
 
 User uploaded `stitch_iclub_registration_visual_redesign (3).zip`, which is B01 despite the archive's legacy "registration" name. Inspected **4 full-length screens**, not the requested full 10+ state coverage: Home badge3 (543×1600), Home badge0 (533×1600), Study root (493×1600), Study nested Back (512×1600), plus 4 independent Tailwind `code.html` and `academic_sapphire/DESIGN.md`. Full review in `docs/ui-redesign/15-B01-stitch-v2-four-screen-review-and-safe-implementation-boundary-20261111.md`.
