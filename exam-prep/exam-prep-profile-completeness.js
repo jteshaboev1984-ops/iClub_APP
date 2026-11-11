@@ -29,7 +29,7 @@
       total: "Haftalik umumiy o‘qish vaqti (soat)",
       math: "Matematika uchun vaqt (soat)",
       save: "Saqlash va davom etish",
-      invalid: "Barcha maydonlarni tekshiring. Matematika vaqti 0 dan katta bo‘lishi va umumiy vaqtdan oshmasligi kerak.",
+      hoursOptional: "ixtiyoriy", invalid: "Soatlar kiritilgan bo‘lsa, ular musbat bo‘lishi va matematika vaqti umumiy vaqtdan oshmasligi kerak.",
       error: "Ma’lumotni saqlab bo‘lmadi. Qayta urinib ko‘ring."
     };
     if (language() === "en") return {
@@ -40,7 +40,7 @@
       total: "Total weekly study time (hours)",
       math: "Mathematics time (hours)",
       save: "Save and continue",
-      invalid: "Check all fields. Mathematics time must be above 0 and cannot exceed total study time.",
+      hoursOptional: "optional", invalid: "If entered, hours must be positive and Maths time may not exceed your total.",
       error: "The information could not be saved. Try again."
     };
     return {
@@ -51,7 +51,7 @@
       total: "Общее учебное время в неделю (часы)",
       math: "Время на математику (часы)",
       save: "Сохранить и продолжить",
-      invalid: "Проверьте все поля. Время на математику должно быть больше 0 и не превышать общее учебное время.",
+      hoursOptional: "необязательно", invalid: "Указанные часы должны быть больше нуля; время на математику не может превышать общее.",
       error: "Не удалось сохранить данные. Попробуйте ещё раз."
     };
   }
@@ -66,9 +66,7 @@
       profile &&
       String(profile.exam_series || "").trim() &&
       String(profile.target_grade || "").trim() &&
-      Number(profile.total_student_hours_available) > 0 &&
-      Number(profile.mathematics_hours_budget) > 0 &&
-      Number(profile.mathematics_hours_budget) <= Number(profile.total_student_hours_available)
+      true // Voluntary weekly hours do not determine profile completeness.
     );
   }
 
@@ -113,8 +111,8 @@
       <form class="ep-live-form" data-ep-profile-completion-form>
         <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile?.exam_series || "")}" placeholder="May/June 2027" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile?.target_grade || "")}" placeholder="A" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(total)}" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(math)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.total)} · ${esc(c.hoursOptional)}</span><input name="total_hours" type="number" min="0.5" max="168" step="any" value="${esc(total)}"></label>
+        <label class="ep-live-field"><span>${esc(c.math)} · ${esc(c.hoursOptional)}</span><input name="math_hours" type="number" min="0.5" max="168" step="any" value="${esc(math)}"></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button></div>
       </form>
       <div data-ep-profile-completion-error role="alert" aria-live="assertive"></div>`;
@@ -128,10 +126,14 @@
     const form = event.currentTarget;
     const examSeries = String(form.elements.exam_series.value || "").trim();
     const targetGrade = String(form.elements.target_grade.value || "").trim().toUpperCase();
-    const totalHours = Number(form.elements.total_hours.value);
-    const mathHours = Number(form.elements.math_hours.value);
+    const parseHours = input => String(input.value || "").trim() === "" ? null : Number(input.value);
+    const totalHours = parseHours(form.elements.total_hours);
+    const mathHours = parseHours(form.elements.math_hours);
     const error = rootEl()?.querySelector("[data-ep-profile-completion-error]");
-    if (!examSeries || !targetGrade || !(totalHours > 0) || !(mathHours > 0) || mathHours > totalHours || totalHours > 168) {
+    if (!examSeries || !targetGrade ||
+       (totalHours != null && (!Number.isFinite(totalHours) || totalHours <= 0 || totalHours > 168)) ||
+       (mathHours != null && (!Number.isFinite(mathHours) || mathHours <= 0 || mathHours > 168)) ||
+       (totalHours != null && mathHours != null && mathHours > totalHours)) {
       if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`;
       return;
     }
