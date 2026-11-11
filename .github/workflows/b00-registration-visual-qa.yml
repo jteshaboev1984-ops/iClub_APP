@@ -61,6 +61,8 @@ jobs:
         if: always()
         with:
           name: b00-registration-visual-qa-screenshots
-          path: b00-qa-step*.png
+          path: |
+            b00-qa-step*.png
+            b00-runtime-*.png
           if-no-files-found: ignore
           retention-days: 7
