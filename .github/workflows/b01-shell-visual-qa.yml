@@ -1,0 +1,54 @@
+name: B01 Sapphire shared shell visual QA (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'visual/iclub-shell-b01.css'
+      - 'qa/b01-shell-visual-browser.cjs'
+      - '.github/workflows/b01-shell-visual-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  shell-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source-preserving shell assets and test syntax
+        run: |
+          node --check qa/b01-shell-visual-browser.cjs
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const html=fs.readFileSync('index.html','utf8');
+          const css=fs.readFileSync('visual/iclub-shell-b01.css','utf8');
+          const buttons=['home','courses','ratings','profile'];
+          for(const name of buttons){
+            if(!html.includes('data-tab="'+name+'"')) throw new Error('Missing original tab '+name);
+          }
+          for(const id of ['topbar-back','topbar-notifications','topbar-action','topbar-logo','topbar-subtitle','tabbar']){
+            if(!html.includes('id="'+id+'"'))throw new Error('Missing original shell id '+id);
+          }
+          if(!html.includes('visual/iclub-shell-b01.css'))throw new Error('Shell CSS link not found');
+          if(css.includes('@import') || /fetch\(|localStorage|sessionStorage|supabase|XMLHttpRequest/i.test(css))
+            throw new Error('B01 must remain CSS-only');
+          console.log('PASS original source DOM selectors preserved');
+          NODE
+      - name: Install test dependency without project lock changes
+        run: npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.56.1
+      - name: Install Chromium only
+        run: npx playwright install --with-deps chromium
+      - name: Compare exact source shell before and after CSS (no backend)
+        run: node qa/b01-shell-visual-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b01-shell-before-after-chromium
+          path: b01-*.png
+          if-no-files-found: ignore
+          retention-days: 7

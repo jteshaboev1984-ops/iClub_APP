@@ -1,0 +1,248 @@
+/* ================================================================
+   B01 — Academic Sapphire shared navigation (visual-only)
+   iClub source-of-truth: existing #topbar grid, #tabbar four-tab grid
+   Does NOT change screen visibility, routing, handler bindings or data.
+   Do not restyle B00 registration, splash or certificate verification.
+   ================================================================ */
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) {
+  --b01-sapphire: #2F6FD6;
+  --b01-sapphire-deep: #1E56B3;
+  --b01-ink: #18263C;
+  --b01-muted: #6E7790;
+  --b01-border: #E6EAF5;
+}
+
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar {
+  /* The real app's grid and .is-no-left arrangement are NOT replaced. */
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  min-height: 73px;
+  gap: 10px;
+  padding: calc(12px + var(--safe-top)) 15px 11px;
+  background: rgba(250,248,255,.975);
+  border-bottom: 1px solid rgba(36,62,110,.065);
+  box-shadow: 0 8px 26px -19px rgba(23,44,93,.30);
+  backdrop-filter: blur(16px) saturate(115%);
+  -webkit-backdrop-filter: blur(16px) saturate(115%);
+}
+
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar.is-no-left {
+  grid-template-columns: 0 minmax(0, 1fr) auto;
+}
+
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-brand {
+  gap: 10px;
+  min-width: 0;
+  align-items: center;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-logo {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(26,58,110,.11);
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-title {
+  min-width: 0;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-title .title {
+  color: #101D34;
+  font-size: 18px;
+  font-weight: 830;
+  line-height: 1.16;
+  letter-spacing: -.034em;
+  white-space: nowrap;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-title .subtitle {
+  color: #6D7589;
+  font-size: 11.3px;
+  line-height: 1.35;
+  font-weight: 530;
+  letter-spacing: -.009em;
+  white-space: nowrap;
+}
+
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 7px;
+  min-width: 0;
+}
+
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .icon-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid rgba(49,86,141,.085);
+  border-radius: 15px;
+  color: #24334D;
+  background: rgba(255,255,255,.99);
+  box-shadow: 0 4px 14px -7px rgba(20,43,85,.20), 0 1px 3px rgba(23,44,84,.03);
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar #topbar-back {
+  width: 44px;
+  height: 44px;
+  border-radius: 15px;
+}
+
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .icon-btn:hover {
+  background: #F2F6FF;
+  border-color: rgba(47,111,214,.23);
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .icon-btn:focus-visible {
+  outline: 2px solid var(--b01-sapphire);
+  outline-offset: 2px;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .v3-shell-icon {
+  width: 23px;
+  height: 23px;
+  stroke-width: 1.9;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  height: 19px;
+  min-width: 19px;
+  padding: 0 4px;
+  border: 2px solid #FAF8FF;
+  border-radius: 999px;
+  background: #D82D38;
+  color: #fff;
+  font-size: 10.5px;
+  line-height: 15px;
+  font-weight: 830;
+  box-shadow: 0 3px 9px rgba(216,45,56,.16);
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .notif-badge[hidden] {
+  display: none !important;
+}
+
+/* Profile action: retain the actual 3-dot SVG from index.html.
+   The previous pseudo-element gear used a Unicode glyph that rendered as
+   mojibake in some browsers. Do not hide or replace the original SVG. */
+/* Four original tab buttons: floating premium surface, no new DOM/actions. */
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar {
+  left: 50%;
+  right: auto;
+  bottom: calc(8px + var(--safe-bottom));
+  width: calc(100% - 24px);
+  max-width: 560px;
+  height: auto;
+  min-height: 78px;
+  padding: 7px 8px;
+  transform: translateX(-50%);
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 4px;
+  border: 1px solid rgba(47,82,143,.10);
+  border-radius: 22px;
+  background: rgba(255,255,255,.985);
+  box-shadow: 0 13px 36px rgba(22,45,96,.14), 0 2px 9px rgba(32,64,113,.055);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+}
+
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab {
+  width: 100%;
+  min-width: 0;
+  min-height: 62px;
+  padding: 6px 2px 7px;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  color: #697387;
+  box-shadow: none;
+  transition: background-color .16s ease, color .16s ease, border-color .16s ease;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab.is-active {
+  color: #1A58C1;
+  background: linear-gradient(180deg, #EBF2FF 0%, #F4F7FF 100%);
+  border-color: rgba(47,111,214,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.96);
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab:focus-visible {
+  outline: 2px solid #2F6FD6;
+  outline-offset: 1px;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab-ico {
+  width: 31px;
+  height: 29px;
+  flex: 0 0 29px;
+  display: grid;
+  place-items: center;
+  font-size: 0;
+  color: inherit;
+  border-radius: 11px;
+  background: transparent;
+  transition: background-color .16s ease, transform .16s ease;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab.is-active .tab-ico {
+  background: #DDEAFF;
+  transform: translateY(-1px);
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .v3-shell-nav-icon {
+  width: 23px;
+  height: 23px;
+  stroke-width: 1.95;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab-txt {
+  font-size: 10.7px;
+  font-weight: 720;
+  line-height: 1.15;
+  letter-spacing: -.012em;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  text-overflow: clip;
+  max-width: 100%;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab.is-active .tab-txt {
+  font-weight: 820;
+}
+/* Explicitly neutralize browser-native button paint in the floating dock.
+   Some WebViews paint a grey system button even after layout declarations. */
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar > button.tab {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #697387 !important;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar > button.tab.is-active {
+  border-color: rgba(47,111,214,.12) !important;
+  background: linear-gradient(180deg,#EBF2FF,#F4F7FF) !important;
+  color: #1A58C1 !important;
+}
+
+@media (max-width: 359px) {
+  body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar {
+    padding-left: 11px;
+    padding-right: 11px;
+    gap: 7px;
+  }
+  body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-brand { gap: 8px; }
+  body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-logo { width: 35px; height: 35px; }
+  body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-title .title { font-size: 17px; }
+  body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar .topbar-title .subtitle { font-size: 10.4px; }
+  body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar { width: calc(100% - 16px); padding: 6px 5px; gap: 2px; }
+  body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab { padding-left: 1px; padding-right: 1px; }
+  body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab-txt { font-size: 10.1px; letter-spacing: -.025em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.iclub-visual-v3 #topbar .icon-btn,
+  body.iclub-visual-v3 #tabbar .tab,
+  body.iclub-visual-v3 #tabbar .tab-ico {
+    transition: none;
+  }
+}
