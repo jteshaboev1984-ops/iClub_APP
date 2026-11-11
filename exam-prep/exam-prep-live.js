@@ -68,9 +68,9 @@
   function copy() {
     if (state.language === "uz") return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Imtihonga tayyorgarlik", safe: "Modulga kirish shaxsiy ruxsat bilan himoyalangan.",
-      profileTitle: "Avval imtihon rejangizni kiriting", profileText: "Bu ma’lumotlar matematika uchun real haftalik yuklamani tuzishga yordam beradi.",
+      profileTitle: "Imtihon sessiyasini kiriting", profileText: "Haftalik soatlarni hozir kiritish shart emas. P1 va P5 tayyorgarligini jadvalsiz boshlashingiz mumkin.", hoursOptional: "ixtiyoriy",
       series: "Imtihon seriyasi", target: "Maqsad baho", total: "Haftalik umumiy o‘qish vaqti (soat)", math: "Matematika uchun vaqt (soat)",
-      save: "Imtihon rejasini saqlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
+      save: "Imtihon rejasini saqlash", saving: "Saqlanmoqda…", invalid: "Kiritilgan soatlarni tekshiring: musbat bo‘lsin, matematika vaqti umumiy vaqtdan oshmasin.",
       items: "savol", areas: "bo‘lim", start: "Kirish tekshiruvini boshlash", resume: "Tekshiruvni davom ettirish", complete: "Kirish tekshiruvi yakunlandi", loading: "Yuklanmoqda…",
       question: "Savol", submit: "Javobni yuborish", correct: "To‘g‘ri", incorrect: "Xatoni ko‘rib chiqing", finish: "Tekshiruv qismi yakunlandi. Natija yangilandi.",
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", back: "Orqaga", overview: "Umumiy ko‘rinish", plan: "Haftalik reja", openPlan: "Haftalik rejani ochish", priority: "Ustuvorlik", week: "Hafta",
@@ -118,9 +118,9 @@
     };
     if (state.language === "en") return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Exam preparation", safe: "Access to this module is protected by personal permission.",
-      profileTitle: "Set your exam plan first", profileText: "This helps build a realistic weekly mathematics workload.",
+      profileTitle: "Choose your exam series", profileText: "Weekly hours are optional. You can start P1 and P5 now and choose a schedule later.", hoursOptional: "optional",
       series: "Exam series", target: "Target grade", total: "Total weekly study time (hours)", math: "Mathematics time (hours)",
-      save: "Save exam plan", saving: "Saving…", invalid: "Check the hours: mathematics time must be above 0 and cannot exceed total time.",
+      save: "Save exam plan", saving: "Saving…", invalid: "Check any hours entered: they must be positive, and Maths time cannot exceed the total.",
       items: "questions", areas: "areas", start: "Start entry check", resume: "Continue the check", complete: "Entry check complete", loading: "Loading…",
       question: "Question", submit: "Submit answer", correct: "Correct", incorrect: "Review this mistake", finish: "Check section complete. Progress updated.",
       error: "The action could not be completed. Try again.", back: "Back", overview: "Overview", plan: "Weekly plan", openPlan: "Open weekly plan", priority: "Priority", week: "Week",
@@ -168,9 +168,9 @@
     };
     return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Подготовка к экзамену", safe: "Доступ к модулю защищён персональным разрешением.",
-      profileTitle: "Сначала задайте план экзамена", profileText: "Это поможет системе построить реалистичную недельную нагрузку по математике.",
+      profileTitle: "Укажите экзаменационную сессию", profileText: "Недельные часы необязательны: их можно выбрать позже. Подготовка P1 и P5 доступна без расписания.", hoursOptional: "необязательно",
       series: "Экзаменационная сессия", target: "Целевая оценка", total: "Общее учебное время в неделю (часы)", math: "Время на математику (часы)",
-      save: "Сохранить план экзамена", saving: "Сохраняем…", invalid: "Проверьте часы: время на математику должно быть больше 0 и не превышать общее время.",
+      save: "Сохранить план экзамена", saving: "Сохраняем…", invalid: "Проверьте указанные часы: значения должны быть больше 0, а время на математику не больше общего.",
       items: "вопросов", areas: "разделов", start: "Начать входную проверку", resume: "Продолжить проверку", complete: "Входная проверка завершена", loading: "Загрузка…",
       question: "Вопрос", submit: "Отправить ответ", correct: "Верно", incorrect: "Разберите эту ошибку", finish: "Часть проверки завершена. Прогресс обновлён.",
       error: "Не удалось выполнить действие. Попробуйте ещё раз.", back: "Назад", overview: "Обзор", plan: "Недельный план", openPlan: "Открыть недельный план", priority: "Приоритет", week: "Неделя",
@@ -535,8 +535,8 @@
     root.innerHTML = shell(`<div class="ep-live-card"><strong>${esc(c.profileTitle)}</strong><div class="ep-live-meta">${esc(c.profileText)}</div><form class="ep-live-form" data-ep-live-profile-form>
       <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" required aria-required="true"></label>
       <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" placeholder="A" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" required aria-required="true"></label>
+      <label class="ep-live-field"><span>${esc(c.total)} · ${esc(c.hoursOptional)}</span><input name="total_hours" type="number" min="0.5" max="168" step="any"></label>
+      <label class="ep-live-field"><span>${esc(c.math)} · ${esc(c.hoursOptional)}</span><input name="math_hours" type="number" min="0.5" max="168" step="any"></label>
       <div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>${esc(state.busy ? c.saving : c.save)}</button></div></form><div data-ep-live-profile-error role="alert" aria-live="assertive"></div></div>`);
     root.querySelector("[data-ep-live-profile-form]")?.addEventListener("submit", saveProfile);
   }
@@ -544,8 +544,16 @@
   async function saveProfile(event) {
     event.preventDefault(); if (state.busy) return;
     const form = event.currentTarget;
-    const values = { examSeries: form.elements.exam_series.value, targetGrade: form.elements.target_grade.value, totalHours: Number(form.elements.total_hours.value), mathHours: Number(form.elements.math_hours.value) };
-    if (!String(values.examSeries || "").trim() || !String(values.targetGrade || "").trim() || !(values.totalHours > 0) || !(values.mathHours > 0) || values.mathHours > values.totalHours || values.totalHours > 168) {
+    const hoursOrNull = element => {
+      const raw = String(element.value || "").trim();
+      return raw === "" ? null : Number(raw);
+    };
+    const values = { examSeries: form.elements.exam_series.value, targetGrade: form.elements.target_grade.value,
+      totalHours: hoursOrNull(form.elements.total_hours), mathHours: hoursOrNull(form.elements.math_hours) };
+    if (!String(values.examSeries || "").trim() || !String(values.targetGrade || "").trim() ||
+        (values.totalHours != null && (!Number.isFinite(values.totalHours) || values.totalHours <= 0 || values.totalHours > 168)) ||
+        (values.mathHours != null && (!Number.isFinite(values.mathHours) || values.mathHours <= 0 || values.mathHours > 168)) ||
+        (values.totalHours != null && values.mathHours != null && values.mathHours > values.totalHours)) {
       const el = rootEl()?.querySelector("[data-ep-live-profile-error]"); if (el) el.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`; return;
     }
     state.busy = true; renderLoading();
