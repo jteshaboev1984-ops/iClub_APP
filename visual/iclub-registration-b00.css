@@ -106,6 +106,21 @@
   outline: 2px solid #2F6FD6;
   outline-offset: 2px;
 }
+/* The existing legacy school-mode SELECT is visually hidden for app.js sync.
+   It must never inherit the visible-input width or minimum height. */
+.iclub-visual-v3 #view-registration.reg-b00-enhanced #reg-is-school {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
 .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input:disabled {
   background: #F2F5FB;
   border-color: #E3E8F2;
