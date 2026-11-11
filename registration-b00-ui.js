@@ -101,7 +101,7 @@
   const stageOneValid = () => {
     for (const id of ["reg-fullname", "reg-region", "reg-district"]) {
       const element = document.getElementById(id);
-      if (!element || !element.checkValidity()) {
+      if (!element || element.disabled || !element.checkValidity()) {
         element?.reportValidity?.();
         return false;
       }
