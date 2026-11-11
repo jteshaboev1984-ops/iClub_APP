@@ -176,6 +176,10 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.equal(await page.locator("#topbar-title").textContent(), "iClub");
     assert.equal(await page.locator("#topbar-subtitle").textContent(), "Smarter together");
     assert.equal(await page.locator("#tabbar").isVisible(), false);
+    if (mode === "success") await page.screenshot({
+      path: path.join(root, "b00-runtime-step1-" + language + "-" + width + ".png"),
+      fullPage: true
+    });
 
     await page.locator(".reg-b00-next").click();
     assert.equal(await page.locator("#reg-b00-step-one").isVisible(), true);
@@ -202,6 +206,10 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.equal(await page.locator("#reg-main-subject-1").inputValue(), "economics");
     assert.equal(await page.locator("#reg-main-subject-2").inputValue(), "mathematics");
     assert.equal(await page.locator("#reg-subject-summary").isVisible(), true);
+    if (mode === "success") await page.screenshot({
+      path: path.join(root, "b00-runtime-step2-" + language + "-" + width + ".png"),
+      fullPage: true
+    });
 
     // Actual app.js controls visibility and clears competitive picks when school is OFF.
     await page.locator("#view-registration .reg-toggle .switch").click();
@@ -214,6 +222,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), true);
     assert.equal(await page.locator("#reg-school-block").isVisible(), true);
     assert.equal(await page.locator("#reg-subject-chips .chip-btn.is-active").count(), 0);
+    await page.waitForFunction(() => document.getElementById("reg-subject-summary")?.textContent === window.i18n.t("reg_subject_summary_none"));
 
     // Preserve personal values through real Step 2 -> Step 1 -> Step 2.
     await page.locator(".reg-b00-prev").click();
@@ -225,7 +234,11 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     const nonschool = language === "en";
     if (nonschool) {
       await page.locator("#view-registration .reg-toggle .switch").click();
-    assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), false);
+      assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), false);
+      if (mode === "success") await page.screenshot({
+        path: path.join(root, "b00-runtime-nonschool-" + language + "-" + width + ".png"),
+        fullPage: true
+      });
     } else {
       await page.locator("#reg-school").fill("154");
       await page.locator("#reg-class").selectOption("9");
@@ -247,6 +260,15 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       assert.equal(await page.locator("#view-registration").isVisible(), true);
       assert.equal(await page.locator("#reg-b00-step-two").isVisible(), true);
       assert.equal(await page.evaluate(() => window.__B00_FAKE.writes.filter(w => w.table === "users").length), 3);
+      await page.screenshot({ path: path.join(root, "b00-runtime-recovery-ru.png"), fullPage: true });
+    } else if (mode === "save_error") {
+      await page.locator("#reg-submit").click();
+      await page.locator("#modal-root .modal-title").waitFor({ timeout: 15000 });
+      assert.match(await page.locator("#modal-root .modal-title").textContent(), /Could not save registration/);
+      assert.equal(await page.locator("#modal-root [data-modal-action]").count(), 1);
+      assert.equal(await page.locator("#view-registration").isVisible(), true);
+      assert.equal(await page.evaluate(() => window.__B00_FAKE.writes.filter(w => w.table === "users").length), 3);
+      assert.equal(await page.evaluate(() => window.__B00_FAKE.writes.filter(w => w.table === "user_subjects").length), 0);
     } else {
       await page.locator("#reg-submit").click();
       await page.locator("#view-home.is-active").waitFor({ timeout: 16000 });
@@ -265,6 +287,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
     assert.ok(over <= 1, "No horizontal overflow: " + width + "px; delta=" + over);
     console.log("PASS real app.js/i18n.js B00", language, mode, width, "no external network", "blocked:", prohibitedRequests.length);
+    assert.equal(prohibitedRequests.length, 0, "No real external network requests allowed");
     assert.equal(pageErrors.length, 0, "Uncaught real app.js exceptions: " + pageErrors.slice(0, 3).join(" | "));
   } finally {
     await page.close();
@@ -280,6 +303,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       { language: "ru", mode: "success", width: 390 },
       { language: "uz", mode: "success", width: 375 },
       { language: "en", mode: "success", width: 320 },
+      { language: "en", mode: "save_error", width: 390 },
       { language: "ru", mode: "duplicate", width: 390 }
     ]) {
       await launchCase(browser, base, testCase);
