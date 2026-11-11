@@ -139,7 +139,13 @@
   }, true);
 
   language.addEventListener("change", renderLabels);
-  document.getElementById("reg-is-school-toggle")?.addEventListener("change", renderLabels);
+  document.getElementById("reg-is-school-toggle")?.addEventListener("change", () => {
+    renderLabels();
+    // Existing app.js clears selected subjects on school -> non-school.
+    // Run its existing summary renderer AFTER the full change event dispatch,
+    // so a later switch back to school never shows stale selected names.
+    queueMicrotask(() => document.dispatchEvent(new CustomEvent("reg-subjects-i18n-updated")));
+  });
 
   // Returning to registration starts at Step 1; no fields or drafts are reset.
   let wasActive = view.classList.contains("is-active");
