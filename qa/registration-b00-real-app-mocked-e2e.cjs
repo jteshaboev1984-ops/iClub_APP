@@ -204,12 +204,14 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.equal(await page.locator("#reg-subject-summary").isVisible(), true);
 
     // Actual app.js controls visibility and clears competitive picks when school is OFF.
-    await page.locator("#reg-is-school-toggle").uncheck();
+    await page.locator("#view-registration .reg-toggle .switch").click();
+    assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), false);
     assert.equal(await page.locator("#reg-nonstudent-subjects").isVisible(), true);
     assert.equal(await page.locator("#reg-subject-section").isVisible(), false);
     assert.equal(await page.locator("#reg-school-block").isVisible(), false);
     assert.equal(await page.locator("#reg-main-subject-1").inputValue(), "");
-    await page.locator("#reg-is-school-toggle").check();
+    await page.locator("#view-registration .reg-toggle .switch").click();
+    assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), true);
     assert.equal(await page.locator("#reg-school-block").isVisible(), true);
     assert.equal(await page.locator("#reg-subject-chips .chip-btn.is-active").count(), 0);
 
@@ -222,7 +224,8 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
 
     const nonschool = language === "en";
     if (nonschool) {
-      await page.locator("#reg-is-school-toggle").uncheck();
+      await page.locator("#view-registration .reg-toggle .switch").click();
+    assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), false);
     } else {
       await page.locator("#reg-school").fill("154");
       await page.locator("#reg-class").selectOption("9");
