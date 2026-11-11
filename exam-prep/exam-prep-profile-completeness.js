@@ -62,11 +62,11 @@
   }
 
   function complete(profile) {
+    // Existing learning profiles need no voluntarily chosen weekly hours.
     return Boolean(
       profile &&
       String(profile.exam_series || "").trim() &&
-      String(profile.target_grade || "").trim() //
-      // Voluntary weekly hours do not determine profile completeness.
+      String(profile.target_grade || "").trim()
     );
   }
 
