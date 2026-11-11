@@ -19,7 +19,7 @@ SOURCE-CONFIRMED SHELL
 - One existing sticky TOP BAR: #topbar. It has exactly (1) #topbar-back arrow on the left as an EXISTING conditional action, (2) center/left brand cluster containing the REAL iClub logo.png (not a fabricated new logo), title "iClub", subtitle "Smarter together", (3) right optional controls #topbar-notifications with real notification count badge #topbar-notifications-badge, and #topbar-action used for contextual actions including profile settings. The actual JS sets visibility according to current view, and the brand shifts left when Back is not shown.
 - One existing BOTTOM TAB BAR: #tabbar. Exactly FOUR real tabs, in this source order, using the existing outlined icons and labels:
   [home] Главная / Bosh sahifa / Home
-  [courses] Учёба / Fanlar / Study (use the app's actual translation in each locale; never rename to a new tab)
+  [courses] Учёба / O‘qish / Study (use the app's actual translation in each locale; never rename to a new tab)
   [ratings] Рейтинг / Reyting / Ratings
   [profile] Профиль / Profil / Profile
   These are the existing navigation actions to their existing view routes, not new pages. No fifth AI, Search, Add, Courses, or Premium tab. The "courses" tab is actually labeled "Учёба" by the existing tab_study translation; do not substitute a different label just because the section contains courses.
@@ -64,7 +64,7 @@ SINGLE-LINE / LINE-WRAP QA — REQUIRED OWNER DECISION
 
 ACTUAL LANGUAGE LABELS — preserve source
 Russian: Главная, Учёба, Рейтинг, Профиль.
-Uzbek Latin: Bosh sahifa, Fanlar, Reyting, Profil.
+Uzbek Latin: Bosh sahifa, O‘qish, Reyting, Profil.
 English: Home, Study, Ratings, Profile.
 Topbar title is always "iClub" with subtitle "Smarter together", subject to exact existing source for special certificate title. Do not invent "My Learning Hub", "Expert Dashboard", "Mentor Chat", "AI assistant" in the header. Sample badge like 3 is VISUAL EXAMPLE ONLY; real value must be provided by the existing notification system.
 
