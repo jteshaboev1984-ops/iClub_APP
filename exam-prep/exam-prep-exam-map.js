@@ -108,8 +108,8 @@
 
   function profileComplete(profile) {
     return Boolean(
-      profile && String(profile.exam_series || "").trim() && String(profile.target_grade || "").trim() &&
-      true // Voluntary hours never determine exam-plan completeness.
+      profile && String(profile.exam_series || "").trim() && String(profile.target_grade || "").trim() //
+      // Voluntary hours never determine exam-plan completeness.
     );
   }
 
