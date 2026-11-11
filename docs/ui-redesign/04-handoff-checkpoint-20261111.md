@@ -1,5 +1,14 @@
 # LATEST CHECKPOINT — UI-REDESIGN #531
 
+## LATEST B00 QA STATUS — FINAL VERIFIED DRAFT SHA / STAGING STILL PENDING (11.11.2026)
+
+**Conditional B00 two-step visual implementation completed in [Draft PR #534](https://github.com/jteshaboev1984-ops/iClub_APP/pull/534) at verified HEAD `8f546f1f21bd75662fa86025ac9e8e65d1ab7848`, based on `main` `85297150a347e98deb8f1e1c58cfbfa2236aea03`. No merge/deployment, no Supabase/production/users data modifications, app.js/i18n.js unchanged.**
+
+**New authoritative detailed QA report:** `docs/ui-redesign/10-B00-runtime-mock-e2e-checkpoint-20261111.md`. [Actions run #43011874638](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/43011874638) **PASS**, 320/375/390/1440 layout + real `app.js` / `i18n.js` with local fake database/Telegram: RU student 2 subjects, UZ student 1, EN non-school, synthetic user save error, synthetic Telegram duplicate/recovery. 0 external requests; registration/consent/subject selection/return navigation and i18n verified. Ten real browser PNG screenshots checked for visual quality. Found and fixed sticky topbar clipping on Step2 and stale subject-summary UI on school OFF→ON (visual-only); earlier narrow hidden select overflow and disabled district issue also fixed.
+
+**Remaining gates only:** isolated real PostgreSQL/Supabase-auth JWT/RLS + genuine Telegram recovery integration using dedicated test instance/accounts (NOT production), final owner visual acceptance and separate release GO. These have NOT been executed/approved. **Next**: continue from PR #534 exact SHA, check latest CI/head, tackle staging safely only if available. Do not redo inventory/mock checks; do not change Math #450/global #528. B01 design may proceed in parallel, but B00 is not released.
+
+
 ## LATEST HANDOFF — B00 CONDITIONAL ACCEPTANCE IMPLEMENTED IN ISOLATED DRAFT PR #534 (2026-11-11)
 
 **Owner decision:** optional Stitch correction v3 is no longer required. Architect conditionally accepted v2 two-step visuals and authorized technical self-correction in isolation. **Scope:** ONLY registration appearance + minimal client-side two-step navigation; existing form fields, registration logic, database and user progress are unchanged. No merge, no production release.
