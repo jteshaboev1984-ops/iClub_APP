@@ -105,6 +105,18 @@ async function run(browser,base,s,after){
  pinnedCards:[pinned(t[4],t),pinned(t[5],t),pinned("Biology",t),pinned("Computer Science",t)]});
  await page.waitForTimeout(260);
  const result=await page.evaluate(()=>{
+  function wordWrapChecks(el){
+    const node=[...el.childNodes].find(x=>x.nodeType===Node.TEXT_NODE&&x.textContent.trim());
+    if(!node)return true;
+    const txt=node.textContent;
+    for(const m of txt.matchAll(/[\p{L}\p{N}‘ʼ'-]{4,}/gu)){
+      const a=document.createRange();a.setStart(node,m.index);a.setEnd(node,m.index+1);
+      const startY=a.getBoundingClientRect().top;
+      a.setStart(node,m.index+m[0].length-1);a.setEnd(node,m.index+m[0].length);
+      if(Math.abs(startY-a.getBoundingClientRect().top)>2)return false;
+    }
+    return true;
+  }
   const q=x=>document.querySelector(x);
   return {
    overflow:document.documentElement.scrollWidth-innerWidth,
