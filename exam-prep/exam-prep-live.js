@@ -1189,8 +1189,12 @@
         p5:"Минут в неделю для P5", daily:"Минут в учебный день", days:"Дней в неделю",
         total:"Ваш недельный ориентир", save:"Сохранить выбор",
         saved:"Выбор сохранён. Результаты и выполненные задания не изменились.",
+        alreadySaved:"Этот вариант уже сохранён. Повторная запись не нужна.",
         error:"Не удалось сохранить. Обновите данные и повторите.",
         invalid:"Сумма минут P1 и P5 должна точно соответствовать выбранному недельному времени.",
+        invalidSplitStep:"Время для P1 и P5 указывайте с шагом 5 минут.",
+        invalidSchedule:"Укажите от 15 до 240 минут в день с шагом 5 минут и от 1 до 7 дней в неделю.",
+        exceedsAvailable:"Выбранное расписание превышает общее доступное время, указанное в плане экзамена.",
         report:"Итоги занятий", empty:"Первый отчёт появится после семи дней с завершённой вводной диагностики.",
         week:"7 дней", month:"Месяц", learning:"Завершено учебных занятий",
         timed:"Завершено проверочных работ",
@@ -1203,8 +1207,12 @@
         p5:"P5 uchun haftalik daqiqa", daily:"O‘qish kunidagi daqiqalar", days:"Haftadagi kunlar",
         total:"Haftalik rejangiz", save:"Tanlovni saqlash",
         saved:"Tanlov saqlandi. Avvalgi natijalar o‘zgarmadi.",
+        alreadySaved:"Bu reja allaqachon saqlangan. Qayta yozish shart emas.",
         error:"Saqlab bo‘lmadi. Ma’lumotni yangilang va qayta urinib ko‘ring.",
         invalid:"P1 va P5 daqiqalari yig‘indisi haftalik reja bilan teng bo‘lishi kerak.",
+        invalidSplitStep:"P1 va P5 uchun vaqtni 5 daqiqalik qadam bilan kiriting.",
+        invalidSchedule:"Kuniga 15–240 daqiqa (5 daqiqalik qadam) va haftasiga 1–7 kun kiriting.",
+        exceedsAvailable:"Tanlangan jadval imtihon rejangizda ko‘rsatilgan umumiy mavjud vaqtdan oshib ketdi.",
         report:"O‘qish yakunlari", empty:"Birinchi hisobot boshlang‘ich diagnostikadan keyingi yetti kun yakunida chiqadi.",
         week:"7 kun", month:"Oy", learning:"Yakunlangan o‘quv mashg‘ulotlari",
         timed:"Yakunlangan sinov ishlari",
@@ -1217,8 +1225,12 @@
         p5:"P5 minutes per week", daily:"Minutes per study day", days:"Study days per week",
         total:"My weekly target", save:"Save my choice",
         saved:"Choice saved. Earlier learning results remain unchanged.",
+        alreadySaved:"This choice is already saved. No new record is needed.",
         error:"Could not save. Refresh your schedule and try again.",
         invalid:"P1 and P5 minutes must add up to your chosen weekly time.",
+        invalidSplitStep:"Enter P1 and P5 minutes in steps of 5.",
+        invalidSchedule:"Enter 15–240 minutes per day in steps of 5 and 1–7 days per week.",
+        exceedsAvailable:"This schedule exceeds the total available study time in your exam plan.",
         report:"Study summaries", empty:"Your first summary appears after seven days following a completed entry diagnostic.",
         week:"7 days", month:"Month", learning:"Completed learning sessions",
         timed:"Completed timed sessions",
@@ -1290,19 +1302,38 @@
       const feedback = panel.querySelector("[data-ep-s3-feedback]");
       const show = text => {if(feedback) feedback.textContent = text;};
       const choice = selected(), row = state.weeklyChoice || {};
-      const value = selector => Number(panel.querySelector(selector)?.value);
+      const value = selector => {
+        const raw = panel.querySelector(selector)?.value;
+        return raw == null || String(raw).trim() === "" ? NaN : Number(raw);
+      };
       const p1 = choice === "keep" ? null : value("[data-ep-s3-p1]");
       const p5 = choice === "keep" ? null : value("[data-ep-s3-p5]");
       const day = choice === "change" ? value("[data-ep-s3-daily]") : null;
       const days = choice === "change" ? value("[data-ep-s3-days]") : null;
       const sum = choice === "change" ? day * days : Number(row.chosen_math_minutes);
-      if (choice !== "keep" && (!Number.isInteger(p1) || !Number.isInteger(p5) ||
-        p1 < 0 || p5 < 0 || p1 + p5 !== sum || p1 % 5 !== 0 || p5 % 5 !== 0)) {
-        show(c.invalid); return;
+      if (choice === "change" && (!Number.isInteger(day) || day < 15 || day > 240 ||
+        day % 5 !== 0 || !Number.isInteger(days) || days < 1 || days > 7)) {
+        show(c.invalidSchedule); return;
       }
-      if (choice === "change" && (!Number.isInteger(day) || day<15 || day>240 ||
-        day%5!==0 || !Number.isInteger(days) || days<1 || days>7 ||
-        sum>Number(row.total_available_minutes))) { show(c.invalid); return; }
+      if (choice !== "keep" && (!Number.isInteger(p1) || !Number.isInteger(p5) ||
+        p1 < 0 || p5 < 0 || p1 % 5 !== 0 || p5 % 5 !== 0)) {
+        show(c.invalidSplitStep); return;
+      }
+      if (choice !== "keep" && p1 + p5 !== sum) { show(c.invalid); return; }
+      if (choice === "change" && sum > Number(row.total_available_minutes)) {
+        show(c.exceedsAvailable); return;
+      }
+      // Avoid a duplicate decision after success in the SAME active week.
+      // Genuine changes and lost-response retries retain existing semantics.
+      const unchanged = row.choice_recorded === true && row.choice_code === choice &&
+        (choice === "keep" || (
+          Number(row.p1_minutes) === p1 && Number(row.p5_minutes) === p5 &&
+          (choice !== "change" || (
+            Number(row.study_minutes_per_day) === day &&
+            Number(row.study_days_per_week) === days
+          ))
+        ));
+      if (unchanged) { state.s3Retry = null; show(c.alreadySaved); return; }
       state.busy=true; button.disabled=true; show("");
       const args = {choice,p1Minutes:p1,p5Minutes:p5,minutesPerDay:day,
         daysPerWeek:days,scheduleRevision:row.schedule_revision};
