@@ -92,7 +92,8 @@ async function main(){
  assert.equal(chosen.study_days_per_week,5);
  assert.equal(chosen.total_student_hours_per_week,null,
   'choosing math cadence may not invent total study hours');
- assert(Math.abs(Number(chosen.mathematics_hours_per_week)-200/60)<0.0001);
+ assert.equal(Math.round(Number(chosen.mathematics_hours_per_week)*60),200,
+  'legacy 2-decimal budget must round to exact chosen cadence minutes');
  const current=valid(await rpc('get_my_exam_prep_weekly_choice_s3_safe_v1'),
   'S3 after voluntary explicit schedule');
  assert.equal(current.chosen_math_minutes,200);
@@ -110,7 +111,8 @@ async function main(){
   'exam profile after voluntary schedule');
  const afterRow=Array.isArray(after)?after[0]:after;
  assert.equal(afterRow.total_student_hours_available,null);
- assert(Math.abs(Number(afterRow.mathematics_hours_budget)-200/60)<0.0001);
+ assert.equal(Math.round(Number(afterRow.mathematics_hours_budget)*60),200,
+  'legacy numeric(8,2) still represents 200 rounded cadence minutes');
 
  const foreign=valid(await rpc('get_exam_prep_exam_profile_v1',{},jwt(D)),
   'separate browser-only profile stays empty');
