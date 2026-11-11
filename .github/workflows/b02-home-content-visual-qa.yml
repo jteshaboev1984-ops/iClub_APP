@@ -1,0 +1,49 @@
+name: B02 Sapphire Home content visual QA (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'visual/iclub-home-b02.css'
+      - 'qa/b02-home-content-browser.cjs'
+      - '.github/workflows/b02-home-content-visual-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  home-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source and syntax guard
+        run: |
+          node --check qa/b02-home-content-browser.cjs
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const h=fs.readFileSync("index.html","utf8");
+          const css=fs.readFileSync("visual/iclub-home-b02.css","utf8");
+          for(const id of ["view-home","home-competitive-list","home-study-list","home-extra-card","home-extra-body"]){
+            if(!h.includes('id="'+id+'"'))throw new Error('Missing original Home source ID '+id);
+          }
+          if(!h.includes('visual/iclub-home-b02.css'))throw new Error('B02 stylesheet not included');
+          if(/@import|fetch\(|localStorage|sessionStorage|supabase|XMLHttpRequest/i.test(css))throw new Error('B02 must remain CSS-only');
+          console.log('PASS Home original markup retained');
+          NODE
+      - name: Install isolated browser dependency
+        run: npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Compare source Home before and after B02 CSS
+        run: node qa/b02-home-content-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b02-home-before-after-chromium
+          path: b02-*.png
+          if-no-files-found: ignore
+          retention-days: 7
