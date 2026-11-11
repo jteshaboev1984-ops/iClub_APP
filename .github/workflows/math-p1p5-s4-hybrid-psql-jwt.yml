@@ -50,6 +50,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Work E2E S3 UI regression without database writes
+        run: |
+          node --check exam-prep/exam-prep-live.js
+          node scripts/p1p5-s3-work-qa-ui-regression.cjs
       - name: Assert only exact current candidate
         run: |
           set -euo pipefail
