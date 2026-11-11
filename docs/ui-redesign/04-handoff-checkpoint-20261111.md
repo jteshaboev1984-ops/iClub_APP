@@ -1,4 +1,9 @@
 # LATEST CHECKPOINT — UI-REDESIGN #531
+
+## NEW LATEST CHECKPOINT — B00 TWO-STEP DESIGN DIRECTION ACCEPTED (2026-11-11)
+
+User accepts a multi-step presentation for the registration screen. We resolved conflicting Stitch step counts as **exactly two VISUAL steps** of the **existing one registration form**, with no new business rules, required fields, checks, auth state, saves or routes. Step 1 = language/full name/region/district. Step 2 = school toggle, conditional school/class and competitive chips or non-school card, existing consent and single final registration submission. Existing topbar app-close back arrow remains; local Previous step is distinct. A progress indicator may say 1/2 and 2/2 but never a fake completion percentage. Minimal UI event code for navigating steps would need separate explicit integration approval and behavior-parity tests; it is not automatically permitted as CSS-only. No code implemented and no design accepted yet. **Revised source-backed Stitch correction prompt is in 08-B00-stitch-two-step-approved-direction-prompt-v2-20261111.md, superseding earlier no-steps directions in 06 and 07. NEXT: await revised Stitch export; review it; do not implement before owner design approval.**
+
 **Snapshot:** 2026-11-11, Asia/Tashkent  
 **Status:** **INVENTORY COMPLETE (source-backed), DESIGN NOT STARTED; NEXT = B00 Registration**  
 **Repo:** jteshaboev1984-ops/iClub_APP  
