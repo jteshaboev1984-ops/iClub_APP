@@ -1,5 +1,14 @@
 # LATEST CHECKPOINT — UI-REDESIGN #531
 
+## LATEST OWNER FEEDBACK / STITCH FIDELITY CORRECTION — 2026-11-11
+
+Architect explicitly rejected the earlier **visually understated** implementation of B00, despite functionality passing. Their requirement: **faithfully reproduce approved Stitch compositions, not simply small color/spacing improvements; substantial user-perceived redesign ("wow")**. This design-parity expectation is binding for B00 and future B01–B14, while original app code remains authoritative for functionality/data/text.
+
+Corrected B00 in [Draft PR #534](https://github.com/jteshaboev1984-ops/iClub_APP/pull/534), verified **HEAD `6ec05e6a7e8258ad207356163aa6c9c26248a38e`**. [GitHub Actions run #43015524827](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/43015524827) **SUCCESS**, fully mocked backend real `app.js`+`i18n.js`, screens 320/375/390/1440, 10 screenshot artifact incl RU/UZ/EN. Actual Step1 fields are now in a white elevated card with separate big blue Next+arrow, large title/labels, icon-enhanced hints, lavender disabled district and an unboxed original Back arrow. Actual Step2 school toggle + school/class share one card; subject chips are larger flex-wrap icon tiles with pale selected state/check; original summary plus read-only selected count; consent and CTA styled like Stitch. CSS cascade specificity corrections verified by Chromium and screenshot inspection. **No app.js, i18n, original source field/IDs, Supabase/data/progress or production modifications; PR unmerged.**
+
+Full latest audit: `docs/ui-redesign/11-B00-stitch-fidelity-correction-and-visual-proof-20261111.md`. Designer's extra marketing/legal/identity text and fake third step deliberately omitted. **Architect final approval of corrected appearance has NOT been given yet**. Real JWT/Supabase/Telegram staging E2E remains a separate release gate. Critical product insight: existing registered users start on Home; B00 visual improvements alone cannot create a "wow at login" for existing learners. Next UI work must faithfully refresh **B01 global shell + B02 Home**, independently and without merging B00 prematurely. Do not repeat old audits.
+
+
 ## LATEST B00 QA STATUS — FINAL VERIFIED DRAFT SHA / STAGING STILL PENDING (11.11.2026)
 
 **Conditional B00 two-step visual implementation completed in [Draft PR #534](https://github.com/jteshaboev1984-ops/iClub_APP/pull/534) at verified HEAD `8f546f1f21bd75662fa86025ac9e8e65d1ab7848`, based on `main` `85297150a347e98deb8f1e1c58cfbfa2236aea03`. No merge/deployment, no Supabase/production/users data modifications, app.js/i18n.js unchanged.**
