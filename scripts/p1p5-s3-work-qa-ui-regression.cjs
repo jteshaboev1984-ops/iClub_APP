@@ -14,6 +14,19 @@ function between(start, end) {
   assert(from >= 0 && until > from, "weekly S3 function boundary missing");
   return source.slice(from, until);
 }
+const durationCode = between(
+  "  function formatWeeklyDurationFromMinutes(value) {",
+  "  function formatDateTime(value) {"
+);
+function checkDuration(locale, input, expected) {
+  const ctx={state:{language:locale}};
+  vm.runInNewContext(durationCode +
+    "\\nglobalThis.__formatMinutes=formatWeeklyDurationFromMinutes;" +
+    "\\nglobalThis.__formatHours=formatWeeklyHours;",ctx);
+  assert.equal(ctx.__formatHours(input),expected,
+    "weekly hours display "+locale+" for "+input);
+  return ctx;
+}
 const weeklyCode =
   between("  function weeklyS3Copy() {", "  function weeklyS3Panel() {") +
   between("  function bindWeeklyS3() {", "  async function renderDashboard() {") +
@@ -80,6 +93,17 @@ async function clickCase({language="ru",choice="change",row=savedChoice,
 }
 
 async function main() {
+  const cases = [
+    ["ru", 3.3333, "3 ч 20 мин"], ["uz",3.3333,"3 soat 20 daq"],
+    ["en",3.3333,"3 h 20 min"], ["ru",3.33,"3 ч 20 мин"],
+    ["ru",6,"6 ч"], ["uz",0.5,"30 daq"],["en",0.5,"30 min"],
+    ["ru",1.9999,"2 ч"],["en",1.0167,"1 h 1 min"]
+  ];
+  for(const [locale,hours,expected] of cases) checkDuration(locale,hours,expected);
+  const blank = checkDuration("ru",null,"");
+  assert.equal(blank.__formatMinutes(null),"","unknown time is never zero");
+  assert.equal(blank.__formatMinutes(200),"3 ч 20 мин","exact cadence in minutes");
+
   for(const language of ["ru","uz","en"]) {
     const duplicate = await clickCase({language});
     assert.equal(duplicate.calls.length,0,
