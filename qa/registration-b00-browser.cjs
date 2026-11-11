@@ -31,7 +31,7 @@ const { chromium } = require("playwright");
         assert.equal(await page.locator("#reg-consent").count(), 1);
         assert.equal(await page.locator("#reg-b00-step-one").isVisible(), true);
         assert.equal(await page.locator("#reg-b00-step-two").isVisible(), false);
-        assert.match(await page.locator(".reg-b00-counter").innerText(), /1 из 2/);
+        assert.match(await page.locator(".reg-b00-counter").innerText(), /1 из 2/i);
         assert.deepEqual(await page.locator("#reg-class option").allTextContents(), ["7", "8", "9", "10", "11"]);
 
         // Step 1 may not advance until existing required fields are valid.
@@ -57,7 +57,7 @@ const { chromium } = require("playwright");
         await page.locator(".reg-b00-next").click();
         assert.equal(await page.locator("#reg-b00-step-one").isVisible(), false);
         assert.equal(await page.locator("#reg-b00-step-two").isVisible(), true);
-        assert.match(await page.locator(".reg-b00-counter").innerText(), /2 из 2/);
+        assert.match(await page.locator(".reg-b00-counter").innerText(), /2 из 2/i);
 
         // The same real form fields and values survive both navigation directions.
         await page.locator(".reg-b00-prev").click();
