@@ -94,7 +94,16 @@
     trackTwo.classList.toggle("is-done", step === 2);
     renderLabels();
     if (shouldScroll && view.classList.contains("is-active")) {
-      try { progress.scrollIntoView({ behavior: "instant", block: "start" }); } catch {}
+      // scrollIntoView(start) places the progress header underneath iClub's
+      // sticky topbar and cuts off the heading on mobile. Reset the document
+      // scroll instead, preserving the existing topbar and source layout.
+      try {
+        const main = document.getElementById("main");
+        if (main) main.scrollTop = 0;
+        window.scrollTo({ top: 0, behavior: "instant" });
+      } catch {
+        try { window.scrollTo(0, 0); } catch {}
+      }
     }
   };
 
