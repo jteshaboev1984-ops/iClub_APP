@@ -124,20 +124,9 @@ body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-spla
   display: none !important;
 }
 
-/* The source Profile action already has data-action='profile-settings'; 
-   show its existing meaning visually without adding any new button. */
-body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar-action[data-action="profile-settings"] > .v3-shell-icon {
-  display: none;
-}
-body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar-action[data-action="profile-settings"]::before {
-  content: "⚙";
-  color: #24334D;
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 24px;
-  font-weight: 500;
-  line-height: 1;
-}
-
+/* Profile action: retain the actual 3-dot SVG from index.html.
+   The previous pseudo-element gear used a Unicode glyph that rendered as
+   mojibake in some browsers. Do not hide or replace the original SVG. */
 /* Four original tab buttons: floating premium surface, no new DOM/actions. */
 body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar {
   left: 50%;
