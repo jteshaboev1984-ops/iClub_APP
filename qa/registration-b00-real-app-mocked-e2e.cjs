@@ -193,6 +193,15 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     await page.locator(".reg-b00-next").click();
     assert.equal(await page.locator("#reg-b00-step-two").isVisible(), true);
     assert.equal(await page.evaluate(() => window.__B00_FAKE.writes.length), 0);
+    const viewGeometry = await page.evaluate(() => ({
+      barBottom: document.getElementById("topbar").getBoundingClientRect().bottom,
+      progressTop: document.querySelector(".reg-b00-progress").getBoundingClientRect().top,
+      headingTop: document.querySelector("#view-registration h1").getBoundingClientRect().top
+    }));
+    assert.ok(viewGeometry.progressTop >= viewGeometry.barBottom - 2,
+      "Step progress must not be clipped under sticky topbar: " + JSON.stringify(viewGeometry));
+    assert.ok(viewGeometry.headingTop >= viewGeometry.barBottom - 2,
+      "Step heading must not be clipped under sticky topbar: " + JSON.stringify(viewGeometry));
 
     assert.deepEqual(await page.locator("#reg-class option").allTextContents(), ["7", "8", "9", "10", "11"]);
     assert.equal(await page.locator("#reg-school-block").isVisible(), true);
@@ -206,10 +215,13 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.equal(await page.locator("#reg-main-subject-1").inputValue(), "economics");
     assert.equal(await page.locator("#reg-main-subject-2").inputValue(), "mathematics");
     assert.equal(await page.locator("#reg-subject-summary").isVisible(), true);
-    if (mode === "success") await page.screenshot({
-      path: path.join(root, "b00-runtime-step2-" + language + "-" + width + ".png"),
-      fullPage: true
-    });
+    if (mode === "success") {
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({
+        path: path.join(root, "b00-runtime-step2-" + language + "-" + width + ".png"),
+        fullPage: true
+      });
+    }
 
     // Actual app.js controls visibility and clears competitive picks when school is OFF.
     await page.locator("#view-registration .reg-toggle .switch").click();
@@ -235,10 +247,14 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     if (nonschool) {
       await page.locator("#view-registration .reg-toggle .switch").click();
       assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), false);
-      if (mode === "success") await page.screenshot({
-        path: path.join(root, "b00-runtime-nonschool-" + language + "-" + width + ".png"),
-        fullPage: true
-      });
+      if (mode === "success") {
+        await page.waitForFunction(() => !document.getElementById("toast")?.classList.contains("is-show"), null, { timeout: 5000 });
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.screenshot({
+          path: path.join(root, "b00-runtime-nonschool-" + language + "-" + width + ".png"),
+          fullPage: true
+        });
+      }
     } else {
       await page.locator("#reg-school").fill("154");
       await page.locator("#reg-class").selectOption("9");
