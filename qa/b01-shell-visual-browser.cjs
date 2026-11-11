@@ -98,7 +98,17 @@ async function run(browser,base,s,after){
    const computed=await page.locator("#tabbar .tab").evaluateAll(els=>els.map(el=>{
      const s=getComputedStyle(el);return {border:s.border,outline:s.outline,background:s.backgroundColor,color:s.color,active:el.classList.contains("is-active"),font:s.fontSize};
    }));
-   console.log("B01_STYLE_DIAGNOSTIC "+JSON.stringify(computed));
+   const debug=await page.evaluate(()=>{
+     const el=document.querySelector("#tabbar .tab");
+     const sheet=[...document.styleSheets].find(s=>s.href?.includes("iclub-shell-b01.css"));
+     return { el:el.outerHTML.slice(0,250), styleSheets:[...document.styleSheets].map(s=>s.href),
+      rules:sheet?[...sheet.cssRules].filter(r=>r.selectorText?.includes("#tabbar")&&r.selectorText?.includes(".tab")).slice(0,7).map(r=>({selector:r.selectorText,matches:el.matches(r.selectorText),css:r.style?.cssText?.slice(0,210)})):[],
+      computed:{appearance:getComputedStyle(el).appearance, border:getComputedStyle(el).border,
+       background:getComputedStyle(el).background,color:getComputedStyle(el).color},
+      parents:el.parentElement?.outerHTML.slice(0,150)
+     };
+   });
+   console.log("B01_STYLE_DIAGNOSTIC "+JSON.stringify(computed)+" MATCH "+JSON.stringify(debug));
  }
  assert.deepEqual(result.tabs.map(x=>x.str),labels[s.lang]);
  assert.equal(result.tabs.length,4);
