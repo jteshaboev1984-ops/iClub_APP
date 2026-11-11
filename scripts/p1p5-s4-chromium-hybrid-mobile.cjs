@@ -33,7 +33,9 @@ async function run(){
     await page.goto(HOST+'/');
     await page.addStyleTag({path:path.resolve('exam-prep/exam-prep-host.css')});
     await page.evaluate(({token,lang,clientRollout})=>{
-     window.iClubExamPrepHybridPaperS4Enabled=true;
+     // No artificial browser-only enablement: the real signed server
+     // catalog must make beta Paper discoverable on its own.
+     delete window.iClubExamPrepHybridPaperS4Enabled;
      window.__hybridTrace=[];
      window.sb={rpc:async(name,args={})=>{
        const res=await fetch('/rpc/'+name,{method:'POST',headers:{
@@ -65,6 +67,8 @@ async function run(){
       return{sync,open};
     },lang);
     assert(opened.sync&&opened.open,'Math host did not start in '+clientRollout);
+    assert.equal(await page.evaluate(() => window.iClubExamPrepHybridPaperS4Enabled),
+      undefined,'client must not need a hidden S4 enable switch');
     const effectiveRollout=await page.evaluate(()=>
       window.iClubExamPrepHostInternal.lastCapabilities?.rolloutState);
     assert.equal(effectiveRollout,clientRollout,
