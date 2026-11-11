@@ -1,5 +1,10 @@
 # LATEST CHECKPOINT — UI-REDESIGN #531
 
+## LATEST — B03 STUDY/COURSES SOURCE AUDIT CREATED (11.11.2026)
+
+Following complete B01 three-dot repair and screenshot-verified B02 Home [Draft PR #536](https://github.com/jteshaboev1984-ops/iClub_APP/pull/536) (HEAD `d472600781a00bab11235864e29f8bdfbe909415` / [CI #43068363801 PASS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/43068363801)), started source audit for **B03 Study/Courses actual screen content**. New source-locked map: `docs/ui-redesign/18-B03-Study-Courses-source-map-and-design-gate-20261111.md`. Confirmed original `#courses-all-subjects`, `#courses-filter-row`, `#subjects-grid`, `.catalog-card/.catalog-head/.catalog-toggle-row`, `#courses-subject-hub` with mentor, conditional Exam Prep gate, Practice, Tours, Materials, Certificates, Archive and videos; nested assessment views are EXCLUDED from B03. Critical safety: Competitive subject toggle activation/deactivation invokes original confirmations, Supabase and possibly progress RESET — B03 visual CSS must not change/toggle behavior. B03 **audit only**, NO B03 app code yet, while architect evaluates B02 before/after. Next work: source-safe B03 Sapphire catalogue/hub design in isolated Draft and rigorous RU/UZ/EN line-wrap QA after visual direction is accepted. Production/main/DB untouched; B01/B02/B00 all DRAFT.
+
+
 ## LATEST — B01 PROFILE THREE-DOT MOJIBAKE FIX + B02 HOME CONTENT VISUAL DRAFT (2026-11-11)
 
 Architect screenshot showed `âš™` in Profile topbar where actual 3-dot SVG should be. **Fixed** in isolated B01 [Draft PR #535](https://github.com/jteshaboev1984-ops/iClub_APP/pull/535) by removing CSS `::before {content:"⚙"}` and `display:none` on source `svg.v3-shell-icon`. Existing original three circles now remain visible. No action/route changed. Exact tested B01 HEAD **`fbd6a1395578f93b3f34814f7505fb9325e6b832`**, [Actions #43065999659 SUCCESS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/43065999659), screenshot verified `b01-after-profile-ru-390.png`.
