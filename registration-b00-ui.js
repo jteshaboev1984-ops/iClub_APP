@@ -102,9 +102,11 @@
       .map((id) => document.getElementById(id)?.value || "")
       .filter(Boolean).length;
     const lang = language.value;
-    const label = lang === "uz" ? "Tanlangan" : lang === "en" ? "Selected" : "Выбрано";
-    const unit = lang === "uz" ? "fandan" : lang === "en" ? "subjects" : "предметов";
-    subjectCounter.textContent = `${label}: ${n} ${lang === "uz" ? "ta / 2" : "из 2"} ${unit}`;
+    subjectCounter.textContent = lang === "uz"
+      ? `Tanlangan: ${n}/2 ta fan`
+      : lang === "en"
+        ? `Selected: ${n} of 2 subjects`
+        : `Выбрано: ${n} из 2 предметов`;
     subjectCounter.dataset.empty = n === 0 ? "true" : "false";
   };
 
