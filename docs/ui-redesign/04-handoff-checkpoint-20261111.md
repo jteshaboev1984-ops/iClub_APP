@@ -1,5 +1,14 @@
 # LATEST CHECKPOINT — UI-REDESIGN #531
 
+## LATEST CHECKPOINT — B01 GLOBAL SHELL SOURCE VERIFIED / STITCH PROMPT READY, SEMANTIC-WRAP QA LOCKED (2026-11-11)
+
+Architect instructed to **continue redesign** and specifically enforce semantically correct text wraps on future screens. B00 remains in isolated, unmerged [Draft PR #534](https://github.com/jteshaboev1984-ops/iClub_APP/pull/534), last validated SHA `8a1aab29a5cb8924efdbe660f364d3846d864ff2` and [CI #43017056709 SUCCESS](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/43017056709): parenthetical " (для рейтинга)" never splits at 320/390px. **No production or backend changes**.
+
+**Newly completed B01 work (docs-only [Draft PR #532](https://github.com/jteshaboev1984-ops/iClub_APP/pull/532)):** verified exact existing source `main=85297150a347e98deb8f1e1c58cfbfa2236aea03` `index.html` #topbar/#tabbar, `app.js` `updateTopbarForView`, `showView`, `setTab`, `bindTabbar`, `bindTopbar`; original CSS and i18n. Created complete 10+ state source-locked **Stitch B01 prompt** in `docs/ui-redesign/12-B01-shell-stitch-prompt-and-wrap-contract-20261111.md`. Created **20-case shell state/function parity and glyph-geometry wrapping QA matrix** in `docs/ui-redesign/13-B01-shell-source-qa-and-wrap-matrix-20261111.md`. Critical source correction: bottom nav courses tab actual `data-i18n="tab_study"` labels RU **Учёба**, UZ **O‘qish** (not Fanlar!), EN **Study**. Four actual tabs preserved Home/Study/Ratings/Profile, no new tabs/metrics/permissions. Strong Sapphire Stitch visual impact required, not the earlier minimal CSS changes.
+
+**Current B01 stage:** `SOURCE VERIFIED → PROMPT READY`. **No Stitch export/owner visual approval yet; NO B01 app code/branch/PR created, by the agreed design gate.** Architect should paste B01 prompt from doc #12 into SAME Stitch workspace, send image(s)/ZIP, then ChatGPT compares against 20-case QA/source and asks design approval before any isolated implementation. Next after B01 = B02 Home. Existing B00 draft cannot be released without dedicated staging validation and owner release GO. Math #450/integration #528 untouched.
+
+
 ## LATEST OWNER FEEDBACK / STITCH FIDELITY CORRECTION — 2026-11-11
 
 Architect explicitly rejected the earlier **visually understated** implementation of B00, despite functionality passing. Their requirement: **faithfully reproduce approved Stitch compositions, not simply small color/spacing improvements; substantial user-perceived redesign ("wow")**. This design-parity expectation is binding for B00 and future B01–B14, while original app code remains authoritative for functionality/data/text.
