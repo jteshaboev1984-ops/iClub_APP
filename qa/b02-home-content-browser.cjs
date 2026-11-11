@@ -22,6 +22,19 @@ const labels={
  uz:["Musobaqa rejimi","Cambridge curriculum bo‘yicha progressni kuzating","Biriktirilgan fanlar","Qo‘shimcha","Matematika","Iqtisodiyot","TUR FAOL","1-tur amaliyoti","Joriy turda ishtirok eting.","Fanni ochish","Amaliyot"],
  en:["Competitive Mode","Track your Cambridge curriculum progress","Pinned Subjects","More","Mathematics","Economics","TOUR ACTIVE","Practice for Tour 1","Take part in the current tour.","Open subject","Practice"]
 };
+const navLabels={
+ ru:["Главная","Учёба","Рейтинг","Профиль"],
+ uz:["Bosh sahifa","O‘qish","Reyting","Profil"],
+ en:["Home","Study","Ratings","Profile"]
+};
+const emptyStrings={
+ ru:["Пока нет предметов в соревновательном режиме.","Здесь появятся ваши учебные предметы. Откройте раздел «Предметы» и закрепите нужные для быстрого доступа."],
+ uz:["Hozircha musobaqa rejimida fanlar yo‘q.","Bu yerda sizning o‘quv fanlaringiz ko‘rinadi. Kerakli fanlarga tezkor kirish uchun «Fanlar» bo‘limida biriktiring."],
+ en:["No subjects in competitive mode yet.","Your study subjects will appear here. Open Courses and pin the ones you want for quick access."]
+};
+for(const l of Object.keys(navLabels)){
+ for(const value of navLabels[l].concat(emptyStrings[l]))assert.ok(i18n.includes(value),"Source translation missing: "+value);
+}
 const allow=p=>p==="/"||p==="/logo.png"||p==="/style.css"||p==="/visual/iclub-visual-v3.css"||p==="/visual/iclub-premium-v3.css"||p==="/visual/iclub-home-b02.css"||/^\/asset\/[A-Za-z0-9._-]+$/.test(p);
 const server=http.createServer((req,res)=>{
  const u=new URL(req.url,"http://127.0.0.1"),p=u.pathname;
@@ -86,14 +99,14 @@ async function run(browser,base,s,after){
  await page.goto(base,{waitUntil:"domcontentloaded"});
  await page.setContent(content(base,after),{waitUntil:"load"});
  const t=labels[s.lang];
- await page.evaluate(({s,t,competitive,pinnedCards})=>{
+ await page.evaluate(({s,t,competitive,pinnedCards,tabs,emptyText})=>{
   const q=x=>document.querySelector(x);
   q('[data-i18n="home_competitive_mode"]').textContent=t[0];
   q('[data-i18n="home_competitive_mode_subtitle"]').textContent=t[1];
   q('[data-i18n="home_pinned_subjects"]').textContent=t[2];
   q('[data-i18n="home_extra_title"]').textContent=t[3];
-  q("#home-competitive-list").innerHTML=s.c?competitive.slice(0,s.c).join(""):'<div class="empty muted">—</div>';
-  q("#home-study-list").innerHTML=s.p?pinnedCards.slice(0,s.p).join(""):'<div class="empty muted">—</div>';
+  q("#home-competitive-list").innerHTML=s.c?competitive.slice(0,s.c).join(""):'<div class="empty muted">'+emptyText[0]+'</div>';
+  q("#home-study-list").innerHTML=s.p?pinnedCards.slice(0,s.p).join(""):'<div class="empty muted">'+emptyText[1]+'</div>';
   q("#home-extra-card").classList.toggle("is-open",s.expanded);
   q("#topbar").style.display="grid";q("#topbar").classList.add("is-no-left");
   q("#topbar-back").style.visibility="hidden";
@@ -101,8 +114,11 @@ async function run(browser,base,s,after){
   q("#topbar-action").style.display="none";
   q("#topbar-subtitle").textContent="Smarter together";
   q("#tabbar").style.display="grid";
+  document.documentElement.lang=s.lang;
+  [...document.querySelectorAll("#tabbar .tab-txt")].forEach((el,i)=>el.textContent=tabs[i]);
  },{s,t,competitive:[card("mathematics",t[4],t),card("economics",t[5],t)],
- pinnedCards:[pinned(t[4],t),pinned(t[5],t),pinned("Biology",t),pinned("Computer Science",t)]});
+ pinnedCards:[pinned(t[4],t),pinned(t[5],t),pinned("Biology",t),pinned("Computer Science",t)],
+ tabs:navLabels[s.lang],emptyText:emptyStrings[s.lang]});
  await page.waitForTimeout(260);
  const result=await page.evaluate(()=>{
   function wordWrapChecks(el){
@@ -130,7 +146,8 @@ async function run(browser,base,s,after){
    empty:document.querySelectorAll("#home-competitive-list > .empty,#home-study-list > .empty").length,
    columns:getComputedStyle(q("#home-study-list")).gridTemplateColumns.split(" ").length,
    words:[...document.querySelectorAll("#view-home .home-block-title,#view-home .home-pinned-title,#view-home .home-competitive-title")].map(x=>({t:x.textContent,ok:wordWrapChecks(x)})),
-   legacy:getComputedStyle(q(".home-legacy")).display
+   legacy:getComputedStyle(q(".home-legacy")).display,
+   tabs:[...document.querySelectorAll("#tabbar .tab-txt")].map(el=>({text:el.textContent,client:el.clientWidth,scroll:el.scrollWidth}))
   };
  });
  assert.ok(result.overflow<=1,"horizontal overflow "+s.lang+"/"+s.width+" "+result.overflow);
@@ -142,6 +159,8 @@ async function run(browser,base,s,after){
  for(const x of result.words)assert.ok(x.ok,"split whole word at "+s.width+" "+x.t);
  if(after&&s.width<360)assert.equal(result.columns,1,"no two-column labels at 320px");
  assert.equal(result.legacy,"none");
+ assert.deepEqual(result.tabs.map(x=>x.text),navLabels[s.lang]);
+ for(const x of result.tabs)assert.ok(x.scroll<=x.client+1,"clipped nav label: "+x.text);
  assert.deepEqual(offsite,[]);assert.deepEqual(errors,[]);
  const capture=(s.lang==="ru"&&s.width===390&&s.p===2)||
   (after&&s.width===320)||(after&&s.c===0)||(after&&s.expanded);
