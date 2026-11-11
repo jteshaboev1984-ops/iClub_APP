@@ -203,6 +203,28 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.ok(viewGeometry.headingTop >= viewGeometry.barBottom - 2,
       "Step heading must not be clipped under sticky topbar: " + JSON.stringify(viewGeometry));
 
+    // Parenthesized qualification is one typographic unit: never leave
+    // "(для" at line-end with "рейтинга)" alone on the next line.
+    if (language === "ru") {
+      const titleLines = await page.locator("#reg-subject-section .card-title").evaluate(el => {
+        const node = Array.from(el.childNodes).find(n =>
+          n.nodeType === Node.TEXT_NODE && n.textContent.includes("(для рейтинга)"));
+        if (!node) return { failure: "Original source text not present", value: el.textContent };
+        const start = node.textContent.indexOf("(для рейтинга)");
+        const getRect = offset => {
+          const range = document.createRange();
+          range.setStart(node, offset);
+          range.setEnd(node, offset + 1);
+          const rect = range.getBoundingClientRect();
+          return { top: Math.round(rect.top), left: Math.round(rect.left) };
+        };
+        return { open: getRect(start), close: getRect(start + "(для рейтинга)".length - 1), width: el.getBoundingClientRect().width };
+      });
+      assert.ok(titleLines.open && titleLines.close &&
+        Math.abs(titleLines.open.top - titleLines.close.top) <= 2,
+      "Keep (для рейтинга) on ONE rendered line: " + JSON.stringify(titleLines));
+    }
+
     assert.deepEqual(await page.locator("#reg-class option").allTextContents(), ["7", "8", "9", "10", "11"]);
     assert.equal(await page.locator("#reg-school-block").isVisible(), true);
     const chips = page.locator("#reg-subject-chips .chip-btn");
@@ -322,6 +344,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
   const browser = await chromium.launch({ headless: true });
   try {
     for (const testCase of [
+      { language: "ru", mode: "success", width: 320 },
       { language: "ru", mode: "success", width: 390 },
       { language: "uz", mode: "success", width: 375 },
       { language: "en", mode: "success", width: 320 },
