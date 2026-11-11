@@ -32,8 +32,9 @@
       cancel: "Bekor qilish",
       mathShort: "Matematika",
       totalShort: "Jami",
-      hours: "soat/hafta",
-      invalid: "Barcha maydonlarni tekshiring. Matematika vaqti 0 dan katta bo‘lishi va umumiy vaqtdan oshmasligi kerak.",
+      hours: "soat/hafta", hoursOptional: "ixtiyoriy", notChosen: "Hali tanlanmagan",
+      rounding: "Vaqt eng yaqin daqiqagacha yaxlitlab ko‘rsatiladi.",
+      invalid: "Kiritilgan soatlar musbat bo‘lsin, matematika vaqti umumiy vaqtdan oshmasin.",
       error: "Ma’lumotni saqlab bo‘lmadi. Qayta urinib ko‘ring.",
       seriesChanged: "Imtihon sessiyasi yangilandi. Oldingi natijalar tarixda saqlanadi. Yangi sessiyaga tayyorgarlik yangi to‘liq ishlar asosida baholanadi; P1 va P5 alohida hisoblanadi.",
       planChanged: "Reja yangilandi. Oldingi progress, tuzatishlar va qayta tekshiruvlar saqlandi.",
@@ -53,8 +54,9 @@
       cancel: "Cancel",
       mathShort: "Mathematics",
       totalShort: "Total",
-      hours: "h/week",
-      invalid: "Check all fields. Mathematics time must be above 0 and cannot exceed total study time.",
+      hours: "h/week", hoursOptional: "optional", notChosen: "Not chosen yet",
+      rounding: "Time is displayed rounded to the nearest minute.",
+      invalid: "Hours entered must be positive and Maths time may not exceed the total.",
       error: "The information could not be saved. Try again.",
       seriesChanged: "Your exam series has been updated. Previous results remain in your history. Readiness for the new series will be based on new full papers; P1 and P5 remain separate.",
       planChanged: "Your plan has been updated. Previous progress, corrections and scheduled checks are kept.",
@@ -74,8 +76,9 @@
       cancel: "Отмена",
       mathShort: "Математика",
       totalShort: "Всего",
-      hours: "ч/нед.",
-      invalid: "Проверьте все поля. Время на математику должно быть больше 0 и не превышать общее учебное время.",
+      hours: "ч/нед.", hoursOptional: "необязательно", notChosen: "Пока не выбрано",
+      rounding: "Время показано с округлением до ближайшей минуты.",
+      invalid: "Указанные часы должны быть больше нуля; время на математику не может превышать общее.",
       error: "Не удалось сохранить данные. Попробуйте ещё раз.",
       seriesChanged: "Экзаменационная сессия обновлена. Прежние результаты останутся в истории. Готовность к новой сессии будет оцениваться по новым полным работам; P1 и P5 по-прежнему учитываются отдельно.",
       planChanged: "План обновлён. Прежний прогресс, исправления и повторные проверки сохранены.",
@@ -90,6 +93,14 @@
       .replaceAll('"', "&quot;").replaceAll("'", "&#039;");
   }
 
+  function weeklyHours(value) {
+    if (value == null || !Number.isFinite(Number(value)) || Number(value) < 0) return copy().notChosen;
+    const n = Math.round(Number(value)*60), h = Math.floor(n/60), m = n%60;
+    const units = language() === "uz" ? ["soat","daq"] :
+      (language() === "en" ? ["h","min"] : ["ч","мин"]);
+    return [h ? h+" "+units[0] : "",m || !h ? m+" "+units[1] : ""].filter(Boolean).join(" ");
+  }
+
   function canUse() {
     const caps = internal.lastCapabilities;
     return Boolean(caps && caps.coreAccess === true && caps.killSwitch === false && caps.rolloutState === "controlled_beta");
@@ -98,8 +109,7 @@
   function profileComplete(profile) {
     return Boolean(
       profile && String(profile.exam_series || "").trim() && String(profile.target_grade || "").trim() &&
-      Number(profile.total_student_hours_available) > 0 && Number(profile.mathematics_hours_budget) > 0 &&
-      Number(profile.mathematics_hours_budget) <= Number(profile.total_student_hours_available)
+      true // Voluntary hours never determine exam-plan completeness.
     );
   }
 
@@ -148,7 +158,7 @@
     const card = document.createElement("div");
     card.className = "ep-live-card";
     card.dataset.epExamPlanCard = "true";
-    card.innerHTML = `<div class="ep-live-head"><div><strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(profile.exam_series)} · ${esc(profile.target_grade)} · ${esc(c.mathShort)} ${esc(profile.mathematics_hours_budget)} ${esc(c.hours)} · ${esc(c.totalShort)} ${esc(profile.total_student_hours_available)} ${esc(c.hours)}</div></div><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-edit>${esc(c.edit)}</button></div>`;
+    card.innerHTML = `<div class="ep-live-head"><div><strong>${esc(c.title)}</strong><div class="ep-live-meta">${esc(profile.exam_series)} · ${esc(profile.target_grade)} · ${esc(c.mathShort)}: ${esc(weeklyHours(profile.mathematics_hours_budget))} · ${esc(c.totalShort)}: ${esc(weeklyHours(profile.total_student_hours_available))}</div><small class="ep-live-meta">${esc(c.rounding)}</small></div><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-edit>${esc(c.edit)}</button></div>`;
 
     const shell = root.querySelector(".ep-host-shell.ep-live") || root.firstElementChild || root;
     const grid = shell.querySelector(".ep-live-grid");
@@ -179,8 +189,8 @@
       <form class="ep-live-form" data-ep-exam-plan-form>
         <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile.exam_series)}" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile.target_grade)}" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.total_student_hours_available)}" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.mathematics_hours_budget)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.total)} · ${esc(c.hoursOptional)}</span><input name="total_hours" type="number" min="0.5" max="168" step="any" value="${esc(profile.total_student_hours_available == null ? "" : profile.total_student_hours_available)}"></label>
+        <label class="ep-live-field"><span>${esc(c.math)} · ${esc(c.hoursOptional)}</span><input name="math_hours" type="number" min="0.5" max="168" step="any" value="${esc(profile.mathematics_hours_budget == null ? "" : profile.mathematics_hours_budget)}"></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.saveStable : c.save)}</button><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-cancel>${esc(c.cancel)}</button></div>
       </form><div data-ep-exam-plan-error role="alert" aria-live="assertive"></div>
     </div></section>`;
@@ -194,10 +204,14 @@
     const form = event.currentTarget;
     const examSeries = String(form.elements.exam_series.value || "").trim();
     const targetGrade = String(form.elements.target_grade.value || "").trim().toUpperCase();
-    const totalHours = Number(form.elements.total_hours.value);
-    const mathHours = Number(form.elements.math_hours.value);
+    const parseHours = el => String(el.value || "").trim() === "" ? null : Number(el.value);
+    const totalHours = parseHours(form.elements.total_hours);
+    const mathHours = parseHours(form.elements.math_hours);
     const error = rootEl()?.querySelector("[data-ep-exam-plan-error]");
-    if (!examSeries || !targetGrade || !(totalHours > 0) || !(mathHours > 0) || mathHours > totalHours || totalHours > 168) {
+    if (!examSeries || !targetGrade ||
+       (totalHours != null && (!Number.isFinite(totalHours) || totalHours <= 0 || totalHours > 168)) ||
+       (mathHours != null && (!Number.isFinite(mathHours) || mathHours <= 0 || mathHours > 168)) ||
+       (totalHours != null && mathHours != null && mathHours > totalHours)) {
       if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`;
       return;
     }
