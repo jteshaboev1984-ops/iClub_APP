@@ -4,6 +4,13 @@
 -- Guard against function source drift; replace existing RPCs without changing
 -- their signatures, grants, search_path or authorization.
 BEGIN;
+-- The profile table already permits unknown hours, but the historical
+-- profile-revision table still required numbers. Keep all existing rows and
+-- CHECK rules intact while allowing truthful NULL snapshots on first entry.
+ALTER TABLE private.exam_prep_exam_map_revisions
+  ALTER COLUMN total_student_hours_available DROP NOT NULL,
+  ALTER COLUMN mathematics_hours_budget DROP NOT NULL;
+
 DO $d3$
 DECLARE v_def text; v_old text; v_new text;
 BEGIN
