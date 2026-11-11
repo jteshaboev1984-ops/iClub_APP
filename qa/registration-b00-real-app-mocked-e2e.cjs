@@ -182,9 +182,9 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.equal(await page.evaluate(() => window.__B00_FAKE.writes.length), 0);
 
     await page.locator("#reg-fullname").fill("Example Student");
-    await page.locator("#reg-region option[value='1']").waitFor({ timeout: 8000 });
+    await page.locator("#reg-region option[value='1']").waitFor({ state: "attached", timeout: 8000 });
     await page.locator("#reg-region").selectOption("1");
-    await page.locator("#reg-district:not([disabled]) option[value='11']").waitFor({ timeout: 8000 });
+    await page.locator("#reg-district:not([disabled]) option[value='11']").waitFor({ state: "attached", timeout: 8000 });
     await page.locator("#reg-district").selectOption("11");
     await page.locator(".reg-b00-next").click();
     assert.equal(await page.locator("#reg-b00-step-two").isVisible(), true);
