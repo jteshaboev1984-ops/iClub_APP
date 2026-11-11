@@ -221,6 +221,21 @@ body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-spla
 body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar .tab.is-active .tab-txt {
   font-weight: 820;
 }
+/* Explicitly neutralize browser-native button paint in the floating dock.
+   Some WebViews paint a grey system button even after layout declarations. */
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar > button.tab {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #697387 !important;
+}
+body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #tabbar > button.tab.is-active {
+  border-color: rgba(47,111,214,.12) !important;
+  background: linear-gradient(180deg,#EBF2FF,#F4F7FF) !important;
+  color: #1A58C1 !important;
+}
+
 @media (max-width: 359px) {
   body.iclub-visual-v3:not(:has(#view-registration.is-active)):not(:has(#view-splash.is-active)):not(:has(#view-certificate-verify.is-active)) #topbar {
     padding-left: 11px;
