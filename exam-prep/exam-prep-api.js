@@ -143,8 +143,8 @@
     const result = await rpc("save_exam_prep_exam_profile_v2", {
       p_exam_series: String(examSeries || "").trim() || null,
       p_target_grade: String(targetGrade || "").trim() || null,
-      p_total_student_hours_available: Number(totalHours),
-      p_mathematics_hours_budget: Number(mathHours)
+      p_total_student_hours_available: totalHours == null || totalHours === "" ? null : Number(totalHours),
+      p_mathematics_hours_budget: mathHours == null || mathHours === "" ? null : Number(mathHours)
     });
     if (!result.ok) return result;
 
