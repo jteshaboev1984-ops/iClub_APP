@@ -94,6 +94,12 @@ async function run(browser,base,s,after){
    subtitle:document.getElementById("topbar-subtitle").textContent};
  });
  assert.ok(result.overflow<=1,"horizontal overflow "+s.view+"/"+s.lang+"/"+s.width+" "+result.overflow);
+ if(after && s.view==="home" && s.lang==="ru" && s.width===390){
+   const computed=await page.locator("#tabbar .tab").evaluateAll(els=>els.map(el=>{
+     const s=getComputedStyle(el);return {border:s.border,outline:s.outline,background:s.backgroundColor,color:s.color,active:el.classList.contains("is-active"),font:s.fontSize};
+   }));
+   console.log("B01_STYLE_DIAGNOSTIC "+JSON.stringify(computed));
+ }
  assert.deepEqual(result.tabs.map(x=>x.str),labels[s.lang]);
  assert.equal(result.tabs.length,4);
  if(s.view==="splash"||s.view==="registration")assert.equal(result.tabDisplay,"none");
