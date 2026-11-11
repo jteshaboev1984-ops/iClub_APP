@@ -216,6 +216,12 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.equal(await page.locator("#reg-main-subject-2").inputValue(), "mathematics");
     assert.equal(await page.locator("#reg-subject-summary").isVisible(), true);
     if (mode === "success") {
+      // The preceding third-chip test intentionally triggers a short toast.
+      // Wait for that expected message to close before photographing the form.
+      await page.waitForFunction(
+        () => !document.getElementById("toast")?.classList.contains("is-show"),
+        null, { timeout: 7000 }
+      );
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({
         path: path.join(root, "b00-runtime-step2-" + language + "-" + width + ".png"),
