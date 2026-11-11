@@ -86,7 +86,11 @@ const { chromium } = require("playwright");
         const metrics = await page.evaluate(() => ({
           viewport: window.innerWidth,
           content: document.documentElement.scrollWidth,
-          subjectColumns: getComputedStyle(document.getElementById("reg-subject-chips")).gridTemplateColumns
+          subjectColumns: getComputedStyle(document.getElementById("reg-subject-chips")).gridTemplateColumns,
+          offending: Array.from(document.querySelectorAll("body *")).map(el => {
+            const r = el.getBoundingClientRect();
+            return { tag: el.tagName, id: el.id, className: typeof el.className === "string" ? el.className.slice(0, 90) : "", left: Math.round(r.left), right: Math.round(r.right), scrollWidth: el.scrollWidth };
+          }).filter(x => x.right > window.innerWidth + 1 || x.left < -1).slice(0, 12)
         }));
         assert.ok(metrics.content <= metrics.viewport + 1,
           `Horizontal overflow at ${width}px: ${JSON.stringify(metrics)}`);
