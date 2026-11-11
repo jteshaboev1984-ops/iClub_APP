@@ -1,0 +1,68 @@
+name: B00 registration two-step visual QA (draft only)
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'registration-b00-ui.js'
+      - 'visual/iclub-registration-b00.css'
+      - 'qa/registration-b00-browser.cjs'
+      - 'qa/registration-b00-real-app-mocked-e2e.cjs'
+      - '.github/workflows/b00-registration-visual-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check presentation module syntax and source invariants
+        run: |
+          node --check registration-b00-ui.js
+          node --check qa/registration-b00-browser.cjs
+          node --check qa/registration-b00-real-app-mocked-e2e.cjs
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const html = fs.readFileSync('index.html','utf8');
+          const js = fs.readFileSync('registration-b00-ui.js','utf8');
+          const css = fs.readFileSync('visual/iclub-registration-b00.css','utf8');
+          const fields = ['reg-language','reg-fullname','reg-region','reg-district','reg-is-school-toggle',
+            'reg-school','reg-class','reg-subject-chips','reg-main-subject-1','reg-main-subject-2',
+            'reg-additional-subject','reg-nonstudent-subjects','reg-consent','reg-submit'];
+          for (const id of fields) {
+            if (!html.includes('id="'+id+'"')) throw new Error('Missing original registration ID: '+id);
+          }
+          if (!html.includes('registration-b00-ui.js') || !html.includes('visual/iclub-registration-b00.css')) {
+            throw new Error('Missing scoped visual asset links');
+          }
+          if (/supabase|localStorage|fetch\(|XMLHttpRequest|indexedDB|sessionStorage|api\//i.test(js)) {
+            throw new Error('Presentation module must never access database or storage');
+          }
+          if (css.includes('body #view-home') || css.includes('#view-courses')) {
+            throw new Error('B00 stylesheet must not target unrelated views');
+          }
+          console.log('PASS source-preservation invariants for B00');
+          NODE
+      - name: Install isolated browser test dependency
+        run: npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test real registration DOM without loading Supabase/production modules
+        run: node qa/registration-b00-browser.cjs
+      - name: Real app.js / i18n.js registration flow (fully mocked, no external network)
+        run: node qa/registration-b00-real-app-mocked-e2e.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: b00-registration-visual-qa-screenshots
+          path: |
+            b00-qa-step*.png
+            b00-runtime-*.png
+          if-no-files-found: ignore
+          retention-days: 7
