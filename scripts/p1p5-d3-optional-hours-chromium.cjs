@@ -37,7 +37,8 @@ async function main(){
       window.i18n={getLang:()=>language};
     },{token,language});
     for(const file of ['exam-prep/exam-prep-api.js','exam-prep/exam-prep-host.js',
-      'exam-prep/exam-prep-live.js','exam-prep/exam-prep-written-understanding-ui.js']){
+      'exam-prep/exam-prep-live.js','exam-prep/exam-prep-written-understanding-ui.js',
+      'exam-prep/exam-prep-profile-completeness.js','exam-prep/exam-prep-exam-map.js']){
       await page.addScriptTag({path:path.resolve(file)});
     }
     const opened=await page.evaluate(async language=>{
@@ -60,6 +61,13 @@ async function main(){
       await form.locator('[type=submit]').click();
     }
     await page.locator('[data-ep-study-schedule]').waitFor({timeout:20000});
+    const planCard=page.locator('[data-ep-exam-plan-card]');
+    await planCard.waitFor({timeout:20000});
+    assert((await planCard.textContent()).includes(
+      {ru:'Пока не выбрано',uz:'Hali tanlanmagan',en:'Not chosen yet'}[language]),
+      'legacy exam-plan card cannot show null/0 hours as confirmed');
+    assert.equal(await page.locator('[data-ep-profile-completion]').count(),0,
+      'legacy completeness overlay must never force weekly hours');
     const daily=page.locator('[data-ep-study-minutes]');
     const days=page.locator('[data-ep-study-days]');
     assert.equal(await daily.inputValue(),'','no invented default daily minutes '+language);
@@ -91,6 +99,17 @@ async function main(){
       assert(body.includes('3 h 20 min'),'saved exact 200-minute display missing');
       assert(body.includes('Not chosen yet'),'overall total must remain unknown');
       assert.equal(await page.locator('[data-ep-s3] input[type=radio]').count(),3);
+      const updated=page.locator('[data-ep-exam-plan-card]');
+      await updated.waitFor({timeout:20000});
+      assert((await updated.textContent()).includes('3 h 20 min'),
+        'legacy plan editor card should display rounded minutes, not 3.33h');
+      await updated.locator('[data-ep-exam-plan-edit]').click();
+      const editor=page.locator('[data-ep-exam-plan-form]');
+      await editor.waitFor({timeout:10000});
+      assert.equal(await editor.locator('[name=total_hours]').getAttribute('required'),null);
+      assert.equal(await editor.locator('[name=math_hours]').getAttribute('required'),null);
+      assert.equal(await editor.locator('[name=total_hours]').inputValue(),'');
+      await page.locator('[data-ep-exam-plan-cancel]').click();
     }
    }finally{await page.close();}
  }
