@@ -82,5 +82,25 @@ BEGIN
   IF length(v_def)-length(replace(v_def,v_old,''))<>length(v_old) THEN
     RAISE EXCEPTION 'd3_capacity_rounding_guard_mismatch'; END IF;
   EXECUTE replace(v_def,v_old,v_new);
+
+  -- Voluntary S3 choices work once Math cadence is known, even if the
+  -- learner has not selected an unrelated overall weekly study total.
+  v_def:=pg_get_functiondef('public.save_my_exam_prep_weekly_choice_s3_safe_v1(text,integer,integer,integer,integer,integer,text)'::regprocedure);
+  v_old:=$old$  IF v_p.user_id IS NULL OR v_p.program_version_id IS NULL
+    OR v_p.total_student_hours_available IS NULL THEN
+   RAISE EXCEPTION 'exam_prep_profile_required'; END IF;$old$;
+  v_new:=$new$  IF v_p.user_id IS NULL OR v_p.program_version_id IS NULL THEN
+   RAISE EXCEPTION 'exam_prep_profile_required'; END IF;$new$;
+  IF length(v_def)-length(replace(v_def,v_old,''))<>length(v_old) THEN
+    RAISE EXCEPTION 'd3_s3_owner_source_guard_mismatch'; END IF;
+  v_def:=replace(v_def,v_old,v_new);
+  v_old:=$old$    IF v_budget>round(v_p.total_student_hours_available*60)::int THEN
+      RAISE EXCEPTION 'exam_prep_s3_exceeds_user_total_available'; END IF;$old$;
+  v_new:=$new$    IF v_p.total_student_hours_available IS NOT NULL AND
+       v_budget>round(v_p.total_student_hours_available*60)::int THEN
+      RAISE EXCEPTION 'exam_prep_s3_exceeds_user_total_available'; END IF;$new$;
+  IF length(v_def)-length(replace(v_def,v_old,''))<>length(v_old) THEN
+    RAISE EXCEPTION 'd3_s3_available_time_source_guard_mismatch'; END IF;
+  EXECUTE replace(v_def,v_old,v_new);
 END $d3$;
 COMMIT;
