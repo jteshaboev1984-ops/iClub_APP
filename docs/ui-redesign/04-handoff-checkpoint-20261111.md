@@ -8,6 +8,12 @@
 **Last committed docs SHA before this checkpoint:** `a6cafeeb86042ea697b7d06e28705ba561064a67`  
 **Parallel non-UI tasks:** Mathematics Issue #450; general integration Issue #528 (do not touch).
 
+## LATEST ARCHITECT DIRECTIVE: VISUAL-ONLY — 2026-11-11
+
+**Binding, supersedes any broader phrasing in earlier docs:** redesign visual presentation only. Existing code is the sole authority for **every** route, user flow, screen, control, user-visible label, business rule, authorization, data contract, storage operation, assessment and action. Stitch can change colors/layout/typography/icons/spacing/responsive styling, but MUST NOT propose implementation of new functionality, reordering of user workflow, deletion of controls, altered semantics, changed copy or JS/DB changes. Code adoption is CSS-first and 100% behavior-preserving; changes to structural markup require separate explicit approval after selector/event compatibility proof. Do not conflate 'all visual states accounted for' with permission to redesign their behavior.
+
+**Next B00 Stitch prompt MUST expressly demand exact registration field set and original paths as coded, not a reimagined onboarding wizard, extra login screen, new tariff selector, additional consent, or different validation.** A source-text inconsistency should be recorded, not quietly rewritten. This decision is also pinned atop Issue #531.
+
 ## Completed in this conversation
 1. Verified real GitHub access and read the current main `index.html` (14 outer view sections), `app.js` (19 Courses screens + 4 Profile screens and dynamic UI) and the loaded visual, Practice, Exam Prep, Economics, Chemistry, AI, support, plan and learning modules. Read relevant source-backed UX/governance documents.
 2. Compiled **157 numbered screen / user-state / conditional-route inventory units** across 14 A–N groups, including all known new/existing, student/nonstudent, Practice/Tours/ratings, certificate/archive/QR, Math/Econ/Chem Exam Prep, AI, commerce, modal/permission/error/empty states. These are *not* 157 distinct live pages: some are conditional or future/DRAFT. The inventory explicitly distinguishes them.
