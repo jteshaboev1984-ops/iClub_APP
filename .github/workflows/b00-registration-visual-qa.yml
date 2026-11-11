@@ -7,6 +7,7 @@ on:
       - 'registration-b00-ui.js'
       - 'visual/iclub-registration-b00.css'
       - 'qa/registration-b00-browser.cjs'
+      - 'qa/registration-b00-real-app-mocked-e2e.cjs'
       - '.github/workflows/b00-registration-visual-qa.yml'
 
 permissions:
@@ -25,6 +26,7 @@ jobs:
         run: |
           node --check registration-b00-ui.js
           node --check qa/registration-b00-browser.cjs
+          node --check qa/registration-b00-real-app-mocked-e2e.cjs
           node - <<'NODE'
           const fs = require('node:fs');
           const html = fs.readFileSync('index.html','utf8');
@@ -53,6 +55,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Test real registration DOM without loading Supabase/production modules
         run: node qa/registration-b00-browser.cjs
+      - name: Real app.js / i18n.js registration flow (fully mocked, no external network)
+        run: node qa/registration-b00-real-app-mocked-e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
