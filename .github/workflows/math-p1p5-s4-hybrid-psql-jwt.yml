@@ -4,6 +4,7 @@ on:
     branches:
       - main
       - docs/math-p1p5-s4-hybrid-paper-owner-decision-20261109
+      - fix/issue450-work-e2e-s3-ui-20261111
     paths:
       - 'supabase/migrations/*exam_prep_math_s4*.sql'
       - 'exam-prep/exam-prep-api.js'
@@ -12,6 +13,9 @@ on:
       - 'scripts/p1p5-s2-signed-calendar-81-source.cjs'
       - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
       - 'scripts/p1p5-s3-chromium-mobile-three-language.cjs'
+      - 'supabase/migrations/*optional_weekly_hours_d3*.sql'
+      - 'scripts/p1p5-d3-*.cjs'
+      - 'supabase/tests/p1p5_d3_*.sql'
       - '.github/workflows/math-p1p5-s4-hybrid-psql-jwt.yml'
   workflow_dispatch:
 permissions:
@@ -209,6 +213,23 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-s3-chromium-mobile-three-language.cjs
           node scripts/p1p5-s3-chromium-mobile-three-language.cjs
+
+      - name: D3 seed two NEW disposable optional-hours owners only
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_d3_optional_hours_isolated_users.sql
+      - name: D3 signed PostgREST optional hours, P1/P5 and later weekly schedule
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-d3-optional-hours-signed.cjs
+          node scripts/p1p5-d3-optional-hours-signed.cjs
+      - name: D3 signed Chromium no-budget UI RU UZ mobile and EN desktop
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-d3-optional-hours-chromium.cjs
+          node scripts/p1p5-d3-optional-hours-chromium.cjs
 
       - name: Clean disposable PostgREST
         if: always()
