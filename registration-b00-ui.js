@@ -64,16 +64,53 @@
 
   // Move the SAME DOM nodes: existing listeners, select options, IDs,
   // visibility code, native validity and submit behavior remain intact.
-  stepOneFields.forEach((field) => stepOne.appendChild(field));
+  // Match the architect-approved Stitch composition: fields together on an
+  // elevated card; the Next CTA sits visibly OUTSIDE that card.
+  // All original source nodes, IDs and handlers are retained.
+  const fieldsCard = create("div", "reg-b00-fields-card");
+  stepOneFields.forEach((field) => fieldsCard.appendChild(field));
+  stepOne.append(fieldsCard, next);
+
   originalChildren.slice(stepOneFields.length).forEach((child) => stepTwo.appendChild(child));
-  stepOne.appendChild(next);
+
+  // Stitch groups the school toggle and School/Grade into ONE card.
+  // Reparenting those existing nodes does not touch app.js visibility rules.
+  const schoolToggle = stepTwo.querySelector(".reg-toggle");
+  const schoolFields = stepTwo.querySelector("#reg-school-block");
+  if (schoolToggle && schoolFields) {
+    const schoolCard = create("div", "reg-b00-school-card");
+    stepTwo.insertBefore(schoolCard, schoolToggle);
+    schoolCard.append(schoolToggle, schoolFields);
+  }
+
+  // A visual-only counter mirrors the existing two selected subject values;
+  // it never changes selections or the original source summary renderer.
+  const subjectCard = stepTwo.querySelector("#reg-subject-section");
+  const summary = stepTwo.querySelector("#reg-subject-summary");
+  const subjectCounter = create("div", "reg-b00-selected-count");
+  subjectCounter.setAttribute("aria-hidden", "true");
+  if (subjectCard && summary) subjectCard.insertBefore(subjectCounter, summary);
+
   stepTwo.appendChild(previous);
   form.append(stepOne, stepTwo);
   content.insertBefore(progress, content.querySelector("h1") || content.firstChild);
 
   let step = 1;
+  const updateSubjectCounter = () => {
+    if (!subjectCounter.isConnected) return;
+    const n = ["reg-main-subject-1", "reg-main-subject-2"]
+      .map((id) => document.getElementById(id)?.value || "")
+      .filter(Boolean).length;
+    const lang = language.value;
+    const label = lang === "uz" ? "Tanlangan" : lang === "en" ? "Selected" : "Выбрано";
+    const unit = lang === "uz" ? "fandan" : lang === "en" ? "subjects" : "предметов";
+    subjectCounter.textContent = `${label}: ${n} ${lang === "uz" ? "ta / 2" : "из 2"} ${unit}`;
+    subjectCounter.dataset.empty = n === 0 ? "true" : "false";
+  };
+
   const renderLabels = () => {
     const c = getCopy();
+    updateSubjectCounter();
     const school = document.getElementById("reg-is-school-toggle");
     counter.textContent = c.count(step);
     title.textContent = step === 1 ? c.one : school?.checked ? c.two : c.nonSchool;
@@ -148,12 +185,16 @@
   }, true);
 
   language.addEventListener("change", renderLabels);
+  document.getElementById("reg-subject-chips")?.addEventListener("click", () => queueMicrotask(updateSubjectCounter));
   document.getElementById("reg-is-school-toggle")?.addEventListener("change", () => {
     renderLabels();
     // Existing app.js clears selected subjects on school -> non-school.
     // Run its existing summary renderer AFTER the full change event dispatch,
     // so a later switch back to school never shows stale selected names.
-    queueMicrotask(() => document.dispatchEvent(new CustomEvent("reg-subjects-i18n-updated")));
+    queueMicrotask(() => {
+      document.dispatchEvent(new CustomEvent("reg-subjects-i18n-updated"));
+      updateSubjectCounter();
+    });
   });
 
   // Returning to registration starts at Step 1; no fields or drafts are reset.
