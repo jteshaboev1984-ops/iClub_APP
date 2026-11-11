@@ -594,6 +594,11 @@ body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar 
   display: flex;
   align-items: center;
   gap: 9px;
+  /* Keep explanatory parentheses together when a narrow phone wraps.
+     In roomier layouts the heading remains a single line. */
+  text-wrap: balance;
+  word-break: normal;
+  overflow-wrap: normal;
 }
 .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .card-title::before {
   content: "";
