@@ -85,6 +85,14 @@ async function run() {
     }
     assert.equal((await core(A)).core_access,true,rollout+' A with selected Math');
     assert.equal((await core(B)).core_access,false,rollout+' B without Math');
+    if(rollout==='expanded_beta') {
+      // A signed Paper catalog is intentionally profile-gated as well as
+      // subject-gated. Create its valid profile using the actual learner RPC.
+      ok(await rpc('save_exam_prep_exam_profile_v2',{
+        p_exam_series:'May/June 2027',p_target_grade:'A',
+        p_total_student_hours_available:12,p_mathematics_hours_budget:6
+      },jwt(A)),'Math-selected learner profile allowed');
+    }
     const catalog=ok(await rpc('get_exam_prep_hybrid_s4_papers_safe_v1',
       {p_component_code:'P1'},jwt(A)),rollout+' Mathematics user Paper catalog');
     assert.equal(catalog.enabled,false,'existing S4 Paper switch remains OFF');
