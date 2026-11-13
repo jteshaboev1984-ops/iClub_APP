@@ -149,7 +149,7 @@ jobs:
           # These pre-existing subject tables are absent only from this MINIMAL
           # disposable bootstrap. Never create them in the real iClub database.
           psql -X -v ON_ERROR_STOP=1 <<'SQL'
-          DO $
+          DO $synthetic_subjects$
           BEGIN
             IF to_regclass('public.subjects') IS NULL THEN
               CREATE TABLE public.subjects(id bigint PRIMARY KEY,subject_key text NOT NULL UNIQUE);
@@ -166,7 +166,7 @@ jobs:
                 UNIQUE(user_id,subject_id)
               );
             END IF;
-          END $;
+          END $synthetic_subjects$;
           SQL
           psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261113150000_math_p1p5_subject_release_guard_v1.sql
 
