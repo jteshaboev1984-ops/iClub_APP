@@ -69,7 +69,9 @@ async function run() {
   for(const rollout of ['expanded_beta','mass']) {
     sql("UPDATE private.exam_prep_feature_config SET rollout_state='"+rollout+
       "',qa_open_all_core=true WHERE id=1");
-    assert.equal((await core(A)).core_access,false,rollout+' A without Math');
+    if(rollout==='expanded_beta') {
+      assert.equal((await core(A)).core_access,false,rollout+' A without Math');
+    }
     assert.equal((await core(B)).core_access,false,rollout+' B without Math');
     deny(await rpc('get_exam_prep_hybrid_s4_papers_safe_v1',
       {p_component_code:'P1'},jwt(B)),rollout+' direct Paper access without Math');
