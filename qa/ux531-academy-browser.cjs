@@ -57,12 +57,18 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
    }
    const heights=headers.map(x=>x.height);
    assert(Math.max(...heights)-Math.min(...heights)<2,'unequal headers '+JSON.stringify({viewport,heights}));
-   assert(new Set(headers.map(x=>x.barColor)).size===1,'topbar color jumps '+JSON.stringify(headers.map(x=>x.barColor)));
+   const bars=headers.map(x=>x.barColor);
+   assert(new Set(bars).size===3,'topbar needs distinct related blue tones '+JSON.stringify(bars));
+   const barTriplets=bars.map(x=>rgbFrom(x)[0]);
+   assert(barTriplets.every(x=>Array.isArray(x)),'topbar RGB missing '+JSON.stringify(bars));
+   const maxBarDifference=Math.max(...[0,1,2].map(c=>Math.max(...barTriplets.map(x=>x[c]))-Math.min(...barTriplets.map(x=>x[c]))));
+   assert(maxBarDifference>=12&&maxBarDifference<=44,'topbar tonal shift must be visible but gentle '+JSON.stringify({bars,maxBarDifference}));
    const triplets=headers.map(x=>rgbFrom(x.gradient));
    assert(triplets.every(x=>x.length===3),'header gradients must have 3 stops '+JSON.stringify(triplets));
+   assert(new Set(headers.map(x=>x.gradient)).size===3,'header gradients must be distinct');
    for(let stop=0;stop<3;stop++)for(let c=0;c<3;c++){
     const vals=triplets.map(t=>t[stop][c]);
-    assert(Math.max(...vals)-Math.min(...vals)<=9,'sharp palette shift '+JSON.stringify({viewport,stop,c,vals}));
+    assert(Math.max(...vals)-Math.min(...vals)<=43,'sharp palette shift +JSON.stringify({viewport,stop,c,vals}));
    }
    await page.evaluate(setScreen,{view:'home',screen:''});
    await page.evaluate(()=>{
