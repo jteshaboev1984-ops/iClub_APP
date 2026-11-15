@@ -1,4 +1,4 @@
-name: UX531 Academy OS B01-B03 source safety
+name: UX531 Academy OS B01-B08 full-screen safety
 
 on:
   pull_request:
@@ -8,9 +8,11 @@ on:
       - 'i18n.js'
       - 'visual/iclub-academy-v55-shell-b01.css'
       - 'visual/iclub-academy-ux531-b02b03.css'
+      - 'visual/iclub-academy-ux531-b04b08.css'
       - 'visual/iclub-academy-ux531-interactions.js'
       - 'qa/ux531-academy-ui-parity.cjs'
       - 'qa/ux531-academy-browser.cjs'
+      - 'qa/ux531-academy-all-screens.cjs'
       - '.github/workflows/ux531-academy-ui-source.yml'
   workflow_dispatch:
 
@@ -34,6 +36,7 @@ jobs:
           node --check i18n.js
           node --check visual/iclub-academy-ux531-interactions.js
           node --check qa/ux531-academy-ui-parity.cjs
+          node --check qa/ux531-academy-all-screens.cjs
       - name: UI source parity and contract
         run: node qa/ux531-academy-ui-parity.cjs
       - name: Install browser runtime (Ubuntu 24.04 compatible)
@@ -42,3 +45,13 @@ jobs:
           npx playwright install chromium
       - name: Browser UI parity on real source DOM and CSS
         run: node qa/ux531-academy-browser.cjs
+      - name: All-screen B04–B08 Chromium geometry and screenshots
+        run: node qa/ux531-academy-all-screens.cjs
+      - name: Preserve review screenshots (no user data)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ux531-academy-all-screen-review
+          path: ux531-academy-all-screens/
+          if-no-files-found: ignore
+          retention-days: 7
