@@ -168,7 +168,7 @@ jobs:
             END IF;
           END $synthetic_subjects$;
           SQL
-          psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261113150000_math_p1p5_subject_release_guard_v1.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261115100103_math_p1p5_subject_release_guard_v1.sql
 
       - name: Generate ephemeral JWT signing key and start local PostgREST
         shell: bash
