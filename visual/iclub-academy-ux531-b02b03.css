@@ -1,7 +1,7 @@
 /* UX #531 Academy OS — shared top zones, Home rails, Subjects, subject workspace.
    Applies only to overview screens. No assessment, authorization or data rules. */
 body.iclub-visual-v3{
- --academy-header-body:128px;
+ --academy-header-body:156px;
  --academy-header-curve:26px;
  --academy-blue:#2c6ccc;
  --academy-ink:#142b50;
@@ -284,7 +284,7 @@ body.iclub-visual-v3 #courses-subject-hub .subject-hub-bottom{
  }
 }
 @media(max-width:340px){
- body.iclub-visual-v3{--academy-header-body:128px}
+ body.iclub-visual-v3{--academy-header-body:156px}
  body.iclub-visual-v3 #courses-all-subjects .catalog-head{padding:12px 9px 8px}
  body.iclub-visual-v3 #courses-all-subjects .catalog-toggle-row{padding:5px 8px}
  body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes{
