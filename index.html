@@ -230,6 +230,14 @@
             <h1 id="academy-home-title" data-i18n="tab_home">Главная</h1>
             <p data-i18n="academy_home_subtitle">Ваши предметы и результаты</p>
           </div>
+          <!-- Read-only, ownership-bound paused Practice entry; no fake Resume for Tours. -->
+          <section id="academy-home-continue" class="home-block academy-home-continue" hidden aria-labelledby="academy-home-continue-title">
+            <div class="home-block-head">
+              <div class="home-block-title" id="academy-home-continue-title" data-i18n="academy_continue_title">Продолжить</div>
+              <div class="home-block-sub" data-i18n="academy_continue_subtitle">Сохранённые незавершённые занятия</div>
+            </div>
+            <div id="academy-home-continue-list" class="academy-home-continue-list"></div>
+          </section>
           <div class="home-block">
             <div class="home-block-head">
               <div class="home-block-title" data-i18n="home_competitive_mode">Competitive Mode</div>
