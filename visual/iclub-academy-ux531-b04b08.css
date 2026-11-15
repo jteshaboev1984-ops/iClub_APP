@@ -311,6 +311,10 @@ body.iclub-visual-v3 #view-profile .academy-profile-zone p{
   color:#e4effd;font-size:12px;margin:0;
 }
 /* The existing profile details stay as original cards; no invented badges. */
+/* Remove old decorative corner circle; use only tonal light and border. */
+body.iclub-visual-v3 #view-profile .profile-hero::after{
+  content:none!important;display:none!important;
+}
 body.iclub-visual-v3 #view-profile #profile-main .profile-hero{
   background:linear-gradient(145deg,#fff,#f2f7ff);
   border:1px solid var(--academy-edge);
