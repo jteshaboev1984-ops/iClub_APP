@@ -336,8 +336,41 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     }
 
 
+    // Native accessible names must follow the translated visible labels.
+    if (mode === "success") {
+      const expected = {
+        ru: ["Главная", "Предметы", "Рейтинг", "Профиль"],
+        uz: ["Bosh sahifa", "Fanlar", "Reyting", "Profil"],
+        en: ["Home", "Subjects", "Ratings", "Profile"]
+      }[language];
+      const tabs = ["home","courses","ratings","profile"];
+      for (let i=0;i<tabs.length;i++) {
+        const button = page.locator('#tabbar [data-tab="'+tabs[i]+'"]');
+        assert.equal(await button.getAttribute("aria-label"), null,
+          "Static English aria-label must not override translated visible text");
+        assert.equal(await button.getAttribute("aria-labelledby"),"tabbar-"+tabs[i]+"-label");
+        assert.equal(await page.locator("#tabbar").getByRole("button",{name:expected[i],exact:true}).count(),1,
+          "Accessible navigation name mismatch: "+language+" "+tabs[i]);
+      }
+    }
     // Work P1: non-school learner must still bind Settings language handlers.
-    if (mode === "success" && nonschool && width === 320) {
+    if (mode === "success" && nonschool && [320,390,1440].includes(width)) {
+      assert.equal(await page.locator('#courses-filter-row [data-main-filter="competitive"]').count(),0,
+        "Non-school catalogue must not offer Competitive choices");
+      await page.locator('#tabbar [data-tab="courses"]').click();
+      await page.locator('#courses-all-subjects.is-active').waitFor();
+      assert.equal(await page.locator('#courses-filter-row [data-main-filter="competitive"]').count(),0);
+      assert.equal(await page.locator('#courses-filter-row').isVisible(),false);
+      assert.ok(await page.locator('#subjects-grid .catalog-card').count() >= 3,
+        "Non-school catalogue must preserve Study subjects");
+      await page.locator('#subjects-grid .catalog-head').first().click();
+      await page.locator('#courses-subject-hub.is-active').waitFor();
+      assert.equal(await page.locator('#courses-subject-hub [data-action="open-tours"]').isVisible(),false,
+        "Non-school Mathematics hub must not display inaccessible Tours CTA");
+      assert.equal(await page.locator('#courses-subject-hub [data-action="open-practice"]').isVisible(),true,
+        "Non-school Practice access must remain available");
+      await page.locator('#tabbar [data-tab="home"]').click();
+      await page.locator('#view-home.is-active').waitFor();
       assert.equal(await page.locator('#home-competitive-list').isVisible(), false,
         'Non-school Home must not advertise restricted competitions');
       await page.locator('#tabbar [data-tab="profile"]').click();
@@ -346,16 +379,24 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
         'Non-school profile must not invite to restricted competitive slots');
       await page.locator('#topbar-action[data-action="profile-settings"]').click();
       await page.locator('#profile-settings.is-active').waitFor();
+      assert.equal(await page.locator('#profile-competitive-list').isVisible(),false,
+        "Non-school Settings must not duplicate the restricted-mode explanation");
+      assert.equal(await page.locator('#settings-competitive-note').innerText(),
+        await page.evaluate(() => window.i18n.t("disabled_not_school")));
       await page.locator('#profile-settings-language [data-lang="uz"]').click();
       await page.waitForFunction(() => window.i18n.getLang() === "uz");
       assert.equal(await page.locator('#tabbar [data-tab="home"] .tab-txt').innerText(), "Bosh sahifa");
+      assert.equal(await page.locator('#tabbar').getByRole("button",{name:"Bosh sahifa",exact:true}).count(),1,
+        "UZ accessible name must match visible tab");
       assert.equal(await page.locator('#profile-settings-language [data-lang="uz"].is-active').count(),1);
       await page.locator('#profile-settings-language [data-lang="en"]').click();
       await page.waitForFunction(() => window.i18n.getLang() === "en");
       assert.equal(await page.locator('#tabbar [data-tab="home"] .tab-txt').innerText(), "Home");
+      assert.equal(await page.locator('#tabbar').getByRole("button",{name:"Home",exact:true}).count(),1,
+        "EN accessible name must match visible tab");
       assert.equal(await page.locator('#profile-settings-content-language [data-lang="en"].is-active').count(),1,
         "Changing UI language MUST NOT alter question language");
-      console.log("PASS Work P1: non-school RU/UZ/EN UI controls remain usable, content language unchanged");
+      console.log("PASS Work P1/P2: non-school language/accessibility, Study-only catalogue/Hub, single note at "+width+"px");
     }
 
     if (mode === "success" && language === "ru" && width === 390) {
@@ -464,6 +505,8 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       { language: "ru", mode: "success", width: 390 },
       { language: "uz", mode: "success", width: 375 },
       { language: "en", mode: "success", width: 320 },
+      { language: "en", mode: "success", width: 390 },
+      { language: "en", mode: "success", width: 1440 },
       { language: "en", mode: "save_error", width: 390 },
       { language: "ru", mode: "duplicate", width: 390 }
     ]) {

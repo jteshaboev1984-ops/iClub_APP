@@ -1384,7 +1384,7 @@
 
   <div class="settings-list">
     <div class="settings-row">
-      <div id="profile-settings-language" class="lang-seg" role="tablist" aria-label="Language">
+      <div id="profile-settings-language" class="lang-seg" role="tablist" aria-label="Language" data-i18n-aria-label="profile_ui_language_title">
         <button type="button" class="lang-btn" data-lang="ru">Рус</button>
         <button type="button" class="lang-btn" data-lang="uz">Uzb</button>
         <button type="button" class="lang-btn" data-lang="en">Eng</button>
@@ -1402,7 +1402,7 @@
 
   <div class="settings-list">
     <div class="settings-row">
-      <div id="profile-settings-content-language" class="lang-seg" role="tablist" aria-label="Content language">
+      <div id="profile-settings-content-language" class="lang-seg" role="tablist" aria-label="Content language" data-i18n-aria-label="profile_content_language_title">
         <button type="button" class="lang-btn" data-lang="ru">Рус</button>
         <button type="button" class="lang-btn" data-lang="uz">Uzb</button>
         <button type="button" class="lang-btn" data-lang="en">Eng</button>
@@ -1594,25 +1594,25 @@
     </main>
 
     <!-- ===== Bottom Tab Bar ===== -->
-    <nav id="tabbar" class="tabbar" aria-label="Bottom navigation">
-      <button class="tab is-active" type="button" data-tab="home" aria-label="Home">
+    <nav id="tabbar" class="tabbar" aria-label="Bottom navigation" data-i18n-aria-label="nav_bottom_aria">
+      <button class="tab is-active" type="button" data-tab="home" aria-labelledby="tabbar-home-label">
         <span class="tab-ico" aria-hidden="true"><svg class="v3-shell-nav-icon" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg></span>
-        <span class="tab-txt" data-i18n="tab_home">Home</span>
+        <span id="tabbar-home-label" class="tab-txt" data-i18n="tab_home">Home</span>
       </button>
 
-      <button class="tab" type="button" data-tab="courses" aria-label="Courses">
+      <button class="tab" type="button" data-tab="courses" aria-labelledby="tabbar-courses-label">
         <span class="tab-ico" aria-hidden="true"><svg class="v3-shell-nav-icon" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/></svg></span>
-        <span class="tab-txt" data-i18n="tab_study">Subjects</span>
+        <span id="tabbar-courses-label" class="tab-txt" data-i18n="tab_study">Subjects</span>
       </button>
 
-      <button class="tab" type="button" data-tab="ratings" aria-label="Ratings">
+      <button class="tab" type="button" data-tab="ratings" aria-labelledby="tabbar-ratings-label">
         <span class="tab-ico" aria-hidden="true"><svg class="v3-shell-nav-icon" viewBox="0 0 24 24"><path d="M5 20v-8"/><path d="M12 20V4"/><path d="M19 20v-12"/><path d="M3 20h18"/></svg></span>
-        <span class="tab-txt" data-i18n="tab_ratings">Ratings</span>
+        <span id="tabbar-ratings-label" class="tab-txt" data-i18n="tab_ratings">Ratings</span>
       </button>
 
-      <button class="tab" type="button" data-tab="profile" aria-label="Profile">
+      <button class="tab" type="button" data-tab="profile" aria-labelledby="tabbar-profile-label">
   <span class="tab-ico" aria-hidden="true"><svg class="v3-shell-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span>
-  <span class="tab-txt" data-i18n="tab_profile">Profile</span>
+  <span id="tabbar-profile-label" class="tab-txt" data-i18n="tab_profile">Profile</span>
 </button>
     </nav>
 

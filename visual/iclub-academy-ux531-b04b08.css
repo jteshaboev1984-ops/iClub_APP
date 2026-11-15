@@ -559,3 +559,10 @@ body.iclub-visual-v3 #courses-practice-start .practice-tour-scroll-hint{
 @media (min-width:700px){
  body.iclub-visual-v3 #courses-practice-start .practice-tour-scroll-hint{display:none}
 }
+
+/* UX531 Work retest: school-only affordances are truly absent for Study-only accounts. */
+body.iclub-visual-v3 #view-courses .section[hidden],
+body.iclub-visual-v3 #courses-subject-hub [data-action="open-tours"][hidden],
+body.iclub-visual-v3 #profile-settings #profile-competitive-list[hidden]{
+  display:none!important;
+}

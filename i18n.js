@@ -339,6 +339,7 @@ hub_resources_sub: "Книги и материалы по предмету",
         "Этот язык будет использоваться для практики, туров и сертификатов.",
       reg_language_reset_note: "Язык заданий можно изменить позже — результаты и ответы сохранятся.",
 
+      nav_bottom_aria: "Нижняя навигация",
       tab_home: "Главная",
     tab_study: "Предметы",
       tab_courses: "Предметы",
@@ -1256,6 +1257,7 @@ hub_resources_sub: "Fan bo‘yicha kitoblar va materiallar",
       reg_language_reset_note:
         "Savollar tilini keyin ham o‘zgartirishingiz mumkin — natijalar va javoblar saqlanadi.",
 
+      nav_bottom_aria: "Quyi navigatsiya",
       tab_home: "Bosh sahifa",
     tab_study: "Fanlar",
       tab_courses: "Fanlar",
@@ -2175,6 +2177,7 @@ hub_resources_sub: "Books and subject resources",
       reg_language_hint: "This language will be used for practice, tours, and certificates.",
       reg_language_reset_note: "You can change the question language later without losing results or answers.",
 
+      nav_bottom_aria: "Bottom navigation",
       tab_home: "Home",
     tab_study: "Subjects",
       tab_courses: "Courses",

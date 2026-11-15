@@ -1088,6 +1088,12 @@ function applyStaticI18n() {
       const key = el.dataset.i18nPlaceholder;
       if (key) el.setAttribute("placeholder", t(key));
     });
+    // Keep accessible control and landmark names in the same UI language
+    // as their visible labels (not in the language of academic questions).
+    document.querySelectorAll("[data-i18n-aria-label]").forEach(el => {
+      const key = el.dataset.i18nAriaLabel;
+      if (key) el.setAttribute("aria-label", t(key));
+    });
   }
 
      function updateOfflineBanner() {
@@ -12825,6 +12831,7 @@ function renderProfileStack() {
   if (!list) return;
 
   list.innerHTML = "";
+  list.hidden = false;
 
     if (!profile) {
     list.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
@@ -12835,7 +12842,8 @@ function renderProfileStack() {
   // (including UI/content language) MUST remain bound for non-school learners.
   if (!profile.is_school_student) {
     if (note) note.textContent = t("disabled_not_school");
-    list.innerHTML = `<div class="empty muted">${t("disabled_not_school")}</div>`;
+    // One concise explanation is enough; keep languages and Study settings usable.
+    list.hidden = true;
   } else {
 
   const current = Array.isArray(profile.subjects) ? profile.subjects : [];
@@ -15076,16 +15084,23 @@ const additionalSubjects = visibleSubjects.filter(s => s.type !== "main");
 state.courses = state.courses || {};
 
 // миграция: если осталось "all" — считаем "study"
-if (!state.courses.mainFilter || state.courses.mainFilter === "all") {
+if (!state.courses.mainFilter || state.courses.mainFilter === "all" ||
+    (!isSchoolUser(profile) && state.courses.mainFilter !== "study")) {
+  // Non-school learners may study, but cannot enter the Competitive catalogue.
+  // Persist only this display filter, never touch subject membership or progress.
   state.courses.mainFilter = "study"; // competitive | study
   saveState();
 }
 
 const filtersWrap = $("#courses-filter-row");
-if (filtersWrap) filtersWrap.innerHTML = "";
+if (filtersWrap) {
+  filtersWrap.innerHTML = "";
+  const filterSection = filtersWrap.closest(".section");
+  if (filterSection) filterSection.hidden = !isSchoolUser(profile);
+}
 
 const renderMainFilterRow = () => {
-  if (!filtersWrap) return;
+  if (!filtersWrap || !isSchoolUser(profile)) return;
 
   const row = document.createElement("div");
   row.className = "grid-section-filters";
@@ -15770,6 +15785,9 @@ async function renderSubjectHubMentorCard(subjectKey) {
     const toursSub = toursBtn?.querySelector(".muted.small");
 
     if (toursBtn) {
+      // Hide a permanently unavailable action for non-school accounts.
+      // Existing Tour permission checks stay authoritative on action dispatch.
+      toursBtn.hidden = !isSchoolUser(profile);
       const planAccess = await window.iClubCommercialAccessUI?.checkCompetitive?.(subjectKey);
       if (subjectKey !== state.courses.subjectKey || !hubPending.active()) return;
       const planEnforced = planAccess?.enforced === true;
