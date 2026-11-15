@@ -13,6 +13,7 @@ on:
       - 'qa/ux531-academy-ui-parity.cjs'
       - 'qa/ux531-academy-browser.cjs'
       - 'qa/ux531-academy-all-screens.cjs'
+      - 'qa/ux531-math-p1p5-plan-runtime.cjs'
       - '.github/workflows/ux531-academy-ui-source.yml'
   workflow_dispatch:
 
@@ -37,6 +38,7 @@ jobs:
           node --check visual/iclub-academy-ux531-interactions.js
           node --check qa/ux531-academy-ui-parity.cjs
           node --check qa/ux531-academy-all-screens.cjs
+          node --check qa/ux531-math-p1p5-plan-runtime.cjs
       - name: UI source parity and contract
         run: node qa/ux531-academy-ui-parity.cjs
       - name: Install browser runtime (Ubuntu 24.04 compatible)
@@ -47,6 +49,8 @@ jobs:
         run: node qa/ux531-academy-browser.cjs
       - name: All-screen B04–B08 Chromium geometry and screenshots
         run: node qa/ux531-academy-all-screens.cjs
+      - name: Live Mathematics P1/P5 after saved plan (in-memory only)
+        run: node qa/ux531-math-p1p5-plan-runtime.cjs
       - name: Preserve review screenshots (no user data)
         uses: actions/upload-artifact@v4
         if: always()

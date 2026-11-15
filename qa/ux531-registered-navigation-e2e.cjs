@@ -420,6 +420,28 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       assert.equal(post.writes,pre.writes,"Read-only subject navigation must not write DB rows");
       assert.equal(post.profile,pre.profile,"Navigation must not rewrite registration local profile");
       console.log("PASS accepted B00 -> actual Home -> Subjects filters -> Subject Hub 3 tabs -> Back -> Home");
+      // School-only routes: read-only Tours/Ratings navigation, never start a Tour attempt.
+      assert.equal(await page.locator('#home-competitive-list').isVisible(), true);
+      await page.locator('#tabbar [data-tab="profile"]').click();
+      await page.locator('#view-profile.is-active').waitFor();
+      assert.equal(await page.locator('#profile-competitive-slots-list').isVisible(), true,
+        "School learner must retain real Competitive slots");
+      assert.equal(await page.locator('#profile-competitive-slots-list .slot-card').count(), 2,
+        "School learner must have two selected Competitive subject cards");
+      await page.locator('#profile-competitive-slots-list .slot-card button').first().click();
+      await page.locator('#courses-subject-hub.is-active').waitFor();
+      await page.locator('#courses-subject-hub [data-action="open-tours"]').click();
+      await page.locator('#courses-tours.is-active').waitFor({timeout:8000});
+      assert.equal(await page.locator('#courses-tour-quiz').isVisible(),false,
+        "Read-only Tours list cannot open timed attempt");
+      await page.locator('#tabbar [data-tab="ratings"]').click();
+      await page.locator('#view-ratings.is-active').waitFor();
+      assert.equal(await page.locator('#ratings-mybar').isVisible(),false,
+        "No real attempts: cannot fabricate My rank");
+      const forbiddenWrites = await page.evaluate(() => window.__B00_FAKE.writes.filter(w =>
+        ["tour_attempts","tour_answers","practice_attempts","practice_answers"].includes(w.table)));
+      assert.deepEqual(forbiddenWrites,[],"School UI smoke must not create any scores or attempts");
+      console.log("PASS school-mode restricted Tours list + Ratings without attempt creation");
     }
 
     const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
