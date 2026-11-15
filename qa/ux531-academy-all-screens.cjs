@@ -23,7 +23,9 @@ for(const id of [...globalViews.map(x=>'view-'+x),...stackScreens.map(x=>'course
  assert.equal((source.match(new RegExp('id="'+id+'"','g'))||[]).length,1,'missing or duplicate source ID '+id);
 }
 for(const action of actions)assert(source.includes('data-action="'+action+'"'),'source action lost: '+action);
-assert.equal([...source.matchAll(/<section\b[^>]*>/g)].length,35,'source screen structure changed');
+assert.equal([...source.matchAll(/<section\b[^>]*\bid="[^"]+"[^>]*>/g)].length,35,'named source screen structure changed');
+// Two dynamic subject-access sections are intentionally unnamed UI containers.
+assert.equal([...source.matchAll(/<section\b[^>]*>/g)].length,37,'including two subject-access subsections');
 assert(source.includes('visual/iclub-academy-ux531-b04b08.css'),'new visual layer not linked');
 for(const k of ['academy_profile_subtitle','academy_continue_title']){
  assert.equal((i18n.match(new RegExp('\\b'+k+':','g'))||[]).length,3,'missing RU/UZ/EN key '+k);
