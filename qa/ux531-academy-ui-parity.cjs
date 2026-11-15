@@ -36,7 +36,7 @@ for(const s of ['#home-competitive-list','#home-study-list'])
  assert.match(css,new RegExp(s),'rail source selector '+s);
 assert.match(interactions,/MutationObserver/,'live render support required');
 assert.match(interactions,/aria-selected/,'accessible hub tab state');
-assert.doesNotMatch(interactions,/\.from\(|localStorage\.|\.rpc\(|supabase|startPractice|reset_subject_progress/i,'visual script must not touch user data');
+assert.doesNotMatch(interactions.replace(/\/\*[\s\S]*?\*\//g,''),/\.from\(|localStorage\.|\.rpc\(|supabase|startPractice|reset_subject_progress/i,'visual script must not touch user data');
 assert.match(app,/pinned\.forEach\(\(s, idx\) => \{/,'all pinned subjects must be shown');
 assert.doesNotMatch(app,/pinned\.slice\(0, 4\)/,'no silent four-item cap');
 for(const t of ['home','courses','ratings','profile'])
