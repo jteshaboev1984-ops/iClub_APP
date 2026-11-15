@@ -1,4 +1,4 @@
-name: UX531 accepted B00 registration + Academy OS integration
+name: UX531 accepted B00 + registered learner integration
 
 on:
   pull_request:
@@ -9,6 +9,9 @@ on:
       - 'visual/iclub-academy-v55-shell-b01.css'
       - 'visual/iclub-academy-ux531-b02b03.css'
       - 'qa/ux531-registration-combination.cjs'
+      - 'qa/ux531-registered-navigation-e2e.cjs'
+      - 'registration-b00-ui.js'
+      - 'visual/iclub-registration-b00.css'
       - '.github/workflows/ux531-registration-combination.yml'
   workflow_dispatch:
 
@@ -32,9 +35,9 @@ jobs:
           set -euo pipefail
           B00_SHA=8a1aab29a5cb8924efdbe660f364d3846d864ff2
           git fetch --no-tags --depth=1 origin "$B00_SHA"
+          # Never mutate checked-out approved B00 assets; prove exact SHA equality.
           for filename in registration-b00-ui.js visual/iclub-registration-b00.css qa/registration-b00-browser.cjs qa/registration-b00-real-app-mocked-e2e.cjs; do
-            mkdir -p "$(dirname "$filename")"
-            git show "$B00_SHA:$filename" > "$filename"
+            git show "$B00_SHA:$filename" | cmp - "$filename"
           done
           grep -q 'Keeps the ORIGINAL' registration-b00-ui.js
           grep -q '#view-registration.reg-b00-enhanced' visual/iclub-registration-b00.css
