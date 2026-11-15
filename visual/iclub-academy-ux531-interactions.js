@@ -60,6 +60,12 @@
     const observer=new MutationObserver(rebuild);
     observer.observe(root,{childList:true});
     activeObservers.push(observer);
+    const langObserver=new MutationObserver(()=>{
+      pagination.setAttribute('aria-label',id==='home-study-list'?copy().pinned:copy().competitive);
+      sync();
+    });
+    langObserver.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+    activeObservers.push(langObserver);
     rebuild();
   }
   function mountHub(){
