@@ -301,3 +301,60 @@ body.iclub-visual-v3 #courses-subject-hub .subject-hub-bottom{
  body.iclub-visual-v3 #home-study-list{scroll-behavior:auto}
  body.iclub-visual-v3 .academy-rail-dot::before{transition:none}
 }
+
+
+/* UX #531: real Home Continue, authenticated Practice only. */
+body.iclub-visual-v3 #academy-home-continue[hidden]{display:none!important}
+body.iclub-visual-v3 #academy-home-continue .academy-home-continue-list{display:grid;gap:10px}
+body.iclub-visual-v3 #academy-home-continue .academy-home-resume-card{
+ width:100%;min-height:84px;display:flex;flex-direction:column;justify-content:center;
+ gap:11px;text-align:left;cursor:pointer;padding:13px 15px;
+ border-radius:18px;border:1px solid #c2d8f7;background:linear-gradient(145deg,#fff,#f4f8ff);
+ box-shadow:0 6px 20px rgba(30,79,147,.07);color:#214d91;
+}
+body.iclub-visual-v3 #academy-home-continue .academy-home-resume-card:focus-visible{
+ outline:3px solid #7eaaee;outline-offset:2px;
+}
+body.iclub-visual-v3 #academy-home-continue .academy-home-resume-card[disabled]{
+ opacity:.72;cursor:wait;
+}
+body.iclub-visual-v3 #academy-home-continue .academy-home-resume-top{
+ font-size:11px;font-weight:750;line-height:1.35;color:#627da3;
+}
+body.iclub-visual-v3 #academy-home-continue .academy-home-resume-line{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;
+}
+body.iclub-visual-v3 #academy-home-continue .academy-home-resume-status{
+ font-weight:850;font-size:13px;overflow-wrap:anywhere;color:#17478f;
+}
+body.iclub-visual-v3 #academy-home-continue .academy-home-resume-cta{
+ color:#215fbe;font-weight:800;font-size:11px;white-space:nowrap;
+}
+
+/* Text-first four-tab navigation; original route buttons and SVG DOM remain. */
+body.iclub-visual-v3:has(#view-home.is-active) #tabbar,
+body.iclub-visual-v3:has(#view-courses.is-active) #tabbar,
+body.iclub-visual-v3:has(#view-ratings.is-active) #tabbar,
+body.iclub-visual-v3:has(#view-profile.is-active) #tabbar{
+ background:rgba(255,255,255,.97);border:1px solid #d8e5fa;
+ box-shadow:0 -3px 17px rgba(34,78,140,.08);
+}
+body.iclub-visual-v3:has(#view-home.is-active) #tabbar .tab-ico,
+body.iclub-visual-v3:has(#view-courses.is-active) #tabbar .tab-ico,
+body.iclub-visual-v3:has(#view-ratings.is-active) #tabbar .tab-ico,
+body.iclub-visual-v3:has(#view-profile.is-active) #tabbar .tab-ico{
+ display:none!important;
+}
+body.iclub-visual-v3:has(#view-home.is-active) #tabbar .tab-txt,
+body.iclub-visual-v3:has(#view-courses.is-active) #tabbar .tab-txt,
+body.iclub-visual-v3:has(#view-ratings.is-active) #tabbar .tab-txt,
+body.iclub-visual-v3:has(#view-profile.is-active) #tabbar .tab-txt{
+ font-size:clamp(10px,2.9vw,12px);line-height:1.2;
+ white-space:normal;text-align:center;overflow-wrap:normal;font-weight:800;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-mode-card-practice{
+ background:linear-gradient(145deg,#fff,#edf5ff);border-color:#c7dcfb;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-mode-card-tours{
+ background:linear-gradient(145deg,#fff,#f3f7ff);border-color:#ccdff7;
+}
