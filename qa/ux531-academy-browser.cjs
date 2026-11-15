@@ -107,6 +107,18 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
    await page.evaluate(setScreen,{view:'courses',screen:'subject-hub'});
    const tabs=page.locator('#courses-subject-hub .academy-hub-tab');
    assert.equal(await tabs.count(),3,'three hub tabs');
+   const headerOrder=await page.evaluate(()=>{
+    const y=selector=>{
+      const e=document.querySelector(selector),r=e.getBoundingClientRect();
+      return{top:r.top,bottom:r.bottom,order:getComputedStyle(e).order};
+    };
+    return{header:y('#courses-subject-hub > .subject-hub-head'),
+      tabs:y('#courses-subject-hub > .academy-hub-tabs'),
+      preparation:y('#courses-subject-hub > #academy-hub-pane-preparation')};
+   });
+   assert(headerOrder.header.bottom<=headerOrder.tabs.top+2&&
+     headerOrder.tabs.bottom<=headerOrder.preparation.top+2,
+     'Subject Hub must show sapphire header BEFORE tabs and cards '+JSON.stringify(headerOrder));
    await tabs.nth(1).click();
    assert.equal(await page.locator('#academy-hub-pane-preparation').isHidden(),true);
    assert.equal(await page.locator('#academy-hub-pane-materials').isVisible(),true);
