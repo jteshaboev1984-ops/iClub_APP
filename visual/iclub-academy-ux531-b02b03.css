@@ -358,3 +358,8 @@ body.iclub-visual-v3 #courses-subject-hub .subject-mode-card-practice{
 body.iclub-visual-v3 #courses-subject-hub .subject-mode-card-tours{
  background:linear-gradient(145deg,#fff,#f3f7ff);border-color:#ccdff7;
 }
+
+/* The legacy Exam Prep ID selector has higher specificity than generic mode cards. */
+body.iclub-visual-v3 #courses-subject-hub #subject-hub-exam-prep-entry{
+ border-radius:17px!important;
+}
