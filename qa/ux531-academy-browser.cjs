@@ -107,6 +107,78 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
    await tabs.nth(1).press('ArrowRight');
    assert.equal(await page.locator('#academy-hub-pane-achievements').isVisible(),true);
    assert.equal(await page.locator('#exam-prep-host-root').count(),1,'Exam Prep host still present');
+
+   if(viewport.width===390){
+    // Execute the exact Home Continue helper extracted from the live app.js,
+    // with a fake owner-bound vault and no application/network writes.
+    const appText=fs.readFileSync(path.join(root,'app.js'),'utf8');
+    const begin=appText.indexOf('  let academyHomeContinueRequest = 0;');
+    const end=appText.indexOf('function renderHome() {',begin);
+    assert(begin>=0&&end>begin&&end-begin<12000,'exact source helper missing');
+    const helper=appText.slice(begin,end);
+    assert(!/localStorage\.|deleteUserSubject|reset_subject_progress|\.from\(/.test(helper),
+      'home helper must not mutate drafts or progress');
+    await page.evaluate(setScreen,{view:'home',screen:''});
+    await page.evaluate(()=>{
+      const initial={
+        status:'paused',subjectKey:'mathematics',
+        quiz:{mode:'practice',safeSessionId:101,questions:[{id:11}]}
+      };
+      window.__academyAuthQA={
+        owner:'00000000-0000-4000-8000-000000000001',
+        other:'00000000-0000-4000-8000-000000000002',
+        uid:null,draft:initial,screen:null,saved:0,practiceOpened:0,alerts:[]
+      };
+      const model=window.__academyAuthQA;
+      window.sb={};
+      window.iClubPracticeDraftIdentityV1={
+        bind:async()=>model.uid,
+        currentUid:()=>model.uid,
+        read:()=>model.uid===model.owner?model.draft:null
+      };
+      window.loadProfile=()=>({subjects:[{key:'mathematics',mode:'study',pinned:true}]});
+      window.isSubjectActive=k=>k==='mathematics';
+      window.getVisibleSubjectsCatalog=()=>[{key:'mathematics'}];
+      window.subjectByKey=()=>({title:'Mathematics'});
+      window.subjectTitle=()=> 'Mathematics';
+      window.t=k=>({practice:'Practice',academy_continue_status:'Paused session',academy_continue_cta:'Continue'})[k]||'';
+      window.tr3=(ru,uz,en)=>en;
+      window.iClubCommercialAccessUI={guardStudy:async()=>true};
+      window.state={courses:{}};
+      window.saveState=()=>{model.saved++};
+      window.setTab=view=>{
+        document.getElementById('view-home').classList.toggle('is-active',view==='home');
+        document.getElementById('view-courses').classList.toggle('is-active',view==='courses');
+      };
+      window.replaceCourses=screen=>{model.screen=screen};
+      window.getCoursesTopScreen=()=>model.screen;
+      window.renderSubjectHub=async()=>{};
+      window.openPracticeStart=async()=>{model.practiceOpened++};
+      window.showToast=msg=>model.alerts.push(msg);
+    });
+    await page.addScriptTag({content:helper+'\nwindow.__runAcademyContinueQA=academyRenderHomeContinue;'});
+    await page.evaluate(()=>window.__runAcademyContinueQA());
+    assert(await page.locator('#academy-home-continue').isHidden(),'no auth must not show any local draft');
+    await page.evaluate(()=>{window.__academyAuthQA.uid=window.__academyAuthQA.owner;});
+    await page.evaluate(()=>window.__runAcademyContinueQA());
+    assert(await page.locator('#academy-home-continue').isVisible(),'owner draft must show');
+    assert.equal(await page.locator('#academy-home-continue-list > button').count(),1);
+    const before=await page.evaluate(()=>JSON.stringify(window.__academyAuthQA.draft));
+    // Simulate a stale Home card clicked just after the account has changed.
+    await page.evaluate(()=>{window.__academyAuthQA.uid=window.__academyAuthQA.other;});
+    await page.locator('#academy-home-continue-list > button').click();
+    assert.equal(await page.evaluate(()=>window.__academyAuthQA.practiceOpened),0,'cross-account resume must fail closed');
+    await page.evaluate(()=>window.dispatchEvent(new Event('iclub:practice-identity-invalidated')));
+    assert(await page.locator('#academy-home-continue').isHidden(),'sign out must hide saved practice');
+    await page.evaluate(()=>{window.__academyAuthQA.uid=window.__academyAuthQA.owner;});
+    await page.evaluate(()=>window.__runAcademyContinueQA());
+    await page.locator('#academy-home-continue-list > button').click();
+    await page.waitForFunction(()=>window.__academyAuthQA.practiceOpened===1,{timeout:2000});
+    const after=await page.evaluate(()=>JSON.stringify(window.__academyAuthQA.draft));
+    assert.equal(before,after,'Home Continue must not mutate draft bytes');
+    assert.equal(await page.evaluate(()=>window.__academyAuthQA.practiceOpened),1);
+    console.log('PASS UX531 owner-bound Practice Continue: anonymous hidden, owner shown, cross-account blocked, existing route only.');
+   }
    assert.equal(errors.length,0,'browser errors '+errors.join('; '));
    console.log('PASS UX531 '+viewport.width+'px: '+Math.round(heights[0])+'px matched headers; smooth sapphire; 2/5 rails; 3 subject tabs');
    await page.close();
