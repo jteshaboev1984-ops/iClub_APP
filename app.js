@@ -14197,11 +14197,17 @@ function uiAlert({ title, message, okText } = {}) {
     const subjectSection = $("#reg-subject-section");
     const nonStudentCard = $("#reg-nonstudent-subjects");
 
-    if (subjectSection) subjectSection.classList.toggle("hidden", !isSchool);
+    // Both groups select initial subjects. School: Competitive. Non-school: Study.
+    // Keep the same B00 chip controls and two-step layout, not a second selector.
+    if (subjectSection) subjectSection.classList.remove("hidden");
     if (nonStudentCard) nonStudentCard.classList.toggle("hidden", isSchool);
 
-    // when switching OFF school mode: clear selected subjects (avoid accidental saving)
-    if (!isSchool) {
+    // Clear selections ONLY when changing between Study and Competitive.
+    // Do not silently erase non-school choices on language changes or rerenders.
+    const nextMode = isSchool ? "school" : "study";
+    const prevMode = subjectSection?.dataset.regMode || nextMode;
+    if (subjectSection) subjectSection.dataset.regMode = nextMode;
+    if (prevMode !== nextMode) {
       const main1 = $("#reg-main-subject-1");
       const main2 = $("#reg-main-subject-2");
       const add1  = $("#reg-additional-subject");
@@ -23227,6 +23233,12 @@ if (
   showToast(t("fill_required_fields"));
   return;
 }
+// A non-school learner chooses 1–2 INITIAL Study subjects. This is not a
+// lifetime Study limit; additional subjects remain available in the catalogue.
+if (!isSchoolStudent && !main1) {
+  showToast(t("reg_study_subject_required"));
+  return;
+}
     const subjects = [];
 
     if (isSchoolStudent) {
@@ -23252,8 +23264,12 @@ if (
         });
       }
     } else {
-      // Non-school users: no subjects during registration.
-      // They can study/practice all subjects without tours and manage subjects later in Profile.
+      // Initial learning choice only; NEVER create Competitive slots for non-school users.
+      [main1, main2].filter(Boolean).forEach(key => subjects.push({
+        key,
+        mode: "study",
+        pinned: true
+      }));
     }
 
         if (subjects.filter(s => s.mode === "competitive").length > 2) {

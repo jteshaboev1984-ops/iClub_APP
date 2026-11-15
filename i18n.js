@@ -376,7 +376,8 @@ hub_resources_sub: "Книги и материалы по предмету",
 
       reg_nonstudent_title: "Обучение без школьного режима",
       reg_nonstudent_text:
-        "Если вы не ученик школы, вы можете изучать и практиковаться по всем предметам без туров. Подключать и удалять предметы можно позже в профиле.",
+        "Туры и рейтинги доступны только школьникам. Выберите 1–2 предмета для начала обучения; остальные можно добавлять позже без ограничений.",
+      reg_study_subject_required: "Выберите хотя бы один предмет для обучения.",
 
       reg_subject_primary_tag: "Основной",
       reg_subject_secondary_tag: "Дополнительный",
@@ -389,8 +390,8 @@ hub_resources_sub: "Книги и материалы по предмету",
 
       reg_subject_label_competitive: "Основной предмет (для рейтинга)",
       reg_subject_hint_competitive: "Выберите основной предмет для рейтинга",
-      reg_subject_label_study: "Основной предмет (для обучения)",
-      reg_subject_hint_study: "Выберите основной предмет для обучения",
+      reg_subject_label_study: "Стартовые предметы для обучения",
+      reg_subject_hint_study: "Выберите 1–2 предмета. Остальные можно добавить позже.",
 
       reg_main_subject_required_label: "Основной предмет (обязательно)",
       reg_main_subject_optional_label: "Основной предмет №2 (опционально)",
@@ -1294,7 +1295,8 @@ hub_resources_sub: "Fan bo‘yicha kitoblar va materiallar",
 
       reg_nonstudent_title: "Maktab rejimisiz o‘qish",
       reg_nonstudent_text:
-        "Agar siz maktab o‘quvchisi bo‘lmasangiz, barcha fanlarni turlarsiz o‘rganish va amaliyot qilish mumkin. Fanlarni keyin profil orqali qo‘shish yoki olib tashlash mumkin.",
+        "Turlar va reytinglar faqat maktab o‘quvchilari uchun. O‘qishni boshlash uchun 1–2 ta fan tanlang; keyin qolganlarini cheklovsiz qo‘shishingiz mumkin.",
+      reg_study_subject_required: "O‘qish uchun kamida bitta fan tanlang.",
 
       reg_subject_primary_tag: "Asosiy",
       reg_subject_secondary_tag: "Qo‘shimcha",
@@ -1307,8 +1309,8 @@ hub_resources_sub: "Fan bo‘yicha kitoblar va materiallar",
 
       reg_subject_label_competitive: "Asosiy fan (reyting uchun)",
       reg_subject_hint_competitive: "Reyting uchun asosiy fanni tanlang",
-      reg_subject_label_study: "Asosiy fan (o‘qish uchun)",
-      reg_subject_hint_study: "O‘qish uchun asosiy fanni tanlang",
+      reg_subject_label_study: "O‘qish uchun boshlang‘ich fanlar",
+      reg_subject_hint_study: "1–2 ta fan tanlang. Qolganlarini keyin qo‘shishingiz mumkin.",
 
       reg_main_subject_required_label: "Asosiy fan (majburiy)",
       reg_main_subject_optional_label: "Asosiy fan №2 (ixtiyoriy)",
@@ -2213,7 +2215,8 @@ hub_resources_sub: "Books and subject resources",
 
       reg_nonstudent_title: "Study mode (non-school)",
       reg_nonstudent_text:
-        "If you are not a school student, you can study and practice all subjects without tours. You can add or remove subjects later in your profile.",
+        "Tours and rankings are for school students only. Choose 1–2 subjects to begin studying; you can add more subjects later without a limit.",
+      reg_study_subject_required: "Choose at least one subject to study.",
 
       reg_subject_primary_tag: "Primary",
       reg_subject_secondary_tag: "Secondary",
@@ -2225,8 +2228,8 @@ hub_resources_sub: "Books and subject resources",
 
       reg_subject_label_competitive: "Main subject (for rankings)",
       reg_subject_hint_competitive: "Choose the main subject used for rankings",
-      reg_subject_label_study: "Study subject",
-      reg_subject_hint_study: "Choose your primary subject for studying",
+      reg_subject_label_study: "Starting study subjects",
+      reg_subject_hint_study: "Choose 1–2 subjects. Add more later at any time.",
 
       reg_main_subject_required_label: "Main subject (required)",
       reg_main_subject_optional_label: "Main subject #2 (optional)",

@@ -374,3 +374,50 @@ body.iclub-visual-v3 #courses-subject-hub > #exam-prep-host-root{order:3}
 body.iclub-visual-v3 #courses-subject-hub > #academy-hub-pane-materials{order:4}
 body.iclub-visual-v3 #courses-subject-hub > #academy-hub-pane-achievements{order:5}
 body.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-bottom{order:6}
+
+
+/* UX #531 owner visual parity: restore approved v5.8 sapphire subject emphasis.
+   Home Competitive uses the actual v5.8 reference blue, with safe white copy.
+   Study pinned tiles are visibly blue-toned, not nearly white; both rails keep
+   their existing swipe, preview peek, ranks, dates, click actions and data. */
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-card{
+  background:linear-gradient(137deg,#174aab 0%,#3071e1 100%);
+  border:1px solid #5e9bfb;
+  box-shadow:0 10px 24px rgba(28,87,186,.24);
+}
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-title,
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-module,
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-rank{
+  color:#fff;
+}
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-note,
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-meta,
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-percent{
+  color:#e3efff;
+}
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-badge{
+  background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.42);
+}
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-badge.is-finished{
+  background:#fff2ee;color:#8b2e23;border-color:#ffd6ca;
+}
+body.iclub-visual-v3 #view-home #home-competitive-list .home-progress{
+  background:rgba(255,255,255,.25);
+}
+body.iclub-visual-v3 #view-home #home-competitive-list .home-progress-fill{
+  background:#d7ebff;
+}
+body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-btn{
+  background:#fff;color:#174aab;border-color:#fff;
+}
+body.iclub-visual-v3 #view-home #home-study-list .home-pinned-tile{
+  background:linear-gradient(142deg,#d9eaff,#b9d8ff);
+  border:1px solid #96bff3;
+  box-shadow:0 8px 20px rgba(28,87,186,.13);
+}
+body.iclub-visual-v3 #view-home #home-study-list .home-pinned-title{
+  color:#163e83;
+}
+body.iclub-visual-v3 #view-home #home-study-list .home-pinned-meta{
+  color:#365f99;
+}

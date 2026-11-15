@@ -255,7 +255,8 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     await page.locator("#view-registration .reg-toggle .switch").click();
     assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), false);
     assert.equal(await page.locator("#reg-nonstudent-subjects").isVisible(), true);
-    assert.equal(await page.locator("#reg-subject-section").isVisible(), false);
+    assert.equal(await page.locator("#reg-subject-section").isVisible(), true,
+      "Non-school registration must show the starting Study subject selector");
     assert.equal(await page.locator("#reg-school-block").isVisible(), false);
     assert.equal(await page.locator("#reg-main-subject-1").inputValue(), "");
     await page.locator("#view-registration .reg-toggle .switch").click();
@@ -275,6 +276,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     if (nonschool) {
       await page.locator("#view-registration .reg-toggle .switch").click();
       assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), false);
+      assert.equal(await page.locator("#reg-subject-section").isVisible(), true);
       if (mode === "success") {
         await page.waitForFunction(() => !document.getElementById("toast")?.classList.contains("is-show"), null, { timeout: 5000 });
         await page.evaluate(() => window.scrollTo(0, 0));
@@ -282,6 +284,19 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
           path: path.join(root, "b00-runtime-nonschool-" + language + "-" + width + ".png"),
           fullPage: true
         });
+      }
+      // Selection is mandatory before any Auth/DB writes. Exact app.js path.
+      await page.locator("#reg-consent").check();
+      const beforeEmptySubmit = await page.evaluate(() => window.__B00_FAKE.writes.length);
+      await page.locator("#reg-submit").click();
+      assert.equal(await page.locator("#view-registration").isVisible(), true);
+      assert.equal(await page.evaluate(() => window.__B00_FAKE.writes.length),beforeEmptySubmit,
+        "Zero selected non-school subjects must not write user or credentials");
+      await page.locator('#reg-subject-chips [data-subject-key="mathematics"]').click();
+      assert.equal(await page.locator("#reg-main-subject-1").inputValue(),"mathematics");
+      assert.equal(await page.locator("#reg-subject-summary").isVisible(),true);
+      if (width === 390 || width === 1440) {
+        await page.locator('#reg-subject-chips [data-subject-key="economics"]').click();
       }
     } else {
       await page.locator("#reg-school").fill("154");
@@ -322,8 +337,13 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       assert.equal(userRows.length, 1, "original users upsert exactly once");
       assert.equal(userRows[0].data.language_code, language);
       assert.equal(userRows[0].data.is_school_student, !nonschool);
-      assert.equal(subjectsRows.length, nonschool ? 0 : 1);
-      if (!nonschool) {
+      assert.equal(subjectsRows.length,1,"Initial subject choices must be persisted for both user modes");
+      if (nonschool) {
+        const studyRows=subjectsRows[0].data;
+        assert.equal(studyRows.length, width === 390 || width === 1440 ? 2 : 1);
+        assert.ok(studyRows.every(row => row.mode === "study" && row.is_pinned === true),
+          "Non-school initial choices must be Study only and pinned");
+      } else {
         assert.equal(subjectsRows[0].data.length, language === "ru" ? 2 : 1);
       }
     }
