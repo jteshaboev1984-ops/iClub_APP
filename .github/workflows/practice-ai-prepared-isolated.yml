@@ -1,8 +1,11 @@
 name: Practice AI - isolated PostgreSQL GoTrue and browser QA
 on:
   pull_request:
-    branches: [main]
+    branches: [main, draft/ux531-academy-v55-b01-shell-20261115]
     paths:
+      - registration-b00-ui.js
+      - visual/iclub-registration-b00.css
+      - qa/ux531-registered-navigation-e2e.cjs
       - supabase/migrations/20261027213000_iclub_ai_practice_math_beta_grants_default_off.sql
       - supabase/tests/iclub_ai_practice_math_beta_activation_isolated.sql
       - supabase/tests/iclub_ai_math_beta_pro_quota_isolated.sql
