@@ -68,7 +68,7 @@ const server=http.createServer((req,res)=>{
       el.setAttribute('aria-hidden',String(!active));
      });
      document.querySelectorAll('#view-profile .profile-screen').forEach(el=>{
-      const active=el.id==='profile-main';el.classList.toggle('is-active',active);el.hidden=!active;
+      const active=el.id==='profile-'+(state.profile||'main');el.classList.toggle('is-active',active);el.hidden=!active;
      });
      const bar=document.getElementById('topbar');
      bar.style.display=['splash','registration'].includes(state.view)?'none':'grid';
@@ -78,19 +78,23 @@ const server=http.createServer((req,res)=>{
    });
    const states=[
     ...globalViews.filter(v=>!['splash','registration','courses'].includes(v)).map(view=>({view})),
-    ...stackScreens.map(part=>({view:'courses',part}))
+    ...stackScreens.map(part=>({view:'courses',part})),
+    ...['plan','subject-access','settings'].map(profile=>({view:'profile',profile}))
    ];
    for(const state of states){
     await page.evaluate(state=>window.__ux531Show(state),state);
     const m=await page.evaluate(state=>{
      const el=document.getElementById(state.view==='courses'?'courses-'+state.part:'view-'+state.view);
      const style=getComputedStyle(el),bounds=el.getBoundingClientRect();
+     const child=state.view==='profile'&&state.profile?
+       document.getElementById('profile-'+state.profile):null;
+     const childVisible=child?getComputedStyle(child).display!=='none':true;
      const sheet=[...document.styleSheets].find(s=>(s.href||'').includes('iclub-academy-ux531-b04b08.css'));
      let rules=0;try{rules=sheet?.cssRules?.length||0}catch{}
-     return{id:el.id,display:style.display,width:bounds.width,
+     return{id:el.id,display:style.display,childVisible,width:bounds.width,
       documentWidth:document.documentElement.scrollWidth,viewport:innerWidth,rules};
     },state);
-    assert(m.display!=='none'&&m.width>0,'screen invisible '+JSON.stringify({width,m}));
+    assert(m.display!=='none'&&m.width>0&&m.childVisible,'screen invisible '+JSON.stringify({width,state,m}));
     assert(m.rules>=50,'Academy CSS failed to load/parse '+JSON.stringify({width,m}));
     assert(m.documentWidth<=m.viewport+2,'root horizontal overflow '+JSON.stringify({width,m}));
     if(width===390&&['view-ratings','view-profile','view-notifications','view-support',
@@ -99,7 +103,7 @@ const server=http.createServer((req,res)=>{
       'courses-tour-result','courses-books','courses-subject-hub'].includes(m.id)){
      const folder=path.join(root,'ux531-academy-all-screens');
      fs.mkdirSync(folder,{recursive:true});
-     await page.screenshot({path:path.join(folder,m.id+'.png'),fullPage:false});
+     await page.screenshot({path:path.join(folder,m.id+(state.profile?'-'+state.profile:'')+'.png'),fullPage:false});
     }
    }
    await page.evaluate(()=>window.__ux531Show({view:'profile'}));
