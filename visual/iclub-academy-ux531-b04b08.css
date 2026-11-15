@@ -486,3 +486,54 @@ body.iclub-visual-v3 :is(
   scroll-behavior:auto;
  }
 }
+
+
+/* B08 / all-screen navigation continuity.
+   Every registered nested route shares the sapphire-family toolbar.
+   More specific B01 selectors still control Home/Subjects/Hub/Ratings/Profile. */
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar,
+body.iclub-visual-v3:has(#view-notifications.is-active) #topbar,
+body.iclub-visual-v3:has(#view-community.is-active) #topbar,
+body.iclub-visual-v3:has(#view-about.is-active) #topbar,
+body.iclub-visual-v3:has(#view-support.is-active) #topbar,
+body.iclub-visual-v3:has(#view-support-topic.is-active) #topbar,
+body.iclub-visual-v3:has(#view-certificates.is-active) #topbar,
+body.iclub-visual-v3:has(#view-archive.is-active) #topbar{
+  background:#24599c;
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.19);
+  box-shadow:0 4px 15px rgba(22,64,122,.10);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-notifications.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-community.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-about.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-support.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-support-topic.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-certificates.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-archive.is-active) #topbar .topbar-title .title{color:#fff}
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-notifications.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-community.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-about.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-support.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-support-topic.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-certificates.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-archive.is-active) #topbar .topbar-title .subtitle{color:#e3efff}
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-notifications.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-community.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-about.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-support.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-support-topic.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-certificates.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-archive.is-active) #topbar .icon-btn{
+ color:#fff;background:rgba(255,255,255,.12);
+ border:1px solid rgba(255,255,255,.32);box-shadow:none;
+}
+/* Public verification stays usable even without login; no forced full hero. */
+body.iclub-visual-v3 #view-certificate-verify .content > .h1{
+ color:#194b8e;
+}
