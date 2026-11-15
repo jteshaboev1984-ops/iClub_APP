@@ -277,6 +277,11 @@ body.iclub-visual-v3 #courses-subject-hub .subject-hub-bottom{
  body.iclub-visual-v3 #courses-all-subjects #subjects-grid{
   grid-template-columns:repeat(3,minmax(0,1fr));
  }
+ /* One item is NOT a carousel. Override the desktop rail width safely. */
+ body.iclub-visual-v3 #home-competitive-list > .home-competitive-card:only-child,
+ body.iclub-visual-v3 #home-study-list > .home-pinned-tile:only-child{
+  flex-basis:100%;
+ }
  body.iclub-visual-v3 #view-home .academy-view-zone,
  body.iclub-visual-v3 #courses-all-subjects .academy-view-zone,
  body.iclub-visual-v3 #courses-subject-hub .subject-hub-head{
