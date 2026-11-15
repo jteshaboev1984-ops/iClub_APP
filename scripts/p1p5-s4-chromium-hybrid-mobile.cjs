@@ -169,6 +169,41 @@ async function run(){
     assert(reviewText.includes(lang==='ru'?'Критерии':lang==='uz'?'Mezonlar':'Criteria'));
     assert(!reviewText.includes('58/75')&&!reviewText.includes('M1 / A1'),
      'no invented written marks, self-marking or examiner');
+
+    // Reproduce the reported real UX defect: old "History" used only Core
+    // learning/diagnostic results (September), while these finished Paper
+    // sessions were kept in a separate, difficult-to-discover S4 journal.
+    // The dashboard's visible "My practice sessions" link must now open
+    // BOTH independently labelled records, not mix ungraded Paper with
+    // verified Core marks or silently consume the old learner history.
+    const legacy=await page.evaluate(async code=>
+      window.iClubExamPrepHostInternal.api.recentResults(code,10),component);
+    await review.locator('[data-ep-hybrid-s4-back]').click();
+    await page.locator('[data-ep-hybrid-s4-catalog]').waitFor({timeout:20000});
+    await page.locator('[data-ep-hybrid-s4-home]').click();
+    const historyEntry=page.locator('[data-ep-hybrid-s4-dashboard-history="'+component+'"]');
+    await historyEntry.waitFor({timeout:20000});
+    await historyEntry.click();
+    const unifiedHistory=page.locator('[data-ep-history-paper-section]');
+    await unifiedHistory.waitFor({timeout:20000});
+    const paperJournalRows=unifiedHistory.locator('[data-ep-history-paper-session]');
+    assert(await paperJournalRows.count()>=1,
+      'finished '+component+' Paper must be visible in normal history '+lang);
+    const journalText=await unifiedHistory.textContent();
+    assert(journalText.includes('Paper 01'),'history should show a human-readable Paper title');
+    assert(journalText.includes(lang==='ru'?'Баллы за Paper не определены':
+      lang==='uz'?'Paper uchun baho aniqlanmagan':'Full Paper mark is unknown'),
+      'never mix S4 rehearsal with marked Core results');
+    const oldHistory=page.locator('[data-ep-history-legacy-section]');
+    assert.equal(await oldHistory.count(),1,'keep separate Core history section');
+    if(legacy?.ok && Array.isArray(legacy.data?.results)){
+      assert.equal(await oldHistory.locator('[data-ep-history-session]').count(),
+        legacy.data.results.length,'preserve the previous learning/diagnostic results');
+    }
+    await paperJournalRows.first().click();
+    await page.locator('[data-ep-hybrid-s4-review]').waitFor({timeout:20000});
+    assert.equal(await page.locator('[data-ep-hybrid-s4-review-item]').count(),
+      component==='P1'?10:7,'reopening completed Paper shows the same approved review');
     assert.equal(errors.length,0,'browser JavaScript errors '+lang+': '+errors.join(';'));
     const http=await page.evaluate(()=>window.__hybridTrace);
     for(const name of ['get_exam_prep_hybrid_s4_papers_safe_v1',

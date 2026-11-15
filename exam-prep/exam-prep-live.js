@@ -493,31 +493,77 @@
     return true;
   }
 
+  // Exam Prep has two different, legitimate histories: graded/verified Core
+  // activities and unmarked optional S4 Paper rehearsals. Keep the sources
+  // separate, but show BOTH in the history surface learners already use.
+  function paperHistoryLabel(key) {
+    const value=String(key||"");
+    const match=value.match(/(?:^|_)full_paper_(\d+)$/i);
+    return match ? "Paper "+match[1] : (value || "Paper");
+  }
+
   async function openRecentResults(component) {
-    if (typeof internal.api?.recentResults !== "function") { await openComponentHome(component); return; }
+    if (typeof internal.api?.recentResults!=="function" &&
+        typeof internal.api?.hybridS4History!=="function") {
+      await openComponentHome(component);return;
+    }
     renderLoading();
+    const paperRequest=typeof internal.api?.hybridS4History==="function"
+      ? internal.api.hybridS4History(component).catch(()=>null)
+      : Promise.resolve(null);
     let result=null;
     try {
-      result=await internal.api.recentResults(component,10);
-      if (result?.ok && typeof internal.api.recentResultsWritten==="function") {
-        const enhanced=await boundWrittenCall(
-          ()=>internal.api.recentResultsWritten(component,10),12000);
-        if (enhanced?.ok && enhanced.data?.component_code===component) result=enhanced;
+      if (typeof internal.api?.recentResults==="function") {
+        result=await internal.api.recentResults(component,10);
+        if (result?.ok && typeof internal.api.recentResultsWritten==="function") {
+          const enhanced=await boundWrittenCall(
+            ()=>internal.api.recentResultsWritten(component,10),12000);
+          if (enhanced?.ok && enhanced.data?.component_code===component) result=enhanced;
+        }
       }
     } catch (_) {}
-    if (!result?.ok) { renderError(); return; }
-    const root=rootEl(); if (!root) return; const c=copy();
-    const rows=Array.isArray(result.data?.results) ? result.data.results : [];
+    const paperResult=await paperRequest;
+    const hasPaperHistory=paperResult?.ok &&
+      paperResult.data?.component_code===component &&
+      Array.isArray(paperResult.data?.sessions);
+    if (!result?.ok && !hasPaperHistory) { renderError(); return; }
+    const root=rootEl(); if (!root) return; const c=copy(),s4=hybridS4Copy();
+    const rows=result?.ok && Array.isArray(result.data?.results) ? result.data.results : [];
     const body=rows.length ? rows.map(row => {
       const machineTotal=Number(row.machine_total || 0), machineCorrect=Number(row.machine_correct || 0);
       const written=Number(row.written_total || 0), advanced=Number(row.written_advanced||0);
       const score=machineTotal>0 ? `${machineCorrect} / ${machineTotal}` : "—";
       const writtenBit=advanced>0 ? " · "+esc(writtenCopy().steps)+": "+advanced : (written>0 ? " · "+esc(c.writtenPart)+": "+written : "");
       return `<button class="ep-history-row" type="button" data-ep-history-session="${esc(row.session_id)}"><span><strong>${esc(resultTypeLabel(row.session_type))}</strong><small>${esc(formatDateTime(row.finalized_at))}</small></span><span>${esc(c.autoChecked)}: ${score}${writtenBit}<b aria-hidden="true">›</b></span></button>`;
-    }).join("") : `<div class="ep-live-notice">${esc(c.noHistory)}</div>`;
-    root.innerHTML=shell(`<section class="ep-history-screen"><div class="ep-live-card"><div class="ep-live-head"><strong>${esc(component)} · ${esc(c.history)}</strong><button class="ep-live-btn secondary" type="button" data-ep-history-back>${esc(c.backToComponent)}</button></div><div class="ep-history-list">${body}</div></div></section>`,{compact:true});
+    }).join("") : `<div class="ep-live-notice">${esc(result?.ok?c.noHistory:c.error)}</div>`;
+
+    const paperRows=hasPaperHistory?paperResult.data.sessions:[];
+    const showPaper=paperRows.length>0 || state.hybridS4Available?.[component]===true;
+    const paperList=paperRows.slice(0,30).map(row=>{
+      const isClosed=Boolean(row.closed_at);
+      const action=row.review_revealed===true?s4.reviewAgain:
+        (isClosed?s4.review:s4.repeat);
+      return `<button class="ep-history-row" type="button" data-ep-history-paper-session="${esc(row.session_id)}"><span><strong>${esc(paperHistoryLabel(row.paper_key))}</strong><small>${esc(formatDateTime(row.started_at))} · ${esc(hybridS4MarkState(row.closure_code))}</small></span><span>${esc(action)}<b aria-hidden="true">›</b></span></button>`;
+    }).join("");
+    const paperSection=showPaper?`<section class="ep-live-card" data-ep-history-paper-section>
+      <div class="ep-live-head"><strong>${esc(s4.title)}</strong></div>
+      <p class="ep-live-meta">${esc(s4.noScore)}</p>
+      <div class="ep-history-list">${paperList||`<div class="ep-live-notice">${esc(hasPaperHistory?s4.emptyHistory:s4.failed)}</div>`}</div>
+    </section>`:"";
+    const legacyHeading=state.language==="uz"?"O‘quv topshiriqlari va kirish tekshiruvlari":
+      (state.language==="en"?"Learning tasks and entry checks":"Учебные задания и диагностики");
+    root.innerHTML=shell(`<section class="ep-history-screen">
+      <div class="ep-live-card"><div class="ep-live-head"><strong>${esc(component)} · ${esc(c.history)}</strong>
+      <button class="ep-live-btn secondary" type="button" data-ep-history-back>${esc(c.backToComponent)}</button></div></div>
+      ${paperSection}
+      <section class="ep-live-card" data-ep-history-legacy-section>
+        <div class="ep-live-head"><strong>${esc(legacyHeading)}</strong></div>
+        <div class="ep-history-list">${body}</div>
+      </section>
+    </section>`,{compact:true});
     root.querySelector('[data-ep-history-back]')?.addEventListener('click',()=>openComponentHome(component));
     root.querySelectorAll('[data-ep-history-session]').forEach(button=>button.addEventListener('click',()=>openSessionResult(button.dataset.epHistorySession,component,"history")));
+    root.querySelectorAll('[data-ep-history-paper-session]').forEach(button=>button.addEventListener('click',()=>void hybridS4Load(button.dataset.epHistoryPaperSession,component)));
   }
 
   function shell(body, options = {}) {
@@ -799,7 +845,8 @@
     const componentName = component === "P1" ? c.componentP1 : c.componentP5;
     const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections} ${esc(home.focusNow)}${deferredCorrections > 0 ? ` · +${deferredCorrections} ${esc(home.later)}` : ""}</small></span><span aria-hidden="true">›</span></button>` : "";
     const lastResultCard = lastResult ? `<section class="ep-component-last-result"><div><span class="ep-component-section-label">${esc(home.lastResult)}</span><strong>${esc(resultTypeLabel(lastResult.session_type))}</strong><small>${lastResult.machine_total > 0 ? `${Number(lastResult.machine_correct || 0)} / ${Number(lastResult.machine_total || 0)} ${esc(c.correctOf)}` : esc(c.writtenPart)}</small></div><button class="ep-live-btn secondary" type="button" data-ep-component-last-result="${esc(lastResult.session_id)}">${esc(c.viewResults)}</button></section>` : "";
-    const history = lastResult ? `<button class="ep-component-link" type="button" data-ep-component-link="history"><span><strong>${esc(home.history)}</strong></span><span aria-hidden="true">›</span></button>` : "";
+    const history = (lastResult || state.hybridS4Available?.[component]===true)
+      ? `<button class="ep-component-link" type="button" data-ep-component-link="history"><span><strong>${esc(home.history)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     // The original timed route remains intact. An approved beta Paper is
     // separately listed only after the existing server confirms availability.
     const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
@@ -1442,7 +1489,9 @@
           '<p class="ep-live-meta">'+esc(h.paperNotice)+'</p>'+
           '<div class="ep-live-actions">'+ready.map(([code])=>
             '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-dashboard-open="'+
-              code+'">'+code+' · '+esc(h.start)+'</button>').join("")+'</div></section>';
+              code+'">'+code+' · '+esc(h.start)+'</button>'+
+            '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-dashboard-history="'+
+              code+'">'+code+' · '+esc(h.history)+'</button>').join("")+'</div></section>';
       }
     }
     const c = copy();
@@ -1462,6 +1511,8 @@
     bindWeeklyS3();
     root.querySelectorAll("[data-ep-hybrid-s4-dashboard-open]").forEach(button =>
       button.addEventListener("click", () => void openHybridS4(button.dataset.epHybridS4DashboardOpen)));
+    root.querySelectorAll("[data-ep-hybrid-s4-dashboard-history]").forEach(button =>
+      button.addEventListener("click", () => void openRecentResults(button.dataset.epHybridS4DashboardHistory)));
     root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
       const component = card.dataset.epLiveOpenComponent;
       // The dashboard explicitly says "Start/Continue entry check".
