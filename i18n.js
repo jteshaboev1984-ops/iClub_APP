@@ -249,6 +249,10 @@ archive_unlock_after_toast: "Архив откроется после закры
 
             courses_title: "Предметы",
     academy_home_subtitle: "Ваши предметы и результаты",
+    academy_continue_title: "Продолжить",
+    academy_continue_subtitle: "Сохранённые незавершённые занятия",
+    academy_continue_status: "Сохранённая пауза",
+    academy_continue_cta: "Продолжить",
     academy_subjects_subtitle: "Подключайте предметы и открывайте их материалы",
     academy_hub_prepare: "Подготовка",
     academy_hub_materials: "Материалы",
@@ -1160,6 +1164,10 @@ archive_unlock_after_toast: "Arxiv joriy rasmiy tur yopilgandan keyin ochiladi."
 
             courses_title: "Fanlar",
     academy_home_subtitle: "Fanlaringiz va natijalaringiz",
+    academy_continue_title: "Davom ettirish",
+    academy_continue_subtitle: "Saqlangan tugallanmagan mashg‘ulotlar",
+    academy_continue_status: "Saqlangan tanaffus",
+    academy_continue_cta: "Davom ettirish",
     academy_subjects_subtitle: "Fanlarni tanlang va materiallarini oching",
     academy_hub_prepare: "Tayyorgarlik",
     academy_hub_materials: "Materiallar",
@@ -2077,6 +2085,10 @@ archive_unlock_after_toast: "The archive will open after the current official to
 
             courses_title: "Subjects",
     academy_home_subtitle: "Your subjects and results",
+    academy_continue_title: "Continue",
+    academy_continue_subtitle: "Saved unfinished sessions",
+    academy_continue_status: "Paused session",
+    academy_continue_cta: "Continue",
     academy_subjects_subtitle: "Choose subjects and open their materials",
     academy_hub_prepare: "Preparation",
     academy_hub_materials: "Materials",
