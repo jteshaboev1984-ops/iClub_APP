@@ -14459,12 +14459,117 @@ function toggleHomeExtra() {
   } catch {}
 }
 
-function renderHome() {
+
+  // UX #531: Home Continue is a read-only entry to the existing authenticated
+  // Practice start/resume flow. No draft/question/session mutations occur here.
+  let academyHomeContinueRequest = 0;
+
+  function academyHideHomeContinue() {
+    const area = document.getElementById("academy-home-continue");
+    const list = document.getElementById("academy-home-continue-list");
+    if (area) area.hidden = true;
+    if (list) list.replaceChildren();
+  }
+
+  async function academyRenderHomeContinue() {
+    const request = ++academyHomeContinueRequest;
+    academyHideHomeContinue();
+    const identity = window.iClubPracticeDraftIdentityV1;
+    if (!identity || !window.sb || !loadProfile()) return;
+    const uid = await identity.bind().catch(() => null);
+    if (request !== academyHomeContinueRequest || !uid || identity.currentUid() !== uid) return;
+    const draft = identity.read();
+    const subjectKey = String(draft?.subjectKey || "").trim();
+    const sessionId = Number(draft?.quiz?.safeDrillSessionId || draft?.quiz?.safeSessionId || 0);
+    if (draft?.status !== "paused" || draft?.quiz?.mode !== "practice" ||
+        !subjectKey || !Number.isSafeInteger(sessionId) || sessionId <= 0 ||
+        !Array.isArray(draft?.quiz?.questions) || draft.quiz.questions.length === 0 ||
+        !isSubjectActive(subjectKey)) return;
+    const profile = loadProfile();
+    if (!profile || !getVisibleSubjectsCatalog().some(s => s.key === subjectKey)) return;
+    if (request !== academyHomeContinueRequest || identity.currentUid() !== uid) return;
+
+    const area = document.getElementById("academy-home-continue");
+    const list = document.getElementById("academy-home-continue-list");
+    if (!area || !list) return;
+
+    const subject = subjectByKey(subjectKey);
+    const title = subjectTitle(subjectKey, subject?.title || subjectKey);
+    const practiceLabel = t("practice") || tr3("Практика", "Amaliyot", "Practice");
+    const statusLabel = t("academy_continue_status") || tr3("Сохранённая пауза", "Saqlangan tanaffus", "Paused session");
+    const actionLabel = t("academy_continue_cta") || tr3("Продолжить", "Davom ettirish", "Continue");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "academy-home-resume-card";
+    btn.setAttribute("aria-label", title + " · " + practiceLabel + " · " + actionLabel);
+
+    const first = document.createElement("span");
+    first.className = "academy-home-resume-top";
+    first.textContent = title + " · " + practiceLabel;
+    const line = document.createElement("span");
+    line.className = "academy-home-resume-line";
+    const status = document.createElement("span");
+    status.className = "academy-home-resume-status";
+    status.textContent = statusLabel;
+    const cta = document.createElement("span");
+    cta.className = "academy-home-resume-cta";
+    cta.textContent = actionLabel + " ›";
+    line.append(status, cta);
+    btn.append(first,line);
+
+    btn.addEventListener("click", async () => {
+      if (btn.disabled || btn.dataset.opening === "1") return;
+      btn.dataset.opening = "1";
+      btn.disabled = true;
+      try {
+        // Repeat current authenticated ownership/session checks at click time.
+        const liveUid = await identity.bind().catch(() => null);
+        const liveDraft = identity.read();
+        const liveSession = Number(liveDraft?.quiz?.safeDrillSessionId || liveDraft?.quiz?.safeSessionId || 0);
+        if (liveUid !== uid || identity.currentUid() !== uid ||
+            liveDraft?.status !== "paused" || liveDraft?.subjectKey !== subjectKey ||
+            liveSession !== sessionId || request !== academyHomeContinueRequest ||
+            !document.querySelector("#view-home.is-active") ||
+            !isSubjectActive(subjectKey)) return;
+        const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
+        if (accessOk === false || identity.currentUid() !== uid ||
+            !document.querySelector("#view-home.is-active")) return;
+        state.courses = state.courses || {};
+        state.courses.subjectKey = subjectKey;
+        state.courses.entryTab = "home";
+        saveState();
+        setTab("courses");
+        replaceCourses("subject-hub");
+        await renderSubjectHub();
+        if (state.courses.subjectKey === subjectKey &&
+            getCoursesTopScreen() === "subject-hub" && identity.currentUid() === uid) {
+          // Existing Practice start checks draft owner again and exposes Resume.
+          await openPracticeStart();
+        }
+      } catch {
+        showToast(t("not_available") || tr3("Недоступно", "Mavjud emas", "Unavailable"));
+      } finally {
+        btn.disabled = false;
+        delete btn.dataset.opening;
+      }
+    });
+    list.replaceChildren(btn);
+    area.hidden = false;
+  }
+
+  window.addEventListener("iclub:practice-identity-invalidated", () => {
+    academyHomeContinueRequest += 1;
+    academyHideHomeContinue();
+  });
+
+    function renderHome() {
     const profile = loadProfile();
     const compWrap = $("#home-competitive-list");
     const pinnedWrap = $("#home-study-list");
     if (!compWrap || !pinnedWrap) return;
 
+    academyHomeContinueRequest += 1;
+    academyHideHomeContinue();
     compWrap.innerHTML = "";
     pinnedWrap.innerHTML = "";
 
@@ -14497,6 +14602,7 @@ function renderHome() {
 
 // ✅ Home extra accordion (restore open/closed)
 applyHomeExtraState();
+void academyRenderHomeContinue().catch(() => academyHideHomeContinue());
 }
 
       // ===========================
