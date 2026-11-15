@@ -14489,7 +14489,7 @@ function renderHome() {
       updateHomeCompetitiveCard(card, s.key);
     });
 
-    pinned.slice(0, 4).forEach((s, idx) => {
+    pinned.forEach((s, idx) => {
   const tile = homePinnedTileEl(s, idx);
   pinnedWrap.appendChild(tile);
   updateHomePinnedTile(tile, s.key);
