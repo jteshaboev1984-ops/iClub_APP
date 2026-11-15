@@ -14332,24 +14332,18 @@ function uiAlert({ title, message, okText } = {}) {
   wrap.dataset.i18nBound = "1";
 }
   
-     // Preserve the learner's click order, rather than the fixed catalogue DOM order.
-  // The first selected subject is the explicitly displayed Primary subject.
-  let selectedOrder = [main1.value, main2.value].filter(Boolean);
-  const syncChipsFromSelects = () => {
-    selectedOrder = [main1.value, main2.value].filter(Boolean);
+     const syncChipsFromSelects = () => {
+    const selected = [main1.value, main2.value].filter(Boolean);
     buttons().forEach(btn => {
-      btn.classList.toggle("is-active", selectedOrder.includes(btn.dataset.subjectKey));
+      btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
     });
     updateSummary();
   };
 
   const syncSelectsFromChips = () => {
-    const activeKeys = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
-    selectedOrder = selectedOrder.filter(key => activeKeys.includes(key));
-    activeKeys.forEach(key => { if (!selectedOrder.includes(key)) selectedOrder.push(key); });
-    selectedOrder = selectedOrder.slice(0, 2);
-    main1.value = selectedOrder[0] || "";
-    main2.value = selectedOrder[1] || "";
+    const selected = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
+    main1.value = selected[0] || "";
+    main2.value = selected[1] || "";
     updateSummary();
   };
 
@@ -14361,7 +14355,6 @@ function uiAlert({ title, message, okText } = {}) {
 
     if (btn.classList.contains("is-active")) {
       btn.classList.remove("is-active");
-      selectedOrder = selectedOrder.filter(key => key !== btn.dataset.subjectKey);
       syncSelectsFromChips();
       return;
     }
@@ -14372,7 +14365,6 @@ function uiAlert({ title, message, okText } = {}) {
     }
 
     btn.classList.add("is-active");
-    selectedOrder.push(btn.dataset.subjectKey);
     syncSelectsFromChips();
   });
 

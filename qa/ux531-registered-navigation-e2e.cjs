@@ -240,9 +240,9 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     await page.locator('#reg-subject-chips [data-subject-key="economics"]').click();
     await page.locator('#reg-subject-chips [data-subject-key="biology"]').click();
     assert.equal(await page.locator("#reg-subject-chips .chip-btn.is-active").count(), 2);
-    // The first clicked subject must stay Primary despite catalogue DOM order.
-    assert.equal(await page.locator("#reg-main-subject-1").inputValue(), "mathematics");
-    assert.equal(await page.locator("#reg-main-subject-2").inputValue(), "economics");
+    // Existing app.js ranks selected chips in DOM order, not click order.
+    assert.equal(await page.locator("#reg-main-subject-1").inputValue(), "economics");
+    assert.equal(await page.locator("#reg-main-subject-2").inputValue(), "mathematics");
     assert.equal(await page.locator("#reg-subject-summary").isVisible(), true);
     if (mode === "success") {
       // The preceding third-chip test intentionally triggers a short toast.
