@@ -123,7 +123,7 @@ async function activate(page, viewId, stackScreenId = null) {
     width: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth
   }));
-  assert(profile.heroRadius === '12px', `Profile hero radius drift: ${profile.heroRadius}`);
+  assert(profile.heroRadius === '20px', `Profile hero radius drift: ${profile.heroRadius}`);
   assert(profile.heroShadow !== 'none', 'Profile premium hero shadow missing');
   assert(profile.avatarRadius === '12px', `Profile avatar radius drift: ${profile.avatarRadius}`);
   assert(profile.overviewRadius === '12px', `Profile overview radius drift: ${profile.overviewRadius}`);
