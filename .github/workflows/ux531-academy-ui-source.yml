@@ -10,6 +10,7 @@ on:
       - 'visual/iclub-academy-ux531-b02b03.css'
       - 'visual/iclub-academy-ux531-interactions.js'
       - 'qa/ux531-academy-ui-parity.cjs'
+      - 'qa/ux531-academy-browser.cjs'
       - '.github/workflows/ux531-academy-ui-source.yml'
   workflow_dispatch:
 
@@ -35,3 +36,9 @@ jobs:
           node --check qa/ux531-academy-ui-parity.cjs
       - name: UI source parity and contract
         run: node qa/ux531-academy-ui-parity.cjs
+      - name: Install browser runtime (Ubuntu 24.04 compatible)
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Browser UI parity on real source DOM and CSS
+        run: node qa/ux531-academy-browser.cjs
