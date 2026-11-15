@@ -19,6 +19,7 @@ const pageHtml = mainHtml
     '<link rel="stylesheet" href="/visual/iclub-academy-v55-shell-b01.css">',
     '<link rel="stylesheet" href="/visual/iclub-academy-ux531-b02b03.css">',
     '<link rel="stylesheet" href="/visual/iclub-registration-b00.css">',
+    '<link rel="stylesheet" href="/visual/iclub-academy-ux531-b04b08.css">',
     "</head>"
   ].join("\n"))
   .replace("</body>", [
@@ -31,6 +32,7 @@ const pageHtml = mainHtml
 const allowedFiles = new Set([
   "/style.css", "/visual/iclub-visual-v3.css",
   "/visual/iclub-premium-v3.css", "/visual/iclub-registration-b00.css",
+  "/visual/iclub-academy-ux531-b04b08.css",
   "/i18n.js", "/app.js", "/registration-b00-ui.js", "/logo.png",
   "/visual/iclub-academy-v55-shell-b01.css", "/visual/iclub-academy-ux531-b02b03.css",
   "/visual/iclub-academy-ux531-interactions.js"
