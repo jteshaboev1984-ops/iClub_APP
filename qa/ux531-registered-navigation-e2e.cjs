@@ -359,7 +359,8 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       // Explicitly cancel activation: no profile changes, no DB writes, no reset.
       const beforeCancel=await page.evaluate(()=>({writes:window.__B00_FAKE.writes.length,
         profile:window.localStorage.getItem("iclub_profile_v1")}));
-      await page.locator('#subjects-grid .catalog-toggle-row input[type="checkbox"]:not(:checked)').first().check();
+      // Styled native input is visually hidden; exercise the real visible switch label.
+      await page.locator('#subjects-grid .catalog-toggle-row .switch').first().click();
       await page.locator('#modal-root [data-modal-action="cancel"]').waitFor();
       await page.locator('#modal-root [data-modal-action="cancel"]').click();
       const afterCancel=await page.evaluate(()=>({writes:window.__B00_FAKE.writes.length,
