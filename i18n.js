@@ -249,6 +249,7 @@ archive_unlock_after_toast: "Архив откроется после закры
 
             courses_title: "Предметы",
     academy_home_subtitle: "Ваши предметы и результаты",
+    academy_profile_subtitle: "Мои результаты и настройки",
     academy_continue_title: "Продолжить",
     academy_continue_subtitle: "Сохранённые незавершённые занятия",
     academy_continue_status: "Сохранённая пауза",
@@ -1164,6 +1165,7 @@ archive_unlock_after_toast: "Arxiv joriy rasmiy tur yopilgandan keyin ochiladi."
 
             courses_title: "Fanlar",
     academy_home_subtitle: "Fanlaringiz va natijalaringiz",
+    academy_profile_subtitle: "Natijalarim va sozlamalar",
     academy_continue_title: "Davom ettirish",
     academy_continue_subtitle: "Saqlangan tugallanmagan mashg‘ulotlar",
     academy_continue_status: "Saqlangan tanaffus",
@@ -2085,6 +2087,7 @@ archive_unlock_after_toast: "The archive will open after the current official to
 
             courses_title: "Subjects",
     academy_home_subtitle: "Your subjects and results",
+    academy_profile_subtitle: "My results and settings",
     academy_continue_title: "Continue",
     academy_continue_subtitle: "Saved unfinished sessions",
     academy_continue_status: "Paused session",
