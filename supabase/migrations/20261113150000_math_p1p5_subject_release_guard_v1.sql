@@ -1,4 +1,5 @@
 -- #450 / #526: use existing Mathematics selection for expanded/mass Core
+-- Mass grants Core by Mathematics selection even when QA-open has been closed.
 -- DEFAULT CONTROLLED BETA IS NOT CHANGED by this migration.
 -- NO new tables, grants, roles, feature flags, user rewrites or progress updates.
 -- The two existing authority functions keep their signatures, SECURITY DEFINER,
@@ -44,6 +45,27 @@ BEGIN
       )
 $private_predicate$;
   v_next := replace(v_source,v_anchor,v_anchor||chr(10)||v_predicate);
+
+  -- Mass Core must NOT depend on a temporary QA override or beta entitlement.
+  -- The EXISTING selected Mathematics subject is sufficient after mass GO.
+  -- This never affects internal_alpha / controlled_beta / expanded_beta rights.
+  v_anchor := 'c.qa_open_all_core';
+  v_hits := (length(v_source)-length(replace(v_source,v_anchor,'')))/length(v_anchor);
+  IF v_hits<>1 THEN
+    RAISE EXCEPTION 'math_subject_release_guard_private_qa_anchor_drift: %',v_hits;
+  END IF;
+  v_next := replace(v_next,v_anchor,$mass_private_core$
+      (
+        c.qa_open_all_core
+        OR (
+          c.rollout_state='mass'
+          AND EXISTS (
+            SELECT 1 FROM public.user_subjects us
+            WHERE us.user_id=v_uid AND us.subject_id=5
+          )
+        )
+      )
+$mass_private_core$);
   EXECUTE v_next;
 
   v_source := pg_get_functiondef(v_public);
@@ -66,6 +88,26 @@ $private_predicate$;
       )
 $public_predicate$;
   v_next := replace(v_source,v_anchor,v_anchor||chr(10)||v_predicate);
+
+  -- Keep paid/optional AI and Mentor entitlement checks unchanged. Only
+  -- Core capability follows selected Mathematics after a declared mass GO.
+  v_anchor := 'AND (e.ent_core OR e.qa_open_all_core)';
+  v_hits := (length(v_source)-length(replace(v_source,v_anchor,'')))/length(v_anchor);
+  IF v_hits<>1 THEN
+    RAISE EXCEPTION 'math_subject_release_guard_public_core_anchor_drift: %',v_hits;
+  END IF;
+  v_next := replace(v_next,v_anchor,$mass_public_core$
+      AND (
+        e.ent_core OR e.qa_open_all_core
+        OR (
+          e.rollout_state='mass'
+          AND EXISTS (
+            SELECT 1 FROM public.user_subjects us
+            WHERE us.user_id=e.user_id AND us.subject_id=5
+          )
+        )
+      )
+$mass_public_core$);
   EXECUTE v_next;
 
   IF (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
