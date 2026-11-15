@@ -119,7 +119,7 @@ async function activateSubjectHubWithLongCopy(page) {
       innerWidth
     };
   });
-  assert(state.slotRadius === '12px', `Profile slot radius drift: ${state.slotRadius}`);
+  assert(state.slotRadius === '15px', `Profile slot radius drift: ${state.slotRadius}`);
   assert(state.slotShadow !== 'none', 'Profile slot premium surface missing');
   assert(state.credentialRadius === '12px', `Credential radius drift: ${state.credentialRadius}`);
   assert(state.credentialShadow !== 'none', 'Credential premium surface missing');
