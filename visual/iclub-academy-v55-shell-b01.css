@@ -9,25 +9,25 @@ body.iclub-visual-v3:has(#view-courses.is-active #courses-all-subjects.is-active
 body.iclub-visual-v3:has(#view-courses.is-active #courses-subject-hub.is-active) #topbar,
 body.iclub-visual-v3:has(#view-ratings.is-active) #topbar,
 body.iclub-visual-v3:has(#view-profile.is-active) #topbar{
- background:#174b95;
+ background:#164987;
  color:#fff;border-bottom:1px solid #8bb6ec;
  box-shadow:0 4px 14px rgba(18,65,131,.10);
  -webkit-backdrop-filter:none;backdrop-filter:none;
 }
 body.iclub-visual-v3:has(#view-home.is-active) #topbar{
- background:#174b95;
+ background:#164987;
 }
 body.iclub-visual-v3:has(#view-courses.is-active #courses-all-subjects.is-active) #topbar{
- background:#174b95;
+ background:#24599b;
 }
 body.iclub-visual-v3:has(#view-courses.is-active #courses-subject-hub.is-active) #topbar{
- background:#174b95;
+ background:#133c78;
 }
 body.iclub-visual-v3:has(#view-ratings.is-active) #topbar{
- background:#174b95;
+ background:#28518d;
 }
 body.iclub-visual-v3:has(#view-profile.is-active) #topbar{
- background:#174b95;
+ background:#31578e;
 }
 body.iclub-visual-v3:has(#view-home.is-active) #topbar .topbar-title .title,
 body.iclub-visual-v3:has(#view-courses.is-active) #topbar .topbar-title .title,
