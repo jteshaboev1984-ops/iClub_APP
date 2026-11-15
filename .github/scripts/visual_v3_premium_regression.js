@@ -126,7 +126,7 @@ async function activate(page, viewId, stackScreenId = null) {
   assert(profile.heroRadius === '20px', `Profile hero radius drift: ${profile.heroRadius}`);
   assert(profile.heroShadow !== 'none', 'Profile premium hero shadow missing');
   assert(profile.avatarRadius === '12px', `Profile avatar radius drift: ${profile.avatarRadius}`);
-  assert(profile.overviewRadius === '12px', `Profile overview radius drift: ${profile.overviewRadius}`);
+  assert(profile.overviewRadius === '15px', `Profile overview radius drift: ${profile.overviewRadius}`);
   assert(profile.width <= profile.innerWidth, `Profile overflow: ${JSON.stringify(profile)}`);
 
   const routes = await page.locator('#tabbar .tab').evaluateAll(nodes => nodes.map(node => node.getAttribute('data-tab')));
