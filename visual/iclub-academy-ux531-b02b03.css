@@ -1,0 +1,298 @@
+/* UX #531 Academy OS — shared top zones, Home rails, Subjects, subject workspace.
+   Applies only to overview screens. No assessment, authorization or data rules. */
+body.iclub-visual-v3{
+ --academy-header-body:128px;
+ --academy-header-curve:26px;
+ --academy-blue:#2c6ccc;
+ --academy-ink:#142b50;
+ --academy-border:rgba(45,101,190,.20);
+ --academy-white:#fff;
+}
+/* Existing topbar remains the sole navigation authority. */
+body.iclub-visual-v3:has(#view-home.is-active) #topbar,
+body.iclub-visual-v3:has(#view-courses.is-active #courses-all-subjects.is-active) #topbar,
+body.iclub-visual-v3:has(#view-courses.is-active #courses-subject-hub.is-active) #topbar,
+body.iclub-visual-v3:has(#view-ratings.is-active) #topbar,
+body.iclub-visual-v3:has(#view-profile.is-active) #topbar{
+ min-height:68px;
+ padding-top:calc(9px + var(--safe-top));
+ padding-bottom:9px;
+ border-bottom:0;
+ box-shadow:none;
+}
+/* Top-of-view uses one identical content height for Home, Subjects, Hub. */
+body.iclub-visual-v3 #view-home .academy-view-zone,
+body.iclub-visual-v3 #courses-all-subjects .academy-view-zone,
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-head{
+ box-sizing:border-box;
+ min-height:var(--academy-header-body);
+ width:calc(100% + 24px);
+ margin:-10px -12px 20px;
+ border-radius:0 0 var(--academy-header-curve) var(--academy-header-curve);
+ padding:16px 20px 22px;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ align-items:stretch;
+ position:relative;
+ overflow:hidden;
+ border:0;
+ border-bottom:1px solid rgba(255,255,255,.22);
+ box-shadow:0 7px 22px rgba(27,70,140,.10);
+}
+body.iclub-visual-v3 #view-home .academy-view-zone{
+ background:linear-gradient(145deg,#103f8b 0%,#2c6ccc 72%,#6a9bd6 100%);
+}
+body.iclub-visual-v3 #courses-all-subjects .academy-view-zone{
+ background:linear-gradient(145deg,#14539e 0%,#397acb 72%,#80afe7 100%);
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-head{
+ background:linear-gradient(145deg,#0f326f 0%,#285bb3 72%,#689ad9 100%);
+}
+body.iclub-visual-v3 .academy-view-zone h1,
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-title{
+ color:#fff!important;
+ font-size:clamp(23px,6vw,29px);
+ font-weight:830;
+ letter-spacing:-.6px;
+ line-height:1.14;
+ margin:4px 0 5px;
+}
+body.iclub-visual-v3 .academy-view-kicker{
+ color:#d4e6ff;
+ font-size:10px;
+ font-weight:750;
+ line-height:1.2;
+ text-transform:uppercase;
+ letter-spacing:.08em;
+}
+body.iclub-visual-v3 .academy-view-zone p,
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-meta{
+ color:#e2eeff!important;
+ font-size:12px;
+ line-height:1.4;
+ margin:0;
+ max-width:36rem;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-head-left{min-width:0}
+body.iclub-visual-v3 #courses-all-subjects > .section:first-of-type{
+ margin:0 0 14px;
+}
+body.iclub-visual-v3 #courses-all-subjects .courses-filter-row{margin-top:0}
+body.iclub-visual-v3 #courses-all-subjects .grid-section-filters{
+ display:grid;grid-template-columns:1fr 1fr;gap:8px;
+ background:#eaf2ff;border:1px solid #d8e6fc;padding:5px;border-radius:15px;
+}
+body.iclub-visual-v3 #courses-all-subjects .grid-section-filters .chip{
+ min-width:0;min-height:42px;border-radius:11px;
+ padding:10px 5px;white-space:normal;text-align:center;line-height:1.2;
+}
+body.iclub-visual-v3 #courses-all-subjects .grid-section-filters .chip.is-active{
+ background:#fff!important;color:#1d54aa!important;border:1px solid #acc9f6!important;
+ box-shadow:0 3px 10px rgba(32,85,170,.10);
+}
+body.iclub-visual-v3 #view-home > .content,
+body.iclub-visual-v3 #view-courses > .content{
+ min-width:0;
+}
+body.iclub-visual-v3 #view-home .home-block{margin:0 0 20px}
+body.iclub-visual-v3 #view-home .home-block-head{margin-bottom:10px}
+body.iclub-visual-v3 #view-home .home-block-title{
+ font-size:16px;letter-spacing:-.15px;font-weight:800;color:var(--academy-ink)
+}
+body.iclub-visual-v3 #view-home .home-block-sub{font-size:11px;color:#627c9d}
+/* Native horizontal swipe, snap, peek. Empty rows remain normal. */
+body.iclub-visual-v3 #home-competitive-list,
+body.iclub-visual-v3 #home-study-list{
+ display:flex!important;
+ flex-wrap:nowrap;
+ align-items:stretch;
+ gap:12px;
+ overflow-x:auto;
+ overflow-y:hidden;
+ overscroll-behavior-x:contain;
+ scroll-snap-type:x mandatory;
+ scroll-padding-inline:1px;
+ scrollbar-width:none;
+ -webkit-overflow-scrolling:touch;
+ padding:0 28px 5px 1px;
+ margin:0;
+}
+body.iclub-visual-v3 #home-competitive-list::-webkit-scrollbar,
+body.iclub-visual-v3 #home-study-list::-webkit-scrollbar{display:none}
+body.iclub-visual-v3 #home-competitive-list > .home-competitive-card,
+body.iclub-visual-v3 #home-study-list > .home-pinned-tile{
+ flex:0 0 calc(100% - 29px);
+ min-width:0;
+ scroll-snap-align:start;
+}
+body.iclub-visual-v3 #home-competitive-list > :only-child,
+body.iclub-visual-v3 #home-study-list > :only-child{
+ flex-basis:100%;
+}
+body.iclub-visual-v3 #home-competitive-list > .empty,
+body.iclub-visual-v3 #home-study-list > .empty{
+ flex:1 0 100%;width:100%;
+}
+body.iclub-visual-v3 #home-competitive-list:has(> :only-child),
+body.iclub-visual-v3 #home-study-list:has(> :only-child){padding-right:1px}
+body.iclub-visual-v3 #home-competitive-list .home-competitive-card{
+ gap:9px;padding:16px;background:#fff;
+ border:1px solid #b9d2f9;border-radius:20px;
+ box-shadow:0 7px 22px rgba(39,84,152,.08);
+}
+body.iclub-visual-v3 #home-competitive-list .home-competitive-hero{
+ display:none!important; /* Decorative subject image, not a feature or action. */
+}
+body.iclub-visual-v3 #home-competitive-list .home-competitive-title{
+ font-size:clamp(18px,5.5vw,24px);letter-spacing:-.45px;color:#17478f
+}
+body.iclub-visual-v3 #home-competitive-list .home-competitive-note{
+ color:#577399;font-size:12px
+}
+body.iclub-visual-v3 #home-competitive-list .home-competitive-meta{align-items:center}
+body.iclub-visual-v3 #home-competitive-list .home-competitive-btn{
+ min-height:44px;background:#235fc0;color:white;
+ border:1px solid #1c52a6;border-radius:12px;
+}
+body.iclub-visual-v3 #home-study-list .home-pinned-tile{
+ background:linear-gradient(154deg,#fff,#f0f6ff);
+ min-height:108px;
+ display:flex;flex-direction:column;justify-content:center;
+ padding:15px;border:1px solid #c9dbf6;border-radius:18px;
+ box-shadow:0 6px 14px rgba(30,82,150,.07);
+}
+body.iclub-visual-v3 #home-study-list .home-pinned-ico{display:none!important}
+body.iclub-visual-v3 #home-study-list .home-pinned-title{
+ color:#154b9b;font-size:19px;letter-spacing:-.3px
+}
+body.iclub-visual-v3 #home-study-list .home-pinned-meta{
+ color:#617c9f;line-height:1.4
+}
+body.iclub-visual-v3 .academy-rail-pagination{
+ display:flex;align-items:center;justify-content:center;gap:8px;
+ margin:6px 0 0;
+}
+body.iclub-visual-v3 .academy-rail-pagination[hidden]{display:none!important}
+body.iclub-visual-v3 .academy-rail-dot{
+ width:18px;height:18px;display:grid;place-items:center;
+ padding:0;margin:0;border:0;background:transparent;border-radius:20px;
+ cursor:pointer
+}
+body.iclub-visual-v3 .academy-rail-dot::before{
+ content:"";display:block;width:6px;height:6px;background:#b7cbed;
+ border-radius:999px;transition:width .2s,background .2s
+}
+body.iclub-visual-v3 .academy-rail-dot[aria-current="true"]::before{
+ width:18px;background:#2c6ccc;
+}
+body.iclub-visual-v3 .academy-rail-dot:focus-visible{outline:2px solid #2c6ccc;outline-offset:2px}
+/* Subjects = catalogue, not a separate learning product. Keep existing toggles. */
+body.iclub-visual-v3 #courses-all-subjects #subjects-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;
+}
+body.iclub-visual-v3 #courses-all-subjects .grid-section-title{
+ grid-column:1/-1;margin:9px 0 1px;color:#345e96;
+}
+body.iclub-visual-v3 #courses-all-subjects .catalog-card{
+ background:linear-gradient(155deg,#fff,#f4f8ff);
+ border:1px solid #c9dcf8;border-radius:18px;
+ box-shadow:0 5px 15px rgba(23,70,131,.07);
+ min-width:0;display:flex;flex-direction:column;
+}
+body.iclub-visual-v3 #courses-all-subjects .catalog-head{
+ padding:15px 12px 10px;
+ flex:1;min-height:76px;
+}
+body.iclub-visual-v3 #courses-all-subjects .catalog-ico{display:none!important}
+body.iclub-visual-v3 #courses-all-subjects .catalog-left{gap:0}
+body.iclub-visual-v3 #courses-all-subjects .catalog-text .card-title{
+ font-size:clamp(13px,4vw,17px);line-height:1.18;
+ font-weight:800;letter-spacing:-.2px;color:#1b4d94;
+ overflow-wrap:break-word;hyphens:auto;
+}
+body.iclub-visual-v3 #courses-all-subjects .catalog-toggle-row{
+ border-top:1px solid #d8e6f9;min-height:52px;padding:5px 10px;
+}
+body.iclub-visual-v3 #courses-all-subjects .catalog-toggle-state{font-size:11px;line-height:1.24}
+body.iclub-visual-v3 #courses-all-subjects .switch{flex-shrink:0}
+/* Subject as focused workspace; all original individual routes remain. */
+body.iclub-visual-v3 #courses-subject-hub .academy-hub-tabs{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
+ padding:5px;margin:0 0 15px;
+ background:#eaf2ff;border:1px solid #d5e3fb;border-radius:16px;
+}
+body.iclub-visual-v3 #courses-subject-hub .academy-hub-tab{
+ min-width:0;min-height:44px;border:1px solid transparent;
+ border-radius:12px;background:transparent;
+ color:#52719b;font-size:clamp(10px,3vw,12px);
+ font-weight:750;padding:7px 4px;line-height:1.18;
+ cursor:pointer;overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #courses-subject-hub .academy-hub-tab[aria-selected="true"]{
+ color:#1c52a3;background:#fff;border-color:#bad2f7;
+ box-shadow:0 3px 9px rgba(20,66,139,.08);
+}
+body.iclub-visual-v3 #courses-subject-hub .academy-hub-tab:focus-visible{
+ outline:3px solid #7dadff;outline-offset:1px;
+}
+body.iclub-visual-v3 #courses-subject-hub .academy-hub-pane[hidden]{display:none!important}
+body.iclub-visual-v3 #courses-subject-hub .academy-hub-pane{
+ display:block;min-width:0;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-label{
+ grid-column:1/-1;
+ font-size:12px;font-weight:800;color:#345f9e;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-mode-card-exam{
+ grid-column:1/-1;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-mode-card-button{
+ min-height:88px;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-mode-icon{
+ display:none!important;/* subject cards have typographic identity */
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-mode-card{
+ border:1px solid #cbdcf6;border-radius:17px;
+ box-shadow:0 4px 13px rgba(30,75,136,.05);
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-panels{margin-bottom:12px}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-list .settings-nav-ico{
+ background:#eff5ff;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-bottom{
+ margin-top:15px;
+}
+@media(min-width:700px){
+ body.iclub-visual-v3 #home-competitive-list > .home-competitive-card{
+  flex-basis:min(52%,410px)
+ }
+ body.iclub-visual-v3 #home-study-list > .home-pinned-tile{
+  flex-basis:min(39%,310px)
+ }
+ body.iclub-visual-v3 #courses-all-subjects #subjects-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+ }
+ body.iclub-visual-v3 #view-home .academy-view-zone,
+ body.iclub-visual-v3 #courses-all-subjects .academy-view-zone,
+ body.iclub-visual-v3 #courses-subject-hub .subject-hub-head{
+  padding-left:28px;padding-right:28px;
+ }
+}
+@media(max-width:340px){
+ body.iclub-visual-v3{--academy-header-body:128px}
+ body.iclub-visual-v3 #courses-all-subjects .catalog-head{padding:12px 9px 8px}
+ body.iclub-visual-v3 #courses-all-subjects .catalog-toggle-row{padding:5px 8px}
+ body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes{
+  grid-template-columns:1fr;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ body.iclub-visual-v3 #home-competitive-list,
+ body.iclub-visual-v3 #home-study-list{scroll-behavior:auto}
+ body.iclub-visual-v3 .academy-rail-dot::before{transition:none}
+}
