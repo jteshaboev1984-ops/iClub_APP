@@ -352,8 +352,19 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       assert.equal(await page.locator('#courses-filter-row [data-main-filter="competitive"].is-active').count(),1);
       await page.locator('#courses-filter-row [data-main-filter="study"]').click();
       assert.equal(await page.locator('#courses-filter-row [data-main-filter="study"].is-active').count(),1);
-      assert.ok(await page.locator('#subjects-grid .catalog-card').count()>=5,
-        "Original Subjects catalogue cards must remain available");
+      // Five source subjects minus the two Competitive selections remain in Study.
+      const visibleStudy=await page.locator('#subjects-grid .catalog-card').count();
+      assert.ok(visibleStudy>=3,
+        "Study catalogue must retain the remaining 3 subjects, found "+visibleStudy);
+      // Explicitly cancel activation: no profile changes, no DB writes, no reset.
+      const beforeCancel=await page.evaluate(()=>({writes:window.__B00_FAKE.writes.length,
+        profile:window.localStorage.getItem("iclub_profile_v1")}));
+      await page.locator('#subjects-grid .catalog-toggle-row input[type="checkbox"]:not(:checked)').first().check();
+      await page.locator('#modal-root [data-modal-action="cancel"]').waitFor();
+      await page.locator('#modal-root [data-modal-action="cancel"]').click();
+      const afterCancel=await page.evaluate(()=>({writes:window.__B00_FAKE.writes.length,
+        profile:window.localStorage.getItem("iclub_profile_v1")}));
+      assert.deepEqual(afterCancel,beforeCancel,"Canceled subject activation must not change user profile or DB");
       // Opening the subject title is separate from selecting/unselecting it.
       const beforeOpen=await page.evaluate(()=>window.__B00_FAKE.writes.length);
       await page.locator('#subjects-grid .catalog-head').first().click();
