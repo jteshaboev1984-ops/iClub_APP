@@ -363,3 +363,14 @@ body.iclub-visual-v3 #courses-subject-hub .subject-mode-card-tours{
 body.iclub-visual-v3 #courses-subject-hub #subject-hub-exam-prep-entry{
  border-radius:17px!important;
 }
+
+
+/* Subject Hub new panel order MUST override legacy v3 flex order 10/25/70.
+   Leaving the legacy order places the subject header beneath active action cards. */
+body.iclub-visual-v3 #courses-subject-hub > .subject-hub-head{order:0}
+body.iclub-visual-v3 #courses-subject-hub > .academy-hub-tabs{order:1}
+body.iclub-visual-v3 #courses-subject-hub > #academy-hub-pane-preparation{order:2}
+body.iclub-visual-v3 #courses-subject-hub > #exam-prep-host-root{order:3}
+body.iclub-visual-v3 #courses-subject-hub > #academy-hub-pane-materials{order:4}
+body.iclub-visual-v3 #courses-subject-hub > #academy-hub-pane-achievements{order:5}
+body.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-bottom{order:6}
