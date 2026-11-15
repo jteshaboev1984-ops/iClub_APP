@@ -123,7 +123,7 @@ for (const forbidden of [
     svg: Boolean(node.querySelector('svg.v3-shell-nav-icon'))
   })));
   assert(JSON.stringify(liveTabs.map(x => x.route)) === JSON.stringify(['home', 'courses', 'ratings', 'profile']), 'Browser internal tab routes changed');
-  assert(JSON.stringify(liveTabs.map(x => x.label)) === JSON.stringify(['Home', 'Study', 'Ratings', 'Profile']), `Browser nav labels mismatch: ${JSON.stringify(liveTabs)}`);
+  assert(JSON.stringify(liveTabs.map(x => x.label)) === JSON.stringify(['Home', 'Subjects', 'Ratings', 'Profile']), `Browser nav labels mismatch: ${JSON.stringify(liveTabs)}`);
   assert(liveTabs.every(x => x.svg), 'Browser navigation has a non-SVG icon');
 
   await browser.close();
