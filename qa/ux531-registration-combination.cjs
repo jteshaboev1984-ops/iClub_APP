@@ -48,7 +48,7 @@ const srv=http.createServer((req,res)=>{
     const stage1=document.getElementById('reg-b00-step-one');
     const stage2=document.getElementById('reg-b00-step-two');
     const fields=[...document.querySelectorAll('#reg-form input, #reg-form select')].map(x=>x.id);
-    const css=getComputedStyle(document.querySelector('.reg-b00-progress .reg-b00-progress-track span.is-done'));
+    const css=getComputedStyle(document.querySelector('.reg-b00-next'));
     const full=getComputedStyle(document.getElementById('reg-fullname'));
     const card=document.querySelector('.reg-b00-fields-card')||document.querySelector('.reg-b00-step-one');
     const accent=css.backgroundColor;
