@@ -541,3 +541,21 @@ body.iclub-visual-v3:has(#view-archive.is-active) #topbar .icon-btn{
 body.iclub-visual-v3 #view-certificate-verify .content > .h1{
  color:#194b8e;
 }
+
+/* Work QA 2026-11-15: preserve all descriptions; restricted routes stay hidden. */
+body.iclub-visual-v3 #view-home .home-block[hidden],
+body.iclub-visual-v3 #view-profile .profile-section[hidden]{display:none!important}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-description{
+  display:block;-webkit-line-clamp:unset;overflow:visible;white-space:normal;
+  line-height:1.45;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card .subject-mode-card-button{
+  height:auto;min-height:138px;
+}
+body.iclub-visual-v3 #courses-practice-start .practice-tour-scroll-hint{
+  color:var(--academy-text-soft);font-size:11px;line-height:1.4;
+  margin:0 0 8px;padding:0 2px;
+}
+@media (min-width:700px){
+ body.iclub-visual-v3 #courses-practice-start .practice-tour-scroll-hint{display:none}
+}

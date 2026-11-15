@@ -488,7 +488,7 @@ badge_active: "АКТИВНО",
 
       // Profile
       profile_title: "Учебный профиль",
-      profile_status_badge: "ПРОДВИНУТЫЙ УРОВЕНЬ",
+      profile_status_badge: "УЧАСТНИК ICLUB",
       profile_performance_overview: "Обзор результатов",
       profile_stability_score: "Стабильность (7 дней)",
       profile_current_level: "Текущий уровень",
@@ -1405,7 +1405,7 @@ practice_past_hint_done: "Oldingi turlar bo‘yicha yangi savollar qolmagan.",
       hub_not_added: "Qo‘shilmagan",
       // Profile
       profile_title: "O‘quv profili",
-      profile_status_badge: "Yuqori daraja",
+      profile_status_badge: "ICLUB ISHTIROKCHISI",
       profile_performance_overview: "Natijalar ko‘rsatkichi",
       profile_stability_score: "Barqarorlik (7 kun)",
       profile_current_level: "Joriy daraja",
@@ -2321,7 +2321,7 @@ practice_past_hint_done: "There are no new questions left for past tours.",
 
       // Profile
       profile_title: "Academic Profile",
-      profile_status_badge: "ADVANCED STATUS",
+      profile_status_badge: "ICLUB LEARNER",
       profile_performance_overview: "Performance Overview",
       profile_stability_score: "Stability (7d)",
       profile_current_level: "Current Level",

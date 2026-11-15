@@ -240,9 +240,9 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     await page.locator('#reg-subject-chips [data-subject-key="economics"]').click();
     await page.locator('#reg-subject-chips [data-subject-key="biology"]').click();
     assert.equal(await page.locator("#reg-subject-chips .chip-btn.is-active").count(), 2);
-    // Existing app.js ranks selected chips in DOM order, not click order.
-    assert.equal(await page.locator("#reg-main-subject-1").inputValue(), "economics");
-    assert.equal(await page.locator("#reg-main-subject-2").inputValue(), "mathematics");
+    // The first clicked subject must stay Primary despite catalogue DOM order.
+    assert.equal(await page.locator("#reg-main-subject-1").inputValue(), "mathematics");
+    assert.equal(await page.locator("#reg-main-subject-2").inputValue(), "economics");
     assert.equal(await page.locator("#reg-subject-summary").isVisible(), true);
     if (mode === "success") {
       // The preceding third-chip test intentionally triggers a short toast.
@@ -335,6 +335,28 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       }
     }
 
+
+    // Work P1: non-school learner must still bind Settings language handlers.
+    if (mode === "success" && nonschool && width === 320) {
+      assert.equal(await page.locator('#home-competitive-list').isVisible(), false,
+        'Non-school Home must not advertise restricted competitions');
+      await page.locator('#tabbar [data-tab="profile"]').click();
+      await page.locator('#view-profile.is-active').waitFor();
+      assert.equal(await page.locator('#profile-competitive-slots-list').isVisible(), false,
+        'Non-school profile must not invite to restricted competitive slots');
+      await page.locator('#topbar-action[data-action="profile-settings"]').click();
+      await page.locator('#profile-settings.is-active').waitFor();
+      await page.locator('#profile-settings-language [data-lang="uz"]').click();
+      await page.waitForFunction(() => window.i18n.getLang() === "uz");
+      assert.equal(await page.locator('#tabbar [data-tab="home"] .tab-txt').innerText(), "Bosh sahifa");
+      assert.equal(await page.locator('#profile-settings-language [data-lang="uz"].is-active').count(),1);
+      await page.locator('#profile-settings-language [data-lang="en"]').click();
+      await page.waitForFunction(() => window.i18n.getLang() === "en");
+      assert.equal(await page.locator('#tabbar [data-tab="home"] .tab-txt').innerText(), "Home");
+      assert.equal(await page.locator('#profile-settings-content-language [data-lang="en"].is-active').count(),1,
+        "Changing UI language MUST NOT alter question language");
+      console.log("PASS Work P1: non-school RU/UZ/EN UI controls remain usable, content language unchanged");
+    }
 
     if (mode === "success" && language === "ru" && width === 390) {
       // REAL app.js + accepted B00 adapter + Academy OS presentation enhancement.

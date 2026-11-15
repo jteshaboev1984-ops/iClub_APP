@@ -5690,6 +5690,7 @@ function renderPracticeTourPicker(cards, selectedTourNo) {
       <div class="practice-tour-picker-title">${escapeHTML(tr3("Выбор тура", "Tur tanlash", "Tour selection"))}</div>
     </div>
 
+    <div class="practice-tour-scroll-hint">${escapeHTML(tr3("← Листайте, чтобы увидеть все туры →", "← Barcha turlarni ko‘rish uchun suring →", "← Swipe to see all tours →"))}</div>
     <div class="practice-tour-chip-row" aria-label="${escapeHTML(tr3("Выбор тура", "Tur tanlash", "Tour selection"))}">
       ${cards.map(c => {
         const selected = Number(c.tourNo) === Number(selectedTourNo);
@@ -12830,12 +12831,12 @@ function renderProfileStack() {
     return;
   }
 
-  // Non-school users: competitive is disabled by product rules
+  // Only the competitive selector is school-gated. Other Settings controls
+  // (including UI/content language) MUST remain bound for non-school learners.
   if (!profile.is_school_student) {
     if (note) note.textContent = t("disabled_not_school");
     list.innerHTML = `<div class="empty muted">${t("disabled_not_school")}</div>`;
-    return;
-  }
+  } else {
 
   const current = Array.isArray(profile.subjects) ? profile.subjects : [];
   const currentComp = current.filter(s => s.mode === "competitive").map(s => s.key);
@@ -12993,6 +12994,7 @@ mainSubjects.forEach(subj => {
 
   list.appendChild(row);
 });
+  } // End school-only competitive settings. Do not return before languages.
 
       // --- Language segmented buttons ---
 const langWrap = document.getElementById("profile-settings-language");
@@ -13544,6 +13546,9 @@ keys.forEach(k => {
   }
 
     if (slotsCountEl) slotsCountEl.textContent = `${comp.length}/2`;
+  // Non-school accounts should never be encouraged to join restricted slots.
+  const slotsSection = slotsListEl?.closest(".profile-section");
+  if (slotsSection) slotsSection.hidden = !profile.is_school_student;
   if (slotsListEl) {
     slotsListEl.innerHTML = "";
 
@@ -13582,7 +13587,7 @@ keys.forEach(k => {
     });
 
     // 2) Пустые слоты до 2 (Empty slot + JOIN)
-    const emptyCount = Math.max(0, 2 - comp.length);
+    const emptyCount = profile.is_school_student ? Math.max(0, 2 - comp.length) : 0;
     for (let i = 0; i < emptyCount; i++) {
       const row = document.createElement("div");
       row.className = "slot-card is-empty";
@@ -14327,18 +14332,24 @@ function uiAlert({ title, message, okText } = {}) {
   wrap.dataset.i18nBound = "1";
 }
   
-     const syncChipsFromSelects = () => {
-    const selected = [main1.value, main2.value].filter(Boolean);
+     // Preserve the learner's click order, rather than the fixed catalogue DOM order.
+  // The first selected subject is the explicitly displayed Primary subject.
+  let selectedOrder = [main1.value, main2.value].filter(Boolean);
+  const syncChipsFromSelects = () => {
+    selectedOrder = [main1.value, main2.value].filter(Boolean);
     buttons().forEach(btn => {
-      btn.classList.toggle("is-active", selected.includes(btn.dataset.subjectKey));
+      btn.classList.toggle("is-active", selectedOrder.includes(btn.dataset.subjectKey));
     });
     updateSummary();
   };
 
   const syncSelectsFromChips = () => {
-    const selected = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
-    main1.value = selected[0] || "";
-    main2.value = selected[1] || "";
+    const activeKeys = buttons().filter(b => b.classList.contains("is-active")).map(b => b.dataset.subjectKey);
+    selectedOrder = selectedOrder.filter(key => activeKeys.includes(key));
+    activeKeys.forEach(key => { if (!selectedOrder.includes(key)) selectedOrder.push(key); });
+    selectedOrder = selectedOrder.slice(0, 2);
+    main1.value = selectedOrder[0] || "";
+    main2.value = selectedOrder[1] || "";
     updateSummary();
   };
 
@@ -14350,6 +14361,7 @@ function uiAlert({ title, message, okText } = {}) {
 
     if (btn.classList.contains("is-active")) {
       btn.classList.remove("is-active");
+      selectedOrder = selectedOrder.filter(key => key !== btn.dataset.subjectKey);
       syncSelectsFromChips();
       return;
     }
@@ -14360,6 +14372,7 @@ function uiAlert({ title, message, okText } = {}) {
     }
 
     btn.classList.add("is-active");
+    selectedOrder.push(btn.dataset.subjectKey);
     syncSelectsFromChips();
   });
 
@@ -14572,6 +14585,9 @@ function toggleHomeExtra() {
     academyHideHomeContinue();
     compWrap.innerHTML = "";
     pinnedWrap.innerHTML = "";
+    // A non-school learner can study, but never has Competitive slots/Tours.
+    const competitiveBlock = compWrap.closest(".home-block");
+    if (competitiveBlock) competitiveBlock.hidden = !!profile && !profile.is_school_student;
 
     if (!profile) {
       compWrap.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
@@ -23097,6 +23113,21 @@ updateSchoolFieldsVisibility();
 if (!form) return;
 if (form.dataset.submitBound === "1") return;
 form.dataset.submitBound = "1";
+
+// Localize the browser's required consent validation without modifying
+// the accepted B00 two-step adapter or bypassing the native required guard.
+const regConsent = document.getElementById("reg-consent");
+if (regConsent && regConsent.dataset.localizedInvalidBound !== "1") {
+  regConsent.dataset.localizedInvalidBound = "1";
+  regConsent.addEventListener("invalid", () => {
+    const lang = String(document.getElementById("reg-language")?.value || "ru");
+    const text = lang === "uz" ? "Shartlar va ma’lumotlarni qayta ishlashga rozilikni tasdiqlang."
+      : lang === "en" ? "Please confirm the terms and data processing agreement."
+      : "Подтвердите согласие с условиями и обработкой данных.";
+    regConsent.setCustomValidity(text);
+  });
+  regConsent.addEventListener("change", () => regConsent.setCustomValidity(""));
+}
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
