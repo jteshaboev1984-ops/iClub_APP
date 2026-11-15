@@ -9,25 +9,25 @@ body.iclub-visual-v3:has(#view-courses.is-active #courses-all-subjects.is-active
 body.iclub-visual-v3:has(#view-courses.is-active #courses-subject-hub.is-active) #topbar,
 body.iclub-visual-v3:has(#view-ratings.is-active) #topbar,
 body.iclub-visual-v3:has(#view-profile.is-active) #topbar{
- background:linear-gradient(132deg,#163f83 0%,#316bc0 78%,#6fa4e5 100%);
+ background:#174b95;
  color:#fff;border-bottom:1px solid #8bb6ec;
  box-shadow:0 4px 14px rgba(18,65,131,.10);
  -webkit-backdrop-filter:none;backdrop-filter:none;
 }
 body.iclub-visual-v3:has(#view-home.is-active) #topbar{
- background:linear-gradient(130deg,#103f8b,#2c6ccc 70%,#6a9bd6);
+ background:#174b95;
 }
 body.iclub-visual-v3:has(#view-courses.is-active #courses-all-subjects.is-active) #topbar{
- background:linear-gradient(130deg,#14539e,#397acb 72%,#80afe7);
+ background:#174b95;
 }
 body.iclub-visual-v3:has(#view-courses.is-active #courses-subject-hub.is-active) #topbar{
- background:linear-gradient(130deg,#0f326f,#285bb3 72%,#689ad9);
+ background:#174b95;
 }
 body.iclub-visual-v3:has(#view-ratings.is-active) #topbar{
- background:linear-gradient(130deg,#244b79,#487ba8 72%,#86a9d2);
+ background:#174b95;
 }
 body.iclub-visual-v3:has(#view-profile.is-active) #topbar{
- background:linear-gradient(130deg,#3e587b,#6e8fb6 72%,#b6cce4);
+ background:#174b95;
 }
 body.iclub-visual-v3:has(#view-home.is-active) #topbar .topbar-title .title,
 body.iclub-visual-v3:has(#view-courses.is-active) #topbar .topbar-title .title,
