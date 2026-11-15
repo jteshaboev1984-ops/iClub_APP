@@ -68,7 +68,7 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
    assert(new Set(headers.map(x=>x.gradient)).size===3,'header gradients must be distinct');
    for(let stop=0;stop<3;stop++)for(let c=0;c<3;c++){
     const vals=triplets.map(t=>t[stop][c]);
-    assert(Math.max(...vals)-Math.min(...vals)<=43,'sharp palette shift +JSON.stringify({viewport,stop,c,vals}));
+    assert(Math.max(...vals)-Math.min(...vals)<=43,'sharp palette shift '+JSON.stringify({viewport,stop,c,vals}));
    }
    await page.evaluate(setScreen,{view:'home',screen:''});
    await page.evaluate(()=>{
