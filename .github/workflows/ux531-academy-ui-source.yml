@@ -1,0 +1,37 @@
+name: UX531 Academy OS B01-B03 source safety
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'app.js'
+      - 'i18n.js'
+      - 'visual/iclub-academy-v55-shell-b01.css'
+      - 'visual/iclub-academy-ux531-b02b03.css'
+      - 'visual/iclub-academy-ux531-interactions.js'
+      - 'qa/ux531-academy-ui-parity.cjs'
+      - '.github/workflows/ux531-academy-ui-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b163ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Core syntax checks
+        run: |
+          node --check app.js
+          node --check i18n.js
+          node --check visual/iclub-academy-ux531-interactions.js
+          node --check qa/ux531-academy-ui-parity.cjs
+      - name: UI source parity and contract
+        run: node qa/ux531-academy-ui-parity.cjs
