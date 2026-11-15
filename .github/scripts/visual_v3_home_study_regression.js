@@ -23,10 +23,10 @@ for (const token of [
 
 assert(app.includes('class="v3-home-pinned-icon"'), 'Pinned subject tile must use the premium line icon');
 assert(!app.includes('<div class="home-pinned-ico">📘</div>'), 'Legacy pinned-subject emoji must not remain');
-assert(i18n.includes('courses_title: "Учёба"'), 'RU Study title missing');
-assert(i18n.includes('courses_title: "O‘qish"'), 'UZ Study title missing');
-assert(i18n.includes('courses_title: "Study"'), 'EN Study title missing');
-assert(html.includes('data-i18n="courses_title">Study</div>'), 'Study screen fallback title is not aligned');
+assert(i18n.includes('courses_title: "Предметы"'), 'RU Subjects title missing');
+assert(i18n.includes('courses_title: "Fanlar"'), 'UZ Subjects title missing');
+assert(i18n.includes('courses_title: "Subjects"'), 'EN Subjects title missing');
+assert(html.includes('data-i18n="courses_title">Предметы</h1>'), 'Study screen fallback title is not aligned');
 
 for (const contract of [
   'data-main-filter="competitive"',
@@ -132,13 +132,13 @@ async function activateStudy(page) {
       innerWidth: innerWidth
     };
   });
-  assert(state.compRadius === '12px', `Home competitive card radius drift: ${state.compRadius}`);
+  assert(state.compRadius === '20px', `Home competitive card radius drift: ${state.compRadius}`);
   assert(state.compShadow !== 'none', 'Home competitive card premium surface missing');
-  assert(state.heroHeight <= 82 && state.heroHeight >= 68, `Home subject visual is too dominant or too small: ${state.heroHeight}`);
-  assert(state.ctaHeight >= 40, `Home primary action target too small: ${state.ctaHeight}`);
-  assert(state.tileRadius === '12px', `Pinned tile radius drift: ${state.tileRadius}`);
-  assert(state.tileDisplay === 'grid', `Pinned tile must use compact premium grid layout: ${state.tileDisplay}`);
-  assert(state.iconWidth >= 17 && state.iconWidth <= 20, `Pinned line icon size drift: ${state.iconWidth}`);
+  assert(state.heroHeight === 0, `Decorative Home subject icon must be visually absent: ${state.heroHeight}`);
+  assert(state.ctaHeight >= 44, `Home primary action target too small: ${state.ctaHeight}`);
+  assert(state.tileRadius === '18px', `Pinned tile radius drift: ${state.tileRadius}`);
+  assert(state.tileDisplay === 'flex', `Pinned tile must use swipe-card flex layout: ${state.tileDisplay}`);
+  assert(state.iconWidth === 0, `Pinned subject icon must be visually hidden: ${state.iconWidth}`);
   assert(state.width <= state.innerWidth, `Home mobile overflow: ${JSON.stringify(state)}`);
 
   await activateStudy(page);
@@ -150,7 +150,7 @@ async function activateStudy(page) {
     const toggle = card.querySelector('.catalog-toggle-row');
     return {
       filterColumns: getComputedStyle(filters).gridTemplateColumns.split(' ').length,
-      filterRadius: getComputedStyle(document.getElementById('courses-filter-row')).borderRadius,
+      filterRadius: getComputedStyle(filters).borderRadius,
       activeChipBg: getComputedStyle(activeChip).backgroundColor,
       cardRadius: getComputedStyle(card).borderRadius,
       cardShadow: getComputedStyle(card).boxShadow,
@@ -161,9 +161,9 @@ async function activateStudy(page) {
     };
   });
   assert(state.filterColumns === 2, `Study mode switch must be a two-column segmented control: ${state.filterColumns}`);
-  assert(state.filterRadius === '12px', `Study mode switch radius drift: ${state.filterRadius}`);
+  assert(state.filterRadius === '15px', `Study mode switch radius drift: ${state.filterRadius}`);
   assert(state.activeChipBg !== 'rgba(0, 0, 0, 0)', 'Active Study mode chip needs a visible selected surface');
-  assert(state.cardRadius === '12px', `Study subject card radius drift: ${state.cardRadius}`);
+  assert(state.cardRadius === '18px', `Study subject card radius drift: ${state.cardRadius}`);
   assert(state.cardShadow !== 'none', 'Study subject card premium surface missing');
   assert(state.headMinHeight >= 50, `Study subject open target too small: ${state.headMinHeight}`);
   assert(state.toggleHeight >= 46, `Study subject state row too small: ${state.toggleHeight}`);
