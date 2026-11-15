@@ -6,6 +6,14 @@
     {id:'home-study-list',child:'.home-pinned-tile'}
   ];
   const activeObservers=[];
+  const copy=()=>{
+    const lang=(document.documentElement.lang||'ru').toLowerCase();
+    return lang.startsWith('uz')
+      ? {competitive:'Musobaqa fanlari',pinned:'Biriktirilgan fanlar',item:'Fan',current:'Joriy fan'}
+      : lang.startsWith('en')
+        ? {competitive:'Competitive subjects',pinned:'Pinned subjects',item:'Subject',current:'Current subject'}
+        : {competitive:'Соревновательные предметы',pinned:'Закреплённые предметы',item:'Предмет',current:'Текущий предмет'};
+  };
   function mountRail({id,child}){
     const root=document.getElementById(id);if(!root)return;
     let pagination=root.nextElementSibling;
@@ -13,7 +21,7 @@
       pagination=document.createElement('div');
       pagination.className='academy-rail-pagination';
       pagination.setAttribute('role','group');
-      pagination.setAttribute('aria-label',id==='home-study-list'?'Закреплённые предметы':'Соревновательные предметы');
+      pagination.setAttribute('aria-label',id==='home-study-list'?copy().pinned:copy().competitive);
       root.after(pagination);
     }
     let buttons=[],cards=[];
@@ -27,7 +35,7 @@
       }
       buttons.forEach((b,i)=>{
         b.setAttribute('aria-current',i===nearest?'true':'false');
-        b.setAttribute('aria-label',(i===nearest?'Текущий предмет, ':'Предмет ')+(i+1)+' из '+cards.length);
+        b.setAttribute('aria-label',(i===nearest?copy().current+', ':copy().item+' ')+(i+1)+' / '+cards.length);
       });
     }
     function rebuild(){
@@ -39,7 +47,7 @@
       if(!many){root.scrollLeft=0;return;}
       cards.forEach((card,i)=>{
         const dot=document.createElement('button');dot.type='button';
-        dot.className='academy-rail-dot';dot.setAttribute('aria-label','Предмет '+(i+1)+' из '+cards.length);
+        dot.className='academy-rail-dot';dot.setAttribute('aria-label',copy().item+' '+(i+1)+' / '+cards.length);
         dot.addEventListener('click',()=>root.scrollTo({
           left:card.offsetLeft-cards[0].offsetLeft,
           behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'
@@ -85,8 +93,11 @@
         show(tabs[n].dataset.academyPane,true);
       });
     });
+    let observedSubject=hub.dataset.subjectKey||'';
     const identityObserver=new MutationObserver(mutations=>{
-      if(mutations.some(m=>m.attributeName==='data-subject-key'))show('preparation');
+      if(!mutations.some(m=>m.attributeName==='data-subject-key'))return;
+      const next=hub.dataset.subjectKey||'';
+      if(next!==observedSubject){observedSubject=next;show('preparation');}
     });
     identityObserver.observe(hub,{attributes:true,attributeFilter:['data-subject-key']});
     activeObservers.push(identityObserver);
