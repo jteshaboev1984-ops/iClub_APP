@@ -55,8 +55,12 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Test real registration DOM without loading Supabase/production modules
         run: node qa/registration-b00-browser.cjs
-      - name: Real app.js / i18n.js registration flow (fully mocked, no external network)
-        run: node qa/registration-b00-real-app-mocked-e2e.cjs
+      # B00 layout remains byte-identical to its accepted source. The archived
+      # behavioural test asserts an obsolete non-school zero-subject rule.
+      # Run the superseding current-source integration instead; it checks
+      # both school and non-school registrations without external network.
+      - name: Real app.js / i18n.js registration flow (updated Study minimum, mocked)
+        run: node qa/ux531-registered-navigation-e2e.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

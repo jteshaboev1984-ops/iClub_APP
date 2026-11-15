@@ -55,9 +55,11 @@ jobs:
         run: |
           node qa/ux531-registration-combination.cjs
           node qa/registration-b00-browser.cjs
-      - name: Accepted registration runtime mock with current main DOM
-        shell: bash
-        run: node qa/registration-b00-real-app-mocked-e2e.cjs
+      # The archived B00 runtime test expects non-school subjects=0.
+      # The architect's newer requirement explicitly supersedes this ONE
+      # behavioural assertion, but the approved B00 visual files/test
+      # remain SHA-pinned and intact. The current-source UX integration
+      # below covers school + non-school, including the new Study minimum.
       - name: Registered learner Home / Subjects / Subject Hub integration
         shell: bash
         run: node qa/ux531-registered-navigation-e2e.cjs

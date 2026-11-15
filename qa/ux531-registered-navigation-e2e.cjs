@@ -338,6 +338,23 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     } else {
       await page.locator("#reg-submit").click();
       await page.locator("#view-home.is-active").waitFor({ timeout: 16000 });
+      // Visually verify the real Academy OS CSS, not a mock style screenshot.
+      if (nonschool) {
+        await page.locator("#home-study-list > .home-pinned-tile").first().waitFor();
+        const study = await page.locator("#home-study-list > .home-pinned-tile").first().evaluate(el =>
+          getComputedStyle(el).backgroundImage);
+        assert.match(study,/linear-gradient/,"Pinned Study tiles must restore sapphire tint");
+        assert.match(study,/rgb\(217, 234, 255\)/,
+          "Pinned Study tile must not use previous near-white background");
+        assert.equal(await page.locator("#home-competitive-list .home-competitive-card").count(),0,
+          "Non-school cannot inherit Competitive cards");
+      } else {
+        await page.locator("#home-competitive-list .home-competitive-card").first().waitFor();
+        const comp = await page.locator("#home-competitive-list .home-competitive-card").first().evaluate(el =>
+          getComputedStyle(el).backgroundImage);
+        assert.match(comp,/rgb\(23, 74, 171\)/,
+          "Approved v5.8 blue Competitive card must override legacy white CSS");
+      }
       const writes = await page.evaluate(() => window.__B00_FAKE.writes);
       const userRows = writes.filter(w => w.table === "users" && w.action === "upsert");
       const subjectsRows = writes.filter(w => w.table === "user_subjects" && w.action === "upsert");
