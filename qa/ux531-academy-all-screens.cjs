@@ -1,0 +1,140 @@
+/* UX531 Academy OS B04-B08, real index.html and CSS, offline Chromium. */
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
+const {chromium}=require('playwright');
+const root=path.resolve(__dirname,'..');
+const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const css=fs.readFileSync(path.join(root,'visual/iclub-academy-ux531-b04b08.css'),'utf8');
+const i18n=fs.readFileSync(path.join(root,'i18n.js'),'utf8');
+const globalViews=['splash','registration','home','courses','ratings','profile','notifications',
+ 'community','about','support','support-topic','certificates','certificate-verify','archive'];
+const stackScreens=['all-subjects','subject-hub','lessons','video','practice-start','practice-quiz',
+ 'practice-result','practice-review','practice-recs','tours','tour-rules','tour-quiz','tour-result',
+ 'tour-review','books','my-recs','my-rec-topic-history','my-rec-topic-review','my-rec-detail'];
+const protectedIds=['practice-pause-btn','practice-submit-btn','practice-question',
+ 'tour-rules-accept','tour-warn-btn','tour-overall-time','tour-question-time','tour-next-btn',
+ 'ratings-subject','ratings-tour','ratings-search','ratings-mybar',
+ 'profile-settings-content-language','profile-competitive-slots-list',
+ 'support-submit','certificates-list','certificate-verify-result','exam-prep-host-root'];
+const actions=['practice-pause','practice-submit','practice-review','practice-recommendations',
+ 'tour-start','tour-next','tour-review','tour-certificate','open-ratings',
+ 'my-rec-train','my-rec-retry','my-rec-delete','support-submit'];
+for(const id of [...globalViews.map(x=>'view-'+x),...stackScreens.map(x=>'courses-'+x),...protectedIds]){
+ assert.equal((source.match(new RegExp('id="'+id+'"','g'))||[]).length,1,'missing or duplicate source ID '+id);
+}
+for(const action of actions)assert(source.includes('data-action="'+action+'"'),'source action lost: '+action);
+assert.equal([...source.matchAll(/<section\b[^>]*>/g)].length,35,'source screen structure changed');
+assert(source.includes('visual/iclub-academy-ux531-b04b08.css'),'new visual layer not linked');
+for(const k of ['academy_profile_subtitle','academy_continue_title']){
+ assert.equal((i18n.match(new RegExp('\\b'+k+':','g'))||[]).length,3,'missing RU/UZ/EN key '+k);
+}
+for(const key of ['B04 — Learning','B05 — Tours','B06 — Profile','B07 — existing Exam Prep','B08 — shared controls'])
+ assert(css.includes(key),'missing design family '+key);
+assert.doesNotMatch(css,/localStorage|supabase\.|fetch\(|\.rpc\(/,'CSS must be side effect-free');
+const fixture=source.replace(/<script\b[\s\S]*?<\/script>/gi,'').replace('class="i18n-pending"','');
+const types={'.html':'text/html','.css':'text/css','.js':'text/javascript','.png':'image/png',
+ '.svg':'image/svg+xml','.woff2':'font/woff2','.jpg':'image/jpeg'};
+const server=http.createServer((req,res)=>{
+ const raw=decodeURIComponent((req.url||'/').split('?')[0]);
+ if(raw==='/fixture'){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});res.end(fixture);return;}
+ const file=path.resolve(root,'.'+raw);
+ if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile()){
+  res.writeHead(404);res.end('not found');return;
+ }
+ res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream'});
+ res.end(fs.readFileSync(file));
+});
+(async()=>{
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const report=[];
+ try{
+  for(const width of [320,375,390,430,768,1440]){
+   const page=await browser.newPage({viewport:{width,height:width<500?844:900}});
+   const errors=[];page.on('pageerror',e=>errors.push(e.message));
+   await page.route(/^https?:\/\/(?!127\.0\.0\.1)/,route=>route.abort());
+   await page.goto('http://127.0.0.1:'+server.address().port+'/fixture',{waitUntil:'load'});
+   await page.evaluate(()=>{
+    window.__ux531Show=(state)=>{
+     document.querySelectorAll('.view').forEach(el=>{
+      const active=el.id==='view-'+state.view;
+      el.classList.toggle('is-active',active);el.hidden=!active;
+     });
+     document.querySelectorAll('#courses-stack > .stack-screen').forEach(el=>{
+      const active=state.view==='courses'&&el.id==='courses-'+state.part;
+      el.classList.toggle('is-active',active);el.hidden=!active;
+      el.setAttribute('aria-hidden',String(!active));
+     });
+     document.querySelectorAll('#view-profile .profile-screen').forEach(el=>{
+      const active=el.id==='profile-main';el.classList.toggle('is-active',active);el.hidden=!active;
+     });
+     const bar=document.getElementById('topbar');
+     bar.style.display=['splash','registration'].includes(state.view)?'none':'grid';
+     document.getElementById('tabbar').style.display=
+       ['home','courses','ratings','profile'].includes(state.view)?'grid':'none';
+    };
+   });
+   const states=[
+    ...globalViews.filter(v=>!['splash','registration','courses'].includes(v)).map(view=>({view})),
+    ...stackScreens.map(part=>({view:'courses',part}))
+   ];
+   for(const state of states){
+    await page.evaluate(state=>window.__ux531Show(state),state);
+    const m=await page.evaluate(state=>{
+     const el=document.getElementById(state.view==='courses'?'courses-'+state.part:'view-'+state.view);
+     const style=getComputedStyle(el),bounds=el.getBoundingClientRect();
+     const sheet=[...document.styleSheets].find(s=>(s.href||'').includes('iclub-academy-ux531-b04b08.css'));
+     let rules=0;try{rules=sheet?.cssRules?.length||0}catch{}
+     return{id:el.id,display:style.display,width:bounds.width,
+      documentWidth:document.documentElement.scrollWidth,viewport:innerWidth,rules};
+    },state);
+    assert(m.display!=='none'&&m.width>0,'screen invisible '+JSON.stringify({width,m}));
+    assert(m.rules>=50,'Academy CSS failed to load/parse '+JSON.stringify({width,m}));
+    assert(m.documentWidth<=m.viewport+2,'root horizontal overflow '+JSON.stringify({width,m}));
+    if(width===390&&['view-ratings','view-profile','view-notifications','view-support',
+      'view-certificates','courses-practice-start','courses-practice-quiz',
+      'courses-practice-result','courses-tours','courses-tour-quiz',
+      'courses-tour-result','courses-books','courses-subject-hub'].includes(m.id)){
+     const folder=path.join(root,'ux531-academy-all-screens');
+     fs.mkdirSync(folder,{recursive:true});
+     await page.screenshot({path:path.join(folder,m.id+'.png'),fullPage:false});
+    }
+   }
+   await page.evaluate(()=>window.__ux531Show({view:'profile'}));
+   const profile=await page.evaluate(()=>{
+    const h=document.querySelector('#view-profile .academy-profile-zone');
+    return {height:h.getBoundingClientRect().height,
+     gradient:getComputedStyle(h).backgroundImage,
+     text:h.querySelector('h1')?.textContent?.trim()};
+   });
+   assert(profile.height>=156&&profile.gradient.includes('linear-gradient'),
+     'Profile blue zone mismatch '+JSON.stringify({width,profile}));
+   assert.equal(profile.text,'Профиль');
+   await page.evaluate(()=>window.__ux531Show({view:'ratings'}));
+   const rating=await page.evaluate(()=>{
+    const h=document.querySelector('#view-ratings .lb-header');
+    return {height:h.getBoundingClientRect().height,
+      actions:[...h.querySelectorAll('button')].map(b=>({
+       width:b.getBoundingClientRect().width,height:b.getBoundingClientRect().height
+      }))};
+   });
+   assert(rating.height>=156,'Ratings blue zone mismatch '+JSON.stringify({width,rating}));
+   assert(rating.actions.every(x=>x.width>=38&&x.height>=38),
+     'Ratings back/search/info inaccessible '+JSON.stringify({width,rating}));
+   assert.equal(errors.length,0,'Unexpected browser exceptions '+JSON.stringify({width,errors}));
+   report.push({width,statesChecked:states.length,profileZone:profile.height,
+     ratingsZone:rating.height,failures:0});
+   console.log('PASS UX531 '+width+'px: '+states.length+' source-screen visual states; no overflow.');
+   await page.close();
+  }
+  const output=path.join(root,'ux531-academy-all-screens');
+  fs.mkdirSync(output,{recursive:true});
+  fs.writeFileSync(path.join(output,'qa-summary.json'),JSON.stringify({
+   totalGlobalViews:globalViews.length,totalCoursesScreens:stackScreens.length,
+   report,note:'DOM/CSS structural fixture; authenticated Work staging still required'
+  },null,2));
+ }finally{
+  await browser.close();
+  await new Promise(resolve=>server.close(resolve));
+ }
+})().catch(e=>{console.error('UX531 all-screen regression failed:',e.stack||e);process.exitCode=1;});
