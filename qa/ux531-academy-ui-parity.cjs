@@ -31,7 +31,7 @@ for(const key of ['preparation','materials','achievements']){
 }
 assert.equal((html.match(/class="academy-view-zone"/g)||[]).length,2,'Home/Subjects intros');
 assert.match(html,/<div class="subject-hub-head">/,'original hub heading');
-assert.match(css,/--academy-header-body:128px/,'shared header height');
+assert.match(css,/--academy-header-body:156px/,'shared header height');
 for(const s of ['#home-competitive-list','#home-study-list'])
  assert.match(css,new RegExp(s),'rail source selector '+s);
 assert.match(interactions,/MutationObserver/,'live render support required');
