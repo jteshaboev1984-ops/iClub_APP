@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="visual/iclub-premium-v3.css?v=premium1-loadingpolish5-trio1" />
   <!-- UX531 B01 draft: learner topbar visual layer only -->
   <link rel="stylesheet" href="visual/iclub-academy-v55-shell-b01.css?v=ux531-academy-v55-b01-1" />
+  <link rel="stylesheet" href="visual/iclub-academy-ux531-b02b03.css?v=ux531-b02b03-1" />
   <link rel="stylesheet" href="practice-topic-choice.css?v=ptopic2" />
   <link rel="stylesheet" href="exam-prep/exam-prep-host.css?v=math-s3-weekly-20261109" />
   <link rel="stylesheet" href="exam-prep/exam-prep-economics-native.css?v=econ-plan-compact-back-20261028" />
@@ -224,6 +225,11 @@
       <!-- ============ Home (Tab) ============ -->
       <section id="view-home" class="view" data-view="home" aria-label="Home">
         <div class="content">
+          <div class="academy-view-zone" aria-labelledby="academy-home-title">
+            <div class="academy-view-kicker">iClub</div>
+            <h1 id="academy-home-title" data-i18n="tab_home">Главная</h1>
+            <p data-i18n="academy_home_subtitle">Ваши предметы и результаты</p>
+          </div>
           <div class="home-block">
             <div class="home-block-head">
               <div class="home-block-title" data-i18n="home_competitive_mode">Competitive Mode</div>
@@ -335,8 +341,12 @@
     <div id="courses-stack">
 
       <section id="courses-all-subjects" class="stack-screen is-active" data-stack="courses" data-screen="all-subjects">
+  <div class="academy-view-zone" aria-labelledby="academy-subjects-title">
+    <div class="academy-view-kicker">iClub</div>
+    <h1 id="academy-subjects-title" data-i18n="courses_title">Предметы</h1>
+    <p data-i18n="academy_subjects_subtitle">Подключайте предметы и открывайте их материалы</p>
+  </div>
   <div class="section">
-    <div class="section-title" data-i18n="courses_title">Study</div>
 
     <!-- ✅ chips go here (rendered by app.js) -->
     <div id="courses-filter-row" class="courses-filter-row"></div>
@@ -356,19 +366,12 @@
   </div>
 </div>
 
-<div class="subject-hub-panels">
-  <button id="subject-hub-mentor-btn" class="panel-card subject-hub-panel subject-hub-mentor-btn" type="button" data-action="open-subject-mentor">
-    <div class="panel-row">
-      <div id="subject-hub-mentor-avatar" class="mentor-avatar" aria-hidden="true"></div>
-      <div class="panel-col">
-        <div class="panel-kicker" data-i18n="mentor_kicker">SUBJECT MENTOR</div>
-        <div id="subject-hub-mentor-title" class="panel-title" data-i18n="mentor_assigning">Ментор назначается</div>
-        <div id="subject-hub-mentor-sub" class="muted small" data-i18n="mentor_profile_soon">Скоро появится профиль</div>
-      </div>
-    </div>
-  </button>
+<div class="academy-hub-tabs" role="tablist" aria-label="Разделы предмета">
+  <button type="button" class="academy-hub-tab" role="tab" id="academy-hub-tab-preparation" data-academy-pane="preparation" aria-controls="academy-hub-pane-preparation" aria-selected="true" tabindex="0" data-i18n="academy_hub_prepare">Подготовка</button>
+  <button type="button" class="academy-hub-tab" role="tab" id="academy-hub-tab-materials" data-academy-pane="materials" aria-controls="academy-hub-pane-materials" aria-selected="false" tabindex="-1" data-i18n="academy_hub_materials">Материалы</button>
+  <button type="button" class="academy-hub-tab" role="tab" id="academy-hub-tab-achievements" data-academy-pane="achievements" aria-controls="academy-hub-pane-achievements" aria-selected="false" tabindex="-1" data-i18n="academy_hub_achievements">Достижения</button>
 </div>
-
+<div id="academy-hub-pane-preparation" class="academy-hub-pane" role="tabpanel" aria-labelledby="academy-hub-tab-preparation" data-academy-pane="preparation" >
 <div class="subject-hub-primary-modes" aria-label="Preparation">
   <div class="subject-hub-primary-label" data-i18n="hub_preparation_section">Подготовка</div>
 
@@ -432,7 +435,24 @@
   </button>
 </div>
 
+
+</div>
 <div id="exam-prep-host-root" class="exam-prep-host-root" hidden aria-hidden="true"></div>
+
+
+<div id="academy-hub-pane-materials" class="academy-hub-pane" role="tabpanel" aria-labelledby="academy-hub-tab-materials" data-academy-pane="materials" hidden>
+<div class="subject-hub-panels">
+  <button id="subject-hub-mentor-btn" class="panel-card subject-hub-panel subject-hub-mentor-btn" type="button" data-action="open-subject-mentor">
+    <div class="panel-row">
+      <div id="subject-hub-mentor-avatar" class="mentor-avatar" aria-hidden="true"></div>
+      <div class="panel-col">
+        <div class="panel-kicker" data-i18n="mentor_kicker">SUBJECT MENTOR</div>
+        <div id="subject-hub-mentor-title" class="panel-title" data-i18n="mentor_assigning">Ментор назначается</div>
+        <div id="subject-hub-mentor-sub" class="muted small" data-i18n="mentor_profile_soon">Скоро появится профиль</div>
+      </div>
+    </div>
+  </button>
+</div>
 
 <div class="section subject-hub-materials-section">
   <div class="h2" data-i18n="hub_materials_section">Материалы</div>
@@ -468,7 +488,10 @@
   </button>
 </div>
 
-  <div class="section subject-hub-system-section" style="margin-top:14px">
+  
+</div>
+<div id="academy-hub-pane-achievements" class="academy-hub-pane" role="tabpanel" aria-labelledby="academy-hub-tab-achievements" data-academy-pane="achievements" hidden>
+<div class="section subject-hub-system-section" style="margin-top:14px">
     <div class="h2" data-i18n="hub_system_section">Системные</div>
   </div>
 
@@ -492,6 +515,8 @@
   </button>
 </div>
 
+
+</div>
 <div class="subject-hub-list subject-hub-bottom">
   <button class="settings-nav" type="button" data-action="open-all-subjects">
     <span class="settings-nav-ico"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-5 2 2-5z"/></svg></span>
@@ -1637,5 +1662,7 @@
   </div>
 
   <script src="practice-results-tabs.js?v=stage03tabs2-premium2-stitch-qa-polish-20261015-tourrecv1"></script>
+  <!-- UI-only rail/pane enhancements; core app.js keeps routing and ownership -->
+  <script src="visual/iclub-academy-ux531-interactions.js?v=ux531-b02b03-1"></script>
 </body>
 </html>
