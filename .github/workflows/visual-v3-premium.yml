@@ -46,7 +46,7 @@ permissions:
 
 jobs:
   premium-screens:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -92,9 +92,9 @@ jobs:
           grep -q 'class="subject-hub-primary-modes"' index.html
           grep -q 'class="v3-home-pinned-icon"' app.js
           ! grep -Fq '<div class="home-pinned-ico">📘</div>' app.js
-          grep -q 'courses_title: "Учёба"' i18n.js
-          grep -q 'courses_title: "O‘qish"' i18n.js
-          grep -q 'courses_title: "Study"' i18n.js
+          grep -q 'courses_title: "Предметы"' i18n.js
+          grep -q 'courses_title: "Fanlar"' i18n.js
+          grep -q 'courses_title: "Subjects"' i18n.js
           test "$(sed -n '/<section id="courses-subject-hub"/,/<\/section>/p' index.html | grep -c 'data-action="open-lessons"')" -eq 1
 
       - name: Install browser runtime
