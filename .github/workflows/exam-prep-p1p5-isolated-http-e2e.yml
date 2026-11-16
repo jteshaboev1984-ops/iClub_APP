@@ -7,6 +7,10 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
+      - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
+      - 'scripts/p1p5-s3-signed-virtual-periods.cjs'
+      - 'scripts/p1p5-s3-chromium-mobile-three-language.cjs'
+      - 'supabase/tests/p1p5_s3_virtual_clock_periods.sql'
       - 'scripts/p1p5-isolated-http-correction-faults.cjs'
       - 'scripts/p1p5-isolated-http-browser-resume.cjs'
       - 'scripts/p1p5-isolated-http-postdue-retest.cjs'
@@ -33,7 +37,7 @@ permissions:
 jobs:
   real-http-auth:
     name: actual Math UI JWT PostgREST PG17
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
@@ -512,4 +516,31 @@ jobs:
           npx playwright install --with-deps chromium
           node scripts/p1p5-isolated-http-auth-e2e.cjs
           echo 'D03: signed P1/P5 host Chromium and no-selfmark old-client deny PASS'
+      - name: S2 signed exam-centre dates and 81 unreviewed workload source
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s2-signed-calendar-81-source.cjs
+          node scripts/p1p5-s2-signed-calendar-81-source.cjs
+      - name: S3 signed owner weekly choices and real 7-day/month reports (no learner write)
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+          node scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs
+      - name: S3 real signed Chromium UI phone RU UZ and desktop EN
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s3-chromium-mobile-three-language.cjs
+          node scripts/p1p5-s3-chromium-mobile-three-language.cjs
+      - name: S3 real completed periods using a guarded disposable-only clock
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -v candidate_sha="$CANDIDATE_SHA" \
+            -f supabase/tests/p1p5_s3_virtual_clock_periods.sql
+          node --check scripts/p1p5-s3-signed-virtual-periods.cjs
+          node scripts/p1p5-s3-signed-virtual-periods.cjs
 

@@ -1,4 +1,4 @@
-# iClub — paste into ChatGPT Project instructions AT CUTOVER
+# iClub — ChatGPT Project settings text (owner installation required)
 
 This is a configuration template, not a live automatic setting. The user must paste the text below into the **iClub ChatGPT Project → Project instructions** after stopping old chat requests and activating the approved GitHub documentation PR.
 

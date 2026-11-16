@@ -39,7 +39,7 @@
   async function loadControlledProgressUx() {
     if (window.iClubExamPrepProgressUxEnabled === false) return false;
     const caps = root.lastCapabilities;
-    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || caps.rolloutState !== "controlled_beta") return false;
+    if (!caps || caps.coreAccess !== true || caps.killSwitch !== false || caps.rolloutState === "off") return false;
     if (!/^https?:/i.test(API_SCRIPT_SRC) || !/exam-prep-api\.js(?:\?|$)/.test(API_SCRIPT_SRC)) return false;
 
     window.iClubExamPrepProgressUxEnabled = true;
@@ -108,7 +108,7 @@
         killSwitch: row.kill_switch !== false
       });
 
-      if (data.coreAccess === true && data.killSwitch === false && data.rolloutState === "controlled_beta") {
+      if (data.coreAccess === true && data.killSwitch === false && data.rolloutState !== "off") {
         const weekly = await rpc("get_my_exam_prep_weekly_flow_status_v1");
         const weeklyRow = weekly.ok
           ? (Array.isArray(weekly.data) ? weekly.data[0] : weekly.data)
@@ -160,6 +160,51 @@
   }
 
   async function examMapStatus() { return rpc("get_exam_prep_exam_map_status_safe_v1"); }
+
+  async function personalHorizon() {
+    return rpc("get_exam_prep_personal_horizon_safe_v1");
+  }
+
+  async function studySchedule() {
+    return rpc("get_exam_prep_study_schedule_safe_v1");
+  }
+
+  async function saveStudySchedule(minutesPerDay, daysPerWeek) {
+    return rpc("save_exam_prep_study_schedule_safe_v1", {
+      p_minutes_per_day: Number(minutesPerDay),
+      p_days_per_week: Number(daysPerWeek)
+    });
+  }
+
+  async function weeklyChoiceS3() {
+    return rpc("get_my_exam_prep_weekly_choice_s3_safe_v1");
+  }
+  async function saveWeeklyChoiceS3(input, idempotencyKey) {
+    return rpc("save_my_exam_prep_weekly_choice_s3_safe_v1", {
+      p_choice_code: String(input.choice || ""),
+      p_p1_minutes: input.p1Minutes == null ? null : Number(input.p1Minutes),
+      p_p5_minutes: input.p5Minutes == null ? null : Number(input.p5Minutes),
+      p_minutes_per_day: input.minutesPerDay == null ? null : Number(input.minutesPerDay),
+      p_days_per_week: input.daysPerWeek == null ? null : Number(input.daysPerWeek),
+      p_expected_schedule_revision: Number(input.scheduleRevision),
+      p_idempotency_key: String(idempotencyKey)
+    });
+  }
+  async function claimPeriodReportsS3() {
+    return rpc("claim_exam_prep_periodic_study_report_safe_v1");
+  }
+  async function periodReportsS3() {
+    return rpc("get_exam_prep_periodic_study_reports_safe_v1");
+  }
+
+  async function confirmExamDate(componentCode, scheduledStartAt) {
+    return rpc("save_my_exam_prep_exam_appointment_v2", {
+      p_component_code: componentArg(componentCode),
+      p_scheduled_start_at: String(scheduledStartAt || ""),
+      p_school_confirmed: true
+    });
+  }
+
 
   const componentArg = componentCode => String(componentCode || "");
 
@@ -343,6 +388,39 @@
       p_attempt_id:attemptId,p_language:language
     });
   }
+  // S4 HYBRID Paper: server-disabled by default, no handwritten upload or student grading.
+  async function hybridS4Catalog(componentCode) {
+    return rpc("get_exam_prep_hybrid_s4_papers_safe_v1",{p_component_code:componentArg(componentCode)});
+  }
+  async function hybridS4History(componentCode) {
+    return rpc("get_exam_prep_hybrid_s4_history_safe_v1",{p_component_code:componentArg(componentCode)});
+  }
+  async function hybridS4StageStatus(componentCode) {
+    return rpc("get_exam_prep_hybrid_s4_stage_status_safe_v1",{p_component_code:componentArg(componentCode)});
+  }
+  async function hybridS4Start(assessmentId,token) {
+    return rpc("start_exam_prep_hybrid_s4_paper_safe_v1",
+      {p_assessment_id:Number(assessmentId),p_idempotency_key:String(token||"")});
+  }
+  async function hybridS4Session(sessionId,language="en") {
+    return rpc("get_exam_prep_hybrid_s4_session_safe_v1",{p_session_id:sessionId,p_language:language});
+  }
+  async function hybridS4Finish(sessionId,reason,token) {
+    return rpc("finish_exam_prep_hybrid_s4_paper_safe_v1",
+      {p_session_id:sessionId,p_reason:String(reason||"finish"),p_idempotency_key:String(token||"")});
+  }
+  async function hybridS4Check(sessionId,itemOrder,partLabel,answer,token) {
+    return rpc("check_exam_prep_hybrid_s4_final_safe_v1",{
+      p_session_id:sessionId,p_item_order:Number(itemOrder),
+      p_part_label:String(partLabel||""),p_answer:String(answer||""),
+      p_idempotency_key:String(token||"")
+    });
+  }
+  async function hybridS4Reveal(sessionId,language="en") {
+    return rpc("reveal_exam_prep_hybrid_s4_review_safe_v1",
+      {p_session_id:sessionId,p_language:language});
+  }
+
   async function readiness(componentCode) { return rpc("get_exam_prep_readiness_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function readinessSummary(componentCode) { return rpc("get_exam_prep_readiness_summary_safe_v1", { p_component_code: componentArg(componentCode) }); }
   async function examOps(componentCode) { return rpc("get_exam_prep_exam_ops_safe_v1", { p_component_code: componentArg(componentCode) }); }
@@ -364,6 +442,8 @@
   root.api = Object.freeze({
     capabilities,
     examProfile, saveExamProfile, examMapStatus,
+    personalHorizon, studySchedule, saveStudySchedule, confirmExamDate,
+    weeklyChoiceS3, saveWeeklyChoiceS3, claimPeriodReportsS3, periodReportsS3,
     diagnosticProgress, startNextDiagnostic, getPlacement, getState, overview,
     legacyReferenceSummary, placementResult, stage0Workflow, syllabusTracker, stage3Closure, skillDetail, correctionQueue, pastPaperCompanion, materialsLibrary,
     getSession, startSession, submitResponse, finalizeSession, sessionReview, recentResults,
@@ -374,6 +454,8 @@
     activePlanSession, weeklyPlan, generateWeeklyPlan, authorizePlanItem,
     timedCatalog, stage4Consolidation, authorizeTimed, finalizeTimed, timedResult, timedReviewPack,
     extraHardCatalog, extraHardStart, extraHardSubmit, extraHardAttempt,
+    hybridS4Catalog, hybridS4History, hybridS4StageStatus, hybridS4Start,
+    hybridS4Session, hybridS4Finish, hybridS4Check, hybridS4Reveal,
     readiness, readinessSummary, examOps, saveExamAppointment, setExamOpsConfirmation, finalCalibration
   });
 
@@ -388,7 +470,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-extrahard-v43-d03-noselfmark-20261109");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-extrahard-v43-d03-noselfmark-20261109-s3-weekly-report-choice");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");

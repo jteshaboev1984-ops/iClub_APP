@@ -26,4 +26,4 @@ Do not interpret this table as a command to run every stream. On START MATH, sho
 
 ## Concurrency
 
-Until owner-led cutover, existing chats continue independently. This documentation branch changes no active task. At activation, re-check current repo state, use one responsible working chat per subject, and place cross-cutting review in an audit chat. Use separate protected-isolation PRs for unrelated streams; do not force-merge older draft stacks into main.
+Owner authorized cutover 2026-11-16. Stop using old chats as concurrent writers; re-check current repo state on first new-chat START or direct request. Use one responsible working chat per subject and a separate audit chat. Keep unrelated streams in isolated PRs; do not force-merge historical draft stacks.

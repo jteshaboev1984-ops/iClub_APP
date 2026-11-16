@@ -21,6 +21,6 @@ Project: iClub_APP (Telegram WebApp / web, Supabase and Vercel). These instructi
 
 ## Transition / activation
 
-These documents are a proposed future chat workflow. Until the architect stops the current chats and activates the new ChatGPT Project instructions, existing active work continues unchanged. Documentation-only staging is not a product release.
+The architect authorized cutover on 2026-11-16. These GitHub-side instructions are ready for new chats once the owner installs docs/ops/PROJECT_INSTRUCTIONS.md into iClub ChatGPT Project settings. Previous chats are historical and must not be resumed as concurrent writers. A documentation-only merge is not a product release.
 
 See docs/ops/PROJECT_INSTRUCTIONS.md for the ready-to-paste ChatGPT Project instructions; adding a file to GitHub alone does not configure a ChatGPT chat.

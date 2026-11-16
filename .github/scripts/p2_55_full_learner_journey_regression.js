@@ -21,7 +21,6 @@ const path = require('path');
     window.__profile = null;
     window.__plan = null;
     window.__session = null;
-    window.__selfMarks = {};
     window.__timedSessionId = '00000000-0000-4000-8000-000000055501';
     window.__caps = { program_key:'math_as_p1_p5',rollout_state:'controlled_beta',core_access:true,ai_assist:false,mentor_care_entitled:false,mentor_assignment_active:false,mentor_authority:false,kill_switch:false };
     window.__progress = {
@@ -33,7 +32,7 @@ const path = require('path');
       P5:{engine_version:'objective_state_v1',components:[{component_code:'P5',operational_stage:0,coverage_pct:0,levels:{L0:36,L1:0,L2:0,L3:0}}],skills:[]}
     };
     window.__p5Before = JSON.stringify({progress:window.__progress.P5,state:window.__state.P5});
-    window.__timedResult = {session_id:window.__timedSessionId,component_code:'P1',attempt_kind:'full_paper',marks_available:10,marks_in_time:0,marks_after_time:0,unattempted_marks:0,score_comparable:false,score_status:'pending_self_review'};
+    window.__timedResult = {session_id:window.__timedSessionId,component_code:'P1',attempt_kind:'full_paper',marks_available:10,marks_in_time:0,marks_after_time:0,unattempted_marks:0,result_scope:'objective_only',written_correctness:'unknown',score_comparable:false,score_status:'not_comparable'};
     window.__capture = () => {
       const text = String(document.querySelector('#exam-prep-host-root')?.textContent || '');
       window.__seenLearnerText.push(text);
@@ -47,8 +46,8 @@ const path = require('path');
     };
     const makePlan = () => ({plan_id:'00000000-0000-4000-8000-000000055401',component_code:'P1',active_week_no:1,plan_version:1,recovery_mode:'normal',items:[{priority_order:1,item_type:'learning',skill_code:'P1-INTERNAL-JOURNEY-SKILL',correction_case_id:null,due_at:null,action_code:'BUILD_FIRST_COVERAGE',action_payload:{},status:'pending'}]});
     const reviewItems = () => [
-      {item_order:1,primary_skill_code:'P1-INTERNAL-PAPER-1',prompt:'Solve x + 2 = 6.',learner_artifact:{text:'x = 4'},max_marks:4,rubric:{max_marks:4,criteria:[{marks:1,rule:'Rearranges correctly.'},{marks:3,rule:'Gets and checks x = 4.'}]},self_review:'Check the rearrangement and final value.',submitted_in_time:true,self_marked:Object.prototype.hasOwnProperty.call(window.__selfMarks,1),self_marks_awarded:window.__selfMarks[1]??null},
-      {item_order:2,primary_skill_code:'P1-INTERNAL-PAPER-2',prompt:'Explain the transformation.',learner_artifact:{text:'Translate right by 2.'},max_marks:6,rubric:{max_marks:6,criteria:[{marks:2,rule:'Identifies the translation.'},{marks:4,rule:'Explains the mapping correctly.'}]},self_review:'Check direction and scale.',submitted_in_time:true,self_marked:Object.prototype.hasOwnProperty.call(window.__selfMarks,2),self_marks_awarded:window.__selfMarks[2]??null}
+      {item_order:1,primary_skill_code:'P1-INTERNAL-PAPER-1',prompt:'Solve x + 2 = 6.',learner_artifact:{text:'x = 4'},max_marks:4,rubric:{max_marks:4,criteria:[{marks:1,rule:'Rearranges correctly.'},{marks:3,rule:'Gets and checks x = 4.'}]},self_review:'Check the rearrangement and final value.',submitted_in_time:true,self_marked:false,self_marks_awarded:null},
+      {item_order:2,primary_skill_code:'P1-INTERNAL-PAPER-2',prompt:'Explain the transformation.',learner_artifact:{text:'Translate right by 2.'},max_marks:6,rubric:{max_marks:6,criteria:[{marks:2,rule:'Identifies the translation.'},{marks:4,rule:'Explains the mapping correctly.'}]},self_review:'Check direction and scale.',submitted_in_time:true,self_marked:false,self_marks_awarded:null}
     ];
 
     window.sb = { rpc: async (name,args={}) => {
@@ -128,14 +127,7 @@ const path = require('path');
       }
       if (name==='get_exam_prep_timed_review_pack_safe_v1') return {data:{session_id:window.__timedSessionId,status:'finalized',items:reviewItems()},error:null};
       if (name==='get_exam_prep_timed_result_safe_v1') {
-        const total=Object.values(window.__selfMarks).reduce((sum,v)=>sum+Number(v||0),0);
-        const done=Object.keys(window.__selfMarks).length===2;
-        window.__timedResult={...window.__timedResult,marks_in_time:total,score_comparable:done,score_status:done?'provisional_comparable':'pending_self_review'};
         return {data:window.__timedResult,error:null};
-      }
-      if (name==='submit_exam_prep_timed_written_self_mark_safe_v1') {
-        window.__selfMarks[args.p_item_order]=args.p_marks_awarded;
-        return {data:{...window.__timedResult,replayed:false},error:null};
       }
       if (name==='get_exam_prep_readiness_safe_v1') return {data:{ready:true,app_readiness_estimate:'STRONG_OBJECTIVE_EVIDENCE',reason_code:'ready',component_code:'P1',last_three_count:3,below_l3_count:0,unresolved_correction_case_count:0},error:null};
       if (name==='get_exam_prep_readiness_summary_safe_v1') return {data:{component_code:'P1',ready:true,estimate_code:'STRONG_OBJECTIVE_EVIDENCE',reason_code:'ready',comparable_full_attempts:3,comparable_full_required:3,topics_needing_stability:0,open_corrections:0,score_window_ready:true,unattempted_ready:true,after_time_ready:true,threshold_gate_configured:true,mentor_care_active:false,mentor_verified:false,mentor_verification_state:'not_active',next_action_code:'continue_final_calibration',not_official_cambridge_grade:true,mentor_verification_optional_for_core:true,p1_p5_separate:true},error:null};
@@ -231,17 +223,17 @@ const path = require('path');
   await page.waitForSelector('textarea[name="ep_live_written_answer"]');
   await page.fill('textarea[name="ep_live_written_answer"]','Translate right by 2.');
   await page.click('[data-ep-live-submit]');
-  await page.waitForSelector('input[name="ep_live_self_mark"]');
+  await page.waitForSelector('[data-ep-live-next-written]');
   let text=await capture();
-  assert(text.includes('Review your work')&&text.includes('Marking criteria'),'post-paper self review missing');
-  await page.fill('input[name="ep_live_self_mark"]','4');
-  await page.click('[data-ep-live-save-self]');
-  await page.waitForSelector('input[name="ep_live_self_mark"]');
-  await page.fill('input[name="ep_live_self_mark"]','5');
-  await page.click('[data-ep-live-save-self]');
-  await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('9 / 10'));
+  assert(text.includes('Review your work')&&text.includes('Marking criteria'),
+    'criteria-only post-paper review missing');
+  await page.click('[data-ep-live-next-written]');
+  await page.waitForSelector('[data-ep-live-next-written]');
+  await page.click('[data-ep-live-next-written]');
+  await page.waitForSelector('[data-ep-live-readiness="P1"]');
   text=await capture();
-  assert(text.includes('Comparable result')&&text.includes('Yes'),'9/10 comparable result missing');
+  assert(!text.includes('9 / 10') && !text.includes('Comparable result: Yes'),
+    'unverified written work must not become an invented exam mark');
 
   await page.click('[data-ep-live-readiness="P1"]');
   await page.waitForFunction(()=>document.querySelector('#exam-prep-host-root')?.textContent.includes('Objective evidence is ready'));
@@ -260,7 +252,7 @@ const path = require('path');
   assert(!/objective_state_v1|P1-INTERNAL-|controlled_beta|academic_credit|feedback_deferred|correct_answer/i.test(finalState.allText),'learner DOM exposed internal or protected terms');
 
   const names=finalState.calls.map(x=>x.name);
-  for (const name of ['save_exam_prep_exam_profile_v2','start_exam_prep_next_diagnostic_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_weekly_plan_safe_v2','generate_exam_prep_weekly_plan_safe_v3','authorize_exam_prep_plan_item_safe_v1','get_exam_prep_timed_catalog_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','submit_exam_prep_timed_written_self_mark_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1','get_exam_prep_final_calibration_safe_v1']) assert(names.includes(name),`${name} missing from full learner journey`);
+  for (const name of ['save_exam_prep_exam_profile_v2','start_exam_prep_next_diagnostic_safe_v1','submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','get_exam_prep_weekly_plan_safe_v2','generate_exam_prep_weekly_plan_safe_v3','authorize_exam_prep_plan_item_safe_v1','get_exam_prep_timed_catalog_safe_v1','authorize_exam_prep_timed_safe_v1','finalize_exam_prep_timed_safe_v1','get_exam_prep_timed_review_pack_safe_v1','get_exam_prep_timed_result_safe_v1','get_exam_prep_readiness_summary_safe_v1','get_exam_prep_final_calibration_safe_v1']) assert(names.includes(name),`${name} missing from full learner journey`);
   const timedFinalize=finalState.calls.find(x=>x.name==='finalize_exam_prep_timed_safe_v1');
   assert(timedFinalize?.args?.p_completion_reason==='submitted','full paper must finalize as submitted');
 

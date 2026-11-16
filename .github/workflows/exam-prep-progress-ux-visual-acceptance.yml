@@ -41,7 +41,7 @@ permissions:
 
 jobs:
   isolated-visual-captures:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate isolated screenshot, date, real-renderer and authorized-journey harnesses

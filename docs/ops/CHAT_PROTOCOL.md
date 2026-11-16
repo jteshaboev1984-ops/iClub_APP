@@ -1,6 +1,6 @@
 # iClub — Chat work protocol v1
 
-Status: STAGED FOR CUTOVER. This document controls developer chat workflow once the architect activates it. It does NOT automate execution or change a live application.
+Status: CUTOVER AUTHORIZED 2026-11-16; **ChatGPT Project instructions must still be installed by the owner** before new-chat commands are operational. This is NOT background execution and does not change a live application.
 
 ## 1. Two entry modes
 

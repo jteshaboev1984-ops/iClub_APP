@@ -1,3 +1,5 @@
+-- Exact migration version 20261109110109 already applied to existing Supabase.
+-- Portable logical D03 source for ephemeral PG17/other environments; production apply had extra current-bank preflight guards.
 -- Main-based v2.2 selective port of the EXISTING reviewed D03 migration.
 -- Original draft: 20261104110000_exam_prep_p1p5_disable_written_self_marks_v1.sql.
 -- NOT APPLIED to production by this PR; only deploy after isolated signed E2E and explicit Core GO.
