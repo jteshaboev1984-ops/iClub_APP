@@ -33,10 +33,12 @@ async function scenario(browser, language, width) {
       const ok = data => ({ ok: true, data });
       window.iClubExamPrepHostInternal = {
         lastCapabilities: { coreAccess: true, killSwitch: false, rolloutState: 'controlled_beta' },
-        progressUxApi: { progress: async component => ok({ goals: component === 'P5' ? [{
-          goal_id: goalId, component_code: 'P5', action_priority_order: 1,
-          item_type: 'learning', status: 'not_started'
-        }] : [] }) },
+        progressUxApi: { progress: async component => ok({ contract_version: 'progress_ux_v1', component_code: component,
+          active_week_no: 1,
+          goals: component === 'P5' ? [{
+            goal_id: goalId, component_code: 'P5', action_priority_order: 1,
+            skill_code: 'P5-NOR-01', item_type: 'learning', status: 'not_started'
+          }] : [] }) },
         api: {
           examProfile: async () => ok({ exam_series: 'May/June 2027', target_grade: 'A',
             total_student_hours_available: 10, mathematics_hours_budget: 5 }),
@@ -50,6 +52,7 @@ async function scenario(browser, language, width) {
             operational_stage: 2, coverage_pct: 0 }] }),
           weeklyPlan: async component => component === 'P5' ? ok({ plan_id: planId,
             active_week_no: 1, items: [{ priority_order: 1, item_type: 'learning',
+              skill_code: 'P5-NOR-01',
               status: s.finalized ? 'completed' : 'pending' }] }) : ok({
                 plan_id: planId, active_week_no: 1, items: [] }),
           getSession: async (id) => {
