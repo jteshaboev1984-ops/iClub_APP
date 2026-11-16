@@ -1,5 +1,10 @@
 # iClub Mathematics P1/P5 — S7 minimal release pack
 
+> **ACTUAL UX CONTROLLED-BETA RELEASE COMPLETED — 2026-11-16.** Owner answered «разрешаю» to the specifically scoped request for **UX-only production publication of #540 into the existing controlled beta**, with **NO SQL migrations, rollout/QA/stage flag updates or live learner writes**. [PR #540](https://github.com/jteshaboev1984-ops/iClub_APP/pull/540) was readied and squash-merged **after exact HEAD `b390ce46be2154ccba831bfd9a92521e991b338b` passed 56/56 CI**, into GitHub `main` SHA `464551650ae925ca3404feff4a5c4c506c49cd70`. Vercel **production READY** deployment `dpl_GhNT6FiyVkgkbPva18fbgNW9qpKK` and verified project alias `i-club-app.vercel.app` report that identical SHA. Prior READY prod `dpl_7Tc4WV4tQHHCcDdBavQbVfodBHnW` / SHA `dc8c9b08e9c56565aeb575bc22c93ca9f289838a` is documented rollback reference. This supersedes the PRE-RELEASE approval/production snapshot below.
+>
+> **Post-deploy live PG17 SELECT-only verification:** `controlled_beta`, Core ON, QA Core+Weekly ON, S4 Paper ON, Stage3–6 gates OFF, kill switch OFF; 7 previously installed source migration receipts; **120/120 Exam Prep profiles chose Mathematics**, no additional Stage6 bridge `20261116164000`; counts unchanged vs immediately before publication (1,477 registered, 883 Math-selected). No deployment SQL or config DML performed. **Do not construe Vercel READY as authenticated user/device smoke**: that step has NOT been exercised; generic public HTTP fetching was unavailable from this environment. One voluntary consented existing-beta account must still verify sign-in, P1/P5, S3 plan save/reload, Paper no marks, history and resume. Mass rollout and Stage6 PR #550 remain explicitly unapproved; P0-16B still tracked separately.
+
+
 **Prepared 2026-11-16, READ-ONLY production verification.** This is a release handoff, **not approval or execution** of main merge, Vercel promotion, Supabase migration, mass rollout, feature flag changes, beta cleanup, live user writes, new AI cost or academic content publication.
 
 ## 1. Freeze the first releasable scope
