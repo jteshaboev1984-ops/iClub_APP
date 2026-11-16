@@ -109,6 +109,8 @@ async function caseRun(browser, address, { language, width, mode }) {
         };
         return {ok:true,data:{saved:true}};
       },
+      async claimPeriodReportsS3() { return {ok:true,data:{claimed:0}}; },
+      async periodReportsS3() { return {ok:true,data:{reports:[]}}; },
       async hybridS4Catalog(component) { return {ok:true,data:{enabled:false,papers:[],component_code:component}}; },
       async hybridS4History(component) {return {ok:true,data:{component_code:component,sessions:[]}};},
       async recentResults(component) {return {ok:true,data:{component_code:component,results:[]}};},
