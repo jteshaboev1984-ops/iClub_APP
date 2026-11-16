@@ -1493,12 +1493,12 @@
       state.s3Retry = null;
       // The write succeeded, but the old S3 snapshot must not be reused for
       // another choice or displayed as if it were the persisted allocation.
-      const [profile,choice]=await Promise.all([
+      const [profile,freshChoice]=await Promise.all([
         internal.api.examProfile().catch(()=>null),
         internal.api.weeklyChoiceS3().catch(()=>null)
       ]);
       if(profile?.ok)state.profile=profile.data;
-      if(!choice?.ok || choice.data?.contract_version!=="voluntary_weekly_choice_s3_v1"){
+      if(!freshChoice?.ok || freshChoice.data?.contract_version!=="voluntary_weekly_choice_s3_v1"){
         show(({
           ru:"Выбор сохранён, но новые данные не загрузились. Вернитесь к P1/P5 и откройте план повторно.",
           uz:"Tanlov saqlandi, lekin yangi ma’lumot yuklanmadi. P1/P5 ga qaytib, rejani qayta oching.",
@@ -1507,7 +1507,7 @@
         button.disabled=true;
         return;
       }
-      state.weeklyChoice=choice.data;
+      state.weeklyChoice=freshChoice.data;
       state.notice=c.saved;
       renderMyPlan("weekly");
     });
