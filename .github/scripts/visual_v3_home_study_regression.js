@@ -21,12 +21,14 @@ for (const token of [
   assert(css.includes(token), `Home/Study premium CSS missing ${token}`);
 }
 
-assert(app.includes('class="v3-home-pinned-icon"'), 'Pinned subject tile must use the premium line icon');
+// Academy OS v5.8 supersedes the icon-first legacy pinned card.
+assert(app.includes('class="home-pinned-top"'), 'Approved Study card top label missing');
+assert(app.includes('class="home-pinned-bottom"'), 'Approved Study card footer missing');
 assert(!app.includes('<div class="home-pinned-ico">📘</div>'), 'Legacy pinned-subject emoji must not remain');
-assert(i18n.includes('courses_title: "Учёба"'), 'RU Study title missing');
-assert(i18n.includes('courses_title: "O‘qish"'), 'UZ Study title missing');
-assert(i18n.includes('courses_title: "Study"'), 'EN Study title missing');
-assert(html.includes('data-i18n="courses_title">Study</div>'), 'Study screen fallback title is not aligned');
+assert(i18n.includes('courses_title: "Предметы"'), 'RU Subjects title missing');
+assert(i18n.includes('courses_title: "Fanlar"'), 'UZ Subjects title missing');
+assert(i18n.includes('courses_title: "Subjects"'), 'EN Subjects title missing');
+assert(html.includes('data-i18n="courses_title">Предметы</h1>'), 'Study screen fallback title is not aligned');
 
 for (const contract of [
   'data-main-filter="competitive"',
@@ -61,9 +63,12 @@ function sampleCompetitiveCard() {
 
 function samplePinnedTile(title) {
   return `<button class="home-pinned-tile" type="button">
-    <div class="home-pinned-ico" aria-hidden="true"><svg class="v3-home-pinned-icon" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5A2.5 2.5 0 0 1 20 21z"/></svg></div>
-    <div class="home-pinned-title">${title}</div>
-    <div class="home-pinned-meta"><span>18/70</span> Practice</div>
+    <span class="home-pinned-top">STUDY SUBJECT</span>
+    <strong class="home-pinned-title">${title}</strong>
+    <span class="home-pinned-bottom">
+      <span class="home-pinned-meta"><span>18/70</span> Practice</span>
+      <span class="home-pinned-open">Open ›</span>
+    </span>
   </button>`;
 }
 
@@ -119,7 +124,8 @@ async function activateStudy(page) {
     const hero = comp.querySelector('.home-competitive-hero');
     const cta = comp.querySelector('.home-competitive-btn');
     const tile = document.querySelector('#view-home .home-pinned-tile');
-    const icon = tile.querySelector('.v3-home-pinned-icon');
+    const title=tile.querySelector('.home-pinned-title');
+    const titleCss=getComputedStyle(title);
     return {
       compRadius: getComputedStyle(comp).borderRadius,
       compShadow: getComputedStyle(comp).boxShadow,
@@ -127,18 +133,30 @@ async function activateStudy(page) {
       ctaHeight: cta.getBoundingClientRect().height,
       tileRadius: getComputedStyle(tile).borderRadius,
       tileDisplay: getComputedStyle(tile).display,
-      iconWidth: icon.getBoundingClientRect().width,
+      tileColor:getComputedStyle(tile).backgroundImage,
+      titleAlign:titleCss.textAlign,
+      titleFontSize:parseFloat(titleCss.fontSize),
+      titleInset:title.getBoundingClientRect().left-tile.getBoundingClientRect().left,
+      topLabelCount:tile.querySelectorAll('.home-pinned-top').length,
+      bottomCount:tile.querySelectorAll('.home-pinned-bottom').length,
       width: document.documentElement.scrollWidth,
       innerWidth: innerWidth
     };
   });
-  assert(state.compRadius === '12px', `Home competitive card radius drift: ${state.compRadius}`);
+  assert(state.compRadius === '20px', `Home competitive card radius drift: ${state.compRadius}`);
   assert(state.compShadow !== 'none', 'Home competitive card premium surface missing');
-  assert(state.heroHeight <= 82 && state.heroHeight >= 68, `Home subject visual is too dominant or too small: ${state.heroHeight}`);
-  assert(state.ctaHeight >= 40, `Home primary action target too small: ${state.ctaHeight}`);
-  assert(state.tileRadius === '12px', `Pinned tile radius drift: ${state.tileRadius}`);
-  assert(state.tileDisplay === 'grid', `Pinned tile must use compact premium grid layout: ${state.tileDisplay}`);
-  assert(state.iconWidth >= 17 && state.iconWidth <= 20, `Pinned line icon size drift: ${state.iconWidth}`);
+  assert(state.heroHeight === 0, `Decorative Home subject icon must be visually absent: ${state.heroHeight}`);
+  assert(state.ctaHeight >= 44, `Home primary action target too small: ${state.ctaHeight}`);
+  assert(state.tileRadius === '19px', `Approved v5.8 Study card radius drift: ${state.tileRadius}`);
+  assert(state.tileDisplay === 'flex', `Pinned tile must use swipe-card flex layout: ${state.tileDisplay}`);
+  assert(state.titleAlign === 'left', 'Approved Study title must align left');
+  assert(state.titleFontSize >= 17 && state.titleFontSize <= 19.1,
+    `Approved v5.8 Study type scale 17–19px: ${state.titleFontSize}`);
+  assert(state.titleInset >= 10 && state.titleInset <= 24, 'Pinned title inset drift');
+  assert(state.topLabelCount === 1 && state.bottomCount === 1,
+    'Approved v5.8 pinned card requires top label + bottom action');
+  assert(state.tileColor.includes('rgb(242, 247, 255)'),
+    `Study palette must retain the approved soft blue, not saturated blue: ${state.tileColor}`);
   assert(state.width <= state.innerWidth, `Home mobile overflow: ${JSON.stringify(state)}`);
 
   await activateStudy(page);
@@ -150,7 +168,7 @@ async function activateStudy(page) {
     const toggle = card.querySelector('.catalog-toggle-row');
     return {
       filterColumns: getComputedStyle(filters).gridTemplateColumns.split(' ').length,
-      filterRadius: getComputedStyle(document.getElementById('courses-filter-row')).borderRadius,
+      filterRadius: getComputedStyle(filters).borderRadius,
       activeChipBg: getComputedStyle(activeChip).backgroundColor,
       cardRadius: getComputedStyle(card).borderRadius,
       cardShadow: getComputedStyle(card).boxShadow,
@@ -161,9 +179,9 @@ async function activateStudy(page) {
     };
   });
   assert(state.filterColumns === 2, `Study mode switch must be a two-column segmented control: ${state.filterColumns}`);
-  assert(state.filterRadius === '12px', `Study mode switch radius drift: ${state.filterRadius}`);
+  assert(state.filterRadius === '15px', `Study mode switch radius drift: ${state.filterRadius}`);
   assert(state.activeChipBg !== 'rgba(0, 0, 0, 0)', 'Active Study mode chip needs a visible selected surface');
-  assert(state.cardRadius === '12px', `Study subject card radius drift: ${state.cardRadius}`);
+  assert(state.cardRadius === '18px', `Study subject card radius drift: ${state.cardRadius}`);
   assert(state.cardShadow !== 'none', 'Study subject card premium surface missing');
   assert(state.headMinHeight >= 50, `Study subject open target too small: ${state.headMinHeight}`);
   assert(state.toggleHeight >= 46, `Study subject state row too small: ${state.toggleHeight}`);

@@ -33,19 +33,26 @@ async function scenario(browser, language, width) {
       const ok = data => ({ ok: true, data });
       window.iClubExamPrepHostInternal = {
         lastCapabilities: { coreAccess: true, killSwitch: false, rolloutState: 'controlled_beta' },
-        progressUxApi: { progress: async component => ok({ goals: component === 'P5' ? [{
-          goal_id: goalId, component_code: 'P5', action_priority_order: 1,
-          item_type: 'learning', status: 'not_started'
-        }] : [] }) },
+        progressUxApi: { progress: async component => ok({ contract_version: 'progress_ux_v1', component_code: component,
+          active_week_no: 1,
+          goals: component === 'P5' ? [{
+            goal_id: goalId, component_code: 'P5', action_priority_order: 1,
+            skill_code: 'P5-NOR-01', item_type: 'learning', status: 'not_started'
+          }] : [] }) },
         api: {
           examProfile: async () => ok({ exam_series: 'May/June 2027', target_grade: 'A',
             total_student_hours_available: 10, mathematics_hours_budget: 5 }),
+          // Existing plan summary reads, never writes; no test date or hours invented.
+          personalHorizon: async () => ok({}),
+          studySchedule: async () => ok(null),
+          weeklyChoiceS3: async () => ok(null),
           diagnosticProgress: async () => ok({ stage0_complete: true,
             screening: { required_items: 3, answered_items: 3, required_areas: 1, answered_areas: 1 } }),
           getState: async component => ok({ components: [{ component_code: component,
             operational_stage: 2, coverage_pct: 0 }] }),
           weeklyPlan: async component => component === 'P5' ? ok({ plan_id: planId,
             active_week_no: 1, items: [{ priority_order: 1, item_type: 'learning',
+              skill_code: 'P5-NOR-01',
               status: s.finalized ? 'completed' : 'pending' }] }) : ok({
                 plan_id: planId, active_week_no: 1, items: [] }),
           getSession: async (id) => {
@@ -116,10 +123,14 @@ async function scenario(browser, language, width) {
       await page.addScriptTag({ path: file(script) });
     }
     await page.evaluate(lang => window.iClubExamPrep.open({ language: lang }), language);
-    await page.waitForSelector('[data-ep-live-plan="P5"]', { state: 'attached' });
-    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P5"]').click());
-    await page.waitForSelector('[data-ep-live-plan-item="1"]');
-    await page.click('[data-ep-live-plan-item="1"]');
+    // Academy OS v5.8: component card opens an overview, not an attempt.
+    // The server-authorized Learning primary action starts the real review.
+    await page.waitForSelector('[data-ep-live-open-component="P5"]');
+    assert.equal(await page.evaluate(() => window.__reviewTest.regularStarts), 0, 'Opening the dashboard must not start an assessment');
+    await page.click('[data-ep-live-open-component="P5"]');
+    await page.waitForSelector('[data-ep-component-primary="task"]');
+    assert.equal(await page.evaluate(() => window.__reviewTest.regularStarts), 0, 'Component overview must not start an assessment');
+    await page.click('[data-ep-component-primary="task"]');
     await page.waitForSelector('.ep-live-qtext');
     for (let i = 0; i < 4; i++) {
       await page.waitForFunction(text => document.querySelector('.ep-live-qtext')?.textContent === text,
@@ -132,7 +143,9 @@ async function scenario(browser, language, width) {
       await page.click('[data-ep-live-submit]');
     }
     await page.waitForFunction(() => window.__reviewTest.finalized === true);
-    await page.waitForSelector('[data-ep-live-dashboard]');
+    // On v5.8 a completed component task returns to P5 Learning;
+    // the dashboard is an explicit Back action, not an automatic redirect.
+    await page.waitForSelector('[data-ep-component-home="P5"]');
     const s = await page.evaluate(() => window.__reviewTest);
     assert.equal(s.reviewStarts, 1, 'One noncredit review starter only');
     assert.equal(s.submitCalls, 4, 'Three objective and saved written responses');

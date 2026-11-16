@@ -72,10 +72,10 @@ async function activateCourseScreen(page, id) {
     width: document.documentElement.scrollWidth,
     innerWidth: innerWidth
   }));
-  assert(state.heroRadius === '12px', `Practice hero radius drift: ${state.heroRadius}`);
+  assert(state.heroRadius === '20px', `Practice hero radius drift: ${state.heroRadius}`);
   assert(state.heroBg.includes('linear-gradient'), 'Practice premium hero background missing');
   assert(state.heroText === 'rgb(15, 23, 42)', `Practice hero text contrast drift: ${state.heroText}`);
-  assert(state.metricRadius === '10px', `Practice metric radius drift: ${state.metricRadius}`);
+  assert(state.metricRadius === '15px', `Practice metric radius drift: ${state.metricRadius}`);
   assert(state.tableRadius === '10px', `Practice table radius drift: ${state.tableRadius}`);
   assert(state.width <= state.innerWidth, `Practice start overflow: ${JSON.stringify(state)}`);
 
@@ -92,7 +92,7 @@ async function activateCourseScreen(page, id) {
     width: document.documentElement.scrollWidth,
     innerWidth: innerWidth
   }));
-  assert(state.cardRadius === '12px', `Practice quiz card radius drift: ${state.cardRadius}`);
+  assert(state.cardRadius === '20px', `Practice quiz card radius drift: ${state.cardRadius}`);
   assert(state.optionRadius === '10px', `Practice option radius drift: ${state.optionRadius}`);
   assert(state.selectedBg === 'rgb(238, 243, 255)', `Practice selected state drift: ${state.selectedBg}`);
   assert(state.questionSize === '14px', `Practice mobile question size drift: ${state.questionSize}`);
@@ -107,10 +107,10 @@ async function activateCourseScreen(page, id) {
     width: document.documentElement.scrollWidth,
     innerWidth: innerWidth
   }));
-  assert(state.heroRadius === '12px', `Tours hero radius drift: ${state.heroRadius}`);
+  assert(state.heroRadius === '20px', `Tours hero radius drift: ${state.heroRadius}`);
   assert(state.heroText === 'rgb(15, 23, 42)', `Tours hero contrast drift: ${state.heroText}`);
-  assert(state.metricRadius === '10px', `Tours metric radius drift: ${state.metricRadius}`);
-  assert(state.historyRadius === '12px', `Tours history radius drift: ${state.historyRadius}`);
+  assert(state.metricRadius === '20px', `Tours metric radius drift: ${state.metricRadius}`);
+  assert(state.historyRadius === '20px', `Tours history radius drift: ${state.historyRadius}`);
   assert(state.width <= state.innerWidth, `Tours overview overflow: ${JSON.stringify(state)}`);
 
   await activateCourseScreen(page, 'courses-tour-quiz');
@@ -131,11 +131,11 @@ async function activateCourseScreen(page, id) {
     width: document.documentElement.scrollWidth,
     innerWidth: innerWidth
   }));
-  assert(state.headRadius === '12px', `Tour head radius drift: ${state.headRadius}`);
+  assert(state.headRadius === '15px', `Tour head radius drift: ${state.headRadius}`);
   assert(state.warningRadius === '10px', `Tour warning radius drift: ${state.warningRadius}`);
   assert(state.warningIcons === 1, `Tour warning SVG count drift: ${state.warningIcons}`);
   assert(state.badgeBg === 'rgb(238, 243, 255)', `Tour badge state drift: ${state.badgeBg}`);
-  assert(state.timerRadius === '10px', `Tour timer radius drift: ${state.timerRadius}`);
+  assert(state.timerRadius === '15px', `Tour timer radius drift: ${state.timerRadius}`);
   assert(state.dangerBg === 'rgb(255, 245, 243)', `Tour danger timer semantics drift: ${state.dangerBg}`);
   assert(state.optionRadius === '10px', `Tour option radius drift: ${state.optionRadius}`);
   assert(state.width <= state.innerWidth, `Tour quiz overflow: ${JSON.stringify(state)}`);

@@ -35,6 +35,7 @@ async function scenario(browser,language,width,kind,mode,weeklyMode) {
       const internal=window.iClubExamPrepHostInternal={lastCapabilities:
         {coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
       internal.api={
+        personalHorizon:async()=>ok({}),studySchedule:async()=>ok(null),weeklyChoiceS3:async()=>ok(null),
         examProfile:async()=>ok({exam_series:'May/June 2027',target_grade:'A',
           total_student_hours_available:10,mathematics_hours_budget:5}),
         diagnosticProgress:async()=>ok({stage0_complete:true,

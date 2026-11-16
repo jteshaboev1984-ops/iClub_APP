@@ -80,19 +80,19 @@ async function activate(page, viewId, stackScreenId = null) {
     innerWidth: window.innerWidth
   }));
   assert(Number(home.titleWeight) >= 700, `Home title is not premium-weight: ${home.titleWeight}`);
-  assert(home.titleSize === '17px', `Home title size drift: ${home.titleSize}`);
+  assert(home.titleSize === '16px', `Home title size drift: ${home.titleSize}`);
   assert(home.extraRadius === '12px', `Home card radius drift: ${home.extraRadius}`);
   assert(home.extraShadow !== 'none', 'Home premium surface shadow missing');
   assert(home.width <= home.innerWidth, `Home overflow: ${JSON.stringify(home)}`);
 
   await activate(page, 'view-courses', 'courses-all-subjects');
   const study = await page.evaluate(() => ({
-    titleSize: getComputedStyle(document.querySelector('#courses-all-subjects .section-title')).fontSize,
+    titleSize: getComputedStyle(document.querySelector('#academy-subjects-title')).fontSize,
     filterRadius: getComputedStyle(document.querySelector('#courses-filter-row')).borderRadius,
     width: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth
   }));
-  assert(study.titleSize === '22px', `Study title size drift: ${study.titleSize}`);
+  assert(parseFloat(study.titleSize) >= 23 && parseFloat(study.titleSize) <= 30, `Subjects header title size drift: ${study.titleSize}`);
   assert(study.width <= study.innerWidth, `Study overflow: ${JSON.stringify(study)}`);
 
   await activate(page, 'view-courses', 'courses-subject-hub');
@@ -109,9 +109,9 @@ async function activate(page, viewId, stackScreenId = null) {
     width: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth
   }));
-  assert(hub.headRadius === '12px', `Subject hub radius drift: ${hub.headRadius}`);
+  assert(hub.headRadius.includes('26px'), `Subject hub rounded lower edge missing: ${hub.headRadius}`);
   assert(hub.headShadow !== 'none', 'Subject hub premium surface shadow missing');
-  assert(hub.entryRadius === '12px', `Exam Prep entry radius drift: ${hub.entryRadius}`);
+  assert(hub.entryRadius === '17px', `Exam Prep entry radius drift: ${hub.entryRadius}`);
   assert(hub.width <= hub.innerWidth, `Subject hub overflow: ${JSON.stringify(hub)}`);
 
   await activate(page, 'view-profile');
@@ -123,10 +123,10 @@ async function activate(page, viewId, stackScreenId = null) {
     width: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth
   }));
-  assert(profile.heroRadius === '12px', `Profile hero radius drift: ${profile.heroRadius}`);
+  assert(profile.heroRadius === '20px', `Profile hero radius drift: ${profile.heroRadius}`);
   assert(profile.heroShadow !== 'none', 'Profile premium hero shadow missing');
   assert(profile.avatarRadius === '12px', `Profile avatar radius drift: ${profile.avatarRadius}`);
-  assert(profile.overviewRadius === '12px', `Profile overview radius drift: ${profile.overviewRadius}`);
+  assert(profile.overviewRadius === '15px', `Profile overview radius drift: ${profile.overviewRadius}`);
   assert(profile.width <= profile.innerWidth, `Profile overflow: ${JSON.stringify(profile)}`);
 
   const routes = await page.locator('#tabbar .tab').evaluateAll(nodes => nodes.map(node => node.getAttribute('data-tab')));

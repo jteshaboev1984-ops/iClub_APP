@@ -48,13 +48,18 @@ async function scenario(browser,language,component,width,mode) {
       const internal=window.iClubExamPrepHostInternal={
         lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
       internal.api={
+        // Synthetic saved-plan GET only: no user/state changes.
+        personalHorizon:async()=>ok({}),
+        studySchedule:async()=>ok(null),
+        weeklyChoiceS3:async()=>ok(null),
         examProfile:async()=>ok({exam_series:'May/June 2027',target_grade:'A',
           total_student_hours_available:10,mathematics_hours_budget:5}),
         diagnosticProgress:async()=>ok({stage0_complete:true,screening:{
           required_items:1,answered_items:1,required_areas:1,answered_areas:1}}),
         getState:async comp=>ok({components:[{component_code:comp,operational_stage:2,coverage_pct:0}]}),
         weeklyPlan:async()=>ok({plan_id:s.planId,active_week_no:1,items:[
-          {priority_order:1,item_type:'learning',status:s.finalized?'completed':'pending'}]}),
+          {priority_order:1,item_type:'learning',skill_code:s.comp+'-CALC-01',
+           status:s.finalized?'completed':'pending'}]}),
         getSessionWritten:async id=>{assert.equal(id,s.sessionId);return ok(get());},
         getSession:async id=>{assert.equal(id,s.sessionId);return ok(get());},
         writtenCriteria:async(id,order)=>{
@@ -94,13 +99,14 @@ async function scenario(browser,language,component,width,mode) {
             completion_status:'advanced_in_plan_only',learner_artifact:null}]}),
         generateWeeklyPlan:async()=>ok({})
       };
-      internal.progressUxApi={progress:async()=>ok({goals:[{
+      internal.progressUxApi={progress:async comp=>ok({contract_version:'progress_ux_v1',component_code:comp,active_week_no:1,goals:[{
         goal_id:s.goalId,component_code:s.comp,item_type:'learning',
         skill_code:s.comp+'-CALC-01',status:'not_started',
         weekly_commitment_complete:false,action_priority_order:1}]})};
       internal.weeklyFlowApi={
         version:'weekly_flow_adapter_v1',
         allowed:()=>null,
+        recover:async()=>ok({status:'none',component_code:s.comp}),
         plan:async()=>ok({status:'existing',plan_id:s.planId}),
         authorize:async(comp,goal,plan)=>{
           assert.equal(comp,s.comp);assert.equal(goal,s.goalId);assert.equal(plan,s.planId);
@@ -116,8 +122,10 @@ async function scenario(browser,language,component,width,mode) {
     // Load the actual reconciled polish6 handler together with the paper flow.
     await page.addScriptTag({path:file('exam-prep/exam-prep-interaction-polish.js')});
     await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
-    await page.evaluate(c=>document.querySelector('[data-ep-live-plan="'+c+'"]').click(),component);
-    await page.click('[data-ep-live-plan-item="1"]');
+    await page.click('[data-ep-live-open-component="'+component+'"]');
+    await page.waitForSelector('[data-ep-component-primary="task"]');
+    assert.equal(await page.locator('[data-ep-live-plan-item]').count(),0,'no hidden plan on visible route');
+    await page.click('[data-ep-component-primary="task"]');
     try {
       await page.waitForSelector('[data-ep-written-next]',{timeout:5000});
     } catch(err) {

@@ -1,0 +1,51 @@
+/* UX #531 / B01 — Academy OS v5.5 shared topbar, visual only.
+   Scope: main learner destinations. Original DOM, handlers, login and data remain unchanged. */
+body.iclub-visual-v3{
+ --academy-sapphire:#2c6ccc;--academy-deep-blue:#102f6b;
+ --academy-cold-blue:#376aa2;--academy-soft-blue:#6b8bb7;
+}
+body.iclub-visual-v3:has(#view-home.is-active) #topbar,
+body.iclub-visual-v3:has(#view-courses.is-active #courses-all-subjects.is-active) #topbar,
+body.iclub-visual-v3:has(#view-courses.is-active #courses-subject-hub.is-active) #topbar,
+body.iclub-visual-v3:has(#view-ratings.is-active) #topbar,
+body.iclub-visual-v3:has(#view-profile.is-active) #topbar{
+ background:#164987;
+ color:#fff;border-bottom:1px solid #8bb6ec;
+ box-shadow:0 4px 14px rgba(18,65,131,.10);
+ -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+body.iclub-visual-v3:has(#view-home.is-active) #topbar{
+ background:#164987;
+}
+body.iclub-visual-v3:has(#view-courses.is-active #courses-all-subjects.is-active) #topbar{
+ background:#24599b;
+}
+body.iclub-visual-v3:has(#view-courses.is-active #courses-subject-hub.is-active) #topbar{
+ background:#133c78;
+}
+body.iclub-visual-v3:has(#view-ratings.is-active) #topbar{
+ background:#28518d;
+}
+body.iclub-visual-v3:has(#view-profile.is-active) #topbar{
+ background:#31578e;
+}
+body.iclub-visual-v3:has(#view-home.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-ratings.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-profile.is-active) #topbar .topbar-title .title{color:#fff}
+body.iclub-visual-v3:has(#view-home.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-ratings.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-profile.is-active) #topbar .topbar-title .subtitle{color:#e5efff}
+body.iclub-visual-v3:has(#view-home.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-ratings.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-profile.is-active) #topbar .icon-btn{
+ background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.35);
+ color:#fff;box-shadow:none;
+}
+body.iclub-visual-v3 #topbar .icon-btn:focus-visible{
+ outline:3px solid #eaf3ff;outline-offset:2px;
+}
+/* Do not alter back/grid alignment, icon visibility, or nested assessment headers.
+   Subject-screen content, catalogue name, carousel and Resume remain subsequent blocks. */

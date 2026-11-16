@@ -21,7 +21,7 @@ assert(tabbarStart >= 0 && tabbarEnd > tabbarStart, 'Primary tabbar markup missi
 const tabbar = html.slice(tabbarStart, tabbarEnd + 6);
 const tabs = [...tabbar.matchAll(/data-tab="([^"]+)"/g)].map(match => match[1]);
 assert(JSON.stringify(tabs) === JSON.stringify(['home', 'courses', 'ratings', 'profile']), `Internal routes changed: ${JSON.stringify(tabs)}`);
-assert(tabbar.includes('data-i18n="tab_study">Study</span>'), 'Study learner-facing nav label missing');
+assert(tabbar.includes('data-i18n="tab_study">Subjects</span>'), 'Subjects learner-facing nav label missing');
 assert(!/[⌂▦▤]/.test(tabbar), 'Legacy navigation glyph leaked after Visual v3 activation');
 assert((tabbar.match(/class="v3-shell-nav-icon"/g) || []).length === 4, 'Bottom navigation must have four line SVG icons');
 
@@ -33,9 +33,9 @@ assert((topbar.match(/class="v3-shell-icon"/g) || []).length === 3, 'Topbar must
 assert(!topbar.includes('🔔') && !topbar.includes('<span class="icon">←</span>'), 'Legacy topbar glyph/emoji leaked after Visual v3 activation');
 
 for (const token of [
-  'tab_study: "Учёба"',
-  'tab_study: "O‘qish"',
-  'tab_study: "Study"'
+  'tab_study: "Предметы"',
+  'tab_study: "Fanlar"',
+  'tab_study: "Subjects"'
 ]) {
   assert(i18n.includes(token), `Missing Visual v3 navigation translation: ${token}`);
 }
@@ -123,7 +123,7 @@ for (const forbidden of [
     svg: Boolean(node.querySelector('svg.v3-shell-nav-icon'))
   })));
   assert(JSON.stringify(liveTabs.map(x => x.route)) === JSON.stringify(['home', 'courses', 'ratings', 'profile']), 'Browser internal tab routes changed');
-  assert(JSON.stringify(liveTabs.map(x => x.label)) === JSON.stringify(['Home', 'Study', 'Ratings', 'Profile']), `Browser nav labels mismatch: ${JSON.stringify(liveTabs)}`);
+  assert(JSON.stringify(liveTabs.map(x => x.label)) === JSON.stringify(['Home', 'Subjects', 'Ratings', 'Profile']), `Browser nav labels mismatch: ${JSON.stringify(liveTabs)}`);
   assert(liveTabs.every(x => x.svg), 'Browser navigation has a non-SVG icon');
 
   await browser.close();

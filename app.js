@@ -1088,6 +1088,12 @@ function applyStaticI18n() {
       const key = el.dataset.i18nPlaceholder;
       if (key) el.setAttribute("placeholder", t(key));
     });
+    // Keep accessible control and landmark names in the same UI language
+    // as their visible labels (not in the language of academic questions).
+    document.querySelectorAll("[data-i18n-aria-label]").forEach(el => {
+      const key = el.dataset.i18nAriaLabel;
+      if (key) el.setAttribute("aria-label", t(key));
+    });
   }
 
      function updateOfflineBanner() {
@@ -5690,6 +5696,7 @@ function renderPracticeTourPicker(cards, selectedTourNo) {
       <div class="practice-tour-picker-title">${escapeHTML(tr3("Выбор тура", "Tur tanlash", "Tour selection"))}</div>
     </div>
 
+    <div class="practice-tour-scroll-hint">${escapeHTML(tr3("← Листайте, чтобы увидеть все туры →", "← Barcha turlarni ko‘rish uchun suring →", "← Swipe to see all tours →"))}</div>
     <div class="practice-tour-chip-row" aria-label="${escapeHTML(tr3("Выбор тура", "Tur tanlash", "Tour selection"))}">
       ${cards.map(c => {
         const selected = Number(c.tourNo) === Number(selectedTourNo);
@@ -12824,18 +12831,20 @@ function renderProfileStack() {
   if (!list) return;
 
   list.innerHTML = "";
+  list.hidden = false;
 
     if (!profile) {
     list.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
     return;
   }
 
-  // Non-school users: competitive is disabled by product rules
+  // Only the competitive selector is school-gated. Other Settings controls
+  // (including UI/content language) MUST remain bound for non-school learners.
   if (!profile.is_school_student) {
     if (note) note.textContent = t("disabled_not_school");
-    list.innerHTML = `<div class="empty muted">${t("disabled_not_school")}</div>`;
-    return;
-  }
+    // One concise explanation is enough; keep languages and Study settings usable.
+    list.hidden = true;
+  } else {
 
   const current = Array.isArray(profile.subjects) ? profile.subjects : [];
   const currentComp = current.filter(s => s.mode === "competitive").map(s => s.key);
@@ -12993,6 +13002,7 @@ mainSubjects.forEach(subj => {
 
   list.appendChild(row);
 });
+  } // End school-only competitive settings. Do not return before languages.
 
       // --- Language segmented buttons ---
 const langWrap = document.getElementById("profile-settings-language");
@@ -13544,6 +13554,9 @@ keys.forEach(k => {
   }
 
     if (slotsCountEl) slotsCountEl.textContent = `${comp.length}/2`;
+  // Non-school accounts should never be encouraged to join restricted slots.
+  const slotsSection = slotsListEl?.closest(".profile-section");
+  if (slotsSection) slotsSection.hidden = !profile.is_school_student;
   if (slotsListEl) {
     slotsListEl.innerHTML = "";
 
@@ -13582,7 +13595,7 @@ keys.forEach(k => {
     });
 
     // 2) Пустые слоты до 2 (Empty slot + JOIN)
-    const emptyCount = Math.max(0, 2 - comp.length);
+    const emptyCount = profile.is_school_student ? Math.max(0, 2 - comp.length) : 0;
     for (let i = 0; i < emptyCount; i++) {
       const row = document.createElement("div");
       row.className = "slot-card is-empty";
@@ -14184,11 +14197,17 @@ function uiAlert({ title, message, okText } = {}) {
     const subjectSection = $("#reg-subject-section");
     const nonStudentCard = $("#reg-nonstudent-subjects");
 
-    if (subjectSection) subjectSection.classList.toggle("hidden", !isSchool);
+    // Both groups select initial subjects. School: Competitive. Non-school: Study.
+    // Keep the same B00 chip controls and two-step layout, not a second selector.
+    if (subjectSection) subjectSection.classList.remove("hidden");
     if (nonStudentCard) nonStudentCard.classList.toggle("hidden", isSchool);
 
-    // when switching OFF school mode: clear selected subjects (avoid accidental saving)
-    if (!isSchool) {
+    // Clear selections ONLY when changing between Study and Competitive.
+    // Do not silently erase non-school choices on language changes or rerenders.
+    const nextMode = isSchool ? "school" : "study";
+    const prevMode = subjectSection?.dataset.regMode || nextMode;
+    if (subjectSection) subjectSection.dataset.regMode = nextMode;
+    if (prevMode !== nextMode) {
       const main1 = $("#reg-main-subject-1");
       const main2 = $("#reg-main-subject-2");
       const add1  = $("#reg-additional-subject");
@@ -14459,14 +14478,122 @@ function toggleHomeExtra() {
   } catch {}
 }
 
-function renderHome() {
+
+  // UX #531: Home Continue is a read-only entry to the existing authenticated
+  // Practice start/resume flow. No draft/question/session mutations occur here.
+  let academyHomeContinueRequest = 0;
+
+  function academyHideHomeContinue() {
+    const area = document.getElementById("academy-home-continue");
+    const list = document.getElementById("academy-home-continue-list");
+    if (area) area.hidden = true;
+    if (list) list.replaceChildren();
+  }
+
+  async function academyRenderHomeContinue() {
+    const request = ++academyHomeContinueRequest;
+    academyHideHomeContinue();
+    const identity = window.iClubPracticeDraftIdentityV1;
+    if (!identity || !window.sb || !loadProfile()) return;
+    const uid = await identity.bind().catch(() => null);
+    if (request !== academyHomeContinueRequest || !uid || identity.currentUid() !== uid) return;
+    const draft = identity.read();
+    const subjectKey = String(draft?.subjectKey || "").trim();
+    const sessionId = Number(draft?.quiz?.safeDrillSessionId || draft?.quiz?.safeSessionId || 0);
+    if (draft?.status !== "paused" || draft?.quiz?.mode !== "practice" ||
+        !subjectKey || !Number.isSafeInteger(sessionId) || sessionId <= 0 ||
+        !Array.isArray(draft?.quiz?.questions) || draft.quiz.questions.length === 0 ||
+        !isSubjectActive(subjectKey)) return;
+    const profile = loadProfile();
+    if (!profile || !getVisibleSubjectsCatalog().some(s => s.key === subjectKey)) return;
+    if (request !== academyHomeContinueRequest || identity.currentUid() !== uid) return;
+
+    const area = document.getElementById("academy-home-continue");
+    const list = document.getElementById("academy-home-continue-list");
+    if (!area || !list) return;
+
+    const subject = subjectByKey(subjectKey);
+    const title = subjectTitle(subjectKey, subject?.title || subjectKey);
+    const practiceLabel = t("practice") || tr3("Практика", "Amaliyot", "Practice");
+    const statusLabel = t("academy_continue_status") || tr3("Сохранённая пауза", "Saqlangan tanaffus", "Paused session");
+    const actionLabel = t("academy_continue_cta") || tr3("Продолжить", "Davom ettirish", "Continue");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "academy-home-resume-card";
+    btn.setAttribute("aria-label", title + " · " + practiceLabel + " · " + actionLabel);
+
+    const first = document.createElement("span");
+    first.className = "academy-home-resume-top";
+    first.textContent = title + " · " + practiceLabel;
+    const line = document.createElement("span");
+    line.className = "academy-home-resume-line";
+    const status = document.createElement("span");
+    status.className = "academy-home-resume-status";
+    status.textContent = statusLabel;
+    const cta = document.createElement("span");
+    cta.className = "academy-home-resume-cta";
+    cta.textContent = actionLabel + " ›";
+    line.append(status, cta);
+    btn.append(first,line);
+
+    btn.addEventListener("click", async () => {
+      if (btn.disabled || btn.dataset.opening === "1") return;
+      btn.dataset.opening = "1";
+      btn.disabled = true;
+      try {
+        // Repeat current authenticated ownership/session checks at click time.
+        const liveUid = await identity.bind().catch(() => null);
+        const liveDraft = identity.read();
+        const liveSession = Number(liveDraft?.quiz?.safeDrillSessionId || liveDraft?.quiz?.safeSessionId || 0);
+        if (liveUid !== uid || identity.currentUid() !== uid ||
+            liveDraft?.status !== "paused" || liveDraft?.subjectKey !== subjectKey ||
+            liveSession !== sessionId || request !== academyHomeContinueRequest ||
+            !document.querySelector("#view-home.is-active") ||
+            !isSubjectActive(subjectKey)) return;
+        const accessOk = await window.iClubCommercialAccessUI?.guardStudy?.(subjectKey);
+        if (accessOk === false || identity.currentUid() !== uid ||
+            !document.querySelector("#view-home.is-active")) return;
+        state.courses = state.courses || {};
+        state.courses.subjectKey = subjectKey;
+        state.courses.entryTab = "home";
+        saveState();
+        setTab("courses");
+        replaceCourses("subject-hub");
+        await renderSubjectHub();
+        if (state.courses.subjectKey === subjectKey &&
+            getCoursesTopScreen() === "subject-hub" && identity.currentUid() === uid) {
+          // Existing Practice start checks draft owner again and exposes Resume.
+          await openPracticeStart();
+        }
+      } catch {
+        showToast(t("not_available") || tr3("Недоступно", "Mavjud emas", "Unavailable"));
+      } finally {
+        btn.disabled = false;
+        delete btn.dataset.opening;
+      }
+    });
+    list.replaceChildren(btn);
+    area.hidden = false;
+  }
+
+  window.addEventListener("iclub:practice-identity-invalidated", () => {
+    academyHomeContinueRequest += 1;
+    academyHideHomeContinue();
+  });
+
+    function renderHome() {
     const profile = loadProfile();
     const compWrap = $("#home-competitive-list");
     const pinnedWrap = $("#home-study-list");
     if (!compWrap || !pinnedWrap) return;
 
+    academyHomeContinueRequest += 1;
+    academyHideHomeContinue();
     compWrap.innerHTML = "";
     pinnedWrap.innerHTML = "";
+    // A non-school learner can study, but never has Competitive slots/Tours.
+    const competitiveBlock = compWrap.closest(".home-block");
+    if (competitiveBlock) competitiveBlock.hidden = !!profile && !profile.is_school_student;
 
     if (!profile) {
       compWrap.innerHTML = `<div class="empty muted">${t("home_need_registration")}</div>`;
@@ -14489,7 +14616,7 @@ function renderHome() {
       updateHomeCompetitiveCard(card, s.key);
     });
 
-    pinned.slice(0, 4).forEach((s, idx) => {
+    pinned.forEach((s, idx) => {
   const tile = homePinnedTileEl(s, idx);
   pinnedWrap.appendChild(tile);
   updateHomePinnedTile(tile, s.key);
@@ -14497,6 +14624,7 @@ function renderHome() {
 
 // ✅ Home extra accordion (restore open/closed)
 applyHomeExtraState();
+void academyRenderHomeContinue().catch(() => academyHideHomeContinue());
 }
 
       // ===========================
@@ -14880,10 +15008,16 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   const el = document.createElement("button");
   el.type = "button";
   el.className = "home-pinned-tile";
+  el.dataset.subject = String(userSubject.key || "").toLowerCase();
+  // Approved Academy OS v5.8 pinned-card anatomy: label / title / footer.
+  // Live practice progress remains the real source value, never demo data.
   el.innerHTML = `
-    <div class="home-pinned-ico" aria-hidden="true"><svg class="v3-home-pinned-icon" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5A2.5 2.5 0 0 1 20 21z"/></svg></div>
-    <div class="home-pinned-title">${escapeHTML(title)}</div>
-    <div class="home-pinned-meta"><span class="js-home-pin-count">${escapeHTML(lessons)}</span> ${escapeHTML(t("home_practice_progress_label") || "")}</div>
+    <span class="home-pinned-top">${escapeHTML(tr3("УЧЕБНЫЙ ПРЕДМЕТ", "O‘QUV FANI", "STUDY SUBJECT"))}</span>
+    <strong class="home-pinned-title">${escapeHTML(title)}</strong>
+    <span class="home-pinned-bottom">
+      <span class="home-pinned-meta"><span class="js-home-pin-count">${escapeHTML(lessons)}</span> ${escapeHTML(t("home_practice_progress_label") || "")}</span>
+      <span class="home-pinned-open">${escapeHTML(tr3("Открыть ›", "Ochish ›", "Open ›"))}</span>
+    </span>
   `;
 
   el.addEventListener("click", () => {
@@ -14962,16 +15096,23 @@ const additionalSubjects = visibleSubjects.filter(s => s.type !== "main");
 state.courses = state.courses || {};
 
 // миграция: если осталось "all" — считаем "study"
-if (!state.courses.mainFilter || state.courses.mainFilter === "all") {
+if (!state.courses.mainFilter || state.courses.mainFilter === "all" ||
+    (!isSchoolUser(profile) && state.courses.mainFilter !== "study")) {
+  // Non-school learners may study, but cannot enter the Competitive catalogue.
+  // Persist only this display filter, never touch subject membership or progress.
   state.courses.mainFilter = "study"; // competitive | study
   saveState();
 }
 
 const filtersWrap = $("#courses-filter-row");
-if (filtersWrap) filtersWrap.innerHTML = "";
+if (filtersWrap) {
+  filtersWrap.innerHTML = "";
+  const filterSection = filtersWrap.closest(".section");
+  if (filterSection) filterSection.hidden = !isSchoolUser(profile);
+}
 
 const renderMainFilterRow = () => {
-  if (!filtersWrap) return;
+  if (!filtersWrap || !isSchoolUser(profile)) return;
 
   const row = document.createElement("div");
   row.className = "grid-section-filters";
@@ -15656,6 +15797,9 @@ async function renderSubjectHubMentorCard(subjectKey) {
     const toursSub = toursBtn?.querySelector(".muted.small");
 
     if (toursBtn) {
+      // Hide a permanently unavailable action for non-school accounts.
+      // Existing Tour permission checks stay authoritative on action dispatch.
+      toursBtn.hidden = !isSchoolUser(profile);
       const planAccess = await window.iClubCommercialAccessUI?.checkCompetitive?.(subjectKey);
       if (subjectKey !== state.courses.subjectKey || !hubPending.active()) return;
       const planEnforced = planAccess?.enforced === true;
@@ -22992,6 +23136,21 @@ if (!form) return;
 if (form.dataset.submitBound === "1") return;
 form.dataset.submitBound = "1";
 
+// Localize the browser's required consent validation without modifying
+// the accepted B00 two-step adapter or bypassing the native required guard.
+const regConsent = document.getElementById("reg-consent");
+if (regConsent && regConsent.dataset.localizedInvalidBound !== "1") {
+  regConsent.dataset.localizedInvalidBound = "1";
+  regConsent.addEventListener("invalid", () => {
+    const lang = String(document.getElementById("reg-language")?.value || "ru");
+    const text = lang === "uz" ? "Shartlar va ma’lumotlarni qayta ishlashga rozilikni tasdiqlang."
+      : lang === "en" ? "Please confirm the terms and data processing agreement."
+      : "Подтвердите согласие с условиями и обработкой данных.";
+    regConsent.setCustomValidity(text);
+  });
+  regConsent.addEventListener("change", () => regConsent.setCustomValidity(""));
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -23080,6 +23239,12 @@ if (
   showToast(t("fill_required_fields"));
   return;
 }
+// A non-school learner chooses 1–2 INITIAL Study subjects. This is not a
+// lifetime Study limit; additional subjects remain available in the catalogue.
+if (!isSchoolStudent && !main1) {
+  showToast(t("reg_study_subject_required"));
+  return;
+}
     const subjects = [];
 
     if (isSchoolStudent) {
@@ -23105,8 +23270,12 @@ if (
         });
       }
     } else {
-      // Non-school users: no subjects during registration.
-      // They can study/practice all subjects without tours and manage subjects later in Profile.
+      // Initial learning choice only; NEVER create Competitive slots for non-school users.
+      [main1, main2].filter(Boolean).forEach(key => subjects.push({
+        key,
+        mode: "study",
+        pinned: true
+      }));
     }
 
         if (subjects.filter(s => s.mode === "competitive").length > 2) {

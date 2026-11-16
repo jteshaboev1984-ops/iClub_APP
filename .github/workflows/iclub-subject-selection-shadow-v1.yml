@@ -5,7 +5,11 @@ on:
     branches:
       - feat/subscription-access-lifecycle-v1
       - main
+      - draft/ux531-academy-v55-b01-shell-20261115
     paths:
+      - 'registration-b00-ui.js'
+      - 'visual/iclub-registration-b00.css'
+      - 'qa/ux531-registered-navigation-e2e.cjs'
       - 'supabase/migrations/20261006164000_iclub_subject_selection_shadow_ui_v1.sql'
       - 'supabase/reversions/20261006164000_iclub_subject_selection_shadow_ui_v1_revert.sql'
       - 'supabase/tests/iclub_subject_selection_shadow_ui_v1_matrix.sql'
@@ -48,7 +52,7 @@ permissions:
 
 jobs:
   subject-selection-safety:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     services:
       postgres:

@@ -1,8 +1,11 @@
 name: Practice Topic Choice Premium QA
 on:
   pull_request:
-    branches: [main]
+    branches: [main, draft/ux531-academy-v55-b01-shell-20261115]
     paths:
+      - 'registration-b00-ui.js'
+      - 'visual/iclub-registration-b00.css'
+      - 'qa/ux531-registered-navigation-e2e.cjs'
       - 'practice-topic-choice.js'
       - 'practice-topic-choice.css'
       - 'app.js'
@@ -18,7 +21,7 @@ permissions:
 
 jobs:
   topic-choice:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4

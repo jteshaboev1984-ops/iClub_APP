@@ -1,0 +1,831 @@
+/* B00 conditional visual refresh — isolated to actual iClub registration.
+   No changed domain logic, selector IDs, fields, data or auth contracts. */
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .content.reg {
+  width: 100%;
+  max-width: 540px;
+  padding: 12px 0 calc(42px + var(--safe-bottom));
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress {
+  margin: 0 0 18px;
+  color: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-counter {
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: .018em;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-title {
+  color: #64748B;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 650;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 9px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track span {
+  height: 5px;
+  border-radius: 999px;
+  background: #E2E8F0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track span.is-done {
+  background: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .h1 {
+  margin-bottom: 7px;
+  font-size: clamp(22px, 5.6vw, 27px);
+  line-height: 1.18;
+  font-weight: 800;
+  letter-spacing: -.026em;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .content.reg > .muted {
+  max-width: 500px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.52;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-form {
+  gap: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step[hidden] {
+  display: none !important;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step-one {
+  padding: 17px 16px 16px;
+  border-radius: 16px;
+  background: #FFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, .045);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field {
+  min-width: 0;
+  gap: 7px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .label {
+  color: #0F172A;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 735;
+  overflow-wrap: anywhere;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input {
+  width: 100%;
+  min-width: 0;
+  min-height: 47px;
+  height: auto;
+  padding: 12px 13px;
+  border: 1px solid #DFE5EF;
+  border-radius: 11px;
+  background: #FFF;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #0F172A;
+  box-shadow: none;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input:focus-visible,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .chip-btn:focus-visible,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-action:focus-visible {
+  outline: 2px solid #2F6FD6;
+  outline-offset: 2px;
+}
+/* The existing legacy school-mode SELECT is visually hidden for app.js sync.
+   It must never inherit the visible-input width or minimum height. */
+.iclub-visual-v3 #view-registration.reg-b00-enhanced #reg-is-school {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input:disabled {
+  background: #F2F5FB;
+  border-color: #E3E8F2;
+  color: #718096;
+  opacity: 1;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field-hint {
+  color: #64748B;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field-note {
+  padding: 10px 12px;
+  background: #F3F7FF;
+  border: 1px solid #E1EAFE;
+  border-radius: 10px;
+  color: #31588A;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-school-block,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
+  padding: 15px 14px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 5px 18px rgba(15, 23, 42, .035);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle {
+  min-height: 76px;
+  gap: 14px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle > div {
+  min-width: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle .muted {
+  margin-top: 3px;
+  line-height: 1.42;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-school-block {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .card-title,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card .card-title {
+  color: #0F172A;
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1.4;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card > .muted,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card .muted {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.54;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 13px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn {
+  min-height: 44px;
+  min-width: 0;
+  padding: 9px 7px;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  color: #273449;
+  background: #F8FAFE;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 700;
+  box-shadow: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn.is-active {
+  border-color: #2F6FD6;
+  background: #2F6FD6;
+  color: #FFF;
+  box-shadow: 0 3px 10px rgba(47, 111, 214, .15);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-summary {
+  padding: 11px 12px;
+  border: 1px solid #E2EAFE;
+  border-radius: 11px;
+  background: #F3F7FF;
+  color: #31588A;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-line {
+  gap: 12px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #334155;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-top: 1px;
+  accent-color: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-action,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit {
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  border-radius: 11px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 750;
+  cursor: pointer;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-next,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit {
+  border: 1px solid #2F6FD6;
+  background: #2F6FD6;
+  color: #FFF;
+  box-shadow: 0 7px 17px rgba(47, 111, 214, .16);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-prev {
+  background: #FFF;
+  border: 1px solid #DFE5EF;
+  color: #31588A;
+  box-shadow: none;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-action:disabled,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit:disabled {
+  opacity: .6;
+  cursor: progress;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit {
+  margin-top: 2px;
+}
+.iclub-visual-v3 #view-splash .logo-wrap {
+  background: linear-gradient(160deg, #F5F8FF, #EAF1FF);
+  border-color: #DFE8FA;
+  border-radius: 26px;
+}
+.iclub-visual-v3 #view-splash .splash-title {
+  font-size: 25px;
+  letter-spacing: -.025em;
+}
+@media (min-width: 780px) {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .content.reg {
+    max-width: 520px;
+    padding-top: 20px;
+  }
+}
+@media (max-width: 359px) {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step-one {
+    padding: 14px 12px;
+  }
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-toggle,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-school-block,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
+    padding: 12px 11px;
+  }
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn {
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+
+/* =======================================================================
+   B00 / Stitch fidelity pass 2 — presentation only
+   Source: approved Academic Sapphire screen comps (NOT their demo logic).
+   Fields, source translations, permissions and save handlers remain intact.
+   ======================================================================= */
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active),
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #main {
+  background: #FAF8FF;
+}
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar {
+  background: rgba(250,248,255,.97);
+  border-bottom: 1px solid rgba(28,47,77,.045);
+  box-shadow: 0 2px 12px rgba(26,37,64,.035);
+}
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar-back {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 12px;
+  padding: 0;
+}
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar-back:active {
+  background: #E9EDFA;
+}
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active) #topbar .topbar-logo {
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(10,27,59,.07);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .content.reg {
+  max-width: 540px;
+  padding-top: 17px;
+  padding-bottom: calc(46px + var(--safe-bottom));
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress {
+  margin-bottom: 23px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-counter {
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+  color: #1557BA;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-title {
+  font-size: 12px;
+  font-weight: 650;
+  color: #3E4860;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track {
+  gap: 6px;
+  margin-top: 9px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track span {
+  height: 6px;
+  background: #E0E6FA;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-progress-track span.is-done {
+  background: linear-gradient(90deg, #2F6FD6, #1E56B3);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .h1 {
+  color: #131B2E;
+  font-size: clamp(26px, 7.1vw, 31px);
+  line-height: 1.16;
+  letter-spacing: -.045em;
+  font-weight: 825;
+  margin-bottom: 9px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .content.reg > .muted {
+  font-size: 15px;
+  font-weight: 440;
+  line-height: 1.54;
+  color: #414D63;
+  margin-bottom: 25px;
+  letter-spacing: -.008em;
+  max-width: 500px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step {
+  gap: 20px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step-one {
+  background: transparent;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-fields-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
+  border: 1px solid rgba(26,47,82,.035);
+  border-radius: 19px;
+  background: #FFFFFF;
+  box-shadow:
+    0 9px 27px -12px rgba(24,42,83,.12),
+    0 2px 6px rgba(25,42,76,.018);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-fields-card {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  padding: 24px 20px 25px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-fields-card .field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .label {
+  color: #131B2E;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 720;
+  letter-spacing: -.016em;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input {
+  min-height: 50px;
+  border: 1px solid #E7EBF5;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 13px 15px;
+  box-shadow: 0 2px 3px rgba(15,23,42,.027);
+  font-size: 14px;
+  font-weight: 450;
+  color: #16213A;
+  line-height: 1.42;
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input::placeholder {
+  color: #6D778E;
+  opacity: 1;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input:focus-visible {
+  border-color: #2F6FD6;
+  box-shadow: 0 0 0 3px rgba(47,111,214,.15);
+  outline: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .input:disabled {
+  background-color: #E9EDFF;
+  color: #60708B;
+  border-color: transparent;
+  box-shadow: 0 1px 2px rgba(15,23,42,.025);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced #reg-district:disabled {
+  padding-left: 41px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%234B5970' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 14px center;
+  background-size: 18px 18px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-fields-card .field:first-child > .label {
+  font-size: 15px;
+  font-weight: 760;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field-hint,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field-note {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  font-size: 12px;
+  line-height: 1.53;
+  color: #49566F;
+  padding: 0;
+  margin: 1px 0 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field-hint::before {
+  content: "ⓘ";
+  display: block;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .field-note::before {
+  content: "↻";
+  display: block;
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1;
+  color: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-action,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit {
+  min-height: 53px;
+  border-radius: 11px;
+  font-size: 15px;
+  font-weight: 780;
+  letter-spacing: -.012em;
+  transition: transform .14s ease, background-color .14s ease, box-shadow .14s ease;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-next,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit {
+  background: #2F6FD6;
+  color: #FFFFFF;
+  border: 1px solid #2F6FD6;
+  box-shadow: 0 5px 12px rgba(47,111,214,.18);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-next:active,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit:active {
+  background: #1E56B3;
+  transform: scale(.992);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-next::after,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step #reg-submit::after {
+  content: "→";
+  display: inline-block;
+  font-size: 21px;
+  font-weight: 450;
+  line-height: 0;
+  vertical-align: -.035em;
+  margin-left: 11px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step-two {
+  gap: 20px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card .reg-toggle {
+  padding: 0;
+  min-height: 57px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  align-items: center;
+  gap: 14px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card .reg-toggle .label {
+  font-size: 16px;
+  font-weight: 760;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card .reg-toggle .muted {
+  font-size: 13px;
+  line-height: 1.48;
+  color: #58637A;
+  margin-top: 4px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card #reg-school-block {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card #reg-school-block .field {
+  min-width: 0;
+  gap: 8px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card #reg-school-block .input {
+  background-color: #F0F2FF;
+  border-color: transparent;
+  box-shadow: none;
+  font-size: 14px;
+  min-height: 50px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card #reg-school-block .input:focus-visible {
+  border-color: #2F6FD6;
+  box-shadow: 0 0 0 3px rgba(47,111,214,.15);
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card #reg-school-block #reg-school {
+  padding-left: 38px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23627187' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 10 10-6 10 6-10 6-10-6Z'/%3E%3Cpath d='M5 12v6c2.3 2.4 11.7 2.4 14 0v-6M22 10v7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 11px center;
+  background-size: 19px 19px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card {
+  padding: 20px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .card-title {
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 770;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  /* Keep explanatory parentheses together when a narrow phone wraps.
+     In roomier layouts the heading remains a single line. */
+  text-wrap: balance;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .card-title::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+  background: #2F6FD6;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card > .muted {
+  color: #516078;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 8px 0 17px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  grid-template-columns: none;
+  align-items: stretch;
+  gap: 9px;
+  margin: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  min-width: 0;
+  min-height: 50px;
+  width: auto;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: #F0F2FF;
+  color: #202B43;
+  padding: 11px 13px;
+  font-size: 13px;
+  font-weight: 640;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  box-shadow: none;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn::before {
+  content: "";
+  display: block;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  background-color: #43516B;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn.is-active,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[aria-pressed="true"] {
+  border-color: #2F6FD6;
+  background: #DBE6FF;
+  color: #124A9B;
+  box-shadow: 0 0 0 1px rgba(47,111,214,.12) inset;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn.is-active::before {
+  background-color: #195DCA;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn.is-active::after {
+  content: "✓";
+  display: inline-block;
+  margin-left: 1px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #195DCA;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-selected-count,
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-summary {
+  background: #EBEEFF;
+  border: 0;
+  color: #21304A;
+  box-shadow: none;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-selected-count {
+  position: relative;
+  min-height: 38px;
+  margin-top: 18px;
+  padding: 13px 12px 1px 40px;
+  border-radius: 12px 12px 0 0;
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.45;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-selected-count::before {
+  content: "ⓘ";
+  position: absolute;
+  left: 13px;
+  top: 11px;
+  color: #2F6FD6;
+  font-size: 19px;
+  font-weight: 850;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-summary {
+  margin: 0;
+  padding: 1px 12px 13px 40px;
+  border-radius: 0 0 12px 12px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-change-note {
+  position: relative;
+  margin-top: 13px;
+  padding-left: 26px;
+  color: #5B667E;
+  font-size: 12px;
+  line-height: 1.57;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-change-note::before {
+  content: "↻";
+  position: absolute;
+  top: 0;
+  left: 2px;
+  font-size: 20px;
+  line-height: 1;
+  color: #6A7D9F;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card .card-title {
+  color: #14233B;
+  font-size: 17px;
+  font-weight: 760;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card .muted {
+  font-size: 13px;
+  line-height: 1.57;
+  color: #516078;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent {
+  padding: 18px 18px;
+  gap: 13px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #233149;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-consent input {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+  accent-color: #2F6FD6;
+  border-radius: 6px;
+  margin-top: 0;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-prev {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #18263D !important;
+  font-weight: 770;
+  min-height: 48px;
+  padding: 9px 12px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-prev::before {
+  content: "←";
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 450;
+  line-height: 0;
+  vertical-align: -.045em;
+  margin-right: 9px;
+}
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-prev:active {
+  background: #EEF1FC !important;
+}
+@media (max-width: 359px) {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-fields-card {
+    padding: 20px 15px;
+    gap: 23px;
+  }
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-school-card,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card,
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-nonstudent-card {
+    padding: 16px;
+  }
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn {
+    padding: 10px 11px;
+    gap: 7px;
+    font-size: 12px;
+  }
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-selected-count {
+    padding-left: 33px;
+  }
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-summary {
+    padding-left: 33px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step:not([hidden]) {
+    animation: regB00StitchReveal .24s ease-out;
+  }
+  @keyframes regB00StitchReveal {
+    from { opacity: .65; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="informatics"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222.5%22%20y%3D%224%22%20width%3D%2219%22%20height%3D%2216%22%20rx%3D%222.5%22%2F%3E%3Cpath%20d%3D%22m6.5%209%203%203-3%203M12%2016h5%22%2F%3E%3C%2Fsvg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%222.5%22%20y%3D%224%22%20width%3D%2219%22%20height%3D%2216%22%20rx%3D%222.5%22%2F%3E%3Cpath%20d%3D%22m6.5%209%203%203-3%203M12%2016h5%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="economics"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%2017%206-6%204%204%208-9M15%206h6v6%22%2F%3E%3C%2Fsvg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m3%2017%206-6%204%204%208-9M15%206h6v6%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="biology"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%203c9%203%209%2015%200%2018M16%203C7%206%207%2018%2016%2021M8.5%207h7M8%2012h8M8.5%2017h7%22%2F%3E%3C%2Fsvg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%203c9%203%209%2015%200%2018M16%203C7%206%207%2018%2016%2021M8.5%207h7M8%2012h8M8.5%2017h7%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="chemistry"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%203h8M10%203v8L4.5%2020h15L14%2011V3M8%2015h8%22%2F%3E%3C%2Fsvg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%203h8M10%203v8L4.5%2020h15L14%2011V3M8%2015h8%22%2F%3E%3C%2Fsvg%3E");
+}
+
+.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-subject-card .chip-btn[data-subject-key="mathematics"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%222.5%22%20width%3D%2216%22%20height%3D%2219%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%208h8M12%205v6M8%2015h3M14%2014l3%203m0-3-3%203%22%2F%3E%3C%2Fsvg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%222.5%22%20width%3D%2216%22%20height%3D%2219%22%20rx%3D%222%22%2F%3E%3Cpath%20d%3D%22M8%208h8M12%205v6M8%2015h3M14%2014l3%203m0-3-3%203%22%2F%3E%3C%2Fsvg%3E");
+}

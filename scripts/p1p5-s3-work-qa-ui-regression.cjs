@@ -29,7 +29,7 @@ function checkDuration(locale, input, expected) {
 }
 const weeklyCode =
   between("  function weeklyS3Copy() {", "  function weeklyS3Panel() {") +
-  between("  function bindWeeklyS3() {", "  async function renderDashboard() {") +
+  between("  function bindWeeklyS3() {", "  // Academy OS v5.8: exam preferences belong to a single compact plan.") +
   "\nglobalThis.__bindWeekly = bindWeeklyS3;";
 
 const savedChoice = Object.freeze({
@@ -49,6 +49,7 @@ async function clickCase({language="ru",choice="change",row=savedChoice,
   p1="110",p5="90",day="40",days="5"}) {
   let onClick;
   const calls = [];
+  const planRenders = [];
   const feedback = {textContent:""};
   const button = {
     disabled:false,
@@ -79,17 +80,30 @@ async function clickCase({language="ru",choice="change",row=savedChoice,
   const context = {
     state, rootEl:()=>({querySelector:()=>panel}),
     internal: {api:{
-      saveWeeklyChoiceS3:async(args,key)=>{calls.push({args,key});return {ok:true,data:{saved:true}};},
+      saveWeeklyChoiceS3:async(args,key)=>{
+        calls.push({args,key});
+        state.weeklyChoice={
+          ...state.weeklyChoice,
+          choice_code:args.choice,choice_recorded:true,
+          p1_minutes:args.p1Minutes==null?state.weeklyChoice.p1_minutes:args.p1Minutes,
+          p5_minutes:args.p5Minutes==null?state.weeklyChoice.p5_minutes:args.p5Minutes,
+          schedule_revision:Number(state.weeklyChoice.schedule_revision)+1
+        };
+        return {ok:true,data:{saved:true}};
+      },
+      weeklyChoiceS3:async()=>({ok:true,data:{...state.weeklyChoice}}),
       examProfile:async()=>({ok:true,data:{}})
     }},
     key:()=> "s3-ui-work-qa-key-abcdefghijklmnop",
-    renderDashboard:async()=>true
+    // The new navigation saves to the same S3 API, then returns to My plan.
+    // This is a presentation spy: it never changes persisted academic data.
+    renderMyPlan:section=>{planRenders.push(section);return true;}
   };
   vm.runInNewContext(weeklyCode,context,{filename:"exam-prep-live-extracted.js"});
   context.__bindWeekly();
   assert.equal(typeof onClick,"function","button click handler must be attached");
   await onClick();
-  return {calls,feedback:feedback.textContent,buttonDisabled:button.disabled,state};
+  return {calls,planRenders,feedback:feedback.textContent,buttonDisabled:button.disabled,state};
 }
 
 async function main() {
@@ -108,6 +122,7 @@ async function main() {
     const duplicate = await clickCase({language});
     assert.equal(duplicate.calls.length,0,
       "same displayed choice must not create another S3 row ("+language+")");
+    assert.deepEqual(duplicate.planRenders,[],"unchanged saved choice does not navigate or re-save");
     assert(duplicate.feedback.length>15,"saved-choice acknowledgement must be visible");
     const badDaily = await clickCase({
       language,row:{...savedChoice,choice_code:"redistribute",chosen_math_minutes:180},
@@ -121,10 +136,15 @@ async function main() {
       day:"40",days:"5",p1:"110",p5:"90"
     });
     assert.equal(valid.calls.length,1,"real change must still be submitted");
+    assert.deepEqual(valid.planRenders,["weekly"],"successful save returns to expanded My plan section");
     assert.equal(valid.calls[0].args.minutesPerDay,40);
     assert.equal(valid.calls[0].args.daysPerWeek,5);
     assert.equal(valid.calls[0].args.p1Minutes,110);
     assert.equal(valid.calls[0].args.p5Minutes,90);
+    assert.equal(valid.state.weeklyChoice.schedule_revision,5,
+      "S3 read-after-write must use a new server revision");
+    assert.equal(valid.state.weeklyChoice.choice_code,"change",
+      "S3 UI snapshot must reflect the persisted choice");
   }
 
   const genuineEdit = await clickCase({p1:"115",p5:"85"});

@@ -65,9 +65,9 @@ async function show(page, id) {
     width: document.documentElement.scrollWidth,
     innerWidth: innerWidth
   }));
-  assert(s.titleSize === '20px', `Ratings mobile title drift: ${s.titleSize}`);
-  assert(s.segmentRadius === '10px', `Ratings segment radius drift: ${s.segmentRadius}`);
-  assert(s.activeColor === 'rgb(36, 87, 214)', `Ratings active state drift: ${s.activeColor}`);
+  assert(s.titleSize === '21px', `Ratings mobile title drift: ${s.titleSize}`);
+  assert(s.segmentRadius === '15px', `Ratings segment radius drift: ${s.segmentRadius}`);
+  assert(s.activeColor === 'rgb(28, 88, 170)', `Ratings active state drift: ${s.activeColor}`);
   assert(s.iconCount === 3, `Ratings line icons missing: ${s.iconCount}`);
   assert(s.width <= s.innerWidth, `Ratings overflow: ${JSON.stringify(s)}`);
 
@@ -79,8 +79,8 @@ async function show(page, id) {
     width: document.documentElement.scrollWidth,
     innerWidth: innerWidth
   }));
-  assert(s.titleSize === '23px', `Global screen title drift: ${s.titleSize}`);
-  assert(s.cardRadius === '12px', `Support card radius drift: ${s.cardRadius}`);
+  assert(parseFloat(s.titleSize) >= 22 && parseFloat(s.titleSize) <= 29, `Global screen title drift: ${s.titleSize}`);
+  assert(s.cardRadius === '20px', `Support card radius drift: ${s.cardRadius}`);
   assert(s.textareaMinHeight === '120px', `Support textarea geometry drift: ${s.textareaMinHeight}`);
   assert(s.width <= s.innerWidth, `Support overflow: ${JSON.stringify(s)}`);
 

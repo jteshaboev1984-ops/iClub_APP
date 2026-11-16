@@ -70,7 +70,7 @@ assert(css.includes('PREMIUM MATHEMATICS EXAM PREP UX v3'), 'Premium Math Exam P
       innerWidth: window.innerWidth
     };
   });
-  assert(entry.radius === '12px', `Math feature card radius drift: ${entry.radius}`);
+  assert(entry.radius === '17px', `Math feature card radius drift: ${entry.radius}`);
   assert(entry.shadow !== 'none', 'Math feature card must read as a premium product surface');
   assert(entry.titleSize >= 17, `Math feature title hierarchy too weak for peer preparation modes: ${entry.titleSize}`);
   assert(entry.width <= entry.innerWidth, `Math feature entry overflow: ${JSON.stringify(entry)}`);

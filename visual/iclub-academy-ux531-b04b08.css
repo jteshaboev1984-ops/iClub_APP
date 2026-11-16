@@ -1,0 +1,850 @@
+/* iClub Academy OS — UX #531 B04–B08, cross-screen design foundation.
+   ONLY visual styles. No changes to app state, Supabase, attempts, scores or auth.
+   Registration B00 remains scoped to #view-registration; don't override it.
+   Contextual headers inside attempts remain compact; no full-height tour hero. */
+
+/* Shared, durable design tokens: sapphire family, distinct yet adjacent tones. */
+body.iclub-visual-v3 {
+  --academy-bg:#f5f8ff;
+  --academy-paper:#fff;
+  --academy-paper-blue:#f3f8ff;
+  --academy-text:#142b50;
+  --academy-text-soft:#5a759b;
+  --academy-edge:#ccdcf4;
+  --academy-edge-strong:#b2ccf1;
+  --academy-focus:#377bdf;
+  --academy-radius-lg:20px;
+  --academy-radius:15px;
+  --academy-radius-sm:11px;
+  --academy-shadow:0 7px 21px rgba(28,74,138,.075);
+  --academy-quiet-shadow:0 3px 11px rgba(28,74,138,.045);
+  --academy-home-a:#144383;
+  --academy-home-b:#2c65bb;
+  --academy-subjects-a:#2459a2;
+  --academy-subjects-b:#3976c8;
+  --academy-math-a:#123a79;
+  --academy-math-b:#2857a8;
+  --academy-ratings-a:#25508a;
+  --academy-ratings-b:#4477b9;
+  --academy-profile-a:#30588c;
+  --academy-profile-b:#4b7bae;
+}
+body.iclub-visual-v3 .view.is-active .content,
+body.iclub-visual-v3 #courses-stack > .stack-screen {
+  min-width:0;
+}
+body.iclub-visual-v3 #view-courses .stack-screen.is-active,
+body.iclub-visual-v3 #view-profile .profile-screen.is-active {
+  color:var(--academy-text);
+}
+/* Common background only on registered learner views, not B00/splash/QR public. */
+body.iclub-visual-v3:has(#view-home.is-active),
+body.iclub-visual-v3:has(#view-courses.is-active),
+body.iclub-visual-v3:has(#view-ratings.is-active),
+body.iclub-visual-v3:has(#view-profile.is-active),
+body.iclub-visual-v3:has(#view-notifications.is-active),
+body.iclub-visual-v3:has(#view-community.is-active),
+body.iclub-visual-v3:has(#view-about.is-active),
+body.iclub-visual-v3:has(#view-support.is-active),
+body.iclub-visual-v3:has(#view-support-topic.is-active),
+body.iclub-visual-v3:has(#view-certificates.is-active),
+body.iclub-visual-v3:has(#view-archive.is-active) {
+  background:var(--academy-bg);
+}
+
+/* B04 — Learning, materials, Practice; keep original ID/action contract. */
+body.iclub-visual-v3 #courses-stack > :is(
+  #courses-lessons,#courses-video,#courses-books,#courses-practice-start,
+  #courses-practice-result,#courses-practice-review,#courses-practice-recs,
+  #courses-my-recs,#courses-my-rec-detail,#courses-my-rec-topic-history,
+  #courses-my-rec-topic-review
+) > .section:first-child {
+  min-width:0;
+}
+body.iclub-visual-v3 #courses-stack > :is(
+  #courses-lessons,#courses-video,#courses-books,#courses-practice-start,
+  #courses-practice-result,#courses-practice-review,#courses-practice-recs,
+  #courses-my-recs,#courses-my-rec-detail,#courses-my-rec-topic-history,
+  #courses-my-rec-topic-review
+) > .section:first-child > :is(.h1,[id$="-title"].h1) {
+  color:#1d4f96;
+  font-size:clamp(21px,5.5vw,26px);
+  font-weight:850;
+  letter-spacing:-.6px;
+  line-height:1.14;
+  margin:8px 0 5px;
+  overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #courses-stack > :is(
+  #courses-lessons,#courses-video,#courses-books,#courses-practice-start,
+  #courses-practice-result,#courses-practice-review,#courses-practice-recs,
+  #courses-my-recs,#courses-my-rec-detail
+) > .section:first-child > .muted {
+  color:var(--academy-text-soft);
+  font-size:12px;
+  line-height:1.52;
+}
+/* Consistent cards for list/review/resource surfaces, including dynamically added rows. */
+body.iclub-visual-v3 :is(
+  #courses-lessons,#courses-video,#courses-books,#courses-practice-start,
+  #courses-practice-result,#courses-practice-review,#courses-practice-recs,
+  #courses-my-recs,#courses-my-rec-detail,#courses-my-rec-topic-history,
+  #courses-my-rec-topic-review
+) :is(.card,.card-btn,.list > .item,.list > .card) {
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  background:var(--academy-paper);
+  box-shadow:var(--academy-shadow);
+  min-width:0;
+}
+body.iclub-visual-v3 #courses-video .video-hub-card{
+  background:linear-gradient(145deg,#fff,#f3f8ff);
+  border-color:var(--academy-edge-strong);
+  padding:clamp(12px,3.6vw,19px);
+}
+body.iclub-visual-v3 #courses-video :is(.video-hub-subject,.video-hub-note-title){
+  color:#2057a1;
+}
+body.iclub-visual-v3 #courses-video #video-player-wrap{
+  border-radius:var(--academy-radius)!important;
+}
+/* Real subject/stage facts only, no invented progress chips. */
+body.iclub-visual-v3 #courses-practice-start .practice-hero{
+  background:linear-gradient(142deg,#fff,#eef5ff);
+  border:1px solid #bdd5f7;
+  border-radius:var(--academy-radius-lg);
+  box-shadow:var(--academy-shadow);
+}
+body.iclub-visual-v3 #courses-practice-start .practice-hero::before{
+  width:3px;background:#3473ca;
+}
+body.iclub-visual-v3 #courses-practice-start :is(.practice-hero-title,.practice-micro-title){
+  color:#194b90;
+}
+body.iclub-visual-v3 #courses-practice-start :is(.practice-metric,.practice-last){
+  border:1px solid var(--academy-edge);border-radius:var(--academy-radius);
+  background:#fff;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-topic-choice{
+  min-width:0;
+  --academy-local-edge:var(--academy-edge);
+}
+/* QUIZ focus: small status bar, generous readable question, no enormous hero. */
+body.iclub-visual-v3 #courses-practice-quiz .quiz-top{
+  background:#eef5ff;
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius);
+  box-shadow:none;
+  padding:10px 12px;
+}
+body.iclub-visual-v3 #courses-practice-quiz > .card{
+  background:#fff;border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  box-shadow:var(--academy-shadow);
+  min-width:0;
+}
+body.iclub-visual-v3 #courses-practice-quiz .question-text{
+  color:#172c49;line-height:1.55;overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #courses-practice-quiz :is(#practice-options,.options){
+  min-width:0;
+}
+body.iclub-visual-v3 #courses-practice-quiz #practice-pause-btn{
+  min-height:44px;
+}
+body.iclub-visual-v3 :is(
+ #courses-practice-result,#courses-practice-review,#courses-practice-recs,
+ #courses-my-rec-detail,#courses-my-rec-topic-history,#courses-my-rec-topic-review
+) :is(.card-title,.h1){
+ color:#1d4b8c;
+}
+body.iclub-visual-v3 :is(
+ #courses-practice-result,#courses-practice-review,#courses-practice-recs,
+ #courses-my-rec-detail
+) .actions-row{
+ display:flex;flex-wrap:wrap;gap:9px;
+}
+body.iclub-visual-v3 :is(
+ #courses-practice-result,#courses-practice-review,#courses-practice-recs
+) .actions-row > .btn{
+ min-height:44px;min-width:0;flex:1 1 138px;border-radius:12px;
+}
+/* Answer correctness and alerts use existing semantic colors, not blue recolors. */
+
+/* B05 — Tours, timed assessments, rankings, archive and certificates. */
+body.iclub-visual-v3 #courses-tours .tours-hero{
+  background:linear-gradient(142deg,#fff,#edf4ff);
+  border:1px solid #bfd6f7;
+  box-shadow:var(--academy-shadow);
+  border-radius:var(--academy-radius-lg);
+}
+body.iclub-visual-v3 #courses-tours .tours-hero::before{
+  width:3px;background:#316cc1;
+}
+body.iclub-visual-v3 #courses-tours .tours-hero-title{
+  color:#194b92;
+}
+body.iclub-visual-v3 #courses-tours :is(.tours-metric,.tours-history,.tours-status){
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  background:#fff;
+  box-shadow:var(--academy-quiet-shadow);
+}
+body.iclub-visual-v3 #courses-tour-rules > .section > .h1{
+  font-size:clamp(21px,5.5vw,26px);
+  font-weight:850;color:#1c4a89;
+}
+body.iclub-visual-v3 #courses-tour-rules :is(.card,.tour-rules-card){
+  background:#fff;border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  box-shadow:var(--academy-shadow);
+}
+body.iclub-visual-v3 #courses-tour-rules input[type="checkbox"]:focus-visible{
+  outline:3px solid var(--academy-focus);outline-offset:3px;
+}
+body.iclub-visual-v3 #courses-tour-quiz .tour-head{
+  background:#edf5ff;border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius);
+  box-shadow:none;
+}
+body.iclub-visual-v3 #courses-tour-quiz .tour-timer-card:not(.danger){
+  background:#fff;border:1px solid #bfd4f3;
+  border-radius:var(--academy-radius);
+  box-shadow:var(--academy-quiet-shadow);
+}
+body.iclub-visual-v3 #courses-tour-quiz .tour-timer-card.danger{
+  /* Preserve explicit red warning semantics and real countdown. */
+  border-radius:var(--academy-radius);
+}
+body.iclub-visual-v3 #courses-tour-quiz > .card{
+  background:#fff;border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  box-shadow:var(--academy-shadow);min-width:0;
+}
+body.iclub-visual-v3 #courses-tour-quiz #tour-question{
+  overflow-wrap:anywhere;line-height:1.53;color:#172c49;
+}
+body.iclub-visual-v3 #courses-tour-quiz .tour-monitor{
+  line-height:1.35;
+}
+body.iclub-visual-v3 :is(#courses-tour-result,#courses-tour-review) :is(.card,.card-btn){
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  background:#fff;box-shadow:var(--academy-shadow);
+}
+body.iclub-visual-v3 :is(#courses-tour-result,#courses-tour-review) .actions-row > .btn{
+  min-height:44px;border-radius:12px;
+}
+/* Leaderboard has its own header actions. Keep back/search/info buttons alive. */
+body.iclub-visual-v3 #view-ratings .lb-header{
+  min-height:156px;
+  margin:-12px -12px 17px;
+  padding:17px clamp(13px,4vw,23px);
+  border:0;border-radius:0 0 26px 26px;
+  background:linear-gradient(148deg,#25508a 0%,#4477b9 67%,#92b9dd 100%);
+  box-shadow:0 7px 21px rgba(28,74,138,.10);
+}
+body.iclub-visual-v3 #view-ratings .lb-title{
+  color:#fff;font-size:clamp(21px,5vw,27px);line-height:1.1;
+  font-weight:850;letter-spacing:-.6px;
+}
+body.iclub-visual-v3 #view-ratings :is(.lb-back,.lb-search-btn,.lb-info){
+  min-width:42px;min-height:42px;width:42px;height:42px;
+  background:rgba(255,255,255,.11);
+  border:1px solid rgba(255,255,255,.34);
+  color:#fff;border-radius:13px;
+}
+body.iclub-visual-v3 #view-ratings .v3-ratings-icon{
+  stroke:currentColor;
+}
+body.iclub-visual-v3 #view-ratings .lb-segment{
+  border:1px solid #cfddf4;background:#eaf2ff;
+  border-radius:var(--academy-radius);
+}
+body.iclub-visual-v3 #view-ratings .seg-btn{
+  min-height:44px;border-radius:11px;
+}
+body.iclub-visual-v3 #view-ratings .seg-btn.is-active{
+  background:#fff;color:#1c58aa;
+  box-shadow:var(--academy-quiet-shadow);
+}
+body.iclub-visual-v3 #view-ratings .lb-select{
+  min-height:44px;border-color:var(--academy-edge);
+  border-radius:13px;background:#fff;color:#223b5d;
+}
+body.iclub-visual-v3 #view-ratings :is(.lb-list-wrap,.lb-search-panel){
+  border-color:var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+}
+body.iclub-visual-v3 #view-ratings .lb-mybar{
+  border-color:var(--academy-edge-strong);
+  box-shadow:0 -5px 20px rgba(25,75,150,.085);
+}
+body.iclub-visual-v3 :is(#view-archive,#view-certificates,#view-certificate-verify) .content{
+  max-width:760px;width:100%;margin-inline:auto;
+  padding-bottom:90px;
+}
+body.iclub-visual-v3 :is(#view-archive,#view-certificates,#view-certificate-verify) :is(.card,.list > .item,.list > .card){
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  background:#fff;box-shadow:var(--academy-quiet-shadow);
+}
+
+/* B06 — Profile, settings and supporting information. */
+body.iclub-visual-v3 #view-profile .academy-profile-zone{
+  box-sizing:border-box;min-height:156px;
+  width:calc(100% + 24px);margin:-10px -12px 18px;
+  padding:16px 20px 22px;border-radius:0 0 26px 26px;
+  display:flex;flex-direction:column;justify-content:center;
+  background:linear-gradient(148deg,#30588c 0%,#4b7bae 67%,#99badd 100%);
+  border-bottom:1px solid rgba(255,255,255,.24);
+  box-shadow:0 7px 22px rgba(27,70,140,.10);
+}
+body.iclub-visual-v3 #view-profile .academy-profile-zone .academy-view-kicker{
+  color:#dceafd;
+}
+body.iclub-visual-v3 #view-profile .academy-profile-zone h1{
+  color:#fff;font-size:clamp(23px,6vw,29px);
+  font-weight:840;line-height:1.16;letter-spacing:-.6px;margin:5px 0 4px;
+}
+body.iclub-visual-v3 #view-profile .academy-profile-zone p{
+  color:#e4effd;font-size:12px;margin:0;
+}
+/* The existing profile details stay as original cards; no invented badges. */
+/* Remove old decorative corner circle; use only tonal light and border. */
+body.iclub-visual-v3 #view-profile .profile-hero::after{
+  content:none!important;display:none!important;
+}
+body.iclub-visual-v3 #view-profile #profile-main .profile-hero{
+  background:linear-gradient(145deg,#fff,#f2f7ff);
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  box-shadow:var(--academy-shadow);
+}
+body.iclub-visual-v3 #view-profile :is(.profile-section-title,.profile-name){
+  color:#1c4a8b;letter-spacing:-.25px;
+}
+body.iclub-visual-v3 #view-profile :is(.profile-row,.overview-card,.profile-stat,.slot-card,.profile-credentials-card){
+  border-color:var(--academy-edge);
+  background:#fff;
+  border-radius:var(--academy-radius);
+  box-shadow:var(--academy-quiet-shadow);
+}
+body.iclub-visual-v3 #view-profile .profile-row{
+  min-height:58px;
+}
+body.iclub-visual-v3 #view-profile .profile-row-title{
+  white-space:normal;text-overflow:clip;overflow-wrap:anywhere;line-height:1.32;
+}
+
+/* Owner visual acceptance: profile numbers, names and status text must stay
+   inside their own cards, with matched baselines at narrow phone widths. */
+body.iclub-visual-v3 #view-profile .profile-hero,
+body.iclub-visual-v3 #view-profile .profile-hero-info,
+body.iclub-visual-v3 #view-profile .profile-stats,
+body.iclub-visual-v3 #view-profile .profile-overview-grid{
+  min-width:0;
+}
+body.iclub-visual-v3 #view-profile .profile-name,
+body.iclub-visual-v3 #view-profile .profile-hero-info .muted{
+  max-width:100%;overflow-wrap:break-word;word-break:normal;
+}
+body.iclub-visual-v3 #view-profile .profile-stats{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;gap:8px;
+}
+body.iclub-visual-v3 #view-profile .profile-stat{
+  display:flex;flex-direction:column;align-items:stretch;
+  justify-content:flex-start;gap:4px;min-width:0;
+  padding:10px 8px;line-height:1.3;text-align:left;
+}
+body.iclub-visual-v3 #view-profile .profile-stat-value{
+  min-width:0;max-width:100%;font-size:clamp(14px,3.8vw,18px);
+  line-height:1.25;overflow-wrap:anywhere;word-break:normal;
+}
+body.iclub-visual-v3 #view-profile #profile-metric-tours{
+  font-size:clamp(12px,3.2vw,16px);
+}
+body.iclub-visual-v3 #view-profile .profile-stat .muted{
+  min-width:0;margin-top:auto;line-height:1.3;overflow-wrap:break-word;
+}
+body.iclub-visual-v3 #view-profile .profile-overview-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;
+}
+body.iclub-visual-v3 #view-profile .overview-card{
+  display:flex;flex-direction:column;align-items:stretch;gap:4px;
+  min-width:0;text-align:left;
+}
+body.iclub-visual-v3 #view-profile .overview-label,
+body.iclub-visual-v3 #view-profile .overview-value,
+body.iclub-visual-v3 #view-profile .overview-sub{
+  min-width:0;max-width:100%;overflow-wrap:break-word;word-break:normal;
+}
+body.iclub-visual-v3 #view-profile .overview-value{
+  font-size:clamp(16px,4.5vw,20px);line-height:1.24;margin-top:2px;
+}
+body.iclub-visual-v3 #view-profile .overview-sub{
+  margin-top:auto;line-height:1.35;
+}
+body.iclub-visual-v3 #view-profile :is(.lang-seg,.settings-list){
+  border-radius:var(--academy-radius);
+}
+body.iclub-visual-v3 #view-profile #profile-settings > .card{
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  box-shadow:var(--academy-quiet-shadow);
+}
+body.iclub-visual-v3 #view-profile .iclub-plan-card{
+  border-radius:var(--academy-radius-lg);
+  box-shadow:var(--academy-shadow);
+}
+body.iclub-visual-v3 #view-profile .iclub-subject-access-row{
+  border-radius:var(--academy-radius);
+  border-color:var(--academy-edge);
+}
+/* Top-level information screens: a calm tonal mini-header, not another decorative hero. */
+body.iclub-visual-v3 :is(
+ #view-notifications,#view-community,#view-about,#view-support,#view-support-topic,
+ #view-certificates,#view-archive,#view-certificate-verify
+) > .content{
+  width:100%;max-width:760px;margin-inline:auto;padding-bottom:94px;min-width:0;
+}
+body.iclub-visual-v3 :is(
+ #view-notifications,#view-community,#view-about,#view-support,#view-support-topic,
+ #view-certificates,#view-archive,#view-certificate-verify
+) > .content > .h1,
+body.iclub-visual-v3 #view-notifications > .content > .notifications-head .h1{
+  font-size:clamp(22px,6vw,29px);
+  color:#194b8e;letter-spacing:-.5px;line-height:1.16;
+}
+body.iclub-visual-v3 #view-notifications .notifications-head{
+  background:linear-gradient(145deg,#eff6ff,#fff);
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  padding:15px 16px;
+}
+body.iclub-visual-v3 :is(
+ #view-notifications,#view-community,#view-about,#view-support,#view-support-topic,
+ #view-certificates,#view-archive,#view-certificate-verify
+) :is(.card,.card-btn,.list > .item,.list > .card){
+  min-width:0;
+  border:1px solid var(--academy-edge);
+  border-radius:var(--academy-radius-lg);
+  background:#fff;box-shadow:var(--academy-quiet-shadow);
+}
+body.iclub-visual-v3 :is(#view-support,#view-support-topic) :is(textarea,input,select){
+  max-width:100%;
+  border-color:var(--academy-edge-strong);
+}
+body.iclub-visual-v3 #view-support-topic #support-submit{
+  min-height:44px;
+}
+/* B07 — existing Exam Prep runtimes, no layout or grading overrides. */
+body.iclub-visual-v3 #exam-prep-host-root{
+  --academy-ep-accent:#2963b6;
+  --academy-ep-edge:#c7d9f5;
+  --academy-ep-surface:#f4f8ff;
+}
+body.iclub-visual-v3 #exam-prep-host-root :is(
+ .ep-host-shell,.ep-native-economics,.ep-native-chemistry,.ep-live,.ep-focus-screen
+){
+  min-width:0;max-width:100%;
+}
+body.iclub-visual-v3 #exam-prep-host-root :is(
+ .ep-host-title,.ep-focus-title,.ep-live-dashboard-title,.ep-written-screen-title
+){
+  color:#19488a;
+  overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #exam-prep-host-root :is(
+ .ep-host-card,.ep-component-area,.ep-native-level-card,
+ .ep-live-question-card,.ep-native-paper,.ep-written-source
+){
+  border-color:var(--academy-ep-edge);
+}
+body.iclub-visual-v3 #exam-prep-host-root :is(
+ .ep-live-btn,.ep-host-btn,.ep-views-btn
+):focus-visible{
+  outline:3px solid var(--academy-focus);
+  outline-offset:2px;
+}
+/* Keep AI availability and feature gating 100% controlled by existing modules. */
+body.iclub-visual-v3 .iclub-global-ai-panel{
+  border-color:var(--academy-edge-strong);
+  border-radius:var(--academy-radius-lg);
+}
+body.iclub-visual-v3 .iclub-global-ai-composer{
+  border-color:var(--academy-edge);
+}
+body.iclub-visual-v3 :is(.iclub-global-ai-quick-btn,.iclub-global-ai-send):focus-visible{
+  outline:3px solid var(--academy-focus);
+  outline-offset:2px;
+}
+
+/* B08 — shared controls and state: focus, disabled, visual-only borders. */
+body.iclub-visual-v3 :is(
+ #view-courses,#view-ratings,#view-profile,#view-notifications,
+ #view-community,#view-about,#view-support,#view-support-topic,
+ #view-certificates,#view-archive
+) :is(button,a,input,select,textarea):focus-visible{
+  outline:3px solid var(--academy-focus);
+  outline-offset:2px;
+}
+body.iclub-visual-v3 :is(
+ #view-courses,#view-ratings,#view-profile,#view-notifications,
+ #view-community,#view-about,#view-support,#view-support-topic
+) button[disabled]{
+  cursor:not-allowed;
+}
+body.iclub-visual-v3 :is(
+ #view-courses,#view-ratings,#view-profile,#view-notifications,
+ #view-community,#view-about,#view-support,#view-support-topic
+) .empty{
+  color:var(--academy-text-soft);
+  border-radius:var(--academy-radius);
+  line-height:1.48;
+}
+/* Do not color errors/safety warnings blue; preserve danger/success semantics. */
+body.iclub-visual-v3 :is(
+ #view-courses,#view-ratings,#view-profile,#view-notifications,
+ #view-community,#view-about,#view-support,#view-support-topic
+) :is(.btn,.card-btn,.settings-nav,.profile-row,.seg-btn){
+  -webkit-tap-highlight-color:transparent;
+}
+@media(max-width:349px){
+ body.iclub-visual-v3 #view-ratings .lb-header{
+   padding-inline:10px;gap:7px;
+ }
+ body.iclub-visual-v3 #view-ratings .lb-title{
+   font-size:20px;
+ }
+ body.iclub-visual-v3 #view-ratings :is(.lb-back,.lb-search-btn,.lb-info){
+   width:38px;min-width:38px;height:42px;
+ }
+ body.iclub-visual-v3 #view-profile .academy-profile-zone{padding-inline:14px}
+ body.iclub-visual-v3 #courses-tour-quiz .tour-timers{gap:7px}
+ body.iclub-visual-v3 #courses-tour-quiz .tour-timer-card{padding-inline:8px}
+}
+@media(min-width:700px){
+ body.iclub-visual-v3 #view-ratings .lb-header{
+  padding-inline:28px;
+ }
+ body.iclub-visual-v3 #view-profile .academy-profile-zone{
+  padding-inline:28px;
+ }
+}
+/* Zero animation on reduced motion; no fake motion in restricted dialogs. */
+@media(prefers-reduced-motion:reduce){
+ body.iclub-visual-v3 .iclub-global-ai-panel,
+ body.iclub-visual-v3 #view-ratings .lb-mybar{
+  scroll-behavior:auto;
+ }
+}
+
+
+/* B08 / all-screen navigation continuity.
+   Every registered nested route shares the sapphire-family toolbar.
+   More specific B01 selectors still control Home/Subjects/Hub/Ratings/Profile. */
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar,
+body.iclub-visual-v3:has(#view-notifications.is-active) #topbar,
+body.iclub-visual-v3:has(#view-community.is-active) #topbar,
+body.iclub-visual-v3:has(#view-about.is-active) #topbar,
+body.iclub-visual-v3:has(#view-support.is-active) #topbar,
+body.iclub-visual-v3:has(#view-support-topic.is-active) #topbar,
+body.iclub-visual-v3:has(#view-certificates.is-active) #topbar,
+body.iclub-visual-v3:has(#view-archive.is-active) #topbar{
+  background:#24599c;
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.19);
+  box-shadow:0 4px 15px rgba(22,64,122,.10);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-notifications.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-community.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-about.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-support.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-support-topic.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-certificates.is-active) #topbar .topbar-title .title,
+body.iclub-visual-v3:has(#view-archive.is-active) #topbar .topbar-title .title{color:#fff}
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-notifications.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-community.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-about.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-support.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-support-topic.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-certificates.is-active) #topbar .topbar-title .subtitle,
+body.iclub-visual-v3:has(#view-archive.is-active) #topbar .topbar-title .subtitle{color:#e3efff}
+body.iclub-visual-v3:has(#view-courses.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-notifications.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-community.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-about.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-support.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-support-topic.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-certificates.is-active) #topbar .icon-btn,
+body.iclub-visual-v3:has(#view-archive.is-active) #topbar .icon-btn{
+ color:#fff;background:rgba(255,255,255,.12);
+ border:1px solid rgba(255,255,255,.32);box-shadow:none;
+}
+/* Public verification stays usable even without login; no forced full hero. */
+body.iclub-visual-v3 #view-certificate-verify .content > .h1{
+ color:#194b8e;
+}
+
+/* Work QA 2026-11-15: preserve all descriptions; restricted routes stay hidden. */
+body.iclub-visual-v3 #view-home .home-block[hidden],
+body.iclub-visual-v3 #view-profile .profile-section[hidden]{display:none!important}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-description{
+  display:block;-webkit-line-clamp:unset;overflow:visible;white-space:normal;
+  line-height:1.45;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card .subject-mode-card-button{
+  height:auto;min-height:138px;
+}
+body.iclub-visual-v3 #courses-practice-start .practice-tour-scroll-hint{
+  color:var(--academy-text-soft);font-size:11px;line-height:1.4;
+  margin:0 0 8px;padding:0 2px;
+}
+@media (min-width:700px){
+ body.iclub-visual-v3 #courses-practice-start .practice-tour-scroll-hint{display:none}
+}
+
+/* UX531 Work retest: school-only affordances are truly absent for Study-only accounts. */
+body.iclub-visual-v3 #view-courses .section[hidden],
+body.iclub-visual-v3 #courses-subject-hub [data-action="open-tours"][hidden],
+body.iclub-visual-v3 #profile-settings #profile-competitive-list[hidden]{
+  display:none!important;
+}
+
+
+/* UX531 owner's review — registration steps and subject Practice visual parity.
+   Scoped only to enhanced registration and the Subject Hub; no data/attempt changes. */
+
+/* Step 1 is the beginning of registration: don't show the app-exit back arrow.
+   Reclaim its layout column for the logo. Step 2 retains its original topbar. */
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active[data-reg-b00-step="1"]) #topbar{
+  grid-template-columns:0px minmax(0,1fr) auto;
+}
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active[data-reg-b00-step="1"]) #topbar-back{
+  display:none!important;
+}
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active[data-reg-b00-step="1"]) #topbar .topbar-brand{
+  grid-column:1/3;
+}
+/* Step 2 Back is a real secondary button, not unframed floating text.
+   Preserve its original return-to-Step-1 click handler and focus behavior. */
+body.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-prev{
+  border:1px solid #cfdbed!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  color:#244b80!important;
+  box-shadow:0 2px 8px rgba(30,79,147,.055)!important;
+}
+body.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-prev:active{
+  background:#edf4ff!important;
+  border-color:#99b8e8!important;
+}
+body.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-prev:focus-visible{
+  outline:3px solid #377bdf;
+  outline-offset:2px;
+}
+
+/* The approved Academy OS family has a consistent blue-white card system.
+   Practice and Exam Prep share border, radius, shadow and typography while
+   keeping different real actions and their server-authoritative gates. */
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > button.subject-mode-card-practice.subject-mode-card-button{
+  border:1px solid #c9d7f8;
+  border-radius:17px;
+  background:linear-gradient(135deg,#fff 0%,#eef4ff 100%);
+  box-shadow:0 9px 24px rgba(36,87,214,.09);
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice::before{
+  background:#376bd3;
+}
+/* Icons are deliberately hidden in the approved design. Therefore the top
+   row requires TWO tracks, not the old icon/status/arrow three-track grid. */
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-topline{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 29px;
+  column-gap:12px;
+  align-items:center;
+  min-width:0;
+  width:100%;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-status{
+  grid-column:1;
+  min-width:0;
+  max-width:100%;
+  justify-self:start;
+  overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-arrow,
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .exam-prep-feature-arrow{
+  grid-column:2;
+  justify-self:end;
+  margin-left:auto;
+  flex-shrink:0;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice .subject-mode-status-practice{
+  border-color:#d4dffd;
+  background:#eef4ff;
+  color:#285cb2;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice .subject-mode-title{
+  color:#193f7c;
+  font-size:17px;
+  font-weight:800;
+  line-height:1.18;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice .subject-mode-description{
+  color:#536b8f;
+  line-height:1.45;
+}
+/* On phones, all available Preparation actions are full-width, matching the
+   Exam Prep card. At desktop keep the approved multi-column composition. */
+/* Match the same 17px radius across the subject preparation card family.
+   Approved two-column school layout and Tour-specific surface remain unchanged. */
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > button.subject-mode-card-tours.subject-mode-card-button{
+  border-radius:17px;
+}
+/* The owner-approved mobile pair (Practice + Tours) stays two columns.
+   Only when Tours is unavailable for non-school students should the remaining
+   Practice occupy the empty area and match the Exam Prep full-width footprint. */
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes:has(> .subject-mode-card-tours[hidden]) > button.subject-mode-card-practice.subject-mode-card-button{
+  grid-column:1/-1;
+}
+
+
+/* ACADEMY EXAM PREP v5.8 INFORMATION ARCHITECTURE — Math P1/P5 ONLY.
+   All grade, entitlement, activity and timer logic stays in original modules.
+   This intentionally does not style Economics/Chemistry native exam screens. */
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-main-components{
+  order:0;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-main-components .ep-live-component-entry{
+  min-width:0;height:100%;border-color:#c6d9f5;border-radius:18px;
+  background:linear-gradient(155deg,#fff 10%,#f2f7ff 100%);
+  box-shadow:0 5px 18px rgba(32,79,148,.07);
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-main-components .ep-live-component-entry:focus-visible,
+body.iclub-visual-v3 #exam-prep-host-root :is(.ep-v58-tab,.ep-v58-back,.ep-v58-setting>summary):focus-visible{
+  outline:3px solid #397be8;outline-offset:2px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-summary{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border:1px solid #c9dbf6;border-radius:18px;background:#f5f9ff;
+  box-shadow:0 2px 9px rgba(31,78,149,.035);
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-summary>div{
+  min-width:0;display:grid;gap:5px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-summary strong{
+  color:#164383;font-size:16px;line-height:1.3;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-summary :is(p,small){
+  margin:0;line-height:1.5;overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-summary>.ep-live-btn{
+  flex:0 0 auto;min-height:44px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-page{
+  display:grid;gap:12px;min-width:0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-section-head{
+  display:grid;gap:7px;padding:3px 1px 8px;min-width:0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-section-head h2{
+  margin:0;font-size:clamp(18px,3.7vw,24px);line-height:1.25;
+  letter-spacing:-.025em;color:#174486;overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-back{
+  min-height:42px;max-width:100%;width:max-content;
+  border:0;background:transparent;color:#2963b6;cursor:pointer;
+  font:inherit;font-size:13px;font-weight:750;padding:6px 3px;text-align:left;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-summary{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border-color:#c9dbf6;background:#f6f9ff;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-summary>div{min-width:0}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-summary p{
+  margin:6px 0 0;overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting{
+  display:block;min-width:0;border:1px solid #d5e1f4;border-radius:16px;
+  background:#fff;overflow:hidden;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting>summary{
+  list-style:none;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;min-height:53px;padding:13px 16px;
+  cursor:pointer;color:#1c477f;font-size:14px;font-weight:750;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting>summary::-webkit-details-marker{display:none}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting>summary::after{
+  content:"+";font-size:19px;font-weight:450;color:#2963b6;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting[open]>summary::after{content:"−"}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting[open]>summary{
+  border-bottom:1px solid #e0e9f7;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting>.ep-live-card,
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting>.ep-live-s3{
+  margin:0;border:0;box-shadow:none;border-radius:0;
+  background:#fff;padding:15px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-tabs{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;gap:5px;padding:5px;
+  border-radius:15px;border:1px solid #d6e3f6;background:#edf4ff;
+  margin:2px 0 13px;min-width:0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-tab{
+  min-width:0;min-height:45px;border:1px solid transparent;
+  background:transparent;border-radius:11px;color:#3b608d;
+  font:inherit;font-size:13px;font-weight:750;line-height:1.25;
+  padding:7px 5px;cursor:pointer;overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-tab[aria-current="page"]{
+  background:#fff;color:#194a96;border-color:#cbdcf5;
+  box-shadow:0 2px 8px rgba(31,82,156,.09);
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-training{
+  display:grid;gap:12px;min-width:0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-training-description{
+  display:grid;gap:5px;padding:2px 2px 0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-training-description h3{
+  margin:0;font-size:18px;color:#194a96;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-training-description p{
+  margin:0;color:#5c728d;font-size:13px;line-height:1.5;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-training-links{
+  border:0;background:transparent;padding:0;gap:8px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-training-links .ep-component-link{
+  border:1px solid #d4e0f4;border-radius:14px;background:#fff;min-height:65px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-training-links .ep-component-link:first-child{
+  border-color:#d4e0f4;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-screen .ep-v58-tabs{
+  margin-top:0;
+}
+@media(max-width:680px){
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-main-components{grid-template-columns:1fr;gap:10px}
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-summary,
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-summary{
+    display:grid;grid-template-columns:minmax(0,1fr);gap:9px;
+  }
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-summary>.ep-live-btn,
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-summary>.ep-live-btn{
+    width:100%;
+  }
+}
+@media(max-width:349px){
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-tab{font-size:12px;padding:7px 3px}
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting>summary{padding:12px}
+}

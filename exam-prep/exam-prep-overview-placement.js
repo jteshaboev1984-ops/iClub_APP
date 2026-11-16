@@ -10,6 +10,11 @@
   function rootEl() { return document.querySelector("#exam-prep-host-root"); }
 
   function detectLanguage() {
+    // Academy OS v5.8 has compact titles; DOM copy is not a reliable language
+    // signal. Use the user's selected UI locale before any legacy fallback.
+    const selected = String(window.i18n?.getLang?.() || document.documentElement.lang || "").toLowerCase();
+    const primary = selected.split("-")[0];
+    if (["ru", "uz", "en"].includes(primary)) return primary;
     const value = String(rootEl()?.textContent || "");
     if (/Umumiy ko‘rinish|Haftalik|Imtihon tayyorgarligi|Dastur bo‘yicha/i.test(value)) return "uz";
     if (/\bOverview\b|weekly plan|exam preparation|entry check|syllabus progress/i.test(value)) return "en";
