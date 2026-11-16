@@ -198,8 +198,21 @@ async function caseRun(browser, address, { language, width, mode }) {
     const expected = language==="en" ? "Preparation for P1 and P5" :
       language==="uz" ? "P1 va P5 bo‘yicha tayyorgarlik" : "Подготовка по P1 и P5";
     assert.equal(copy,expected);
-    assert.equal(await page.locator(".ep-live-dashboard-profile").count(),1,
-      "Saved study plan must be reflected on the P1/P5 dashboard");
+    // Route overview must show the single My Plan card BELOW P1/P5, not
+    // repeat the same hours/profile in a second badge above the cards.
+    assert.equal(await page.locator(".ep-live-dashboard-profile").count(),0,
+      "Do not duplicate saved plan details beside the route header");
+    assert.equal(await page.locator("[data-ep-v58-plan-summary]").count(),1);
+    assert.match(await page.locator("[data-ep-v58-plan-summary]").innerText(),
+      language==="en"?/My plan/:language==="uz"?/Mening rejam/:/Мой план/);
+    const overviewOrder = await page.evaluate(()=>{
+      const root=document.getElementById("exam-prep-host-root");
+      return ["ep-live-dashboard-intro","ep-v58-main-components","ep-v58-plan-summary"]
+        .map(cls=>[...root.querySelectorAll("."+cls)][0])
+        .filter(Boolean).map(el=>[...el.parentElement.children].indexOf(el));
+    });
+    assert.deepEqual(overviewOrder,[0,1,2],
+      "Your route, P1/P5, and My Plan must appear in that order");
     // The exact approved v5.8 plan, learning, practice and history layout
     // must fit across all named widths without reducing touch targets.
     const verifyLayout = async (place, requireTabs=false) => {
@@ -299,12 +312,17 @@ async function caseRun(browser, address, { language, width, mode }) {
     await page.locator(".ep-v58-main-components").waitFor();
     await page.locator('[data-ep-live-open-component="P1"]').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
-    await verifyLayout('P1 Learning',true);
+    await verifyLayout('P1 Route',true);
+    const routeLabel=language==="ru"?"Маршрут":language==="uz"?"Yo‘l":"Route";
+    assert.equal(await page.locator('[data-ep-v58-tab="learning"]').innerText(),routeLabel,
+      "Route tab describes the next step, progress, topics and corrections");
     assert.equal(await page.locator('[data-ep-v58-tab="learning"]').getAttribute("aria-current"),
-      "page","component opens Learning, never starts diagnostics");
+      "page","component opens its route, never starts diagnostics");
     assert.deepEqual((await page.evaluate(()=>window.__UX531_MATH_TEST.starts)),[]);
     await page.locator('[data-ep-v58-tab="training"]').click();
     await page.locator('[data-ep-v58-component-training="P1"]').waitFor();
+    assert.equal(await page.locator(".ep-v58-training-description h3").count(),0,
+      "Active Practice tab must not repeat the same heading");
     await verifyLayout('P1 Practice',true);
     await page.locator('[data-ep-v58-tab="history"]').click();
     await page.locator('[data-ep-v58-history="P1"]').waitFor();
