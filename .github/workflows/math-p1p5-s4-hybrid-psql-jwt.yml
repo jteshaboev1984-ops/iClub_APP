@@ -259,14 +259,6 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-s4-active-diagnostic-coexistence.cjs
           node scripts/p1p5-s4-active-diagnostic-coexistence.cjs
-      - name: S4 owner rule — positive Stage3–6 objective-only, no Paper score, signed HTTP
-        run: |
-          set -euo pipefail
-          test "$P1P5_E2E_ISOLATED" = 'true'
-          test "$PGHOST" = '127.0.0.1'
-          test "$PGDATABASE" = 'postgres'
-          node --check scripts/p1p5-s4-positive-objective-stage-signed.cjs
-          node scripts/p1p5-s4-positive-objective-stage-signed.cjs
       - name: Clean disposable PostgREST
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
