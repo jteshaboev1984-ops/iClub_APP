@@ -1809,7 +1809,7 @@
         ref:"Справочные материалы MF19 (официальный Cambridge 9709, 2026–2027)", normalTable:"Таблица нормального распределения", print:"Печать / сохранить PDF", printHint:"Печать содержит только задания — без ответов и критериев.",
         finish:"Завершить тренировку",finishConfirm:"Завершить тренировку и перейти к разбору?",
         early:"Завершить досрочно",earlyConfirm:"Завершить досрочно? Непроверенные ответы не станут оценкой.",
-        noScore:"Письменные решения не проверены. Баллы за Paper не определены.",
+        noScore:"Paper — тренировка без баллов. Письменные решения не оцениваются.",
         mark:"Возможные баллы",close:"Тренировка завершена",expired:"Время вышло",
         optional:"Необязательная проверка конечных ответов",quickHint:"Проверяются только выбранные конечные ответы, а не способ решения. Баллы за работу не начисляются.",
         noKeys:"Для этого Paper цифровая проверка конечных ответов пока недоступна.",
@@ -1825,7 +1825,8 @@
         reviewIntro:"Сопоставьте своё решение в тетради с требованиями к каждому вопросу. Это ориентир для повторения, а не проверка вашей работы.",
         reviewSteps:"На что обратить внимание в решении",reviewStepHelp:"Критерии показывают необходимые шаги и результаты. Они не являются полным образцом решения.",
         revisitTopic:"Тема для повторения",reviewAll:"Разбор вопросов",reviewQuestion:"Открыть разбор вопроса",
-        reviewNoGrade:"Не ставьте себе баллы: приложение не проверяло ход письменного решения.",
+        reviewNoGrade:"Баллы за Paper не ставятся. Используйте критерии и рекомендации только для разбора решения.",
+        mentorOptional:"Если решение вызывает вопросы, сравните шаги с критериями и при желании обсудите их с ментором. Это необязательно и не влияет на доступ к обучению.",
         reviewEmpty:"Для этого вопроса утверждённые критерии ещё не предоставлены."
       },
       uz:{
@@ -1835,7 +1836,7 @@
         ref:"MF19: rasmiy Cambridge 9709 formulalar va jadvallar (2026–2027)", normalTable:"Normal taqsimot jadvali", print:"Chop etish / PDF sifatida saqlash", printHint:"Chop etiladigan nusxada faqat savollar bor — javoblar va mezonlarsiz.",
         finish:"Mashqni yakunlash",finishConfirm:"Mashqni yakunlab tahlilga o‘tasizmi?",
         early:"Ertaroq yakunlash",earlyConfirm:"Ertaroq yakunlaysizmi? Yozma ish baholanmaydi.",
-        noScore:"Yozma yechim tekshirilmagan. Paper uchun baho aniqlanmagan.",
+        noScore:"Paper — ball qo‘yilmaydigan mashq. Yozma yechimlar baholanmaydi.",
         mark:"Mumkin bo‘lgan ball",close:"Mashq yakunlandi",expired:"Vaqt tugadi",
         optional:"Ixtiyoriy yakuniy javob tekshiruvi",quickHint:"Faqat ayrim yakuniy javoblar tekshiriladi, yechish usuli emas. Paper baholanmaydi.",
         noKeys:"Ushbu Paper uchun raqamli javob tekshiruvi hali mavjud emas.",
@@ -1851,7 +1852,8 @@
         reviewIntro:"Daftardagi yechimingizni har bir savol mezonlari bilan taqqoslang. Bu takrorlash uchun yo‘riqnoma, ishni baholash emas.",
         reviewSteps:"Yechimdagi muhim bosqichlar",reviewStepHelp:"Mezonlar kerakli bosqich va natijalarni ko‘rsatadi, ammo to‘liq namuna yechim emas.",
         revisitTopic:"Takrorlash mavzusi",reviewAll:"Savollar tahlili",reviewQuestion:"Savol tahlilini ochish",
-        reviewNoGrade:"O‘zingizga ball qo‘ymang: yozma yechish usuli ilovada tekshirilmagan.",
+        reviewNoGrade:"Paper uchun ball qo‘yilmaydi. Mezonlar va tavsiyalardan faqat yechimni tahlil qilish uchun foydalaning.",
+        mentorOptional:"Yechimda savollar bo‘lsa, bosqichlarni mezonlar bilan solishtiring va xohlasangiz mentor bilan muhokama qiling. Bu majburiy emas va o‘qishga kirishga ta’sir qilmaydi.",
         reviewEmpty:"Bu savol uchun tasdiqlangan mezonlar hali mavjud emas."
       },
       en:{
@@ -1861,7 +1863,7 @@
         ref:"Official Cambridge 9709 MF19 formulae and tables (2026–2027)", normalTable:"Normal distribution table", print:"Print / save as PDF", printHint:"Print view includes questions only — no answers or marking criteria.",
         finish:"Finish practice",finishConfirm:"Finish this Paper rehearsal and continue to review?",
         early:"End early",earlyConfirm:"End early? Your written work will remain ungraded.",
-        noScore:"Written methods have not been checked. Full Paper mark is unknown.",
+        noScore:"Paper is ungraded practice. No marks are awarded for written work.",
         mark:"Marks available",close:"Practice ended",expired:"Time expired",
         optional:"Optional final-answer check",quickHint:"Only selected final answers are checked, not working or method marks. No Paper grade is awarded.",
         noKeys:"No digital final-answer checks are available for this Paper yet.",
@@ -1877,7 +1879,8 @@
         reviewIntro:"Compare your notebook working with each question's approved criteria. This guides revision; your written work was not graded.",
         reviewSteps:"Steps to look for in your working",reviewStepHelp:"Criteria identify expected methods and outcomes; they are not a complete worked solution.",
         revisitTopic:"Topic to revisit",reviewAll:"Question-by-question review",reviewQuestion:"Open this question's review",
-        reviewNoGrade:"Do not award yourself marks: the app has not checked your written method.",
+        reviewNoGrade:"No Paper marks are awarded. Use the criteria and tips only to review your solution.",
+        mentorOptional:"If you are unsure about a step, compare it with the criteria and optionally discuss it with a mentor. This is never required for continued study.",
         reviewEmpty:"Approved criteria are not available for this question."
       }
     })[state.language] || hybridS4CopyFallback();
@@ -2123,6 +2126,7 @@
       '<p class="ep-live-meta">'+esc(c.noWorked)+'</p>'+
       '<p class="ep-live-meta">'+esc(c.reviewIntro)+'</p>'+
       '<p class="ep-live-meta">'+esc(c.reviewNoGrade)+'</p>'+
+      '<p class="ep-live-meta" data-ep-hybrid-s4-mentor-optional>'+esc(c.mentorOptional)+'</p>'+
       '<strong>'+esc(c.reviewAll)+'</strong></section>'+body+
       '<section class="ep-live-card"><button type="button" class="ep-live-btn secondary"'+
       ' data-ep-hybrid-s4-back>'+esc(state.paperOrigin==="history"?(state.language==="ru"?"К истории":state.language==="uz"?"Tarixga qaytish":"Back to history"):c.back)+'</button></section></div>');
