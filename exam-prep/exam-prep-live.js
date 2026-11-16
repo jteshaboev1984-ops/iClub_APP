@@ -1897,9 +1897,16 @@
       esc(c.back)+'</button></div>'+
       '<p class="ep-live-meta">'+esc(c.paperNotice)+'</p>'+
       (rows||'<p class="ep-live-notice">'+esc(c.noPapers)+'</p>')+
-      '</section><section class="ep-live-card"><strong>'+esc(c.history)+'</strong>'+
-      (past||'<p class="ep-live-meta">'+esc(c.emptyHistory)+'</p>')+'</section>');
+      '</section>'+
+      (past?'<section class="ep-live-card"><strong>'+
+        esc(state.language==="ru"?"Продолжить начатое":state.language==="uz"?"Boshlanganini davom ettirish":"Continue unfinished Paper")+
+        '</strong>'+past+'</section>':"")+
+      '<section class="ep-live-card"><button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-go-history>'+
+      esc(c.history)+'</button></section>');
     root.querySelector('[data-ep-hybrid-s4-home]')?.addEventListener("click",()=>renderComponentTraining(component));
+    root.querySelector('[data-ep-hybrid-s4-go-history]')?.addEventListener("click",()=>{
+      state.paperOrigin="history";void openRecentResults(component);
+    });
     root.querySelectorAll('[data-ep-hybrid-s4-start]').forEach(b=>
       b.addEventListener("click",()=>void hybridS4Start(component,Number(b.dataset.epHybridS4Start))));
     root.querySelectorAll('[data-ep-hybrid-s4-resume]').forEach(b=>
