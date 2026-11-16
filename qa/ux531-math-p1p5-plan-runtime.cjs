@@ -146,6 +146,26 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.equal(copy,expected);
     assert.equal(await page.locator(".ep-live-dashboard-profile").count(),1,
       "Saved study plan must be reflected on the P1/P5 dashboard");
+    // The exact approved v5.8 plan, learning, practice and history layout
+    // must fit across all named widths without reducing touch targets.
+    const verifyLayout = async (place, requireTabs=false) => {
+      const metrics=await page.evaluate(()=>{
+        const tabs=[...document.querySelectorAll('#exam-prep-host-root .ep-v58-tab')]
+          .filter(el=>getComputedStyle(el).display!=='none')
+          .map(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
+        return {width:document.documentElement.scrollWidth,viewport:innerWidth,tabs};
+      });
+      assert(metrics.width<=metrics.viewport+2,
+        place+' horizontal overflow '+language+'/'+width+': '+JSON.stringify(metrics));
+      if(requireTabs){
+        assert.equal(metrics.tabs.length,3,place+' requires exactly three P1/P5 tabs');
+        assert(metrics.tabs.every(t=>t.width>=44&&t.height>=44),
+          place+' must keep accessible touch target '+JSON.stringify(metrics.tabs));
+        const w=metrics.tabs.map(t=>t.width);
+        assert(Math.max(...w)-Math.min(...w)<=2,
+          place+' tabs must be symmetrical '+JSON.stringify(metrics.tabs));
+      }
+    };
     const scope = await page.evaluate(() => ({
       viewport:innerWidth,document:document.documentElement.scrollWidth,
       rootWidth:document.getElementById("exam-prep-host-root").getBoundingClientRect().width
@@ -164,6 +184,7 @@ async function caseRun(browser, address, { language, width, mode }) {
       "Dashboard must not expose an always-open schedule form");
     await page.locator("[data-ep-v58-plan-open]").click();
     await page.locator("[data-ep-v58-plan-page]").waitFor();
+    await verifyLayout('My plan');
     assert.equal(await page.locator("[data-ep-v58-setting]").count(),2,
       "Schedule and dates must be grouped behind disclosure");
     const settings=page.locator('[data-ep-v58-setting="schedule"]');
@@ -174,18 +195,35 @@ async function caseRun(browser, address, { language, width, mode }) {
     await page.locator(".ep-v58-main-components").waitFor();
     await page.locator('[data-ep-live-open-component="P1"]').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
+    await verifyLayout('P1 Learning',true);
     assert.equal(await page.locator('[data-ep-v58-tab="learning"]').getAttribute("aria-current"),
       "page","component opens Learning, never starts diagnostics");
     assert.deepEqual((await page.evaluate(()=>window.__UX531_MATH_TEST.starts)),[]);
     await page.locator('[data-ep-v58-tab="training"]').click();
     await page.locator('[data-ep-v58-component-training="P1"]').waitFor();
+    await verifyLayout('P1 Practice',true);
     await page.locator('[data-ep-v58-tab="history"]').click();
     await page.locator('[data-ep-v58-history="P1"]').waitFor();
+    await verifyLayout('P1 History',true);
     assert.equal(await page.locator('[data-ep-history-legacy-section]').count(),1);
     await page.locator('[data-ep-v58-tab="learning"]').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
+    await page.locator('[data-ep-component-back]').click();
+    await page.locator('[data-ep-live-open-component="P5"]').click();
+    await page.locator('[data-ep-component-home="P5"]').waitFor();
+    await verifyLayout('P5 Learning',true);
+    assert.equal(await page.locator('[data-ep-v58-tab="learning"]').getAttribute('aria-current'),'page');
+    await page.locator('[data-ep-v58-tab="training"]').click();
+    await page.locator('[data-ep-v58-component-training="P5"]').waitFor();
+    await verifyLayout('P5 Practice',true);
+    await page.locator('[data-ep-v58-tab="history"]').click();
+    await page.locator('[data-ep-v58-history="P5"]').waitFor();
+    await verifyLayout('P5 History',true);
+    assert.equal(await page.locator('[data-ep-history-legacy-section]').count(),1);
+    await page.locator('[data-ep-v58-tab="learning"]').click();
+    await page.locator('[data-ep-component-home="P5"]').waitFor();
     assert.deepEqual((await page.evaluate(()=>window.__UX531_MATH_TEST.starts)),[],
-      "Three-tab browsing must never generate or consume an attempt");
+      "P1/P5 browsing must never generate or consume an attempt");
     if (language==="ru" && width===390 || language==="uz" && width===320 ||
         language==="en" && width===1440) {
       fs.mkdirSync(screens,{recursive:true});
@@ -209,8 +247,10 @@ async function caseRun(browser, address, { language, width, mode }) {
   const browser = await chromium.launch({headless:true});
   try {
     await caseRun(browser,base,{language:"ru",width:390,mode:"denied"});
-    for (const [language,width] of [["ru",390],["uz",320],["en",1440]]) {
-      await caseRun(browser,base,{language,width,mode:"plan"});
+    for (const language of ["ru","uz","en"]) {
+      for (const width of [320,375,390,430,1440]) {
+        await caseRun(browser,base,{language,width,mode:"plan"});
+      }
     }
   } finally {
     await browser.close();
