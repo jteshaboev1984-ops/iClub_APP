@@ -239,7 +239,7 @@ async function caseRun(browser, address, { language, width, mode }) {
         "Transient save failure must keep the form mounted");
       await page.locator("[data-ep-live-save-profile]").click();
       await page.locator("[data-ep-v58-plan-page]").waitFor();
-      assert.match(await page.locator("[data-ep-v58-plan-page] [role=status]").innerText(),/сохран/i,
+      assert.match(await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").innerText(),/сохран/i,
         "Plan must show the server-save confirmation on the current screen");
 
       const weekly=page.locator('[data-ep-v58-setting="weekly"]');
@@ -248,8 +248,8 @@ async function caseRun(browser, address, { language, width, mode }) {
       await weekly.locator("[data-ep-s3-p1]").fill("110");
       await weekly.locator("[data-ep-s3-p5]").fill("90");
       await weekly.locator("[data-ep-s3-save]").click();
-      await page.locator("[data-ep-v58-plan-page] [role=status]").waitFor();
-      assert.match(await page.locator("[data-ep-v58-plan-page] [role=status]").innerText(),/сохран/i);
+      await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").waitFor();
+      assert.match(await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").innerText(),/сохран/i);
       await page.locator('[data-ep-v58-setting="weekly"][open]').waitFor();
       assert.equal(await page.locator("[data-ep-s3-p1]").inputValue(),"110");
       assert.equal(await page.locator("[data-ep-s3-p5]").inputValue(),"90");
