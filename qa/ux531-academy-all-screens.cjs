@@ -116,8 +116,9 @@ const server=http.createServer((req,res)=>{
    assert(profile.height>=156&&profile.gradient.includes('linear-gradient'),
      'Profile blue zone mismatch '+JSON.stringify({width,profile}));
    assert.equal(profile.text,'Профиль');
-   // Owner's phone review: no profile metric may paint outside its own
-   // card, even during the localized loading state or a two-line value.
+   // Owner's phone review: simulate the long loading label during measurement
+   // even though the shipped placeholder is intentionally a compact ellipsis.
+   await page.evaluate(()=>{document.getElementById('profile-metric-tours').textContent='Загружаем…';});
    const metricLayout=await page.evaluate(()=>{
      const cards=[...document.querySelectorAll('#profile-main .profile-stat, #profile-main .overview-card')];
      const rows=cards.map(card=>{
@@ -139,7 +140,10 @@ const server=http.createServer((req,res)=>{
       'Profile must inherit iClub system typography at '+width);
    assert(Math.abs(metricLayout.overview[0].bottom-metricLayout.overview[1].bottom)<=2,
       'Profile overview cards must align at '+width);
-   await page.evaluate(()=>window.__ux531Show({view:'ratings'}));
+   await page.evaluate(()=>{
+     document.getElementById('profile-metric-tours').textContent='…';
+     window.__ux531Show({view:'ratings'});
+   });
    const rating=await page.evaluate(()=>{
     const h=document.querySelector('#view-ratings .lb-header');
     return {height:h.getBoundingClientRect().height,
