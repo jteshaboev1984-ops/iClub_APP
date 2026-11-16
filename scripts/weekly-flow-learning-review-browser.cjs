@@ -123,10 +123,10 @@ async function scenario(browser, language, width) {
     // Academy OS v5.8: component card opens an overview, not an attempt.
     // The server-authorized Learning primary action starts the real review.
     await page.waitForSelector('[data-ep-live-open-component="P5"]');
-    assert.equal(s.regularStarts, 0, 'Opening the dashboard must not start an assessment');
+    assert.equal(await page.evaluate(() => window.__reviewTest.regularStarts), 0, 'Opening the dashboard must not start an assessment');
     await page.click('[data-ep-live-open-component="P5"]');
     await page.waitForSelector('[data-ep-component-primary="task"]');
-    assert.equal(s.regularStarts, 0, 'Component overview must not start an assessment');
+    assert.equal(await page.evaluate(() => window.__reviewTest.regularStarts), 0, 'Component overview must not start an assessment');
     await page.click('[data-ep-component-primary="task"]');
     await page.waitForSelector('.ep-live-qtext');
     for (let i = 0; i < 4; i++) {
