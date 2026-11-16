@@ -602,11 +602,34 @@
     if (!String(values.examSeries || "").trim() || !String(values.targetGrade || "").trim() || !(values.totalHours > 0) || !(values.mathHours > 0) || values.mathHours > values.totalHours || values.totalHours > 168) {
       const el = rootEl()?.querySelector("[data-ep-live-profile-error]"); if (el) el.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`; return;
     }
-    state.busy = true; renderLoading();
-    const result = await internal.api.saveExamProfile(values); state.busy = false;
-    if (!result?.ok) { renderError(); return; }
-    const profile = await internal.api.examProfile(); state.profile = profile?.ok ? profile.data : null;
+    // Keep the edited fields mounted when the server is unavailable; an error
+    // must not discard the learner's unsaved examination plan.
+    const button=form.querySelector("[data-ep-live-save-profile]");
+    const feedback=rootEl()?.querySelector("[data-ep-live-profile-error]");
+    if(feedback)feedback.textContent="";
+    state.busy=true;if(button)button.disabled=true;
+    let result=null;
+    try{result=await internal.api.saveExamProfile(values);}catch(_){}
+    state.busy=false;
+    if(!result?.ok){
+      if(button)button.disabled=false;
+      if(feedback)feedback.textContent=copy().error;
+      return;
+    }
+    let profile=null;
+    try{profile=await internal.api.examProfile();}catch(_){}
+    if(!profile?.ok || !profile.data){
+      if(button)button.disabled=false;
+      if(feedback)feedback.textContent=({
+        ru:"Профиль сохранён, но получить обновлённые данные не удалось. Повторно откройте план.",
+        uz:"Profil saqlandi, ammo yangilangan ma’lumotlarni olib bo‘lmadi. Rejani qayta oching.",
+        en:"Profile saved, but the updated data could not be loaded. Reopen the plan."
+      })[state.language]||"Profile saved, but the updated data could not be loaded.";
+      return;
+    }
+    state.profile=profile.data;
     const toPlan=state.profileEditorFromPlan===true;state.profileEditorFromPlan=false;
+    state.notice=copy().saved;
     if(toPlan)renderMyPlan();else await renderDashboard();
   }
 
@@ -1468,8 +1491,23 @@
       state.busy=false; button.disabled=false;
       if (!saved?.ok) { show(c.error); return; }
       state.s3Retry = null;
-      const profile = await internal.api.examProfile();
-      if(profile?.ok) state.profile=profile.data;
+      // The write succeeded, but the old S3 snapshot must not be reused for
+      // another choice or displayed as if it were the persisted allocation.
+      const [profile,choice]=await Promise.all([
+        internal.api.examProfile().catch(()=>null),
+        internal.api.weeklyChoiceS3().catch(()=>null)
+      ]);
+      if(profile?.ok)state.profile=profile.data;
+      if(!choice?.ok || choice.data?.contract_version!=="voluntary_weekly_choice_s3_v1"){
+        show(({
+          ru:"Выбор сохранён, но новые данные не загрузились. Вернитесь к P1/P5 и откройте план повторно.",
+          uz:"Tanlov saqlandi, lekin yangi ma’lumot yuklanmadi. P1/P5 ga qaytib, rejani qayta oching.",
+          en:"Choice saved, but the updated plan could not be loaded. Return to P1/P5 and reopen My plan."
+        })[state.language]||"Choice saved, but the updated plan could not be loaded.");
+        button.disabled=true;
+        return;
+      }
+      state.weeklyChoice=choice.data;
       state.notice=c.saved;
       renderMyPlan("weekly");
     });
@@ -1507,6 +1545,7 @@
     const section=(key,title,body)=>'<details class="ep-v58-setting" data-ep-v58-setting="'+key+'"'+
       (expand===key?' open':'')+'><summary>'+esc(title)+'</summary>'+body+'</details>';
     root.innerHTML=shell('<section class="ep-v58-plan-page" data-ep-v58-plan-page>'+
+      (state.notice?'<div class="ep-live-notice" role="status" aria-live="polite">'+esc(state.notice)+'</div>':'')+
       '<header class="ep-v58-section-head"><button type="button" class="ep-v58-back" data-ep-v58-plan-back>← '+esc(t.back)+'</button>'+
       '<h2>'+esc(t.plan)+'</h2></header>'+
       '<section class="ep-live-card ep-v58-profile-summary"><div><strong>'+esc(t.profile)+'</strong>'+
@@ -1516,6 +1555,7 @@
       section("dates",t.dates,examDatesPanel())+
       (state.weeklyChoice?section("weekly",t.weekly,weeklyS3Panel()):"")+
       '</section>',{compact:true});
+    state.notice=null;
     root.querySelector("[data-ep-v58-plan-back]")?.addEventListener("click",()=>void renderDashboard());
     root.querySelector("[data-ep-v58-profile-edit]")?.addEventListener("click",()=>{
       state.profileEditorFromPlan=true;renderProfile();
