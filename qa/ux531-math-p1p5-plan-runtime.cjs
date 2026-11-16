@@ -24,7 +24,7 @@ const html = [
   // Omitting it made offline Math screenshots render in browser-default serif.
   '<link rel="stylesheet" href="/style.css">',
   '<link rel="stylesheet" href="/visual/iclub-visual-v3.css">',
-  '<link rel="stylesheet" href="/exam-prep/exam-prep-host.css">
+  '<link rel="stylesheet" href="/exam-prep/exam-prep-host.css">',
   '<link rel="stylesheet" href="/visual/iclub-academy-ux531-b04b08.css">',
   '</head><body class="iclub-visual-v3">',
   '<main style="width:100%;max-width:100%;box-sizing:border-box;padding:10px">',
