@@ -187,13 +187,17 @@
   }, true);
 
   language.addEventListener("change", renderLabels);
-  document.getElementById("reg-subject-chips")?.addEventListener("click", () => queueMicrotask(updateSubjectCounter));
+  // Read after app.js has synchronously applied the chip choice to hidden
+  // selects; microtasks may otherwise run between event listeners (off-by-one).
+  document.getElementById("reg-subject-chips")?.addEventListener("click", () => {
+    requestAnimationFrame(updateSubjectCounter);
+  });
   document.getElementById("reg-is-school-toggle")?.addEventListener("change", () => {
     renderLabels();
     // Existing app.js clears selected subjects on school -> non-school.
     // Run its existing summary renderer AFTER the full change event dispatch,
     // so a later switch back to school never shows stale selected names.
-    queueMicrotask(() => {
+    requestAnimationFrame(() => {
       document.dispatchEvent(new CustomEvent("reg-subjects-i18n-updated"));
       updateSubjectCounter();
     });

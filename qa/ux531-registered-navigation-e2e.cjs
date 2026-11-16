@@ -284,6 +284,19 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       await page.locator("#view-registration .reg-toggle .switch").click();
       assert.equal(await page.locator("#reg-is-school-toggle").isChecked(), false);
       assert.equal(await page.locator("#reg-subject-section").isVisible(), true);
+      const counterText = (n) => ({
+        ru: `Выбрано: ${n} из 2 предметов`,
+        uz: `Tanlangan: ${n}/2 ta fan`,
+        en: `Selected: ${n} of 2 subjects`
+      })[language];
+      const assertCounter = async (n) => {
+        const label = counterText(n);
+        await page.waitForFunction(expected =>
+          document.querySelector(".reg-b00-selected-count")?.textContent===expected,
+          label,{timeout:4000});
+        assert.equal(await page.locator(".reg-b00-selected-count").innerText(),label);
+      };
+      await assertCounter(0);
       if (mode === "success") {
         await page.waitForFunction(() => !document.getElementById("toast")?.classList.contains("is-show"), null, { timeout: 5000 });
         await page.evaluate(() => window.scrollTo(0, 0));
@@ -300,10 +313,21 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       assert.equal(await page.evaluate(() => window.__B00_FAKE.writes.length),beforeEmptySubmit,
         "Zero selected non-school subjects must not write user or credentials");
       await page.locator('#reg-subject-chips [data-subject-key="mathematics"]').click();
+      await assertCounter(1);
+      await page.locator('#reg-subject-chips [data-subject-key="economics"]').click();
+      await assertCounter(2);
+      await page.locator('#reg-subject-chips [data-subject-key="mathematics"]').click();
+      await assertCounter(1);
+      await page.locator('#reg-subject-chips [data-subject-key="economics"]').click();
+      await assertCounter(0);
+      // Re-select: one required initial Study subject, optional second.
+      await page.locator('#reg-subject-chips [data-subject-key="mathematics"]').click();
+      await assertCounter(1);
       assert.equal(await page.locator("#reg-main-subject-1").inputValue(),"mathematics");
       assert.equal(await page.locator("#reg-subject-summary").isVisible(),true);
       if (width === 390 || width === 1440) {
         await page.locator('#reg-subject-chips [data-subject-key="economics"]').click();
+        await assertCounter(2);
       }
     } else {
       await page.locator("#reg-school").fill("154");
@@ -344,8 +368,33 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
         const study = await page.locator("#home-study-list > .home-pinned-tile").first().evaluate(el =>
           getComputedStyle(el).backgroundImage);
         assert.match(study,/linear-gradient/,"Pinned Study tiles must restore sapphire tint");
-        assert.match(study,/rgb\(217, 234, 255\)/,
-          "Pinned Study tile must not use previous near-white background");
+        assert.match(study,/rgb\(242, 247, 255\)/,
+          "Pinned Study tile must match the architect-approved v5.8 neutral sapphire tint");
+        const visual = await page.locator("#home-study-list > .home-pinned-tile").first().evaluate(el => {
+          const card = el.getBoundingClientRect();
+          const title = el.querySelector(".home-pinned-title");
+          const titleBox = title.getBoundingClientRect();
+          const css = getComputedStyle(title);
+          const outer = getComputedStyle(el);
+          return {
+            textAlign:css.textAlign,fontSize:parseFloat(css.fontSize),
+            outerAlign:outer.textAlign,cardHeight:card.height,
+            leftOffset:titleBox.left-card.left,
+            rightGap:card.right-titleBox.right,
+            topCount:el.querySelectorAll(".home-pinned-top").length,
+            footerCount:el.querySelectorAll(".home-pinned-bottom").length
+          };
+        });
+        assert.equal(visual.textAlign,"left","Approved Study title must be left-aligned");
+        assert.equal(visual.outerAlign,"left","Approved Study card must not center content");
+        assert.ok(visual.fontSize>=17 && visual.fontSize<=19.1,
+          "Approved Study title must be 17-19px, not an oversized heading: "+JSON.stringify(visual));
+        assert.ok(visual.leftOffset>=10 && visual.leftOffset<=24,
+          "Study title must align to card's left inset: "+JSON.stringify(visual));
+        assert.equal(visual.topCount,1);
+        assert.equal(visual.footerCount,1);
+        assert.ok(visual.cardHeight>=128 && visual.cardHeight<=240,
+          "Study card should stay compact while allowing long translations");
         assert.equal(await page.locator("#home-competitive-list .home-competitive-card").count(),0,
           "Non-school cannot inherit Competitive cards");
       } else {

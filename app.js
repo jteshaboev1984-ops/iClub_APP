@@ -15008,10 +15008,16 @@ async function updateHomePinnedTile(tileEl, subjectKey) {
   const el = document.createElement("button");
   el.type = "button";
   el.className = "home-pinned-tile";
+  el.dataset.subject = String(userSubject.key || "").toLowerCase();
+  // Approved Academy OS v5.8 pinned-card anatomy: label / title / footer.
+  // Live practice progress remains the real source value, never demo data.
   el.innerHTML = `
-    <div class="home-pinned-ico" aria-hidden="true"><svg class="v3-home-pinned-icon" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5A2.5 2.5 0 0 1 20 21z"/></svg></div>
-    <div class="home-pinned-title">${escapeHTML(title)}</div>
-    <div class="home-pinned-meta"><span class="js-home-pin-count">${escapeHTML(lessons)}</span> ${escapeHTML(t("home_practice_progress_label") || "")}</div>
+    <span class="home-pinned-top">${escapeHTML(tr3("УЧЕБНЫЙ ПРЕДМЕТ", "O‘QUV FANI", "STUDY SUBJECT"))}</span>
+    <strong class="home-pinned-title">${escapeHTML(title)}</strong>
+    <span class="home-pinned-bottom">
+      <span class="home-pinned-meta"><span class="js-home-pin-count">${escapeHTML(lessons)}</span> ${escapeHTML(t("home_practice_progress_label") || "")}</span>
+      <span class="home-pinned-open">${escapeHTML(tr3("Открыть ›", "Ochish ›", "Open ›"))}</span>
+    </span>
   `;
 
   el.addEventListener("click", () => {

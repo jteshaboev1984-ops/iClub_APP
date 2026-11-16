@@ -8,6 +8,8 @@ on:
       - 'visual/iclub-registration-b00.css'
       - 'qa/registration-b00-browser.cjs'
       - 'qa/registration-b00-real-app-mocked-e2e.cjs'
+      - 'qa/ux531-registered-navigation-e2e.cjs'
+      - 'qa/ux531-b00-counter-fix-guard.cjs'
       - '.github/workflows/b00-registration-visual-qa.yml'
 
 permissions:
@@ -27,6 +29,7 @@ jobs:
           node --check registration-b00-ui.js
           node --check qa/registration-b00-browser.cjs
           node --check qa/registration-b00-real-app-mocked-e2e.cjs
+          node --check qa/ux531-b00-counter-fix-guard.cjs
           node - <<'NODE'
           const fs = require('node:fs');
           const html = fs.readFileSync('index.html','utf8');
