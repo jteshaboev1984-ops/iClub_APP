@@ -1,5 +1,7 @@
 -- P2-02 Stage 3 Syllabus Closure current-schema matrix.
--- Rollback-only synthetic learner. Verifies P1/P5 closure independently.
+-- Rollback-only synthetic learner. Verifies independent P1/P5 fail-closed rules.
+-- D03 removed the ability to self-grade written full Paper. A positive Stage3
+-- full-baseline exit requires independently VERIFIED marks and is UNPROVEN here.
 \set ON_ERROR_STOP on
 \echo 'P2-02 Stage 3 Syllabus Closure matrix'
 
@@ -95,6 +97,16 @@ begin
     raise exception 'P2-02 public closure API privilege boundary drift';
   end if;
 
+  -- Even a stale client cannot invoke the old written self-mark RPC.
+  if to_regprocedure('public.submit_exam_prep_timed_written_self_mark_safe_v1(uuid,integer,integer,text,text)') is null
+     or has_function_privilege('authenticated',
+          'public.submit_exam_prep_timed_written_self_mark_safe_v1(uuid,integer,integer,text,text)','EXECUTE')
+     or has_function_privilege('anon',
+          'public.submit_exam_prep_timed_written_self_mark_safe_v1(uuid,integer,integer,text,text)','EXECUTE')
+  then
+    raise exception 'P2-02 D03 written self-mark RPC access firewall drift';
+  end if;
+
   insert into auth.users(id,email,role,aud)
   values(v_user,'p202-stage3-closure@invalid.example','authenticated','authenticated');
   insert into public.users(id,first_name,last_name,language_code)
@@ -161,8 +173,9 @@ begin
     end if;
   end loop;
 
-  -- Create one fully reviewed comparable full-paper baseline for each component.
-  -- After P1 completes, P5 must remain independently blocked.
+  -- Insert one finalized but UNGRADED all-written Paper per component.
+  -- Even privileged legacy self-mark rows must NEVER count as verified marks
+  -- or create comparable Paper baselines / release Stage3-Stage4.
   for r in
     select *
     from (values
@@ -252,44 +265,49 @@ begin
     select
       v_session,ti.item_order,v_user,ti.max_marks,ti.max_marks,true,
       'p202-s3-'||lower(r.component_code)||'-self-'||lpad(ti.item_order::text,2,'0'),
-      'Rollback-only P2-02 comparability fixture'
+      'Rollback-only P2-02 malicious legacy self-mark negative fixture'
     from private.exam_prep_timed_assessment_items ti
     where ti.assessment_id=v_ass;
 
-    if not private.exam_prep_timed_score_comparable_v1(v_session) then
-      raise exception 'P2-02 completed written review not comparable component=%',r.component_code;
+    -- Synthetic old self-mark rows are NOT independently verified scoring.
+    if private.exam_prep_timed_score_comparable_v1(v_session) then
+      raise exception 'P2-02 D03 violation: legacy self-marks made Paper comparable component=%',r.component_code;
     end if;
 
     v_status:=private.exam_prep_stage3_exit_status_v1(
       v_user,v_program,r.component_code
     );
-    if not (v_status->>'ready')::boolean
-       or v_status->>'reason_code'<>'ready'
-       or (v_status->>'comparable_full_baseline_count')::int<>1
-       or (v_status->>'stage4_unlocked')::boolean
+    if coalesce((v_status->>'ready')::boolean,true)
+       or v_status->>'reason_code'<>'full_baseline_missing'
+       or (v_status->>'comparable_full_baseline_count')::int<>0
+       or coalesce((v_status->>'stage4_unlocked')::boolean,true)
     then
-      raise exception 'P2-02 component did not meet Stage-3 closure after baseline component=% payload=%',
+      raise exception 'P2-02 unverified written Paper unlocked Stage-3 component=% payload=%',
         r.component_code,v_status;
     end if;
 
     if r.component_code='P1' then
       v_other:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P5');
-      if (v_other->>'ready')::boolean
+      if coalesce((v_other->>'ready')::boolean,true)
          or v_other->>'reason_code'<>'full_baseline_missing'
       then
-        raise exception 'P2-02 P1 closure incorrectly promoted P5 payload=%',v_other;
+        raise exception 'P2-02 forged P1 Paper impacted P5 payload=%',v_other;
       end if;
     end if;
   end loop;
 
-  -- Both components can now independently satisfy the closure evaluator.
+  -- Neither component may bypass full Paper academic verification.
   v_status:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P1');
   v_other:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P5');
-  if not (v_status->>'ready')::boolean or not (v_other->>'ready')::boolean then
-    raise exception 'P2-02 symmetric P1/P5 closure failed P1=% P5=%',v_status,v_other;
+  if coalesce((v_status->>'ready')::boolean,true)
+     or coalesce((v_other->>'ready')::boolean,true)
+     or v_status->>'reason_code'<>'full_baseline_missing'
+     or v_other->>'reason_code'<>'full_baseline_missing'
+  then
+    raise exception 'P2-02 D03 independent P1/P5 baseline firewall failed P1=% P5=%',v_status,v_other;
   end if;
 
-  -- Reopen one governed P1 key skill: P1 must fail, P5 must remain ready.
+  -- Lower one governed P1 key skill; P5 remains independently baseline-blocked.
   select k.skill_code into v_key
   from private.exam_prep_stage3_key_skills k
   where k.rule_version=v_rule and k.program_version_id=v_program and k.component_code='P1'
@@ -304,7 +322,8 @@ begin
   v_other:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P5');
   if (v_status->>'ready')::boolean
      or v_status->>'reason_code'<>'key_l3_incomplete'
-     or not (v_other->>'ready')::boolean
+     or coalesce((v_other->>'ready')::boolean,true)
+     or v_other->>'reason_code'<>'full_baseline_missing'
   then
     raise exception 'P2-02 key L3/component firewall failed P1=% P5=%',v_status,v_other;
   end if;
@@ -314,7 +333,7 @@ begin
   where user_id=v_user and program_version_id=v_program
     and component_code='P1' and skill_code=v_key and engine_version=v_engine;
 
-  -- Reopen one non-key P5 skill to L1: P5 must fail L2, P1 must remain ready.
+  -- Lower one non-key P5 skill to L1; P1 remains baseline-blocked.
   select n.skill_code into v_key
   from private.exam_prep_syllabus_nodes n
   where n.program_version_id=v_program and n.component_code='P5'
@@ -334,7 +353,8 @@ begin
   v_other:=private.exam_prep_stage3_exit_status_v1(v_user,v_program,'P1');
   if (v_status->>'ready')::boolean
      or v_status->>'reason_code'<>'l2_incomplete'
-     or not (v_other->>'ready')::boolean
+     or coalesce((v_other->>'ready')::boolean,true)
+     or v_other->>'reason_code'<>'full_baseline_missing'
   then
     raise exception 'P2-02 all-skills L2/component firewall failed P5=% P1=%',v_status,v_other;
   end if;
@@ -351,10 +371,10 @@ begin
     raise exception 'P2-02 Product Content-Complete / learner closure firewall missing';
   end if;
 
-  raise notice 'P2-02 Stage 3 Syllabus Closure current-schema matrix: GREEN';
+  raise notice 'P2-02 D03 fail-closed Stage3 matrix GREEN; positive independently verified full-Paper baseline UNPROVEN';
 end
 $$;
 
 ROLLBACK;
 
-\echo 'P2-02 Stage 3 Syllabus Closure matrix: GREEN'
+\echo 'P2-02 D03 Stage3 negative safety GREEN; verified written baseline UNPROVEN'
