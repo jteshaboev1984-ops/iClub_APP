@@ -212,6 +212,10 @@ async function main(){
     "Stage6 objective progression must unlock Final Calibration without Paper marks");
   assert.equal(p1Cal.stage6_operational_access,true);
   assert.equal(p1Cal.hybrid_stage_gate_enabled,true);
+  assert.equal(p1Cal.exam_operations?.component_code,"P1",
+    "P2-06 exam operations must survive objective Stage6 reader replacement");
+  assert(Array.isArray(p1Cal.exam_operations?.checklist_items),
+    "exam logistics checklist must remain on Final Calibration");
   assert.equal(p1Cal.paper_marks_awarded,false);
   assert.equal(p1Cal.readiness.app_readiness_estimate,"INSUFFICIENT_EVIDENCE");
   assert.equal(p1Cal.readiness.ready,false,
@@ -261,6 +265,8 @@ async function main(){
     {p_component_code:"P1"}),"Stage6 legacy OFF calibration preserved");
   assert.equal(offCal.hybrid_stage_gate_enabled,false);
   assert.equal(offCal.stage6_operational_access,false);
+  assert.equal(offCal.exam_operations?.component_code,"P1",
+    "legacy calibration must preserve exam operations when hybrid flag OFF");
   assert.equal(offCal.available,false,
     "existing legacy comparator still requires independent marks when hybrid is OFF");
   console.log("PASS signed PG17/PostgREST objective stage 3->6 P1/P5: "+
