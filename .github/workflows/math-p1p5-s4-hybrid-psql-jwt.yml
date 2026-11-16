@@ -168,7 +168,7 @@ jobs:
             END IF;
           END $synthetic_subjects$;
           SQL
-          psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261113150000_math_p1p5_subject_release_guard_v1.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261115100103_math_p1p5_subject_release_guard_v1.sql
 
       - name: Generate ephemeral JWT signing key and start local PostgREST
         shell: bash
@@ -254,6 +254,11 @@ jobs:
           node --check scripts/p1p5-s3-chromium-mobile-three-language.cjs
           node scripts/p1p5-s3-chromium-mobile-three-language.cjs
 
+      - name: S4 existing active diagnostic remains intact during Paper rehearsal
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s4-active-diagnostic-coexistence.cjs
+          node scripts/p1p5-s4-active-diagnostic-coexistence.cjs
       - name: Clean disposable PostgREST
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true

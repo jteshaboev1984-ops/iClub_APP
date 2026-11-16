@@ -105,12 +105,34 @@ async function run() {
   sql("DELETE FROM public.user_subjects WHERE user_id='"+B+"' AND subject_id=5");
   assert.equal((await core(B)).core_access,false,'deselection closes mass access');
 
+  // MASS GO must close temporary QA overrides: the current governing decision
+  // forbids a mass Core release with qa_open_all_core=true. A Math student
+  // without ANY beta Core entitlement must still obtain the ordinary Core,
+  // while every non-selected student must remain denied by both RPCs.
+  sql("UPDATE private.exam_prep_feature_config SET qa_open_all_core=false,"+
+    "qa_open_all_weekly=false WHERE id=1");
+  sql("UPDATE private.exam_prep_feature_entitlements SET core_access=false WHERE user_id='"+B+"'");
+  assert.equal((await core(B)).core_access,false,'mass QA OFF: non-selected denied');
+  sql("INSERT INTO public.user_subjects(user_id,subject_id,mode) VALUES('"+B+
+    "',5,'competitive') ON CONFLICT(user_id,subject_id) DO NOTHING");
+  const massNoBeta=await core(B);
+  assert.equal(massNoBeta.core_access,true,'mass QA OFF: selected Mathematics gets Core without beta entitlement');
+  assert.equal(massNoBeta.ai_assist,false,'mass selection does not grant AI');
+  assert.equal(massNoBeta.mentor_care_entitled,false,'mass selection does not grant Mentor');
+  const massPaper=await rpc('get_exam_prep_hybrid_s4_papers_safe_v1',
+    {p_component_code:'P1'},jwt(B));
+  assert.equal(massPaper.data?.message,'exam_prep_profile_required',
+    'mass no-beta selected owner passed private Core authorizer to profile prerequisite');
+  sql("DELETE FROM public.user_subjects WHERE user_id='"+B+"' AND subject_id=5");
+  assert.equal((await core(B)).core_access,false,'mass QA OFF: deselection revokes Core');
+  sql("UPDATE private.exam_prep_feature_entitlements SET core_access=true WHERE user_id='"+B+"'");
+
   // Existing controlled beta must behave exactly as before (explicit grants).
   sql("UPDATE private.exam_prep_feature_config SET rollout_state='controlled_beta',"+
     "qa_open_all_core=false WHERE id=1");
   assert.equal((await core(A)).core_access,true,'selected beta owner unchanged');
   assert.equal((await core(B)).core_access,true,'nonselected beta entitlement unchanged');
   assert.equal(legacyCounts(),start,'legacy Practice/Tours/certificates unchanged');
-  console.log('P1/P5 SUBJECT ACCESS PASS: beta unchanged; expanded/mass selected-only; direct RPC denied; no legacy writes');
+  console.log('P1/P5 SUBJECT ACCESS PASS: beta unchanged; expanded/mass selected-only; mass QA-OFF no-entitlement Core; direct RPC denied; no legacy writes');
 }
 run().catch(error => {console.error(error);process.exitCode=1;});
