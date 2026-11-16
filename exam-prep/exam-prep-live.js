@@ -629,7 +629,11 @@
     }
     state.profile=profile.data;
     const toPlan=state.profileEditorFromPlan===true;state.profileEditorFromPlan=false;
-    state.notice=copy().saved;
+    state.notice=({
+      ru:"Экзаменационный профиль сохранён.",
+      uz:"Imtihon profili saqlandi.",
+      en:"Exam profile saved."
+    })[state.language]||"Exam profile saved.";
     if(toPlan)renderMyPlan();else await renderDashboard();
   }
 
