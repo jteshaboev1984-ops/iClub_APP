@@ -143,7 +143,9 @@ async function scenario(browser, language, width) {
       await page.click('[data-ep-live-submit]');
     }
     await page.waitForFunction(() => window.__reviewTest.finalized === true);
-    await page.waitForSelector('[data-ep-live-dashboard]');
+    // On v5.8 a completed component task returns to P5 Learning;
+    // the dashboard is an explicit Back action, not an automatic redirect.
+    await page.waitForSelector('[data-ep-component-home="P5"]');
     const s = await page.evaluate(() => window.__reviewTest);
     assert.equal(s.reviewStarts, 1, 'One noncredit review starter only');
     assert.equal(s.submitCalls, 4, 'Three objective and saved written responses');

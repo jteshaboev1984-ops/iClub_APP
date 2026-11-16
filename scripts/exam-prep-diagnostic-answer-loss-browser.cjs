@@ -35,6 +35,11 @@ async function scenario(browser,language,width,kind,mode) {
       const internal=window.iClubExamPrepHostInternal={lastCapabilities:
         {coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}};
       internal.api={
+        // New compact My plan reads saved settings without changing any
+        // academic state. The synthetic fixture intentionally stores none.
+        personalHorizon:async()=>ok({}),
+        studySchedule:async()=>ok(null),
+        weeklyChoiceS3:async()=>ok(null),
         examProfile:async()=>ok({exam_series:'May/June 2027',target_grade:'A',
           total_student_hours_available:10,mathematics_hours_budget:5}),
         diagnosticProgress:async()=>ok({stage0_complete:false,
