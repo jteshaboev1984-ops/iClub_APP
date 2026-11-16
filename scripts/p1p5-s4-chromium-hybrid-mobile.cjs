@@ -146,9 +146,13 @@ async function run(){
     const checks=page.locator('[data-ep-hybrid-s4-checks]');
     await checks.waitFor({timeout:20000});
     const resultText=await checks.textContent();
-    assert(resultText.includes(lang==='ru'?'Баллы за Paper не определены':
-      lang==='uz'?'Paper uchun baho aniqlanmagan':'Full Paper mark is unknown'),
-      'after full Paper user must see honest unmarked writing '+lang);
+    const paperNoMarks=lang==='ru'
+      ?'Paper — тренировка без баллов. Письменные решения не оцениваются.'
+      :lang==='uz'
+        ?'Paper — ball qo‘yilmaydigan mashq. Yozma yechimlar baholanmaydi.'
+        :'Paper is ungraded practice. No marks are awarded for written work.';
+    assert(resultText.includes(paperNoMarks),
+      'after full Paper user must see explicit no-marks policy '+lang);
     if(component==='P1'){
       const btn=checks.locator('[data-ep-hybrid-s4-check]').first();
       assert(await btn.count(),'synthetic disposable-only numeric checkpoint absent');
@@ -168,8 +172,10 @@ async function run(){
     assert.equal(await review.locator('[data-ep-hybrid-s4-answer]').count(),0,
      'after criteria reveal no new independent answer check');
     const reviewText=await review.textContent();
-    assert(reviewText.includes(lang==='ru'?'Письменные решения не проверены':
-      lang==='uz'?'Yozma yechim tekshirilmagan':'Written methods have not been checked'));
+    assert(reviewText.includes(paperNoMarks),
+      'review must still show explicit no-Paper-marks policy '+lang);
+    assert.equal(await review.locator('[data-ep-hybrid-s4-mentor-optional]').count(),1,
+      'mentor help is optional advice, not a score or mandatory review');
     assert(reviewText.includes(lang==='ru'?'Критерии':lang==='uz'?'Mezonlar':'Criteria'));
     assert(!reviewText.includes('58/75')&&!reviewText.includes('M1 / A1'),
      'no invented written marks, self-marking or examiner');
@@ -194,9 +200,8 @@ async function run(){
       'finished '+component+' Paper must be visible in normal history '+lang);
     const journalText=await unifiedHistory.textContent();
     assert(journalText.includes('Paper 01'),'history should show a human-readable Paper title');
-    assert(journalText.includes(lang==='ru'?'Баллы за Paper не определены':
-      lang==='uz'?'Paper uchun baho aniqlanmagan':'Full Paper mark is unknown'),
-      'never mix S4 rehearsal with marked Core results');
+    assert(journalText.includes(paperNoMarks),
+      'never mix ungraded S4 rehearsal with marked Core results');
     const oldHistory=page.locator('[data-ep-history-legacy-section]');
     assert.equal(await oldHistory.count(),1,'keep separate Core history section');
     if(legacy?.ok && Array.isArray(legacy.data?.results)){
