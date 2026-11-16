@@ -80,7 +80,18 @@ async function clickCase({language="ru",choice="change",row=savedChoice,
   const context = {
     state, rootEl:()=>({querySelector:()=>panel}),
     internal: {api:{
-      saveWeeklyChoiceS3:async(args,key)=>{calls.push({args,key});return {ok:true,data:{saved:true}};},
+      saveWeeklyChoiceS3:async(args,key)=>{
+        calls.push({args,key});
+        state.weeklyChoice={
+          ...state.weeklyChoice,
+          choice_code:args.choice,choice_recorded:true,
+          p1_minutes:args.p1Minutes==null?state.weeklyChoice.p1_minutes:args.p1Minutes,
+          p5_minutes:args.p5Minutes==null?state.weeklyChoice.p5_minutes:args.p5Minutes,
+          schedule_revision:Number(state.weeklyChoice.schedule_revision)+1
+        };
+        return {ok:true,data:{saved:true}};
+      },
+      weeklyChoiceS3:async()=>({ok:true,data:{...state.weeklyChoice}}),
       examProfile:async()=>({ok:true,data:{}})
     }},
     key:()=> "s3-ui-work-qa-key-abcdefghijklmnop",
@@ -130,6 +141,10 @@ async function main() {
     assert.equal(valid.calls[0].args.daysPerWeek,5);
     assert.equal(valid.calls[0].args.p1Minutes,110);
     assert.equal(valid.calls[0].args.p5Minutes,90);
+    assert.equal(valid.state.weeklyChoice.schedule_revision,5,
+      "S3 read-after-write must use a new server revision");
+    assert.equal(valid.state.weeklyChoice.choice_code,"change",
+      "S3 UI snapshot must reflect the persisted choice");
   }
 
   const genuineEdit = await clickCase({p1:"115",p5:"85"});
