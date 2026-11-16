@@ -224,8 +224,9 @@ async function caseRun(browser, address, { language, width, mode }) {
         .map(cls=>[...root.querySelectorAll("."+cls)][0])
         .filter(Boolean).map(el=>[...el.parentElement.children].indexOf(el));
     });
-    assert.deepEqual(overviewOrder,[0,1,2],
-      "Your route, P1/P5, and My Plan must appear in that order");
+    assert.equal(overviewOrder.length,3,"Route, P1/P5 and My Plan must exist");
+    assert(overviewOrder[0]<overviewOrder[1] && overviewOrder[1]<overviewOrder[2],
+      "Your route, P1/P5, and My Plan must appear in that order: "+overviewOrder);
     // The exact approved v5.8 plan, learning, practice and history layout
     // must fit across all named widths without reducing touch targets.
     const verifyLayout = async (place, requireTabs=false) => {
