@@ -20,7 +20,7 @@ permissions:
   contents: read
 jobs:
   written-learning:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
         run: node scripts/math-written-external-browser.cjs
 
   written-database-isolated:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     services:
       postgres:
