@@ -99,16 +99,16 @@ BEGIN
 
   v_actions:=jsonb_build_array(
     jsonb_build_object('action_code','short_targeted_work','priority',1,
-      'purpose','Keep work short and focused on confirmed weak skills; full Paper remains ungraded.'),
+      'purpose','Maintain exam form with short evidence-driven work; do not reopen the whole syllabus.'),
     jsonb_build_object('action_code','timing_and_logistics','priority',2,
       'purpose','Confirm component timing and exam logistics through the approved profile process.'),
     jsonb_build_object('action_code','taper','priority',3,
-      'purpose','Avoid bulk workload and protect recovery; calibration creates no new mastery.')
+      'purpose','Reduce bulk workload and protect sleep/recovery; calibration volume does not create new mastery.')
   );
   IF v_open_cases>0 THEN
     v_actions:=jsonb_build_array(jsonb_build_object(
       'action_code','close_recurring_issue','priority',1,
-      'purpose','Close an outstanding objective correction before optional practice.',
+      'purpose','Resolve the highest-priority remaining evidence-based correction before adding optional work.',
       'skill_code',v_latest_skill,'correction_case_id',v_latest_case
     )) || v_actions;
   END IF;
@@ -126,10 +126,14 @@ BEGIN
     'actions',v_actions,
     'new_mastery_allowed',false,
     'mentor_verified_readiness',false,
-    'paper_marks_awarded',false,
-    'paper_rehearsal_required',false,
+    'paper_marks_awarded',CASE WHEN v_hybrid THEN false ELSE null END,
+    'paper_rehearsal_required',CASE WHEN v_hybrid THEN false ELSE null END,
     'mentor_required_for_core',false,
-    'note','Final Calibration is objective operational planning, not a Paper grade or Cambridge readiness prediction.'
+    'note',CASE WHEN v_hybrid THEN
+      'Final Calibration is objective operational planning, not a Paper grade or Cambridge readiness prediction.'
+      ELSE
+      'Final Calibration is component-specific taper/logistics support. It is not a predicted Cambridge grade and does not create Mentor Verified readiness.'
+      END
   );
 END;
 $math_s4_stage6$;
