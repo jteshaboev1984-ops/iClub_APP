@@ -554,9 +554,10 @@
     </section>`:"";
     const legacyHeading=state.language==="uz"?"O‘quv topshiriqlari va kirish tekshiruvlari":
       (state.language==="en"?"Learning tasks and entry checks":"Учебные задания и диагностики");
-    root.innerHTML=shell(`<section class="ep-history-screen">
+    root.innerHTML=shell(`<section class="ep-history-screen" data-ep-v58-history="${esc(component)}">
       <div class="ep-live-card"><div class="ep-live-head"><strong>${esc(component)} · ${esc(c.history)}</strong>
       <button class="ep-live-btn secondary" type="button" data-ep-history-back>${esc(c.backToComponent)}</button></div></div>
+      ${epComponentTabs(component,"history")}
       ${paperSection}
       <section class="ep-live-card" data-ep-history-legacy-section>
         <div class="ep-live-head"><strong>${esc(legacyHeading)}</strong></div>
@@ -564,8 +565,11 @@
       </section>
     </section>`,{compact:true});
     root.querySelector('[data-ep-history-back]')?.addEventListener('click',()=>openComponentHome(component));
+    epBindTabs(component,root);
     root.querySelectorAll('[data-ep-history-session]').forEach(button=>button.addEventListener('click',()=>openSessionResult(button.dataset.epHistorySession,component,"history")));
-    root.querySelectorAll('[data-ep-history-paper-session]').forEach(button=>button.addEventListener('click',()=>void hybridS4Load(button.dataset.epHistoryPaperSession,component)));
+    root.querySelectorAll('[data-ep-history-paper-session]').forEach(button=>button.addEventListener('click',()=>{
+      state.paperOrigin="history";void hybridS4Load(button.dataset.epHistoryPaperSession,component);
+    }));
   }
 
   function shell(body, options = {}) {
@@ -923,6 +927,7 @@
       <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
         <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><button class="ep-route-back" type="button" data-ep-component-back aria-label="${esc(c.overview)}">←</button><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
           <div class="ep-route-identity"><div><h2>${esc(componentName)}</h2><span class="ep-route-phase">${esc(stageLabel(stage))} · ${esc(c.stageTitle)}</span></div><span class="ep-live-component-code">${component}</span></div></header>
+        ${epComponentTabs(component,"learning")}
         <section class="ep-component-next"><span class="ep-component-section-label">${esc(home.next)}</span>
           <strong class="ep-component-next-title">${esc(action.title)}</strong>
           <div class="ep-route-next-detail">${esc(action.detail)}</div>
@@ -932,8 +937,9 @@
           <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
         ${lastResultCard}
         <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
-        <section class="ep-component-links">${attention}${history}${timed}${hybrid}${readiness}${materials}${extraHard}</section></section>`, {compact:true});
+        <section class="ep-component-links">${attention}${readiness}${materials}</section></section>`, {compact:true});
     state.notice = null;
+    epBindTabs(component,root);
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
     root.querySelectorAll("[data-ep-component-skill]").forEach(button => button.addEventListener("click", () => internal.learnerViews?.openSkill?.(component, button.dataset.epComponentSkill)));
