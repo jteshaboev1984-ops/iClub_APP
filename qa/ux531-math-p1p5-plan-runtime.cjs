@@ -13,7 +13,11 @@ const screens = path.join(root, "ux531-academy-all-screens");
 const html = [
   '<!doctype html><html lang="ru"><head><meta charset="utf-8">',
   '<meta name="viewport" content="width=device-width, initial-scale=1">',
-  '<link rel="stylesheet" href="/exam-prep/exam-prep-host.css">',
+  // Production iClub loads the shared sans-serif foundation BEFORE Exam Prep.
+  // Omitting it made offline Math screenshots render in browser-default serif.
+  '<link rel="stylesheet" href="/style.css">',
+  '<link rel="stylesheet" href="/visual/iclub-visual-v3.css">',
+  '<link rel="stylesheet" href="/exam-prep/exam-prep-host.css">
   '<link rel="stylesheet" href="/visual/iclub-academy-ux531-b04b08.css">',
   '</head><body class="iclub-visual-v3">',
   '<main style="width:100%;max-width:100%;box-sizing:border-box;padding:10px">',
@@ -31,7 +35,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html);
     return;
   }
-  if (!["/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
+  if (!["/style.css", "/visual/iclub-visual-v3.css", "/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
     res.writeHead(404).end(); return;
   }
   const file = path.join(root, p.slice(1));
@@ -142,6 +146,10 @@ async function caseRun(browser, address, { language, width, mode }) {
       return;
     }
     assert.equal(opened,true,"Synthetic authorized host should open");
+    const initialFont = await page.evaluate(() =>
+      getComputedStyle(document.querySelector("#exam-prep-host-root .ep-host-shell")).fontFamily);
+    assert(/ui-sans-serif|system-ui/i.test(initialFont) && !/Times New Roman/i.test(initialFont),
+      "Math Exam Prep must inherit the actual iClub sans-serif app typography: "+initialFont);
     const form = page.locator("[data-ep-live-profile-form]");
     await form.waitFor();
     assert.equal(await form.locator("input").count(),4,"Real plan form has four fields");
