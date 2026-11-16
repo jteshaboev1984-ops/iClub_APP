@@ -14,7 +14,8 @@ const html = [
   '<!doctype html><html lang="ru"><head><meta charset="utf-8">',
   '<meta name="viewport" content="width=device-width, initial-scale=1">',
   '<link rel="stylesheet" href="/exam-prep/exam-prep-host.css">',
-  '</head><body>',
+  '<link rel="stylesheet" href="/visual/iclub-academy-ux531-b04b08.css">',
+  '</head><body class="iclub-visual-v3">',
   '<main style="width:100%;max-width:100%;box-sizing:border-box;padding:10px">',
   '<section id="courses-subject-hub" data-subject-key="mathematics">',
   '<div id="exam-prep-host-root"></div></section></main>',
@@ -30,7 +31,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html);
     return;
   }
-  if (!["/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-host.css"].includes(p)) {
+  if (!["/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
     res.writeHead(404).end(); return;
   }
   const file = path.join(root, p.slice(1));
@@ -84,6 +85,8 @@ async function caseRun(browser, address, { language, width, mode }) {
       async studySchedule() { return {ok:true,data:null}; },
       async weeklyChoiceS3() { return {ok:true,data:null}; },
       async hybridS4Catalog(component) { return {ok:true,data:{enabled:false,papers:[],component_code:component}}; },
+      async hybridS4History(component) {return {ok:true,data:{component_code:component,sessions:[]}};},
+      async recentResults(component) {return {ok:true,data:{component_code:component,results:[]}};},
       async startNextDiagnostic(component) {
         tracker.starts.push(component);
         throw Error("QA must not start any attempt");
@@ -154,6 +157,35 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.deepEqual(recorded.diag,["P1","P5"],"Independent diagnostic reads");
     assert.deepEqual(recorded.starts,[],"No exam attempt started by the visual test");
     assert.deepEqual(recorded.serverWrites,[],"No persistence outside synthetic memory");
+    // The v5.8 overview keeps the two subject components ABOVE configuration.
+    assert.equal(await page.locator(".ep-v58-main-components .ep-live-component-entry").count(),2);
+    assert.equal(await page.locator("[data-ep-v58-plan-summary]").count(),1);
+    assert.equal(await page.locator("[data-ep-study-schedule]").count(),0,
+      "Dashboard must not expose an always-open schedule form");
+    await page.locator("[data-ep-v58-plan-open]").click();
+    await page.locator("[data-ep-v58-plan-page]").waitFor();
+    assert.equal(await page.locator("[data-ep-v58-setting]").count(),2,
+      "Schedule and dates must be grouped behind disclosure");
+    const settings=page.locator('[data-ep-v58-setting="schedule"]');
+    assert.equal(await settings.evaluate(el=>el.open),false,"schedule should be collapsed");
+    await settings.locator("summary").click();
+    assert.equal(await settings.evaluate(el=>el.open),true);
+    await page.locator("[data-ep-v58-plan-back]").click();
+    await page.locator(".ep-v58-main-components").waitFor();
+    await page.locator('[data-ep-live-open-component="P1"]').click();
+    await page.locator('[data-ep-component-home="P1"]').waitFor();
+    assert.equal(await page.locator('[data-ep-v58-tab="learning"]').getAttribute("aria-current"),
+      "page","component opens Learning, never starts diagnostics");
+    assert.deepEqual((await page.evaluate(()=>window.__UX531_MATH_TEST.starts)),[]);
+    await page.locator('[data-ep-v58-tab="training"]').click();
+    await page.locator('[data-ep-v58-component-training="P1"]').waitFor();
+    await page.locator('[data-ep-v58-tab="history"]').click();
+    await page.locator('[data-ep-v58-history="P1"]').waitFor();
+    assert.equal(await page.locator('[data-ep-history-legacy-section]').count(),1);
+    await page.locator('[data-ep-v58-tab="learning"]').click();
+    await page.locator('[data-ep-component-home="P1"]').waitFor();
+    assert.deepEqual((await page.evaluate(()=>window.__UX531_MATH_TEST.starts)),[],
+      "Three-tab browsing must never generate or consume an attempt");
     if (language==="ru" && width===390 || language==="uz" && width===320 ||
         language==="en" && width===1440) {
       fs.mkdirSync(screens,{recursive:true});
