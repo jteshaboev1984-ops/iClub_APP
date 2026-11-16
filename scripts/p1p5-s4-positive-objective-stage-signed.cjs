@@ -204,6 +204,20 @@ async function main(){
   }
   assert.equal(stageSql("P1"),"6","actual S4 hybrid stage projector unlocks P1 Final Calibration");
   assert.equal(stageSql("P5"),"4","P5 stops at Stage4 with unresolved objective L3");
+  const p1Cal=ok(await rpc("get_exam_prep_final_calibration_safe_v1",
+    {p_component_code:"P1"}),"P1 signed operational calibration");
+  const p5Blocked=ok(await rpc("get_exam_prep_final_calibration_safe_v1",
+    {p_component_code:"P5"}),"P5 signed calibration still blocked");
+  assert.equal(p1Cal.available,true,
+    "Stage6 objective progression must unlock Final Calibration without Paper marks");
+  assert.equal(p1Cal.stage6_operational_access,true);
+  assert.equal(p1Cal.hybrid_stage_gate_enabled,true);
+  assert.equal(p1Cal.paper_marks_awarded,false);
+  assert.equal(p1Cal.readiness.app_readiness_estimate,"INSUFFICIENT_EVIDENCE");
+  assert.equal(p1Cal.readiness.ready,false,
+    "operational access is not examiner/Cambridge grade readiness");
+  assert.equal(p5Blocked.available,false,
+    "P5 cannot use P1's objective Stage6 or marks");
   // The P5 remedy is objectively reaching L3, not a Paper score or mentor.
   sql("UPDATE private.exam_prep_skill_states SET objective_level=3 "+
     "WHERE user_id='"+C+"' AND component_code='P5'");
@@ -215,6 +229,12 @@ async function main(){
   sql("UPDATE private.exam_prep_stage_states SET l2_count=0,l3_count=36 "+
     "WHERE user_id='"+C+"' AND component_code='P5'");
   assert.equal(stageSql("P5"),"6","P5 independently reaches Stage6 without Paper marks");
+  const p5Cal=ok(await rpc("get_exam_prep_final_calibration_safe_v1",
+    {p_component_code:"P5"}),"P5 signed Stage6 calibration");
+  assert.equal(p5Cal.available,true);
+  assert.equal(p5Cal.stage6_operational_access,true);
+  assert.equal(p5Cal.paper_marks_awarded,false);
+  assert.equal(p5Cal.readiness.ready,false);
   const gateP1=sql("SELECT max_unlocked_stage FROM private.exam_prep_component_access_gates "+
     "WHERE user_id='"+C+"' AND component_code='P1'");
   const gateP5=sql("SELECT max_unlocked_stage FROM private.exam_prep_component_access_gates "+
@@ -237,6 +257,12 @@ async function main(){
     "WHERE singleton");
   const offAgain=await status("P1");
   assert.equal(offAgain.enabled,false,"feature OFF must block stage-reader API");
+  const offCal=ok(await rpc("get_exam_prep_final_calibration_safe_v1",
+    {p_component_code:"P1"}),"Stage6 legacy OFF calibration preserved");
+  assert.equal(offCal.hybrid_stage_gate_enabled,false);
+  assert.equal(offCal.stage6_operational_access,false);
+  assert.equal(offCal.available,false,
+    "existing legacy comparator still requires independent marks when hybrid is OFF");
   console.log("PASS signed PG17/PostgREST objective stage 3->6 P1/P5: "+
     "empty/no coverage/key L3/corrective gates; real isolated stage projector and "+
     "owner-bound readback; zero Paper marks or mandatory mentor. "+
