@@ -19,6 +19,7 @@ BEGIN
   IF position('exam_prep_stage5_readiness_status_v1' IN v_def)=0
      OR position('order by derived_at desc' IN lower(v_def))=0
      OR position('exam_prep_require_core_access_v1' IN v_def)=0
+     OR position('exam_prep_exam_ops_status_v1' IN v_def)=0
   THEN
     RAISE EXCEPTION 'Math S4 Stage6 existing owner/calibration source changed';
   END IF;
@@ -44,6 +45,7 @@ DECLARE
   v_latest_case uuid;
   v_actions jsonb;
   v_readiness_note jsonb;
+  v_ops jsonb;
 BEGIN
   v_uid:=private.exam_prep_require_core_access_v1();
   IF p_component_code NOT IN ('P1','P5') THEN
@@ -61,6 +63,8 @@ BEGIN
   -- OFF, including all genuine historic digital scores and permissions.
   v_ready:=private.exam_prep_stage5_readiness_status_v1(
     v_uid,v_program,p_component_code);
+  -- Preserve the pre-existing P2-06 owner-only exam logistics/checklist.
+  v_ops:=private.exam_prep_exam_ops_status_v1(v_uid,v_program,p_component_code);
   SELECT coalesce(operational_stage,0) INTO v_stage
   FROM private.exam_prep_stage_states
   WHERE user_id=v_uid AND program_version_id=v_program
@@ -124,15 +128,18 @@ BEGIN
     'readiness',v_readiness_note,
     'open_correction_cases',v_open_cases,
     'actions',v_actions,
+    'exam_operations',v_ops,
     'new_mastery_allowed',false,
-    'mentor_verified_readiness',false,
+    'mentor_verified_readiness',CASE WHEN v_hybrid THEN false
+      ELSE coalesce((private.exam_prep_mentor_verified_readiness_status_v1(
+        v_uid,v_program,p_component_code)->>'mentor_verified')::boolean,false) END,
     'paper_marks_awarded',CASE WHEN v_hybrid THEN false ELSE null END,
     'paper_rehearsal_required',CASE WHEN v_hybrid THEN false ELSE null END,
     'mentor_required_for_core',false,
     'note',CASE WHEN v_hybrid THEN
       'Final Calibration is objective operational planning, not a Paper grade or Cambridge readiness prediction.'
       ELSE
-      'Final Calibration is component-specific taper/logistics support. It is not a predicted Cambridge grade and does not create Mentor Verified readiness.'
+      'Final Calibration is component-specific taper/logistics support. It is not a predicted Cambridge grade and does not create mastery from last-minute work.'
       END
   );
 END;
