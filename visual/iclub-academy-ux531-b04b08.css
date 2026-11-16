@@ -653,6 +653,11 @@ body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-
 }
 /* On phones, all available Preparation actions are full-width, matching the
    Exam Prep card. At desktop keep the approved multi-column composition. */
+/* Match the same 17px radius across the subject preparation card family.
+   Approved two-column school layout and Tour-specific surface remain unchanged. */
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > button.subject-mode-card-tours.subject-mode-card-button{
+  border-radius:17px;
+}
 /* The owner-approved mobile pair (Practice + Tours) stays two columns.
    Only when Tours is unavailable for non-school students should the remaining
    Practice occupy the empty area and match the Exam Prep full-width footprint. */
