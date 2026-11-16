@@ -686,7 +686,8 @@
     const compat = complete
       ? `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-plan="${component}"></button>${stage >= 2 ? `<button type="button" data-ep-live-timed="${component}"></button>` : ""}${stage >= 5 ? `<button type="button" data-ep-live-readiness="${component}"></button>` : ""}</div>`
       : `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-start="${component}"></button></div>`;
-    const hint = complete ? `${home.openComponent} ${component}` : (active || ansItems > 0 ? c.continueCheck : c.start);
+    // Component card opens the overview; the next-action button starts work.
+    const hint = `${home.openComponent} ${component}`;
     return `<div class="ep-live-component-slot"><button class="ep-live-card ep-live-component-card ep-live-component-entry" type="button" data-ep-live-component="${component}" data-ep-component-entry="1" data-ep-live-open-component="${component}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(home.skills)}</span></div><span class="ep-live-component-arrow" aria-hidden="true">›</span></div>${status}<div class="ep-live-component-open">${esc(hint)} <span aria-hidden="true">→</span></div></button>${compat}</div>`;
   }
 
@@ -906,23 +907,8 @@
     const componentName = component === "P1" ? c.componentP1 : c.componentP5;
     const attention = diagnosticComplete && corrections > 0 ? `<button class="ep-component-link" type="button" data-ep-component-link="corrections"><span><strong>${esc(home.attention)}</strong><small>${corrections} ${esc(home.focusNow)}${deferredCorrections > 0 ? ` · +${deferredCorrections} ${esc(home.later)}` : ""}</small></span><span aria-hidden="true">›</span></button>` : "";
     const lastResultCard = lastResult ? `<section class="ep-component-last-result"><div><span class="ep-component-section-label">${esc(home.lastResult)}</span><strong>${esc(resultTypeLabel(lastResult.session_type))}</strong><small>${lastResult.machine_total > 0 ? `${Number(lastResult.machine_correct || 0)} / ${Number(lastResult.machine_total || 0)} ${esc(c.correctOf)}` : esc(c.writtenPart)}</small></div><button class="ep-live-btn secondary" type="button" data-ep-component-last-result="${esc(lastResult.session_id)}">${esc(c.viewResults)}</button></section>` : "";
-    const history = (lastResult || state.hybridS4Available?.[component]===true)
-      ? `<button class="ep-component-link" type="button" data-ep-component-link="history"><span><strong>${esc(home.history)}</strong></span><span aria-hidden="true">›</span></button>` : "";
-    // The original timed route remains intact. An approved beta Paper is
-    // separately listed only after the existing server confirms availability.
-    const timed = stage >= 2 ? `<button class="ep-component-link" type="button" data-ep-component-link="timed"><span><strong>${esc(home.timed)}</strong><small>${esc(stageLabel(stage))}</small></span><span aria-hidden="true">›</span></button>` : "";
-    const hybrid = state.hybridS4Available?.[component] === true
-      ? `<button class="ep-component-link" type="button" data-ep-component-link="hybrid-paper"><span><strong>${esc(hybridS4Copy().title)}</strong><small>${esc(hybridS4Copy().paperNotice)}</small></span><span aria-hidden="true">›</span></button>`
-      : "";
     const readiness = stage >= 5 ? `<button class="ep-component-link" type="button" data-ep-component-link="readiness"><span><strong>${esc(home.readiness)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
-    // Optional Math original challenges; no dependency on current Stage or marks.
-    const extraHardTitle = state.language === "ru" ? "Задачи повышенной сложности"
-      : state.language === "uz" ? "Qo‘shimcha murakkab masalalar" : "Extra Hard";
-    const extraHardHint = state.language === "ru" ? "Необязательно, без оценки"
-      : state.language === "uz" ? "Ixtiyoriy, bahosiz" : "Optional, not graded";
-    const extraHard = internal.extraHardView?.open
-      ? `<button class="ep-component-link" type="button" data-ep-component-link="extra-hard"><span><strong>${esc(extraHardTitle)}</strong><small>${esc(extraHardHint)}</small></span><span aria-hidden="true">›</span></button>` : "";
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
       <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
         <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><button class="ep-route-back" type="button" data-ep-component-back aria-label="${esc(c.overview)}">←</button><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
@@ -1581,7 +1567,6 @@
     }
     // No hidden browser flag: the EXISTING signed owner RPC alone decides
     // whether beta Paper is available. Stage 0 entry remains independent.
-    let hybridS4Dashboard = "";
     state.hybridS4Available = { P1: false, P5: false };
     if (typeof internal.api?.hybridS4Catalog === "function") {
       const [hp1,hp5] = await Promise.all([
@@ -1593,17 +1578,7 @@
         .filter(([,v]) => v?.ok && v.data?.enabled === true &&
           Array.isArray(v.data.papers) && v.data.papers.length > 0);
       for (const [code] of ready) state.hybridS4Available[code] = true;
-      if (ready.length) {
-        const h=hybridS4Copy();
-        hybridS4Dashboard = '<section class="ep-live-card" data-ep-hybrid-s4-dashboard>'+
-          '<div class="ep-live-head"><strong>'+esc(h.title)+'</strong></div>'+
-          '<p class="ep-live-meta">'+esc(h.paperNotice)+'</p>'+
-          '<div class="ep-live-actions">'+ready.map(([code])=>
-            '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-dashboard-open="'+
-              code+'">'+code+' · '+esc(h.start)+'</button>'+
-            '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-dashboard-history="'+
-              code+'">'+code+' · '+esc(h.history)+'</button>').join("")+'</div></section>';
-      }
+
     }
     const c = copy();
     const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
