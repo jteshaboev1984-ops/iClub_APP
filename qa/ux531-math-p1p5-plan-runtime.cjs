@@ -52,11 +52,17 @@ async function caseRun(browser, address, { language, width, mode }) {
   });
   await page.addInitScript(({ deny }) => {
     const tracker = window.__UX531_MATH_TEST = {
-      profile: null, saves: [], diag: [], starts: [], serverWrites: []
+      profile: null, saves: [], diag: [], starts: [], serverWrites: [],
+      failNextProfileSave:false, failNextWeeklyRead:false,
+      weeklyChoice:null, weeklyReads:0, weeklySaves:[]
     };
     const api = {
       async examProfile() { return { ok:true, data:tracker.profile }; },
       async saveExamProfile(values) {
+        if(tracker.failNextProfileSave){
+          tracker.failNextProfileSave=false;
+          return {ok:false,error:{message:"Synthetic transient save failure"}};
+        }
         tracker.saves.push({ ...values });
         tracker.profile = {
           exam_series: values.examSeries,
@@ -83,7 +89,28 @@ async function caseRun(browser, address, { language, width, mode }) {
       },
       async personalHorizon() { return {ok:true,data:null}; },
       async studySchedule() { return {ok:true,data:null}; },
-      async weeklyChoiceS3() { return {ok:true,data:null}; },
+      async weeklyChoiceS3() {
+        tracker.weeklyReads++;
+        if(tracker.failNextWeeklyRead){
+          tracker.failNextWeeklyRead=false;
+          return {ok:false,error:{message:"Synthetic read-back failure"}};
+        }
+        return {ok:true,data:tracker.weeklyChoice ? {...tracker.weeklyChoice}:null};
+      },
+      async saveWeeklyChoiceS3(args,id) {
+        tracker.weeklySaves.push({args:{...args},id});
+        const prior=tracker.weeklyChoice;
+        if(!prior || prior.schedule_revision!==args.scheduleRevision)
+          return {ok:false,error:{message:"Synthetic stale schedule revision"}};
+        tracker.weeklyChoice={
+          ...prior, choice_code:args.choice, choice_recorded:true,
+          p1_minutes:args.p1Minutes, p5_minutes:args.p5Minutes,
+          schedule_revision:prior.schedule_revision+1
+        };
+        return {ok:true,data:{saved:true}};
+      },
+      async claimPeriodReportsS3() { return {ok:true,data:{claimed:0}}; },
+      async periodReportsS3() { return {ok:true,data:{reports:[]}}; },
       async hybridS4Catalog(component) { return {ok:true,data:{enabled:false,papers:[],component_code:component}}; },
       async hybridS4History(component) {return {ok:true,data:{component_code:component,sessions:[]}};},
       async recentResults(component) {return {ok:true,data:{component_code:component,results:[]}};},
@@ -126,6 +153,18 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.equal(await page.evaluate(() => window.__UX531_MATH_TEST.saves.length),0,
       "Invalid weekly budget cannot be persisted");
     await form.locator('[name="math_hours"]').fill("8");
+    const regression=language==="ru" && width===390;
+    if(regression){
+      await page.evaluate(()=>{
+        window.__UX531_MATH_TEST.weeklyChoice={
+          contract_version:"voluntary_weekly_choice_s3_v1",
+          schedule_revision:1, choice_recorded:true, choice_code:"keep",
+          chosen_math_minutes:200, total_available_minutes:960,
+          p1_minutes:100, p5_minutes:100,
+          study_minutes_per_day:40, study_days_per_week:5
+        };
+      });
+    }
     await form.locator('[data-ep-live-save-profile]').click();
     await page.locator(".ep-live-component-entry").first().waitFor({timeout:10000});
     assert.equal(await page.locator(".ep-live-component-entry").count(),2,"P1 and P5 must remain separate");
@@ -185,8 +224,58 @@ async function caseRun(browser, address, { language, width, mode }) {
     await page.locator("[data-ep-v58-plan-open]").click();
     await page.locator("[data-ep-v58-plan-page]").waitFor();
     await verifyLayout('My plan');
-    assert.equal(await page.locator("[data-ep-v58-setting]").count(),2,
-      "Schedule and dates must be grouped behind disclosure");
+    assert.equal(await page.locator("[data-ep-v58-setting]").count(),regression?3:2,
+      "Schedule, dates and available weekly choice must use native disclosures");
+    if(regression){
+      // A failed profile edit must not erase the form or the user's new values.
+      await page.locator("[data-ep-v58-profile-edit]").click();
+      await page.locator('[name="target_grade"]').fill("A*");
+      await page.evaluate(()=>{window.__UX531_MATH_TEST.failNextProfileSave=true;});
+      await page.locator("[data-ep-live-save-profile]").click();
+      await page.locator("[data-ep-live-profile-error]").getByText(/не удалось|ошиб|сохран/i).waitFor();
+      assert.equal(await page.locator('[name="target_grade"]').inputValue(),"A*",
+        "Transient save failure must preserve the edited grade");
+      assert.equal(await page.locator("[data-ep-live-profile-form]").count(),1,
+        "Transient save failure must keep the form mounted");
+      await page.locator("[data-ep-live-save-profile]").click();
+      await page.locator("[data-ep-v58-plan-page]").waitFor();
+      assert.match(await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").innerText(),/сохран/i,
+        "Plan must show the server-save confirmation on the current screen");
+
+      const weekly=page.locator('[data-ep-v58-setting="weekly"]');
+      await weekly.locator("summary").click();
+      await weekly.locator('input[value="redistribute"]').check();
+      await weekly.locator("[data-ep-s3-p1]").fill("110");
+      await weekly.locator("[data-ep-s3-p5]").fill("90");
+      await weekly.locator("[data-ep-s3-save]").click();
+      await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").waitFor();
+      assert.match(await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").innerText(),/сохран/i);
+      await page.locator('[data-ep-v58-setting="weekly"][open]').waitFor();
+      assert.equal(await page.locator("[data-ep-s3-p1]").inputValue(),"110");
+      assert.equal(await page.locator("[data-ep-s3-p5]").inputValue(),"90");
+      assert.equal(await page.evaluate(()=>window.__UX531_MATH_TEST.weeklyReads>=2),true,
+        "Persisted S3 state must be fetched after Save");
+      await page.locator("[data-ep-s3-save]").click();
+      assert.equal(await page.evaluate(()=>window.__UX531_MATH_TEST.weeklySaves.length),1,
+        "A saved and reread identical S3 choice must not create a duplicate write");
+
+      // Server accepted the next choice, but its read-back fails. Do not falsely
+      // display the old allocation as saved; tell the learner to reopen My plan.
+      await weekly.locator("[data-ep-s3-p1]").fill("120");
+      await weekly.locator("[data-ep-s3-p5]").fill("80");
+      await page.evaluate(()=>{window.__UX531_MATH_TEST.failNextWeeklyRead=true;});
+      await weekly.locator("[data-ep-s3-save]").click();
+      await weekly.locator("[data-ep-s3-feedback]").getByText(/сохранён.*не загрузились/i).waitFor();
+      assert.equal(await weekly.locator("[data-ep-s3-save]").isDisabled(),true,
+        "Stale server revision cannot be submitted a second time");
+      await page.locator("[data-ep-v58-plan-back]").click();
+      await page.locator("[data-ep-v58-plan-open]").click();
+      await page.locator('[data-ep-v58-setting="weekly"] summary').click();
+      assert.equal(await page.locator("[data-ep-s3-p1]").inputValue(),"120");
+      assert.equal(await page.locator("[data-ep-s3-p5]").inputValue(),"80",
+        "Reopening My plan must load the accepted server allocation");
+      assert.equal(await page.evaluate(()=>window.__UX531_MATH_TEST.weeklySaves.length),2);
+    }
     const settings=page.locator('[data-ep-v58-setting="schedule"]');
     assert.equal(await settings.evaluate(el=>el.open),false,"schedule should be collapsed");
     await settings.locator("summary").click();
