@@ -18,6 +18,7 @@ assert.equal(git('merge-base',base,head),base,'Release SHA must be an ancestor')
 const changed=git('diff','--name-only',base,head).split('\n').filter(Boolean);
 const allowed=new Set([
   '.github/workflows/exam-prep-weekly-answer-recovery.yml',
+  '.github/workflows/exam-prep-weekly-profile-recovery.yml',
   '.github/workflows/ux531-previewless-release-firewall.yml',
   'docs/ui-redesign/27-ux531-math-post-mobile-six-point-polish-20261116.md',
   'exam-prep/exam-prep-api.js','exam-prep/exam-prep-live.js','index.html',
@@ -45,6 +46,11 @@ const pinnedMatch=pinned.match(/git hash-object exam-prep\/exam-prep-live\.js\)"
 assert(pinnedMatch,'Existing audit pin removed');
 assert.equal(git('hash-object','exam-prep/exam-prep-live.js'),pinnedMatch[1],
   'New pinned Math runtime must exactly match the audited source bytes');
+const profileWorkflow=fs.readFileSync('.github/workflows/exam-prep-weekly-profile-recovery.yml','utf8');
+const profilePin=profileWorkflow.match(/git hash-object exam-prep\/exam-prep-api\.js\)" = '([a-f0-9]{40})'/);
+assert(profilePin,'Existing reviewed profile-recovery API pin removed');
+assert.equal(git('hash-object','exam-prep/exam-prep-api.js'),profilePin[1],
+  'Reviewed API source must exactly match profile recovery pin');
 for(const token of [
   'async function reconcilePendingAnswer(pending)',
   'pending.idempotencyKey',
