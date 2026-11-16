@@ -1909,7 +1909,7 @@
       minutes(p.time_limit_sec)+' '+esc(copy().minutes)+'</div></div>'+
       '<button type="button" class="ep-live-btn" data-ep-hybrid-s4-start="'+
       Number(p.assessment_id)+'">'+esc(c.start)+'</button></div>').join("");
-    const past=history.slice(0,12).map(h=>
+    const past=history.filter(h=>!h.closure_code).slice(0,12).map(h=>
       '<div class="ep-live-timed-row"><div><strong>'+esc(h.paper_key)+'</strong>'+
       '<div class="ep-live-meta">'+esc(hybridS4MarkState(h.closure_code))+
       ' · '+esc(formatDateTime(h.started_at))+'</div></div>'+
@@ -1924,7 +1924,7 @@
       (rows||'<p class="ep-live-notice">'+esc(c.noPapers)+'</p>')+
       '</section><section class="ep-live-card"><strong>'+esc(c.history)+'</strong>'+
       (past||'<p class="ep-live-meta">'+esc(c.emptyHistory)+'</p>')+'</section>');
-    root.querySelector('[data-ep-hybrid-s4-home]')?.addEventListener("click",renderDashboard);
+    root.querySelector('[data-ep-hybrid-s4-home]')?.addEventListener("click",()=>renderComponentTraining(component));
     root.querySelectorAll('[data-ep-hybrid-s4-start]').forEach(b=>
       b.addEventListener("click",()=>void hybridS4Start(component,Number(b.dataset.epHybridS4Start))));
     root.querySelectorAll('[data-ep-hybrid-s4-resume]').forEach(b=>
@@ -2101,7 +2101,9 @@
       '<section class="ep-live-card"><button type="button" class="ep-live-btn secondary"'+
       ' data-ep-hybrid-s4-back>'+esc(c.back)+'</button></section></div>');
     root.querySelector('[data-ep-hybrid-s4-back]')?.addEventListener("click",()=>{
-      state.hybridS4=null;void renderHybridS4Catalog(component);
+      state.hybridS4=null;
+      if(state.paperOrigin==="history")void openRecentResults(component);
+      else void renderHybridS4Catalog(component);
     });
   }
   // ---------------- END S4 HYBRID ---------------------------------------
@@ -2163,7 +2165,7 @@
     const body = rows.length ? rows.map(row => `<div class="ep-live-timed-row"><div><strong>${esc(assessmentTitle(row))}</strong><div class="ep-live-meta">${Number(row.marks_available || 0)} ${esc(c.marks)} · ${minutes(row.time_limit_sec)} ${esc(c.minutes)}</div></div><button class="ep-live-btn" type="button" data-ep-live-timed-start="${Number(row.assessment_id)}">${esc(c.startTimed)}</button></div>`).join("") : `<div class="ep-live-notice">${esc(c.noTimed)}</div>`;
     const consolidation = renderConsolidationCard(stage4Data);
     root.innerHTML = shell(`${consolidation}<div class="ep-live-card"><div class="ep-live-head"><strong>${component} · ${esc(c.timed)}</strong><button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>${esc(c.overview)}</button></div>${body}</div>`);
-    root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click', renderDashboard);
+    root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click',()=>renderComponentTraining(component));
     root.querySelectorAll('[data-ep-live-timed-start]').forEach(b => b.addEventListener('click', () => startTimed(component, Number(b.dataset.epLiveTimedStart))));
   }
 
@@ -2835,7 +2837,7 @@
     if (!state.profile) renderProfile(); else await renderDashboard();
     return canMount(context) && token === state.mountToken;
   }
-  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.s3Retry = null; state.hybridS4 = null; state.hybridS4Active = false; state.hybridS4Available = { P1: false, P5: false }; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
+  function reset() { ++state.mountToken; ++state.writtenCriteriaRequest; state.pendingWrittenStep=null; clearTimer(); state.busy = false; state.profile = null; state.personalHorizon = null; state.studySchedule = null; state.weeklyChoice = null; state.weeklyReports = null; state.s3Retry = null; state.hybridS4 = null; state.hybridS4Active = false; state.paperOrigin = "catalog"; state.profileEditorFromPlan = false; state.hybridS4Available = { P1: false, P5: false }; state.progress = { P1: null, P5: null }; state.componentState = { P1: null, P5: null }; state.session = null; state.returnView = null; state.notice = null; state.pendingSubmission = null; }
 
   function attach() {
     if (attached) return; const host = window.iClubExamPrep;
@@ -2862,7 +2864,10 @@
         return result;
       },
       back: () => {
-        if (rootEl()?.querySelector("[data-ep-component-home]")) { void renderDashboard(); return true; }
+        const root=rootEl();
+        if(root?.querySelector("[data-ep-component-home],[data-ep-v58-component-training],[data-ep-v58-plan-page]")) { void renderDashboard(); return true; }
+        if(root?.querySelector("[data-ep-v58-history]")) { const code=root.querySelector("[data-ep-v58-history]").dataset.epV58History;void openComponentHome(code);return true; }
+        if(state.profileEditorFromPlan){state.profileEditorFromPlan=false;renderMyPlan();return true;}
         reset(); return host.back();
       }, close: () => { reset(); return host.close(); }, isOpen: () => host.isOpen(), liveFlowVersion: VERSION
     });
