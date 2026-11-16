@@ -40,6 +40,10 @@ async function scenario(browser, language, width) {
         api: {
           examProfile: async () => ok({ exam_series: 'May/June 2027', target_grade: 'A',
             total_student_hours_available: 10, mathematics_hours_budget: 5 }),
+          // Existing plan summary reads, never writes; no test date or hours invented.
+          personalHorizon: async () => ok({}),
+          studySchedule: async () => ok(null),
+          weeklyChoiceS3: async () => ok(null),
           diagnosticProgress: async () => ok({ stage0_complete: true,
             screening: { required_items: 3, answered_items: 3, required_areas: 1, answered_areas: 1 } }),
           getState: async component => ok({ components: [{ component_code: component,
@@ -116,10 +120,14 @@ async function scenario(browser, language, width) {
       await page.addScriptTag({ path: file(script) });
     }
     await page.evaluate(lang => window.iClubExamPrep.open({ language: lang }), language);
-    await page.waitForSelector('[data-ep-live-plan="P5"]', { state: 'attached' });
-    await page.evaluate(() => document.querySelector('[data-ep-live-plan="P5"]').click());
-    await page.waitForSelector('[data-ep-live-plan-item="1"]');
-    await page.click('[data-ep-live-plan-item="1"]');
+    // Academy OS v5.8: component card opens an overview, not an attempt.
+    // The server-authorized Learning primary action starts the real review.
+    await page.waitForSelector('[data-ep-live-open-component="P5"]');
+    assert.equal(s.regularStarts, 0, 'Opening the dashboard must not start an assessment');
+    await page.click('[data-ep-live-open-component="P5"]');
+    await page.waitForSelector('[data-ep-component-primary="task"]');
+    assert.equal(s.regularStarts, 0, 'Component overview must not start an assessment');
+    await page.click('[data-ep-component-primary="task"]');
     await page.waitForSelector('.ep-live-qtext');
     for (let i = 0; i < 4; i++) {
       await page.waitForFunction(text => document.querySelector('.ep-live-qtext')?.textContent === text,

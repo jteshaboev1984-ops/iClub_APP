@@ -29,7 +29,7 @@ function checkDuration(locale, input, expected) {
 }
 const weeklyCode =
   between("  function weeklyS3Copy() {", "  function weeklyS3Panel() {") +
-  between("  function bindWeeklyS3() {", "  async function renderDashboard() {") +
+  between("  function bindWeeklyS3() {", "  // Academy OS v5.8: exam preferences belong to a single compact plan.") +
   "\nglobalThis.__bindWeekly = bindWeeklyS3;";
 
 const savedChoice = Object.freeze({
@@ -49,6 +49,7 @@ async function clickCase({language="ru",choice="change",row=savedChoice,
   p1="110",p5="90",day="40",days="5"}) {
   let onClick;
   const calls = [];
+  const planRenders = [];
   const feedback = {textContent:""};
   const button = {
     disabled:false,
@@ -83,13 +84,15 @@ async function clickCase({language="ru",choice="change",row=savedChoice,
       examProfile:async()=>({ok:true,data:{}})
     }},
     key:()=> "s3-ui-work-qa-key-abcdefghijklmnop",
-    renderDashboard:async()=>true
+    // The new navigation saves to the same S3 API, then returns to My plan.
+    // This is a presentation spy: it never changes persisted academic data.
+    renderMyPlan:section=>{planRenders.push(section);return true;}
   };
   vm.runInNewContext(weeklyCode,context,{filename:"exam-prep-live-extracted.js"});
   context.__bindWeekly();
   assert.equal(typeof onClick,"function","button click handler must be attached");
   await onClick();
-  return {calls,feedback:feedback.textContent,buttonDisabled:button.disabled,state};
+  return {calls,planRenders,feedback:feedback.textContent,buttonDisabled:button.disabled,state};
 }
 
 async function main() {
@@ -108,6 +111,7 @@ async function main() {
     const duplicate = await clickCase({language});
     assert.equal(duplicate.calls.length,0,
       "same displayed choice must not create another S3 row ("+language+")");
+    assert.deepEqual(duplicate.planRenders,[],"unchanged saved choice does not navigate or re-save");
     assert(duplicate.feedback.length>15,"saved-choice acknowledgement must be visible");
     const badDaily = await clickCase({
       language,row:{...savedChoice,choice_code:"redistribute",chosen_math_minutes:180},
@@ -121,6 +125,7 @@ async function main() {
       day:"40",days:"5",p1:"110",p5:"90"
     });
     assert.equal(valid.calls.length,1,"real change must still be submitted");
+    assert.deepEqual(valid.planRenders,["weekly"],"successful save returns to expanded My plan section");
     assert.equal(valid.calls[0].args.minutesPerDay,40);
     assert.equal(valid.calls[0].args.daysPerWeek,5);
     assert.equal(valid.calls[0].args.p1Minutes,110);
