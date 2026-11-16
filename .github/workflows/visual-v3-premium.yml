@@ -90,7 +90,10 @@ jobs:
           grep -q 'class="v3-tour-warning-icon"' index.html
           grep -q 'id="subject-hub-exam-prep-entry"' index.html
           grep -q 'class="subject-hub-primary-modes"' index.html
-          grep -q 'class="v3-home-pinned-icon"' app.js
+          # Academy OS v5.8 supersedes legacy hidden icon with text-first
+          # Study label/title/footer. Keep the rest of the premium gate intact.
+          grep -q 'class="home-pinned-top"' app.js
+          grep -q 'class="home-pinned-bottom"' app.js
           ! grep -Fq '<div class="home-pinned-ico">📘</div>' app.js
           grep -q 'courses_title: "Предметы"' i18n.js
           grep -q 'courses_title: "Fanlar"' i18n.js

@@ -592,6 +592,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       { language: "uz", mode: "success", width: 375 },
       { language: "en", mode: "success", width: 320 },
       { language: "en", mode: "success", width: 390 },
+      { language: "en", mode: "success", width: 528 },
       { language: "en", mode: "success", width: 1440 },
       { language: "en", mode: "save_error", width: 390 },
       { language: "ru", mode: "duplicate", width: 390 }
