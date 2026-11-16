@@ -499,7 +499,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
         "Practice arrow must align near card right edge");
       assert.equal(practiceLayout.align,"left");
       assert.match(practiceLayout.bg,/linear-gradient/,"Practice must have a real Exam Prep-family surface");
-      if(width<620) assert.ok(practiceLayout.cardWidth>=practiceLayout.hubWidth-3,
+      if(nonschool) assert.ok(practiceLayout.cardWidth>=practiceLayout.hubWidth-3,
         "Mobile Practice must match Exam Prep full-width footprint");
 
       await page.locator('#tabbar [data-tab="home"]').click();
@@ -596,7 +596,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
         "Practice arrow must align near card right edge");
       assert.equal(practiceLayout.align,"left");
       assert.match(practiceLayout.bg,/linear-gradient/,"Practice must have a real Exam Prep-family surface");
-      if(width<620) assert.ok(practiceLayout.cardWidth>=practiceLayout.hubWidth-3,
+      if(nonschool) assert.ok(practiceLayout.cardWidth>=practiceLayout.hubWidth-3,
         "Mobile Practice must match Exam Prep full-width footprint");
       assert.equal(await page.evaluate(()=>window.__B00_FAKE.writes.length),beforeOpen,
         "Opening a subject may not accidentally toggle a competitive/study selection");

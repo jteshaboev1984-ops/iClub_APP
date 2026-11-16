@@ -603,7 +603,7 @@ body.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-
 /* The approved Academy OS family has a consistent blue-white card system.
    Practice and Exam Prep share border, radius, shadow and typography while
    keeping different real actions and their server-authoritative gates. */
-body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice{
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > button.subject-mode-card-practice.subject-mode-card-button{
   border:1px solid #c9d7f8;
   border-radius:17px;
   background:linear-gradient(135deg,#fff 0%,#eef4ff 100%);
@@ -653,14 +653,9 @@ body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-
 }
 /* On phones, all available Preparation actions are full-width, matching the
    Exam Prep card. At desktop keep the approved multi-column composition. */
-@media(max-width:619px){
-  body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes{
-    grid-template-columns:minmax(0,1fr);
-    gap:12px;
-  }
-  body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > :is(
-    .subject-mode-card-practice,.subject-mode-card-tours,.subject-mode-card-exam
-  ){
-    grid-column:1/-1;
-  }
+/* The owner-approved mobile pair (Practice + Tours) stays two columns.
+   Only when Tours is unavailable for non-school students should the remaining
+   Practice occupy the empty area and match the Exam Prep full-width footprint. */
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes:has(> .subject-mode-card-tours[hidden]) > button.subject-mode-card-practice.subject-mode-card-button{
+  grid-column:1/-1;
 }
