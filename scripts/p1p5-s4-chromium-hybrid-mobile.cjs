@@ -73,18 +73,22 @@ async function run(){
       window.iClubExamPrepHostInternal.lastCapabilities?.rolloutState);
     assert.equal(effectiveRollout,clientRollout,
       'client view of existing rollout must match the simulated release state');
-    // Stage0 component cards correctly start diagnosis; Paper pilot is an
-    // independent server-gated voluntary entry and must not change that flow.
-    const pilot=page.locator('[data-ep-hybrid-s4-dashboard-open="'+component+'"]');
-    try {await pilot.waitFor({timeout:12000,state:'visible'});}
-    catch(err) {
-      const diagnostics=await page.evaluate(()=>({
-        text:(document.querySelector('#exam-prep-host-root')?.innerText||'').slice(0,2400),
-        rpc:window.__hybridTrace||[]
-      }));
-      console.error('S4 PILOT ENTRY DIAGNOSTIC',lang,component,JSON.stringify(diagnostics));
-      throw err;
-    }
+    // A component tile is ALWAYS navigation; Stage0 must not auto-start.
+    const card=page.locator('[data-ep-live-open-component="'+component+'"]');
+    await card.waitFor({timeout:20000});
+    const beforeClicks=await page.evaluate(()=>window.__hybridTrace.filter(x=>
+      x.name==='start_exam_prep_next_diagnostic_safe_v1').length);
+    await card.click();
+    await page.locator('[data-ep-component-home]').waitFor({timeout:20000});
+    assert.equal(await page.locator('[data-ep-v58-tab="learning"]').getAttribute('aria-current'),
+      'page','component tile must open overview not a question');
+    const afterClicks=await page.evaluate(()=>window.__hybridTrace.filter(x=>
+      x.name==='start_exam_prep_next_diagnostic_safe_v1').length);
+    assert.equal(afterClicks,beforeClicks,'card tap must never start Stage0');
+    await page.locator('[data-ep-v58-tab="training"]').click();
+    await page.locator('[data-ep-v58-component-training]').waitFor({timeout:20000});
+    const pilot=page.locator('[data-ep-component-link="hybrid-paper"]');
+    await pilot.waitFor({timeout:20000});
     await pilot.click();
     const catalog=page.locator('[data-ep-hybrid-s4-catalog]');
     await catalog.waitFor({timeout:20000});
@@ -169,6 +173,44 @@ async function run(){
     assert(reviewText.includes(lang==='ru'?'Критерии':lang==='uz'?'Mezonlar':'Criteria'));
     assert(!reviewText.includes('58/75')&&!reviewText.includes('M1 / A1'),
      'no invented written marks, self-marking or examiner');
+
+    // Reproduce the reported real UX defect: old "History" used only Core
+    // learning/diagnostic results (September), while these finished Paper
+    // sessions were kept in a separate, difficult-to-discover S4 journal.
+    // Academy OS v5.8 keeps both histories under one component History tab,
+    // distinct from the Paper catalogue and from graded Core results.
+    const legacy=await page.evaluate(async code=>
+      window.iClubExamPrepHostInternal.api.recentResults(code,10),component);
+    await review.locator('[data-ep-hybrid-s4-back]').click();
+    await page.locator('[data-ep-hybrid-s4-catalog]').waitFor({timeout:20000});
+    await page.locator('[data-ep-hybrid-s4-home]').click();
+    await page.locator('[data-ep-v58-component-training]').waitFor({timeout:20000});
+    await page.locator('[data-ep-v58-tab="history"]').click();
+    await page.locator('[data-ep-v58-history="'+component+'"]').waitFor({timeout:20000});
+    const unifiedHistory=page.locator('[data-ep-history-paper-section]');
+    await unifiedHistory.waitFor({timeout:20000});
+    const paperJournalRows=unifiedHistory.locator('[data-ep-history-paper-session]');
+    assert(await paperJournalRows.count()>=1,
+      'finished '+component+' Paper must be visible in normal history '+lang);
+    const journalText=await unifiedHistory.textContent();
+    assert(journalText.includes('Paper 01'),'history should show a human-readable Paper title');
+    assert(journalText.includes(lang==='ru'?'Баллы за Paper не определены':
+      lang==='uz'?'Paper uchun baho aniqlanmagan':'Full Paper mark is unknown'),
+      'never mix S4 rehearsal with marked Core results');
+    const oldHistory=page.locator('[data-ep-history-legacy-section]');
+    assert.equal(await oldHistory.count(),1,'keep separate Core history section');
+    if(legacy?.ok && Array.isArray(legacy.data?.results)){
+      assert.equal(await oldHistory.locator('[data-ep-history-session]').count(),
+        legacy.data.results.length,'preserve the previous learning/diagnostic results');
+    }
+    await paperJournalRows.first().click();
+    await page.locator('[data-ep-hybrid-s4-review]').waitFor({timeout:20000});
+    assert.equal(await page.locator('[data-ep-hybrid-s4-review-item]').count(),
+      component==='P1'?10:7,'reopening completed Paper shows the same approved review');
+    await page.locator('[data-ep-hybrid-s4-back]').click();
+    await page.locator('[data-ep-v58-history="'+component+'"]').waitFor({timeout:20000});
+    assert.equal(await page.locator('[data-ep-hybrid-s4-catalog]').count(),0,
+      'history review back must not send learner to new Paper catalogue');
     assert.equal(errors.length,0,'browser JavaScript errors '+lang+': '+errors.join(';'));
     const http=await page.evaluate(()=>window.__hybridTrace);
     for(const name of ['get_exam_prep_hybrid_s4_papers_safe_v1',
