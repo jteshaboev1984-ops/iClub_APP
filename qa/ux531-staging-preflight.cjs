@@ -35,6 +35,37 @@ function validateOrigins(uiOrigin, backendOrigin, declaredRef) {
   return { appHost: ui.hostname, backendRef: matched[1] };
 }
 
+// A staging CSP cannot merely mention the new backend while also
+// permitting broad https: or *.supabase.co connections. Form POSTs are
+// governed separately from fetch/connect-src, so constrain them too.
+function validateStagingCsp(html, backendRef) {
+  const matches=[...html.matchAll(/<meta\b[^>]*http-equiv\s*=\s*["']Content-Security-Policy["'][^>]*>/gi)];
+  assert.equal(matches.length,1,'QA page needs exactly one explicit CSP meta');
+  const tag=matches[0][0],content=tag.match(/\bcontent\s*=\s*(["'])(.*?)\1/i)?.[2];
+  assert(content,'Staging CSP must provide quoted policy content');
+  const firstScript=html.search(/<script\b/i);
+  assert(firstScript===-1||matches[0].index<firstScript,'CSP must precede every script');
+  const directives=new Map();
+  for(const part of content.split(';').map(s=>s.trim()).filter(Boolean)) {
+    const [name,...values]=part.split(/\s+/);
+    assert(!directives.has(name),'Duplicate CSP directive: '+name);
+    directives.set(name,values);
+  }
+  assert.deepEqual(directives.get('default-src'),["'self'"],
+    'Staging CSP default-src must be self only');
+  const connects=directives.get('connect-src')||[];
+  const api='https://'+backendRef+'.supabase.co';
+  const allowed=new Set(["'self'",api,'wss://'+backendRef+'.supabase.co']);
+  assert(connects.includes(api),'connect-src must include exact verified staging backend URL');
+  assert(connects.every(value=>allowed.has(value)),
+    'connect-src permits a wildcard, production or other unapproved origin');
+  assert.deepEqual(directives.get('form-action'),["'self'"],
+    'Staging form-action must prevent cross-origin POST submissions');
+  assert.deepEqual(directives.get('base-uri'),["'self'"],
+    'Staging base-uri must prevent cross-origin link/action rewrites');
+  return true;
+}
+
 function scriptsFromHtml(directory) {
   const html = fs.readFileSync(path.join(directory, 'index.html'), 'utf8');
   const out = [];
@@ -55,7 +86,7 @@ function scriptsFromHtml(directory) {
 function findProductionReferences(directory) {
   const inventory = scriptsFromHtml(directory);
   const references = [];
-  for (const script of inventory.scripts) {
+  for (const script of [{relative:'index.html',content:inventory.html},...inventory.scripts]) {
     const lines = script.content.split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].includes(PRODUCTION_REF)) {
@@ -85,13 +116,7 @@ function enforce() {
   assert.equal(inspected.references.length, 0,
     'Staged browser scripts still reference live iClub Supabase: ' +
     inspected.references.map(x => x.file + ':' + x.line).join(', '));
-  assert(inspected.html.includes('http-equiv="Content-Security-Policy"'),
-    'Staging page needs restrictive browser CSP before its scripts');
-  const meta = inspected.html.match(/<meta\b[^>]*http-equiv="Content-Security-Policy"[^>]*>/i);
-  assert(meta && meta[0].includes(origin.backendRef + '.supabase.co'),
-    'Browser connect-src must explicitly limit API calls to the isolated project');
-  assert(inspected.html.includes('content="default-src') || meta[0].includes('connect-src'),
-    'Staging CSP must set connect-src; do not rely on CORS');
+  validateStagingCsp(inspected.html,origin.backendRef);
   const app = fs.readFileSync(path.join(dir, 'app.js'), 'utf8');
   assert(app.includes(dbUrl.replace(/\/$/, '')), 'Staged app.js is not configured for the isolated backend');
   console.log('PREFLIGHT PASS (NOT E2E): inspected browser source; backend=' + origin.backendRef +
@@ -121,7 +146,23 @@ function selfTest() {
     'https://' + fake + '.supabase.co/', fake), /live iClub/);
   assert.throws(() => validateOrigins('https://ux531-qa.example.test/',
     'https://' + fake + '.supabase.co/', 'anotherprojectrefxx'), /project ID/);
-  console.log('SELF-TEST PASS: separate backend accepted, production and mismatched project IDs rejected.');
+  const meta=policy=>'<html><head><meta http-equiv="Content-Security-Policy" content="'+policy+'"><script src="app.js"></script></head></html>';
+  const base="default-src 'self'; base-uri 'self'; form-action 'self'; ";
+  const safePolicy=base+"connect-src 'self' https://"+fake+".supabase.co wss://"+fake+".supabase.co";
+  assert(validateStagingCsp(meta(safePolicy),fake));
+  assert.throws(()=>validateStagingCsp(meta(base+"connect-src * https://"+fake+".supabase.co"),fake),
+    /unapproved origin/);
+  assert.throws(()=>validateStagingCsp(meta(base+"connect-src https: https://"+fake+".supabase.co"),fake),
+    /unapproved origin/);
+  assert.throws(()=>validateStagingCsp(meta(base+"connect-src https:\/\/\*.supabase.co https:\/\/"+fake+".supabase.co"),fake),
+    /unapproved origin/);
+  assert.throws(()=>validateStagingCsp(meta(safePolicy+" https://"+PRODUCTION_REF+".supabase.co"),fake),
+    /unapproved origin/);
+  assert.throws(()=>validateStagingCsp(meta(safePolicy.replace("form-action 'self'; ","")),fake),
+    /form-action/);
+  assert.throws(()=>validateStagingCsp('<script src="app.js"></script>'+meta(safePolicy),fake),
+    /precede every script/);
+  console.log('SELF-TEST PASS: backend origins, CSP allowlist, form/base isolation and script order fail closed.');
 }
 
 const mode = process.argv[2] || '--audit';
