@@ -580,14 +580,15 @@
 
   function renderProfile() {
     clearTimer();
-    const root = rootEl(); if (!root) return; const c = copy();
-    root.innerHTML = shell(`<div class="ep-live-card"><strong>${esc(c.profileTitle)}</strong><div class="ep-live-meta">${esc(c.profileText)}</div><form class="ep-live-form" data-ep-live-profile-form>
-      <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" placeholder="A" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" required aria-required="true"></label>
+    const root = rootEl(); if (!root) return; const c = copy(), edit=state.profileEditorFromPlan===true;
+    root.innerHTML = shell(`<div class="ep-live-card"><strong>${esc(edit?epNavCopy().profile:c.profileTitle)}</strong><div class="ep-live-meta">${esc(c.profileText)}</div><form class="ep-live-form" data-ep-live-profile-form>
+      <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" value="${esc(state.profile?.exam_series||"")}" required aria-required="true"></label>
+      <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" placeholder="A" value="${esc(state.profile?.target_grade||"")}" required aria-required="true"></label>
+      <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(state.profile?.total_student_hours_available??"")}" required aria-required="true"></label>
+      <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(state.profile?.mathematics_hours_budget??"")}" required aria-required="true"></label>
       <div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>${esc(state.busy ? c.saving : c.save)}</button></div></form><div data-ep-live-profile-error role="alert" aria-live="assertive"></div></div>`);
     root.querySelector("[data-ep-live-profile-form]")?.addEventListener("submit", saveProfile);
+    if(edit){const back=document.createElement("button");back.type="button";back.className="ep-v58-back";back.textContent="← "+epNavCopy().plan;back.addEventListener("click",()=>{state.profileEditorFromPlan=false;renderMyPlan();});root.querySelector(".ep-live-card")?.prepend(back);}
   }
 
   async function saveProfile(event) {
@@ -600,7 +601,9 @@
     state.busy = true; renderLoading();
     const result = await internal.api.saveExamProfile(values); state.busy = false;
     if (!result?.ok) { renderError(); return; }
-    const profile = await internal.api.examProfile(); state.profile = profile?.ok ? profile.data : null; await renderDashboard();
+    const profile = await internal.api.examProfile(); state.profile = profile?.ok ? profile.data : null;
+    const toPlan=state.profileEditorFromPlan===true;state.profileEditorFromPlan=false;
+    if(toPlan)renderMyPlan();else await renderDashboard();
   }
 
   const COMPONENT_AREA_LABELS = Object.freeze({
@@ -1125,7 +1128,7 @@
       state.profile = profile.data;
       state.studySchedule = schedule.data;
       state.notice = c.saved;
-      await renderDashboard();
+      renderMyPlan("schedule");
     });
   }
 
@@ -1249,7 +1252,7 @@
       state.personalHorizon = next?.ok ? next.data : null;
       state.notice = c.saved;
       state.busy = false;
-      await renderDashboard();
+      renderMyPlan("dates");
     }));
   }
 
@@ -1424,7 +1427,7 @@
       const profile = await internal.api.examProfile();
       if(profile?.ok) state.profile=profile.data;
       state.notice=c.saved;
-      await renderDashboard();
+      renderMyPlan("weekly");
     });
   }
 
