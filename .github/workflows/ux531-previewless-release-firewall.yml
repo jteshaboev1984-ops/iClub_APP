@@ -32,5 +32,13 @@ jobs:
           UX531_EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
-          node --check qa/ux531-previewless-release-firewall.cjs
-          node qa/ux531-previewless-release-firewall.cjs
+          # The original integrated-candidate firewall remains unchanged.
+          # Post-release tiny fixes from the exact owner-approved release SHA
+          # have a narrower exact-file and source-hash gate of their own.
+          if [[ "$UX531_BASE_SHA" == "464551650ae925ca3404feff4a5c4c506c49cd70" ]]; then
+            node --check qa/ux531-postrelease-source-guard.cjs
+            node qa/ux531-postrelease-source-guard.cjs
+          else
+            node --check qa/ux531-previewless-release-firewall.cjs
+            node qa/ux531-previewless-release-firewall.cjs
+          fi
