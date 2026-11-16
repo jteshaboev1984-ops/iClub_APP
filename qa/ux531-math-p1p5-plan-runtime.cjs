@@ -16,6 +16,19 @@ assert.equal((paperSource.match(/noScore:/g)||[]).length,4,
   "S4 Paper must remain ungraded in RU/UZ/EN and the safe fallback");
 assert.match(paperSource,/data-ep-hybrid-s4-mentor-optional/,
   "Paper review should provide optional advice without a required mentor gate");
+assert.match(paperSource,/function renderLoading\(scope = "default", component = ""\)/,
+  "Exam Prep loading copy must describe the current destination");
+for(const expected of ['renderLoading("route")','renderLoading("component", component)',
+    'renderLoading("history", component)','renderLoading("plan", component)',
+    'renderLoading("paper", component)','renderLoading("answer")']){
+  assert(paperSource.includes(expected),"Missing contextual loading message: "+expected);
+}
+assert(paperSource.includes('ru:["Маршрут","Тренировки","История"'),
+  "Route and Practice must describe distinct functions");
+const homeStyle=fs.readFileSync(path.join(root,"visual/iclub-academy-ux531-b02b03.css"),"utf8");
+assert(homeStyle.includes("linear-gradient(133deg,#fff 0%,#f9fbff 100%)"),
+  "Pinned Study cards must look quieter than the stronger Competitive rail");
+
 const screens = path.join(root, "ux531-academy-all-screens");
 const html = [
   '<!doctype html><html lang="ru"><head><meta charset="utf-8">',
