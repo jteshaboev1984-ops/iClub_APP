@@ -183,6 +183,14 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     assert.equal(await page.locator("#topbar-title").textContent(), "iClub");
     assert.equal(await page.locator("#topbar-subtitle").textContent(), "Smarter together");
     assert.equal(await page.locator("#tabbar").isVisible(), false);
+    assert.equal(await page.locator("#view-registration").getAttribute("data-reg-b00-step"),"1");
+    assert.equal(await page.locator("#topbar-back").isVisible(),false,
+      "Step 1 must not show the redundant app-exit back arrow");
+    const regBrand = await page.evaluate(() => ({
+      logo: document.querySelector("#topbar .topbar-brand").getBoundingClientRect().left,
+      back: getComputedStyle(document.getElementById("topbar-back")).display
+    }));
+    assert.equal(regBrand.back,"none","Step 1 must not reserve a clickable back control");
     if (mode === "success") await page.screenshot({
       path: path.join(root, "b00-runtime-step1-" + language + "-" + width + ".png"),
       fullPage: true
@@ -199,6 +207,15 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
     await page.locator("#reg-district").selectOption("11");
     await page.locator(".reg-b00-next").click();
     assert.equal(await page.locator("#reg-b00-step-two").isVisible(), true);
+    assert.equal(await page.locator("#topbar-back").isVisible(),true,
+      "Step 2 topbar keeps its original application exit handler");
+    const prevStyle = await page.locator(".reg-b00-prev").evaluate(el => {
+      const v=getComputedStyle(el);
+      return {border:v.borderTopWidth,style:v.borderTopStyle,bg:v.backgroundColor,radius:v.borderRadius};
+    });
+    assert.equal(prevStyle.style,"solid","Step 2 Back must have a visible border");
+    assert.ok(parseFloat(prevStyle.border)>=1,"Step 2 Back is not a framed button");
+    assert.ok(parseFloat(prevStyle.radius)>=10,"Step 2 Back requires rounded corners");
     assert.equal(await page.evaluate(() => window.__B00_FAKE.writes.length), 0);
     const viewGeometry = await page.evaluate(() => ({
       barBottom: document.getElementById("topbar").getBoundingClientRect().bottom,
@@ -274,6 +291,8 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
 
     // Preserve personal values through real Step 2 -> Step 1 -> Step 2.
     await page.locator(".reg-b00-prev").click();
+    assert.equal(await page.locator("#topbar-back").isVisible(),false,
+      "Returning to Step 1 must hide the redundant arrow again");
     assert.equal(await page.locator("#reg-fullname").inputValue(), "Example Student");
     assert.equal(await page.locator("#reg-region").inputValue(), "1");
     assert.equal(await page.locator("#reg-district").inputValue(), "11");
@@ -440,7 +459,7 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       }
     }
     // Work P1: non-school learner must still bind Settings language handlers.
-    if (mode === "success" && nonschool && [320,390,1440].includes(width)) {
+    if (mode === "success" && nonschool && [320,390,528,1440].includes(width)) {
       assert.equal(await page.locator('#courses-filter-row [data-main-filter="competitive"]').count(),0,
         "Non-school catalogue must not offer Competitive choices");
       await page.locator('#tabbar [data-tab="courses"]').click();
@@ -455,6 +474,34 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
         "Non-school Mathematics hub must not display inaccessible Tours CTA");
       assert.equal(await page.locator('#courses-subject-hub [data-action="open-practice"]').isVisible(),true,
         "Non-school Practice access must remain available");
+      // The Practice card uses the same visual family as Exam Prep:
+      // blue-white border, left aligned text and independent arrow track.
+      const practiceLayout=await page.locator('#courses-subject-hub [data-action="open-practice"]').evaluate(el=>{
+        const card=el.getBoundingClientRect();
+        const badge=el.querySelector(".subject-mode-status").getBoundingClientRect();
+        const arrow=el.querySelector(".subject-mode-arrow").getBoundingClientRect();
+        const head=el.querySelector(".subject-mode-topline");
+        const style=getComputedStyle(el);
+        return {
+          cardWidth:card.width,hubWidth:el.parentElement.getBoundingClientRect().width,
+          badgeRight:badge.right,arrowLeft:arrow.left,
+          arrowRightInset:card.right-arrow.right,
+          topCols:getComputedStyle(head).gridTemplateColumns.split(" ").length,
+          radius:style.borderRadius,bg:style.backgroundImage,
+          align:style.textAlign
+        };
+      });
+      assert.equal(practiceLayout.topCols,2,
+        "Iconless Practice must reserve separate tracks for status and arrow");
+      assert.ok(practiceLayout.arrowLeft-practiceLayout.badgeRight>=8,
+        "Practice arrow must not touch 'Always available': "+JSON.stringify(practiceLayout));
+      assert.ok(practiceLayout.arrowRightInset>=5 && practiceLayout.arrowRightInset<=32,
+        "Practice arrow must align near card right edge");
+      assert.equal(practiceLayout.align,"left");
+      assert.match(practiceLayout.bg,/linear-gradient/,"Practice must have a real Exam Prep-family surface");
+      if(width<620) assert.ok(practiceLayout.cardWidth>=practiceLayout.hubWidth-3,
+        "Mobile Practice must match Exam Prep full-width footprint");
+
       await page.locator('#tabbar [data-tab="home"]').click();
       await page.locator('#view-home.is-active').waitFor();
       assert.equal(await page.locator('#home-competitive-list').isVisible(), false,
@@ -524,6 +571,33 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       assert.equal(await page.locator('#courses-subject-hub .academy-hub-tab').count(),3);
       assert.equal(await page.locator('#academy-hub-pane-preparation').isVisible(),true);
       assert.equal(await page.locator('#exam-prep-host-root').count(),1);
+      // The Practice card uses the same visual family as Exam Prep:
+      // blue-white border, left aligned text and independent arrow track.
+      const practiceLayout=await page.locator('#courses-subject-hub [data-action="open-practice"]').evaluate(el=>{
+        const card=el.getBoundingClientRect();
+        const badge=el.querySelector(".subject-mode-status").getBoundingClientRect();
+        const arrow=el.querySelector(".subject-mode-arrow").getBoundingClientRect();
+        const head=el.querySelector(".subject-mode-topline");
+        const style=getComputedStyle(el);
+        return {
+          cardWidth:card.width,hubWidth:el.parentElement.getBoundingClientRect().width,
+          badgeRight:badge.right,arrowLeft:arrow.left,
+          arrowRightInset:card.right-arrow.right,
+          topCols:getComputedStyle(head).gridTemplateColumns.split(" ").length,
+          radius:style.borderRadius,bg:style.backgroundImage,
+          align:style.textAlign
+        };
+      });
+      assert.equal(practiceLayout.topCols,2,
+        "Iconless Practice must reserve separate tracks for status and arrow");
+      assert.ok(practiceLayout.arrowLeft-practiceLayout.badgeRight>=8,
+        "Practice arrow must not touch 'Always available': "+JSON.stringify(practiceLayout));
+      assert.ok(practiceLayout.arrowRightInset>=5 && practiceLayout.arrowRightInset<=32,
+        "Practice arrow must align near card right edge");
+      assert.equal(practiceLayout.align,"left");
+      assert.match(practiceLayout.bg,/linear-gradient/,"Practice must have a real Exam Prep-family surface");
+      if(width<620) assert.ok(practiceLayout.cardWidth>=practiceLayout.hubWidth-3,
+        "Mobile Practice must match Exam Prep full-width footprint");
       assert.equal(await page.evaluate(()=>window.__B00_FAKE.writes.length),beforeOpen,
         "Opening a subject may not accidentally toggle a competitive/study selection");
       await page.locator('#courses-subject-hub [data-academy-pane="materials"].academy-hub-tab').click();

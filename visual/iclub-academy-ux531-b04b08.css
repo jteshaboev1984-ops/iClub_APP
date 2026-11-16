@@ -566,3 +566,101 @@ body.iclub-visual-v3 #courses-subject-hub [data-action="open-tours"][hidden],
 body.iclub-visual-v3 #profile-settings #profile-competitive-list[hidden]{
   display:none!important;
 }
+
+
+/* UX531 owner's review — registration steps and subject Practice visual parity.
+   Scoped only to enhanced registration and the Subject Hub; no data/attempt changes. */
+
+/* Step 1 is the beginning of registration: don't show the app-exit back arrow.
+   Reclaim its layout column for the logo. Step 2 retains its original topbar. */
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active[data-reg-b00-step="1"]) #topbar{
+  grid-template-columns:0px minmax(0,1fr) auto;
+}
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active[data-reg-b00-step="1"]) #topbar-back{
+  display:none!important;
+}
+body.iclub-visual-v3:has(#view-registration.reg-b00-enhanced.is-active[data-reg-b00-step="1"]) #topbar .topbar-brand{
+  grid-column:1/3;
+}
+/* Step 2 Back is a real secondary button, not unframed floating text.
+   Preserve its original return-to-Step-1 click handler and focus behavior. */
+body.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-prev{
+  border:1px solid #cfdbed!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  color:#244b80!important;
+  box-shadow:0 2px 8px rgba(30,79,147,.055)!important;
+}
+body.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-prev:active{
+  background:#edf4ff!important;
+  border-color:#99b8e8!important;
+}
+body.iclub-visual-v3 #view-registration.reg-b00-enhanced .reg-b00-step .reg-b00-prev:focus-visible{
+  outline:3px solid #377bdf;
+  outline-offset:2px;
+}
+
+/* The approved Academy OS family has a consistent blue-white card system.
+   Practice and Exam Prep share border, radius, shadow and typography while
+   keeping different real actions and their server-authoritative gates. */
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice{
+  border:1px solid #c9d7f8;
+  border-radius:17px;
+  background:linear-gradient(135deg,#fff 0%,#eef4ff 100%);
+  box-shadow:0 9px 24px rgba(36,87,214,.09);
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice::before{
+  background:#376bd3;
+}
+/* Icons are deliberately hidden in the approved design. Therefore the top
+   row requires TWO tracks, not the old icon/status/arrow three-track grid. */
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-topline{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 29px;
+  column-gap:12px;
+  align-items:center;
+  min-width:0;
+  width:100%;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-status{
+  grid-column:1;
+  min-width:0;
+  max-width:100%;
+  justify-self:start;
+  overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .subject-mode-arrow,
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes .exam-prep-feature-arrow{
+  grid-column:2;
+  justify-self:end;
+  margin-left:auto;
+  flex-shrink:0;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice .subject-mode-status-practice{
+  border-color:#d4dffd;
+  background:#eef4ff;
+  color:#285cb2;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice .subject-mode-title{
+  color:#193f7c;
+  font-size:17px;
+  font-weight:800;
+  line-height:1.18;
+}
+body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > .subject-mode-card-practice .subject-mode-description{
+  color:#536b8f;
+  line-height:1.45;
+}
+/* On phones, all available Preparation actions are full-width, matching the
+   Exam Prep card. At desktop keep the approved multi-column composition. */
+@media(max-width:619px){
+  body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes{
+    grid-template-columns:minmax(0,1fr);
+    gap:12px;
+  }
+  body.iclub-visual-v3 #courses-subject-hub .subject-hub-primary-modes > :is(
+    .subject-mode-card-practice,.subject-mode-card-tours,.subject-mode-card-exam
+  ){
+    grid-column:1/-1;
+  }
+}
