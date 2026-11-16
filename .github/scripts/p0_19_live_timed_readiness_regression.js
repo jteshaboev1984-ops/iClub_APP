@@ -66,6 +66,12 @@ const path = require('path');
   await page.evaluate(async()=>{await window.iClubExamPrep.syncSubjectHub({subjectKey:'mathematics',language:'en'});await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});});
   await page.waitForSelector('[data-ep-live-open-component="P1"]');
   await page.click('[data-ep-live-open-component="P1"]');
+  // v5.8 moves Timed work under the explicit Practice tab.
+  // Opening P1 itself must not authorize a timed attempt.
+  await page.waitForSelector('[data-ep-v58-tab="training"]');
+  assert((await page.evaluate(()=>window.__calls.filter(x=>x.name==='authorize_exam_prep_timed_safe_v1').length))===0,
+    'component overview must never authorize Timed');
+  await page.click('[data-ep-v58-tab="training"]');
   await page.waitForSelector('[data-ep-component-link="timed"]');
   await page.click('[data-ep-component-link="timed"]');
   await page.waitForSelector('[data-ep-live-timed-start="501"]');

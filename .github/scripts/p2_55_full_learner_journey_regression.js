@@ -164,7 +164,7 @@ const path = require('path');
 
   await page.click('[data-ep-live-open-component="P1"]');
   await page.waitForSelector('[data-ep-component-primary="diagnostic"]');
-  assert.equal((await page.evaluate(()=>window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1').length)),0,
+  assert((await page.evaluate(()=>window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1').length))===0,
     'P1 overview alone must never create a diagnostic session');
   await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForSelector('input[name="ep_live_answer"]');
