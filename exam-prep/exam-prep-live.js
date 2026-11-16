@@ -1894,7 +1894,7 @@
     root.innerHTML=shell('<section class="ep-live-card" data-ep-hybrid-s4-catalog>'+
       '<div class="ep-live-head"><strong>'+component+' · '+esc(c.title)+'</strong>'+
       '<button type="button" class="ep-live-btn secondary" data-ep-hybrid-s4-home>'+
-      esc(c.back)+'</button></div>'+
+      esc(state.language==="ru"?"К тренировкам":state.language==="uz"?"Mashqlarga qaytish":"Back to practice")+'</button></div>'+
       '<p class="ep-live-meta">'+esc(c.paperNotice)+'</p>'+
       (rows||'<p class="ep-live-notice">'+esc(c.noPapers)+'</p>')+
       '</section>'+
@@ -2081,7 +2081,7 @@
       '<p class="ep-live-meta">'+esc(c.reviewNoGrade)+'</p>'+
       '<strong>'+esc(c.reviewAll)+'</strong></section>'+body+
       '<section class="ep-live-card"><button type="button" class="ep-live-btn secondary"'+
-      ' data-ep-hybrid-s4-back>'+esc(c.back)+'</button></section></div>');
+      ' data-ep-hybrid-s4-back>'+esc(state.paperOrigin==="history"?(state.language==="ru"?"К истории":state.language==="uz"?"Tarixga qaytish":"Back to history"):c.back)+'</button></section></div>');
     root.querySelector('[data-ep-hybrid-s4-back]')?.addEventListener("click",()=>{
       state.hybridS4=null;
       if(state.paperOrigin==="history")void openRecentResults(component);
