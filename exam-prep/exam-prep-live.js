@@ -826,6 +826,58 @@
     }).join("");
   }
 
+
+  function epComponentTabs(component,active){
+    const all={
+      ru:["Обучение","Тренировки","История","К P1 и P5","Выберите тренировку. Полные Paper доступны добровольно.","Короткие работы на время по текущим правилам.","Полный Paper на бумаге. Письменные решения не оцениваются.","Необязательные сложные задачи, отдельно от Paper.","Тренировки пока недоступны."],
+      uz:["O‘rganish","Mashqlar","Tarix","P1 va P5 ga","Mashqni tanlang. To‘liq Paper ixtiyoriy.","Joriy bosqichdagi vaqtli qisqa mashqlar.","To‘liq Paper qog‘ozda yechiladi. Yozma yechim baholanmaydi.","Paper natijalaridan alohida ixtiyoriy masalalar.","Hozircha mashqlar mavjud emas."],
+      en:["Learning","Practice","History","Back to P1 and P5","Choose practice. Full Papers are always voluntary.","Short timed work under current rules.","Full Paper on paper. Written methods are not graded.","Optional harder questions, separate from Papers.","Practice is not currently available."]
+    },r=all[state.language]||all.ru,tabNames=[["learning",r[0]],["training",r[1]],["history",r[2]]];
+    return '<nav class="ep-v58-tabs" data-ep-v58-tabs aria-label="'+esc(component)+'">'+
+      tabNames.map(([key,label])=>'<button class="ep-v58-tab" type="button" data-ep-v58-tab="'+key+
+        '" aria-current="'+(key===active?'page':'false')+'">'+esc(label)+'</button>').join("")+'</nav>';
+  }
+  function epBindTabs(component,root=rootEl()){
+    root?.querySelectorAll('[data-ep-v58-tab]').forEach(button=>button.addEventListener('click',()=>{
+      const tab=button.dataset.epV58Tab;
+      if(tab==="learning")void openComponentHome(component);
+      else if(tab==="training")renderComponentTraining(component);
+      else if(tab==="history")void openRecentResults(component);
+    }));
+  }
+  function renderComponentTraining(component){
+    clearTimer();
+    const root=rootEl();if(!root)return;
+    const h=componentHomeCopy(),c=copy();
+    const r=({
+      ru:["Тренировки","К P1 и P5","Выберите тренировку. Полные Paper доступны добровольно.","Короткие работы на время по текущим правилам.","Полный Paper на бумаге. Письменные решения не оцениваются.","Необязательные сложные задачи, отдельно от Paper.","Тренировки пока недоступны."],
+      uz:["Mashqlar","P1 va P5 ga","Mashqni tanlang. To‘liq Paper ixtiyoriy.","Joriy bosqichdagi vaqtli qisqa mashqlar.","To‘liq Paper qog‘ozda yechiladi. Yozma yechim baholanmaydi.","Paper natijalaridan alohida ixtiyoriy masalalar.","Hozircha mashqlar mavjud emas."],
+      en:["Practice","Back to P1 and P5","Choose practice. Full Papers are always voluntary.","Short timed work under current rules.","Full Paper on paper. Written methods are not graded.","Optional harder questions, separate from Papers.","Practice is not currently available."]
+    })[state.language];
+    const stage=Number(componentSummary(component,state.componentState[component])?.operational_stage||0);
+    const link=(kind,title,hint)=>'<button type="button" class="ep-component-link" data-ep-component-link="'+kind+
+      '"><span><strong>'+esc(title)+'</strong><small>'+esc(hint)+'</small></span><span aria-hidden="true">›</span></button>';
+    const timed=stage>=2?link("timed",h.timed,r[3]):"";
+    const paper=state.hybridS4Available?.[component]===true?link("hybrid-paper",hybridS4Copy().title,r[4]):"";
+    const extra=internal.extraHardView?.open?link("extra-hard",
+      state.language==="ru"?"Задачи повышенной сложности":state.language==="uz"?"Qo‘shimcha murakkab masalalar":"Extra Hard",r[5]):"";
+    root.innerHTML=shell('<section class="ep-v58-training" data-ep-v58-component-training="'+esc(component)+'">'+
+      '<header class="ep-v58-section-head"><button class="ep-v58-back" type="button" data-ep-v58-training-back>← '+esc(r[1])+'</button>'+
+      '<h2>'+esc(component+" · "+(component==="P1"?c.componentP1:c.componentP5))+'</h2></header>'+
+      epComponentTabs(component,"training")+
+      '<div class="ep-v58-training-description"><h3>'+esc(r[0])+'</h3><p>'+esc(r[2])+'</p></div>'+
+      '<section class="ep-component-links ep-v58-training-links">'+(timed+paper+extra||'<p class="ep-live-notice">'+esc(r[6])+'</p>')+
+      '</section></section>',{compact:true});
+    root.querySelector('[data-ep-v58-training-back]')?.addEventListener("click",()=>void renderDashboard());
+    epBindTabs(component,root);
+    root.querySelector('[data-ep-component-link="timed"]')?.addEventListener("click",()=>void openTimed(component));
+    root.querySelector('[data-ep-component-link="hybrid-paper"]')?.addEventListener("click",()=>{
+      state.paperOrigin="catalog";void openHybridS4(component);
+    });
+    root.querySelector('[data-ep-component-link="extra-hard"]')?.addEventListener("click",()=>
+      internal.extraHardView?.open?.(component,state.language,()=>renderComponentTraining(component)));
+  }
+
   function renderComponentHome(component, payload) {
     clearTimer();
     const root = rootEl(); if (!root) return;
