@@ -37,6 +37,7 @@ async function scenario(browser,language,width,component,sessionType,kind,mode,e
         lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'}
       };
       internal.api={
+        personalHorizon:async()=>wrap({}),studySchedule:async()=>wrap(null),weeklyChoiceS3:async()=>wrap(null),
         examProfile:async()=>wrap({exam_series:'May/June 2027',target_grade:'A',
           total_student_hours_available:10,mathematics_hours_budget:5}),
         diagnosticProgress:async component=>wrap({component_code:component,stage0_complete:true,

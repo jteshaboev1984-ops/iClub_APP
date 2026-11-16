@@ -16,19 +16,21 @@ async function scenario(browser,language,width,loss) {
     getSessionReads:0,componentWrites:[],profileWrites:0,planId:PLAN};
   const errors=[];
   const call=async(name,args={})=>{
+    if(name==='horizon') return good({});
+    if(name==='schedule'||name==='choice') return good(null);
     if(name==='profile') return good({exam_series:'May/June 2027',target_grade:'A',
       total_student_hours_available:10,mathematics_hours_budget:5});
     if(name==='diagnostic') return good({stage0_complete:true,
       screening:{required_items:1,answered_items:1,required_areas:1,answered_areas:1}});
     if(name==='state') return good({components:[{component_code:args.component,
       operational_stage:2,coverage_pct:0}]});
-    if(name==='progress') return good({goals:args.component==='P5'?[{
+    if(name==='progress') return good({contract_version:'progress_ux_v1',component_code:args.component,active_week_no:1,goals:args.component==='P5'?[{
       goal_id:GOAL,component_code:'P5',action_priority_order:model.finalized?null:1,
       item_type:'learning',skill_code:'P5-DAT-01',
       weekly_commitment_complete:model.finalized,
       status:model.finalized?'completed':'not_started'}]:[]});
     if(name==='plan') return good({plan_id:PLAN,active_week_no:1,items:args.component==='P5'?[{
-      priority_order:1,item_type:'learning',status:model.finalized?'completed':'pending'}]:[]});
+      priority_order:1,item_type:'learning',skill_code:'P5-DAT-01',status:model.finalized?'completed':'pending'}]:[]});
     if(name==='session') {
       model.getSessionReads++;
       if(args.id!==SESSION) throw Error('Wrong session identity');
@@ -113,6 +115,7 @@ async function scenario(browser,language,width,loss) {
         lastCapabilities:{coreAccess:true,killSwitch:false,rolloutState:'controlled_beta'},
         progressUxApi:{progress:component=>request('progress',{component})},
         api:{examProfile:()=>request('profile'),diagnosticProgress:()=>request('diagnostic'),
+          personalHorizon:()=>request('horizon'),studySchedule:()=>request('schedule'),weeklyChoiceS3:()=>request('choice'),
           getState:component=>request('state',{component}),
           weeklyPlan:component=>request('plan',{component}),
           getSession:(id)=>request('session',{id}),
@@ -128,20 +131,23 @@ async function scenario(browser,language,width,loss) {
       'exam-prep/exam-prep-weekly-review-ui.js','exam-prep/exam-prep-live.js'])
       await page.addScriptTag({path:path.resolve(script)});
     await page.evaluate(lang=>window.iClubExamPrep.open({language:lang}),language);
-    await page.waitForSelector('[data-ep-live-plan="P5"]', { state: 'attached' });
+    await page.waitForSelector('[data-ep-live-open-component="P5"]');
     return page;
   }
   let first,second;
   try {
     first=await attach();
-    await first.evaluate(() => document.querySelector('[data-ep-live-plan="P5"]').click());
-    await first.waitForSelector('[data-ep-live-plan-item="1"]');
-    await first.click('[data-ep-live-plan-item="1"]');
+    await first.click('[data-ep-live-open-component="P5"]');
+    await first.waitForSelector('[data-ep-component-primary="task"]');
+    assert.equal(model.starts,0,'component card cannot start review');
+    await first.click('[data-ep-component-primary="task"]');
     await first.waitForSelector('.ep-live-qtext');
     assert.equal(await first.locator('.ep-live-qtext').innerText(),texts[0]);
     assert.equal(model.starts,1);
     second=await attach();
-    await second.evaluate(() => document.querySelector('[data-ep-live-plan="P5"]').click());
+    await second.click('[data-ep-live-open-component="P5"]');
+    await second.waitForSelector('[data-ep-component-primary="resume"]');
+    await second.click('[data-ep-component-primary="resume"]');
     await second.waitForSelector('.ep-live-qtext');
     assert.equal(await second.locator('.ep-live-qtext').innerText(),texts[0]);
     assert.equal(model.starts,1,'Cold second device resumed, never started review twice');
@@ -171,7 +177,7 @@ async function scenario(browser,language,width,loss) {
       assert.equal(model.writtenSends,1,'Status check must stay read-only');
       await second.click('[data-ep-answer-retry]');
     }
-    await second.waitForSelector('.ep-live-card [data-ep-live-dashboard]');
+    await second.waitForSelector('[data-ep-component-home="P5"]');
     assert.equal(await second.locator('[data-ep-live-plan-item]').count(),0);
     assert.equal(model.finalized,true);
     assert.equal(model.starts,1);
@@ -187,7 +193,7 @@ async function scenario(browser,language,width,loss) {
     assert.deepEqual(model.answered,[true,true,true,true]);
     // An old first-tab view must reconcile to the same FINALIZED server state.
     await first.click('[data-ep-live-exit]');
-    await first.waitForSelector('.ep-live-card [data-ep-live-dashboard]');
+    await first.waitForSelector('[data-ep-component-home="P5"]');
     assert.equal(model.starts,1);
     assert.deepEqual(errors,[]);
     console.log(`PASS two tabs ${language} ${width}px ${loss}: one review, written recovery, unchanged plan`);
