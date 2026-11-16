@@ -179,6 +179,14 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
 
   const beforeStart=await page.evaluate(()=>window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1').length);
   await page.click('[data-ep-live-open-component="P1"]');
+  await page.waitForSelector('[data-ep-component-home="P1"]');
+  const navigation=await page.evaluate(()=>({
+    starts:window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1').length,
+    action:Boolean(document.querySelector('[data-ep-component-primary="diagnostic"]'))
+  }));
+  assert(navigation.starts===0&&navigation.action,
+    'component tap must open P1 overview, not consume a diagnostic attempt');
+  await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForFunction(()=>document.querySelector('input[name="ep_live_answer"]'));
   r=await page.evaluate(()=>({
     starts:window.__calls.filter(x=>x.name==='start_exam_prep_next_diagnostic_safe_v1'),
@@ -187,9 +195,9 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
     componentPage:Boolean(document.querySelector('[data-ep-component-home]'))
   }));
   assert(beforeStart===0 && r.starts.length===1 && r.starts[0].args.p_component_code==='P1',
-    'one dashboard tap must invoke exactly one P1 diagnostic start');
+    'explicit component next-action must start exactly one P1 diagnostic');
   assert(r.stateReads===0,'incomplete Stage 0 must not rebuild derived state');
-  assert(!r.redundantStart && !r.componentPage,'first entry must reach the question directly, without the second Start screen');
+  assert(!r.redundantStart && !r.componentPage,'explicit Start must open the question without a duplicate Start screen');
 
 
   r=await page.evaluate(()=>({
