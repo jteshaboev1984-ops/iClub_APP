@@ -85,6 +85,9 @@ async function scenario(browser,language,width,component,sessionType,kind,mode,e
     await page.addScriptTag({path:file('exam-prep/exam-prep-live.js')});
     await page.evaluate(language=>window.iClubExamPrep.open({language,subjectKey:'mathematics'}),language);
     await page.click('[data-ep-live-open-component="'+component+'"]');
+    await page.waitForSelector('[data-ep-component-home="'+component+'"]');
+    await page.click('[data-ep-v58-tab="training"]');
+    await page.waitForSelector('[data-ep-v58-component-training="'+component+'"]');
     await page.click('[data-ep-component-link="timed"]');
     await page.click('[data-ep-live-timed-start="91"]');
     await page.waitForSelector('[data-ep-live-submit]');
