@@ -158,6 +158,12 @@ async function scenario(browser,language,width,loss) {
     // Second tab's screen is stale: its back/resume action must reload server
     // evidence rather than reopening the already answered original first item.
     await second.click('[data-ep-live-exit]');
+    // v5.8 Back returns to the P5 Learning overview. Continue is a
+    // separate user action, with server-side recovery of the saved next item.
+    await second.waitForSelector('[data-ep-component-home="P5"]');
+    assert.equal(model.starts,1,'Back must not start another review session');
+    await second.waitForSelector('[data-ep-component-primary="resume"]');
+    await second.click('[data-ep-component-primary="resume"]');
     await second.waitForFunction(()=>document.querySelector('.ep-live-qtext')?.textContent==='Original question 2');
     for(let i=1;i<3;i++) {
       assert.equal(await second.locator('.ep-live-qtext').innerText(),texts[i]);
