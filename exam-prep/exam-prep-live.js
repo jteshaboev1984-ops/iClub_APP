@@ -16,6 +16,8 @@
     s3Retry: null,
     hybridS4: null,
     hybridS4Active: false,
+    paperOrigin: "catalog",
+    profileEditorFromPlan: false,
     hybridS4Available: { P1: false, P5: false },
     progress: { P1: null, P5: null },
     componentState: { P1: null, P5: null },
@@ -1426,6 +1428,54 @@
     });
   }
 
+
+  // Academy OS v5.8: exam preferences belong to a single compact plan.
+  function epNavCopy(){
+    const labels={
+      ru:["Мой план","К P1 и P5","Изменить профиль","Экзаменационный профиль","Режим занятий","Даты экзаменов","Недельный план и отчёты","Настроить","Не указана"],
+      uz:["Mening rejam","P1 va P5 ga","Profilni o‘zgartirish","Imtihon profili","O‘qish jadvali","Imtihon sanalari","Haftalik reja va hisobotlar","Sozlash","Kiritilmagan"],
+      en:["My plan","Back to P1 and P5","Edit profile","Exam profile","Study schedule","Exam dates","Weekly plan and reports","Manage","Not entered"]
+    };
+    const names=["plan","back","edit","profile","schedule","dates","weekly","manage","none"];
+    return Object.fromEntries(names.map((name,i)=>[name,(labels[state.language]||labels.ru)[i]]));
+  }
+  function epPlanSummary(){
+    const c=copy(),t=epNavCopy(),p=state.profile||{};
+    const info=[p.exam_series,p.target_grade?c.targetShort+": "+p.target_grade:"",
+      Number(p.mathematics_hours_budget)>0?c.mathShort+": "+formatWeeklyHours(p.mathematics_hours_budget):""].filter(Boolean);
+    const dates=["P1","P5"].map(code=>code+": "+(state.personalHorizon?.[code]?.exam_start_at?
+      formatDateTime(state.personalHorizon[code].exam_start_at):t.none));
+    return '<section class="ep-live-card ep-v58-plan-summary" data-ep-v58-plan-summary>'+
+      '<div><strong>'+esc(t.plan)+'</strong><p class="ep-live-meta">'+esc(info.join(" · "))+
+      '</p><small class="ep-live-meta">'+esc(dates.join(" · "))+'</small></div>'+
+      '<button type="button" class="ep-live-btn secondary" data-ep-v58-plan-open>'+esc(t.manage)+'</button></section>';
+  }
+  function renderMyPlan(expand=""){
+    clearTimer();
+    const root=rootEl();if(!root)return;
+    const t=epNavCopy(),c=copy(),p=state.profile||{};
+    const info=[p.exam_series,p.target_grade?c.targetShort+": "+p.target_grade:"",
+      Number(p.total_student_hours_available)>0?c.totalShort+": "+formatWeeklyHours(p.total_student_hours_available):"",
+      Number(p.mathematics_hours_budget)>0?c.mathShort+": "+formatWeeklyHours(p.mathematics_hours_budget):""].filter(Boolean);
+    const section=(key,title,body)=>'<details class="ep-v58-setting" data-ep-v58-setting="'+key+'"'+
+      (expand===key?' open':'')+'><summary>'+esc(title)+'</summary>'+body+'</details>';
+    root.innerHTML=shell('<section class="ep-v58-plan-page" data-ep-v58-plan-page>'+
+      '<header class="ep-v58-section-head"><button type="button" class="ep-v58-back" data-ep-v58-plan-back>← '+esc(t.back)+'</button>'+
+      '<h2>'+esc(t.plan)+'</h2></header>'+
+      '<section class="ep-live-card ep-v58-profile-summary"><div><strong>'+esc(t.profile)+'</strong>'+
+      '<p class="ep-live-meta">'+esc(info.join(" · "))+'</p></div>'+
+      '<button type="button" class="ep-live-btn secondary" data-ep-v58-profile-edit>'+esc(t.edit)+'</button></section>'+
+      section("schedule",t.schedule,studySchedulePanel())+
+      section("dates",t.dates,examDatesPanel())+
+      (state.weeklyChoice?section("weekly",t.weekly,weeklyS3Panel()):"")+
+      '</section>',{compact:true});
+    root.querySelector("[data-ep-v58-plan-back]")?.addEventListener("click",()=>void renderDashboard());
+    root.querySelector("[data-ep-v58-profile-edit]")?.addEventListener("click",()=>{
+      state.profileEditorFromPlan=true;renderProfile();
+    });
+    bindStudySchedule();bindExamDatePanel();bindWeeklyS3();
+  }
+
   async function renderDashboard() {
     clearTimer();
     const root = rootEl();
@@ -1504,7 +1554,7 @@
     ].filter(Boolean);
     const profileLine = profileBits.join(" · ");
     const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section>${studySchedulePanel()}${examDatesPanel()}${weeklyS3Panel()}${hybridS4Dashboard}<div class="ep-live-grid">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid ep-v58-main-components">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>${epPlanSummary()}`, { compact: true });
     state.notice = null;
     bindStudySchedule();
     bindExamDatePanel();
@@ -1513,17 +1563,10 @@
       button.addEventListener("click", () => void openHybridS4(button.dataset.epHybridS4DashboardOpen)));
     root.querySelectorAll("[data-ep-hybrid-s4-dashboard-history]").forEach(button =>
       button.addEventListener("click", () => void openRecentResults(button.dataset.epHybridS4DashboardHistory)));
-    root.querySelectorAll("[data-ep-live-open-component]").forEach(card => card.addEventListener("click", () => {
-      const component = card.dataset.epLiveOpenComponent;
-      // The dashboard explicitly says "Start/Continue entry check".
-      // Honour that one-tap action; do not show a second identical CTA.
-      // Server-side idempotency and session recovery stay authoritative.
-      if (state.progress[component]?.stage0_complete !== true) {
-        void startDiagnostic(component, "component");
-      } else {
-        void openComponentHome(component);
-      }
-    }));
+    root.querySelector('[data-ep-v58-plan-open]')?.addEventListener('click',()=>renderMyPlan());
+    // The component card is navigation, never an authorization to start an attempt.
+    root.querySelectorAll("[data-ep-live-open-component]").forEach(card=>
+      card.addEventListener("click",()=>void openComponentHome(card.dataset.epLiveOpenComponent)));
     root.querySelectorAll("[data-ep-live-start]").forEach(b => b.addEventListener("click", () => startDiagnostic(b.dataset.epLiveStart)));
     root.querySelectorAll("[data-ep-live-plan]").forEach(b => b.addEventListener("click", () => openPlan(b.dataset.epLivePlan)));
     root.querySelectorAll("[data-ep-live-timed]").forEach(b => b.addEventListener("click", () => openTimed(b.dataset.epLiveTimed)));
