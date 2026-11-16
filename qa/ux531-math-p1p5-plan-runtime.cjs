@@ -12,8 +12,8 @@ const root = path.resolve(__dirname, "..");
 const paperSource = fs.readFileSync(path.join(root, "exam-prep/exam-prep-live.js"),"utf8");
 assert.equal((paperSource.match(/mentorOptional:/g)||[]).length,3,
   "S4 Paper mentor advice must be localized in RU/UZ/EN");
-assert.equal((paperSource.match(/noScore:/g)||[]).length,3,
-  "S4 Paper must explicitly remain ungraded in RU/UZ/EN");
+assert.equal((paperSource.match(/noScore:/g)||[]).length,4,
+  "S4 Paper must remain ungraded in RU/UZ/EN and the safe fallback");
 assert.match(paperSource,/data-ep-hybrid-s4-mentor-optional/,
   "Paper review should provide optional advice without a required mentor gate");
 const screens = path.join(root, "ux531-academy-all-screens");
