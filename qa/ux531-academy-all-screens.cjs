@@ -116,7 +116,34 @@ const server=http.createServer((req,res)=>{
    assert(profile.height>=156&&profile.gradient.includes('linear-gradient'),
      'Profile blue zone mismatch '+JSON.stringify({width,profile}));
    assert.equal(profile.text,'Профиль');
-   await page.evaluate(()=>window.__ux531Show({view:'ratings'}));
+   // Owner's phone review: simulate the long loading label during measurement
+   // even though the shipped placeholder is intentionally a compact ellipsis.
+   await page.evaluate(()=>{document.getElementById('profile-metric-tours').textContent='Загружаем…';});
+   const metricLayout=await page.evaluate(()=>{
+     const cards=[...document.querySelectorAll('#profile-main .profile-stat, #profile-main .overview-card')];
+     const rows=cards.map(card=>{
+       const content=card.querySelector('.profile-stat-value, .overview-value');
+       const cb=card.getBoundingClientRect(),tb=content.getBoundingClientRect();
+       return {cardWidth:cb.width,textWidth:content.clientWidth,
+         scrollWidth:content.scrollWidth,contentRight:tb.right,cardRight:cb.right,
+         font:getComputedStyle(content).fontFamily};
+     });
+     const overview=[...document.querySelectorAll('#profile-main .overview-card')]
+       .map(c=>({top:c.getBoundingClientRect().top,bottom:c.getBoundingClientRect().bottom}));
+     return {rows,overview};
+   });
+   assert.equal(metricLayout.rows.length,5,'three metrics + two profile overview cards');
+   assert(metricLayout.rows.every(c=>c.scrollWidth<=c.textWidth+2 &&
+      c.contentRight<=c.cardRight+2),'profile text must remain inside its card at '+width+
+      ': '+JSON.stringify(metricLayout.rows));
+   assert(metricLayout.rows.every(c=>/ui-sans-serif|system-ui/i.test(c.font)),
+      'Profile must inherit iClub system typography at '+width);
+   assert(Math.abs(metricLayout.overview[0].bottom-metricLayout.overview[1].bottom)<=2,
+      'Profile overview cards must align at '+width);
+   await page.evaluate(()=>{
+     document.getElementById('profile-metric-tours').textContent='…';
+     window.__ux531Show({view:'ratings'});
+   });
    const rating=await page.evaluate(()=>{
     const h=document.querySelector('#view-ratings .lb-header');
     return {height:h.getBoundingClientRect().height,

@@ -9,10 +9,21 @@ const path = require("node:path");
 const { chromium } = require("playwright");
 
 const root = path.resolve(__dirname, "..");
+const paperSource = fs.readFileSync(path.join(root, "exam-prep/exam-prep-live.js"),"utf8");
+assert.equal((paperSource.match(/mentorOptional:/g)||[]).length,3,
+  "S4 Paper mentor advice must be localized in RU/UZ/EN");
+assert.equal((paperSource.match(/noScore:/g)||[]).length,4,
+  "S4 Paper must remain ungraded in RU/UZ/EN and the safe fallback");
+assert.match(paperSource,/data-ep-hybrid-s4-mentor-optional/,
+  "Paper review should provide optional advice without a required mentor gate");
 const screens = path.join(root, "ux531-academy-all-screens");
 const html = [
   '<!doctype html><html lang="ru"><head><meta charset="utf-8">',
   '<meta name="viewport" content="width=device-width, initial-scale=1">',
+  // Production iClub loads the shared sans-serif foundation BEFORE Exam Prep.
+  // Omitting it made offline Math screenshots render in browser-default serif.
+  '<link rel="stylesheet" href="/style.css">',
+  '<link rel="stylesheet" href="/visual/iclub-visual-v3.css">',
   '<link rel="stylesheet" href="/exam-prep/exam-prep-host.css">',
   '<link rel="stylesheet" href="/visual/iclub-academy-ux531-b04b08.css">',
   '</head><body class="iclub-visual-v3">',
@@ -31,7 +42,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html);
     return;
   }
-  if (!["/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
+  if (!["/style.css", "/visual/iclub-visual-v3.css", "/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
     res.writeHead(404).end(); return;
   }
   const file = path.join(root, p.slice(1));
@@ -142,6 +153,10 @@ async function caseRun(browser, address, { language, width, mode }) {
       return;
     }
     assert.equal(opened,true,"Synthetic authorized host should open");
+    const initialFont = await page.evaluate(() =>
+      getComputedStyle(document.querySelector("#exam-prep-host-root .ep-host-shell")).fontFamily);
+    assert(/ui-sans-serif|system-ui/i.test(initialFont) && !/Times New Roman/i.test(initialFont),
+      "Math Exam Prep must inherit the actual iClub sans-serif app typography: "+initialFont);
     const form = page.locator("[data-ep-live-profile-form]");
     await form.waitFor();
     assert.equal(await form.locator("input").count(),4,"Real plan form has four fields");
