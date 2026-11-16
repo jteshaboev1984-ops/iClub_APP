@@ -50,6 +50,17 @@ async function main(){
     return window.iClubExamPrep.open({subjectKey:'mathematics',language});
    },language);
    assert(opened,'owner Mathematics S3 host did not open');
+   // v5.8 keeps weekly choices in My plan, closed until explicit request.
+   // No weekly form is allowed to expand automatically on Exam Prep landing.
+   await page.locator('[data-ep-v58-plan-open]').waitFor({timeout:20000});
+   assert.equal(await page.locator('[data-ep-s3]').count(),0,
+     'weekly controls must not occupy the compact landing');
+   await page.locator('[data-ep-v58-plan-open]').click();
+   const weeklyDetails=page.locator('[data-ep-v58-setting="weekly"]');
+   await weeklyDetails.waitFor({timeout:20000});
+   assert.equal(await weeklyDetails.evaluate(el=>el.open),false,
+     'voluntary S3 section starts collapsed');
+   await weeklyDetails.locator('summary').click();
    const panel=page.locator('[data-ep-s3]');
    await panel.waitFor({timeout:20000});
    assert((await panel.textContent()).includes(title),'missing translated S3 '+language);
