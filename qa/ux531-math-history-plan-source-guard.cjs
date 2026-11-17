@@ -1,0 +1,73 @@
+#!/usr/bin/env node
+/* Exact-source UX firewall for 2026-11-17 Mathematics follow-up.
+   Read-only, no student/network/database/deployment writes. */
+"use strict";
+const fs=require("node:fs"),cp=require("node:child_process"),assert=require("node:assert/strict");
+const RELEASE="f945228fefe0ec3a013f34b7d0ab9ac6c40cc2e4";
+const base=String(process.env.UX531_BASE_SHA||"");
+const head=String(process.env.UX531_EXPECTED_SHA||"");
+assert(/^[a-f0-9]{40}$/.test(base)&&/^[a-f0-9]{40}$/.test(head),"Full SHA required");
+assert.equal(base,RELEASE,"Guard only for approved Academy #555 release");
+const git=(...args)=>cp.execFileSync("git",args,{encoding:"utf8",maxBuffer:20000000}).trimEnd();
+assert.equal(git("rev-parse","HEAD"),head,"Exact target SHA must be checked out");
+assert.equal(git("merge-base",RELEASE,head),RELEASE,"Released SHA must be ancestor");
+const changed=git("diff","--name-only",RELEASE,head).split("\n").filter(Boolean);
+const allowed=new Set([
+ ".github/scripts/visual_v3_home_study_regression.js",
+ ".github/workflows/exam-prep-weekly-answer-recovery.yml",
+ ".github/workflows/exam-prep-weekly-profile-recovery.yml",
+ ".github/workflows/ux531-previewless-release-firewall.yml",
+ "docs/ui-redesign/28-ux531-math-history-plan-and-retention-20261117.md",
+ "exam-prep/exam-prep-api.js","exam-prep/exam-prep-live.js",
+ "index.html","qa/ux531-math-p1p5-plan-runtime.cjs",
+ "qa/ux531-registered-navigation-e2e.cjs",
+ "qa/ux531-math-history-plan-source-guard.cjs",
+ "visual/iclub-academy-ux531-b02b03.css",
+ "visual/iclub-academy-ux531-b04b08.css"
+]);
+assert(changed.length>=10,"Expected bounded UI patch");
+for(const x of changed)assert(allowed.has(x),"Unexpected release file "+x);
+assert(!changed.some(x=>/^supabase\/|^api\/|^security\/|^content\/|^package|^vercel\.json|\.env/.test(x)),
+ "No SQL/backend/student records/release or entitlement changes");
+const read=p=>fs.readFileSync(p,"utf8");
+const live=read("exam-prep/exam-prep-live.js"),api=read("exam-prep/exam-prep-api.js");
+const index=read("index.html"),style=read("visual/iclub-academy-ux531-b02b03.css");
+const css=read("visual/iclub-academy-ux531-b04b08.css");
+assert(style.includes("linear-gradient(137deg,#174aab 0%,#3071e1 100%)"),
+ "Competitive palette must remain unchanged");
+assert(style.includes("linear-gradient(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%)"),
+ "Pinned Study must be saturated blue but lighter than Competitive");
+for(const token of [
+ "function renderMyPlan(expand=","function examProfileFormMarkup()",
+ 'renderMyPlan("profile")',"data-ep-v58-profile-editor",
+ "async function saveProfile(event)","isInitialSetup",
+ "async function openRecentResults(component)","historyListMarkup(",
+ "bindHistoryDisclosure(","recentResults(component,20)",
+ "recentResultsWritten(component,20)","data-ep-history-recent",
+ "data-ep-history-archive","rows.slice(0,3)","rows.slice(3+shown,3+shown+5)",
+ "data-ep-history-paper-session","data-ep-history-session",
+ "epComponentTabs(component","data-ep-v58-plan-summary",
+ "async function reconcilePendingAnswer(pending)","pending.idempotencyKey"
+])assert(live.includes(token),"Required original/updated source invariant absent: "+token);
+assert(!live.includes("data-ep-history-delete"),"History deletion not approved");
+assert(css.includes(".ep-history-archive")&&css.includes(".ep-history-more[hidden]"),"History CSS missing");
+for(const v of ["ux531-b02b03-blue-20261117-v3","ux531-b04b08-history-plan-v3",
+ "ux531-compact-plan-history-loader-v3"])assert(index.includes(v),"Cache bust missing "+v);
+assert(api.includes("ux531-compact-plan-history-20261117"),"Dynamic UI cache identity missing");
+const a=read(".github/workflows/exam-prep-weekly-answer-recovery.yml")
+ .match(/git hash-object exam-prep\/exam-prep-live\.js\)" = '([a-f0-9]{40})'/);
+const p=read(".github/workflows/exam-prep-weekly-profile-recovery.yml")
+ .match(/git hash-object exam-prep\/exam-prep-api\.js\)" = '([a-f0-9]{40})'/);
+assert(a&&p,"Guarded answer/profile pins missing");
+assert.equal(git("hash-object","exam-prep/exam-prep-live.js"),a[1],"Answer-ACK full blob changed without pin");
+assert.equal(git("hash-object","exam-prep/exam-prep-api.js"),p[1],"Profile API full blob changed without pin");
+const apiPlus=git("diff","--unified=0",RELEASE,head,"--","exam-prep/exam-prep-api.js")
+ .split("\n").filter(x=>x.startsWith("+")&&!x.startsWith("+++"));
+assert(apiPlus.length===1&&apiPlus[0].includes("ux531-compact-plan-history-20261117"),
+ "API may change only display-client cache version");
+const livePlus=git("diff","--unified=0",RELEASE,head,"--","exam-prep/exam-prep-live.js")
+ .split("\n").filter(x=>x.startsWith("+")&&!x.startsWith("+++"));
+for(const x of livePlus)assert(!/localStorage\.(?:clear|removeItem)|\b(?:drop|truncate)\s+(?:table|schema)\b|\b(?:qa_open_all_core|rollout_state|ai_enabled|mentor_enabled|stage_gates_enabled)\s*[:=]/i.test(x),
+ "No storage clearing or authorization changes: "+x.slice(0,150));
+console.log("UX531 Mathematics compact plan/history SOURCE-ONLY guard PASS");
+console.log("base="+RELEASE+" head="+head+" files="+changed.length+" dbWrites=0");
