@@ -40,10 +40,12 @@ assert(interactions.includes("{id:'home-competitive-list',child:'.home-competiti
  'Competitive swipe and dots preserved');
 assert(interactions.includes("{id:'home-study-list',child:'.home-pinned-tile'}"),
  'Pinned Study swipe and dots preserved');
-assert.match(css,/linear-gradient\(137deg,#174aab 0%,#3071e1 100%\)/,
- 'Same deep-blue background applies to every Competitive card');
-assert.match(css,/linear-gradient\(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%\)/,
- 'Lighter blue applies only to pinned Study');
+assert.match(css,/#view-home #home-competitive-list \.home-competitive-card\{\s*background:#174aab;/,
+ 'All Competitive cards use exact solid #174AAB swatch from sample 1');
+assert.match(css,/#view-home #home-study-list \.home-pinned-tile\{[\s\S]*?background:#3071e1;/,
+ 'All pinned Study cards use exact solid #3071E1 swatch from sample 2');
+assert.doesNotMatch(css,/background:linear-gradient\(137deg,#174aab|background:linear-gradient\(137deg,#5689d2/,
+ 'No mixed color gradient remains on subject cards');
 assert.match(interactions,/MutationObserver/,'live render support required');
 assert.match(interactions,/aria-selected/,'accessible hub tab state');
 assert.doesNotMatch(interactions.replace(/\/\*[\s\S]*?\*\//g,''),/\.from\(|localStorage\.|\.rpc\(|supabase|startPractice|reset_subject_progress/i,'visual script must not touch user data');
