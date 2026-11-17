@@ -321,6 +321,13 @@ async function caseRun(browser, address, { language, width, mode }) {
     if(regression){
       // A failed profile edit must not erase the form or the user's new values.
       await page.locator("[data-ep-v58-profile-edit]").click();
+      assert.equal(await page.locator("[data-ep-v58-profile-summary]").count(),0);
+      await page.evaluate(()=>window.iClubExamPrep.back());
+      assert.equal(await page.locator("[data-ep-v58-profile-fact]").count(),4,
+        "Device back from Edit restores the profile summary, not P1/P5 route");
+      assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
+        "Device back must not leave a duplicate profile editor mounted");
+      await page.locator("[data-ep-v58-profile-edit]").click();
       assert.equal(await page.locator("[data-ep-v58-plan-page] [data-ep-live-profile-form]").count(),1,
         "Saved-profile editing must remain inside the single My plan page");
       assert.equal(await page.locator("[data-ep-v58-profile-summary]").count(),0,
