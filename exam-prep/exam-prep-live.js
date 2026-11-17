@@ -2812,12 +2812,87 @@
 
   async function openReadiness(component) {
     clearTimer(); renderLoading("readiness", component);
+    // Source-authoritative operational Stage 3-6 is DIFFERENT from a
+    // Cambridge exam-readiness grade. Never substitute unmarked Paper attempts
+    // into the old comparable-score summary.
+    const hybrid = typeof internal.api?.hybridS4StageStatus === "function"
+      ? await internal.api.hybridS4StageStatus(component).catch(() => null)
+      : null;
+    // A failed/malformed authoritative stage response must never fall back
+    // to the old comparable-Paper-score screen. Legacy view is permitted
+    // ONLY when the signed owner RPC explicitly reports enabled:false.
+    if (!hybrid?.ok || typeof hybrid.data?.enabled !== "boolean") {
+      renderError(); return;
+    }
+    if (hybrid?.ok && hybrid.data?.enabled === true) {
+      const calibration = typeof internal.api?.finalCalibration === "function"
+        ? await internal.api.finalCalibration(component).catch(() => null)
+        : null;
+      renderOperationalReadiness(component,hybrid.data,
+        calibration?.ok ? calibration.data : null);
+      return;
+    }
     const useSummary = typeof internal.api?.readinessSummary === "function";
     const result = useSummary
       ? await internal.api.readinessSummary(component)
       : await internal.api.readiness(component);
     if (!result?.ok) { renderError(); return; }
     renderReadiness(component, normalizeReadiness(result.data || {}));
+  }
+
+  function renderOperationalReadiness(component, status, calibration) {
+    const root = rootEl(); if (!root) return; const c=copy();
+    const t=({
+      ru:{
+        title:"Учебные этапы",intro:"Переход между этапами зависит от подтверждённых навыков и исправлений. Paper — тренировка без баллов.",
+        l3:"Навыков на уровне L3",corrections:"Открытых исправлений",
+        ready:"Учебные условия выполнены",pending:"Нужно продолжить работу над навыками",
+        note:"Письменные Paper не оцениваются. Для разбора решения можно по желанию обратиться к ментору.",
+        waiting:"После обновления учебного этапа станет доступна финальная калибровка."
+      },
+      uz:{
+        title:"O‘quv bosqichlari",intro:"Bosqichlar tasdiqlangan ko‘nikmalar va tuzatishlarga bog‘liq. Paper uchun ball qo‘yilmaydi.",
+        l3:"L3 darajadagi ko‘nikmalar",corrections:"Ochiq tuzatishlar",
+        ready:"O‘quv shartlari bajarildi",pending:"Ko‘nikmalar ustida ishlashni davom ettiring",
+        note:"Yozma Paper baholanmaydi. Yechimni muhokama qilish uchun xohlasangiz mentor bilan maslahat qiling.",
+        waiting:"Bosqich holati yangilangach, yakuniy moslashuv ochiladi."
+      },
+      en:{
+        title:"Learning stages",intro:"Progression uses verified objective skills and corrections. Paper is ungraded practice.",
+        l3:"Skills at L3",corrections:"Open corrections",
+        ready:"Learning conditions met",pending:"More objective skill evidence is needed",
+        note:"Written Papers receive no marks. You may ask a mentor for advice; this is optional.",
+        waiting:"Final calibration becomes available after the operational stage is updated."
+      }
+    })[state.language] || {
+      title:"Learning stages",intro:"Paper is ungraded practice.",
+      l3:"Skills at L3",corrections:"Open corrections",
+      ready:"Learning conditions met",pending:"More objective evidence needed",
+      note:"Paper is ungraded; mentor advice is optional.",
+      waiting:"Final calibration is not available yet."
+    };
+    const objective=status?.stage5_to_6||{};
+    const total=Math.max(0,Number(objective.canonical_skill_count)||0);
+    const below=Math.max(0,Number(objective.below_l3_count)||0);
+    const corrections=Math.max(0,Number(objective.unresolved_correction_case_count)||0);
+    const achieved=Math.max(0,total-below);
+    const stageReady=objective.ready===true;
+    const available=calibration?.stage6_operational_access===true &&
+      calibration?.available===true && Number(calibration.operational_stage)>=6;
+    root.innerHTML=shell('<div class="ep-live-card" data-ep-live-operational-readiness>'+
+      '<div class="ep-live-head"><div><strong>'+esc(component+' · '+t.title)+'</strong></div>'+
+      '<button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>'+esc(c.overview)+'</button></div>'+
+      '<p class="ep-live-notice">'+esc(t.intro)+'</p>'+
+      '<strong>'+esc(stageReady?t.ready:t.pending)+'</strong>'+
+      '<div class="ep-live-stats"><div class="ep-live-stat"><span>'+esc(t.l3)+'</span>'+
+      '<strong>'+achieved+' / '+total+'</strong></div><div class="ep-live-stat"><span>'+
+      esc(t.corrections)+'</span><strong>'+corrections+'</strong></div></div>'+
+      '<p class="ep-live-meta">'+esc(t.note)+'</p>'+
+      (available?'<div class="ep-live-actions"><button class="ep-live-btn" type="button" '+
+        'data-ep-live-calibration="'+esc(component)+'">'+esc(c.openCalibration)+'</button></div>':
+        stageReady?'<p class="ep-live-meta">'+esc(t.waiting)+'</p>':'')+'</div>');
+    root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click',renderDashboard);
+    root.querySelector('[data-ep-live-calibration]')?.addEventListener('click',()=>openCalibration(component));
   }
 
   function renderReadiness(component, data) {
