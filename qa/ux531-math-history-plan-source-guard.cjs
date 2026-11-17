@@ -20,10 +20,12 @@ const allowed=new Set([
  "docs/ui-redesign/28-ux531-math-history-plan-and-retention-20261117.md",
  "exam-prep/exam-prep-api.js","exam-prep/exam-prep-live.js",
  "index.html","qa/ux531-academy-all-screens.cjs",
+ "qa/ux531-academy-browser.cjs","qa/ux531-academy-ui-parity.cjs",
  "qa/ux531-math-p1p5-plan-runtime.cjs",
  "scripts/p1p5-s3-chromium-mobile-three-language.cjs",
  "qa/ux531-registered-navigation-e2e.cjs",
  "qa/ux531-math-history-plan-source-guard.cjs",
+ "visual/iclub-academy-ux531-interactions.js",
  "visual/iclub-academy-ux531-b02b03.css",
  "visual/iclub-academy-ux531-b04b08.css"
 ]);
@@ -110,11 +112,43 @@ for(const name of ["math-my-plan-first-setup-ru-390.png",
  assert(planQA.includes(name),"Owner requested Math My plan/history capture missing: "+name);
 assert(!fullScreens.includes("save_exam_prep")&&!fullScreens.includes("supabase.rpc"),
  "Visual-only Home comparison must not write user/profile/attempt data");
+// Owner visual feedback 2026-11-17: no Competitive swipe; ALL such
+// cards are identical dark blue. The lighter blue belongs to pinned Study.
+const railJs=read("visual/iclub-academy-ux531-interactions.js");
+const railBrowser=read("qa/ux531-academy-browser.cjs");
+const academyParity=read("qa/ux531-academy-ui-parity.cjs");
+assert(style.includes("#home-competitive-list{")&&
+ style.includes("grid-template-columns:minmax(0,1fr)")&&
+ style.includes("#home-competitive-list + .academy-rail-pagination")&&
+ style.includes("grid-template-columns:repeat(2,minmax(0,1fr))"),
+ "All Competitive cards must be visible as a static equal-width list/grid");
+assert(style.includes("scroll-snap-type:x mandatory")&&
+ railJs.includes("const rails=[{id:'home-study-list',child:'.home-pinned-tile'}]")&&
+ !railJs.includes("{id:'home-competitive-list',child:'.home-competitive-card'}"),
+ "Only lighter-blue pinned Study may have swipe pagination");
+assert(railBrowser.includes("'Competitive must not have swipe dots'")&&
+ academyParity.includes("No Competitive swipe dots"),
+ "Browser and source regression must protect the stationary Competitive list");
+const componentCards=live.slice(live.indexOf("function componentCard("),live.indexOf("function trackerAreaForSkill("));
+assert(componentCards.includes("data-ep-live-open-component=")&&
+ componentCards.includes("ep-live-component-arrow")&&
+ !componentCards.includes("ep-live-component-open"),
+ "P1/P5 must keep a full-card button with exactly one upper arrow, no bottom Open");
+const nav=live.slice(live.indexOf("function epNavCopy(){"),live.indexOf("async function renderDashboard()"));
+assert(nav.includes("function renderMyPlan(")&&
+ !nav.includes('data-ep-v58-plan-back>←')&&
+ nav.includes("epBottomBack('data-ep-v58-plan-back'")&&
+ live.includes("function epSyncBackFallback(")&&
+ live.includes('getComputedStyle(button).visibility==="visible"'),
+ "Topbar back is primary; only one fallback bottom Back may appear when absent");
+for(const text of ["Ko‘zlangan baho","Imtihon sessiyasi","Haftalik reja va hisobotlar",
+ "Tayyorgarlik","Mashg‘ulot jadvali","Haftasiga necha kun"])
+ assert(live.includes(text),"Natural Uzbek UI terminology missing: "+text);
 assert(!live.includes("data-ep-history-delete"),"History deletion not approved");
 assert(css.includes(".ep-history-archive")&&css.includes(".ep-history-more[hidden]"),"History CSS missing");
-for(const v of ["ux531-b02b03-blue-20261117-v3","ux531-b04b08-single-plan-v4",
- "ux531-single-plan-loader-v4"])assert(index.includes(v),"Cache bust missing "+v);
-assert(api.includes("ux531-single-plan-no-duplicates-20261117-v4"),"Dynamic UI cache identity missing");
+for(const v of ["ux531-static-competitive-pinned-blue-v4","ux531-math-single-back-v5",
+ "ux531-math-single-back-loader-v5","ux531-pinned-only-rail-2"])assert(index.includes(v),"Cache bust missing "+v);
+assert(api.includes("ux531-native-back-single-arrow-uz-20261117-v5"),"Dynamic UI cache identity missing");
 const a=read(".github/workflows/exam-prep-weekly-answer-recovery.yml")
  .match(/git hash-object exam-prep\/exam-prep-live\.js\)" = '([a-f0-9]{40})'/);
 const p=read(".github/workflows/exam-prep-weekly-profile-recovery.yml")
