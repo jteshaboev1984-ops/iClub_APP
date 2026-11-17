@@ -86,6 +86,15 @@ const server = http.createServer((req, res) => {
 async function caseRun(browser, address, { language, width, mode }) {
   const page = await browser.newPage({ viewport: { width, height: 840 } });
   const unexpected = [], externalRequests = [];
+  // Disposable test data only: owner visual acceptance screenshots.
+  // Avoid production, real learner names, Supabase credentials, and answers.
+  const capture=async(name,eligible=true)=>{
+    if(!eligible)return;
+    fs.mkdirSync(screens,{recursive:true});
+    await page.screenshot({path:path.join(screens,name),fullPage:true});
+  };
+  const mobileRu=language==="ru"&&width===390;
+  const reviewViewport=mobileRu||(language==="uz"&&width===320)||(language==="en"&&width===1440);
   page.on("pageerror", error => unexpected.push(String(error)));
   await page.route("**/*", route => {
     if (new URL(route.request().url()).hostname === "127.0.0.1") return route.continue();
@@ -209,6 +218,7 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),1);
     const form = page.locator("[data-ep-live-profile-form]");
     await form.waitFor();
+    await capture("math-my-plan-first-setup-ru-390.png",mobileRu);
     assert.equal(await form.locator("input").count(),4,"Real plan form has four fields");
     await form.locator('[name="exam_series"]').fill("June 2027");
     await form.locator('[name="target_grade"]').fill("A");
@@ -264,6 +274,7 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.equal(overviewOrder.length,3,"Route, P1/P5 and My Plan must exist");
     assert(overviewOrder[0]<overviewOrder[1] && overviewOrder[1]<overviewOrder[2],
       "Your route, P1/P5, and My Plan must appear in that order: "+overviewOrder);
+    await capture("math-p1p5-route-"+language+"-"+width+".png",reviewViewport);
     // The exact approved v5.8 plan, learning, practice and history layout
     // must fit across all named widths without reducing touch targets.
     const verifyLayout = async (place, requireTabs=false) => {
@@ -306,6 +317,13 @@ async function caseRun(browser, address, { language, width, mode }) {
     await page.locator("[data-ep-v58-plan-open]").click();
     await page.locator("[data-ep-v58-plan-page]").waitFor();
     await verifyLayout('My plan');
+    await capture("math-my-plan-overview-"+language+"-"+width+".png",reviewViewport);
+    if(mobileRu) {
+      const examDates=page.locator('[data-ep-v58-setting="dates"]');
+      await examDates.locator('summary').click();
+      await capture("math-my-plan-p1p5-dates-ru-390.png");
+      await examDates.locator('summary').click();
+    }
     assert.equal(await page.locator("[data-ep-v58-setting]").count(),2,
       "Exactly two settings: exam dates, plus ONE schedule/weekly-allocation editor");
     assert.equal(await page.locator(".ep-v58-profile-fact").count(),4,
@@ -328,6 +346,7 @@ async function caseRun(browser, address, { language, width, mode }) {
       assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
         "Device back must not leave a duplicate profile editor mounted");
       await page.locator("[data-ep-v58-profile-edit]").click();
+      await capture("math-my-plan-profile-edit-ru-390.png");
       assert.equal(await page.locator("[data-ep-v58-plan-page] [data-ep-live-profile-form]").count(),1,
         "Saved-profile editing must remain inside the single My plan page");
       assert.equal(await page.locator("[data-ep-v58-profile-summary]").count(),0,
@@ -356,6 +375,7 @@ async function caseRun(browser, address, { language, width, mode }) {
 
       const weekly=page.locator('[data-ep-v58-setting="weekly"]');
       await weekly.locator("summary").click();
+      await capture("math-my-plan-weekly-s3-ru-390.png");
       await weekly.locator('input[value="redistribute"]').check();
       await weekly.locator("[data-ep-s3-p1]").fill("110");
       await weekly.locator("[data-ep-s3-p5]").fill("90");
@@ -396,6 +416,7 @@ async function caseRun(browser, address, { language, width, mode }) {
       const settings=page.locator('[data-ep-v58-setting="schedule"]');
       assert.equal(await settings.evaluate(el=>el.open),false,"schedule should be collapsed");
       await settings.locator("summary").click();
+      await capture("math-my-plan-legacy-schedule-"+language+"-"+width+".png",reviewViewport);
       assert.equal(await settings.evaluate(el=>el.open),true);
       assert.equal(await page.locator("[data-ep-study-schedule] [data-ep-study-minutes]").count(),1);
       assert.equal(await page.locator("[data-ep-study-schedule] [data-ep-study-days]").count(),1);
@@ -426,12 +447,14 @@ async function caseRun(browser, address, { language, width, mode }) {
     const paperRecent=page.locator('[data-ep-history-recent="paper"] .ep-history-row');
     assert.equal(await coreRecent.count(),3,"Only newest 3 Core rows should render immediately");
     assert.equal(await paperRecent.count(),3,"Only newest 3 ungraded Paper rows should render immediately");
+    await capture("math-p1-history-three-recent-ru-390.png",mobileRu);
     const coreOlder=page.locator('[data-ep-history-archive="core"]');
     const paperOlder=page.locator('[data-ep-history-archive="paper"]');
     assert.equal(await coreOlder.locator('.ep-history-row').count(),0,"Older Core hidden before disclosure");
     await coreOlder.locator('summary').click();
     await coreOlder.locator('.ep-history-row').nth(4).waitFor();
     assert.equal(await coreOlder.locator('.ep-history-row').count(),5,"Reveal exactly 5 Core rows");
+    await capture("math-p1-history-older-five-ru-390.png",mobileRu);
     await coreOlder.locator('[data-ep-history-more="core"]').click();
     assert.equal(await coreOlder.locator('.ep-history-row').count(),10,"Second batch is exactly five");
     await coreOlder.locator('[data-ep-history-more="core"]').click();
