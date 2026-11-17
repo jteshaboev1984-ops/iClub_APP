@@ -132,7 +132,8 @@ const server=http.createServer((req,res)=>{
      const pinned=title=>'<button class="home-pinned-tile" type="button">'+
       '<span class="home-pinned-top">ЗАКРЕПЛЁН · ПРИМЕР</span>'+
       '<strong class="home-pinned-title">'+title+'</strong>'+
-      '<span class="home-pinned-bottom"><span class="home-pinned-meta">Учебный предмет</span>'+
+      '<span class="home-pinned-bottom"><span class="home-pinned-meta">'+
+      '<span class="js-home-pin-count">18/70</span> Практика</span>'+
       '<span class="home-pinned-open">Открыть ›</span></span></button>';
      document.getElementById('home-study-list').innerHTML=pinned('Biology')+pinned('Computer Science');
     });
@@ -162,6 +163,17 @@ const server=http.createServer((req,res)=>{
     assert(palettes.competitiveLayout==='flex' &&
       (width!==390||(palettes.competitiveScrollable&&palettes.pinnedScrollable)),
       'Both subject families retain their mobile swipe behavior');
+    const pinnedTextColors=await page.evaluate(()=>[...document.querySelectorAll(
+      '#view-home #home-study-list .home-pinned-tile')].map(card=>({
+      title:card.querySelector('.home-pinned-title')?.textContent?.trim(),
+      colors:[card,...card.querySelectorAll('*')].map(el=>getComputedStyle(el).color),
+      arrow:card.querySelector('.home-pinned-open')?.textContent?.trim()
+    })));
+    assert(pinnedTextColors.length===2&&pinnedTextColors.every(card=>
+      card.colors.length>=7&&card.colors.every(color=>color==='rgb(255, 255, 255)')&&
+      card.arrow?.includes('›')),
+      'Every pinned label, nested progress, and arrow must be white (owner review): '+
+        JSON.stringify(pinnedTextColors));
     const folder=path.join(root,'ux531-academy-all-screens');
     fs.mkdirSync(folder,{recursive:true});
     await page.screenshot({path:path.join(folder,'home-competitive-and-pinned-blue-'+width+'.png'),fullPage:true});
