@@ -78,6 +78,30 @@ module.exports=async function runStageOnBrowser(jwt){
         await page.locator('[data-ep-live-open-component="P1"]').click();
         await page.locator('[data-ep-component-home="P1"]').waitFor({timeout:25000});
         const readinessLink=page.locator('[data-ep-component-link="readiness"]');
+        if(await readinessLink.count()!==1){
+          // Diagnostics are aggregated synthetic-only evidence. The real
+          // getState projection may differ from the directly seeded stage
+          // fixture. Do not invent a browser Stage6 to make the test pass.
+          const diag=await page.evaluate(async()=>{
+            const s=await window.sb.rpc("get_exam_prep_state_safe_v1",
+              {p_component_code:"P1"});
+            const h=await window.sb.rpc("get_exam_prep_hybrid_s4_stage_status_safe_v1",
+              {p_component_code:"P1"});
+            return {
+              sourceProjectionOk:s.error===null,
+              components:(s.data?.components||[]).map(x=>({
+                code:x.component_code,stage:x.operational_stage,coverage:x.coverage_pct
+              })),
+              stageOn:h.data?.enabled,objectiveReady:h.data?.stage5_to_6?.ready,
+              stageReason:h.data?.stage5_to_6?.reason_code||null,
+              calibrationLinkCount:document.querySelectorAll('[data-ep-component-link="readiness"]').length,
+              signedCalls:(window.__stageOnTrace||[]).map(x=>x.name)
+                .filter(x=>/state|stage|progress|placement/.test(x)).slice(-12)
+            };
+          });
+          throw new Error("Stage-ON P1 readiness link absent from actual route "+lang+
+            ": "+JSON.stringify(diag));
+        }
         await readinessLink.waitFor({timeout:25000});
         await readinessLink.click();
         const stageUI=page.locator('[data-ep-live-operational-readiness]');
