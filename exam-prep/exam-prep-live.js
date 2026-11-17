@@ -689,6 +689,7 @@
   async function saveProfile(event) {
     event.preventDefault(); if (state.busy) return;
     const form = event.currentTarget;
+    const isInitialSetup=!state.profile;
     const values = { examSeries: form.elements.exam_series.value, targetGrade: form.elements.target_grade.value, totalHours: Number(form.elements.total_hours.value), mathHours: Number(form.elements.math_hours.value) };
     if (!String(values.examSeries || "").trim() || !String(values.targetGrade || "").trim() || !(values.totalHours > 0) || !(values.mathHours > 0) || values.mathHours > values.totalHours || values.totalHours > 168) {
       const el = rootEl()?.querySelector("[data-ep-live-profile-error]"); if (el) el.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`; return;
@@ -725,7 +726,8 @@
       uz:"Imtihon profili saqlandi.",
       en:"Exam profile saved."
     })[state.language]||"Exam profile saved.";
-    if(toPlan)renderMyPlan();else await renderDashboard();
+    if(isInitialSetup)await renderDashboard();
+    else if(toPlan)renderMyPlan();else await renderDashboard();
   }
 
   const COMPONENT_AREA_LABELS = Object.freeze({
