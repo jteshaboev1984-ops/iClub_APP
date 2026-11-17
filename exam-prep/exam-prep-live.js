@@ -71,9 +71,9 @@
   function copy() {
     if (state.language === "uz") return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Imtihonga tayyorgarlik", safe: "Modulga kirish shaxsiy ruxsat bilan himoyalangan.",
-      profileTitle: "Avval imtihon rejangizni kiriting", profileText: "Bu ma’lumotlar matematika uchun real haftalik yuklamani tuzishga yordam beradi.",
-      series: "Imtihon seriyasi", target: "Maqsad baho", total: "Haftalik umumiy o‘qish vaqti (soat)", math: "Matematika uchun vaqt (soat)",
-      save: "Mening rejamga saqlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
+      profileTitle: "Imtihon rejangizni kiriting", profileText: "Shu ma’lumotlar asosida matematikaga ajratadigan haftalik vaqtingiz rejalashtiriladi.",
+      series: "Imtihon sessiyasi", target: "Ko‘zlangan baho", total: "Haftasiga o‘qishga ajratilgan jami vaqt (soat)", math: "Haftasiga matematika uchun vaqt (soat)",
+      save: "Rejani saqlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
       items: "savol", areas: "bo‘lim", start: "Kirish tekshiruvini boshlash", resume: "Tekshiruvni davom ettirish", complete: "Kirish tekshiruvi yakunlandi", loading: "Yuklanmoqda…",
       question: "Savol", submit: "Javobni yuborish", correct: "To‘g‘ri", incorrect: "Xatoni ko‘rib chiqing", finish: "Tekshiruv qismi yakunlandi. Natija yangilandi.",
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", back: "Orqaga", overview: "Umumiy ko‘rinish", plan: "Haftalik reja", openPlan: "Haftalik rejani ochish", priority: "Ustuvorlik", week: "Hafta",
@@ -98,7 +98,7 @@
       consolidationReasonPending: "Keyingi bosqich uchun hali ko‘proq tasdiqlangan natija kerak.",
       consolidationReference: "Format bo‘yicha yo‘nalish: rasmiy Cambridge 9709, June 2026. Faqat format va vaqt shartlari uchun ishlatiladi; ballarni bevosita solishtirish uchun emas.",
       consolidationReferenceLink: "Cambridge rasmiy izohi",
-      dashboardEyebrow: "Sizning yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "Har bir komponent o‘z bosqichi, dalillari va keyingi qadami bilan alohida yuradi.",
+      dashboardEyebrow: "Tayyorgarlik yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "P1 va P5 uchun bosqichlar, natijalar va keyingi vazifalar alohida ko‘rsatiladi.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma", continueCheck: "Kirish tekshiruvini davom ettirish", profileSaved: "Saqlangan reja", targetShort: "Maqsad", totalShort: "Jami", mathShort: "Matematika", hoursShort: "soat/hafta",
       actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash",
       examOpsTitle: "Imtihon kuni rejasi", examOpsProgress: "Tekshiruvlar", examOpsChecklist: "Imtihon oldidan tekshiruv",
@@ -507,7 +507,7 @@
   function historyDisclosureCopy(){
     return ({
       ru:{older:"Более ранние записи",more:"Показать ещё",partial:"Здесь показаны только последние записи. Предыдущие результаты не удалены."},
-      uz:{older:"Oldingi yozuvlar",more:"Yana ko‘rsatish",partial:"Bu yerda faqat so‘nggi yozuvlar ko‘rsatiladi. Eski natijalar o‘chirilmagan."},
+      uz:{older:"Avvalgi natijalar",more:"Yana ko‘rsatish",partial:"Faqat so‘nggi natijalar ko‘rsatilmoqda. Avvalgi natijalar o‘chirilmagan."},
       en:{older:"Earlier entries",more:"Show more",partial:"Only the latest entries are shown here. Older results have not been deleted."}
     })[state.language] || {older:"Более ранние записи",more:"Показать ещё",partial:"Здесь показаны только последние записи."};
   }
@@ -602,14 +602,14 @@
     const legacyHeading=state.language==="uz"?"O‘quv topshiriqlari va kirish tekshiruvlari":
       (state.language==="en"?"Learning tasks and entry checks":"Учебные задания и диагностики");
     root.innerHTML=shell('<section class="ep-history-screen" data-ep-v58-history="'+esc(component)+'">'+
-      '<div class="ep-live-card"><div class="ep-live-head"><strong>'+esc(component)+' · '+esc(c.history)+'</strong>'+
-      '<button class="ep-live-btn secondary" type="button" data-ep-history-back>'+esc(c.backToComponent)+'</button></div></div>'+
+      '<div class="ep-live-card"><div class="ep-live-head"><strong>'+esc(component)+' · '+esc(c.history)+'</strong></div></div>'+
       epComponentTabs(component,"history")+paperSection+
       '<section class="ep-live-card" data-ep-history-legacy-section>'+
       '<div class="ep-live-head"><strong>'+esc(legacyHeading)+'</strong></div>'+
       historyListMarkup("core",rows,makeCoreRow,20,
         '<div class="ep-live-notice">'+esc(result?.ok?c.noHistory:c.error)+'</div>')+
-      '</section></section>',{compact:true});
+      '</section>'+epBottomBack('data-ep-history-back',c.backToComponent)+'</section>',{compact:true});
+    epSyncBackFallback(root);
     root.querySelector('[data-ep-history-back]')?.addEventListener('click',()=>openComponentHome(component));
     epBindTabs(component,root);
     const screen=root.querySelector("[data-ep-v58-history]");
@@ -748,10 +748,10 @@
 
   function componentHomeCopy() {
     if (state.language === "uz") return {
-      back: "Sizning yo‘lingiz", next: "Keyingi qadam", progress: "Progress", topics: "Mavzular",
+      back: "P1 va P5 ga qaytish", next: "Keyingi qadam", progress: "O‘zlashtirish", topics: "Mavzular",
       attention: "E’tibor talab qiladi", timed: "Vaqtli mashq", materials: "O‘quv materiallari",
       readiness: "Imtihon tayyorgarligi", confirmed: "Tasdiqlangan", inProgress: "Jarayonda",
-      notStarted: "Boshlanmagan", needsAttention: "Qayta ko‘rish kerak", openComponent: "Ochish",
+      notStarted: "Boshlanmagan", needsAttention: "Qayta ko‘rish kerak", openComponent: "Bo‘limni ochish",
       startTask: "Topshiriqni boshlash", continueTask: "Topshiriqni davom ettirish",
       fixTask: "Xatoni tuzatish", retestTask: "Qayta tekshiruvdan o‘tish", mixedTask: "Aralash mashqni boshlash",
       timedTask: "Vaqtli mashqni boshlash", checkNext: "Keyingi topshiriqni tekshirish",
@@ -792,6 +792,20 @@
     return rows.find(x => x?.component_code === component) || rows[0] || null;
   }
 
+  // The app topbar already owns Back for Exam Prep. An embedded/offline
+  // view without that global control gets exactly one bottom fallback instead.
+  function epBottomBack(attribute,label){
+    return '<div class="ep-v58-fallback-nav" data-ep-v58-fallback-nav>'+
+      '<button class="ep-live-btn secondary" type="button" '+attribute+'>'+esc(label)+'</button></div>';
+  }
+  function epSyncBackFallback(root=rootEl()){
+    const bar=document.getElementById("topbar"),button=document.getElementById("topbar-back");
+    const visible=!!(bar&&button&&getComputedStyle(bar).display!=="none"&&
+      getComputedStyle(button).display!=="none"&&
+      getComputedStyle(button).visibility==="visible");
+    root?.querySelectorAll("[data-ep-v58-fallback-nav]").forEach(node=>{node.hidden=visible;});
+  }
+
   function componentCard(component, progress, statePayload) {
     const c = copy(), home = componentHomeCopy(), s = progress?.screening || {}, summary = componentSummary(component, statePayload);
     const reqItems = Number(s.required_items || 0), ansItems = Number(s.answered_items || 0), reqAreas = Number(s.required_areas || 0), ansAreas = Number(s.answered_areas || 0);
@@ -807,8 +821,7 @@
       ? `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-plan="${component}"></button>${stage >= 2 ? `<button type="button" data-ep-live-timed="${component}"></button>` : ""}${stage >= 5 ? `<button type="button" data-ep-live-readiness="${component}"></button>` : ""}</div>`
       : `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-start="${component}"></button></div>`;
     // Component card opens the overview; the next-action button starts work.
-    const hint = `${home.openComponent} ${component}`;
-    return `<div class="ep-live-component-slot"><button class="ep-live-card ep-live-component-card ep-live-component-entry" type="button" data-ep-live-component="${component}" data-ep-component-entry="1" data-ep-live-open-component="${component}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(home.skills)}</span></div><span class="ep-live-component-arrow" aria-hidden="true">›</span></div>${status}<div class="ep-live-component-open">${esc(hint)} <span aria-hidden="true">→</span></div></button>${compat}</div>`;
+    return `<div class="ep-live-component-slot"><button class="ep-live-card ep-live-component-card ep-live-component-entry" type="button" data-ep-live-component="${component}" data-ep-component-entry="1" data-ep-live-open-component="${component}" aria-label="${esc(componentName)} · ${esc(home.openComponent)}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(home.skills)}</span></div><span class="ep-live-component-arrow" aria-hidden="true">›</span></div>${status}</button>${compat}</div>`;
   }
 
   function trackerAreaForSkill(tracker, skillCode) {
@@ -955,7 +968,7 @@
   function epComponentTabs(component,active){
     const all={
       ru:["Маршрут","Тренировки","История","К P1 и P5","Выберите тренировку. Полные Paper доступны добровольно.","Короткие работы на время по текущим правилам.","Полный Paper на бумаге. Письменные решения не оцениваются.","Необязательные сложные задачи, отдельно от Paper.","Тренировки пока недоступны."],
-      uz:["Yo‘l","Mashqlar","Tarix","P1 va P5 ga","Mashqni tanlang. To‘liq Paper ixtiyoriy.","Joriy bosqichdagi vaqtli qisqa mashqlar.","To‘liq Paper qog‘ozda yechiladi. Yozma yechim baholanmaydi.","Paper natijalaridan alohida ixtiyoriy masalalar.","Hozircha mashqlar mavjud emas."],
+      uz:["Tayyorgarlik","Mashqlar","Tarix","P1 va P5 ga qaytish","Mashq turini tanlang. To‘liq Paper ishlash majburiy emas.","Hozirgi bosqichga mos qisqa, vaqt bilan cheklangan mashqlar.","To‘liq Paper qog‘ozda bajariladi. Yozma yechimlarga ball qo‘yilmaydi.","Paper natijalaridan mustaqil qo‘shimcha murakkab masalalar.","Hozircha mashqlar mavjud emas."],
       en:["Route","Practice","History","Back to P1 and P5","Choose practice. Full Papers are always voluntary.","Short timed work under current rules.","Full Paper on paper. Written methods are not graded.","Optional harder questions, separate from Papers.","Practice is not currently available."]
     },r=all[state.language]||all.ru,tabNames=[["learning",r[0]],["training",r[1]],["history",r[2]]];
     return '<nav class="ep-v58-tabs" data-ep-v58-tabs aria-label="'+esc(component)+'">'+
@@ -976,7 +989,7 @@
     const h=componentHomeCopy(),c=copy();
     const r=({
       ru:["Тренировки","К P1 и P5","Выберите тренировку. Полные Paper доступны добровольно.","Короткие работы на время по текущим правилам.","Полный Paper на бумаге. Письменные решения не оцениваются.","Необязательные сложные задачи, отдельно от Paper.","Тренировки пока недоступны."],
-      uz:["Mashqlar","P1 va P5 ga","Mashqni tanlang. To‘liq Paper ixtiyoriy.","Joriy bosqichdagi vaqtli qisqa mashqlar.","To‘liq Paper qog‘ozda yechiladi. Yozma yechim baholanmaydi.","Paper natijalaridan alohida ixtiyoriy masalalar.","Hozircha mashqlar mavjud emas."],
+      uz:["Mashqlar","P1 va P5 ga qaytish","Mashq turini tanlang. To‘liq Paper ishlash majburiy emas.","Hozirgi bosqichga mos qisqa, vaqt bilan cheklangan mashqlar.","To‘liq Paper qog‘ozda bajariladi. Yozma yechimlarga ball qo‘yilmaydi.","Paper natijalaridan mustaqil qo‘shimcha murakkab masalalar.","Hozircha mashqlar mavjud emas."],
       en:["Practice","Back to P1 and P5","Choose practice. Full Papers are always voluntary.","Short timed work under current rules.","Full Paper on paper. Written methods are not graded.","Optional harder questions, separate from Papers.","Practice is not currently available."]
     })[state.language];
     const stage=Number(componentSummary(component,state.componentState[component])?.operational_stage||0);
@@ -987,12 +1000,13 @@
     const extra=internal.extraHardView?.open?link("extra-hard",
       state.language==="ru"?"Задачи повышенной сложности":state.language==="uz"?"Qo‘shimcha murakkab masalalar":"Extra Hard",r[5]):"";
     root.innerHTML=shell('<section class="ep-v58-training" data-ep-v58-component-training="'+esc(component)+'">'+
-      '<header class="ep-v58-section-head"><button class="ep-v58-back" type="button" data-ep-v58-training-back>← '+esc(r[1])+'</button>'+
+      '<header class="ep-v58-section-head">'+
       '<h2>'+esc(component+" · "+(component==="P1"?c.componentP1:c.componentP5))+'</h2></header>'+
       epComponentTabs(component,"training")+
       '<div class="ep-v58-training-description"><p>'+esc(r[2])+'</p></div>'+
       '<section class="ep-component-links ep-v58-training-links">'+(timed+paper+extra||'<p class="ep-live-notice">'+esc(r[6])+'</p>')+
-      '</section></section>',{compact:true});
+      '</section>'+epBottomBack('data-ep-v58-training-back',r[1])+'</section>',{compact:true});
+    epSyncBackFallback(root);
     root.querySelector('[data-ep-v58-training-back]')?.addEventListener("click",()=>void renderDashboard());
     epBindTabs(component,root);
     root.querySelector('[data-ep-component-link="timed"]')?.addEventListener("click",()=>void openTimed(component));
@@ -1031,7 +1045,7 @@
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
       <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
-        <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><button class="ep-route-back" type="button" data-ep-component-back aria-label="${esc(c.overview)}">←</button><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
+        <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
           <div class="ep-route-identity"><div><h2>${esc(componentName)}</h2><span class="ep-route-phase">${esc(stageLabel(stage))} · ${esc(c.stageTitle)}</span></div><span class="ep-live-component-code">${component}</span></div></header>
         ${epComponentTabs(component,"learning")}
         <section class="ep-component-next"><span class="ep-component-section-label">${esc(home.next)}</span>
@@ -1043,8 +1057,9 @@
           <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
         ${lastResultCard}
         <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
-        <section class="ep-component-links">${attention}${readiness}${materials}</section></section>`, {compact:true});
+        <section class="ep-component-links">${attention}${readiness}${materials}</section>${epBottomBack("data-ep-component-back",c.overview)}</section>`, {compact:true});
     state.notice = null;
+    epSyncBackFallback(root);
     epBindTabs(component,root);
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
@@ -1315,7 +1330,7 @@
         labelP1: "P1 · Pure Mathematics 1", labelP5: "P5 · Probability & Statistics 1"
       },
       uz: {
-        title: "P1 va P5 imtihon sanalari", hint: "Har bir komponent boshlanish vaqtini maktab yoki imtihon markazi ma’lumotiga ko‘ra kiriting (O‘zbekiston, UTC+5). iClub sanani taxmin qilmaydi.",
+        title: "P1 va P5 imtihon sanalari", hint: "P1 va P5 boshlanadigan sanani va vaqtni maktabingiz yoki imtihon markazidan aniqlab kiriting (O‘zbekiston vaqti, UTC+5). iClub imtihon sanasini o‘zi belgilamaydi.",
         confirmed: "Sana va vaqtni maktab yoki imtihon markazida tekshirdim",
         save: "Sanani saqlash", missing: "Sana hali kiritilmagan", before: "Tayyorgarlik muddati kirish diagnostikasidan keyin aniqlanadi",
         remaining: "Imtihongacha kunlar", initial: "Diagnostikadan imtihongacha kunlar",
@@ -1436,22 +1451,22 @@
         minutes:"Фактические минуты занятий не подсчитаны: одного открытия экрана недостаточно для их подтверждения."
       },
       uz: {
-        title:"Haftalik reja", intro:"O‘zingizga mos variantni tanlang. Bu o‘qishni cheklamaydi.",
+        title:"Haftalik reja", intro:"O‘zingizga qulay rejani tanlang. Bu reja ko‘proq shug‘ullanishingizga to‘sqinlik qilmaydi.",
         keep:"Joriy rejani saqlash", split:"Vaqtni P1 va P5 o‘rtasida qayta taqsimlash",
-        change:"Yangi o‘qish vaqtini tanlash", p1:"P1 uchun haftalik daqiqa",
-        p5:"P5 uchun haftalik daqiqa", daily:"O‘qish kunidagi daqiqalar", days:"Haftadagi kunlar",
+        change:"Mashg‘ulot vaqtini o‘zgartirish", p1:"P1 uchun haftalik daqiqa",
+        p5:"P5 uchun haftalik daqiqa", daily:"Bir kunda mashg‘ulot uchun vaqt (daqiqa)", days:"Haftasiga necha kun",
         total:"Haftalik rejangiz", save:"Tanlovni saqlash",
         saved:"Tanlov saqlandi. Avvalgi natijalar o‘zgarmadi.",
-        alreadySaved:"Bu reja allaqachon saqlangan. Qayta yozish shart emas.",
+        alreadySaved:"Bu reja avval saqlangan. Qayta saqlash shart emas.",
         error:"Saqlab bo‘lmadi. Ma’lumotni yangilang va qayta urinib ko‘ring.",
         invalid:"P1 va P5 daqiqalari yig‘indisi haftalik reja bilan teng bo‘lishi kerak.",
         invalidSplitStep:"P1 va P5 uchun vaqtni 5 daqiqalik qadam bilan kiriting.",
         invalidSchedule:"Kuniga 15–240 daqiqa (5 daqiqalik qadam) va haftasiga 1–7 kun kiriting.",
         exceedsAvailable:"Tanlangan jadval imtihon rejangizda ko‘rsatilgan umumiy mavjud vaqtdan oshib ketdi.",
-        report:"O‘qish yakunlari", empty:"Birinchi hisobot boshlang‘ich diagnostikadan keyingi yetti kun yakunida chiqadi.",
+        report:"Mashg‘ulotlar hisoboti", empty:"Dastlabki tekshiruvdan keyin yetti kun o‘tgach, birinchi hisobot paydo bo‘ladi.",
         week:"7 kun", month:"Oy", learning:"Yakunlangan o‘quv mashg‘ulotlari",
         timed:"Yakunlangan sinov ishlari",
-        minutes:"Haqiqiy o‘qish daqiqalari hisoblanmadi: sahifani ochish yetarli dalil emas."
+        minutes:"Ilovada o‘tkazilgan vaqt haqiqiy mashg‘ulot vaqti sifatida hisoblanmaydi."
       },
       en: {
         title:"Weekly plan", intro:"Choose what works for you. This plan never limits additional studying.",
@@ -1609,7 +1624,7 @@
   function epNavCopy(){
     const labels={
       ru:["Мой план","К P1 и P5","Изменить профиль","Экзаменационный профиль","Режим занятий","Даты экзаменов","Недельный режим и отчёты","Настроить","Не указана","Цель, даты и время подготовки — в одном месте"],
-      uz:["Mening rejam","P1 va P5 ga","Profilni o‘zgartirish","Imtihon profili","O‘qish jadvali","Imtihon sanalari","Haftalik jadval va hisobotlar","Sozlash","Kiritilmagan","Maqsad, imtihon sanalari va o‘qish vaqti — bir joyda"],
+      uz:["Mening rejam","P1 va P5 ga qaytish","Rejani tahrirlash","Imtihonga tayyorgarlik","Mashg‘ulot jadvali","Imtihon sanalari","Haftalik reja va hisobotlar","Rejani ko‘rish","Belgilanmagan","Maqsad, imtihon sanalari va mashg‘ulot vaqti shu yerda"],
       en:["My plan","Back to P1 and P5","Edit profile","Exam profile","Study schedule","Exam dates","Weekly schedule and reports","Manage","Not entered","Goals, exam dates and study time in one place"]
     };
     const names=["plan","back","edit","profile","schedule","dates","weekly","manage","none","hint"];
@@ -1649,17 +1664,16 @@
       '<button type="button" class="ep-live-btn secondary" data-ep-v58-profile-edit>'+esc(t.edit)+'</button></section>':"";
     root.innerHTML=shell('<section class="ep-v58-plan-page" data-ep-v58-plan-page>'+
       (state.notice?'<div class="ep-live-notice" role="status" aria-live="polite">'+esc(state.notice)+'</div>':'')+
-      '<header class="ep-v58-section-head">'+
-      (hasProfile?'<button type="button" class="ep-v58-back" data-ep-v58-plan-back>← '+
-        esc(editing?t.plan:t.back)+'</button>':"")+
-      '<h2>'+esc(t.plan)+'</h2></header>'+profileSummary+
+      '<header class="ep-v58-section-head"><h2>'+esc(t.plan)+'</h2></header>'+profileSummary+
       (editing?examProfileFormMarkup():"")+
       (hasProfile&&!editing?
         section("dates",t.dates,examDatesPanel())+
         (hasWeekly?section("weekly",t.weekly,weeklyS3Panel()):
           section("schedule",t.schedule,studySchedulePanel())):"")+
+      (hasProfile?epBottomBack('data-ep-v58-plan-back',editing?t.plan:t.back):"")+
       '</section>',{compact:true});
     state.notice=null;
+    epSyncBackFallback(root);
     root.querySelector("[data-ep-v58-plan-back]")?.addEventListener("click",()=>{
       if(editing&&hasProfile)renderMyPlan();else void renderDashboard();
     });
