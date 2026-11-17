@@ -133,7 +133,8 @@ async function activateStudy(page) {
       ctaHeight: cta.getBoundingClientRect().height,
       tileRadius: getComputedStyle(tile).borderRadius,
       tileDisplay: getComputedStyle(tile).display,
-      tileColor:getComputedStyle(tile).backgroundImage,
+      tileColor:getComputedStyle(tile).backgroundColor,
+      tileImage:getComputedStyle(tile).backgroundImage,
       titleAlign:titleCss.textAlign,
       titleFontSize:parseFloat(titleCss.fontSize),
       titleInset:title.getBoundingClientRect().left-tile.getBoundingClientRect().left,
@@ -155,8 +156,8 @@ async function activateStudy(page) {
   assert(state.titleInset >= 10 && state.titleInset <= 24, 'Pinned title inset drift');
   assert(state.topLabelCount === 1 && state.bottomCount === 1,
     'Approved v5.8 pinned card requires top label + bottom action');
-  assert(state.tileColor.includes('rgb(86, 137, 210)') && state.tileColor.includes('rgb(116, 162, 225)'),
-    `Owner-approved Study palette must stay visibly lighter than Competitive, not near-white: ${state.tileColor}`);
+  assert(state.tileColor==='rgb(48, 113, 225)' && state.tileImage==='none',
+    `Pinned Study must match owner's screenshot 2 flat #3071E1, not a gradient: ${JSON.stringify(state)}`);
   assert(state.width <= state.innerWidth, `Home mobile overflow: ${JSON.stringify(state)}`);
 
   await activateStudy(page);
