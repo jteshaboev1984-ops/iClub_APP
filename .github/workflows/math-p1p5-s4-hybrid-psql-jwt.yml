@@ -279,6 +279,17 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p2_06_final_calibration_exam_ops_matrix.sql
+      - name: Stage ON real finalized objective evidence and signed Chromium RU UZ EN
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          node --check scripts/p1p5-s4-stage-on-real-evidence-seed.cjs
+          node --check scripts/p1p5-s4-stage-on-finalized-e2e.cjs
+          node --check scripts/p1p5-s4-stage-on-finalized-browser.cjs
+          node scripts/p1p5-s4-stage-on-real-evidence-seed.cjs
+          node scripts/p1p5-s4-stage-on-finalized-e2e.cjs
       - name: Clean disposable PostgREST
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
