@@ -112,23 +112,25 @@ for(const name of ["math-my-plan-first-setup-ru-390.png",
  assert(planQA.includes(name),"Owner requested Math My plan/history capture missing: "+name);
 assert(!fullScreens.includes("save_exam_prep")&&!fullScreens.includes("supabase.rpc"),
  "Visual-only Home comparison must not write user/profile/attempt data");
-// Owner visual feedback 2026-11-17: no Competitive swipe; ALL such
-// cards are identical dark blue. The lighter blue belongs to pinned Study.
+// Clarified owner direction: BOTH Competitive and pinned Study must swipe.
+// Every Competitive card retains one identical original blue; only pinned
+// Study uses the second, lighter approved blue (not an alternation by swipe).
 const railJs=read("visual/iclub-academy-ux531-interactions.js");
 const railBrowser=read("qa/ux531-academy-browser.cjs");
 const academyParity=read("qa/ux531-academy-ui-parity.cjs");
-assert(style.includes("#home-competitive-list{")&&
- style.includes("grid-template-columns:minmax(0,1fr)")&&
- style.includes("#home-competitive-list + .academy-rail-pagination")&&
- style.includes("grid-template-columns:repeat(2,minmax(0,1fr))"),
- "All Competitive cards must be visible as a static equal-width list/grid");
-assert(style.includes("scroll-snap-type:x mandatory")&&
- railJs.includes("const rails=[{id:'home-study-list',child:'.home-pinned-tile'}]")&&
- !railJs.includes("{id:'home-competitive-list',child:'.home-competitive-card'}"),
- "Only lighter-blue pinned Study may have swipe pagination");
-assert(railBrowser.includes("'Competitive must not have swipe dots'")&&
- academyParity.includes("No Competitive swipe dots"),
- "Browser and source regression must protect the stationary Competitive list");
+assert(style.includes("#home-competitive-list,")&&
+ style.includes("#home-study-list{")&&
+ style.includes("scroll-snap-type:x mandatory"),
+ "Both native swipe rails must remain available to mobile learners");
+assert(railJs.includes("{id:'home-competitive-list',child:'.home-competitive-card'}")&&
+ railJs.includes("{id:'home-study-list',child:'.home-pinned-tile'}"),
+ "Both accessible pagination rails must exist");
+assert(railBrowser.includes("Competitive color must NOT change on swipe")&&
+ academyParity.includes("Both subject families must keep horizontal swipe"),
+ "Browser and source assertions must protect swipe AND uniform Competitive color");
+assert(style.includes("linear-gradient(137deg,#174aab 0%,#3071e1 100%)")&&
+ style.includes("linear-gradient(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%)"),
+ "Deep blue stays Competitive, second lighter blue stays pinned");
 const componentCards=live.slice(live.indexOf("function componentCard("),live.indexOf("function trackerAreaForSkill("));
 assert(componentCards.includes("data-ep-live-open-component=")&&
  componentCards.includes("ep-live-component-arrow")&&
