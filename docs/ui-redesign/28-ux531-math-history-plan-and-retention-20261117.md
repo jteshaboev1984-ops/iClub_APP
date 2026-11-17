@@ -8,6 +8,20 @@
 3. History must show three latest records and expandable older entries in sets of five; decide what happens after 70–90 records and whether deletion/automatic cleaning is appropriate.
 4. Inspect other iClub screens for the same long-list problem.
 
+## 2026-11-17 follow-up: strict no-duplicate setting audit
+
+Owner explicitly rejected duplicated values/actions even if both were relocated into “My plan”. The previous Draft #558 still showed the saved four-field summary **alongside its populated edit form**, offered separate daily-minute/day-of-week editors in legacy Study Schedule AND S3 Weekly Choice for one learner, duplicated total/Math hours in Schedule, and showed P1/P5 times both as summary text and as prefilled datetime inputs.
+
+**Corrected source-only UX contract:**
+1. The route/dashboard has **one My plan navigation card** and explanatory text, NOT a duplicate readout of exam series/grade/hours/P1/P5 dates.
+2. In My plan normal view, four profile values (exam series, goal grade, total weekly time, Mathematics weekly budget) appear **once** in a labeled 4-cell summary. On Edit, the summary and other settings are **replaced** by exactly one four-input owner-scoped editor, with the existing unsaved-data-on-error behavior. Back within Edit returns to the summary; it does not duplicate panels. Initial setup uses exactly the same editor.
+3. P1/P5 exam start dates are edited in **one datetime input each** and accompanied by status/verification, not a second duplicate formatted date row; the unchanged server confirmation requirement remains.
+4. Only **one editable schedule per user**: if a server-returned `voluntary_weekly_choice_s3_v1` contract exists, show Weekly Choice (keep/redistribute/change, P1/P5 allocation, daily minutes, days per week and reports). Hide redundant legacy Study Schedule **in that mode only**. Without the S3 contract, retain the existing legacy Study Schedule save RPC and show no S3 panel. This conditional selection never changes server features or authorization.
+5. The legacy Schedule panel no longer repeats the four-profile budgets; it shows its own daily-minute/day count and a derived weekly preview. The S3 weekly allocation budget is shown only if **different** from the saved general Mathematics budget (distinct active weekly target). Nested headings identical to their parent expandable titles were removed. Reports are still in the weekly panel, once.
+6. No API/schema/RPC/persisted learner value changed, no new mandatory hours, no Paper grades. The unique-value UX is enforced by RU/UZ/EN × 320/375/390/430/1440 actual-source synthetic Chromium tests and fixed source pins.
+
+Potential **academic Stage3–6 PR #557** also edits `exam-prep/exam-prep-live.js` on a separate branch; integrate or rebase sequentially only after owner coordination and exact-head retests. Do not overwrite that workstream.
+
 ## Exact source facts
 - Competitive Home CSS: `#174AAB → #3071E1` white text and prominent shadow. This Draft changes **only pinned Study** to `#5689D2 → #6196DD → #74A2E1`, navy `#071E3D`, border and softer elevation. This is a true blue gradient, not grey/white/pastel; title-label contrast on darkest stop >=4.5:1.
 - `exam-prep/exam-prep-live.js`: old `renderProfile` was separate form for exam series, target grade, total weekly study hours, Mathematics hours; existing `renderMyPlan` already offered schedule, confirmed P1/P5 exam dates, weekly choice/reports and an Edit profile action.
