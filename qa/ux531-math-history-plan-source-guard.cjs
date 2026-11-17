@@ -20,6 +20,7 @@ const allowed=new Set([
  "docs/ui-redesign/28-ux531-math-history-plan-and-retention-20261117.md",
  "exam-prep/exam-prep-api.js","exam-prep/exam-prep-live.js",
  "index.html","qa/ux531-math-p1p5-plan-runtime.cjs",
+ "scripts/p1p5-s3-chromium-mobile-three-language.cjs",
  "qa/ux531-registered-navigation-e2e.cjs",
  "qa/ux531-math-history-plan-source-guard.cjs",
  "visual/iclub-academy-ux531-b02b03.css",
@@ -73,6 +74,24 @@ assert(!examDates.includes("dateText")&&examDates.includes("data-ep-exam-date-in
 const s3=live.slice(live.indexOf("function weeklyS3Panel()"),live.indexOf("function bindWeeklyS3()"));
 assert(s3.includes("data-ep-s3-newtime")&&s3.includes("data-ep-s3-p1")&&
  s3.includes("data-ep-s3-p5"),"S3 must preserve P1/P5 allocation and daily schedule editing");
+// Two existing UX test suites were adjusted only to follow the new
+// source-backed presentation contract, NEVER to bypass signed owner data.
+// The translated section title appears ONCE in its <summary>, and the
+// saved weekly total is verified via signed S3 read-back rather than a
+// duplicate number inside the UI.
+const s3Browser=read("scripts/p1p5-s3-chromium-mobile-three-language.cjs");
+assert(s3Browser.includes("weeklyDetails.locator('summary').textContent()"),
+ "S3 must check its accessible translated disclosure heading");
+assert(s3Browser.includes("get_my_exam_prep_weekly_choice_s3_safe_v1")&&
+ s3Browser.includes("chosen_math_minutes,175")&&
+ s3Browser.includes("p1_minutes,100")&&s3Browser.includes("p5_minutes,75"),
+ "S3 must verify a real signed owner persistence read, not fake repeat UI text");
+assert(!s3Browser.includes("panel.textContent()).includes(title)"),
+ "Old duplicate S3 heading test must be retired");
+const planQA=read("qa/ux531-math-p1p5-plan-runtime.cjs");
+assert(planQA.includes(".ep-v58-profile-fact")&&
+ !planQA.includes("[data-ep-v58-profile-fact]"),
+ "QA must select the actual labeled profile fact class, not nonexistent data attribute");
 assert(!live.includes("data-ep-history-delete"),"History deletion not approved");
 assert(css.includes(".ep-history-archive")&&css.includes(".ep-history-more[hidden]"),"History CSS missing");
 for(const v of ["ux531-b02b03-blue-20261117-v3","ux531-b04b08-single-plan-v4",
