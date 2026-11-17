@@ -19,7 +19,7 @@ assert.match(paperSource,/data-ep-hybrid-s4-mentor-optional/,
 assert.match(paperSource,/function renderLoading\(scope = "default", component = ""\)/,
   "Exam Prep loading copy must describe the current destination");
 for(const expected of ['renderLoading("route")','renderLoading("component", component)',
-    'renderLoading("history", component)','renderLoading("plan", component)',
+    'renderLoading("history",component)','renderLoading("plan", component)',
     'renderLoading("paper", component)','renderLoading("answer")']){
   assert(paperSource.includes(expected),"Missing contextual loading message: "+expected);
 }
