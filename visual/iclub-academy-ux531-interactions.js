@@ -1,8 +1,12 @@
 /* iClub Academy OS UX #531: presentation-only rail pagination and subject hub panels.
    No Supabase, localStorage, assessment state, profile writes, or route overrides. */
 (()=>{'use strict';
-  // Only pinned Study cards paginate. Competitive cards are a fixed grid.
-  const rails=[{id:'home-study-list',child:'.home-pinned-tile'}];
+  // Both subject families swipe; each competitive card shares one deep blue,
+  // while pinned Study keeps its distinct lighter blue. Dots affect navigation only.
+  const rails=[
+    {id:'home-competitive-list',child:'.home-competitive-card'},
+    {id:'home-study-list',child:'.home-pinned-tile'}
+  ];
   const activeObservers=[];
   const copy=()=>{
     const lang=(document.documentElement.lang||'ru').toLowerCase();
@@ -19,7 +23,7 @@
       pagination=document.createElement('div');
       pagination.className='academy-rail-pagination';
       pagination.setAttribute('role','group');
-      pagination.setAttribute('aria-label',copy().pinned);
+      pagination.setAttribute('aria-label',id==='home-study-list'?copy().pinned:copy().competitive);
       root.after(pagination);
     }
     let buttons=[],cards=[];
@@ -59,7 +63,7 @@
     observer.observe(root,{childList:true});
     activeObservers.push(observer);
     const langObserver=new MutationObserver(()=>{
-      pagination.setAttribute('aria-label',copy().pinned);
+      pagination.setAttribute('aria-label',id==='home-study-list'?copy().pinned:copy().competitive);
       sync();
     });
     langObserver.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
