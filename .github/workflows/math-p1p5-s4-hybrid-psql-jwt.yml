@@ -259,6 +259,11 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-s4-active-diagnostic-coexistence.cjs
           node scripts/p1p5-s4-active-diagnostic-coexistence.cjs
+      - name: Math Stage3–6 source-function fail-closed RPC fallback (non-E2E)
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s4-readiness-fail-closed-source.cjs
+          node scripts/p1p5-s4-readiness-fail-closed-source.cjs
       - name: S4 owner rule — positive Stage3–6 objective-only, no Paper score, signed HTTP
         run: |
           set -euo pipefail
