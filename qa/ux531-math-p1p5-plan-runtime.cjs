@@ -316,8 +316,8 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.equal(await page.locator("[data-ep-exam-date-component]").count(),2);
     assert.equal(await page.locator('[data-ep-v58-setting="weekly"]').count(),regression?1:0);
     assert.equal(await page.locator('[data-ep-v58-setting="schedule"]').count(),regression?0:1);
-    assert.equal(await page.locator("[data-ep-study-minutes]").count(),0,
-      "Collapsed legacy schedule may not coexist with S3 schedule editor");
+    assert.equal(await page.locator("[data-ep-study-minutes]").count(),regression?0:1,
+      "Only the appropriate schedule editor may exist in the plan");
     if(regression){
       // A failed profile edit must not erase the form or the user's new values.
       await page.locator("[data-ep-v58-profile-edit]").click();
@@ -392,7 +392,7 @@ async function caseRun(browser, address, { language, width, mode }) {
       assert.equal(await settings.evaluate(el=>el.open),true);
       assert.equal(await page.locator("[data-ep-study-schedule] [data-ep-study-minutes]").count(),1);
       assert.equal(await page.locator("[data-ep-study-schedule] [data-ep-study-days]").count(),1);
-      assert.equal(await page.locator("[data-ep-study-schedule] .ep-live-study-schedule-summary .ep-live-meta").count(),0,
+      assert.equal(await page.locator("[data-ep-study-schedule] .ep-live-study-schedule-summary span.ep-live-meta").count(),0,
         "Do not repeat Maths and total-time budget in schedule preview");
     }
     await page.locator("[data-ep-v58-plan-back]").click();
