@@ -19,7 +19,8 @@ const allowed=new Set([
  ".github/workflows/ux531-previewless-release-firewall.yml",
  "docs/ui-redesign/28-ux531-math-history-plan-and-retention-20261117.md",
  "exam-prep/exam-prep-api.js","exam-prep/exam-prep-live.js",
- "index.html","qa/ux531-math-p1p5-plan-runtime.cjs",
+ "index.html","qa/ux531-academy-all-screens.cjs",
+ "qa/ux531-math-p1p5-plan-runtime.cjs",
  "scripts/p1p5-s3-chromium-mobile-three-language.cjs",
  "qa/ux531-registered-navigation-e2e.cjs",
  "qa/ux531-math-history-plan-source-guard.cjs",
@@ -92,6 +93,23 @@ const planQA=read("qa/ux531-math-p1p5-plan-runtime.cjs");
 assert(planQA.includes(".ep-v58-profile-fact")&&
  !planQA.includes("[data-ep-v58-profile-fact]"),
  "QA must select the actual labeled profile fact class, not nonexistent data attribute");
+// Owner visual acceptance uses only disposable fixture data and source CSS.
+// The saved screenshot payloads are NOT proofs of production learner state.
+const fullScreens=read("qa/ux531-academy-all-screens.cjs");
+for(const name of ["home-competitive-and-pinned-blue-",
+ "home-competitive-card","home-pinned-tile"])
+ assert(fullScreens.includes(name),"Visual Home source-CSS comparison capture missing: "+name);
+assert(fullScreens.includes("ПРИМЕР · ТУР")&&
+ fullScreens.includes("ЗАКРЕПЛЁН · ПРИМЕР"),
+ "Illustrative Home cards must be visibly labeled synthetic");
+for(const name of ["math-my-plan-first-setup-ru-390.png",
+ "math-my-plan-overview-","math-my-plan-p1p5-dates-ru-390.png",
+ "math-my-plan-profile-edit-ru-390.png","math-my-plan-weekly-s3-ru-390.png",
+ "math-my-plan-legacy-schedule-","math-p1-history-three-recent-ru-390.png",
+ "math-p1-history-older-five-ru-390.png"])
+ assert(planQA.includes(name),"Owner requested Math My plan/history capture missing: "+name);
+assert(!fullScreens.includes("save_exam_prep")&&!fullScreens.includes("supabase.rpc"),
+ "Visual-only Home comparison must not write user/profile/attempt data");
 assert(!live.includes("data-ep-history-delete"),"History deletion not approved");
 assert(css.includes(".ep-history-archive")&&css.includes(".ep-history-more[hidden]"),"History CSS missing");
 for(const v of ["ux531-b02b03-blue-20261117-v3","ux531-b04b08-single-plan-v4",
