@@ -891,3 +891,29 @@ body.iclub-visual-v3 #exam-prep-host-root .ep-history-cap-note{
 body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-editor{
   min-width:0;overflow-wrap:normal;
 }
+
+/* One visible value per setting: compact four-field profile summary in My plan.
+   The editor replaces, rather than repeats, these facts while editing. */
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-summary>div:first-child{
+  min-width:0;flex:1 1 auto;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-facts{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px 16px;margin-top:12px;min-width:0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-fact{
+  display:grid;gap:3px;min-width:0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-fact small{
+  font-size:11px;font-weight:500;line-height:1.35;color:#4b6281;
+  overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-fact strong{
+  font-size:13px;font-weight:760;line-height:1.4;color:#163d73;
+  overflow-wrap:anywhere;
+}
+@media(max-width:390px){
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-facts{
+    grid-template-columns:minmax(0,1fr);gap:9px;
+  }
+}
