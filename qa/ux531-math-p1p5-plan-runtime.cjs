@@ -164,7 +164,7 @@ async function caseRun(browser, address, { language, width, mode }) {
           }))}};
       },
       async recentResults(component,limit) {
-        assert.equal(limit,20,"Core history only requests the supported 20-row server cap");
+        if(limit!==20)throw Error("Core history must request only the supported 20-row cap");
         return {ok:true,data:{component_code:component,results:Array.from(
           {length:component==="P1"?18:0},(_,i)=>({
             session_id:"synthetic-core-"+(i+1),session_type:"learning",
