@@ -133,6 +133,14 @@ assert(style.includes("background:#174aab;")&&
  !style.includes("linear-gradient(137deg,#174aab")&&
  !style.includes("linear-gradient(137deg,#5689d2"),
  "Exact solid sample 1 stays Competitive; exact solid sample 2 stays pinned");
+// White must reach all *nested* pinned text and arrow elements, not just
+// button color. Original Competitive #174AAB remains untouched.
+assert(style.includes("#home-study-list .home-pinned-tile *")&&
+ style.includes("color:#fff!important;"),
+ "Pinned Study descendants must all be white, including nested progress and Open arrow");
+assert(railBrowser.includes("All pinned title, top label, progress counter, footer, and Open arrow must be WHITE")&&
+ fullScreens.includes("Every pinned label, nested progress, and arrow must be white"),
+ "Chromium suite and screenshot artifact must inspect computed text/arrow colors");
 const componentCards=live.slice(live.indexOf("function componentCard("),live.indexOf("function trackerAreaForSkill("));
 assert(componentCards.includes("data-ep-live-open-component=")&&
  componentCards.includes("ep-live-component-arrow")&&
@@ -150,7 +158,7 @@ for(const text of ["Ko‘zlangan baho","Imtihon sessiyasi","Haftalik reja va his
  assert(live.includes(text),"Natural Uzbek UI terminology missing: "+text);
 assert(!live.includes("data-ep-history-delete"),"History deletion not approved");
 assert(css.includes(".ep-history-archive")&&css.includes(".ep-history-more[hidden]"),"History CSS missing");
-for(const v of ["ux531-owner-solid-swatches-dual-swipe-v6","ux531-math-single-back-v5",
+for(const v of ["ux531-owner-white-pinned-text-v7","ux531-math-single-back-v5",
  "ux531-math-single-back-loader-v5","ux531-dual-subject-rail-3"])assert(index.includes(v),"Cache bust missing "+v);
 assert(api.includes("ux531-native-back-single-arrow-uz-20261117-v5"),"Dynamic UI cache identity missing");
 const a=read(".github/workflows/exam-prep-weekly-answer-recovery.yml")
