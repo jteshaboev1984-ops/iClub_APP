@@ -480,6 +480,17 @@ body.iclub-visual-v3 #view-home #home-study-list .home-pinned-open{
   font-weight:800;
 }
 
+/* Final owner acceptance: ALL pinned Study labels, nested progress counters,
+   "Open" text/arrow, and any pseudo-icons must be white on solid #3071E1.
+   Localize the override to the Home pinned tiles only; never affect the
+   darker Competitive cards, their buttons, layout, swipe, or academic UI. */
+body.iclub-visual-v3 #view-home #home-study-list .home-pinned-tile,
+body.iclub-visual-v3 #view-home #home-study-list .home-pinned-tile *,
+body.iclub-visual-v3 #view-home #home-study-list .home-pinned-tile *::before,
+body.iclub-visual-v3 #view-home #home-study-list .home-pinned-tile *::after{
+  color:#fff!important;
+}
+
 body.iclub-visual-v3 #view-home #home-study-list .home-pinned-tile:focus-visible{
   outline:3px solid #174aab;
   outline-offset:3px;
