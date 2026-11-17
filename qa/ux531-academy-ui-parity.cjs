@@ -34,6 +34,10 @@ assert.match(html,/<div class="subject-hub-head">/,'original hub heading');
 assert.match(css,/--academy-header-body:156px/,'shared header height');
 for(const s of ['#home-competitive-list','#home-study-list'])
  assert.match(css,new RegExp(s),'rail source selector '+s);
+assert.match(css,/#home-competitive-list\\{[\\s\\S]*?display:grid!important/,'Competitive must not scroll horizontally');
+assert.match(css,/#home-study-list\\{[\\s\\S]*?scroll-snap-type:x mandatory/,'Pinned Study keeps swipe');
+assert(!interactions.includes("{id:'home-competitive-list',child:"),'No Competitive swipe dots');
+assert(interactions.includes("{id:'home-study-list',child:"),'Pinned swipe dots preserved');
 assert.match(interactions,/MutationObserver/,'live render support required');
 assert.match(interactions,/aria-selected/,'accessible hub tab state');
 assert.doesNotMatch(interactions.replace(/\/\*[\s\S]*?\*\//g,''),/\.from\(|localStorage\.|\.rpc\(|supabase|startPractice|reset_subject_progress/i,'visual script must not touch user data');
@@ -53,5 +57,5 @@ assert.match(i18n,/tab_study: "Fanlar"/);
 assert.match(i18n,/tab_study: "Subjects"/);
 assert.match(shell,/#view-ratings\.is-active/);
 assert.match(shell,/#view-profile\.is-active/);
-console.log('PASS: UX531 B01–B03 source parity, three languages, native rail and workspace contract.');
+console.log('PASS: UX531 B01–B03 source parity, three languages, static Competitive and pinned Study rail workspace contract.');
 console.log('NOTE: not a browser, auth, JWT/PostgREST, production or release test.');
