@@ -376,10 +376,11 @@ body.iclub-visual-v3 #courses-subject-hub > #academy-hub-pane-achievements{order
 body.iclub-visual-v3 #courses-subject-hub > .subject-hub-list.subject-hub-bottom{order:6}
 
 
-/* UX #531: Competitive keeps strong sapphire emphasis; pinned Study is quieter.
-   Preserve the original swipe rails, routes, rankings and student progress. */
+/* Owner-sampled solid fills: Competitive #174AAB (screenshot 1),
+   pinned Study #3071E1 (screenshot 2). All cards within each rail share
+   their one color; both rails still swipe and no other routes are touched. */
 body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-card{
-  background:linear-gradient(137deg,#174aab 0%,#3071e1 100%);
+  background:#174aab;
   border:1px solid #5e9bfb;
   box-shadow:0 10px 24px rgba(28,87,186,.24);
 }
@@ -408,8 +409,8 @@ body.iclub-visual-v3 #view-home #home-competitive-list .home-progress-fill{
 body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-btn{
   background:#fff;color:#174aab;border-color:#fff;
 }
-/* Owner mobile review 2026-11-17: saturated BLUE from the Competitive family,
-   clearly lighter than Competitive, not washed-out pastel or near-white. */
+/* Pinned background is the owner's exact second swatch, not a gradient.
+   White labels meet normal-size contrast on solid #3071E1 (~4.59:1). */
 body.iclub-visual-v3 #view-home #home-study-list .home-pinned-tile{
   display:flex;
   flex-direction:column;
@@ -422,8 +423,8 @@ body.iclub-visual-v3 #view-home #home-study-list .home-pinned-tile{
   padding:16px;
   border:1px solid #4475b9;
   border-radius:20px;
-  background:linear-gradient(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%);
-  color:#071e3d;
+  background:#3071e1;
+  color:#fff;
   box-shadow:0 8px 20px rgba(27,81,160,.14);
 }
 body.iclub-visual-v3 #view-home #home-study-list .home-pinned-top{
@@ -433,13 +434,13 @@ body.iclub-visual-v3 #view-home #home-study-list .home-pinned-top{
   font-weight:850;
   line-height:1.3;
   letter-spacing:.085em;
-  color:#071e3d;
+  color:#fff;
 }
 body.iclub-visual-v3 #view-home #home-study-list .home-pinned-title{
   display:block;
   margin:0;
   min-width:0;
-  color:#071e3d;
+  color:#fff;
   text-align:left;
   font-size:clamp(17px,4.6vw,19px);
   font-weight:850;
@@ -454,9 +455,9 @@ body.iclub-visual-v3 #view-home #home-study-list .home-pinned-bottom{
   align-items:center;
   gap:7px 10px;
   width:100%;
-  border-top:1px solid rgba(7,30,61,.27);
+  border-top:1px solid rgba(255,255,255,.35);
   padding-top:10px;
-  color:#071e3d;
+  color:#fff;
   font-size:10px;
   line-height:1.35;
   font-weight:750;
@@ -467,14 +468,14 @@ body.iclub-visual-v3 #view-home #home-study-list .home-pinned-meta{
   margin:0;
   padding:0;
   min-width:0;
-  color:#071e3d;
+  color:#fff;
   font-size:10px;
   line-height:1.35;
   font-weight:750;
 }
 body.iclub-visual-v3 #view-home #home-study-list .home-pinned-open{
   margin-left:auto;
-  color:#071e3d;
+  color:#fff;
   white-space:nowrap;
   font-weight:800;
 }
