@@ -864,6 +864,19 @@ body.iclub-visual-v3 #exam-prep-host-root .ep-history-screen .ep-v58-tabs{
   body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting>summary{padding:12px}
 }
 
+/* One Back control: existing app topbar is primary. When embedded without
+   an active topbar Back, show an accessible fallback at the BOTTOM only. */
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-fallback-nav{
+  display:flex;justify-content:center;margin-top:16px;padding:0 2px 4px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-fallback-nav[hidden]{display:none!important}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-fallback-nav .ep-live-btn{
+  min-height:44px;width:100%;max-width:420px;white-space:normal;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-main-components .ep-live-component-entry{
+  cursor:pointer;
+}
+
 /* Mathematics History: three most recent; native expandable older rows in sets of five. */
 body.iclub-visual-v3 #exam-prep-host-root .ep-history-archive{
   margin-top:12px;border:1px solid #bfd3ef;border-radius:14px;
