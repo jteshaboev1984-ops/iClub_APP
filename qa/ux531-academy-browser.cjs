@@ -90,18 +90,41 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
     const e=document.getElementById(id),dots=e.nextElementSibling;
     return {id,children:e.children.length,dots:dots?.children.length||0,scrollable:e.scrollWidth>e.clientWidth,layout:getComputedStyle(e).display};
    }));
-   assert(!rails[0].scrollable&&rails[1].scrollable,'Competitive must stay static while pinned Study swipes '+JSON.stringify(rails));
-   assert.equal(rails[0].layout,'grid','Competitive cards must use the static grid');
-   assert.equal(rails[0].dots,0,'Competitive must not have swipe dots');
-   assert.equal(rails[1].dots,5,'5 pinned subjects/dots');
-   const competitivePositions=await page.evaluate(()=>[...document.querySelectorAll('#home-competitive-list .home-competitive-card')].map(el=>({top:el.getBoundingClientRect().top,left:el.getBoundingClientRect().left})));
-   assert(competitivePositions.length===2&&
-     (viewport.width<700
-       ? competitivePositions[0].top<competitivePositions[1].top
-       : Math.abs(competitivePositions[0].top-competitivePositions[1].top)<2&&
-           competitivePositions[0].left<competitivePositions[1].left),
-     'All Competitive cards must be visible, stacked on phones and side-by-side on desktop: '+
-       JSON.stringify({viewport,competitivePositions}));
+   assert(rails[0].layout==='flex'&&rails[1].layout==='flex',
+     'Both Competitive and pinned Study stay swipe rails '+JSON.stringify(rails));
+   assert.equal(rails[0].dots,2,'Each Competitive subject still has its swipe dot');
+   assert.equal(rails[1].dots,5,'Pinned subjects keep swipe dots');
+   assert(rails[1].scrollable,'Pinned Study must be swipeable '+JSON.stringify(rails));
+   if(viewport.width<700)
+     assert(rails[0].scrollable,'Competitive subjects must also swipe on phone widths '+viewport.width);
+   const samePalette=await page.evaluate(()=>{
+     const cards=[...document.querySelectorAll('#home-competitive-list .home-competitive-card')];
+     const pinned=document.querySelector('#home-study-list .home-pinned-tile');
+     return{competitive:cards.map(c=>getComputedStyle(c).backgroundImage),
+       pinned:getComputedStyle(pinned).backgroundImage};
+   });
+   assert(samePalette.competitive.length===2 &&
+      samePalette.competitive[0]===samePalette.competitive[1] &&
+      samePalette.competitive[0].includes('rgb(23, 74, 171)'),
+     'Every Competitive card must retain the same deep blue before swipe: '+JSON.stringify(samePalette));
+   assert(samePalette.pinned.includes('rgb(86, 137, 210)') &&
+     samePalette.pinned!==samePalette.competitive[0],
+     'Second, lighter blue must belong to pinned Study: '+JSON.stringify(samePalette));
+   if(viewport.width<700){
+     await page.evaluate(()=>{const e=document.getElementById('home-competitive-list');
+       e.scrollLeft=e.scrollWidth;});
+     await page.waitForTimeout(190);
+     const after=await page.evaluate(()=>{
+       const rail=document.getElementById('home-competitive-list');
+       return{scrollLeft:rail.scrollLeft,
+         colors:[...rail.querySelectorAll('.home-competitive-card')].map(c=>getComputedStyle(c).backgroundImage),
+         selected:[...rail.nextElementSibling.children].findIndex(b=>b.getAttribute('aria-current')==='true')};
+     });
+     assert(after.scrollLeft>10&&after.selected===1,
+       'Competitive rail must swipe to second subject: '+JSON.stringify(after));
+     assert(after.colors.every(c=>c===samePalette.competitive[0]),
+       'Competitive color must NOT change on swipe: '+JSON.stringify(after.colors));
+   }
    await page.evaluate(()=>{const e=document.getElementById('home-study-list');e.scrollLeft=e.scrollWidth;});
    await page.waitForTimeout(190);
    const current=await page.evaluate(()=>[...document.querySelector('#home-study-list+.academy-rail-pagination').children].findIndex(el=>el.getAttribute('aria-current')==='true'));
@@ -207,7 +230,7 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
     console.log('PASS UX531 owner-bound Practice Continue: anonymous hidden, owner shown, cross-account blocked, existing route only.');
    }
    assert.equal(errors.length,0,'browser errors '+errors.join('; '));
-   console.log('PASS UX531 '+viewport.width+'px: '+Math.round(heights[0])+'px matched headers; smooth sapphire; 2/5 rails; 3 subject tabs');
+   console.log('PASS UX531 '+viewport.width+'px: '+Math.round(heights[0])+'px matched headers; smooth sapphire; 2/5 swipe rails; equal competitive colors; 3 subject tabs');
    await page.close();
   }
  }finally{await browser.close();await new Promise(r=>srv.close(r));}
