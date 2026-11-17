@@ -259,6 +259,26 @@ jobs:
           set -euo pipefail
           node --check scripts/p1p5-s4-active-diagnostic-coexistence.cjs
           node scripts/p1p5-s4-active-diagnostic-coexistence.cjs
+      - name: Math Stage3–6 source-function fail-closed RPC fallback (non-E2E)
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-s4-readiness-fail-closed-source.cjs
+          node scripts/p1p5-s4-readiness-fail-closed-source.cjs
+      - name: S4 owner rule — positive Stage3–6 objective-only, no Paper score, signed HTTP
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          node --check scripts/p1p5-s4-positive-objective-stage-signed.cjs
+          node scripts/p1p5-s4-positive-objective-stage-signed.cjs
+      - name: S4 preserve existing P2-06 Final Calibration exam operations (rollback)
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p2_06_final_calibration_exam_ops_matrix.sql
       - name: Clean disposable PostgREST
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
