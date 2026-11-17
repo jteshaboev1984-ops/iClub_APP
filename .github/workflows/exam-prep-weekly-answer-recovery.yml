@@ -34,7 +34,7 @@ jobs:
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
           # UX531 2026-11-16: explicit post-mobile review source re-pin. Original
           # guarded answer-ACK invariants below and signed browser tests remain mandatory.
-          test "$(git hash-object exam-prep/exam-prep-live.js)" = '4347a582a20ba1f609684c5681b4903f50047972'
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = 'ce110d3d28f8adb0240ca3652b46766e7febd89a'
           grep -Fq 'data-ep-result-item-order=' exam-prep/exam-prep-live.js
           grep -Fq 'data-ep-result-session-type=' exam-prep/exam-prep-live.js
           grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
