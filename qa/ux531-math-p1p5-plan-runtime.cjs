@@ -19,19 +19,23 @@ assert.match(paperSource,/data-ep-hybrid-s4-mentor-optional/,
 assert.match(paperSource,/function renderLoading\(scope = "default", component = ""\)/,
   "Exam Prep loading copy must describe the current destination");
 for(const expected of ['renderLoading("route")','renderLoading("component", component)',
-    'renderLoading("history", component)','renderLoading("plan", component)',
+    'renderLoading("history",component)','renderLoading("plan", component)',
     'renderLoading("paper", component)','renderLoading("answer")']){
   assert(paperSource.includes(expected),"Missing contextual loading message: "+expected);
 }
 assert(paperSource.includes('ru:["Маршрут","Тренировки","История"'),
   "Route and Practice must describe distinct functions");
 const homeStyle=fs.readFileSync(path.join(root,"visual/iclub-academy-ux531-b02b03.css"),"utf8");
-// Owner 2026-11-17: pinned Study stays recognisably BLUE, visibly lighter
-// than Competitive. Dark text on its lightest/strongest blue keeps contrast.
-assert(homeStyle.includes("linear-gradient(138deg,#75a5eb 0%,#9abff2 55%,#c1dafa 100%)"),
-  "Pinned Study needs a genuinely blue, noticeably lighter gradient");
-assert(homeStyle.includes("linear-gradient(137deg,#174aab 0%,#3071e1 100%)"),
-  "The original saturated Competitive gradient must remain untouched");
+// Final owner swatches supersede historical gradients. Both rails still swipe:
+// Competitive screenshot 1 is SOLID #174AAB, pinned Study screenshot 2 SOLID #3071E1.
+// White labels must remain readable on the brighter solid pinned fill.
+assert(homeStyle.includes("body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-card{\n  background:#174aab;"),
+  "All Competitive subject cards must match the exact solid #174AAB swatch");
+assert(homeStyle.includes("background:#3071e1;"),
+  "Pinned Study cards must match the exact solid #3071E1 swatch");
+assert(!homeStyle.includes("linear-gradient(137deg,#174aab")&&
+  !homeStyle.includes("linear-gradient(137deg,#5689d2"),
+  "Previous mixed-color swatches must not reappear as gradients");
 const luminance = hex => {
   const channels=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255)
     .map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);
@@ -39,12 +43,11 @@ const luminance = hex => {
 };
 const contrast = (a,b) => (Math.max(luminance(a),luminance(b))+.05)/
   (Math.min(luminance(a),luminance(b))+.05);
-assert(luminance("#75a5eb")>luminance("#3071e1"),
-  "Pinned blue must be lighter than even the light end of Competitive");
-for (const textColor of ["#102f59","#153866"])
-  assert(contrast(textColor,"#75a5eb")>=4.5,
-    "Pinned label/title/footer must remain readable on the deepest blue stop");
-assert(homeStyle.includes("box-shadow:0 8px 20px rgba(27,81,160,.11)"),
+assert(luminance("#3071e1")>luminance("#174aab"),
+  "Pinned swatch must be lighter than Competitive");
+assert(contrast("#ffffff","#3071e1")>=4.5,
+  "White pinned title, header and footer text must remain readable");
+assert(homeStyle.includes("box-shadow:0 8px 20px rgba(27,81,160,.14)"),
   "Pinned elevation must stay visibly below Competitive");
 
 const screens = path.join(root, "ux531-academy-all-screens");
@@ -86,6 +89,15 @@ const server = http.createServer((req, res) => {
 async function caseRun(browser, address, { language, width, mode }) {
   const page = await browser.newPage({ viewport: { width, height: 840 } });
   const unexpected = [], externalRequests = [];
+  // Disposable test data only: owner visual acceptance screenshots.
+  // Avoid production, real learner names, Supabase credentials, and answers.
+  const capture=async(name,eligible=true)=>{
+    if(!eligible)return;
+    fs.mkdirSync(screens,{recursive:true});
+    await page.screenshot({path:path.join(screens,name),fullPage:true});
+  };
+  const mobileRu=language==="ru"&&width===390;
+  const reviewViewport=mobileRu||(language==="uz"&&width===320)||(language==="en"&&width===1440);
   page.on("pageerror", error => unexpected.push(String(error)));
   await page.route("**/*", route => {
     if (new URL(route.request().url()).hostname === "127.0.0.1") return route.continue();
@@ -154,8 +166,24 @@ async function caseRun(browser, address, { language, width, mode }) {
       async claimPeriodReportsS3() { return {ok:true,data:{claimed:0}}; },
       async periodReportsS3() { return {ok:true,data:{reports:[]}}; },
       async hybridS4Catalog(component) { return {ok:true,data:{enabled:false,papers:[],component_code:component}}; },
-      async hybridS4History(component) {return {ok:true,data:{component_code:component,sessions:[]}};},
-      async recentResults(component) {return {ok:true,data:{component_code:component,results:[]}};},
+      async hybridS4History(component) {
+        return {ok:true,data:{component_code:component,sessions:Array.from(
+          {length:component==="P1"?12:0},(_,i)=>({
+            session_id:"synthetic-paper-"+(i+1),paper_key:"p1_full_paper_"+(i+1),
+            started_at:new Date(Date.UTC(2026,10,16-i)).toISOString(),
+            closed_at:new Date(Date.UTC(2026,10,16-i)).toISOString(),
+            closure_code:"completed",review_revealed:true
+          }))}};
+      },
+      async recentResults(component,limit) {
+        if(limit!==20)throw Error("Core history must request only the supported 20-row cap");
+        return {ok:true,data:{component_code:component,results:Array.from(
+          {length:component==="P1"?18:0},(_,i)=>({
+            session_id:"synthetic-core-"+(i+1),session_type:"learning",
+            finalized_at:new Date(Date.UTC(2026,10,16-i)).toISOString(),
+            machine_total:5,machine_correct:4,written_total:0,written_advanced:0
+          }))}};
+      },
       async startNextDiagnostic(component) {
         tracker.starts.push(component);
         throw Error("QA must not start any attempt");
@@ -188,8 +216,12 @@ async function caseRun(browser, address, { language, width, mode }) {
       getComputedStyle(document.querySelector("#exam-prep-host-root .ep-host-shell")).fontFamily);
     assert(/ui-sans-serif|system-ui/i.test(initialFont) && !/Times New Roman/i.test(initialFont),
       "Math Exam Prep must inherit the actual iClub sans-serif app typography: "+initialFont);
+    assert.equal(await page.locator("[data-ep-v58-plan-page]").count(),1,
+      "New learner should edit profile within My plan, not on a duplicate screen");
+    assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),1);
     const form = page.locator("[data-ep-live-profile-form]");
     await form.waitFor();
+    await capture("math-my-plan-first-setup-ru-390.png",mobileRu);
     assert.equal(await form.locator("input").count(),4,"Real plan form has four fields");
     await form.locator('[name="exam_series"]').fill("June 2027");
     await form.locator('[name="target_grade"]').fill("A");
@@ -218,6 +250,12 @@ async function caseRun(browser, address, { language, width, mode }) {
     const cardP5 = page.locator('[data-ep-live-open-component="P5"]');
     assert.equal(await cardP1.count(),1);
     assert.equal(await cardP5.count(),1);
+    assert.equal(await page.locator(".ep-live-component-open").count(),0,
+      "P1/P5 must not repeat the bottom Open text and arrow");
+    assert.equal(await page.locator(".ep-live-component-arrow").count(),2,
+      "P1 and P5 retain exactly one top-right arrow each");
+    assert.equal(await cardP1.getAttribute("type"),"button",
+      "Whole P1 card must remain a native tappable button");
     const p1 = await cardP1.innerText(), p5 = await cardP5.innerText();
     assert.match(p1,/Pure Mathematics 1/);
     assert.match(p5,/Probability & Statistics 1/);
@@ -245,6 +283,7 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.equal(overviewOrder.length,3,"Route, P1/P5 and My Plan must exist");
     assert(overviewOrder[0]<overviewOrder[1] && overviewOrder[1]<overviewOrder[2],
       "Your route, P1/P5, and My Plan must appear in that order: "+overviewOrder);
+    await capture("math-p1p5-route-"+language+"-"+width+".png",reviewViewport);
     // The exact approved v5.8 plan, learning, practice and history layout
     // must fit across all named widths without reducing touch targets.
     const verifyLayout = async (place, requireTabs=false) => {
@@ -279,16 +318,56 @@ async function caseRun(browser, address, { language, width, mode }) {
     // The v5.8 overview keeps the two subject components ABOVE configuration.
     assert.equal(await page.locator(".ep-v58-main-components .ep-live-component-entry").count(),2);
     assert.equal(await page.locator("[data-ep-v58-plan-summary]").count(),1);
+    const overviewPlan=await page.locator("[data-ep-v58-plan-summary]").innerText();
+    assert(!overviewPlan.includes("June 2027")&&!overviewPlan.includes("16")&&!overviewPlan.includes("P1:")&&
+      !overviewPlan.includes("P5:"),"Dashboard My plan link must not duplicate profile, dates or budget");
     assert.equal(await page.locator("[data-ep-study-schedule]").count(),0,
       "Dashboard must not expose an always-open schedule form");
     await page.locator("[data-ep-v58-plan-open]").click();
     await page.locator("[data-ep-v58-plan-page]").waitFor();
     await verifyLayout('My plan');
-    assert.equal(await page.locator("[data-ep-v58-setting]").count(),regression?3:2,
-      "Schedule, dates and available weekly choice must use native disclosures");
+    assert.equal(await page.locator(".ep-v58-section-head .ep-v58-back").count(),0,
+      "My plan must not repeat the global topbar Back above its title");
+    assert.equal(await page.locator("[data-ep-v58-plan-back]").count(),1,
+      "One optional bottom Back is kept for embedded views without a topbar");
+    await capture("math-my-plan-overview-"+language+"-"+width+".png",reviewViewport);
+    if(mobileRu) {
+      const examDates=page.locator('[data-ep-v58-setting="dates"]');
+      await examDates.locator('summary').click();
+      await capture("math-my-plan-p1p5-dates-ru-390.png");
+      await examDates.locator('summary').click();
+    }
+    assert.equal(await page.locator("[data-ep-v58-setting]").count(),2,
+      "Exactly two settings: exam dates, plus ONE schedule/weekly-allocation editor");
+    assert.equal(await page.locator(".ep-v58-profile-fact").count(),4,
+      "Exam series, target, total time, Maths time appear once in My plan summary");
+    assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
+      "Editing form cannot repeat saved values unless user chooses Edit");
+    assert.equal(await page.locator('[data-ep-v58-setting="dates"]').count(),1);
+    assert.equal(await page.locator("[data-ep-exam-date-component]").count(),2);
+    assert.equal(await page.locator('[data-ep-v58-setting="weekly"]').count(),regression?1:0);
+    assert.equal(await page.locator('[data-ep-v58-setting="schedule"]').count(),regression?0:1);
+    assert.equal(await page.locator("[data-ep-study-minutes]").count(),regression?0:1,
+      "Only the appropriate schedule editor may exist in the plan");
     if(regression){
       // A failed profile edit must not erase the form or the user's new values.
       await page.locator("[data-ep-v58-profile-edit]").click();
+      assert.equal(await page.locator("[data-ep-v58-profile-summary]").count(),0);
+      await page.evaluate(()=>window.iClubExamPrep.back());
+      assert.equal(await page.locator(".ep-v58-profile-fact").count(),4,
+        "Device back from Edit restores the profile summary, not P1/P5 route");
+      assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
+        "Device back must not leave a duplicate profile editor mounted");
+      await page.locator("[data-ep-v58-profile-edit]").click();
+      await capture("math-my-plan-profile-edit-ru-390.png");
+      assert.equal(await page.locator("[data-ep-v58-plan-page] [data-ep-live-profile-form]").count(),1,
+        "Saved-profile editing must remain inside the single My plan page");
+      assert.equal(await page.locator("[data-ep-v58-profile-summary]").count(),0,
+        "No saved-profile summary under the four identical editable values");
+      assert.equal(await page.locator("[data-ep-v58-setting]").count(),0,
+        "Hide unrelated dates and weekly controls while editing the four fields");
+      assert.equal(await page.locator("[data-ep-live-profile-form] input").count(),4,
+        "All original profile settings must exist exactly once in My plan editor");
       await page.locator('[name="target_grade"]').fill("A*");
       await page.evaluate(()=>{window.__UX531_MATH_TEST.failNextProfileSave=true;});
       await page.locator("[data-ep-live-save-profile]").click();
@@ -301,9 +380,15 @@ async function caseRun(browser, address, { language, width, mode }) {
       await page.locator("[data-ep-v58-plan-page]").waitFor();
       assert.match(await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").innerText(),/сохран/i,
         "Plan must show the server-save confirmation on the current screen");
+      assert.equal(await page.locator(".ep-v58-profile-fact").count(),4);
+      assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
+        "After save, show summary INSTEAD OF editable form");
+      assert.equal(await page.locator("[data-ep-study-schedule]").count(),0,
+        "S3 weekly choice controls both daily schedule and P1/P5 split; no legacy duplicate");
 
       const weekly=page.locator('[data-ep-v58-setting="weekly"]');
       await weekly.locator("summary").click();
+      await capture("math-my-plan-weekly-s3-ru-390.png");
       await weekly.locator('input[value="redistribute"]').check();
       await weekly.locator("[data-ep-s3-p1]").fill("110");
       await weekly.locator("[data-ep-s3-p5]").fill("90");
@@ -336,16 +421,29 @@ async function caseRun(browser, address, { language, width, mode }) {
         "Reopening My plan must load the accepted server allocation");
       assert.equal(await page.evaluate(()=>window.__UX531_MATH_TEST.weeklySaves.length),2);
     }
-    const settings=page.locator('[data-ep-v58-setting="schedule"]');
-    assert.equal(await settings.evaluate(el=>el.open),false,"schedule should be collapsed");
-    await settings.locator("summary").click();
-    assert.equal(await settings.evaluate(el=>el.open),true);
+    if(regression) {
+      assert.equal(await page.locator('[data-ep-v58-setting="schedule"]').count(),0,
+        "Never show duplicate day/minute schedule when S3 is present");
+      assert.equal(await page.locator('[data-ep-s3-newtime]').count(),1);
+    } else {
+      const settings=page.locator('[data-ep-v58-setting="schedule"]');
+      assert.equal(await settings.evaluate(el=>el.open),false,"schedule should be collapsed");
+      await settings.locator("summary").click();
+      await capture("math-my-plan-legacy-schedule-"+language+"-"+width+".png",reviewViewport);
+      assert.equal(await settings.evaluate(el=>el.open),true);
+      assert.equal(await page.locator("[data-ep-study-schedule] [data-ep-study-minutes]").count(),1);
+      assert.equal(await page.locator("[data-ep-study-schedule] [data-ep-study-days]").count(),1);
+      assert.equal(await page.locator("[data-ep-study-schedule] .ep-live-study-schedule-summary span.ep-live-meta").count(),0,
+        "Do not repeat Maths and total-time budget in schedule preview");
+    }
     await page.locator("[data-ep-v58-plan-back]").click();
     await page.locator(".ep-v58-main-components").waitFor();
-    await page.locator('[data-ep-live-open-component="P1"]').click();
+    await page.locator('[data-ep-live-open-component="P1"] .ep-live-component-copy').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
     await verifyLayout('P1 Route',true);
-    const routeLabel=language==="ru"?"Маршрут":language==="uz"?"Yo‘l":"Route";
+    assert.equal(await page.locator(".ep-route-header .ep-route-back").count(),0,
+      "P1 route must not repeat the topbar arrow within its hero");
+    const routeLabel=language==="ru"?"Маршрут":language==="uz"?"Tayyorgarlik":"Route";
     assert.equal(await page.locator('[data-ep-v58-tab="learning"]').innerText(),routeLabel,
       "Route tab describes the next step, progress, topics and corrections");
     assert.equal(await page.locator('[data-ep-v58-tab="learning"]').getAttribute("aria-current"),
@@ -353,13 +451,42 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.deepEqual((await page.evaluate(()=>window.__UX531_MATH_TEST.starts)),[]);
     await page.locator('[data-ep-v58-tab="training"]').click();
     await page.locator('[data-ep-v58-component-training="P1"]').waitFor();
+    assert.equal(await page.locator(".ep-v58-training .ep-v58-section-head .ep-v58-back").count(),0,
+      "Practice title needs no second top Back control");
     assert.equal(await page.locator(".ep-v58-training-description h3").count(),0,
       "Active Practice tab must not repeat the same heading");
     await verifyLayout('P1 Practice',true);
     await page.locator('[data-ep-v58-tab="history"]').click();
     await page.locator('[data-ep-v58-history="P1"]').waitFor();
+    assert.equal(await page.locator("[data-ep-history-back]").count(),1,
+      "History fallback Back lives at the bottom only");
     await verifyLayout('P1 History',true);
     assert.equal(await page.locator('[data-ep-history-legacy-section]').count(),1);
+    const coreRecent=page.locator('[data-ep-history-recent="core"] .ep-history-row');
+    const paperRecent=page.locator('[data-ep-history-recent="paper"] .ep-history-row');
+    assert.equal(await coreRecent.count(),3,"Only newest 3 Core rows should render immediately");
+    assert.equal(await paperRecent.count(),3,"Only newest 3 ungraded Paper rows should render immediately");
+    await capture("math-p1-history-three-recent-ru-390.png",mobileRu);
+    const coreOlder=page.locator('[data-ep-history-archive="core"]');
+    const paperOlder=page.locator('[data-ep-history-archive="paper"]');
+    assert.equal(await coreOlder.locator('.ep-history-row').count(),0,"Older Core hidden before disclosure");
+    await coreOlder.locator('summary').click();
+    await coreOlder.locator('.ep-history-row').nth(4).waitFor();
+    assert.equal(await coreOlder.locator('.ep-history-row').count(),5,"Reveal exactly 5 Core rows");
+    await capture("math-p1-history-older-five-ru-390.png",mobileRu);
+    await coreOlder.locator('[data-ep-history-more="core"]').click();
+    assert.equal(await coreOlder.locator('.ep-history-row').count(),10,"Second batch is exactly five");
+    await coreOlder.locator('[data-ep-history-more="core"]').click();
+    assert.equal(await coreOlder.locator('.ep-history-row').count(),15,"All 18 synthetic Core rows remain accessible");
+    assert.equal(await coreOlder.locator('[data-ep-history-more="core"]').isVisible(),false);
+    await paperOlder.locator('summary').click();
+    await paperOlder.locator('.ep-history-row').nth(4).waitFor();
+    assert.equal(await paperOlder.locator('.ep-history-row').count(),5,"Paper history reveals 5 without scoring");
+    await paperOlder.locator('[data-ep-history-more="paper"]').click();
+    assert.equal(await paperOlder.locator('.ep-history-row').count(),9,"All 12 Paper rows accessible");
+    assert.equal(await paperOlder.locator('[data-ep-history-more="paper"]').isVisible(),false);
+    assert.equal(await page.locator('[data-ep-history-delete]').count(),0,"No destructive history UX");
+
     await page.locator('[data-ep-v58-tab="learning"]').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
     await page.locator('[data-ep-component-back]').click();
