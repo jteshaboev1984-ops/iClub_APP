@@ -160,7 +160,7 @@ assert.equal(git("hash-object","exam-prep/exam-prep-live.js"),a[1],"Answer-ACK f
 assert.equal(git("hash-object","exam-prep/exam-prep-api.js"),p[1],"Profile API full blob changed without pin");
 const apiPlus=git("diff","--unified=0",RELEASE,head,"--","exam-prep/exam-prep-api.js")
  .split("\n").filter(x=>x.startsWith("+")&&!x.startsWith("+++"));
-assert(apiPlus.length===1&&apiPlus[0].includes("ux531-single-plan-no-duplicates-20261117-v4"),
+assert(apiPlus.length===1&&apiPlus[0].includes("ux531-native-back-single-arrow-uz-20261117-v5"),
  "API may change only display-client cache version");
 const livePlus=git("diff","--unified=0",RELEASE,head,"--","exam-prep/exam-prep-live.js")
  .split("\n").filter(x=>x.startsWith("+")&&!x.startsWith("+++"));
