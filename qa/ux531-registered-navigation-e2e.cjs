@@ -384,13 +384,14 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
       // Visually verify the real Academy OS CSS, not a mock style screenshot.
       if (nonschool) {
         await page.locator("#home-study-list > .home-pinned-tile").first().waitFor();
-        const study = await page.locator("#home-study-list > .home-pinned-tile").first().evaluate(el =>
-          getComputedStyle(el).backgroundImage);
-        assert.match(study,/linear-gradient/,"Pinned Study tiles must restore sapphire tint");
-        assert.match(study,/rgb\(86, 137, 210\)/,
-          "Pinned Study must start at the visibly lighter sapphire blue, not white");
-        assert.match(study,/rgb\(116, 162, 225\)/,
-          "Pinned Study must end at soft sapphire blue and keep the same card family");
+        const study = await page.locator("#home-study-list > .home-pinned-tile").first().evaluate(el => ({
+          color:getComputedStyle(el).backgroundColor,
+          image:getComputedStyle(el).backgroundImage
+        }));
+        assert.equal(study.color,"rgb(48, 113, 225)",
+          "Every pinned Study card must use owner's screenshot 2 solid #3071E1");
+        assert.equal(study.image,"none",
+          "Pinned Study background must be a flat color, not a gradient");
         const visual = await page.locator("#home-study-list > .home-pinned-tile").first().evaluate(el => {
           const card = el.getBoundingClientRect();
           const title = el.querySelector(".home-pinned-title");
@@ -420,10 +421,14 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
           "Non-school cannot inherit Competitive cards");
       } else {
         await page.locator("#home-competitive-list .home-competitive-card").first().waitFor();
-        const comp = await page.locator("#home-competitive-list .home-competitive-card").first().evaluate(el =>
-          getComputedStyle(el).backgroundImage);
-        assert.match(comp,/rgb\(23, 74, 171\)/,
-          "Approved v5.8 blue Competitive card must override legacy white CSS");
+        const comp = await page.locator("#home-competitive-list .home-competitive-card").first().evaluate(el => ({
+          color:getComputedStyle(el).backgroundColor,
+          image:getComputedStyle(el).backgroundImage
+        }));
+        assert.equal(comp.color,"rgb(23, 74, 171)",
+          "Competitive cards must use owner's screenshot 1 solid #174AAB");
+        assert.equal(comp.image,"none",
+          "Competitive swipes must not alternate colors through a gradient");
       }
       const writes = await page.evaluate(() => window.__B00_FAKE.writes);
       const userRows = writes.filter(w => w.table === "users" && w.action === "upsert");
