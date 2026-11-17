@@ -95,8 +95,13 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
    assert.equal(rails[0].dots,0,'Competitive must not have swipe dots');
    assert.equal(rails[1].dots,5,'5 pinned subjects/dots');
    const competitivePositions=await page.evaluate(()=>[...document.querySelectorAll('#home-competitive-list .home-competitive-card')].map(el=>({top:el.getBoundingClientRect().top,left:el.getBoundingClientRect().left})));
-   assert(competitivePositions.length===2&&competitivePositions[0].top<competitivePositions[1].top,
-     'On mobile both Competitive subjects must be visible as stacked cards, not swiped: '+JSON.stringify(competitivePositions));
+   assert(competitivePositions.length===2&&
+     (viewport.width<700
+       ? competitivePositions[0].top<competitivePositions[1].top
+       : Math.abs(competitivePositions[0].top-competitivePositions[1].top)<2&&
+           competitivePositions[0].left<competitivePositions[1].left),
+     'All Competitive cards must be visible, stacked on phones and side-by-side on desktop: '+
+       JSON.stringify({viewport,competitivePositions}));
    await page.evaluate(()=>{const e=document.getElementById('home-study-list');e.scrollLeft=e.scrollWidth;});
    await page.waitForTimeout(190);
    const current=await page.evaluate(()=>[...document.querySelector('#home-study-list+.academy-rail-pagination').children].findIndex(el=>el.getAttribute('aria-current')==='true'));
