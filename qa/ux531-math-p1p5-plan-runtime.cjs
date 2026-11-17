@@ -308,7 +308,7 @@ async function caseRun(browser, address, { language, width, mode }) {
     await verifyLayout('My plan');
     assert.equal(await page.locator("[data-ep-v58-setting]").count(),2,
       "Exactly two settings: exam dates, plus ONE schedule/weekly-allocation editor");
-    assert.equal(await page.locator("[data-ep-v58-profile-fact]").count(),4,
+    assert.equal(await page.locator(".ep-v58-profile-fact").count(),4,
       "Exam series, target, total time, Maths time appear once in My plan summary");
     assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
       "Editing form cannot repeat saved values unless user chooses Edit");
@@ -323,7 +323,7 @@ async function caseRun(browser, address, { language, width, mode }) {
       await page.locator("[data-ep-v58-profile-edit]").click();
       assert.equal(await page.locator("[data-ep-v58-profile-summary]").count(),0);
       await page.evaluate(()=>window.iClubExamPrep.back());
-      assert.equal(await page.locator("[data-ep-v58-profile-fact]").count(),4,
+      assert.equal(await page.locator(".ep-v58-profile-fact").count(),4,
         "Device back from Edit restores the profile summary, not P1/P5 route");
       assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
         "Device back must not leave a duplicate profile editor mounted");
@@ -348,7 +348,7 @@ async function caseRun(browser, address, { language, width, mode }) {
       await page.locator("[data-ep-v58-plan-page]").waitFor();
       assert.match(await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").innerText(),/сохран/i,
         "Plan must show the server-save confirmation on the current screen");
-      assert.equal(await page.locator("[data-ep-v58-profile-fact]").count(),4);
+      assert.equal(await page.locator(".ep-v58-profile-fact").count(),4);
       assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
         "After save, show summary INSTEAD OF editable form");
       assert.equal(await page.locator("[data-ep-study-schedule]").count(),0,
