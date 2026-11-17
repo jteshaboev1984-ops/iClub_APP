@@ -1,0 +1,37 @@
+name: Mathematics UX531 + Stage3-6 integrated source firewall (NO deployment)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/**'
+      - 'visual/**'
+      - 'qa/math-ux-stage36-integration-source-guard.cjs'
+      - 'scripts/p1p5-s4-*'
+      - 'supabase/migrations/*exam_prep_math_s4*.sql'
+      - '.github/workflows/math-ux-stage36-integration-source-gate.yml'
+permissions:
+  contents: read
+jobs:
+  approved-union-source:
+    if: github.head_ref == 'integration/math-ux531-stage36-20261117-v1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact SHA, reviewed union allowlist, academic no-grade and owner-only access
+        env:
+          MATH_UX_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MATH_UX_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          node --check qa/math-ux-stage36-integration-source-guard.cjs
+          node qa/math-ux-stage36-integration-source-guard.cjs
+          git diff --exit-code
+          echo 'PASS: test-only source review. No database, Vercel, production or learner writes.'
