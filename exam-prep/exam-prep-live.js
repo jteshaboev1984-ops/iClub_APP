@@ -2990,6 +2990,9 @@
       },
       back: () => {
         const root=rootEl();
+        if(root?.querySelector("[data-ep-v58-plan-page]") && state.profileEditorFromPlan && state.profile) {
+          state.profileEditorFromPlan=false;renderMyPlan();return true;
+        }
         if(root?.querySelector("[data-ep-v58-plan-page]") && !state.profile) { reset();return host.back(); }
         if(root?.querySelector("[data-ep-component-home],[data-ep-v58-component-training],[data-ep-v58-plan-page]")) { void renderDashboard(); return true; }
         if(root?.querySelector("[data-ep-v58-history]")) { const code=root.querySelector("[data-ep-v58-history]").dataset.epV58History;void openComponentHome(code);return true; }
