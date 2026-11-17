@@ -62,6 +62,16 @@ assert.equal(git("hash-object",".github/workflows/p2-08-progress-preservation.ym
 assert.equal(git("hash-object",".github/workflows/p2-43-protected-integrity-regression.yml"),"8a778c8aa821f99db58e520d3bb2844b86fa9af6","Reviewed CI fix file drift: .github/workflows/p2-43-protected-integrity-regression.yml");
 assert.equal(git("hash-object",".github/workflows/written-understanding-checks-v1.yml"),"fae72b32cf7f0c4947a84e19956622ee333b11f1","Reviewed CI fix file drift: .github/workflows/written-understanding-checks-v1.yml");
 assert.equal(git("hash-object","scripts/exam-prep-subject-isolation-regression.cjs"),"653bc8cef7469c0bdbb30226aec43ae7103108d1","Exact scoped offline subject-isolation DOM stub changed");
+assert.equal(git("hash-object",".github/workflows/ux531-previewless-release-firewall.yml"),
+  "500d3fa0ce61aea4f2f5e1508b922f5bb4d08b91",
+  "Dual UX-only/strict integration routing changed without reviewed source pin");
+const dualRoute=read(".github/workflows/ux531-previewless-release-firewall.yml");
+assert(dualRoute.includes('GITHUB_EVENT_NAME')&&dualRoute.includes('integration/math562-ci563-release-candidate-20261117')&&
+  dualRoute.includes('MATH_UX_BASE_SHA="$UX531_BASE_SHA"')&&
+  dualRoute.includes('node qa/math-ux-stage36-integration-source-guard.cjs')&&
+  dualRoute.includes('node qa/ux531-math-history-plan-source-guard.cjs')&&
+  dualRoute.includes('node qa/ux531-previewless-release-firewall.cjs'),
+  "Both existing UX-only and exact combined Math/UX/CI guard paths required");
 const changes=git("diff","--name-only",MAIN,head).split("\n").filter(Boolean).sort();
 assert.deepEqual(changes,expected.sort(),"Only pre-reviewed UX+Math+CI baseline repair union files allowed");
 const live=read("exam-prep/exam-prep-live.js");
