@@ -2731,6 +2731,12 @@
     const hybrid = typeof internal.api?.hybridS4StageStatus === "function"
       ? await internal.api.hybridS4StageStatus(component).catch(() => null)
       : null;
+    // A failed/malformed authoritative stage response must never fall back
+    // to the old comparable-Paper-score screen. Legacy view is permitted
+    // ONLY when the signed owner RPC explicitly reports enabled:false.
+    if (!hybrid?.ok || typeof hybrid.data?.enabled !== "boolean") {
+      renderError(); return;
+    }
     if (hybrid?.ok && hybrid.data?.enabled === true) {
       const calibration = typeof internal.api?.finalCalibration === "function"
         ? await internal.api.finalCalibration(component).catch(() => null)
