@@ -88,11 +88,15 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
    await page.waitForTimeout(120);
    const rails=await page.evaluate(()=>['home-competitive-list','home-study-list'].map(id=>{
     const e=document.getElementById(id),dots=e.nextElementSibling;
-    return {id,children:e.children.length,dots:dots.children.length,scrollable:e.scrollWidth>e.clientWidth};
+    return {id,children:e.children.length,dots:dots?.children.length||0,scrollable:e.scrollWidth>e.clientWidth,layout:getComputedStyle(e).display};
    }));
-   assert(rails[0].scrollable&&rails[1].scrollable,'native swipe should be available '+JSON.stringify(rails));
-   assert.equal(rails[0].dots,2,'2 competitive dots');
+   assert(!rails[0].scrollable&&rails[1].scrollable,'Competitive must stay static while pinned Study swipes '+JSON.stringify(rails));
+   assert.equal(rails[0].layout,'grid','Competitive cards must use the static grid');
+   assert.equal(rails[0].dots,0,'Competitive must not have swipe dots');
    assert.equal(rails[1].dots,5,'5 pinned subjects/dots');
+   const competitivePositions=await page.evaluate(()=>[...document.querySelectorAll('#home-competitive-list .home-competitive-card')].map(el=>({top:el.getBoundingClientRect().top,left:el.getBoundingClientRect().left})));
+   assert(competitivePositions.length===2&&competitivePositions[0].top<competitivePositions[1].top,
+     'On mobile both Competitive subjects must be visible as stacked cards, not swiped: '+JSON.stringify(competitivePositions));
    await page.evaluate(()=>{const e=document.getElementById('home-study-list');e.scrollLeft=e.scrollWidth;});
    await page.waitForTimeout(190);
    const current=await page.evaluate(()=>[...document.querySelector('#home-study-list+.academy-rail-pagination').children].findIndex(el=>el.getAttribute('aria-current')==='true'));
