@@ -29,8 +29,9 @@ const file="scripts/p1p5-s4-stage-on-finalized-evidence-fixture.sql";
 const fixture=fs.readFileSync(file,"utf8");
 const marker="-- P2-69 proven pg_temp helper definitions are inserted by the wrapper here.";
 assert(fixture.split(marker).length===2,"Fixture helper insertion point changed");
-const sql=fixture.replace(marker,helpers);
+const sql=fixture.replace(marker,()=>helpers);
 assert(sql.includes("BEGIN;")&&sql.includes("COMMIT;")&&
+  sql.includes("as "+String.fromCharCode(36,36))&&sql.includes("end;\n"+String.fromCharCode(36,36)+";")&&
   sql.includes("private.rebuild_exam_prep_state_v1(v_uid,null)")&&
   !/UPDATE private\.exam_prep_skill_states|INSERT INTO private\.exam_prep_skill_states|UPDATE private\.exam_prep_stage_states|INSERT INTO private\.exam_prep_stage_states/i.test(sql),
   "No direct academic projection injection accepted");
