@@ -34,10 +34,16 @@ assert.match(html,/<div class="subject-hub-head">/,'original hub heading');
 assert.match(css,/--academy-header-body:156px/,'shared header height');
 for(const s of ['#home-competitive-list','#home-study-list'])
  assert.match(css,new RegExp(s),'rail source selector '+s);
-assert.match(css,/#home-competitive-list\\{[\\s\\S]*?display:grid!important/,'Competitive must not scroll horizontally');
-assert.match(css,/#home-study-list\\{[\\s\\S]*?scroll-snap-type:x mandatory/,'Pinned Study keeps swipe');
-assert(!interactions.includes("{id:'home-competitive-list',child:"),'No Competitive swipe dots');
-assert(interactions.includes("{id:'home-study-list',child:"),'Pinned swipe dots preserved');
+assert.match(css,/#home-competitive-list,[\s\S]*?#home-study-list\{[\s\S]*?display:flex!important[\s\S]*?scroll-snap-type:x mandatory/,
+ 'Both subject families must keep horizontal swipe');
+assert(interactions.includes("{id:'home-competitive-list',child:'.home-competitive-card'}"),
+ 'Competitive swipe and dots preserved');
+assert(interactions.includes("{id:'home-study-list',child:'.home-pinned-tile'}"),
+ 'Pinned Study swipe and dots preserved');
+assert.match(css,/linear-gradient\(137deg,#174aab 0%,#3071e1 100%\)/,
+ 'Same deep-blue background applies to every Competitive card');
+assert.match(css,/linear-gradient\(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%\)/,
+ 'Lighter blue applies only to pinned Study');
 assert.match(interactions,/MutationObserver/,'live render support required');
 assert.match(interactions,/aria-selected/,'accessible hub tab state');
 assert.doesNotMatch(interactions.replace(/\/\*[\s\S]*?\*\//g,''),/\.from\(|localStorage\.|\.rpc\(|supabase|startPractice|reset_subject_progress/i,'visual script must not touch user data');
@@ -57,5 +63,5 @@ assert.match(i18n,/tab_study: "Fanlar"/);
 assert.match(i18n,/tab_study: "Subjects"/);
 assert.match(shell,/#view-ratings\.is-active/);
 assert.match(shell,/#view-profile\.is-active/);
-console.log('PASS: UX531 B01–B03 source parity, three languages, static Competitive and pinned Study rail workspace contract.');
+console.log('PASS: UX531 B01–B03 source parity, three languages, both swipe rails with uniform Competitive and lighter pinned Study palette.');
 console.log('NOTE: not a browser, auth, JWT/PostgREST, production or release test.');
