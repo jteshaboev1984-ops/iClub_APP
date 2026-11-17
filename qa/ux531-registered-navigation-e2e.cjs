@@ -387,9 +387,9 @@ async function launchCase(browser, baseUrl, { language, mode, width }) {
         const study = await page.locator("#home-study-list > .home-pinned-tile").first().evaluate(el =>
           getComputedStyle(el).backgroundImage);
         assert.match(study,/linear-gradient/,"Pinned Study tiles must restore sapphire tint");
-        assert.match(study,/rgb\(117, 165, 235\)/,
+        assert.match(study,/rgb\(86, 137, 210\)/,
           "Pinned Study must start at the visibly lighter sapphire blue, not white");
-        assert.match(study,/rgb\(193, 218, 250\)/,
+        assert.match(study,/rgb\(116, 162, 225\)/,
           "Pinned Study must end at soft sapphire blue and keep the same card family");
         const visual = await page.locator("#home-study-list > .home-pinned-tile").first().evaluate(el => {
           const card = el.getBoundingClientRect();
