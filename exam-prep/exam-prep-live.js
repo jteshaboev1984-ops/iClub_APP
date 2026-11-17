@@ -112,7 +112,7 @@
       yourResponse: "Sizning javobingiz", correctResponse: "To‘g‘ri javob", why: "Izoh", whatToReview: "Nimani takrorlash kerak",
       writtenDone: "Bajarildi", writtenNotAuto: "Bu yozma yechim avtomatik baholanmaydi.", understandingCheckLabel: "Tushunishni tekshirish",
       understandingNotMark: "Bu yozma yechim uchun baho emas.", recentWork: "Oxirgi ish", viewResults: "Natijalarni ko‘rish", history: "Mashg‘ulotlar tarixi",
-      noHistory: "Hali tugallangan ishlar yo‘q.", backToHistory: "Tarixga qaytish", backToComponent: "Mavzuga qaytish",
+      noHistory: "Hali tugallangan ishlar yo‘q.", backToHistory: "Tarixga qaytish", backToComponent: "Bo‘limga qaytish",
       writtenInfoTitle: "Yozma topshiriq", writtenInfoText: "Faqat yakuniy javobni emas, yechim yo‘lini ham ko‘rsating.",
       writtenCoreText: "Core’da bu yechim avtomatik baholanmaydi va to‘g‘ri javoblar foiziga kirmaydi. Yuborgandan keyin mezonlar bo‘yicha o‘zingizni tekshirishingiz mumkin.",
       writtenAiText: "Yozma yechim avtomatik to‘g‘ri/noto‘g‘ri foiziga kirmaydi. AI izohi mavjud bo‘lsa, u alohida ko‘rsatiladi va yakuniy baho hisoblanmaydi.",
@@ -821,7 +821,7 @@
       ? `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-plan="${component}"></button>${stage >= 2 ? `<button type="button" data-ep-live-timed="${component}"></button>` : ""}${stage >= 5 ? `<button type="button" data-ep-live-readiness="${component}"></button>` : ""}</div>`
       : `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-start="${component}"></button></div>`;
     // Component card opens the overview; the next-action button starts work.
-    return `<div class="ep-live-component-slot"><button class="ep-live-card ep-live-component-card ep-live-component-entry" type="button" data-ep-live-component="${component}" data-ep-component-entry="1" data-ep-live-open-component="${component}" aria-label="${esc(componentName)} · ${esc(home.openComponent)}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(home.skills)}</span></div><span class="ep-live-component-arrow" aria-hidden="true">›</span></div>${status}</button>${compat}</div>`;
+    return `<div class="ep-live-component-slot"><button class="ep-live-card ep-live-component-card ep-live-component-entry" type="button" data-ep-live-component="${component}" data-ep-component-entry="1" data-ep-live-open-component="${component}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(home.skills)}</span></div><span class="ep-live-component-arrow" aria-hidden="true">›</span></div>${status}</button>${compat}</div>`;
   }
 
   function trackerAreaForSkill(tracker, skillCode) {
@@ -1057,7 +1057,7 @@
           <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
         ${lastResultCard}
         <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
-        <section class="ep-component-links">${attention}${readiness}${materials}</section>${epBottomBack("data-ep-component-back",c.overview)}</section>`, {compact:true});
+        <section class="ep-component-links">${attention}${readiness}${materials}</section>${epBottomBack("data-ep-component-back",epNavCopy().back)}</section>`, {compact:true});
     state.notice = null;
     epSyncBackFallback(root);
     epBindTabs(component,root);
