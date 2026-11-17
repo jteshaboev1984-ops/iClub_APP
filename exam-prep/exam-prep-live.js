@@ -613,17 +613,24 @@
   }
   function renderError(message = null) { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-error" role="alert" aria-live="assertive">${esc(message || copy().error)}</div><button class="ep-live-btn secondary" type="button" data-ep-live-home>${esc(copy().overview)}</button>`); root?.querySelector('[data-ep-live-home]')?.addEventListener('click', renderDashboard); }
 
+  // The initial exam preferences and all later edits live INSIDE My plan.
+  // One owner-scoped form and one save path; no duplicate "Exam plan" screen.
+  function examProfileFormMarkup() {
+    const c=copy(),p=state.profile||{};
+    return '<div class="ep-live-card ep-v58-profile-editor" data-ep-v58-profile-editor>'+
+      '<strong>'+esc(epNavCopy().profile)+'</strong><p class="ep-live-meta">'+esc(c.profileText)+'</p>'+
+      '<form class="ep-live-form" data-ep-live-profile-form>'+
+      '<label class="ep-live-field"><span>'+esc(c.series)+'</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" value="'+esc(p.exam_series||"")+'" required aria-required="true"></label>'+
+      '<label class="ep-live-field"><span>'+esc(c.target)+'</span><input name="target_grade" maxlength="40" placeholder="A" value="'+esc(p.target_grade||"")+'" required aria-required="true"></label>'+
+      '<label class="ep-live-field"><span>'+esc(c.total)+'</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="'+esc(p.total_student_hours_available??"")+'" required aria-required="true"></label>'+
+      '<label class="ep-live-field"><span>'+esc(c.math)+'</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="'+esc(p.mathematics_hours_budget??"")+'" required aria-required="true"></label>'+
+      '<div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>'+esc(c.save)+'</button></div></form>'+
+      '<div data-ep-live-profile-error role="alert" aria-live="assertive"></div></div>';
+  }
+
   function renderProfile() {
-    clearTimer();
-    const root = rootEl(); if (!root) return; const c = copy(), edit=state.profileEditorFromPlan===true;
-    root.innerHTML = shell(`<div class="ep-live-card"><strong>${esc(edit?epNavCopy().profile:c.profileTitle)}</strong><div class="ep-live-meta">${esc(c.profileText)}</div><form class="ep-live-form" data-ep-live-profile-form>
-      <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" value="${esc(state.profile?.exam_series||"")}" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" placeholder="A" value="${esc(state.profile?.target_grade||"")}" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(state.profile?.total_student_hours_available??"")}" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(state.profile?.mathematics_hours_budget??"")}" required aria-required="true"></label>
-      <div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>${esc(state.busy ? c.saving : c.save)}</button></div></form><div data-ep-live-profile-error role="alert" aria-live="assertive"></div></div>`);
-    root.querySelector("[data-ep-live-profile-form]")?.addEventListener("submit", saveProfile);
-    if(edit){const back=document.createElement("button");back.type="button";back.className="ep-v58-back";back.textContent="← "+epNavCopy().plan;back.addEventListener("click",()=>{state.profileEditorFromPlan=false;renderMyPlan();});root.querySelector(".ep-live-card")?.prepend(back);}
+    state.profileEditorFromPlan=true;
+    renderMyPlan("profile");
   }
 
   async function saveProfile(event) {
@@ -1573,29 +1580,35 @@
   function renderMyPlan(expand=""){
     clearTimer();
     const root=rootEl();if(!root)return;
-    const t=epNavCopy(),c=copy(),p=state.profile||{};
+    const t=epNavCopy(),c=copy(),p=state.profile||{},hasProfile=Boolean(state.profile);
     const info=[p.exam_series,p.target_grade?c.targetShort+": "+p.target_grade:"",
       Number(p.total_student_hours_available)>0?c.totalShort+": "+formatWeeklyHours(p.total_student_hours_available):"",
       Number(p.mathematics_hours_budget)>0?c.mathShort+": "+formatWeeklyHours(p.mathematics_hours_budget):""].filter(Boolean);
     const section=(key,title,body)=>'<details class="ep-v58-setting" data-ep-v58-setting="'+key+'"'+
       (expand===key?' open':'')+'><summary>'+esc(title)+'</summary>'+body+'</details>';
-    root.innerHTML=shell('<section class="ep-v58-plan-page" data-ep-v58-plan-page>'+
-      (state.notice?'<div class="ep-live-notice" role="status" aria-live="polite">'+esc(state.notice)+'</div>':'')+
-      '<header class="ep-v58-section-head"><button type="button" class="ep-v58-back" data-ep-v58-plan-back>← '+esc(t.back)+'</button>'+
-      '<h2>'+esc(t.plan)+'</h2></header>'+
+    const editing=expand==="profile"||!hasProfile;
+    const summary=hasProfile?
       '<section class="ep-live-card ep-v58-profile-summary"><div><strong>'+esc(t.profile)+'</strong>'+
       '<p class="ep-live-meta">'+esc(info.join(" · "))+'</p></div>'+
-      '<button type="button" class="ep-live-btn secondary" data-ep-v58-profile-edit>'+esc(t.edit)+'</button></section>'+
-      section("schedule",t.schedule,studySchedulePanel())+
-      section("dates",t.dates,examDatesPanel())+
-      (state.weeklyChoice?section("weekly",t.weekly,weeklyS3Panel()):"")+
+      '<button type="button" class="ep-live-btn secondary" data-ep-v58-profile-edit>'+esc(t.edit)+'</button></section>':"";
+    root.innerHTML=shell('<section class="ep-v58-plan-page" data-ep-v58-plan-page>'+
+      (state.notice?'<div class="ep-live-notice" role="status" aria-live="polite">'+esc(state.notice)+'</div>':'')+
+      '<header class="ep-v58-section-head">'+
+      (hasProfile?'<button type="button" class="ep-v58-back" data-ep-v58-plan-back>← '+esc(t.back)+'</button>':'')+
+      '<h2>'+esc(t.plan)+'</h2></header>'+summary+
+      (editing?examProfileFormMarkup():"")+
+      (hasProfile?
+        section("schedule",t.schedule,studySchedulePanel())+
+        section("dates",t.dates,examDatesPanel())+
+        (state.weeklyChoice?section("weekly",t.weekly,weeklyS3Panel()):""):"")+
       '</section>',{compact:true});
     state.notice=null;
     root.querySelector("[data-ep-v58-plan-back]")?.addEventListener("click",()=>void renderDashboard());
     root.querySelector("[data-ep-v58-profile-edit]")?.addEventListener("click",()=>{
-      state.profileEditorFromPlan=true;renderProfile();
+      state.profileEditorFromPlan=true;renderMyPlan("profile");
     });
-    bindStudySchedule();bindExamDatePanel();bindWeeklyS3();
+    root.querySelector("[data-ep-live-profile-form]")?.addEventListener("submit",saveProfile);
+    if(hasProfile){bindStudySchedule();bindExamDatePanel();bindWeeklyS3();}
   }
 
   async function renderDashboard() {
@@ -2917,6 +2930,7 @@
       },
       back: () => {
         const root=rootEl();
+        if(root?.querySelector("[data-ep-v58-plan-page]") && !state.profile) { reset();return host.back(); }
         if(root?.querySelector("[data-ep-component-home],[data-ep-v58-component-training],[data-ep-v58-plan-page]")) { void renderDashboard(); return true; }
         if(root?.querySelector("[data-ep-v58-history]")) { const code=root.querySelector("[data-ep-v58-history]").dataset.epV58History;void openComponentHome(code);return true; }
         if(state.profileEditorFromPlan){state.profileEditorFromPlan=false;renderMyPlan();return true;}
