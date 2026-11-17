@@ -42,6 +42,7 @@ const expected=[
  "qa/ux531-math-history-plan-source-guard.cjs",
  "qa/ux531-math-p1p5-plan-runtime.cjs",
  "qa/ux531-registered-navigation-e2e.cjs",
+ "scripts/exam-prep-subject-isolation-regression.cjs",
  "scripts/p1p5-s3-chromium-mobile-three-language.cjs",
  "scripts/p1p5-s4-positive-objective-stage-signed.cjs",
  "scripts/p1p5-s4-readiness-fail-closed-source.cjs",
@@ -60,6 +61,7 @@ assert.equal(git("hash-object",".github/workflows/p2-03-past-paper-companion.yml
 assert.equal(git("hash-object",".github/workflows/p2-08-progress-preservation.yml"),"95e6a3f61a31a28f2cc4d20df076d47fccdd0bc5","Reviewed CI fix file drift: .github/workflows/p2-08-progress-preservation.yml");
 assert.equal(git("hash-object",".github/workflows/p2-43-protected-integrity-regression.yml"),"8a778c8aa821f99db58e520d3bb2844b86fa9af6","Reviewed CI fix file drift: .github/workflows/p2-43-protected-integrity-regression.yml");
 assert.equal(git("hash-object",".github/workflows/written-understanding-checks-v1.yml"),"fae72b32cf7f0c4947a84e19956622ee333b11f1","Reviewed CI fix file drift: .github/workflows/written-understanding-checks-v1.yml");
+assert.equal(git("hash-object","scripts/exam-prep-subject-isolation-regression.cjs"),"653bc8cef7469c0bdbb30226aec43ae7103108d1","Exact scoped offline subject-isolation DOM stub changed");
 const changes=git("diff","--name-only",MAIN,head).split("\n").filter(Boolean).sort();
 assert.deepEqual(changes,expected.sort(),"Only pre-reviewed UX+Math+CI baseline repair union files allowed");
 const live=read("exam-prep/exam-prep-live.js");
