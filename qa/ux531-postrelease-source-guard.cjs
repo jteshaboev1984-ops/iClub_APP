@@ -17,6 +17,7 @@ assert.equal(git('rev-parse','HEAD'),head,'The exact reviewed commit must be che
 assert.equal(git('merge-base',base,head),base,'Release SHA must be an ancestor');
 const changed=git('diff','--name-only',base,head).split('\n').filter(Boolean);
 const allowed=new Set([
+  '.github/scripts/visual_v3_home_study_regression.js',
   '.github/workflows/exam-prep-weekly-answer-recovery.yml',
   '.github/workflows/exam-prep-weekly-profile-recovery.yml',
   '.github/workflows/ux531-previewless-release-firewall.yml',
@@ -90,6 +91,18 @@ assert(navAdded.length===4 && navRemoved.length===2 &&
   navAdded.join(' ').includes('193, 218, 250') &&
   navRemoved.join(' ').includes('242, 247, 255'),
   'Only the architect-updated blue pinned-card browser colour checks may change');
+// The older visual-v3 home test must follow the owner's new approved color
+// contract. Check its diff exactly; no UI routing, state or auth test softened.
+const visualDiff=git('diff','--unified=0',base,head,'--','.github/scripts/visual_v3_home_study_regression.js');
+const visualAdded=visualDiff.split('\n').filter(x=>x.startsWith('+')&&!x.startsWith('+++'));
+const visualRemoved=visualDiff.split('\n').filter(x=>x.startsWith('-')&&!x.startsWith('---'));
+assert(visualAdded.length===3 && visualRemoved.length===3 &&
+  visualAdded.join(' ').includes("state.tileRadius === '20px'") &&
+  visualAdded.join(' ').includes('117, 165, 235') &&
+  visualAdded.join(' ').includes('193, 218, 250') &&
+  visualRemoved.join(' ').includes("state.tileRadius === '19px'") &&
+  visualRemoved.join(' ').includes('242, 247, 255'),
+  'Only obsolete radius/gradient expectations may change in the legacy home regression');
 assert(!changed.some(p=>/^supabase\/|^api\/|^security\/|^content\/|^package|^vercel\.json|\.env/.test(p)),
   'No backend, question, dependency or secret edits permitted');
 console.log('UX531 postrelease exact-SHA SOURCE-ONLY GUARD: PASS');
