@@ -17,9 +17,9 @@ async function main(){
  const browser=await chromium.launch({headless:true});
  try {
  for(const [language,title,width] of [
-   ['ru','Недельный план',390],
-   ['uz','Haftalik reja',375],
-   ['en','Weekly plan',1280]
+   ['ru','Недельный режим и отчёты',390],
+   ['uz','Haftalik jadval va hisobotlar',375],
+   ['en','Weekly schedule and reports',1280]
  ]) {
   const page=await browser.newPage({viewport:{width,height:850},timezoneId:'Asia/Tashkent'});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
