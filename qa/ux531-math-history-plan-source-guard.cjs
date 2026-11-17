@@ -37,10 +37,10 @@ const read=p=>fs.readFileSync(p,"utf8");
 const live=read("exam-prep/exam-prep-live.js"),api=read("exam-prep/exam-prep-api.js");
 const index=read("index.html"),style=read("visual/iclub-academy-ux531-b02b03.css");
 const css=read("visual/iclub-academy-ux531-b04b08.css");
-assert(style.includes("linear-gradient(137deg,#174aab 0%,#3071e1 100%)"),
- "Competitive palette must remain unchanged");
-assert(style.includes("linear-gradient(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%)"),
- "Pinned Study must be saturated blue but lighter than Competitive");
+assert(style.includes("body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-card{\n  background:#174aab;"),
+ "Competitive cards must use exactly screenshot 1 solid #174AAB");
+assert(style.includes("background:#3071e1;"),
+ "Pinned Study must use screenshot 2 solid #3071E1");
 for(const token of [
  "function renderMyPlan(expand=","function examProfileFormMarkup()",
  'renderMyPlan("profile")',"data-ep-v58-profile-editor",
@@ -128,9 +128,11 @@ assert(railJs.includes("{id:'home-competitive-list',child:'.home-competitive-car
 assert(railBrowser.includes("Competitive color must NOT change on swipe")&&
  academyParity.includes("Both subject families must keep horizontal swipe"),
  "Browser and source assertions must protect swipe AND uniform Competitive color");
-assert(style.includes("linear-gradient(137deg,#174aab 0%,#3071e1 100%)")&&
- style.includes("linear-gradient(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%)"),
- "Deep blue stays Competitive, second lighter blue stays pinned");
+assert(style.includes("background:#174aab;")&&
+ style.includes("background:#3071e1;")&&
+ !style.includes("linear-gradient(137deg,#174aab")&&
+ !style.includes("linear-gradient(137deg,#5689d2"),
+ "Exact solid sample 1 stays Competitive; exact solid sample 2 stays pinned");
 const componentCards=live.slice(live.indexOf("function componentCard("),live.indexOf("function trackerAreaForSkill("));
 assert(componentCards.includes("data-ep-live-open-component=")&&
  componentCards.includes("ep-live-component-arrow")&&
