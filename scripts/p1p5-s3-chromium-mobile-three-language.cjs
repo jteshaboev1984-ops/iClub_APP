@@ -18,7 +18,7 @@ async function main(){
  try {
  for(const [language,title,width] of [
    ['ru','Недельный режим и отчёты',390],
-   ['uz','Haftalik jadval va hisobotlar',375],
+   ['uz','Haftalik reja va hisobotlar',375],
    ['en','Weekly schedule and reports',1280]
  ]) {
   const page=await browser.newPage({viewport:{width,height:850},timezoneId:'Asia/Tashkent'});
