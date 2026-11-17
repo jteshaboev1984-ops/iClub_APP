@@ -1224,14 +1224,11 @@
     const row = state.studySchedule || {};
     const minutes = Number(row.study_minutes_per_day || 30);
     const days = Number(row.study_days_per_week || 5);
-    const math = Number(state.profile?.mathematics_hours_budget || 0);
-    const total = Number(state.profile?.total_student_hours_available || 0);
     const options = Array.from({ length: 7 }, (_, i) => {
       const n = i + 1;
       return `<option value="${n}" ${n === days ? "selected" : ""}>${n}</option>`;
     }).join("");
     return `<section class="ep-live-card ep-live-study-schedule" data-ep-study-schedule>
-      <div class="ep-live-head"><strong>${esc(c.title)}</strong></div>
       <p class="ep-live-meta">${esc(c.hint)}</p>
       <div class="ep-live-study-schedule-fields">
         <label class="ep-live-field"><span>${esc(c.minutes)}</span><input class="ep-live-input" type="number" step="5" min="15" max="240" value="${esc(minutes)}" data-ep-study-minutes></label>
@@ -1239,7 +1236,6 @@
       </div>
       <div class="ep-live-study-schedule-summary">
         <strong data-ep-study-preview>${esc(c.preview)}: ${esc(formatWeeklyDurationFromMinutes(minutes*days))}</strong>
-        <span class="ep-live-meta">${esc(c.current)}: ${esc(formatWeeklyHours(math))} · ${esc(c.total)}: ${esc(formatWeeklyHours(total))}</span>
         <small class="ep-live-meta">${esc(c.rounding)}</small>
       </div>
       <button class="ep-live-btn secondary" type="button" data-ep-study-save>${esc(c.save)}</button>
@@ -1360,12 +1356,10 @@
         status = `${c.remaining}: ${Math.max(0, Number(item.days_remaining || 0))} · ${c.initial}: ${Math.max(0, Number(item.days_diagnostic_to_exam || 0))}`;
       } else if (examStart) status = c.before;
       const proof = examStart ? (item.official_timetable_verified === true ? c.verified : c.centre) : "";
-      const dateText = examStart ? new Intl.DateTimeFormat(dateLocale(), { timeZone: "Asia/Tashkent", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(examStart)) : "";
       const value = examCentreLocalValue(examStart);
       return `<div class="ep-live-exam-date-row" data-ep-exam-date-component="${component}">
         <div class="ep-live-exam-date-summary">
           <strong>${esc(component === "P1" ? c.labelP1 : c.labelP5)}</strong>
-          <span class="ep-live-meta">${esc(dateText || c.missing)}</span>
           <span class="ep-live-meta">${esc(status)}</span>
           ${proof ? `<span class="ep-live-meta">${esc(proof)}</span>` : ""}
         </div>
@@ -1377,7 +1371,6 @@
     }).join("");
     const completed = ["P1", "P5"].some(code => data[code]?.status === "horizon_ready");
     return `<section class="ep-live-card ep-live-exam-date-panel" data-ep-exam-date-panel>
-      <div class="ep-live-head"><strong>${esc(c.title)}</strong></div>
       <p class="ep-live-meta">${esc(c.hint)}</p>
       <div class="ep-live-exam-date-grid">${parts}</div>
       ${completed ? `<p class="ep-live-meta">${esc(c.forecast)}</p>` : ""}
@@ -1508,8 +1501,9 @@
         cell("P1",p1) + cell("P5",p5) + "</div></div>";
     }).join("");
     return "<section class='ep-live-s3' data-ep-s3>" +
-      "<h3>" + esc(c.title) + "</h3><p>" + esc(c.intro) + "</p>" +
-      "<div class='ep-live-s3-budget'>" + esc(c.total) + ": <strong>" + budget + " min</strong></div>" +
+      "<p>" + esc(c.intro) + "</p>" +
+      (Math.abs(Number(state.profile?.mathematics_hours_budget || 0)*60-budget)>0.5 ?
+        "<div class='ep-live-s3-budget'>" + esc(c.total) + ": <strong>" + budget + " min</strong></div>": "") +
       "<div class='ep-live-s3-options'>" +
       "<label><input type='radio' name='ep-s3-choice' value='keep'" + checked("keep") + "> " + esc(c.keep) + "</label>" +
       "<label><input type='radio' name='ep-s3-choice' value='redistribute'" + checked("redistribute") + "> " + esc(c.split) + "</label>" +
@@ -1614,56 +1608,67 @@
   // Academy OS v5.8: exam preferences belong to a single compact plan.
   function epNavCopy(){
     const labels={
-      ru:["Мой план","К P1 и P5","Изменить профиль","Экзаменационный профиль","Режим занятий","Даты экзаменов","Недельный план и отчёты","Настроить","Не указана"],
-      uz:["Mening rejam","P1 va P5 ga","Profilni o‘zgartirish","Imtihon profili","O‘qish jadvali","Imtihon sanalari","Haftalik reja va hisobotlar","Sozlash","Kiritilmagan"],
-      en:["My plan","Back to P1 and P5","Edit profile","Exam profile","Study schedule","Exam dates","Weekly plan and reports","Manage","Not entered"]
+      ru:["Мой план","К P1 и P5","Изменить профиль","Экзаменационный профиль","Режим занятий","Даты экзаменов","Недельный режим и отчёты","Настроить","Не указана","Цель, даты и время подготовки — в одном месте"],
+      uz:["Mening rejam","P1 va P5 ga","Profilni o‘zgartirish","Imtihon profili","O‘qish jadvali","Imtihon sanalari","Haftalik jadval va hisobotlar","Sozlash","Kiritilmagan","Maqsad, imtihon sanalari va o‘qish vaqti — bir joyda"],
+      en:["My plan","Back to P1 and P5","Edit profile","Exam profile","Study schedule","Exam dates","Weekly schedule and reports","Manage","Not entered","Goals, exam dates and study time in one place"]
     };
-    const names=["plan","back","edit","profile","schedule","dates","weekly","manage","none"];
+    const names=["plan","back","edit","profile","schedule","dates","weekly","manage","none","hint"];
     return Object.fromEntries(names.map((name,i)=>[name,(labels[state.language]||labels.ru)[i]]));
   }
+  // Route is a link to the one plan, not a second copy of its saved fields.
   function epPlanSummary(){
-    const c=copy(),t=epNavCopy(),p=state.profile||{};
-    const info=[p.exam_series,p.target_grade?c.targetShort+": "+p.target_grade:"",
-      Number(p.mathematics_hours_budget)>0?c.mathShort+": "+formatWeeklyHours(p.mathematics_hours_budget):""].filter(Boolean);
-    const dates=["P1","P5"].map(code=>code+": "+(state.personalHorizon?.[code]?.exam_start_at?
-      formatDateTime(state.personalHorizon[code].exam_start_at):t.none));
+    const t=epNavCopy();
     return '<section class="ep-live-card ep-v58-plan-summary" data-ep-v58-plan-summary>'+
-      '<div><strong>'+esc(t.plan)+'</strong><p class="ep-live-meta">'+esc(info.join(" · "))+
-      '</p><small class="ep-live-meta">'+esc(dates.join(" · "))+'</small></div>'+
+      '<div><strong>'+esc(t.plan)+'</strong><p class="ep-live-meta">'+esc(t.hint)+'</p></div>'+
       '<button type="button" class="ep-live-btn secondary" data-ep-v58-plan-open>'+esc(t.manage)+'</button></section>';
   }
   function renderMyPlan(expand=""){
     clearTimer();
     const root=rootEl();if(!root)return;
     const t=epNavCopy(),c=copy(),p=state.profile||{},hasProfile=Boolean(state.profile);
-    const info=[p.exam_series,p.target_grade?c.targetShort+": "+p.target_grade:"",
-      Number(p.total_student_hours_available)>0?c.totalShort+": "+formatWeeklyHours(p.total_student_hours_available):"",
-      Number(p.mathematics_hours_budget)>0?c.mathShort+": "+formatWeeklyHours(p.mathematics_hours_budget):""].filter(Boolean);
+    const editing=expand==="profile"||!hasProfile;
+    state.profileEditorFromPlan=editing;
+    const facts=hasProfile?[
+      [c.series,p.exam_series||t.none],
+      [c.target,p.target_grade||t.none],
+      [c.total,Number(p.total_student_hours_available)>0?formatWeeklyHours(p.total_student_hours_available):t.none],
+      [c.math,Number(p.mathematics_hours_budget)>0?formatWeeklyHours(p.mathematics_hours_budget):t.none]
+    ]:[];
+    const factItems=facts.map(([label,value])=>
+      '<div class="ep-v58-profile-fact"><small>'+esc(label)+'</small><strong>'+esc(value)+'</strong></div>').join("");
     const section=(key,title,body)=>'<details class="ep-v58-setting" data-ep-v58-setting="'+key+'"'+
       (expand===key?' open':'')+'><summary>'+esc(title)+'</summary>'+body+'</details>';
-    const editing=expand==="profile"||!hasProfile;
-    const summary=hasProfile?
-      '<section class="ep-live-card ep-v58-profile-summary"><div><strong>'+esc(t.profile)+'</strong>'+
-      '<p class="ep-live-meta">'+esc(info.join(" · "))+'</p></div>'+
+    // A weekly S3 choice already owns the editable daily minutes, study days
+    // AND P1/P5 distribution; don't show the older schedule editor beside it.
+    // Accounts without the S3 contract retain the existing schedule save path.
+    const hasWeekly=state.weeklyChoice?.contract_version==="voluntary_weekly_choice_s3_v1";
+    const profileSummary=hasProfile&&!editing?
+      '<section class="ep-live-card ep-v58-profile-summary" data-ep-v58-profile-summary>'+
+      '<div><strong>'+esc(t.profile)+'</strong>'+
+      '<div class="ep-v58-profile-facts">'+factItems+'</div></div>'+
       '<button type="button" class="ep-live-btn secondary" data-ep-v58-profile-edit>'+esc(t.edit)+'</button></section>':"";
     root.innerHTML=shell('<section class="ep-v58-plan-page" data-ep-v58-plan-page>'+
       (state.notice?'<div class="ep-live-notice" role="status" aria-live="polite">'+esc(state.notice)+'</div>':'')+
       '<header class="ep-v58-section-head">'+
-      (hasProfile?'<button type="button" class="ep-v58-back" data-ep-v58-plan-back>← '+esc(t.back)+'</button>':'')+
-      '<h2>'+esc(t.plan)+'</h2></header>'+summary+
+      (hasProfile?'<button type="button" class="ep-v58-back" data-ep-v58-plan-back>← '+
+        esc(editing?t.plan:t.back)+'</button>':"")+
+      '<h2>'+esc(t.plan)+'</h2></header>'+profileSummary+
       (editing?examProfileFormMarkup():"")+
-      (hasProfile?
-        section("schedule",t.schedule,studySchedulePanel())+
+      (hasProfile&&!editing?
         section("dates",t.dates,examDatesPanel())+
-        (state.weeklyChoice?section("weekly",t.weekly,weeklyS3Panel()):""):"")+
+        (hasWeekly?section("weekly",t.weekly,weeklyS3Panel()):
+          section("schedule",t.schedule,studySchedulePanel())):"")+
       '</section>',{compact:true});
     state.notice=null;
-    root.querySelector("[data-ep-v58-plan-back]")?.addEventListener("click",()=>void renderDashboard());
-    root.querySelector("[data-ep-v58-profile-edit]")?.addEventListener("click",()=>{
-      state.profileEditorFromPlan=true;renderMyPlan("profile");
+    root.querySelector("[data-ep-v58-plan-back]")?.addEventListener("click",()=>{
+      if(editing&&hasProfile)renderMyPlan();else void renderDashboard();
     });
+    root.querySelector("[data-ep-v58-profile-edit]")?.addEventListener("click",()=>renderMyPlan("profile"));
     root.querySelector("[data-ep-live-profile-form]")?.addEventListener("submit",saveProfile);
-    if(hasProfile){bindStudySchedule();bindExamDatePanel();bindWeeklyS3();}
+    if(hasProfile&&!editing){
+      bindExamDatePanel();
+      if(hasWeekly)bindWeeklyS3();else bindStudySchedule();
+    }
   }
 
   async function renderDashboard() {
