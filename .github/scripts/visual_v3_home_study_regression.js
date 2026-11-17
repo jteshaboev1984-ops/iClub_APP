@@ -155,7 +155,7 @@ async function activateStudy(page) {
   assert(state.titleInset >= 10 && state.titleInset <= 24, 'Pinned title inset drift');
   assert(state.topLabelCount === 1 && state.bottomCount === 1,
     'Approved v5.8 pinned card requires top label + bottom action');
-  assert(state.tileColor.includes('rgb(117, 165, 235)') && state.tileColor.includes('rgb(193, 218, 250)'),
+  assert(state.tileColor.includes('rgb(86, 137, 210)') && state.tileColor.includes('rgb(116, 162, 225)'),
     `Owner-approved Study palette must stay visibly lighter than Competitive, not near-white: ${state.tileColor}`);
   assert(state.width <= state.innerWidth, `Home mobile overflow: ${JSON.stringify(state)}`);
 
