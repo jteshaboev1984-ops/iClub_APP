@@ -121,6 +121,14 @@ const server=http.createServer((req,res)=>{
       '<div class="home-competitive-meta"><span class="home-competitive-module">Тур · пример</span></div>'+
       '<div class="home-progress"><div class="home-progress-fill" style="width:34%"></div></div></div>'+
       '<button class="btn primary home-competitive-btn" type="button">Открыть предмет</button></div>';
+     document.getElementById('home-competitive-list').insertAdjacentHTML('beforeend',
+      '<div class="home-competitive-card" data-subject="chemistry">'+
+      '<div class="home-competitive-badge">ПРИМЕР · ТУР</div>'+
+      '<div class="home-competitive-body"><div class="home-competitive-title">Chemistry</div>'+
+      '<div class="home-competitive-note">Соревновательный предмет</div>'+
+      '<div class="home-competitive-meta"><span class="home-competitive-module">Тур · пример</span></div>'+
+      '<div class="home-progress"><div class="home-progress-fill" style="width:18%"></div></div></div>'+
+      '<button class="btn primary home-competitive-btn" type="button">Открыть предмет</button></div>');
      const pinned=title=>'<button class="home-pinned-tile" type="button">'+
       '<span class="home-pinned-top">ЗАКРЕПЛЁН · ПРИМЕР</span>'+
       '<strong class="home-pinned-title">'+title+'</strong>'+
@@ -128,13 +136,21 @@ const server=http.createServer((req,res)=>{
       '<span class="home-pinned-open">Открыть ›</span></span></button>';
      document.getElementById('home-study-list').innerHTML=pinned('Biology')+pinned('Computer Science');
     });
-    const palettes=await page.evaluate(()=>({
-      competition:getComputedStyle(document.querySelector('#view-home .home-competitive-card')).backgroundImage,
-      pinned:getComputedStyle(document.querySelector('#view-home .home-pinned-tile')).backgroundImage
-    }));
-    assert(palettes.competition.includes('rgb(23, 74, 171)')&&
-      palettes.pinned.includes('rgb(86, 137, 210)'),
-      'Owner visual acceptance must show real Competition and lighter Study CSS '+JSON.stringify(palettes));
+    const palettes=await page.evaluate(()=>{
+      const comp=document.getElementById('home-competitive-list');
+      return{
+        competitive:[...comp.querySelectorAll('.home-competitive-card')].map(card=>getComputedStyle(card).backgroundImage),
+        competitiveScrollable:comp.scrollWidth>comp.clientWidth+1,
+        competitiveLayout:getComputedStyle(comp).display,
+        pinned:getComputedStyle(document.querySelector('#view-home .home-pinned-tile')).backgroundImage
+      };
+    });
+    assert(palettes.competitive.length===2&&palettes.competitive.every(x=>x===palettes.competitive[0]),
+      'Both fixed Competitive cards must have exactly the same deep-blue palette');
+    assert(palettes.competitive[0].includes('rgb(23, 74, 171)')&&
+      palettes.pinned.includes('rgb(86, 137, 210)')&&
+      !palettes.competitiveScrollable&&palettes.competitiveLayout==='grid',
+      'Only pinned Study uses lighter blue and swipe; Competitive static '+JSON.stringify(palettes));
     const folder=path.join(root,'ux531-academy-all-screens');
     fs.mkdirSync(folder,{recursive:true});
     await page.screenshot({path:path.join(folder,'home-competitive-and-pinned-blue-'+width+'.png'),fullPage:true});
