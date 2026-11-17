@@ -148,8 +148,8 @@ for(const text of ["Ko‘zlangan baho","Imtihon sessiyasi","Haftalik reja va his
  assert(live.includes(text),"Natural Uzbek UI terminology missing: "+text);
 assert(!live.includes("data-ep-history-delete"),"History deletion not approved");
 assert(css.includes(".ep-history-archive")&&css.includes(".ep-history-more[hidden]"),"History CSS missing");
-for(const v of ["ux531-static-competitive-pinned-blue-v4","ux531-math-single-back-v5",
- "ux531-math-single-back-loader-v5","ux531-pinned-only-rail-2"])assert(index.includes(v),"Cache bust missing "+v);
+for(const v of ["ux531-dual-swipe-single-competitive-blue-v5","ux531-math-single-back-v5",
+ "ux531-math-single-back-loader-v5","ux531-dual-subject-rail-3"])assert(index.includes(v),"Cache bust missing "+v);
 assert(api.includes("ux531-native-back-single-arrow-uz-20261117-v5"),"Dynamic UI cache identity missing");
 const a=read(".github/workflows/exam-prep-weekly-answer-recovery.yml")
  .match(/git hash-object exam-prep\/exam-prep-live\.js\)" = '([a-f0-9]{40})'/);
