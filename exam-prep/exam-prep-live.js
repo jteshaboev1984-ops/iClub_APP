@@ -504,72 +504,125 @@
     return match ? "Paper "+match[1] : (value || "Paper");
   }
 
-  async function openRecentResults(component) {
-    if (typeof internal.api?.recentResults!=="function" &&
-        typeof internal.api?.hybridS4History!=="function") {
+  function historyDisclosureCopy(){
+    return ({
+      ru:{older:"Более ранние записи",more:"Показать ещё",partial:"Здесь показаны только последние записи. Предыдущие результаты не удалены."},
+      uz:{older:"Oldingi yozuvlar",more:"Yana ko‘rsatish",partial:"Bu yerda faqat so‘nggi yozuvlar ko‘rsatiladi. Eski natijalar o‘chirilmagan."},
+      en:{older:"Earlier entries",more:"Show more",partial:"Only the latest entries are shown here. Older results have not been deleted."}
+    })[state.language] || {older:"Более ранние записи",more:"Показать ещё",partial:"Здесь показаны только последние записи."};
+  }
+  // The present signed Core RPC returns at most 20 records and the S4 Paper
+  // RPC 30. Progressive disclosure here is UI-only, NOT server pagination.
+  function historyListMarkup(kind,rows,makeRow,serverCap,empty){
+    if(!rows.length)return '<div class="ep-history-list">'+empty+'</div>';
+    const c=historyDisclosureCopy(),older=Math.max(0,rows.length-3);
+    return '<div class="ep-history-list" data-ep-history-recent="'+kind+'">'+
+      rows.slice(0,3).map(makeRow).join("")+'</div>'+
+      (older?'<details class="ep-history-archive" data-ep-history-archive="'+kind+'">'+
+        '<summary>'+esc(c.older)+' ('+older+')</summary>'+
+        '<div class="ep-history-list" data-ep-history-older="'+kind+'"></div>'+
+        '<button type="button" class="ep-live-btn secondary ep-history-more" data-ep-history-more="'+kind+'" hidden></button>'+
+        '</details>':"")+
+      (rows.length>=serverCap?'<p class="ep-live-meta ep-history-cap-note">'+esc(c.partial)+'</p>':"");
+  }
+  function bindHistoryDisclosure(screen,kind,rows,makeRow){
+    const details=screen.querySelector('[data-ep-history-archive="'+kind+'"]');
+    if(!details)return;
+    const holder=details.querySelector('[data-ep-history-older="'+kind+'"]');
+    const button=details.querySelector('[data-ep-history-more="'+kind+'"]');
+    let shown=0;
+    const append=()=>{
+      const older=rows.length-3;
+      if(shown>=older)return;
+      const batch=rows.slice(3+shown,3+shown+5);
+      holder.insertAdjacentHTML("beforeend",batch.map(makeRow).join(""));
+      shown+=batch.length;
+      const left=older-shown;
+      button.hidden=left===0;
+      if(left)button.textContent=historyDisclosureCopy().more+" ("+Math.min(5,left)+")";
+    };
+    details.addEventListener("toggle",()=>{if(details.open&&!shown)append();});
+    button.addEventListener("click",append);
+  }
+
+  async function openRecentResults(component){
+    if(typeof internal.api?.recentResults!=="function"&&
+        typeof internal.api?.hybridS4History!=="function"){
       await openComponentHome(component);return;
     }
-    renderLoading("history", component);
+    renderLoading("history",component);
     const paperRequest=typeof internal.api?.hybridS4History==="function"
-      ? internal.api.hybridS4History(component).catch(()=>null)
-      : Promise.resolve(null);
+      ?internal.api.hybridS4History(component).catch(()=>null):Promise.resolve(null);
     let result=null;
-    try {
-      if (typeof internal.api?.recentResults==="function") {
-        result=await internal.api.recentResults(component,10);
-        if (result?.ok && typeof internal.api.recentResultsWritten==="function") {
+    try{
+      if(typeof internal.api?.recentResults==="function"){
+        result=await internal.api.recentResults(component,20);
+        if(result?.ok&&typeof internal.api.recentResultsWritten==="function"){
           const enhanced=await boundWrittenCall(
-            ()=>internal.api.recentResultsWritten(component,10),12000);
-          if (enhanced?.ok && enhanced.data?.component_code===component) result=enhanced;
+            ()=>internal.api.recentResultsWritten(component,20),12000);
+          if(enhanced?.ok&&enhanced.data?.component_code===component)result=enhanced;
         }
       }
-    } catch (_) {}
+    }catch(_){}
     const paperResult=await paperRequest;
-    const hasPaperHistory=paperResult?.ok &&
-      paperResult.data?.component_code===component &&
-      Array.isArray(paperResult.data?.sessions);
-    if (!result?.ok && !hasPaperHistory) { renderError(); return; }
-    const root=rootEl(); if (!root) return; const c=copy(),s4=hybridS4Copy();
-    const rows=result?.ok && Array.isArray(result.data?.results) ? result.data.results : [];
-    const body=rows.length ? rows.map(row => {
-      const machineTotal=Number(row.machine_total || 0), machineCorrect=Number(row.machine_correct || 0);
-      const written=Number(row.written_total || 0), advanced=Number(row.written_advanced||0);
-      const score=machineTotal>0 ? `${machineCorrect} / ${machineTotal}` : "—";
-      const writtenBit=advanced>0 ? " · "+esc(writtenCopy().steps)+": "+advanced : (written>0 ? " · "+esc(c.writtenPart)+": "+written : "");
-      return `<button class="ep-history-row" type="button" data-ep-history-session="${esc(row.session_id)}"><span><strong>${esc(resultTypeLabel(row.session_type))}</strong><small>${esc(formatDateTime(row.finalized_at))}</small></span><span>${esc(c.autoChecked)}: ${score}${writtenBit}<b aria-hidden="true">›</b></span></button>`;
-    }).join("") : `<div class="ep-live-notice">${esc(result?.ok?c.noHistory:c.error)}</div>`;
-
+    const hasPaperHistory=paperResult?.ok&&
+      paperResult.data?.component_code===component&&Array.isArray(paperResult.data?.sessions);
+    if(!result?.ok&&!hasPaperHistory){renderError();return;}
+    const root=rootEl();if(!root)return;
+    const c=copy(),s4=hybridS4Copy();
+    const rows=result?.ok&&Array.isArray(result.data?.results)?result.data.results:[];
+    const makeCoreRow=row=>{
+      const machineTotal=Number(row.machine_total||0),machineCorrect=Number(row.machine_correct||0);
+      const written=Number(row.written_total||0),advanced=Number(row.written_advanced||0);
+      const score=machineTotal>0?machineCorrect+" / "+machineTotal:"—";
+      const writtenBit=advanced>0?" · "+esc(writtenCopy().steps)+": "+advanced:
+        (written>0?" · "+esc(c.writtenPart)+": "+written:"");
+      return '<button class="ep-history-row" type="button" data-ep-history-session="'+esc(row.session_id)+'">'+
+        '<span><strong>'+esc(resultTypeLabel(row.session_type))+'</strong><small>'+
+        esc(formatDateTime(row.finalized_at))+'</small></span><span>'+esc(c.autoChecked)+': '+
+        score+writtenBit+'<b aria-hidden="true">›</b></span></button>';
+    };
     const paperRows=hasPaperHistory?paperResult.data.sessions:[];
-    const showPaper=paperRows.length>0 || state.hybridS4Available?.[component]===true;
-    const paperList=paperRows.slice(0,30).map(row=>{
-      const isClosed=Boolean(row.closed_at);
-      const action=row.review_revealed===true?s4.reviewAgain:
-        (isClosed?s4.review:s4.repeat);
-      return `<button class="ep-history-row" type="button" data-ep-history-paper-session="${esc(row.session_id)}"><span><strong>${esc(paperHistoryLabel(row.paper_key))}</strong><small>${esc(formatDateTime(row.started_at))} · ${esc(hybridS4MarkState(row.closure_code))}</small></span><span>${esc(action)}<b aria-hidden="true">›</b></span></button>`;
-    }).join("");
-    const paperSection=showPaper?`<section class="ep-live-card" data-ep-history-paper-section>
-      <div class="ep-live-head"><strong>${esc(s4.title)}</strong></div>
-      <p class="ep-live-meta">${esc(s4.noScore)}</p>
-      <div class="ep-history-list">${paperList||`<div class="ep-live-notice">${esc(hasPaperHistory?s4.emptyHistory:s4.failed)}</div>`}</div>
-    </section>`:"";
+    const makePaperRow=row=>{
+      const closed=Boolean(row.closed_at);
+      const action=row.review_revealed===true?s4.reviewAgain:(closed?s4.review:s4.repeat);
+      return '<button class="ep-history-row" type="button" data-ep-history-paper-session="'+esc(row.session_id)+'">'+
+        '<span><strong>'+esc(paperHistoryLabel(row.paper_key))+'</strong><small>'+
+        esc(formatDateTime(row.started_at))+' · '+esc(hybridS4MarkState(row.closure_code))+
+        '</small></span><span>'+esc(action)+'<b aria-hidden="true">›</b></span></button>';
+    };
+    const showPaper=paperRows.length>0||state.hybridS4Available?.[component]===true;
+    const paperSection=showPaper?
+      '<section class="ep-live-card" data-ep-history-paper-section>'+
+      '<div class="ep-live-head"><strong>'+esc(s4.title)+'</strong></div>'+
+      '<p class="ep-live-meta">'+esc(s4.noScore)+'</p>'+
+      historyListMarkup("paper",paperRows,makePaperRow,30,
+        '<div class="ep-live-notice">'+esc(hasPaperHistory?s4.emptyHistory:s4.failed)+'</div>')+
+      '</section>':"";
     const legacyHeading=state.language==="uz"?"O‘quv topshiriqlari va kirish tekshiruvlari":
       (state.language==="en"?"Learning tasks and entry checks":"Учебные задания и диагностики");
-    root.innerHTML=shell(`<section class="ep-history-screen" data-ep-v58-history="${esc(component)}">
-      <div class="ep-live-card"><div class="ep-live-head"><strong>${esc(component)} · ${esc(c.history)}</strong>
-      <button class="ep-live-btn secondary" type="button" data-ep-history-back>${esc(c.backToComponent)}</button></div></div>
-      ${epComponentTabs(component,"history")}
-      ${paperSection}
-      <section class="ep-live-card" data-ep-history-legacy-section>
-        <div class="ep-live-head"><strong>${esc(legacyHeading)}</strong></div>
-        <div class="ep-history-list">${body}</div>
-      </section>
-    </section>`,{compact:true});
+    root.innerHTML=shell('<section class="ep-history-screen" data-ep-v58-history="'+esc(component)+'">'+
+      '<div class="ep-live-card"><div class="ep-live-head"><strong>'+esc(component)+' · '+esc(c.history)+'</strong>'+
+      '<button class="ep-live-btn secondary" type="button" data-ep-history-back>'+esc(c.backToComponent)+'</button></div></div>'+
+      epComponentTabs(component,"history")+paperSection+
+      '<section class="ep-live-card" data-ep-history-legacy-section>'+
+      '<div class="ep-live-head"><strong>'+esc(legacyHeading)+'</strong></div>'+
+      historyListMarkup("core",rows,makeCoreRow,20,
+        '<div class="ep-live-notice">'+esc(result?.ok?c.noHistory:c.error)+'</div>')+
+      '</section></section>',{compact:true});
     root.querySelector('[data-ep-history-back]')?.addEventListener('click',()=>openComponentHome(component));
     epBindTabs(component,root);
-    root.querySelectorAll('[data-ep-history-session]').forEach(button=>button.addEventListener('click',()=>openSessionResult(button.dataset.epHistorySession,component,"history")));
-    root.querySelectorAll('[data-ep-history-paper-session]').forEach(button=>button.addEventListener('click',()=>{
-      state.paperOrigin="history";void hybridS4Load(button.dataset.epHistoryPaperSession,component);
-    }));
+    const screen=root.querySelector("[data-ep-v58-history]");
+    bindHistoryDisclosure(screen,"core",rows,makeCoreRow);
+    bindHistoryDisclosure(screen,"paper",paperRows,makePaperRow);
+    // One delegated listener covers rows revealed later, preserves original
+    // owner-scoped review handlers, never creates attempts or changes marks.
+    screen.addEventListener("click",event=>{
+      const core=event.target.closest("[data-ep-history-session]");
+      if(core){void openSessionResult(core.dataset.epHistorySession,component,"history");return;}
+      const paper=event.target.closest("[data-ep-history-paper-session]");
+      if(paper){state.paperOrigin="history";void hybridS4Load(paper.dataset.epHistoryPaperSession,component);}
+    });
   }
 
   function shell(body, options = {}) {
