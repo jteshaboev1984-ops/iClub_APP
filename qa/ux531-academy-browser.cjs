@@ -82,17 +82,68 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
     }
     for(let i=0;i<5;i++){
      const card=document.createElement('button');card.className='home-pinned-tile';
-     card.innerHTML='<span class="home-pinned-title">Subject '+i+'</span>';pinned.append(card);
+     card.innerHTML='<span class="home-pinned-top">STUDY SUBJECT</span>'+
+       '<strong class="home-pinned-title">Subject '+i+'</strong>'+
+       '<span class="home-pinned-bottom"><span class="home-pinned-meta">'+
+       '<span class="js-home-pin-count">18/70</span> Practice</span>'+
+       '<span class="home-pinned-open">Open ›</span></span>';
+     pinned.append(card);
     }
    });
    await page.waitForTimeout(120);
    const rails=await page.evaluate(()=>['home-competitive-list','home-study-list'].map(id=>{
     const e=document.getElementById(id),dots=e.nextElementSibling;
-    return {id,children:e.children.length,dots:dots.children.length,scrollable:e.scrollWidth>e.clientWidth};
+    return {id,children:e.children.length,dots:dots?.children.length||0,scrollable:e.scrollWidth>e.clientWidth,layout:getComputedStyle(e).display};
    }));
-   assert(rails[0].scrollable&&rails[1].scrollable,'native swipe should be available '+JSON.stringify(rails));
-   assert.equal(rails[0].dots,2,'2 competitive dots');
-   assert.equal(rails[1].dots,5,'5 pinned subjects/dots');
+   assert(rails[0].layout==='flex'&&rails[1].layout==='flex',
+     'Both Competitive and pinned Study stay swipe rails '+JSON.stringify(rails));
+   assert.equal(rails[0].dots,2,'Each Competitive subject still has its swipe dot');
+   assert.equal(rails[1].dots,5,'Pinned subjects keep swipe dots');
+   assert(rails[1].scrollable,'Pinned Study must be swipeable '+JSON.stringify(rails));
+   if(viewport.width<700)
+     assert(rails[0].scrollable,'Competitive subjects must also swipe on phone widths '+viewport.width);
+   const samePalette=await page.evaluate(()=>{
+     const competition=[...document.querySelectorAll('#home-competitive-list .home-competitive-card')];
+     const study=[...document.querySelectorAll('#home-study-list .home-pinned-tile')];
+     return {
+       competitive:competition.map(c=>getComputedStyle(c).backgroundColor),
+       competitiveImages:competition.map(c=>getComputedStyle(c).backgroundImage),
+       pinned:study.map(c=>getComputedStyle(c).backgroundColor),
+       pinnedImages:study.map(c=>getComputedStyle(c).backgroundImage)
+     };
+   });
+   assert(samePalette.competitive.length===2 &&
+      samePalette.competitive.every(c=>c==='rgb(23, 74, 171)') &&
+      samePalette.competitiveImages.every(c=>c==='none'),
+     'Every Competitive card must match exact solid owner sample #174AAB: '+JSON.stringify(samePalette));
+   assert(samePalette.pinned.length===5 &&
+      samePalette.pinned.every(c=>c==='rgb(48, 113, 225)') &&
+      samePalette.pinnedImages.every(c=>c==='none'),
+     'Every pinned Study card must match exact solid owner sample #3071E1: '+JSON.stringify(samePalette));
+   const pinnedText=await page.evaluate(()=>[...document.querySelectorAll('#home-study-list .home-pinned-tile')].map(card=>({
+     colors:[card,...card.querySelectorAll('*')].map(el=>getComputedStyle(el).color),
+     opens:[...card.querySelectorAll('.home-pinned-open')].map(el=>el.textContent.trim())
+   })));
+   assert(pinnedText.length===5&&pinnedText.every(card=>card.colors.length>=7&&
+       card.colors.every(color=>color==='rgb(255, 255, 255)')&&
+       card.opens.every(text=>text.includes('›'))),
+     'All pinned title, top label, progress counter, footer, and Open arrow must be WHITE: '+
+       JSON.stringify(pinnedText));
+   if(viewport.width<700){
+     await page.evaluate(()=>{const e=document.getElementById('home-competitive-list');
+       e.scrollLeft=e.scrollWidth;});
+     await page.waitForTimeout(190);
+     const after=await page.evaluate(()=>{
+       const rail=document.getElementById('home-competitive-list');
+       return{scrollLeft:rail.scrollLeft,
+         colors:[...rail.querySelectorAll('.home-competitive-card')].map(c=>getComputedStyle(c).backgroundColor),
+         selected:[...rail.nextElementSibling.children].findIndex(b=>b.getAttribute('aria-current')==='true')};
+     });
+     assert(after.scrollLeft>10&&after.selected===1,
+       'Competitive rail must swipe to second subject: '+JSON.stringify(after));
+     assert(after.colors.every(c=>c==='rgb(23, 74, 171)'),
+       'Competitive color must NOT change on swipe: '+JSON.stringify(after.colors));
+   }
    await page.evaluate(()=>{const e=document.getElementById('home-study-list');e.scrollLeft=e.scrollWidth;});
    await page.waitForTimeout(190);
    const current=await page.evaluate(()=>[...document.querySelector('#home-study-list+.academy-rail-pagination').children].findIndex(el=>el.getAttribute('aria-current')==='true'));
@@ -198,7 +249,7 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
     console.log('PASS UX531 owner-bound Practice Continue: anonymous hidden, owner shown, cross-account blocked, existing route only.');
    }
    assert.equal(errors.length,0,'browser errors '+errors.join('; '));
-   console.log('PASS UX531 '+viewport.width+'px: '+Math.round(heights[0])+'px matched headers; smooth sapphire; 2/5 rails; 3 subject tabs');
+   console.log('PASS UX531 '+viewport.width+'px: '+Math.round(heights[0])+'px matched headers; smooth sapphire; 2/5 swipe rails; equal competitive colors; 3 subject tabs');
    await page.close();
   }
  }finally{await browser.close();await new Promise(r=>srv.close(r));}

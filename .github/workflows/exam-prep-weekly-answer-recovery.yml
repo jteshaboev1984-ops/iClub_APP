@@ -32,9 +32,10 @@ jobs:
         run: |
           set -euo pipefail
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
-          # UX531 2026-11-16: explicit post-mobile review source re-pin. Original
-          # guarded answer-ACK invariants below and signed browser tests remain mandatory.
-          test "$(git hash-object exam-prep/exam-prep-live.js)" = '07284532974eca96a0193f58079b091546a65919'
+          # Math/UX integration 2026-11-17: reviewed academic Stage3-6 readout
+          # layered onto owner-accepted UX #558. Preserve strict whole-file
+          # answer ACK/retry invariants and existing signed Chromium tests.
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = '665a71e3624059fb5da89caac9ea772adc1d25b2'
           grep -Fq 'data-ep-result-item-order=' exam-prep/exam-prep-live.js
           grep -Fq 'data-ep-result-session-type=' exam-prep/exam-prep-live.js
           grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
