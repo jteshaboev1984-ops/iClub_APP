@@ -222,6 +222,9 @@ async function main(){
     "operational access is not examiner/Cambridge grade readiness");
   assert.equal(p5Blocked.available,false,
     "P5 cannot use P1's objective Stage6 or marks");
+  // Real signed Stage-ON Chromium, across RU/UZ/EN. This is run BEFORE P5
+  // receives its own L3 evidence, so one component stays correctly blocked.
+  await require("./p1p5-s4-stage-on-browser-actual-ui.cjs")(jwt);
   // The P5 remedy is objectively reaching L3, not a Paper score or mentor.
   sql("UPDATE private.exam_prep_skill_states SET objective_level=3 "+
     "WHERE user_id='"+C+"' AND component_code='P5'");
