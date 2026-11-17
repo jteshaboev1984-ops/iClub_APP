@@ -83,8 +83,8 @@ for(const line of runtimeDiff.split('\n')){
 // The registered-navigation browser QA changes ONLY its 2-line pinned-colour
 // expectation; no learner flow/auth/request checks may be softened in this PR.
 const navDiff=git('diff','--unified=0',base,head,'--','qa/ux531-registered-navigation-e2e.cjs');
-const navAdded=navDiff.split('\\n').filter(x=>x.startsWith('+')&&!x.startsWith('+++'));
-const navRemoved=navDiff.split('\\n').filter(x=>x.startsWith('-')&&!x.startsWith('---'));
+const navAdded=navDiff.split('\n').filter(x=>x.startsWith('+')&&!x.startsWith('+++'));
+const navRemoved=navDiff.split('\n').filter(x=>x.startsWith('-')&&!x.startsWith('---'));
 assert(navAdded.length===4 && navRemoved.length===2 &&
   navAdded.join(' ').includes('117, 165, 235') &&
   navAdded.join(' ').includes('193, 218, 250') &&
