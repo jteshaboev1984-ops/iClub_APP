@@ -28,7 +28,7 @@ assert(paperSource.includes('ru:["Маршрут","Тренировки","Ист
 const homeStyle=fs.readFileSync(path.join(root,"visual/iclub-academy-ux531-b02b03.css"),"utf8");
 // Owner 2026-11-17: pinned Study stays recognisably BLUE, visibly lighter
 // than Competitive. Dark text on its lightest/strongest blue keeps contrast.
-assert(homeStyle.includes("linear-gradient(138deg,#75a5eb 0%,#9abff2 55%,#c1dafa 100%)"),
+assert(homeStyle.includes("linear-gradient(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%)"),
   "Pinned Study needs a genuinely blue, noticeably lighter gradient");
 assert(homeStyle.includes("linear-gradient(137deg,#174aab 0%,#3071e1 100%)"),
   "The original saturated Competitive gradient must remain untouched");
@@ -39,12 +39,12 @@ const luminance = hex => {
 };
 const contrast = (a,b) => (Math.max(luminance(a),luminance(b))+.05)/
   (Math.min(luminance(a),luminance(b))+.05);
-assert(luminance("#75a5eb")>luminance("#3071e1"),
+assert(luminance("#5689d2")>luminance("#3071e1"),
   "Pinned blue must be lighter than even the light end of Competitive");
-for (const textColor of ["#102f59","#153866"])
-  assert(contrast(textColor,"#75a5eb")>=4.5,
+for (const textColor of ["#071e3d"])
+  assert(contrast(textColor,"#5689d2")>=4.5,
     "Pinned label/title/footer must remain readable on the deepest blue stop");
-assert(homeStyle.includes("box-shadow:0 8px 20px rgba(27,81,160,.11)"),
+assert(homeStyle.includes("box-shadow:0 8px 20px rgba(27,81,160,.14)"),
   "Pinned elevation must stay visibly below Competitive");
 
 const screens = path.join(root, "ux531-academy-all-screens");
