@@ -8,6 +8,16 @@
 3. History must show three latest records and expandable older entries in sets of five; decide what happens after 70–90 records and whether deletion/automatic cleaning is appropriate.
 4. Inspect other iClub screens for the same long-list problem.
 
+## 2026-11-17 exact-head CI reconciliation after runner backlog
+
+GitHub Actions eventually completed prior exact HEAD `bf8e71f61c21dfa5c716077e02dce294f5566cb1`: **53 SUCCESS / 8 FAILURE**. This was NOT a release-ready result. Real failure logs proved **three** workflow failures within this UX change's acceptance suites:
+- Academy B01–B08 synthetic Chromium `qa/ux531-math-p1p5-plan-runtime.cjs:311` used `[data-ep-v58-profile-fact]` although the displayed four fields actually use the CSS class `.ep-v58-profile-fact`. This was a test-selector mismatch: `0 !== 4`, not four hidden fields.
+- Both signed PG17/PostgREST/S3 browser workflows failed `scripts/p1p5-s3-chromium-mobile-three-language.cjs:66` because the test expected the old *duplicate* “Недельный план” heading inside `[data-ep-s3]`. The new single heading is in the parent disclosure `<summary>`, translated as “Недельный режим и отчёты” / “Haftalik jadval va hisobotlar” / “Weekly schedule and reports”. This was a stale test expectation; signed PostgreSQL/JWT authorization jobs and S3 server negative tests passed.
+- Corrected the S3 browser test to verify the one translated parent `summary` heading and **actual persisted** `chosen_math_minutes=175`, P1=100, P5=75 via signed owner `get_my_exam_prep_weekly_choice_s3_safe_v1` RPC read-back, rather than reprinting the weekly total on screen solely for the test. This preserves the owner's no-duplication request and strengthens persistence evidence.
+- The other five failures were unchanged P2-03, Written Understanding, P2-43, P2-08 old Playwright 1.55 unsupported `ubuntu26.04-x64`; P0-14 old `connect-src 'none'` source grep on unchanged preview. These are separately owned legacy CI issues, not a reason to change Math UX/auth or assert complete green.
+- Changes confined to synthetic UI test, signed S3 browser assertion test, strict source guard/allowlist and this documentation within Draft #558. No production source modification from the failed run, no SQL migrations, student mutations, or weakening of signed contracts.
+- **Current revised head after these changes: `19a6b895cb409a5125171ff761ca831e0adbf8a3`**. Exact-head tests were queued at the documentation checkpoint; prior 53/8 must not be reported as current SHA evidence. No merge or release.
+
 ## 2026-11-17 follow-up: strict no-duplicate setting audit
 
 Owner explicitly rejected duplicated values/actions even if both were relocated into “My plan”. The previous Draft #558 still showed the saved four-field summary **alongside its populated edit form**, offered separate daily-minute/day-of-week editors in legacy Study Schedule AND S3 Weekly Choice for one learner, duplicated total/Math hours in Schedule, and showed P1/P5 times both as summary text and as prefilled datetime inputs.
