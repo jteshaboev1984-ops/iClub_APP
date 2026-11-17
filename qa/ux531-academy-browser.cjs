@@ -82,7 +82,12 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
     }
     for(let i=0;i<5;i++){
      const card=document.createElement('button');card.className='home-pinned-tile';
-     card.innerHTML='<span class="home-pinned-title">Subject '+i+'</span>';pinned.append(card);
+     card.innerHTML='<span class="home-pinned-top">STUDY SUBJECT</span>'+
+       '<strong class="home-pinned-title">Subject '+i+'</strong>'+
+       '<span class="home-pinned-bottom"><span class="home-pinned-meta">'+
+       '<span class="js-home-pin-count">18/70</span> Practice</span>'+
+       '<span class="home-pinned-open">Open ›</span></span>';
+     pinned.append(card);
     }
    });
    await page.waitForTimeout(120);
@@ -115,6 +120,15 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
       samePalette.pinned.every(c=>c==='rgb(48, 113, 225)') &&
       samePalette.pinnedImages.every(c=>c==='none'),
      'Every pinned Study card must match exact solid owner sample #3071E1: '+JSON.stringify(samePalette));
+   const pinnedText=await page.evaluate(()=>[...document.querySelectorAll('#home-study-list .home-pinned-tile')].map(card=>({
+     colors:[card,...card.querySelectorAll('*')].map(el=>getComputedStyle(el).color),
+     opens:[...card.querySelectorAll('.home-pinned-open')].map(el=>el.textContent.trim())
+   })));
+   assert(pinnedText.length===5&&pinnedText.every(card=>card.colors.length>=7&&
+       card.colors.every(color=>color==='rgb(255, 255, 255)')&&
+       card.opens.every(text=>text.includes('›'))),
+     'All pinned title, top label, progress counter, footer, and Open arrow must be WHITE: '+
+       JSON.stringify(pinnedText));
    if(viewport.width<700){
      await page.evaluate(()=>{const e=document.getElementById('home-competitive-list');
        e.scrollLeft=e.scrollWidth;});
