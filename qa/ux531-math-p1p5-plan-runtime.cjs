@@ -26,12 +26,16 @@ for(const expected of ['renderLoading("route")','renderLoading("component", comp
 assert(paperSource.includes('ru:["Маршрут","Тренировки","История"'),
   "Route and Practice must describe distinct functions");
 const homeStyle=fs.readFileSync(path.join(root,"visual/iclub-academy-ux531-b02b03.css"),"utf8");
-// Owner 2026-11-17: pinned Study stays recognisably BLUE, visibly lighter
-// than Competitive. Dark text on its lightest/strongest blue keeps contrast.
-assert(homeStyle.includes("linear-gradient(137deg,#5689d2 0%,#6196dd 55%,#74a2e1 100%)"),
-  "Pinned Study needs a genuinely blue, noticeably lighter gradient");
-assert(homeStyle.includes("linear-gradient(137deg,#174aab 0%,#3071e1 100%)"),
-  "The original saturated Competitive gradient must remain untouched");
+// Final owner swatches supersede historical gradients. Both rails still swipe:
+// Competitive screenshot 1 is SOLID #174AAB, pinned Study screenshot 2 SOLID #3071E1.
+// White labels must remain readable on the brighter solid pinned fill.
+assert(homeStyle.includes("body.iclub-visual-v3 #view-home #home-competitive-list .home-competitive-card{\n  background:#174aab;"),
+  "All Competitive subject cards must match the exact solid #174AAB swatch");
+assert(homeStyle.includes("background:#3071e1;"),
+  "Pinned Study cards must match the exact solid #3071E1 swatch");
+assert(!homeStyle.includes("linear-gradient(137deg,#174aab")&&
+  !homeStyle.includes("linear-gradient(137deg,#5689d2"),
+  "Previous mixed-color swatches must not reappear as gradients");
 const luminance = hex => {
   const channels=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255)
     .map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);
@@ -39,11 +43,10 @@ const luminance = hex => {
 };
 const contrast = (a,b) => (Math.max(luminance(a),luminance(b))+.05)/
   (Math.min(luminance(a),luminance(b))+.05);
-assert(luminance("#5689d2")>luminance("#3071e1"),
-  "Pinned blue must be lighter than even the light end of Competitive");
-for (const textColor of ["#071e3d"])
-  assert(contrast(textColor,"#5689d2")>=4.5,
-    "Pinned label/title/footer must remain readable on the deepest blue stop");
+assert(luminance("#3071e1")>luminance("#174aab"),
+  "Pinned swatch must be lighter than Competitive");
+assert(contrast("#ffffff","#3071e1")>=4.5,
+  "White pinned title, header and footer text must remain readable");
 assert(homeStyle.includes("box-shadow:0 8px 20px rgba(27,81,160,.14)"),
   "Pinned elevation must stay visibly below Competitive");
 
