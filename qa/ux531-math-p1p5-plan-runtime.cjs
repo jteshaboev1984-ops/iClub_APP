@@ -154,8 +154,24 @@ async function caseRun(browser, address, { language, width, mode }) {
       async claimPeriodReportsS3() { return {ok:true,data:{claimed:0}}; },
       async periodReportsS3() { return {ok:true,data:{reports:[]}}; },
       async hybridS4Catalog(component) { return {ok:true,data:{enabled:false,papers:[],component_code:component}}; },
-      async hybridS4History(component) {return {ok:true,data:{component_code:component,sessions:[]}};},
-      async recentResults(component) {return {ok:true,data:{component_code:component,results:[]}};},
+      async hybridS4History(component) {
+        return {ok:true,data:{component_code:component,sessions:Array.from(
+          {length:component==="P1"?12:0},(_,i)=>({
+            session_id:"synthetic-paper-"+(i+1),paper_key:"p1_full_paper_"+(i+1),
+            started_at:new Date(Date.UTC(2026,10,16-i)).toISOString(),
+            closed_at:new Date(Date.UTC(2026,10,16-i)).toISOString(),
+            closure_code:"completed",review_revealed:true
+          }))}};
+      },
+      async recentResults(component,limit) {
+        assert.equal(limit,20,"Core history only requests the supported 20-row server cap");
+        return {ok:true,data:{component_code:component,results:Array.from(
+          {length:component==="P1"?18:0},(_,i)=>({
+            session_id:"synthetic-core-"+(i+1),session_type:"learning",
+            finalized_at:new Date(Date.UTC(2026,10,16-i)).toISOString(),
+            machine_total:5,machine_correct:4,written_total:0,written_advanced:0
+          }))}};
+      },
       async startNextDiagnostic(component) {
         tracker.starts.push(component);
         throw Error("QA must not start any attempt");
@@ -188,6 +204,9 @@ async function caseRun(browser, address, { language, width, mode }) {
       getComputedStyle(document.querySelector("#exam-prep-host-root .ep-host-shell")).fontFamily);
     assert(/ui-sans-serif|system-ui/i.test(initialFont) && !/Times New Roman/i.test(initialFont),
       "Math Exam Prep must inherit the actual iClub sans-serif app typography: "+initialFont);
+    assert.equal(await page.locator("[data-ep-v58-plan-page]").count(),1,
+      "New learner should edit profile within My plan, not on a duplicate screen");
+    assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),1);
     const form = page.locator("[data-ep-live-profile-form]");
     await form.waitFor();
     assert.equal(await form.locator("input").count(),4,"Real plan form has four fields");
@@ -289,6 +308,8 @@ async function caseRun(browser, address, { language, width, mode }) {
     if(regression){
       // A failed profile edit must not erase the form or the user's new values.
       await page.locator("[data-ep-v58-profile-edit]").click();
+      assert.equal(await page.locator("[data-ep-v58-plan-page] [data-ep-live-profile-form]").count(),1,
+        "Saved-profile editing must remain inside the single My plan page");
       await page.locator('[name="target_grade"]').fill("A*");
       await page.evaluate(()=>{window.__UX531_MATH_TEST.failNextProfileSave=true;});
       await page.locator("[data-ep-live-save-profile]").click();
@@ -360,6 +381,29 @@ async function caseRun(browser, address, { language, width, mode }) {
     await page.locator('[data-ep-v58-history="P1"]').waitFor();
     await verifyLayout('P1 History',true);
     assert.equal(await page.locator('[data-ep-history-legacy-section]').count(),1);
+    const coreRecent=page.locator('[data-ep-history-recent="core"] .ep-history-row');
+    const paperRecent=page.locator('[data-ep-history-recent="paper"] .ep-history-row');
+    assert.equal(await coreRecent.count(),3,"Only newest 3 Core rows should render immediately");
+    assert.equal(await paperRecent.count(),3,"Only newest 3 ungraded Paper rows should render immediately");
+    const coreOlder=page.locator('[data-ep-history-archive="core"]');
+    const paperOlder=page.locator('[data-ep-history-archive="paper"]');
+    assert.equal(await coreOlder.locator('.ep-history-row').count(),0,"Older Core hidden before disclosure");
+    await coreOlder.locator('summary').click();
+    await coreOlder.locator('.ep-history-row').nth(4).waitFor();
+    assert.equal(await coreOlder.locator('.ep-history-row').count(),5,"Reveal exactly 5 Core rows");
+    await coreOlder.locator('[data-ep-history-more="core"]').click();
+    assert.equal(await coreOlder.locator('.ep-history-row').count(),10,"Second batch is exactly five");
+    await coreOlder.locator('[data-ep-history-more="core"]').click();
+    assert.equal(await coreOlder.locator('.ep-history-row').count(),15,"All 18 synthetic Core rows remain accessible");
+    assert.equal(await coreOlder.locator('[data-ep-history-more="core"]').isVisible(),false);
+    await paperOlder.locator('summary').click();
+    await paperOlder.locator('.ep-history-row').nth(4).waitFor();
+    assert.equal(await paperOlder.locator('.ep-history-row').count(),5,"Paper history reveals 5 without scoring");
+    await paperOlder.locator('[data-ep-history-more="paper"]').click();
+    assert.equal(await paperOlder.locator('.ep-history-row').count(),9,"All 12 Paper rows accessible");
+    assert.equal(await paperOlder.locator('[data-ep-history-more="paper"]').isVisible(),false);
+    assert.equal(await page.locator('[data-ep-history-delete]').count(),0,"No destructive history UX");
+
     await page.locator('[data-ep-v58-tab="learning"]').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
     await page.locator('[data-ep-component-back]').click();
