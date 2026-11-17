@@ -98,18 +98,23 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
    if(viewport.width<700)
      assert(rails[0].scrollable,'Competitive subjects must also swipe on phone widths '+viewport.width);
    const samePalette=await page.evaluate(()=>{
-     const cards=[...document.querySelectorAll('#home-competitive-list .home-competitive-card')];
-     const pinned=document.querySelector('#home-study-list .home-pinned-tile');
-     return{competitive:cards.map(c=>getComputedStyle(c).backgroundImage),
-       pinned:getComputedStyle(pinned).backgroundImage};
+     const competition=[...document.querySelectorAll('#home-competitive-list .home-competitive-card')];
+     const study=[...document.querySelectorAll('#home-study-list .home-pinned-tile')];
+     return {
+       competitive:competition.map(c=>getComputedStyle(c).backgroundColor),
+       competitiveImages:competition.map(c=>getComputedStyle(c).backgroundImage),
+       pinned:study.map(c=>getComputedStyle(c).backgroundColor),
+       pinnedImages:study.map(c=>getComputedStyle(c).backgroundImage)
+     };
    });
    assert(samePalette.competitive.length===2 &&
-      samePalette.competitive[0]===samePalette.competitive[1] &&
-      samePalette.competitive[0].includes('rgb(23, 74, 171)'),
-     'Every Competitive card must retain the same deep blue before swipe: '+JSON.stringify(samePalette));
-   assert(samePalette.pinned.includes('rgb(86, 137, 210)') &&
-     samePalette.pinned!==samePalette.competitive[0],
-     'Second, lighter blue must belong to pinned Study: '+JSON.stringify(samePalette));
+      samePalette.competitive.every(c=>c==='rgb(23, 74, 171)') &&
+      samePalette.competitiveImages.every(c=>c==='none'),
+     'Every Competitive card must match exact solid owner sample #174AAB: '+JSON.stringify(samePalette));
+   assert(samePalette.pinned.length===5 &&
+      samePalette.pinned.every(c=>c==='rgb(48, 113, 225)') &&
+      samePalette.pinnedImages.every(c=>c==='none'),
+     'Every pinned Study card must match exact solid owner sample #3071E1: '+JSON.stringify(samePalette));
    if(viewport.width<700){
      await page.evaluate(()=>{const e=document.getElementById('home-competitive-list');
        e.scrollLeft=e.scrollWidth;});
@@ -117,12 +122,12 @@ const rgbFrom=s=>[...s.matchAll(/rgba?\((\d+),\s*(\d+),\s*(\d+)/g)].map(m=>[+m[1
      const after=await page.evaluate(()=>{
        const rail=document.getElementById('home-competitive-list');
        return{scrollLeft:rail.scrollLeft,
-         colors:[...rail.querySelectorAll('.home-competitive-card')].map(c=>getComputedStyle(c).backgroundImage),
+         colors:[...rail.querySelectorAll('.home-competitive-card')].map(c=>getComputedStyle(c).backgroundColor),
          selected:[...rail.nextElementSibling.children].findIndex(b=>b.getAttribute('aria-current')==='true')};
      });
      assert(after.scrollLeft>10&&after.selected===1,
        'Competitive rail must swipe to second subject: '+JSON.stringify(after));
-     assert(after.colors.every(c=>c===samePalette.competitive[0]),
+     assert(after.colors.every(c=>c==='rgb(23, 74, 171)'),
        'Competitive color must NOT change on swipe: '+JSON.stringify(after.colors));
    }
    await page.evaluate(()=>{const e=document.getElementById('home-study-list');e.scrollLeft=e.scrollWidth;});
