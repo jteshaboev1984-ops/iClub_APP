@@ -17,6 +17,12 @@ assert.equal(git("rev-parse","HEAD"),head,"Checkout must be exact PR source, not
 assert.equal(git("merge-base",MAIN,head),MAIN,"Published baseline must be ancestor");
 const read=p=>fs.readFileSync(p,"utf8");
 const expected=[
+ ".github/scripts/p0_14_legacy_off_regression.js",
+ ".github/workflows/p0-14-host-regression.yml",
+ ".github/workflows/p2-03-past-paper-companion.yml",
+ ".github/workflows/p2-08-progress-preservation.yml",
+ ".github/workflows/p2-43-protected-integrity-regression.yml",
+ ".github/workflows/written-understanding-checks-v1.yml",
  ".github/scripts/p0_19_live_timed_readiness_regression.js",
  ".github/scripts/p2_55_full_learner_journey_regression.js",
  ".github/scripts/visual_v3_home_study_regression.js",
@@ -48,8 +54,14 @@ const expected=[
  "visual/iclub-academy-ux531-b04b08.css",
  "visual/iclub-academy-ux531-interactions.js"
 ];
+assert.equal(git("hash-object",".github/scripts/p0_14_legacy_off_regression.js"),"8f844e38efa69fb8fb45819b779deb079cca1ef1","Reviewed CI fix file drift: .github/scripts/p0_14_legacy_off_regression.js");
+assert.equal(git("hash-object",".github/workflows/p0-14-host-regression.yml"),"3e623fbd9c8d28ca6b2040a6cbc840f8e2b16927","Reviewed CI fix file drift: .github/workflows/p0-14-host-regression.yml");
+assert.equal(git("hash-object",".github/workflows/p2-03-past-paper-companion.yml"),"b6f92bcae4dd9061d18452bce0876c2072319df6","Reviewed CI fix file drift: .github/workflows/p2-03-past-paper-companion.yml");
+assert.equal(git("hash-object",".github/workflows/p2-08-progress-preservation.yml"),"95e6a3f61a31a28f2cc4d20df076d47fccdd0bc5","Reviewed CI fix file drift: .github/workflows/p2-08-progress-preservation.yml");
+assert.equal(git("hash-object",".github/workflows/p2-43-protected-integrity-regression.yml"),"8a778c8aa821f99db58e520d3bb2844b86fa9af6","Reviewed CI fix file drift: .github/workflows/p2-43-protected-integrity-regression.yml");
+assert.equal(git("hash-object",".github/workflows/written-understanding-checks-v1.yml"),"fae72b32cf7f0c4947a84e19956622ee333b11f1","Reviewed CI fix file drift: .github/workflows/written-understanding-checks-v1.yml");
 const changes=git("diff","--name-only",MAIN,head).split("\n").filter(Boolean).sort();
-assert.deepEqual(changes,expected.sort(),"Only pre-reviewed UX+Math+CI files allowed");
+assert.deepEqual(changes,expected.sort(),"Only pre-reviewed UX+Math+CI baseline repair union files allowed");
 const live=read("exam-prep/exam-prep-live.js");
 const css=read("visual/iclub-academy-ux531-b02b03.css");
 const swatch=(p,what)=>assert(css.includes(p),what+" owner-accepted solid swatch missing");
@@ -73,6 +85,14 @@ for(const token of [
  "Number(calibration.operational_stage)>=6"
 ]) assert(live.includes(token),"Required UX or academic fail-closed invariant missing: "+token);
 assert(!live.includes("data-ep-history-delete"),"Academic history deletion NOT approved");
+const fixedP014=read(".github/workflows/p0-14-host-regression.yml");
+const fixedLegacyOff=read(".github/scripts/p0_14_legacy_off_regression.js");
+assert(fixedP014.includes("ubuntu-24.04")&&fixedP014.includes("ux531-math-single-back-loader-v5")&&
+  fixedP014.includes("ux531-mobile-polish-20261116-loader-v2"),"Repaired P0-14 must retain exact released tags");
+assert(fixedP014.includes("const all=[...s.matchAll(/")&&fixedP014.includes("const array=[...s.matchAll(/")&&
+  fixedLegacyOff.includes("Exam Prep must remain hidden with real OFF capability"),
+  "No bypass of P0-14 direct DB check or legacy OFF gate");
+
 assert.equal(git("hash-object","exam-prep/exam-prep-live.js"),
   "665a71e3624059fb5da89caac9ea772adc1d25b2",
   "Whole merged answer-ACK/Stage source no longer reviewed");

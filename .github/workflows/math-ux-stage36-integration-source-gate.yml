@@ -13,7 +13,7 @@ permissions:
   contents: read
 jobs:
   approved-union-source:
-    if: github.head_ref == 'integration/math-ux531-stage36-20261117-v1'
+    if: github.head_ref == 'integration/math-ux531-stage36-20261117-v1' || github.head_ref == 'integration/math562-ci563-release-candidate-20261117'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
