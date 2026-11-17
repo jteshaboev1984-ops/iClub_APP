@@ -298,18 +298,37 @@ async function caseRun(browser, address, { language, width, mode }) {
     // The v5.8 overview keeps the two subject components ABOVE configuration.
     assert.equal(await page.locator(".ep-v58-main-components .ep-live-component-entry").count(),2);
     assert.equal(await page.locator("[data-ep-v58-plan-summary]").count(),1);
+    const overviewPlan=await page.locator("[data-ep-v58-plan-summary]").innerText();
+    assert(!overviewPlan.includes("June 2027")&&!overviewPlan.includes("16")&&!overviewPlan.includes("P1:")&&
+      !overviewPlan.includes("P5:"),"Dashboard My plan link must not duplicate profile, dates or budget");
     assert.equal(await page.locator("[data-ep-study-schedule]").count(),0,
       "Dashboard must not expose an always-open schedule form");
     await page.locator("[data-ep-v58-plan-open]").click();
     await page.locator("[data-ep-v58-plan-page]").waitFor();
     await verifyLayout('My plan');
-    assert.equal(await page.locator("[data-ep-v58-setting]").count(),regression?3:2,
-      "Schedule, dates and available weekly choice must use native disclosures");
+    assert.equal(await page.locator("[data-ep-v58-setting]").count(),2,
+      "Exactly two settings: exam dates, plus ONE schedule/weekly-allocation editor");
+    assert.equal(await page.locator("[data-ep-v58-profile-fact]").count(),4,
+      "Exam series, target, total time, Maths time appear once in My plan summary");
+    assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
+      "Editing form cannot repeat saved values unless user chooses Edit");
+    assert.equal(await page.locator('[data-ep-v58-setting="dates"]').count(),1);
+    assert.equal(await page.locator("[data-ep-exam-date-component]").count(),2);
+    assert.equal(await page.locator('[data-ep-v58-setting="weekly"]').count(),regression?1:0);
+    assert.equal(await page.locator('[data-ep-v58-setting="schedule"]').count(),regression?0:1);
+    assert.equal(await page.locator("[data-ep-study-minutes]").count(),0,
+      "Collapsed legacy schedule may not coexist with S3 schedule editor");
     if(regression){
       // A failed profile edit must not erase the form or the user's new values.
       await page.locator("[data-ep-v58-profile-edit]").click();
       assert.equal(await page.locator("[data-ep-v58-plan-page] [data-ep-live-profile-form]").count(),1,
         "Saved-profile editing must remain inside the single My plan page");
+      assert.equal(await page.locator("[data-ep-v58-profile-summary]").count(),0,
+        "No saved-profile summary under the four identical editable values");
+      assert.equal(await page.locator("[data-ep-v58-setting]").count(),0,
+        "Hide unrelated dates and weekly controls while editing the four fields");
+      assert.equal(await page.locator("[data-ep-live-profile-form] input").count(),4,
+        "All original profile settings must exist exactly once in My plan editor");
       await page.locator('[name="target_grade"]').fill("A*");
       await page.evaluate(()=>{window.__UX531_MATH_TEST.failNextProfileSave=true;});
       await page.locator("[data-ep-live-save-profile]").click();
@@ -322,6 +341,11 @@ async function caseRun(browser, address, { language, width, mode }) {
       await page.locator("[data-ep-v58-plan-page]").waitFor();
       assert.match(await page.locator("[data-ep-v58-plan-page] > .ep-live-notice[role=status]").innerText(),/сохран/i,
         "Plan must show the server-save confirmation on the current screen");
+      assert.equal(await page.locator("[data-ep-v58-profile-fact]").count(),4);
+      assert.equal(await page.locator("[data-ep-v58-profile-editor]").count(),0,
+        "After save, show summary INSTEAD OF editable form");
+      assert.equal(await page.locator("[data-ep-study-schedule]").count(),0,
+        "S3 weekly choice controls both daily schedule and P1/P5 split; no legacy duplicate");
 
       const weekly=page.locator('[data-ep-v58-setting="weekly"]');
       await weekly.locator("summary").click();
@@ -357,10 +381,20 @@ async function caseRun(browser, address, { language, width, mode }) {
         "Reopening My plan must load the accepted server allocation");
       assert.equal(await page.evaluate(()=>window.__UX531_MATH_TEST.weeklySaves.length),2);
     }
-    const settings=page.locator('[data-ep-v58-setting="schedule"]');
-    assert.equal(await settings.evaluate(el=>el.open),false,"schedule should be collapsed");
-    await settings.locator("summary").click();
-    assert.equal(await settings.evaluate(el=>el.open),true);
+    if(regression) {
+      assert.equal(await page.locator('[data-ep-v58-setting="schedule"]').count(),0,
+        "Never show duplicate day/minute schedule when S3 is present");
+      assert.equal(await page.locator('[data-ep-s3-newtime]').count(),1);
+    } else {
+      const settings=page.locator('[data-ep-v58-setting="schedule"]');
+      assert.equal(await settings.evaluate(el=>el.open),false,"schedule should be collapsed");
+      await settings.locator("summary").click();
+      assert.equal(await settings.evaluate(el=>el.open),true);
+      assert.equal(await page.locator("[data-ep-study-schedule] [data-ep-study-minutes]").count(),1);
+      assert.equal(await page.locator("[data-ep-study-schedule] [data-ep-study-days]").count(),1);
+      assert.equal(await page.locator("[data-ep-study-schedule] .ep-live-study-schedule-summary .ep-live-meta").count(),0,
+        "Do not repeat Maths and total-time budget in schedule preview");
+    }
     await page.locator("[data-ep-v58-plan-back]").click();
     await page.locator(".ep-v58-main-components").waitFor();
     await page.locator('[data-ep-live-open-component="P1"]').click();
