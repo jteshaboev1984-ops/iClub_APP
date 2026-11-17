@@ -71,9 +71,9 @@
   function copy() {
     if (state.language === "uz") return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Imtihonga tayyorgarlik", safe: "Modulga kirish shaxsiy ruxsat bilan himoyalangan.",
-      profileTitle: "Avval imtihon rejangizni kiriting", profileText: "Bu ma’lumotlar matematika uchun real haftalik yuklamani tuzishga yordam beradi.",
-      series: "Imtihon seriyasi", target: "Maqsad baho", total: "Haftalik umumiy o‘qish vaqti (soat)", math: "Matematika uchun vaqt (soat)",
-      save: "Imtihon rejasini saqlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
+      profileTitle: "Imtihon rejangizni kiriting", profileText: "Shu ma’lumotlar asosida matematikaga ajratadigan haftalik vaqtingiz rejalashtiriladi.",
+      series: "Imtihon sessiyasi", target: "Ko‘zlangan baho", total: "Haftasiga o‘qishga ajratilgan jami vaqt (soat)", math: "Haftasiga matematika uchun vaqt (soat)",
+      save: "Rejani saqlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
       items: "savol", areas: "bo‘lim", start: "Kirish tekshiruvini boshlash", resume: "Tekshiruvni davom ettirish", complete: "Kirish tekshiruvi yakunlandi", loading: "Yuklanmoqda…",
       question: "Savol", submit: "Javobni yuborish", correct: "To‘g‘ri", incorrect: "Xatoni ko‘rib chiqing", finish: "Tekshiruv qismi yakunlandi. Natija yangilandi.",
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", back: "Orqaga", overview: "Umumiy ko‘rinish", plan: "Haftalik reja", openPlan: "Haftalik rejani ochish", priority: "Ustuvorlik", week: "Hafta",
@@ -98,7 +98,7 @@
       consolidationReasonPending: "Keyingi bosqich uchun hali ko‘proq tasdiqlangan natija kerak.",
       consolidationReference: "Format bo‘yicha yo‘nalish: rasmiy Cambridge 9709, June 2026. Faqat format va vaqt shartlari uchun ishlatiladi; ballarni bevosita solishtirish uchun emas.",
       consolidationReferenceLink: "Cambridge rasmiy izohi",
-      dashboardEyebrow: "Sizning yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "Har bir komponent o‘z bosqichi, dalillari va keyingi qadami bilan alohida yuradi.",
+      dashboardEyebrow: "Tayyorgarlik yo‘lingiz", dashboardTitle: "P1 va P5 bo‘yicha tayyorgarlik", dashboardText: "P1 va P5 uchun bosqichlar, natijalar va keyingi vazifalar alohida ko‘rsatiladi.",
       componentP1: "Pure Mathematics 1", componentP5: "Probability & Statistics 1", skillsLabel: "ko‘nikma", continueCheck: "Kirish tekshiruvini davom ettirish", profileSaved: "Saqlangan reja", targetShort: "Maqsad", totalShort: "Jami", mathShort: "Matematika", hoursShort: "soat/hafta",
       actionCloseIssue: "Qolgan asosiy xatoni yoping", actionShort: "Qisqa maqsadli mashq", actionTiming: "Vaqt va imtihon tartibini tekshirish", actionTaper: "Yuklamani kamaytirish va natijani saqlash",
       examOpsTitle: "Imtihon kuni rejasi", examOpsProgress: "Tekshiruvlar", examOpsChecklist: "Imtihon oldidan tekshiruv",
@@ -112,7 +112,7 @@
       yourResponse: "Sizning javobingiz", correctResponse: "To‘g‘ri javob", why: "Izoh", whatToReview: "Nimani takrorlash kerak",
       writtenDone: "Bajarildi", writtenNotAuto: "Bu yozma yechim avtomatik baholanmaydi.", understandingCheckLabel: "Tushunishni tekshirish",
       understandingNotMark: "Bu yozma yechim uchun baho emas.", recentWork: "Oxirgi ish", viewResults: "Natijalarni ko‘rish", history: "Mashg‘ulotlar tarixi",
-      noHistory: "Hali tugallangan ishlar yo‘q.", backToHistory: "Tarixga qaytish", backToComponent: "Mavzuga qaytish",
+      noHistory: "Hali tugallangan ishlar yo‘q.", backToHistory: "Tarixga qaytish", backToComponent: "Bo‘limga qaytish",
       writtenInfoTitle: "Yozma topshiriq", writtenInfoText: "Faqat yakuniy javobni emas, yechim yo‘lini ham ko‘rsating.",
       writtenCoreText: "Core’da bu yechim avtomatik baholanmaydi va to‘g‘ri javoblar foiziga kirmaydi. Yuborgandan keyin mezonlar bo‘yicha o‘zingizni tekshirishingiz mumkin.",
       writtenAiText: "Yozma yechim avtomatik to‘g‘ri/noto‘g‘ri foiziga kirmaydi. AI izohi mavjud bo‘lsa, u alohida ko‘rsatiladi va yakuniy baho hisoblanmaydi.",
@@ -121,9 +121,9 @@
     };
     if (state.language === "en") return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Exam preparation", safe: "Access to this module is protected by personal permission.",
-      profileTitle: "Set your exam plan first", profileText: "This helps build a realistic weekly mathematics workload.",
+      profileTitle: "My plan", profileText: "This helps build a realistic weekly mathematics workload.",
       series: "Exam series", target: "Target grade", total: "Total weekly study time (hours)", math: "Mathematics time (hours)",
-      save: "Save exam plan", saving: "Saving…", invalid: "Check the hours: mathematics time must be above 0 and cannot exceed total time.",
+      save: "Save in My plan", saving: "Saving…", invalid: "Check the hours: mathematics time must be above 0 and cannot exceed total time.",
       items: "questions", areas: "areas", start: "Start entry check", resume: "Continue the check", complete: "Entry check complete", loading: "Loading…",
       question: "Question", submit: "Submit answer", correct: "Correct", incorrect: "Review this mistake", finish: "Check section complete. Progress updated.",
       error: "The action could not be completed. Try again.", back: "Back", overview: "Overview", plan: "Weekly plan", openPlan: "Open weekly plan", priority: "Priority", week: "Week",
@@ -171,9 +171,9 @@
     };
     return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Подготовка к экзамену", safe: "Доступ к модулю защищён персональным разрешением.",
-      profileTitle: "Сначала задайте план экзамена", profileText: "Это поможет системе построить реалистичную недельную нагрузку по математике.",
+      profileTitle: "Мой план", profileText: "Это поможет системе построить реалистичную недельную нагрузку по математике.",
       series: "Экзаменационная сессия", target: "Целевая оценка", total: "Общее учебное время в неделю (часы)", math: "Время на математику (часы)",
-      save: "Сохранить план экзамена", saving: "Сохраняем…", invalid: "Проверьте часы: время на математику должно быть больше 0 и не превышать общее время.",
+      save: "Сохранить в «Мой план»", saving: "Сохраняем…", invalid: "Проверьте часы: время на математику должно быть больше 0 и не превышать общее время.",
       items: "вопросов", areas: "разделов", start: "Начать входную проверку", resume: "Продолжить проверку", complete: "Входная проверка завершена", loading: "Загрузка…",
       question: "Вопрос", submit: "Отправить ответ", correct: "Верно", incorrect: "Разберите эту ошибку", finish: "Часть проверки завершена. Прогресс обновлён.",
       error: "Не удалось выполнить действие. Попробуйте ещё раз.", back: "Назад", overview: "Обзор", plan: "Недельный план", openPlan: "Открыть недельный план", priority: "Приоритет", week: "Неделя",
@@ -504,72 +504,125 @@
     return match ? "Paper "+match[1] : (value || "Paper");
   }
 
-  async function openRecentResults(component) {
-    if (typeof internal.api?.recentResults!=="function" &&
-        typeof internal.api?.hybridS4History!=="function") {
+  function historyDisclosureCopy(){
+    return ({
+      ru:{older:"Более ранние записи",more:"Показать ещё",partial:"Здесь показаны только последние записи. Предыдущие результаты не удалены."},
+      uz:{older:"Avvalgi natijalar",more:"Yana ko‘rsatish",partial:"Faqat so‘nggi natijalar ko‘rsatilmoqda. Avvalgi natijalar o‘chirilmagan."},
+      en:{older:"Earlier entries",more:"Show more",partial:"Only the latest entries are shown here. Older results have not been deleted."}
+    })[state.language] || {older:"Более ранние записи",more:"Показать ещё",partial:"Здесь показаны только последние записи."};
+  }
+  // The present signed Core RPC returns at most 20 records and the S4 Paper
+  // RPC 30. Progressive disclosure here is UI-only, NOT server pagination.
+  function historyListMarkup(kind,rows,makeRow,serverCap,empty){
+    if(!rows.length)return '<div class="ep-history-list">'+empty+'</div>';
+    const c=historyDisclosureCopy(),older=Math.max(0,rows.length-3);
+    return '<div class="ep-history-list" data-ep-history-recent="'+kind+'">'+
+      rows.slice(0,3).map(makeRow).join("")+'</div>'+
+      (older?'<details class="ep-history-archive" data-ep-history-archive="'+kind+'">'+
+        '<summary>'+esc(c.older)+' ('+older+')</summary>'+
+        '<div class="ep-history-list" data-ep-history-older="'+kind+'"></div>'+
+        '<button type="button" class="ep-live-btn secondary ep-history-more" data-ep-history-more="'+kind+'" hidden></button>'+
+        '</details>':"")+
+      (rows.length>=serverCap?'<p class="ep-live-meta ep-history-cap-note">'+esc(c.partial)+'</p>':"");
+  }
+  function bindHistoryDisclosure(screen,kind,rows,makeRow){
+    const details=screen.querySelector('[data-ep-history-archive="'+kind+'"]');
+    if(!details)return;
+    const holder=details.querySelector('[data-ep-history-older="'+kind+'"]');
+    const button=details.querySelector('[data-ep-history-more="'+kind+'"]');
+    let shown=0;
+    const append=()=>{
+      const older=rows.length-3;
+      if(shown>=older)return;
+      const batch=rows.slice(3+shown,3+shown+5);
+      holder.insertAdjacentHTML("beforeend",batch.map(makeRow).join(""));
+      shown+=batch.length;
+      const left=older-shown;
+      button.hidden=left===0;
+      if(left)button.textContent=historyDisclosureCopy().more+" ("+Math.min(5,left)+")";
+    };
+    details.addEventListener("toggle",()=>{if(details.open&&!shown)append();});
+    button.addEventListener("click",append);
+  }
+
+  async function openRecentResults(component){
+    if(typeof internal.api?.recentResults!=="function"&&
+        typeof internal.api?.hybridS4History!=="function"){
       await openComponentHome(component);return;
     }
-    renderLoading("history", component);
+    renderLoading("history",component);
     const paperRequest=typeof internal.api?.hybridS4History==="function"
-      ? internal.api.hybridS4History(component).catch(()=>null)
-      : Promise.resolve(null);
+      ?internal.api.hybridS4History(component).catch(()=>null):Promise.resolve(null);
     let result=null;
-    try {
-      if (typeof internal.api?.recentResults==="function") {
-        result=await internal.api.recentResults(component,10);
-        if (result?.ok && typeof internal.api.recentResultsWritten==="function") {
+    try{
+      if(typeof internal.api?.recentResults==="function"){
+        result=await internal.api.recentResults(component,20);
+        if(result?.ok&&typeof internal.api.recentResultsWritten==="function"){
           const enhanced=await boundWrittenCall(
-            ()=>internal.api.recentResultsWritten(component,10),12000);
-          if (enhanced?.ok && enhanced.data?.component_code===component) result=enhanced;
+            ()=>internal.api.recentResultsWritten(component,20),12000);
+          if(enhanced?.ok&&enhanced.data?.component_code===component)result=enhanced;
         }
       }
-    } catch (_) {}
+    }catch(_){}
     const paperResult=await paperRequest;
-    const hasPaperHistory=paperResult?.ok &&
-      paperResult.data?.component_code===component &&
-      Array.isArray(paperResult.data?.sessions);
-    if (!result?.ok && !hasPaperHistory) { renderError(); return; }
-    const root=rootEl(); if (!root) return; const c=copy(),s4=hybridS4Copy();
-    const rows=result?.ok && Array.isArray(result.data?.results) ? result.data.results : [];
-    const body=rows.length ? rows.map(row => {
-      const machineTotal=Number(row.machine_total || 0), machineCorrect=Number(row.machine_correct || 0);
-      const written=Number(row.written_total || 0), advanced=Number(row.written_advanced||0);
-      const score=machineTotal>0 ? `${machineCorrect} / ${machineTotal}` : "—";
-      const writtenBit=advanced>0 ? " · "+esc(writtenCopy().steps)+": "+advanced : (written>0 ? " · "+esc(c.writtenPart)+": "+written : "");
-      return `<button class="ep-history-row" type="button" data-ep-history-session="${esc(row.session_id)}"><span><strong>${esc(resultTypeLabel(row.session_type))}</strong><small>${esc(formatDateTime(row.finalized_at))}</small></span><span>${esc(c.autoChecked)}: ${score}${writtenBit}<b aria-hidden="true">›</b></span></button>`;
-    }).join("") : `<div class="ep-live-notice">${esc(result?.ok?c.noHistory:c.error)}</div>`;
-
+    const hasPaperHistory=paperResult?.ok&&
+      paperResult.data?.component_code===component&&Array.isArray(paperResult.data?.sessions);
+    if(!result?.ok&&!hasPaperHistory){renderError();return;}
+    const root=rootEl();if(!root)return;
+    const c=copy(),s4=hybridS4Copy();
+    const rows=result?.ok&&Array.isArray(result.data?.results)?result.data.results:[];
+    const makeCoreRow=row=>{
+      const machineTotal=Number(row.machine_total||0),machineCorrect=Number(row.machine_correct||0);
+      const written=Number(row.written_total||0),advanced=Number(row.written_advanced||0);
+      const score=machineTotal>0?machineCorrect+" / "+machineTotal:"—";
+      const writtenBit=advanced>0?" · "+esc(writtenCopy().steps)+": "+advanced:
+        (written>0?" · "+esc(c.writtenPart)+": "+written:"");
+      return '<button class="ep-history-row" type="button" data-ep-history-session="'+esc(row.session_id)+'">'+
+        '<span><strong>'+esc(resultTypeLabel(row.session_type))+'</strong><small>'+
+        esc(formatDateTime(row.finalized_at))+'</small></span><span>'+esc(c.autoChecked)+': '+
+        score+writtenBit+'<b aria-hidden="true">›</b></span></button>';
+    };
     const paperRows=hasPaperHistory?paperResult.data.sessions:[];
-    const showPaper=paperRows.length>0 || state.hybridS4Available?.[component]===true;
-    const paperList=paperRows.slice(0,30).map(row=>{
-      const isClosed=Boolean(row.closed_at);
-      const action=row.review_revealed===true?s4.reviewAgain:
-        (isClosed?s4.review:s4.repeat);
-      return `<button class="ep-history-row" type="button" data-ep-history-paper-session="${esc(row.session_id)}"><span><strong>${esc(paperHistoryLabel(row.paper_key))}</strong><small>${esc(formatDateTime(row.started_at))} · ${esc(hybridS4MarkState(row.closure_code))}</small></span><span>${esc(action)}<b aria-hidden="true">›</b></span></button>`;
-    }).join("");
-    const paperSection=showPaper?`<section class="ep-live-card" data-ep-history-paper-section>
-      <div class="ep-live-head"><strong>${esc(s4.title)}</strong></div>
-      <p class="ep-live-meta">${esc(s4.noScore)}</p>
-      <div class="ep-history-list">${paperList||`<div class="ep-live-notice">${esc(hasPaperHistory?s4.emptyHistory:s4.failed)}</div>`}</div>
-    </section>`:"";
+    const makePaperRow=row=>{
+      const closed=Boolean(row.closed_at);
+      const action=row.review_revealed===true?s4.reviewAgain:(closed?s4.review:s4.repeat);
+      return '<button class="ep-history-row" type="button" data-ep-history-paper-session="'+esc(row.session_id)+'">'+
+        '<span><strong>'+esc(paperHistoryLabel(row.paper_key))+'</strong><small>'+
+        esc(formatDateTime(row.started_at))+' · '+esc(hybridS4MarkState(row.closure_code))+
+        '</small></span><span>'+esc(action)+'<b aria-hidden="true">›</b></span></button>';
+    };
+    const showPaper=paperRows.length>0||state.hybridS4Available?.[component]===true;
+    const paperSection=showPaper?
+      '<section class="ep-live-card" data-ep-history-paper-section>'+
+      '<div class="ep-live-head"><strong>'+esc(s4.title)+'</strong></div>'+
+      '<p class="ep-live-meta">'+esc(s4.noScore)+'</p>'+
+      historyListMarkup("paper",paperRows,makePaperRow,30,
+        '<div class="ep-live-notice">'+esc(hasPaperHistory?s4.emptyHistory:s4.failed)+'</div>')+
+      '</section>':"";
     const legacyHeading=state.language==="uz"?"O‘quv topshiriqlari va kirish tekshiruvlari":
       (state.language==="en"?"Learning tasks and entry checks":"Учебные задания и диагностики");
-    root.innerHTML=shell(`<section class="ep-history-screen" data-ep-v58-history="${esc(component)}">
-      <div class="ep-live-card"><div class="ep-live-head"><strong>${esc(component)} · ${esc(c.history)}</strong>
-      <button class="ep-live-btn secondary" type="button" data-ep-history-back>${esc(c.backToComponent)}</button></div></div>
-      ${epComponentTabs(component,"history")}
-      ${paperSection}
-      <section class="ep-live-card" data-ep-history-legacy-section>
-        <div class="ep-live-head"><strong>${esc(legacyHeading)}</strong></div>
-        <div class="ep-history-list">${body}</div>
-      </section>
-    </section>`,{compact:true});
+    root.innerHTML=shell('<section class="ep-history-screen" data-ep-v58-history="'+esc(component)+'">'+
+      '<div class="ep-live-card"><div class="ep-live-head"><strong>'+esc(component)+' · '+esc(c.history)+'</strong></div></div>'+
+      epComponentTabs(component,"history")+paperSection+
+      '<section class="ep-live-card" data-ep-history-legacy-section>'+
+      '<div class="ep-live-head"><strong>'+esc(legacyHeading)+'</strong></div>'+
+      historyListMarkup("core",rows,makeCoreRow,20,
+        '<div class="ep-live-notice">'+esc(result?.ok?c.noHistory:c.error)+'</div>')+
+      '</section>'+epBottomBack('data-ep-history-back',c.backToComponent)+'</section>',{compact:true});
+    epSyncBackFallback(root);
     root.querySelector('[data-ep-history-back]')?.addEventListener('click',()=>openComponentHome(component));
     epBindTabs(component,root);
-    root.querySelectorAll('[data-ep-history-session]').forEach(button=>button.addEventListener('click',()=>openSessionResult(button.dataset.epHistorySession,component,"history")));
-    root.querySelectorAll('[data-ep-history-paper-session]').forEach(button=>button.addEventListener('click',()=>{
-      state.paperOrigin="history";void hybridS4Load(button.dataset.epHistoryPaperSession,component);
-    }));
+    const screen=root.querySelector("[data-ep-v58-history]");
+    bindHistoryDisclosure(screen,"core",rows,makeCoreRow);
+    bindHistoryDisclosure(screen,"paper",paperRows,makePaperRow);
+    // One delegated listener covers rows revealed later, preserves original
+    // owner-scoped review handlers, never creates attempts or changes marks.
+    screen.addEventListener("click",event=>{
+      const core=event.target.closest("[data-ep-history-session]");
+      if(core){void openSessionResult(core.dataset.epHistorySession,component,"history");return;}
+      const paper=event.target.closest("[data-ep-history-paper-session]");
+      if(paper){state.paperOrigin="history";void hybridS4Load(paper.dataset.epHistoryPaperSession,component);}
+    });
   }
 
   function shell(body, options = {}) {
@@ -613,22 +666,30 @@
   }
   function renderError(message = null) { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-error" role="alert" aria-live="assertive">${esc(message || copy().error)}</div><button class="ep-live-btn secondary" type="button" data-ep-live-home>${esc(copy().overview)}</button>`); root?.querySelector('[data-ep-live-home]')?.addEventListener('click', renderDashboard); }
 
+  // The initial exam preferences and all later edits live INSIDE My plan.
+  // One owner-scoped form and one save path; no duplicate "Exam plan" screen.
+  function examProfileFormMarkup() {
+    const c=copy(),p=state.profile||{};
+    return '<div class="ep-live-card ep-v58-profile-editor" data-ep-v58-profile-editor>'+
+      '<strong>'+esc(epNavCopy().profile)+'</strong><p class="ep-live-meta">'+esc(c.profileText)+'</p>'+
+      '<form class="ep-live-form" data-ep-live-profile-form>'+
+      '<label class="ep-live-field"><span>'+esc(c.series)+'</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" value="'+esc(p.exam_series||"")+'" required aria-required="true"></label>'+
+      '<label class="ep-live-field"><span>'+esc(c.target)+'</span><input name="target_grade" maxlength="40" placeholder="A" value="'+esc(p.target_grade||"")+'" required aria-required="true"></label>'+
+      '<label class="ep-live-field"><span>'+esc(c.total)+'</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="'+esc(p.total_student_hours_available??"")+'" required aria-required="true"></label>'+
+      '<label class="ep-live-field"><span>'+esc(c.math)+'</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="'+esc(p.mathematics_hours_budget??"")+'" required aria-required="true"></label>'+
+      '<div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>'+esc(c.save)+'</button></div></form>'+
+      '<div data-ep-live-profile-error role="alert" aria-live="assertive"></div></div>';
+  }
+
   function renderProfile() {
-    clearTimer();
-    const root = rootEl(); if (!root) return; const c = copy(), edit=state.profileEditorFromPlan===true;
-    root.innerHTML = shell(`<div class="ep-live-card"><strong>${esc(edit?epNavCopy().profile:c.profileTitle)}</strong><div class="ep-live-meta">${esc(c.profileText)}</div><form class="ep-live-form" data-ep-live-profile-form>
-      <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" value="${esc(state.profile?.exam_series||"")}" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" placeholder="A" value="${esc(state.profile?.target_grade||"")}" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(state.profile?.total_student_hours_available??"")}" required aria-required="true"></label>
-      <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(state.profile?.mathematics_hours_budget??"")}" required aria-required="true"></label>
-      <div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>${esc(state.busy ? c.saving : c.save)}</button></div></form><div data-ep-live-profile-error role="alert" aria-live="assertive"></div></div>`);
-    root.querySelector("[data-ep-live-profile-form]")?.addEventListener("submit", saveProfile);
-    if(edit){const back=document.createElement("button");back.type="button";back.className="ep-v58-back";back.textContent="← "+epNavCopy().plan;back.addEventListener("click",()=>{state.profileEditorFromPlan=false;renderMyPlan();});root.querySelector(".ep-live-card")?.prepend(back);}
+    state.profileEditorFromPlan=true;
+    renderMyPlan("profile");
   }
 
   async function saveProfile(event) {
     event.preventDefault(); if (state.busy) return;
     const form = event.currentTarget;
+    const isInitialSetup=!state.profile;
     const values = { examSeries: form.elements.exam_series.value, targetGrade: form.elements.target_grade.value, totalHours: Number(form.elements.total_hours.value), mathHours: Number(form.elements.math_hours.value) };
     if (!String(values.examSeries || "").trim() || !String(values.targetGrade || "").trim() || !(values.totalHours > 0) || !(values.mathHours > 0) || values.mathHours > values.totalHours || values.totalHours > 168) {
       const el = rootEl()?.querySelector("[data-ep-live-profile-error]"); if (el) el.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`; return;
@@ -665,7 +726,8 @@
       uz:"Imtihon profili saqlandi.",
       en:"Exam profile saved."
     })[state.language]||"Exam profile saved.";
-    if(toPlan)renderMyPlan();else await renderDashboard();
+    if(isInitialSetup)await renderDashboard();
+    else if(toPlan)renderMyPlan();else await renderDashboard();
   }
 
   const COMPONENT_AREA_LABELS = Object.freeze({
@@ -686,10 +748,10 @@
 
   function componentHomeCopy() {
     if (state.language === "uz") return {
-      back: "Sizning yo‘lingiz", next: "Keyingi qadam", progress: "Progress", topics: "Mavzular",
+      back: "P1 va P5 ga qaytish", next: "Keyingi qadam", progress: "O‘zlashtirish", topics: "Mavzular",
       attention: "E’tibor talab qiladi", timed: "Vaqtli mashq", materials: "O‘quv materiallari",
       readiness: "Imtihon tayyorgarligi", confirmed: "Tasdiqlangan", inProgress: "Jarayonda",
-      notStarted: "Boshlanmagan", needsAttention: "Qayta ko‘rish kerak", openComponent: "Ochish",
+      notStarted: "Boshlanmagan", needsAttention: "Qayta ko‘rish kerak", openComponent: "Bo‘limni ochish",
       startTask: "Topshiriqni boshlash", continueTask: "Topshiriqni davom ettirish",
       fixTask: "Xatoni tuzatish", retestTask: "Qayta tekshiruvdan o‘tish", mixedTask: "Aralash mashqni boshlash",
       timedTask: "Vaqtli mashqni boshlash", checkNext: "Keyingi topshiriqni tekshirish",
@@ -730,6 +792,20 @@
     return rows.find(x => x?.component_code === component) || rows[0] || null;
   }
 
+  // The app topbar already owns Back for Exam Prep. An embedded/offline
+  // view without that global control gets exactly one bottom fallback instead.
+  function epBottomBack(attribute,label){
+    return '<div class="ep-v58-fallback-nav" data-ep-v58-fallback-nav>'+
+      '<button class="ep-live-btn secondary" type="button" '+attribute+'>'+esc(label)+'</button></div>';
+  }
+  function epSyncBackFallback(root=rootEl()){
+    const bar=document.getElementById("topbar"),button=document.getElementById("topbar-back");
+    const visible=!!(bar&&button&&getComputedStyle(bar).display!=="none"&&
+      getComputedStyle(button).display!=="none"&&
+      getComputedStyle(button).visibility==="visible");
+    root?.querySelectorAll("[data-ep-v58-fallback-nav]").forEach(node=>{node.hidden=visible;});
+  }
+
   function componentCard(component, progress, statePayload) {
     const c = copy(), home = componentHomeCopy(), s = progress?.screening || {}, summary = componentSummary(component, statePayload);
     const reqItems = Number(s.required_items || 0), ansItems = Number(s.answered_items || 0), reqAreas = Number(s.required_areas || 0), ansAreas = Number(s.answered_areas || 0);
@@ -745,8 +821,7 @@
       ? `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-plan="${component}"></button>${stage >= 2 ? `<button type="button" data-ep-live-timed="${component}"></button>` : ""}${stage >= 5 ? `<button type="button" data-ep-live-readiness="${component}"></button>` : ""}</div>`
       : `<div class="ep-live-compat-actions" hidden aria-hidden="true"><button type="button" data-ep-live-start="${component}"></button></div>`;
     // Component card opens the overview; the next-action button starts work.
-    const hint = `${home.openComponent} ${component}`;
-    return `<div class="ep-live-component-slot"><button class="ep-live-card ep-live-component-card ep-live-component-entry" type="button" data-ep-live-component="${component}" data-ep-component-entry="1" data-ep-live-open-component="${component}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(home.skills)}</span></div><span class="ep-live-component-arrow" aria-hidden="true">›</span></div>${status}<div class="ep-live-component-open">${esc(hint)} <span aria-hidden="true">→</span></div></button>${compat}</div>`;
+    return `<div class="ep-live-component-slot"><button class="ep-live-card ep-live-component-card ep-live-component-entry" type="button" data-ep-live-component="${component}" data-ep-component-entry="1" data-ep-live-open-component="${component}"><div class="ep-live-component-head"><span class="ep-live-component-code">${component}</span><div class="ep-live-component-copy"><strong>${esc(componentName)}</strong><span>${skillCount} ${esc(home.skills)}</span></div><span class="ep-live-component-arrow" aria-hidden="true">›</span></div>${status}</button>${compat}</div>`;
   }
 
   function trackerAreaForSkill(tracker, skillCode) {
@@ -893,7 +968,7 @@
   function epComponentTabs(component,active){
     const all={
       ru:["Маршрут","Тренировки","История","К P1 и P5","Выберите тренировку. Полные Paper доступны добровольно.","Короткие работы на время по текущим правилам.","Полный Paper на бумаге. Письменные решения не оцениваются.","Необязательные сложные задачи, отдельно от Paper.","Тренировки пока недоступны."],
-      uz:["Yo‘l","Mashqlar","Tarix","P1 va P5 ga","Mashqni tanlang. To‘liq Paper ixtiyoriy.","Joriy bosqichdagi vaqtli qisqa mashqlar.","To‘liq Paper qog‘ozda yechiladi. Yozma yechim baholanmaydi.","Paper natijalaridan alohida ixtiyoriy masalalar.","Hozircha mashqlar mavjud emas."],
+      uz:["Tayyorgarlik","Mashqlar","Tarix","P1 va P5 ga qaytish","Mashq turini tanlang. To‘liq Paper ishlash majburiy emas.","Hozirgi bosqichga mos qisqa, vaqt bilan cheklangan mashqlar.","To‘liq Paper qog‘ozda bajariladi. Yozma yechimlarga ball qo‘yilmaydi.","Paper natijalaridan mustaqil qo‘shimcha murakkab masalalar.","Hozircha mashqlar mavjud emas."],
       en:["Route","Practice","History","Back to P1 and P5","Choose practice. Full Papers are always voluntary.","Short timed work under current rules.","Full Paper on paper. Written methods are not graded.","Optional harder questions, separate from Papers.","Practice is not currently available."]
     },r=all[state.language]||all.ru,tabNames=[["learning",r[0]],["training",r[1]],["history",r[2]]];
     return '<nav class="ep-v58-tabs" data-ep-v58-tabs aria-label="'+esc(component)+'">'+
@@ -914,7 +989,7 @@
     const h=componentHomeCopy(),c=copy();
     const r=({
       ru:["Тренировки","К P1 и P5","Выберите тренировку. Полные Paper доступны добровольно.","Короткие работы на время по текущим правилам.","Полный Paper на бумаге. Письменные решения не оцениваются.","Необязательные сложные задачи, отдельно от Paper.","Тренировки пока недоступны."],
-      uz:["Mashqlar","P1 va P5 ga","Mashqni tanlang. To‘liq Paper ixtiyoriy.","Joriy bosqichdagi vaqtli qisqa mashqlar.","To‘liq Paper qog‘ozda yechiladi. Yozma yechim baholanmaydi.","Paper natijalaridan alohida ixtiyoriy masalalar.","Hozircha mashqlar mavjud emas."],
+      uz:["Mashqlar","P1 va P5 ga qaytish","Mashq turini tanlang. To‘liq Paper ishlash majburiy emas.","Hozirgi bosqichga mos qisqa, vaqt bilan cheklangan mashqlar.","To‘liq Paper qog‘ozda bajariladi. Yozma yechimlarga ball qo‘yilmaydi.","Paper natijalaridan mustaqil qo‘shimcha murakkab masalalar.","Hozircha mashqlar mavjud emas."],
       en:["Practice","Back to P1 and P5","Choose practice. Full Papers are always voluntary.","Short timed work under current rules.","Full Paper on paper. Written methods are not graded.","Optional harder questions, separate from Papers.","Practice is not currently available."]
     })[state.language];
     const stage=Number(componentSummary(component,state.componentState[component])?.operational_stage||0);
@@ -925,12 +1000,13 @@
     const extra=internal.extraHardView?.open?link("extra-hard",
       state.language==="ru"?"Задачи повышенной сложности":state.language==="uz"?"Qo‘shimcha murakkab masalalar":"Extra Hard",r[5]):"";
     root.innerHTML=shell('<section class="ep-v58-training" data-ep-v58-component-training="'+esc(component)+'">'+
-      '<header class="ep-v58-section-head"><button class="ep-v58-back" type="button" data-ep-v58-training-back>← '+esc(r[1])+'</button>'+
+      '<header class="ep-v58-section-head">'+
       '<h2>'+esc(component+" · "+(component==="P1"?c.componentP1:c.componentP5))+'</h2></header>'+
       epComponentTabs(component,"training")+
       '<div class="ep-v58-training-description"><p>'+esc(r[2])+'</p></div>'+
       '<section class="ep-component-links ep-v58-training-links">'+(timed+paper+extra||'<p class="ep-live-notice">'+esc(r[6])+'</p>')+
-      '</section></section>',{compact:true});
+      '</section>'+epBottomBack('data-ep-v58-training-back',r[1])+'</section>',{compact:true});
+    epSyncBackFallback(root);
     root.querySelector('[data-ep-v58-training-back]')?.addEventListener("click",()=>void renderDashboard());
     epBindTabs(component,root);
     root.querySelector('[data-ep-component-link="timed"]')?.addEventListener("click",()=>void openTimed(component));
@@ -969,7 +1045,7 @@
     const materials = internal.materialsView?.openMaterials ? `<button class="ep-component-link" type="button" data-ep-component-link="materials"><span><strong>${esc(home.materials)}</strong></span><span aria-hidden="true">›</span></button>` : "";
     root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}
       <section class="ep-component-home ep-route-premium" data-ep-component-home="${component}" data-ep-ai-plan-available="${aiPlanAvailable ? "true" : "false"}" data-ep-ai-repeated-available="${aiRepeatedAvailable ? "true" : "false"}">
-        <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><button class="ep-route-back" type="button" data-ep-component-back aria-label="${esc(c.overview)}">←</button><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
+        <header class="ep-component-hero ep-route-header"><div class="ep-route-top"><span class="ep-route-kicker">CAMBRIDGE AS MATHEMATICS</span></div>
           <div class="ep-route-identity"><div><h2>${esc(componentName)}</h2><span class="ep-route-phase">${esc(stageLabel(stage))} · ${esc(c.stageTitle)}</span></div><span class="ep-live-component-code">${component}</span></div></header>
         ${epComponentTabs(component,"learning")}
         <section class="ep-component-next"><span class="ep-component-section-label">${esc(home.next)}</span>
@@ -981,8 +1057,9 @@
           <div class="ep-route-evidence-note">${esc(uxText().evidence)}</div></section>
         ${lastResultCard}
         <section class="ep-component-topics"><div class="ep-component-section-head"><strong>${esc(home.topics)}</strong><span>${Array.isArray(tracker?.areas) ? tracker.areas.length : 0}</span></div>${topicsMarkup(tracker)}</section>
-        <section class="ep-component-links">${attention}${readiness}${materials}</section></section>`, {compact:true});
+        <section class="ep-component-links">${attention}${readiness}${materials}</section>${epBottomBack("data-ep-component-back",epNavCopy().back)}</section>`, {compact:true});
     state.notice = null;
+    epSyncBackFallback(root);
     epBindTabs(component,root);
     root.querySelector("[data-ep-component-back]")?.addEventListener("click", renderDashboard);
     root.querySelector("[data-ep-component-primary]")?.addEventListener("click", () => handleComponentPrimary(component, action));
@@ -1162,14 +1239,11 @@
     const row = state.studySchedule || {};
     const minutes = Number(row.study_minutes_per_day || 30);
     const days = Number(row.study_days_per_week || 5);
-    const math = Number(state.profile?.mathematics_hours_budget || 0);
-    const total = Number(state.profile?.total_student_hours_available || 0);
     const options = Array.from({ length: 7 }, (_, i) => {
       const n = i + 1;
       return `<option value="${n}" ${n === days ? "selected" : ""}>${n}</option>`;
     }).join("");
     return `<section class="ep-live-card ep-live-study-schedule" data-ep-study-schedule>
-      <div class="ep-live-head"><strong>${esc(c.title)}</strong></div>
       <p class="ep-live-meta">${esc(c.hint)}</p>
       <div class="ep-live-study-schedule-fields">
         <label class="ep-live-field"><span>${esc(c.minutes)}</span><input class="ep-live-input" type="number" step="5" min="15" max="240" value="${esc(minutes)}" data-ep-study-minutes></label>
@@ -1177,7 +1251,6 @@
       </div>
       <div class="ep-live-study-schedule-summary">
         <strong data-ep-study-preview>${esc(c.preview)}: ${esc(formatWeeklyDurationFromMinutes(minutes*days))}</strong>
-        <span class="ep-live-meta">${esc(c.current)}: ${esc(formatWeeklyHours(math))} · ${esc(c.total)}: ${esc(formatWeeklyHours(total))}</span>
         <small class="ep-live-meta">${esc(c.rounding)}</small>
       </div>
       <button class="ep-live-btn secondary" type="button" data-ep-study-save>${esc(c.save)}</button>
@@ -1257,7 +1330,7 @@
         labelP1: "P1 · Pure Mathematics 1", labelP5: "P5 · Probability & Statistics 1"
       },
       uz: {
-        title: "P1 va P5 imtihon sanalari", hint: "Har bir komponent boshlanish vaqtini maktab yoki imtihon markazi ma’lumotiga ko‘ra kiriting (O‘zbekiston, UTC+5). iClub sanani taxmin qilmaydi.",
+        title: "P1 va P5 imtihon sanalari", hint: "P1 va P5 boshlanadigan sanani va vaqtni maktabingiz yoki imtihon markazidan aniqlab kiriting (O‘zbekiston vaqti, UTC+5). iClub imtihon sanasini o‘zi belgilamaydi.",
         confirmed: "Sana va vaqtni maktab yoki imtihon markazida tekshirdim",
         save: "Sanani saqlash", missing: "Sana hali kiritilmagan", before: "Tayyorgarlik muddati kirish diagnostikasidan keyin aniqlanadi",
         remaining: "Imtihongacha kunlar", initial: "Diagnostikadan imtihongacha kunlar",
@@ -1298,12 +1371,10 @@
         status = `${c.remaining}: ${Math.max(0, Number(item.days_remaining || 0))} · ${c.initial}: ${Math.max(0, Number(item.days_diagnostic_to_exam || 0))}`;
       } else if (examStart) status = c.before;
       const proof = examStart ? (item.official_timetable_verified === true ? c.verified : c.centre) : "";
-      const dateText = examStart ? new Intl.DateTimeFormat(dateLocale(), { timeZone: "Asia/Tashkent", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(examStart)) : "";
       const value = examCentreLocalValue(examStart);
       return `<div class="ep-live-exam-date-row" data-ep-exam-date-component="${component}">
         <div class="ep-live-exam-date-summary">
           <strong>${esc(component === "P1" ? c.labelP1 : c.labelP5)}</strong>
-          <span class="ep-live-meta">${esc(dateText || c.missing)}</span>
           <span class="ep-live-meta">${esc(status)}</span>
           ${proof ? `<span class="ep-live-meta">${esc(proof)}</span>` : ""}
         </div>
@@ -1315,7 +1386,6 @@
     }).join("");
     const completed = ["P1", "P5"].some(code => data[code]?.status === "horizon_ready");
     return `<section class="ep-live-card ep-live-exam-date-panel" data-ep-exam-date-panel>
-      <div class="ep-live-head"><strong>${esc(c.title)}</strong></div>
       <p class="ep-live-meta">${esc(c.hint)}</p>
       <div class="ep-live-exam-date-grid">${parts}</div>
       ${completed ? `<p class="ep-live-meta">${esc(c.forecast)}</p>` : ""}
@@ -1374,29 +1444,29 @@
         invalid:"Сумма минут P1 и P5 должна точно соответствовать выбранному недельному времени.",
         invalidSplitStep:"Время для P1 и P5 указывайте с шагом 5 минут.",
         invalidSchedule:"Укажите от 15 до 240 минут в день с шагом 5 минут и от 1 до 7 дней в неделю.",
-        exceedsAvailable:"Выбранное расписание превышает общее доступное время, указанное в плане экзамена.",
+        exceedsAvailable:"Выбранное расписание превышает доступное учебное время, указанное в «Мой план».",
         report:"Итоги занятий", empty:"Первый отчёт появится после семи дней с завершённой вводной диагностики.",
         week:"7 дней", month:"Месяц", learning:"Завершено учебных занятий",
         timed:"Завершено проверочных работ",
         minutes:"Фактические минуты занятий не подсчитаны: одного открытия экрана недостаточно для их подтверждения."
       },
       uz: {
-        title:"Haftalik reja", intro:"O‘zingizga mos variantni tanlang. Bu o‘qishni cheklamaydi.",
+        title:"Haftalik reja", intro:"O‘zingizga qulay rejani tanlang. Bu reja ko‘proq shug‘ullanishingizga to‘sqinlik qilmaydi.",
         keep:"Joriy rejani saqlash", split:"Vaqtni P1 va P5 o‘rtasida qayta taqsimlash",
-        change:"Yangi o‘qish vaqtini tanlash", p1:"P1 uchun haftalik daqiqa",
-        p5:"P5 uchun haftalik daqiqa", daily:"O‘qish kunidagi daqiqalar", days:"Haftadagi kunlar",
+        change:"Mashg‘ulot vaqtini o‘zgartirish", p1:"P1 uchun haftalik daqiqa",
+        p5:"P5 uchun haftalik daqiqa", daily:"Bir kunda mashg‘ulot uchun vaqt (daqiqa)", days:"Haftasiga necha kun",
         total:"Haftalik rejangiz", save:"Tanlovni saqlash",
         saved:"Tanlov saqlandi. Avvalgi natijalar o‘zgarmadi.",
-        alreadySaved:"Bu reja allaqachon saqlangan. Qayta yozish shart emas.",
+        alreadySaved:"Bu reja avval saqlangan. Qayta saqlash shart emas.",
         error:"Saqlab bo‘lmadi. Ma’lumotni yangilang va qayta urinib ko‘ring.",
         invalid:"P1 va P5 daqiqalari yig‘indisi haftalik reja bilan teng bo‘lishi kerak.",
         invalidSplitStep:"P1 va P5 uchun vaqtni 5 daqiqalik qadam bilan kiriting.",
         invalidSchedule:"Kuniga 15–240 daqiqa (5 daqiqalik qadam) va haftasiga 1–7 kun kiriting.",
         exceedsAvailable:"Tanlangan jadval imtihon rejangizda ko‘rsatilgan umumiy mavjud vaqtdan oshib ketdi.",
-        report:"O‘qish yakunlari", empty:"Birinchi hisobot boshlang‘ich diagnostikadan keyingi yetti kun yakunida chiqadi.",
+        report:"Mashg‘ulotlar hisoboti", empty:"Dastlabki tekshiruvdan keyin yetti kun o‘tgach, birinchi hisobot paydo bo‘ladi.",
         week:"7 kun", month:"Oy", learning:"Yakunlangan o‘quv mashg‘ulotlari",
         timed:"Yakunlangan sinov ishlari",
-        minutes:"Haqiqiy o‘qish daqiqalari hisoblanmadi: sahifani ochish yetarli dalil emas."
+        minutes:"Ilovada o‘tkazilgan vaqt haqiqiy mashg‘ulot vaqti sifatida hisoblanmaydi."
       },
       en: {
         title:"Weekly plan", intro:"Choose what works for you. This plan never limits additional studying.",
@@ -1410,7 +1480,7 @@
         invalid:"P1 and P5 minutes must add up to your chosen weekly time.",
         invalidSplitStep:"Enter P1 and P5 minutes in steps of 5.",
         invalidSchedule:"Enter 15–240 minutes per day in steps of 5 and 1–7 days per week.",
-        exceedsAvailable:"This schedule exceeds the total available study time in your exam plan.",
+        exceedsAvailable:"This schedule exceeds the total available study time in My plan.",
         report:"Study summaries", empty:"Your first summary appears after seven days following a completed entry diagnostic.",
         week:"7 days", month:"Month", learning:"Completed learning sessions",
         timed:"Completed timed sessions",
@@ -1446,8 +1516,9 @@
         cell("P1",p1) + cell("P5",p5) + "</div></div>";
     }).join("");
     return "<section class='ep-live-s3' data-ep-s3>" +
-      "<h3>" + esc(c.title) + "</h3><p>" + esc(c.intro) + "</p>" +
-      "<div class='ep-live-s3-budget'>" + esc(c.total) + ": <strong>" + budget + " min</strong></div>" +
+      "<p>" + esc(c.intro) + "</p>" +
+      (Math.abs(Number(state.profile?.mathematics_hours_budget || 0)*60-budget)>0.5 ?
+        "<div class='ep-live-s3-budget'>" + esc(c.total) + ": <strong>" + budget + " min</strong></div>": "") +
       "<div class='ep-live-s3-options'>" +
       "<label><input type='radio' name='ep-s3-choice' value='keep'" + checked("keep") + "> " + esc(c.keep) + "</label>" +
       "<label><input type='radio' name='ep-s3-choice' value='redistribute'" + checked("redistribute") + "> " + esc(c.split) + "</label>" +
@@ -1552,50 +1623,66 @@
   // Academy OS v5.8: exam preferences belong to a single compact plan.
   function epNavCopy(){
     const labels={
-      ru:["Мой план","К P1 и P5","Изменить профиль","Экзаменационный профиль","Режим занятий","Даты экзаменов","Недельный план и отчёты","Настроить","Не указана"],
-      uz:["Mening rejam","P1 va P5 ga","Profilni o‘zgartirish","Imtihon profili","O‘qish jadvali","Imtihon sanalari","Haftalik reja va hisobotlar","Sozlash","Kiritilmagan"],
-      en:["My plan","Back to P1 and P5","Edit profile","Exam profile","Study schedule","Exam dates","Weekly plan and reports","Manage","Not entered"]
+      ru:["Мой план","К P1 и P5","Изменить профиль","Экзаменационный профиль","Режим занятий","Даты экзаменов","Недельный режим и отчёты","Настроить","Не указана","Цель, даты и время подготовки — в одном месте"],
+      uz:["Mening rejam","P1 va P5 ga qaytish","Rejani tahrirlash","Imtihonga tayyorgarlik","Mashg‘ulot jadvali","Imtihon sanalari","Haftalik reja va hisobotlar","Rejani ko‘rish","Belgilanmagan","Maqsad, imtihon sanalari va mashg‘ulot vaqti shu yerda"],
+      en:["My plan","Back to P1 and P5","Edit profile","Exam profile","Study schedule","Exam dates","Weekly schedule and reports","Manage","Not entered","Goals, exam dates and study time in one place"]
     };
-    const names=["plan","back","edit","profile","schedule","dates","weekly","manage","none"];
+    const names=["plan","back","edit","profile","schedule","dates","weekly","manage","none","hint"];
     return Object.fromEntries(names.map((name,i)=>[name,(labels[state.language]||labels.ru)[i]]));
   }
+  // Route is a link to the one plan, not a second copy of its saved fields.
   function epPlanSummary(){
-    const c=copy(),t=epNavCopy(),p=state.profile||{};
-    const info=[p.exam_series,p.target_grade?c.targetShort+": "+p.target_grade:"",
-      Number(p.mathematics_hours_budget)>0?c.mathShort+": "+formatWeeklyHours(p.mathematics_hours_budget):""].filter(Boolean);
-    const dates=["P1","P5"].map(code=>code+": "+(state.personalHorizon?.[code]?.exam_start_at?
-      formatDateTime(state.personalHorizon[code].exam_start_at):t.none));
+    const t=epNavCopy();
     return '<section class="ep-live-card ep-v58-plan-summary" data-ep-v58-plan-summary>'+
-      '<div><strong>'+esc(t.plan)+'</strong><p class="ep-live-meta">'+esc(info.join(" · "))+
-      '</p><small class="ep-live-meta">'+esc(dates.join(" · "))+'</small></div>'+
+      '<div><strong>'+esc(t.plan)+'</strong><p class="ep-live-meta">'+esc(t.hint)+'</p></div>'+
       '<button type="button" class="ep-live-btn secondary" data-ep-v58-plan-open>'+esc(t.manage)+'</button></section>';
   }
   function renderMyPlan(expand=""){
     clearTimer();
     const root=rootEl();if(!root)return;
-    const t=epNavCopy(),c=copy(),p=state.profile||{};
-    const info=[p.exam_series,p.target_grade?c.targetShort+": "+p.target_grade:"",
-      Number(p.total_student_hours_available)>0?c.totalShort+": "+formatWeeklyHours(p.total_student_hours_available):"",
-      Number(p.mathematics_hours_budget)>0?c.mathShort+": "+formatWeeklyHours(p.mathematics_hours_budget):""].filter(Boolean);
+    const t=epNavCopy(),c=copy(),p=state.profile||{},hasProfile=Boolean(state.profile);
+    const editing=expand==="profile"||!hasProfile;
+    state.profileEditorFromPlan=editing;
+    const facts=hasProfile?[
+      [c.series,p.exam_series||t.none],
+      [c.target,p.target_grade||t.none],
+      [c.total,Number(p.total_student_hours_available)>0?formatWeeklyHours(p.total_student_hours_available):t.none],
+      [c.math,Number(p.mathematics_hours_budget)>0?formatWeeklyHours(p.mathematics_hours_budget):t.none]
+    ]:[];
+    const factItems=facts.map(([label,value])=>
+      '<div class="ep-v58-profile-fact"><small>'+esc(label)+'</small><strong>'+esc(value)+'</strong></div>').join("");
     const section=(key,title,body)=>'<details class="ep-v58-setting" data-ep-v58-setting="'+key+'"'+
       (expand===key?' open':'')+'><summary>'+esc(title)+'</summary>'+body+'</details>';
+    // A weekly S3 choice already owns the editable daily minutes, study days
+    // AND P1/P5 distribution; don't show the older schedule editor beside it.
+    // Accounts without the S3 contract retain the existing schedule save path.
+    const hasWeekly=state.weeklyChoice?.contract_version==="voluntary_weekly_choice_s3_v1";
+    const profileSummary=hasProfile&&!editing?
+      '<section class="ep-live-card ep-v58-profile-summary" data-ep-v58-profile-summary>'+
+      '<div><strong>'+esc(t.profile)+'</strong>'+
+      '<div class="ep-v58-profile-facts">'+factItems+'</div></div>'+
+      '<button type="button" class="ep-live-btn secondary" data-ep-v58-profile-edit>'+esc(t.edit)+'</button></section>':"";
     root.innerHTML=shell('<section class="ep-v58-plan-page" data-ep-v58-plan-page>'+
       (state.notice?'<div class="ep-live-notice" role="status" aria-live="polite">'+esc(state.notice)+'</div>':'')+
-      '<header class="ep-v58-section-head"><button type="button" class="ep-v58-back" data-ep-v58-plan-back>← '+esc(t.back)+'</button>'+
-      '<h2>'+esc(t.plan)+'</h2></header>'+
-      '<section class="ep-live-card ep-v58-profile-summary"><div><strong>'+esc(t.profile)+'</strong>'+
-      '<p class="ep-live-meta">'+esc(info.join(" · "))+'</p></div>'+
-      '<button type="button" class="ep-live-btn secondary" data-ep-v58-profile-edit>'+esc(t.edit)+'</button></section>'+
-      section("schedule",t.schedule,studySchedulePanel())+
-      section("dates",t.dates,examDatesPanel())+
-      (state.weeklyChoice?section("weekly",t.weekly,weeklyS3Panel()):"")+
+      '<header class="ep-v58-section-head"><h2>'+esc(t.plan)+'</h2></header>'+profileSummary+
+      (editing?examProfileFormMarkup():"")+
+      (hasProfile&&!editing?
+        section("dates",t.dates,examDatesPanel())+
+        (hasWeekly?section("weekly",t.weekly,weeklyS3Panel()):
+          section("schedule",t.schedule,studySchedulePanel())):"")+
+      (hasProfile?epBottomBack('data-ep-v58-plan-back',editing?t.plan:t.back):"")+
       '</section>',{compact:true});
     state.notice=null;
-    root.querySelector("[data-ep-v58-plan-back]")?.addEventListener("click",()=>void renderDashboard());
-    root.querySelector("[data-ep-v58-profile-edit]")?.addEventListener("click",()=>{
-      state.profileEditorFromPlan=true;renderProfile();
+    epSyncBackFallback(root);
+    root.querySelector("[data-ep-v58-plan-back]")?.addEventListener("click",()=>{
+      if(editing&&hasProfile)renderMyPlan();else void renderDashboard();
     });
-    bindStudySchedule();bindExamDatePanel();bindWeeklyS3();
+    root.querySelector("[data-ep-v58-profile-edit]")?.addEventListener("click",()=>renderMyPlan("profile"));
+    root.querySelector("[data-ep-live-profile-form]")?.addEventListener("submit",saveProfile);
+    if(hasProfile&&!editing){
+      bindExamDatePanel();
+      if(hasWeekly)bindWeeklyS3();else bindStudySchedule();
+    }
   }
 
   async function renderDashboard() {
@@ -2725,12 +2812,87 @@
 
   async function openReadiness(component) {
     clearTimer(); renderLoading("readiness", component);
+    // Source-authoritative operational Stage 3-6 is DIFFERENT from a
+    // Cambridge exam-readiness grade. Never substitute unmarked Paper attempts
+    // into the old comparable-score summary.
+    const hybrid = typeof internal.api?.hybridS4StageStatus === "function"
+      ? await internal.api.hybridS4StageStatus(component).catch(() => null)
+      : null;
+    // A failed/malformed authoritative stage response must never fall back
+    // to the old comparable-Paper-score screen. Legacy view is permitted
+    // ONLY when the signed owner RPC explicitly reports enabled:false.
+    if (!hybrid?.ok || typeof hybrid.data?.enabled !== "boolean") {
+      renderError(); return;
+    }
+    if (hybrid?.ok && hybrid.data?.enabled === true) {
+      const calibration = typeof internal.api?.finalCalibration === "function"
+        ? await internal.api.finalCalibration(component).catch(() => null)
+        : null;
+      renderOperationalReadiness(component,hybrid.data,
+        calibration?.ok ? calibration.data : null);
+      return;
+    }
     const useSummary = typeof internal.api?.readinessSummary === "function";
     const result = useSummary
       ? await internal.api.readinessSummary(component)
       : await internal.api.readiness(component);
     if (!result?.ok) { renderError(); return; }
     renderReadiness(component, normalizeReadiness(result.data || {}));
+  }
+
+  function renderOperationalReadiness(component, status, calibration) {
+    const root = rootEl(); if (!root) return; const c=copy();
+    const t=({
+      ru:{
+        title:"Учебные этапы",intro:"Переход между этапами зависит от подтверждённых навыков и исправлений. Paper — тренировка без баллов.",
+        l3:"Навыков на уровне L3",corrections:"Открытых исправлений",
+        ready:"Учебные условия выполнены",pending:"Нужно продолжить работу над навыками",
+        note:"Письменные Paper не оцениваются. Для разбора решения можно по желанию обратиться к ментору.",
+        waiting:"После обновления учебного этапа станет доступна финальная калибровка."
+      },
+      uz:{
+        title:"O‘quv bosqichlari",intro:"Bosqichlar tasdiqlangan ko‘nikmalar va tuzatishlarga bog‘liq. Paper uchun ball qo‘yilmaydi.",
+        l3:"L3 darajadagi ko‘nikmalar",corrections:"Ochiq tuzatishlar",
+        ready:"O‘quv shartlari bajarildi",pending:"Ko‘nikmalar ustida ishlashni davom ettiring",
+        note:"Yozma Paper baholanmaydi. Yechimni muhokama qilish uchun xohlasangiz mentor bilan maslahat qiling.",
+        waiting:"Bosqich holati yangilangach, yakuniy moslashuv ochiladi."
+      },
+      en:{
+        title:"Learning stages",intro:"Progression uses verified objective skills and corrections. Paper is ungraded practice.",
+        l3:"Skills at L3",corrections:"Open corrections",
+        ready:"Learning conditions met",pending:"More objective skill evidence is needed",
+        note:"Written Papers receive no marks. You may ask a mentor for advice; this is optional.",
+        waiting:"Final calibration becomes available after the operational stage is updated."
+      }
+    })[state.language] || {
+      title:"Learning stages",intro:"Paper is ungraded practice.",
+      l3:"Skills at L3",corrections:"Open corrections",
+      ready:"Learning conditions met",pending:"More objective evidence needed",
+      note:"Paper is ungraded; mentor advice is optional.",
+      waiting:"Final calibration is not available yet."
+    };
+    const objective=status?.stage5_to_6||{};
+    const total=Math.max(0,Number(objective.canonical_skill_count)||0);
+    const below=Math.max(0,Number(objective.below_l3_count)||0);
+    const corrections=Math.max(0,Number(objective.unresolved_correction_case_count)||0);
+    const achieved=Math.max(0,total-below);
+    const stageReady=objective.ready===true;
+    const available=calibration?.stage6_operational_access===true &&
+      calibration?.available===true && Number(calibration.operational_stage)>=6;
+    root.innerHTML=shell('<div class="ep-live-card" data-ep-live-operational-readiness>'+
+      '<div class="ep-live-head"><div><strong>'+esc(component+' · '+t.title)+'</strong></div>'+
+      '<button class="ep-live-btn secondary" type="button" data-ep-live-dashboard>'+esc(c.overview)+'</button></div>'+
+      '<p class="ep-live-notice">'+esc(t.intro)+'</p>'+
+      '<strong>'+esc(stageReady?t.ready:t.pending)+'</strong>'+
+      '<div class="ep-live-stats"><div class="ep-live-stat"><span>'+esc(t.l3)+'</span>'+
+      '<strong>'+achieved+' / '+total+'</strong></div><div class="ep-live-stat"><span>'+
+      esc(t.corrections)+'</span><strong>'+corrections+'</strong></div></div>'+
+      '<p class="ep-live-meta">'+esc(t.note)+'</p>'+
+      (available?'<div class="ep-live-actions"><button class="ep-live-btn" type="button" '+
+        'data-ep-live-calibration="'+esc(component)+'">'+esc(c.openCalibration)+'</button></div>':
+        stageReady?'<p class="ep-live-meta">'+esc(t.waiting)+'</p>':'')+'</div>');
+    root.querySelector('[data-ep-live-dashboard]')?.addEventListener('click',renderDashboard);
+    root.querySelector('[data-ep-live-calibration]')?.addEventListener('click',()=>openCalibration(component));
   }
 
   function renderReadiness(component, data) {
@@ -2917,6 +3079,10 @@
       },
       back: () => {
         const root=rootEl();
+        if(root?.querySelector("[data-ep-v58-plan-page]") && state.profileEditorFromPlan && state.profile) {
+          state.profileEditorFromPlan=false;renderMyPlan();return true;
+        }
+        if(root?.querySelector("[data-ep-v58-plan-page]") && !state.profile) { reset();return host.back(); }
         if(root?.querySelector("[data-ep-component-home],[data-ep-v58-component-training],[data-ep-v58-plan-page]")) { void renderDashboard(); return true; }
         if(root?.querySelector("[data-ep-v58-history]")) { const code=root.querySelector("[data-ep-v58-history]").dataset.epV58History;void openComponentHome(code);return true; }
         if(state.profileEditorFromPlan){state.profileEditorFromPlan=false;renderMyPlan();return true;}

@@ -17,9 +17,9 @@ async function main(){
  const browser=await chromium.launch({headless:true});
  try {
  for(const [language,title,width] of [
-   ['ru','Недельный план',390],
-   ['uz','Haftalik reja',375],
-   ['en','Weekly plan',1280]
+   ['ru','Недельный режим и отчёты',390],
+   ['uz','Haftalik reja va hisobotlar',375],
+   ['en','Weekly schedule and reports',1280]
  ]) {
   const page=await browser.newPage({viewport:{width,height:850},timezoneId:'Asia/Tashkent'});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -63,7 +63,7 @@ async function main(){
    await weeklyDetails.locator('summary').click();
    const panel=page.locator('[data-ep-s3]');
    await panel.waitFor({timeout:20000});
-   assert((await panel.textContent()).includes(title),'missing translated S3 '+language);
+   assert((await weeklyDetails.locator('summary').textContent()).includes(title),'missing translated S3 heading '+language);
    assert.equal(await panel.locator('input[type=radio]').count(),3,'must expose exactly three voluntary choices');
    assert(!(await panel.textContent()).includes('Cambridge grade'),'do not promise official marks');
    // Responsive: the panel must fit horizontally on both narrow phones.
@@ -85,8 +85,11 @@ async function main(){
      const events=await page.evaluate(()=>window.__s3Requests);
      assert(events.some(x=>x.name==='save_my_exam_prep_weekly_choice_s3_safe_v1'&&x.ok),
       'real HTTP did not save P1/P5 redistribution');
-     assert((await page.locator('[data-ep-s3]').textContent()).includes('175'),
-      'real selected schedule changed unexpectedly');
+     const readback=await page.evaluate(async()=>window.sb.rpc('get_my_exam_prep_weekly_choice_s3_safe_v1'));
+     assert.equal(readback?.data?.chosen_math_minutes,175,
+      'real signed schedule changed unexpectedly: expected 175 minutes');
+     assert.equal(readback?.data?.p1_minutes,100,'real signed P1 allocation changed');
+     assert.equal(readback?.data?.p5_minutes,75,'real signed P5 allocation changed');
    }
    const http=await page.evaluate(()=>window.__s3Requests);
    assert(http.some(x=>x.name==='get_my_exam_prep_weekly_choice_s3_safe_v1'&&x.ok),

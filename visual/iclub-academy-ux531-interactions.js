@@ -1,6 +1,8 @@
 /* iClub Academy OS UX #531: presentation-only rail pagination and subject hub panels.
    No Supabase, localStorage, assessment state, profile writes, or route overrides. */
 (()=>{'use strict';
+  // Both subject families swipe; each competitive card shares one deep blue,
+  // while pinned Study keeps its distinct lighter blue. Dots affect navigation only.
   const rails=[
     {id:'home-competitive-list',child:'.home-competitive-card'},
     {id:'home-study-list',child:'.home-pinned-tile'}

@@ -1,0 +1,89 @@
+# UX #531 — second owner review: saturated blue Study, one My plan, scalable history
+
+2026-11-17 · Source-only Draft · Canonical tracker Issue #531 · Academic data integrity Issue #450
+
+## Owner's specific feedback
+1. Pinned Study remains in the same blue family as Competitive, but has less visual prominence; the previous `#75A5EB → #C1DAFA` looked washed out.
+2. Separate 'План экзамена' duplicates 'Мой план'; put every real preference and action into 'Мой план'.
+3. History must show three latest records and expandable older entries in sets of five; decide what happens after 70–90 records and whether deletion/automatic cleaning is appropriate.
+4. Inspect other iClub screens for the same long-list problem.
+
+## 2026-11-17 exact-head CI reconciliation after runner backlog
+
+GitHub Actions eventually completed prior exact HEAD `bf8e71f61c21dfa5c716077e02dce294f5566cb1`: **53 SUCCESS / 8 FAILURE**. This was NOT a release-ready result. Real failure logs proved **three** workflow failures within this UX change's acceptance suites:
+- Academy B01–B08 synthetic Chromium `qa/ux531-math-p1p5-plan-runtime.cjs:311` used `[data-ep-v58-profile-fact]` although the displayed four fields actually use the CSS class `.ep-v58-profile-fact`. This was a test-selector mismatch: `0 !== 4`, not four hidden fields.
+- Both signed PG17/PostgREST/S3 browser workflows failed `scripts/p1p5-s3-chromium-mobile-three-language.cjs:66` because the test expected the old *duplicate* “Недельный план” heading inside `[data-ep-s3]`. The new single heading is in the parent disclosure `<summary>`, translated as “Недельный режим и отчёты” / “Haftalik jadval va hisobotlar” / “Weekly schedule and reports”. This was a stale test expectation; signed PostgreSQL/JWT authorization jobs and S3 server negative tests passed.
+- Corrected the S3 browser test to verify the one translated parent `summary` heading and **actual persisted** `chosen_math_minutes=175`, P1=100, P5=75 via signed owner `get_my_exam_prep_weekly_choice_s3_safe_v1` RPC read-back, rather than reprinting the weekly total on screen solely for the test. This preserves the owner's no-duplication request and strengthens persistence evidence.
+- The other five failures were unchanged P2-03, Written Understanding, P2-43, P2-08 old Playwright 1.55 unsupported `ubuntu26.04-x64`; P0-14 old `connect-src 'none'` source grep on unchanged preview. These are separately owned legacy CI issues, not a reason to change Math UX/auth or assert complete green.
+- Changes confined to synthetic UI test, signed S3 browser assertion test, strict source guard/allowlist and this documentation within Draft #558. No production source modification from the failed run, no SQL migrations, student mutations, or weakening of signed contracts.
+- **Current revised head after these changes: `19a6b895cb409a5125171ff761ca831e0adbf8a3`**. Exact-head tests were queued at the documentation checkpoint; prior 53/8 must not be reported as current SHA evidence. No merge or release.
+
+## 2026-11-17 follow-up: strict no-duplicate setting audit
+
+Owner explicitly rejected duplicated values/actions even if both were relocated into “My plan”. The previous Draft #558 still showed the saved four-field summary **alongside its populated edit form**, offered separate daily-minute/day-of-week editors in legacy Study Schedule AND S3 Weekly Choice for one learner, duplicated total/Math hours in Schedule, and showed P1/P5 times both as summary text and as prefilled datetime inputs.
+
+**Corrected source-only UX contract:**
+1. The route/dashboard has **one My plan navigation card** and explanatory text, NOT a duplicate readout of exam series/grade/hours/P1/P5 dates.
+2. In My plan normal view, four profile values (exam series, goal grade, total weekly time, Mathematics weekly budget) appear **once** in a labeled 4-cell summary. On Edit, the summary and other settings are **replaced** by exactly one four-input owner-scoped editor, with the existing unsaved-data-on-error behavior. Back within Edit returns to the summary; it does not duplicate panels. Initial setup uses exactly the same editor.
+3. P1/P5 exam start dates are edited in **one datetime input each** and accompanied by status/verification, not a second duplicate formatted date row; the unchanged server confirmation requirement remains.
+4. Only **one editable schedule per user**: if a server-returned `voluntary_weekly_choice_s3_v1` contract exists, show Weekly Choice (keep/redistribute/change, P1/P5 allocation, daily minutes, days per week and reports). Hide redundant legacy Study Schedule **in that mode only**. Without the S3 contract, retain the existing legacy Study Schedule save RPC and show no S3 panel. This conditional selection never changes server features or authorization.
+5. The legacy Schedule panel no longer repeats the four-profile budgets; it shows its own daily-minute/day count and a derived weekly preview. The S3 weekly allocation budget is shown only if **different** from the saved general Mathematics budget (distinct active weekly target). Nested headings identical to their parent expandable titles were removed. Reports are still in the weekly panel, once.
+6. No API/schema/RPC/persisted learner value changed, no new mandatory hours, no Paper grades. The unique-value UX is enforced by RU/UZ/EN × 320/375/390/430/1440 actual-source synthetic Chromium tests and fixed source pins.
+
+Potential **academic Stage3–6 PR #557** also edits `exam-prep/exam-prep-live.js` on a separate branch; integrate or rebase sequentially only after owner coordination and exact-head retests. Do not overwrite that workstream.
+
+## Exact source facts
+- Competitive Home CSS: `#174AAB → #3071E1` white text and prominent shadow. This Draft changes **only pinned Study** to `#5689D2 → #6196DD → #74A2E1`, navy `#071E3D`, border and softer elevation. This is a true blue gradient, not grey/white/pastel; title-label contrast on darkest stop >=4.5:1.
+- `exam-prep/exam-prep-live.js`: old `renderProfile` was separate form for exam series, target grade, total weekly study hours, Mathematics hours; existing `renderMyPlan` already offered schedule, confirmed P1/P5 exam dates, weekly choice/reports and an Edit profile action.
+- This Draft unifies initial profile setup and later editing **inside My plan** using the same `saveExamProfile` RPC and validation. First save still takes learner to P1/P5; an unsuccessful save keeps the unsaved form values. No new access/mandatory hours policy or legacy data mutations.
+- History has **two independent sources**: Core objective/diagnostic results vs *ungraded* S4 Paper executions. Core `get_exam_prep_recent_results_safe_v1(text,int)` has a hard server limit of 20 and written extension delegates to this function. Paper `get_exam_prep_hybrid_s4_history_safe_v1(text)` has a hard server limit of 30. Previous UI asked for only 10 Core and showed up to 30 Paper, potentially all on one page.
+- New UI asks for at most 20 Core and 30 Paper, independently shows latest **3** for each, opens an accessible native disclosure for older records, appends **5** records per click, preserves original owner-authorized review, separate P1/P5 and ungraded Paper. If the server cap is reached, a small honest note says only recent entries are available. **This is local progressive disclosure, not unimplemented server pagination.**
+- No delete/archive mutations, no client-only fake counters, no new library or paid service, no learner records touched.
+
+## How to scale when history reaches 70–90 or 900
+**Next design proposal, NOT implemented nor authorized:** owner-scoped server-side cursor pagination per (component, record type). Return 3 newest on first page, batches of 5 afterwards. Sort by `(finalized_at DESC,id DESC)` for Core and `(started_at DESC,id DESC)` for Paper with tie-breaker; signed or validated cursor, `has_more`, optional count, explicit server-side permission, bounded page size, indexed filter on user/component/time. Never download 90 records at initial screen opening, never rely on client slicing of a 20-row RPC response, never merge ungraded Paper into graded Core score. Preserve active/open Paper and current attempts. Test two learners, locale, pagination under concurrent new attempts, null dates, rerenders and authorized session review. New API/migration/release requires separate owner approval and signed PostgreSQL17/JWT/PostgREST/Chromium evidence.
+
+## Retention / deletion proposal: release HOLD
+- **Do not auto-delete academic history** just because a learner has 70/90 records. Record count is a UI/pagination issue, not a data-retention justification. Exam Prep evidence feeds progress, correction history, reporting and readiness; deleting records could corrupt projections.
+- Differentiate: (a) hide/archive a record from a learner-facing list while preserving server-authoritative audit/progress; (b) safe removal of cache or notification UI state; (c) irreversible personal-data deletion only under an approved account/retention lifecycle. These are different operations and permissions.
+- If owner chooses a user-facing hide option later: require exact affected records/ownership, a visible explanation that it does not erase academic results or rankings, audit and recovery semantics, anti-manipulation checks. No student-controlled deletion of official competitive Tour scores, ranks, certificates, verified academic evidence or original answers without an independently approved retention/deletion policy.
+- Any age-based data deletion requires a written policy: categories, legal/educational purpose, retention period, consent/notice, access rights, backups, recovery, downstream aggregates and audit. **No period, scheduled cleanup, archival SQL, soft-hide column, timer, feature flag or data change is approved by this Draft.**
+
+## Other real iClub surfaces to inspect (read-only, not changed)
+1. `practice-topic-choice.js` already trims a topic Practice preview to three recent attempts; `practice-results-tabs.js` shows recent attempt preview five and has a separate fuller history surface. Check its server cap and navigation back behavior before adopting a shared cursor convention.
+2. `app.js` Notifications already supports a per-row user-scoped `deleted_at` *soft hide* and a confirmed Clear all. Notification hiding is **not** an acceptable precedent for deleting scored student work; notification lists still deserve bounded loading.
+3. `app.js` Archive filters by season and loads Tour attempts to derive per-tour results; preserve competition evidence and certificates. For a large number of seasons/attempts, review server filtering and pagination, not deletion.
+4. `app.js` Certificates has a season selector; a long list should group by season/year or bounded batches without removing verifiable documents.
+5. `app.js` Ratings and existing Practice histories are read-oriented lists that may need pagination/virtualization under real volumes; review their actual query limits separately. Do not alter competitive rules in a UX PR.
+
+## Verification / release gates
+Source-only isolated Draft from exact published `main`; adapted Chromium tests must check RU/UZ/EN, widths 320/375/390/430/1440, initial setup, failed save retention, inline re-edit, P1 and P5, Core/Paper 3+5 disclosure, no writes/attempt starts on browse, original history review buttons and objective-vs-Paper separation. Full source hashes of answer-ACK and profile API remain pinned in their existing guard workflows. Main/prod/rollout/SQL/student-data untouched; separate owner GO needed to publish.
+
+UI rationale is consistent with NN/g's documented advice that goal-oriented lists often benefit from user-controlled "Load More" or pagination rather than endless infinite scrolling. This is a design recommendation, not a claim about other specific apps' internal retention policies.
+
+
+## 2026-11-17 owner visual-feedback correction — cards, Back and Uzbek (DRAFT / NO RELEASE)
+
+Owner review after the 8-page #558 Chromium visual pack accepted the remaining screens subject to four corrections:
+
+1. **Both Competitive and pinned Study remain swipeable; exact SOLID colors from the owner's screenshots.** Previous gradient interpretation was superseded by two supplied swatches: screenshot 1 is solid `#174AAB` (`rgb(23,74,171)`) on **every Competitive card**, screenshot 2 is solid `#3071E1` (`rgb(48,113,225)`) on **every pinned Study card**. No gradient, no color alternation when swiping to a second card. Native horizontal swipe, dots, touch behavior, layouts, actions, rankings, and progress remain unchanged. Pinned card label colors are white for readable normal-size text on the new solid blue (~4.59:1 contrast); typography and geometry unchanged.
+2. **P1/P5 route cards = one arrow at the top-right and full-card tap.** Removed duplicate footer `Open P1/P5 →`; the original native `button[data-ep-live-open-component]` remains the entire clickable surface, including keyboard activation and its text-based accessible name. No automatic start of an examination attempt.
+3. **One Back navigation per screen.** The actual iClub Courses topbar has a Back arrow and delegates Exam Prep to `iClubExamPrep.back()`. Removed in-page arrow/text duplication at the top of the My plan, P1/P5 component route, Practice and History. In an offline/embedded context where the *visible* topbar arrow is unavailable, a single 44px+ **bottom** Back action appears with the original safe destination. The plan editor still returns to the saved summary; the summary returns to the P1/P5 dashboard. No duplicate route or history state.
+4. **Uzbek Latin copy manually normalized on directly affected screens** (not an automated literal translation): `Imtihon sessiyasi`, `Ko‘zlangan baho`, `Haftasiga matematika uchun vaqt`, `Mening rejam`, `Tayyorgarlik`, `Mashg‘ulot jadvali`, `Haftalik reja va hisobotlar`, `Avvalgi natijalar`, `Haftasiga necha kun`. The user's original Paper/AS terminology remains in English when it is an official component name, not a sentence fragment. Dates retain UTC+5 and the same confirmation rules; weekly choice remains optional; nothing claims verified Paper marks.
+
+**Regression scope:** the existing Academy browser/source-parity gates now assert both rails are swipeable on phone widths, both have accessible pagination, all Competitive cards have the same solid `#174AAB` (no `background-image`) before and after a swipe, and pinned cards share solid `#3071E1` (no gradient). The owner screenshot fixture captures the first and second Competitive swipe state; the Math Chromium fixture checks whole-card tap, exactly one top arrow, no duplicated header back, bottom fallback, and Uzbek tab copy. The signed S3 RU/UZ/EN browser checks the new Uzbek disclosure title. Existing source-only release firewall explicitly allowlists/pins only these UI/QA changes. This is NOT an academic syllabus revision, release authorization, localization sign-off by a human language editor, new entitlement, or a user-data operation.
+
+**Review instructions:** compare updated Home at 390/1440, P1/P5 route at 390/1440 and My plan / training / history with the original visual pack. New screenshot artifacts belong to the latest exact-HEAD Academy workflow; never present older `3795...` screenshots as if they reflect the new navigation.
+
+
+## 2026-11-17 final owner color swatches — clarification to all historical gradients
+
+The final **two uploaded PNG screenshots** supersede earlier gradient discussions in this document. Pixel-mode/center sample of screenshot 1: RGB (23, 74, 171), `#174AAB`; screenshot 2: RGB (48, 113, 225), `#3071E1`. Apply **solid fills**, not gradient stops or different colors per card index. To support legibility on the brighter pinned blue, use white labels and a white translucent internal divider, with the existing fonts, spacing, click targets and full swipe behavior intact. No edits to Mathematics Paper, My plan, Uzbek copy, server, access, history, or the academic PR #557 are part of this final color-only revision. Earlier gradient mentions are historical and must not be implemented in a subsequent merge.
+
+## 2026-11-17 — final owner typography correction (pinned cards only, NOT release)
+
+Owner explicitly approved all prior UI except pinned Study text contrast and ordered implementation plus a visible preview. **Both** Home swipe rails and all solid owner swatches remain exactly unchanged: Competitive `#174AAB`, pinned `#3071E1`. Within the **pinned Study card only**, enforce white text `#FFFFFF` on the button itself, every descendant including the top label, subject title, nested real progress counter, progress caption, `Open ›` label and arrow, and any decorative text pseudo-element. The scoped rule uses `!important` deliberately to resist legacy black `--v3-text` and `--v3-muted` overrides; does not change other buttons, color fills, layouts, swipes, or registered/academic behavior.
+
+Browser regression now constructs realistic pinned DOM including `.js-home-pin-count` and asserts **every computed foreground `rgb(255,255,255)`** for five cards at widths 320/375/390/430/1440. Full-screen screenshot fixture asserts the same across top/title/counter/footer/open arrow using 2 illustrative cards and produces owner-review PNG. CSS cache identity updated. Strict source guard checks this contract without touching deployment. This is source-backed visual QA using synthetic placeholders, NOT a claim about a real learner's private profile or progress.
+
+Current approval boundary: owner has **not** authorized merge, deploy, production, student data changes, academic PR #557 merge or wider release. Inspect exact-head CI and generated screenshots before calling the final visual gate PASS; outstanding five legacy CI workflow failures remain independently tracked.
