@@ -247,6 +247,12 @@ async function caseRun(browser, address, { language, width, mode }) {
     const cardP5 = page.locator('[data-ep-live-open-component="P5"]');
     assert.equal(await cardP1.count(),1);
     assert.equal(await cardP5.count(),1);
+    assert.equal(await page.locator(".ep-live-component-open").count(),0,
+      "P1/P5 must not repeat the bottom Open text and arrow");
+    assert.equal(await page.locator(".ep-live-component-arrow").count(),2,
+      "P1 and P5 retain exactly one top-right arrow each");
+    assert.equal(await cardP1.getAttribute("type"),"button",
+      "Whole P1 card must remain a native tappable button");
     const p1 = await cardP1.innerText(), p5 = await cardP5.innerText();
     assert.match(p1,/Pure Mathematics 1/);
     assert.match(p5,/Probability & Statistics 1/);
@@ -317,6 +323,10 @@ async function caseRun(browser, address, { language, width, mode }) {
     await page.locator("[data-ep-v58-plan-open]").click();
     await page.locator("[data-ep-v58-plan-page]").waitFor();
     await verifyLayout('My plan');
+    assert.equal(await page.locator(".ep-v58-section-head .ep-v58-back").count(),0,
+      "My plan must not repeat the global topbar Back above its title");
+    assert.equal(await page.locator("[data-ep-v58-plan-back]").count(),1,
+      "One optional bottom Back is kept for embedded views without a topbar");
     await capture("math-my-plan-overview-"+language+"-"+width+".png",reviewViewport);
     if(mobileRu) {
       const examDates=page.locator('[data-ep-v58-setting="dates"]');
@@ -425,10 +435,12 @@ async function caseRun(browser, address, { language, width, mode }) {
     }
     await page.locator("[data-ep-v58-plan-back]").click();
     await page.locator(".ep-v58-main-components").waitFor();
-    await page.locator('[data-ep-live-open-component="P1"]').click();
+    await page.locator('[data-ep-live-open-component="P1"] .ep-live-component-copy').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
     await verifyLayout('P1 Route',true);
-    const routeLabel=language==="ru"?"Маршрут":language==="uz"?"Yo‘l":"Route";
+    assert.equal(await page.locator(".ep-route-header .ep-route-back").count(),0,
+      "P1 route must not repeat the topbar arrow within its hero");
+    const routeLabel=language==="ru"?"Маршрут":language==="uz"?"Tayyorgarlik":"Route";
     assert.equal(await page.locator('[data-ep-v58-tab="learning"]').innerText(),routeLabel,
       "Route tab describes the next step, progress, topics and corrections");
     assert.equal(await page.locator('[data-ep-v58-tab="learning"]').getAttribute("aria-current"),
@@ -436,11 +448,15 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.deepEqual((await page.evaluate(()=>window.__UX531_MATH_TEST.starts)),[]);
     await page.locator('[data-ep-v58-tab="training"]').click();
     await page.locator('[data-ep-v58-component-training="P1"]').waitFor();
+    assert.equal(await page.locator(".ep-v58-training .ep-v58-section-head .ep-v58-back").count(),0,
+      "Practice title needs no second top Back control");
     assert.equal(await page.locator(".ep-v58-training-description h3").count(),0,
       "Active Practice tab must not repeat the same heading");
     await verifyLayout('P1 Practice',true);
     await page.locator('[data-ep-v58-tab="history"]').click();
     await page.locator('[data-ep-v58-history="P1"]').waitFor();
+    assert.equal(await page.locator("[data-ep-history-back]").count(),1,
+      "History fallback Back lives at the bottom only");
     await verifyLayout('P1 History',true);
     assert.equal(await page.locator('[data-ep-history-legacy-section]').count(),1);
     const coreRecent=page.locator('[data-ep-history-recent="core"] .ep-history-row');
