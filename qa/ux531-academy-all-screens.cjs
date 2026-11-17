@@ -146,14 +146,28 @@ const server=http.createServer((req,res)=>{
       };
     });
     assert(palettes.competitive.length===2&&palettes.competitive.every(x=>x===palettes.competitive[0]),
-      'Both fixed Competitive cards must have exactly the same deep-blue palette');
+      'Both swipeable Competitive cards must have exactly the same deep-blue palette');
     assert(palettes.competitive[0].includes('rgb(23, 74, 171)')&&
       palettes.pinned.includes('rgb(86, 137, 210)')&&
-      !palettes.competitiveScrollable&&palettes.competitiveLayout==='grid',
-      'Only pinned Study uses lighter blue and swipe; Competitive static '+JSON.stringify(palettes));
+      palettes.competitiveLayout==='flex'&&(width!==390||palettes.competitiveScrollable),
+      'Both families swipe on phones; only pinned uses the lighter blue '+JSON.stringify(palettes));
     const folder=path.join(root,'ux531-academy-all-screens');
     fs.mkdirSync(folder,{recursive:true});
     await page.screenshot({path:path.join(folder,'home-competitive-and-pinned-blue-'+width+'.png'),fullPage:true});
+    if(width===390){
+      await page.evaluate(()=>{
+        const comp=document.getElementById('home-competitive-list');
+        comp.scrollLeft=comp.scrollWidth;
+      });
+      await page.waitForTimeout(180);
+      const second=await page.evaluate(()=>{
+        const comp=document.getElementById('home-competitive-list');
+        return{left:comp.scrollLeft,colors:[...comp.children].map(c=>getComputedStyle(c).backgroundImage)};
+      });
+      assert(second.left>10&&second.colors.every(c=>c===palettes.competitive[0]),
+        'Swipe to second Competitive card must preserve its identical color: '+JSON.stringify(second));
+      await page.screenshot({path:path.join(folder,'home-competitive-second-swipe-same-blue-390.png'),fullPage:true});
+    }
    }
    await page.evaluate(()=>window.__ux531Show({view:'profile'}));
    const profile=await page.evaluate(()=>{
