@@ -479,7 +479,7 @@
   
   async function openSessionResult(sessionId, component, origin = "completion") {
     if (typeof internal.api?.sessionReview !== "function") return false;
-    renderLoading();
+    renderLoading("review", component);
     let result=null;
     try {
       result=await internal.api.sessionReview(sessionId,state.language);
@@ -509,7 +509,7 @@
         typeof internal.api?.hybridS4History!=="function") {
       await openComponentHome(component);return;
     }
-    renderLoading();
+    renderLoading("history", component);
     const paperRequest=typeof internal.api?.hybridS4History==="function"
       ? internal.api.hybridS4History(component).catch(()=>null)
       : Promise.resolve(null);
@@ -579,7 +579,38 @@
       : `<div class="ep-live-head"><div><div class="ep-host-kicker">${esc(c.kicker)}</div><h2 class="ep-host-title">${esc(c.title)}</h2></div></div>`;
     return `<section class="ep-host-shell ep-live" aria-label="${esc(c.title)}">${head}${body}</section>`;
   }
-  function renderLoading() { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-card" role="status" aria-live="polite">${esc(copy().loading)}</div>`); }
+  function renderLoading(scope = "default", component = "") {
+    clearTimer();
+    const root = rootEl(); if (!root) return;
+    // A loading message must describe the NEXT screen, not a stale previous page.
+    // All language variants are static presentation copy; no backend or timer change.
+    const labels = {
+      ru: { default:"Загрузка…",prep:"Открываем подготовку…",route:"Загружаем ваш маршрут…",
+        component:"Открываем маршрут…",history:"Загружаем историю…",
+        plan:"Открываем учебный план…",task:"Загружаем задание…",
+        diagnostic:"Начинаем входную проверку…",practice:"Открываем тренировку…",
+        papers:"Загружаем Paper…",paper:"Открываем Paper…",
+        review:"Загружаем разбор…",answer:"Сохраняем ответ…",
+        finish:"Завершаем попытку…",readiness:"Загружаем показатели…"},
+      uz: { default:"Yuklanmoqda…",prep:"Imtihonga tayyorgarlik ochilmoqda…",route:"Yo‘lingiz yuklanmoqda…",
+        component:"Yo‘l ochilmoqda…",history:"Tarix yuklanmoqda…",
+        plan:"O‘quv rejasi ochilmoqda…",task:"Topshiriq yuklanmoqda…",
+        diagnostic:"Kirish tekshiruvi boshlanmoqda…",practice:"Mashq ochilmoqda…",
+        papers:"Paperlar yuklanmoqda…",paper:"Paper ochilmoqda…",
+        review:"Tahlil yuklanmoqda…",answer:"Javob saqlanmoqda…",
+        finish:"Urinish yakunlanmoqda…",readiness:"Ko‘rsatkichlar yuklanmoqda…"},
+      en: { default:"Loading…",prep:"Opening exam preparation…",route:"Loading your route…",
+        component:"Opening the route…",history:"Loading history…",
+        plan:"Opening study plan…",task:"Loading task…",
+        diagnostic:"Starting entry check…",practice:"Opening practice…",
+        papers:"Loading Papers…",paper:"Opening Paper…",
+        review:"Loading review…",answer:"Saving answer…",
+        finish:"Finishing attempt…",readiness:"Loading progress…"}
+    };
+    const text = labels[state.language]?.[scope] || labels[state.language]?.default || copy().loading;
+    const suffix = ["P1","P5"].includes(component) ? " " + component : "";
+    root.innerHTML = shell(`<div class="ep-live-card" role="status" aria-live="polite">${esc(text)}${esc(suffix)}</div>`);
+  }
   function renderError(message = null) { clearTimer(); const root = rootEl(); if (root) root.innerHTML = shell(`<div class="ep-live-error" role="alert" aria-live="assertive">${esc(message || copy().error)}</div><button class="ep-live-btn secondary" type="button" data-ep-live-home>${esc(copy().overview)}</button>`); root?.querySelector('[data-ep-live-home]')?.addEventListener('click', renderDashboard); }
 
   function renderProfile() {
@@ -861,9 +892,9 @@
 
   function epComponentTabs(component,active){
     const all={
-      ru:["Обучение","Тренировки","История","К P1 и P5","Выберите тренировку. Полные Paper доступны добровольно.","Короткие работы на время по текущим правилам.","Полный Paper на бумаге. Письменные решения не оцениваются.","Необязательные сложные задачи, отдельно от Paper.","Тренировки пока недоступны."],
-      uz:["O‘rganish","Mashqlar","Tarix","P1 va P5 ga","Mashqni tanlang. To‘liq Paper ixtiyoriy.","Joriy bosqichdagi vaqtli qisqa mashqlar.","To‘liq Paper qog‘ozda yechiladi. Yozma yechim baholanmaydi.","Paper natijalaridan alohida ixtiyoriy masalalar.","Hozircha mashqlar mavjud emas."],
-      en:["Learning","Practice","History","Back to P1 and P5","Choose practice. Full Papers are always voluntary.","Short timed work under current rules.","Full Paper on paper. Written methods are not graded.","Optional harder questions, separate from Papers.","Practice is not currently available."]
+      ru:["Маршрут","Тренировки","История","К P1 и P5","Выберите тренировку. Полные Paper доступны добровольно.","Короткие работы на время по текущим правилам.","Полный Paper на бумаге. Письменные решения не оцениваются.","Необязательные сложные задачи, отдельно от Paper.","Тренировки пока недоступны."],
+      uz:["Yo‘l","Mashqlar","Tarix","P1 va P5 ga","Mashqni tanlang. To‘liq Paper ixtiyoriy.","Joriy bosqichdagi vaqtli qisqa mashqlar.","To‘liq Paper qog‘ozda yechiladi. Yozma yechim baholanmaydi.","Paper natijalaridan alohida ixtiyoriy masalalar.","Hozircha mashqlar mavjud emas."],
+      en:["Route","Practice","History","Back to P1 and P5","Choose practice. Full Papers are always voluntary.","Short timed work under current rules.","Full Paper on paper. Written methods are not graded.","Optional harder questions, separate from Papers.","Practice is not currently available."]
     },r=all[state.language]||all.ru,tabNames=[["learning",r[0]],["training",r[1]],["history",r[2]]];
     return '<nav class="ep-v58-tabs" data-ep-v58-tabs aria-label="'+esc(component)+'">'+
       tabNames.map(([key,label])=>'<button class="ep-v58-tab" type="button" data-ep-v58-tab="'+key+
@@ -897,7 +928,7 @@
       '<header class="ep-v58-section-head"><button class="ep-v58-back" type="button" data-ep-v58-training-back>← '+esc(r[1])+'</button>'+
       '<h2>'+esc(component+" · "+(component==="P1"?c.componentP1:c.componentP5))+'</h2></header>'+
       epComponentTabs(component,"training")+
-      '<div class="ep-v58-training-description"><h3>'+esc(r[0])+'</h3><p>'+esc(r[2])+'</p></div>'+
+      '<div class="ep-v58-training-description"><p>'+esc(r[2])+'</p></div>'+
       '<section class="ep-component-links ep-v58-training-links">'+(timed+paper+extra||'<p class="ep-live-notice">'+esc(r[6])+'</p>')+
       '</section></section>',{compact:true});
     root.querySelector('[data-ep-v58-training-back]')?.addEventListener("click",()=>void renderDashboard());
@@ -969,7 +1000,7 @@
 
   async function openComponentHome(component) {
     if (state.busy || !["P1", "P5"].includes(component)) return;
-    state.busy = true; renderLoading();
+    state.busy = true; renderLoading("component", component);
     const flow = window.iClubExamPrepWeeklyFlowEnabled === true ? internal.weeklyFlowApi : null;
 
     // These two reads rebuild placement projections on the server. Running them
@@ -1029,7 +1060,7 @@
 
   async function prepareAndLaunch(component) {
     if (state.busy) return;
-    state.busy = true; renderLoading();
+    state.busy = true; renderLoading("task", component);
     let plan = null;
     let weeklyProgress = null;
     if (window.iClubExamPrepWeeklyFlowEnabled === true) {
@@ -1572,7 +1603,7 @@
     const root = rootEl();
     if (!root || !canMount()) return;
     const token = state.mountToken;
-    renderLoading();
+    renderLoading("route");
 
     // During Stage 0 the component cards use only diagnostic screening
     // progress. Defer the heavier derived-state rebuild until that component has
@@ -1625,16 +1656,7 @@
 
     }
     const c = copy();
-    const totalHours = Number(state.profile?.total_student_hours_available || 0), mathHours = Number(state.profile?.mathematics_hours_budget || 0);
-    const profileBits = [
-      state.profile?.exam_series || "",
-      state.profile?.target_grade ? `${c.targetShort}: ${state.profile.target_grade}` : "",
-      totalHours > 0 ? `${c.totalShort}: ${formatWeeklyHours(totalHours)}` : "",
-      mathHours > 0 ? `${c.mathShort}: ${formatWeeklyHours(mathHours)}` : ""
-    ].filter(Boolean);
-    const profileLine = profileBits.join(" · ");
-    const profileBadge = profileLine ? `<div class="ep-live-dashboard-profile"><strong>${esc(c.profileSaved)}</strong><span>${esc(profileLine)}</span></div>` : "";
-    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div>${profileBadge}</section><div class="ep-live-grid ep-v58-main-components">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>${epPlanSummary()}`, { compact: true });
+    root.innerHTML = shell(`${state.notice ? `<div class="ep-live-notice" role="status" aria-live="polite">${esc(state.notice)}</div>` : ""}<section class="ep-live-dashboard-intro"><div><div class="ep-live-dashboard-eyebrow">${esc(c.dashboardEyebrow)}</div><h3 class="ep-live-dashboard-title">${esc(c.dashboardTitle)}</h3><p class="ep-live-dashboard-text">${esc(c.dashboardText)}</p></div></section><div class="ep-live-grid ep-v58-main-components">${componentCard("P1", p1.data, s1.data)}${componentCard("P5", p5.data, s5.data)}</div>${epPlanSummary()}`, { compact: true });
     state.notice = null;
     bindStudySchedule();
     bindExamDatePanel();
@@ -1654,7 +1676,7 @@
   }
 
   async function startDiagnostic(component, returnKind = "dashboard") {
-    if (state.busy) return; state.busy = true; renderLoading();
+    if (state.busy) return; state.busy = true; renderLoading("diagnostic", component);
     const result = await internal.api.startNextDiagnostic(component, key(`ep-check-${component.toLowerCase()}`)); state.busy = false;
     if (!result?.ok || !result.data?.session_id) { renderError(); return; }
     state.returnView = { kind: returnKind, component }; await loadSession(result.data.session_id);
@@ -1665,7 +1687,7 @@
   }
 
   async function openPlan(component) {
-    clearTimer(); renderLoading();
+    clearTimer(); renderLoading("plan", component);
     // The new weekly flow is an explicit OFF-by-default cutover. Never fall back to
     // a plan-changing legacy RPC if its audited server contract is unavailable.
     if (window.iClubExamPrepWeeklyFlowEnabled === true) {
@@ -1723,7 +1745,7 @@
   }
 
   async function launchPlanItem(component, planId, priorityOrder, returnKind = "plan") {
-    if (state.busy) return; state.busy = true; renderLoading();
+    if (state.busy) return; state.busy = true; renderLoading("task", component);
     if (window.iClubExamPrepWeeklyFlowEnabled === true) {
       const flow = internal.weeklyFlowApi;
       const progress = typeof internal.progressUxApi?.progress === 'function'
@@ -1785,7 +1807,7 @@
   async function openTimed(component) {
     // Preserve the original academically gated timed route unchanged.
     state.hybridS4Active = false;
-    clearTimer(); renderLoading();
+    clearTimer(); renderLoading("practice", component);
     const [result, stage4Result] = await Promise.all([
       internal.api.timedCatalog(component),
       typeof internal.api?.stage4Consolidation === "function"
@@ -1914,7 +1936,7 @@
     tick();state.timerId=setInterval(tick,1000);
   }
   async function renderHybridS4Catalog(component,payload=null) {
-    clearTimer();renderLoading();
+    clearTimer();renderLoading("papers", component);
     const c=hybridS4Copy();
     let list=payload;
     if(!list) {
@@ -1960,14 +1982,14 @@
       b.addEventListener("click",()=>void hybridS4Load(b.dataset.epHybridS4Resume,component)));
   }
   async function hybridS4Start(component,assessmentId) {
-    if(state.busy)return;state.busy=true;renderLoading();
+    if(state.busy)return;state.busy=true;renderLoading("paper", component);
     const res=await internal.api.hybridS4Start(assessmentId,key("ep-hybrid-s4-start"));
     state.busy=false;
     if(!res?.ok || !res.data?.session_id){renderError();return;}
     await hybridS4Load(res.data.session_id,component);
   }
   async function hybridS4Load(sessionId,component) {
-    clearTimer();renderLoading();
+    clearTimer();renderLoading("paper", component);
     const res=await internal.api.hybridS4Session(sessionId,state.language);
     if(!res?.ok || res.data?.session_id!==sessionId ||
       res.data?.component_code!==component){renderError();return;}
@@ -2092,7 +2114,7 @@
   }
   async function hybridS4Reveal(sessionId,component) {
     if(state.busy)return;
-    state.busy=true;clearTimer();renderLoading();
+    state.busy=true;clearTimer();renderLoading("review", component);
     const res=await internal.api.hybridS4Reveal(sessionId,state.language);
     state.busy=false;
     if(!res?.ok || res.data?.session_id!==sessionId){renderError();return;}
@@ -2200,7 +2222,7 @@
   }
 
   async function startTimed(component, assessmentId) {
-    if (state.busy) return; state.busy = true; renderLoading();
+    if (state.busy) return; state.busy = true; renderLoading("practice", component);
     const auth = await internal.api.authorizeTimed(assessmentId);
     if (!auth?.ok || !auth.data?.authorization_id) { state.busy = false; renderError(); return; }
     const started = await internal.api.startSession(auth.data.authorization_id, key("ep-timed-session")); state.busy = false;
@@ -2228,7 +2250,7 @@
   }
 
   async function loadSession(sessionId) {
-    clearTimer(); renderLoading();
+    clearTimer(); renderLoading("task");
     // Legacy remains the baseline for diagnostics/timed/Paper and for any
     // beta whose new server contract has not been deployed. The additive reader
     // is optional and may not yet exist; never strand existing learners.
@@ -2605,7 +2627,7 @@
       await sendPendingAnswer(pending);
       return;
     }
-    state.busy=true; clearTimer(); renderLoading();
+    state.busy=true; clearTimer(); renderLoading("answer");
     const result=await internal.api.submitResponse(state.session.session_id,item.item_order,payload,
       key('ep-answer'),Date.now()-state.itemStartedAt,state.language); state.busy=false;
     if (!result?.ok) { renderError(); return; }
@@ -2616,14 +2638,14 @@
     // A timed attempt must not finalize while an answer's server ACK is unknown.
     // On reconciliation, loadSession rechecks the original absolute deadline.
     if (state.busy || !state.session || state.pendingSubmission) return; const sessionId = state.session.session_id, component = state.session.component_code;
-    state.busy = true; clearTimer(); renderLoading();
+    state.busy = true; clearTimer(); renderLoading("finish", component);
     const finalized = await internal.api.finalizeTimed(sessionId, key("ep-timed-finalize"), reason); state.busy = false;
     if (!finalized?.ok) { renderError(); return; }
     state.session = null; await openTimedReview(sessionId, component);
   }
 
   async function openTimedReview(sessionId, component) {
-    renderLoading();
+    renderLoading("review", component);
     const [review, result] = await Promise.all([internal.api.timedReviewPack(sessionId, state.language), internal.api.timedResult(sessionId)]);
     if (!review?.ok || !result?.ok) { renderError(); return; }
     const items = Array.isArray(review.data?.items) ? review.data.items : [];
@@ -2702,7 +2724,7 @@
   }
 
   async function openReadiness(component) {
-    clearTimer(); renderLoading();
+    clearTimer(); renderLoading("readiness", component);
     const useSummary = typeof internal.api?.readinessSummary === "function";
     const result = useSummary
       ? await internal.api.readinessSummary(component)
@@ -2859,7 +2881,7 @@
     const root = rootEl();
     if (!root || root.querySelector('[data-ep-beta-action]')) return false;
     const token = ++state.mountToken;
-    renderLoading();
+    renderLoading("prep");
     const profile = await internal.api.examProfile();
     if (!canMount(context) || token !== state.mountToken) return false;
     if (!profile?.ok) { renderError(); return false; }

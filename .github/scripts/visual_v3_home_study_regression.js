@@ -147,7 +147,7 @@ async function activateStudy(page) {
   assert(state.compShadow !== 'none', 'Home competitive card premium surface missing');
   assert(state.heroHeight === 0, `Decorative Home subject icon must be visually absent: ${state.heroHeight}`);
   assert(state.ctaHeight >= 44, `Home primary action target too small: ${state.ctaHeight}`);
-  assert(state.tileRadius === '19px', `Approved v5.8 Study card radius drift: ${state.tileRadius}`);
+  assert(state.tileRadius === '20px', `Owner-approved 2026-11-17 light-blue Study card radius drift: ${state.tileRadius}`);
   assert(state.tileDisplay === 'flex', `Pinned tile must use swipe-card flex layout: ${state.tileDisplay}`);
   assert(state.titleAlign === 'left', 'Approved Study title must align left');
   assert(state.titleFontSize >= 17 && state.titleFontSize <= 19.1,
@@ -155,8 +155,8 @@ async function activateStudy(page) {
   assert(state.titleInset >= 10 && state.titleInset <= 24, 'Pinned title inset drift');
   assert(state.topLabelCount === 1 && state.bottomCount === 1,
     'Approved v5.8 pinned card requires top label + bottom action');
-  assert(state.tileColor.includes('rgb(242, 247, 255)'),
-    `Study palette must retain the approved soft blue, not saturated blue: ${state.tileColor}`);
+  assert(state.tileColor.includes('rgb(117, 165, 235)') && state.tileColor.includes('rgb(193, 218, 250)'),
+    `Owner-approved Study palette must stay visibly lighter than Competitive, not near-white: ${state.tileColor}`);
   assert(state.width <= state.innerWidth, `Home mobile overflow: ${JSON.stringify(state)}`);
 
   await activateStudy(page);

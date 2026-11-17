@@ -759,7 +759,7 @@ body.iclub-visual-v3 #exam-prep-host-root .ep-v58-section-head h2{
   letter-spacing:-.025em;color:#174486;overflow-wrap:anywhere;
 }
 body.iclub-visual-v3 #exam-prep-host-root .ep-v58-back{
-  min-height:42px;max-width:100%;width:max-content;
+  min-height:44px;max-width:100%;width:max-content;
   border:0;background:transparent;color:#2963b6;cursor:pointer;
   font:inherit;font-size:13px;font-weight:750;padding:6px 3px;text-align:left;
 }
@@ -808,6 +808,21 @@ body.iclub-visual-v3 #exam-prep-host-root .ep-v58-tab{
 body.iclub-visual-v3 #exam-prep-host-root .ep-v58-tab[aria-current="page"]{
   background:#fff;color:#194a96;border-color:#cbdcf5;
   box-shadow:0 2px 8px rgba(31,82,156,.09);
+}
+/* Post-mobile QA: concise Math buttons remain tappable and wrap naturally;
+   scoped to Exam Prep's existing Math live interface only. */
+body.iclub-visual-v3 #exam-prep-host-root .ep-live :is(
+  .ep-live-btn,.ep-v58-back,.ep-v58-tab
+){
+  min-height:44px;box-sizing:border-box;white-space:normal;
+  overflow-wrap:break-word;line-height:1.35;
+}
+body.iclub-visual-v3 #exam-prep-host-root :is(
+  .ep-v58-section-head,.ep-v58-training-description,
+  .ep-v58-profile-summary,.ep-v58-plan-summary,.ep-v58-tabs
+){min-width:0;max-width:100%}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-plan-summary>.ep-live-btn{
+  max-width:100%;
 }
 body.iclub-visual-v3 #exam-prep-host-root .ep-v58-training{
   display:grid;gap:12px;min-width:0;

@@ -16,6 +16,37 @@ assert.equal((paperSource.match(/noScore:/g)||[]).length,4,
   "S4 Paper must remain ungraded in RU/UZ/EN and the safe fallback");
 assert.match(paperSource,/data-ep-hybrid-s4-mentor-optional/,
   "Paper review should provide optional advice without a required mentor gate");
+assert.match(paperSource,/function renderLoading\(scope = "default", component = ""\)/,
+  "Exam Prep loading copy must describe the current destination");
+for(const expected of ['renderLoading("route")','renderLoading("component", component)',
+    'renderLoading("history", component)','renderLoading("plan", component)',
+    'renderLoading("paper", component)','renderLoading("answer")']){
+  assert(paperSource.includes(expected),"Missing contextual loading message: "+expected);
+}
+assert(paperSource.includes('ru:["Маршрут","Тренировки","История"'),
+  "Route and Practice must describe distinct functions");
+const homeStyle=fs.readFileSync(path.join(root,"visual/iclub-academy-ux531-b02b03.css"),"utf8");
+// Owner 2026-11-17: pinned Study stays recognisably BLUE, visibly lighter
+// than Competitive. Dark text on its lightest/strongest blue keeps contrast.
+assert(homeStyle.includes("linear-gradient(138deg,#75a5eb 0%,#9abff2 55%,#c1dafa 100%)"),
+  "Pinned Study needs a genuinely blue, noticeably lighter gradient");
+assert(homeStyle.includes("linear-gradient(137deg,#174aab 0%,#3071e1 100%)"),
+  "The original saturated Competitive gradient must remain untouched");
+const luminance = hex => {
+  const channels=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255)
+    .map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);
+  return .2126*channels[0]+.7152*channels[1]+.0722*channels[2];
+};
+const contrast = (a,b) => (Math.max(luminance(a),luminance(b))+.05)/
+  (Math.min(luminance(a),luminance(b))+.05);
+assert(luminance("#75a5eb")>luminance("#3071e1"),
+  "Pinned blue must be lighter than even the light end of Competitive");
+for (const textColor of ["#102f59","#153866"])
+  assert(contrast(textColor,"#75a5eb")>=4.5,
+    "Pinned label/title/footer must remain readable on the deepest blue stop");
+assert(homeStyle.includes("box-shadow:0 8px 20px rgba(27,81,160,.11)"),
+  "Pinned elevation must stay visibly below Competitive");
+
 const screens = path.join(root, "ux531-academy-all-screens");
 const html = [
   '<!doctype html><html lang="ru"><head><meta charset="utf-8">',
@@ -198,8 +229,22 @@ async function caseRun(browser, address, { language, width, mode }) {
     const expected = language==="en" ? "Preparation for P1 and P5" :
       language==="uz" ? "P1 va P5 bo‘yicha tayyorgarlik" : "Подготовка по P1 и P5";
     assert.equal(copy,expected);
-    assert.equal(await page.locator(".ep-live-dashboard-profile").count(),1,
-      "Saved study plan must be reflected on the P1/P5 dashboard");
+    // Route overview must show the single My Plan card BELOW P1/P5, not
+    // repeat the same hours/profile in a second badge above the cards.
+    assert.equal(await page.locator(".ep-live-dashboard-profile").count(),0,
+      "Do not duplicate saved plan details beside the route header");
+    assert.equal(await page.locator("[data-ep-v58-plan-summary]").count(),1);
+    assert.match(await page.locator("[data-ep-v58-plan-summary]").innerText(),
+      language==="en"?/My plan/:language==="uz"?/Mening rejam/:/Мой план/);
+    const overviewOrder = await page.evaluate(()=>{
+      const root=document.getElementById("exam-prep-host-root");
+      return ["ep-live-dashboard-intro","ep-v58-main-components","ep-v58-plan-summary"]
+        .map(cls=>[...root.querySelectorAll("."+cls)][0])
+        .filter(Boolean).map(el=>[...el.parentElement.children].indexOf(el));
+    });
+    assert.equal(overviewOrder.length,3,"Route, P1/P5 and My Plan must exist");
+    assert(overviewOrder[0]<overviewOrder[1] && overviewOrder[1]<overviewOrder[2],
+      "Your route, P1/P5, and My Plan must appear in that order: "+overviewOrder);
     // The exact approved v5.8 plan, learning, practice and history layout
     // must fit across all named widths without reducing touch targets.
     const verifyLayout = async (place, requireTabs=false) => {
@@ -299,12 +344,17 @@ async function caseRun(browser, address, { language, width, mode }) {
     await page.locator(".ep-v58-main-components").waitFor();
     await page.locator('[data-ep-live-open-component="P1"]').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
-    await verifyLayout('P1 Learning',true);
+    await verifyLayout('P1 Route',true);
+    const routeLabel=language==="ru"?"Маршрут":language==="uz"?"Yo‘l":"Route";
+    assert.equal(await page.locator('[data-ep-v58-tab="learning"]').innerText(),routeLabel,
+      "Route tab describes the next step, progress, topics and corrections");
     assert.equal(await page.locator('[data-ep-v58-tab="learning"]').getAttribute("aria-current"),
-      "page","component opens Learning, never starts diagnostics");
+      "page","component opens its route, never starts diagnostics");
     assert.deepEqual((await page.evaluate(()=>window.__UX531_MATH_TEST.starts)),[]);
     await page.locator('[data-ep-v58-tab="training"]').click();
     await page.locator('[data-ep-v58-component-training="P1"]').waitFor();
+    assert.equal(await page.locator(".ep-v58-training-description h3").count(),0,
+      "Active Practice tab must not repeat the same heading");
     await verifyLayout('P1 Practice',true);
     await page.locator('[data-ep-v58-tab="history"]').click();
     await page.locator('[data-ep-v58-history="P1"]').waitFor();
