@@ -49,11 +49,35 @@ for(const token of [
  "epComponentTabs(component","data-ep-v58-plan-summary",
  "async function reconcilePendingAnswer(pending)","pending.idempotencyKey"
 ])assert(live.includes(token),"Required original/updated source invariant absent: "+token);
+// Strict no-duplicate setting contract. No saved values, time editor or
+// P1/P5 date may be shown twice on the same My plan screen.
+const myPlan=live.slice(live.indexOf("function renderMyPlan(expand="),live.indexOf("async function renderDashboard()"));
+const routePlan=live.slice(live.indexOf("function epPlanSummary()"),live.indexOf("function renderMyPlan(expand="));
+assert(myPlan.includes("const editing=expand===")&&myPlan.includes("hasProfile&&!editing"),
+ "Saved profile summary must be replaced (not repeated) while editing");
+assert(myPlan.includes('data-ep-v58-profile-summary')&&myPlan.includes("ep-v58-profile-facts"),
+ "All four profile facts must remain in one labeled summary");
+assert(myPlan.includes('section("dates",t.dates,examDatesPanel())'),
+ "Preserve both confirmed P1/P5 date actions in My plan");
+assert(myPlan.includes('hasWeekly?section("weekly",t.weekly,weeklyS3Panel()):')&&
+ myPlan.includes('section("schedule",t.schedule,studySchedulePanel())'),
+ "Expose exactly one time editor per server S3/legacy contract");
+assert(!routePlan.includes("mathematics_hours_budget")&&!routePlan.includes("personalHorizon")&&
+ !routePlan.includes("exam_series"),"Route must not repeat saved My plan values");
+const legacy=live.slice(live.indexOf("function studySchedulePanel()"),live.indexOf("function bindStudySchedule()"));
+assert(!legacy.includes("formatWeeklyHours(math)")&&!legacy.includes("formatWeeklyHours(total)")&&
+ !legacy.includes("esc(c.current)"),"Legacy schedule must not reprint profile budgets");
+const examDates=live.slice(live.indexOf("function examDatesPanel()"),live.indexOf("function bindExamDatePanel()"));
+assert(!examDates.includes("dateText")&&examDates.includes("data-ep-exam-date-input"),
+ "P1/P5 dates need one input each, no duplicated displayed date string");
+const s3=live.slice(live.indexOf("function weeklyS3Panel()"),live.indexOf("function bindWeeklyS3()"));
+assert(s3.includes("data-ep-s3-newtime")&&s3.includes("data-ep-s3-p1")&&
+ s3.includes("data-ep-s3-p5"),"S3 must preserve P1/P5 allocation and daily schedule editing");
 assert(!live.includes("data-ep-history-delete"),"History deletion not approved");
 assert(css.includes(".ep-history-archive")&&css.includes(".ep-history-more[hidden]"),"History CSS missing");
-for(const v of ["ux531-b02b03-blue-20261117-v3","ux531-b04b08-history-plan-v3",
- "ux531-compact-plan-history-loader-v3"])assert(index.includes(v),"Cache bust missing "+v);
-assert(api.includes("ux531-compact-plan-history-20261117"),"Dynamic UI cache identity missing");
+for(const v of ["ux531-b02b03-blue-20261117-v3","ux531-b04b08-single-plan-v4",
+ "ux531-single-plan-loader-v4"])assert(index.includes(v),"Cache bust missing "+v);
+assert(api.includes("ux531-single-plan-no-duplicates-20261117-v4"),"Dynamic UI cache identity missing");
 const a=read(".github/workflows/exam-prep-weekly-answer-recovery.yml")
  .match(/git hash-object exam-prep\/exam-prep-live\.js\)" = '([a-f0-9]{40})'/);
 const p=read(".github/workflows/exam-prep-weekly-profile-recovery.yml")
@@ -63,7 +87,7 @@ assert.equal(git("hash-object","exam-prep/exam-prep-live.js"),a[1],"Answer-ACK f
 assert.equal(git("hash-object","exam-prep/exam-prep-api.js"),p[1],"Profile API full blob changed without pin");
 const apiPlus=git("diff","--unified=0",RELEASE,head,"--","exam-prep/exam-prep-api.js")
  .split("\n").filter(x=>x.startsWith("+")&&!x.startsWith("+++"));
-assert(apiPlus.length===1&&apiPlus[0].includes("ux531-compact-plan-history-20261117"),
+assert(apiPlus.length===1&&apiPlus[0].includes("ux531-single-plan-no-duplicates-20261117-v4"),
  "API may change only display-client cache version");
 const livePlus=git("diff","--unified=0",RELEASE,head,"--","exam-prep/exam-prep-live.js")
  .split("\n").filter(x=>x.startsWith("+")&&!x.startsWith("+++"));
