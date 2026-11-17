@@ -22,7 +22,8 @@ const allowed=new Set([
   '.github/workflows/ux531-previewless-release-firewall.yml',
   'docs/ui-redesign/27-ux531-math-post-mobile-six-point-polish-20261116.md',
   'exam-prep/exam-prep-api.js','exam-prep/exam-prep-live.js','index.html',
-  'qa/ux531-math-p1p5-plan-runtime.cjs','qa/ux531-postrelease-source-guard.cjs',
+  'qa/ux531-math-p1p5-plan-runtime.cjs','qa/ux531-registered-navigation-e2e.cjs',
+  'qa/ux531-postrelease-source-guard.cjs',
   'visual/iclub-academy-ux531-b02b03.css','visual/iclub-academy-ux531-b04b08.css'
 ]);
 assert(changed.length>=8,'Expected substantive scoped follow-up, not an empty patch');
@@ -79,6 +80,16 @@ for(const line of runtimeDiff.split('\n')){
   assert(!/localStorage\.(?:clear|removeItem)|\b(?:truncate|drop)\s+(?:table|schema)\b|\b(?:qa_open_all_core|rollout_state|ai_enabled|mentor_enabled|stage_gates_enabled)\s*[:=]/i.test(line),
     'Forbidden state/entitlement mutation: '+line.slice(0,150));
 }
+// The registered-navigation browser QA changes ONLY its 2-line pinned-colour
+// expectation; no learner flow/auth/request checks may be softened in this PR.
+const navDiff=git('diff','--unified=0',base,head,'--','qa/ux531-registered-navigation-e2e.cjs');
+const navAdded=navDiff.split('\n').filter(x=>x.startsWith('+')&&!x.startsWith('+++'));
+const navRemoved=navDiff.split('\n').filter(x=>x.startsWith('-')&&!x.startsWith('---'));
+assert(navAdded.length===4 && navRemoved.length===2 &&
+  navAdded.join(' ').includes('117, 165, 235') &&
+  navAdded.join(' ').includes('193, 218, 250') &&
+  navRemoved.join(' ').includes('242, 247, 255'),
+  'Only the architect-updated blue pinned-card browser colour checks may change');
 assert(!changed.some(p=>/^supabase\/|^api\/|^security\/|^content\/|^package|^vercel\.json|\.env/.test(p)),
   'No backend, question, dependency or secret edits permitted');
 console.log('UX531 postrelease exact-SHA SOURCE-ONLY GUARD: PASS');
