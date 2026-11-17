@@ -101,25 +101,10 @@ body.iclub-visual-v3 #view-home .home-block-title{
  font-size:16px;letter-spacing:-.15px;font-weight:800;color:var(--academy-ink)
 }
 body.iclub-visual-v3 #view-home .home-block-sub{font-size:11px;color:#627c9d}
-/* Competitive subjects: a fixed, equal-card list. No horizontal rail,
-   swipe paging or page dots. All competitive cards use the SAME deep blue.
-   Pinned Study alone keeps the lighter-blue swipe rail. */
-body.iclub-visual-v3 #home-competitive-list{
- display:grid!important;
- grid-template-columns:minmax(0,1fr);
- gap:12px;
- overflow:visible;
- padding:0;
- margin:0;
- min-width:0;
- scroll-snap-type:none;
-}
-body.iclub-visual-v3 #home-competitive-list > .home-competitive-card{
- min-width:0;width:100%;box-sizing:border-box;
-}
-body.iclub-visual-v3 #home-competitive-list + .academy-rail-pagination{
- display:none!important;
-}
+/* BOTH subject families remain horizontal swipe rails on phones.
+   Every Competitive card always keeps the SAME original deep-blue gradient;
+   pinned Study uses the second, lighter blue and its own swipe dots. */
+body.iclub-visual-v3 #home-competitive-list,
 body.iclub-visual-v3 #home-study-list{
  display:flex!important;
  flex-wrap:nowrap;
@@ -135,16 +120,21 @@ body.iclub-visual-v3 #home-study-list{
  padding:0 28px 5px 1px;
  margin:0;
 }
+body.iclub-visual-v3 #home-competitive-list::-webkit-scrollbar,
 body.iclub-visual-v3 #home-study-list::-webkit-scrollbar{display:none}
+body.iclub-visual-v3 #home-competitive-list > .home-competitive-card,
 body.iclub-visual-v3 #home-study-list > .home-pinned-tile{
  flex:0 0 calc(100% - 29px);
  min-width:0;
  scroll-snap-align:start;
 }
+body.iclub-visual-v3 #home-competitive-list > :only-child,
 body.iclub-visual-v3 #home-study-list > :only-child{flex-basis:100%}
+body.iclub-visual-v3 #home-competitive-list > .empty,
 body.iclub-visual-v3 #home-study-list > .empty{
  flex:1 0 100%;width:100%;
 }
+body.iclub-visual-v3 #home-competitive-list:has(> :only-child),
 body.iclub-visual-v3 #home-study-list:has(> :only-child){padding-right:1px}
 body.iclub-visual-v3 #home-competitive-list .home-competitive-card{
  gap:9px;padding:16px;background:#fff;
@@ -278,8 +268,8 @@ body.iclub-visual-v3 #courses-subject-hub .subject-hub-bottom{
  margin-top:15px;
 }
 @media(min-width:700px){
- body.iclub-visual-v3 #home-competitive-list{
-  grid-template-columns:repeat(2,minmax(0,1fr));
+ body.iclub-visual-v3 #home-competitive-list > .home-competitive-card{
+  flex-basis:min(52%,410px)
  }
  body.iclub-visual-v3 #home-study-list > .home-pinned-tile{
   flex-basis:min(39%,310px)
@@ -288,6 +278,7 @@ body.iclub-visual-v3 #courses-subject-hub .subject-hub-bottom{
   grid-template-columns:repeat(3,minmax(0,1fr));
  }
  /* One item is NOT a carousel. Override the desktop rail width safely. */
+ body.iclub-visual-v3 #home-competitive-list > .home-competitive-card:only-child,
  body.iclub-visual-v3 #home-study-list > .home-pinned-tile:only-child{
   flex-basis:100%;
  }
