@@ -224,15 +224,12 @@ async function caseRun(browser, address, { language, width, mode }) {
     const form = page.locator("[data-ep-live-profile-form]");
     await form.waitFor();
     await capture("math-my-plan-first-setup-ru-390.png",mobileRu);
-    assert.equal(await form.locator("input").count(),4,"Real plan form has four fields");
+    assert.equal(await form.locator("input").count(),2,
+      "D3: first entry asks only for exam series and target grade, never study hours");
+    assert.equal(await form.locator('[name="total_hours"]').count(),0);
+    assert.equal(await form.locator('[name="math_hours"]').count(),0);
     await form.locator('[name="exam_series"]').fill("June 2027");
     await form.locator('[name="target_grade"]').fill("A");
-    await form.locator('[name="total_hours"]').fill("16");
-    await form.locator('[name="math_hours"]').fill("17");
-    await form.locator('[data-ep-live-save-profile]').click();
-    assert.equal(await page.evaluate(() => window.__UX531_MATH_TEST.saves.length),0,
-      "Invalid weekly budget cannot be persisted");
-    await form.locator('[name="math_hours"]').fill("8");
     const regression=language==="ru" && width===390;
     if(regression){
       await page.evaluate(()=>{
@@ -246,6 +243,28 @@ async function caseRun(browser, address, { language, width, mode }) {
       });
     }
     await form.locator('[data-ep-live-save-profile]').click();
+    await page.locator(".ep-live-component-entry").first().waitFor({timeout:10000});
+    const initial=await page.evaluate(()=>window.__UX531_MATH_TEST);
+    assert.equal(initial.saves.length,1,"New learner saves genuine exam details once");
+    assert.equal(initial.saves[0].totalHours,null,"Unknown total time must not become zero or estimate");
+    assert.equal(initial.saves[0].mathHours,null,"Unknown Maths time must remain null");
+
+    // The same unified My plan later offers VOLUNTARY hours. Exercise both
+    // an invalid choice and successful existing-profile edit without a second page.
+    await page.locator('[data-ep-v58-plan-open]').click();
+    await page.locator('[data-ep-v58-profile-edit]').click();
+    const returning=page.locator('[data-ep-live-profile-form]');
+    assert.equal(await returning.locator('input').count(),4,
+      "Only returning learner's edit view offers two optional time fields");
+    await returning.locator('[name="total_hours"]').fill("16");
+    await returning.locator('[name="math_hours"]').fill("17");
+    await returning.locator('[data-ep-live-save-profile]').click();
+    assert.equal(await page.evaluate(()=>window.__UX531_MATH_TEST.saves.length),1,
+      "Invalid weekly budget must not produce another profile write");
+    await returning.locator('[name="math_hours"]').fill("8");
+    await returning.locator('[data-ep-live-save-profile]').click();
+    await page.locator('[data-ep-v58-profile-summary]').waitFor();
+    await page.locator('[data-ep-v58-plan-back]').click();
     await page.locator(".ep-live-component-entry").first().waitFor({timeout:10000});
     assert.equal(await page.locator(".ep-live-component-entry").count(),2,"P1 and P5 must remain separate");
     const cardP1 = page.locator('[data-ep-live-open-component="P1"]');
@@ -320,8 +339,8 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert(scope.document <= scope.viewport + 1,
       "Saved plan and two Paper cards overflow at "+width+": "+JSON.stringify(scope));
     const recorded = await page.evaluate(() => window.__UX531_MATH_TEST);
-    assert.equal(recorded.saves.length,1,"Exactly one synthetic save after validation");
-    assert.deepEqual(recorded.diag,["P1","P5"],"Independent diagnostic reads");
+    assert.equal(recorded.saves.length,2,"Initial optional-hours NULL save and explicit later time edit");
+    assert.deepEqual(recorded.diag,["P1","P5","P1","P5"],"Both dashboard loads separately read P1 and P5");
     assert.deepEqual(recorded.starts,[],"No exam attempt started by the visual test");
     assert.deepEqual(recorded.serverWrites,[],"No persistence outside synthetic memory");
     // The v5.8 overview keeps the two subject components ABOVE configuration.

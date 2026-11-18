@@ -48,9 +48,12 @@ jobs:
             test "$UX531_BASE_SHA" = "d69e8f7e2dcd287487a2926ccc5792e2dd0746ff"
             test "$UX531_EXPECTED_SHA" = "$(git rev-parse HEAD)"
             mapfile -t changed < <(git diff --name-only "$UX531_BASE_SHA" "$UX531_EXPECTED_SHA")
-            test "${#changed[@]}" -eq 8
+            test "${#changed[@]}" -eq 11
             for f in "${changed[@]}"; do
               case "$f" in
+              ".github/workflows/p0-14-host-regression.yml") ;;
+              ".github/workflows/p2-09-exam-map-revision.yml") ;;
+              ".github/scripts/p2_09_exam_map_ui_regression.js") ;;
               ".github/workflows/exam-prep-weekly-profile-recovery.yml") ;;
               ".github/workflows/math-p1p5-d3-protected-recovery-review.yml") ;;
               ".github/workflows/ux531-academy-ui-source.yml") ;;
@@ -65,10 +68,13 @@ jobs:
           test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '4c54b9d774b56a843aa1b98454758ef60cdd56fa'
           test "$(git hash-object exam-prep/exam-prep-api.js)" = 'ddfb9f643d089c726ec5c84284359a5cea87b7f4'
           test "$(git hash-object index.html)" = '075b589d32fd22120ac79556df893b9a02f1344a'
-          test "$(git hash-object qa/ux531-math-p1p5-plan-runtime.cjs)" = '5adae58cb6f49c55da80c4acfaf18b3e3e1f72a0'
+          test "$(git hash-object qa/ux531-math-p1p5-plan-runtime.cjs)" = '53d4b24e99354e76ecb88c7af617ba4d556ec87f'
           test "$(git hash-object .github/workflows/ux531-academy-ui-source.yml)" = '051812918abf798fdaa63b9d96390b60fafdb565'
           test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'f468142f6ab5614fa19548bd9f9009e4e2106db4'
           test "$(git hash-object .github/workflows/math-p1p5-d3-protected-recovery-review.yml)" = '33cf15c04ca5a290893e58d8b733883c31ce8b7f'
+          test "$(git hash-object .github/workflows/p0-14-host-regression.yml)" = '3c9d1f5b0a31198b8f4c4947cba9697af6a1dd62'
+          test "$(git hash-object .github/workflows/p2-09-exam-map-revision.yml)" = 'b63b2a4ba6e77e257c7397e2b770835085d07dc1'
+          test "$(git hash-object .github/scripts/p2_09_exam_map_ui_regression.js)" = '58ebebc331bdeb5ba1d21e27f6e80810dacff05e'
           test "$(git hash-object exam-prep/exam-prep-live.js)" = 'e875085e55b4580df9659b27e7f32c8490fcd06a'
           test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
           node --check exam-prep/exam-prep-exam-map.js

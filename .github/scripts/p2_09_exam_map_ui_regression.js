@@ -74,7 +74,7 @@ const path = require('path');
     await window.iClubExamPrep.open({subjectKey:'mathematics',language:'en'});
   });
 
-  await page.waitForFunction(() => window.__dashboardProfileCalls === 1);
+  await page.waitForSelector('[data-ep-v58-plan-summary]');
   await page.evaluate(() => {
     const dashboard = document.querySelector('.ep-live-dashboard-intro');
     if (!dashboard) throw new Error('dashboard missing before mutation storm');
@@ -85,51 +85,60 @@ const path = require('path');
       marker.remove();
     }
   });
-  await page.waitForSelector('[data-ep-exam-plan-card]');
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(240);
   const initialDashboardProfileCalls = await page.evaluate(() => window.__dashboardProfileCalls);
-  assert(initialDashboardProfileCalls === 1, `dashboard mutation storm started ${initialDashboardProfileCalls} profile reads; expected exactly 1`);
-  let text = await page.locator('#exam-prep-host-root').textContent();
-  assert(text.includes('Exam plan'),'exam-plan card missing');
-  assert(text.includes('May/June 2027'),'current exam series missing');
-  assert(text.includes('Mathematics 6 h/week'),'mathematics hours summary missing');
+  assert(initialDashboardProfileCalls === 0,
+    `Legacy overlay must not fetch profile beside unified My plan; got ${initialDashboardProfileCalls}`);
+  assert(await page.locator('[data-ep-v58-plan-summary]').count() === 1, 'one My plan card required');
+  assert(await page.locator('[data-ep-exam-plan-card]').count() === 0, 'obsolete Exam Plan overlay must not render');
+  assert(await page.locator('[data-ep-exam-plan-edit]').count() === 0, 'obsolete editor CTA must not render');
 
-  await page.click('[data-ep-exam-plan-edit]');
-  await page.waitForSelector('[data-ep-exam-plan-form]');
-  text = await page.locator('#exam-prep-host-root').textContent();
-  assert(text.includes('Previous progress, correction work and scheduled checks are kept.'),'non-destructive edit explanation missing');
+  await page.click('[data-ep-v58-plan-open]');
+  await page.waitForSelector('[data-ep-v58-plan-page]');
+  let text = await page.locator('[data-ep-v58-profile-facts]').textContent();
+  assert(text.includes('May/June 2027'), 'previously saved exam series must be retained');
+  assert(text.includes('6'), 'saved Mathematics budget must remain readable');
+  assert(await page.locator('[data-ep-v58-profile-editor]').count() === 0,
+    'saved profile summary and editable form must not be shown together');
 
-  await page.fill('[data-ep-exam-plan-form] input[name="exam_series"]','Oct/Nov 2027');
-  await page.fill('[data-ep-exam-plan-form] input[name="total_hours"]','10');
-  await page.fill('[data-ep-exam-plan-form] input[name="math_hours"]','5');
-  await page.click('[data-ep-exam-plan-form] button[type="submit"]');
+  await page.click('[data-ep-v58-profile-edit]');
+  await page.waitForSelector('[data-ep-live-profile-form]');
+  assert(await page.locator('[data-ep-exam-plan-form]').count() === 0,
+    'legacy profile editor must not replace My plan editor');
+  await page.fill('[data-ep-live-profile-form] input[name="exam_series"]','Oct/Nov 2027');
+  await page.fill('[data-ep-live-profile-form] input[name="total_hours"]','10');
+  await page.fill('[data-ep-live-profile-form] input[name="math_hours"]','5');
+  await page.click('[data-ep-live-profile-form] button[type="submit"]');
+  await page.waitForSelector('[data-ep-v58-profile-summary]');
+  text = await page.locator('[data-ep-v58-profile-facts]').textContent();
+  assert(text.includes('Oct/Nov 2027'), 'updated exam series must be shown inside My plan');
+  assert(text.includes('5'), 'explicit voluntary Maths time change must persist in the plan summary');
 
-  await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent?.includes('Previous results remain in your history.'));
-  await page.waitForSelector('[data-ep-exam-plan-card]');
-
+  await page.click('[data-ep-v58-plan-back]');
+  await page.waitForSelector('[data-ep-v58-plan-summary]');
+  await page.waitForTimeout(140);
   const result = await page.evaluate(() => ({
     calls:window.__calls,
     text:document.querySelector('#exam-prep-host-root').textContent,
     hasP1Plan:Boolean(document.querySelector('[data-ep-live-plan="P1"]')),
-    hasP5Plan:Boolean(document.querySelector('[data-ep-live-plan="P5"]'))
+    hasP5Plan:Boolean(document.querySelector('[data-ep-live-plan="P5"]')),
+    hasLegacyCard:Boolean(document.querySelector('[data-ep-exam-plan-card]')),
+    profile:window.__profile
   }));
   const names = result.calls.map(x=>x.name);
   assert(names.includes('save_exam_prep_exam_profile_v2'),'versioned profile save missing');
   assert(!names.includes('save_exam_prep_exam_profile_v1'),'legacy profile save must not be used');
-
-  const planCalls = result.calls.filter(x=>x.name==='generate_exam_prep_weekly_plan_safe_v3');
-  assert(planCalls.length===2,'profile change must independently rebuild P1 and P5 plans');
-  assert(planCalls.some(x=>x.args.p_component_code==='P1'),'P1 plan rebuild missing');
-  assert(planCalls.some(x=>x.args.p_component_code==='P5'),'P5 plan rebuild missing');
-
+  assert(!names.includes('generate_exam_prep_weekly_plan_safe_v3'),
+    'Changing exam details must preserve current active weekly plans; no silent regeneration');
   for (const forbidden of ['submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','finalize_exam_prep_timed_safe_v1']) {
     assert(!names.includes(forbidden),`${forbidden} must not be called by profile editing`);
   }
-
-  assert(result.text.includes('Oct/Nov 2027'),'updated series not shown');
-  assert(result.text.includes('P1 and P5 remain separate'),'component-separation learner notice missing');
-  assert(result.hasP1Plan && result.hasP5Plan,'dashboard must remain available after plan update');
-  assert(!/profile_revision|paper_comparability_epoch|comparability|controlled_beta|synthetic|internal skill/i.test(result.text),'internal terminology leaked to learner UI');
+  assert(result.profile.exam_series==='Oct/Nov 2027','updated series must persist in mocked owner profile');
+  assert(result.profile.mathematics_hours_budget===5,'chosen Maths budget must persist');
+  assert(result.hasP1Plan && result.hasP5Plan,'P1 and P5 remain independent after profile edit');
+  assert(!result.hasLegacyCard,'returning to dashboard must not resurrect legacy duplicate');
+  assert(!/profile_revision|paper_comparability_epoch|comparability|controlled_beta|synthetic|internal skill/i.test(result.text),
+    'internal terminology leaked to learner UI');
 
   await browser.close();
   console.log('P2-09 Exam Map learner editor: PASS');
