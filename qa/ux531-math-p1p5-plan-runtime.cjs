@@ -65,6 +65,7 @@ const html = [
   '<section id="courses-subject-hub" data-subject-key="mathematics">',
   '<div id="exam-prep-host-root"></div></section></main>',
   '<script src="/exam-prep/exam-prep-live.js"></script>',
+  '<script src="/exam-prep/exam-prep-exam-map.js"></script>',
   '</body></html>'
 ].join("");
 
@@ -76,7 +77,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html);
     return;
   }
-  if (!["/style.css", "/visual/iclub-visual-v3.css", "/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
+  if (!["/style.css", "/visual/iclub-visual-v3.css", "/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-exam-map.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
     res.writeHead(404).end(); return;
   }
   const file = path.join(root, p.slice(1));
@@ -202,6 +203,7 @@ async function caseRun(browser, address, { language, width, mode }) {
   try {
     await page.goto(address, {waitUntil:"domcontentloaded"});
     await page.waitForFunction(() => window.iClubExamPrep?.liveFlowVersion);
+    await page.waitForFunction(() => window.iClubExamPrepHostInternal?.examMapUiVersion === "p209map3");
     const opened = await page.evaluate(async language =>
       window.iClubExamPrep.open({subjectKey:"mathematics",language}), language);
     if (mode === "denied") {
@@ -222,15 +224,12 @@ async function caseRun(browser, address, { language, width, mode }) {
     const form = page.locator("[data-ep-live-profile-form]");
     await form.waitFor();
     await capture("math-my-plan-first-setup-ru-390.png",mobileRu);
-    assert.equal(await form.locator("input").count(),4,"Real plan form has four fields");
+    assert.equal(await form.locator("input").count(),2,
+      "D3: first entry asks only for exam series and target grade, never study hours");
+    assert.equal(await form.locator('[name="total_hours"]').count(),0);
+    assert.equal(await form.locator('[name="math_hours"]').count(),0);
     await form.locator('[name="exam_series"]').fill("June 2027");
     await form.locator('[name="target_grade"]').fill("A");
-    await form.locator('[name="total_hours"]').fill("16");
-    await form.locator('[name="math_hours"]').fill("17");
-    await form.locator('[data-ep-live-save-profile]').click();
-    assert.equal(await page.evaluate(() => window.__UX531_MATH_TEST.saves.length),0,
-      "Invalid weekly budget cannot be persisted");
-    await form.locator('[name="math_hours"]').fill("8");
     const regression=language==="ru" && width===390;
     if(regression){
       await page.evaluate(()=>{
@@ -244,6 +243,28 @@ async function caseRun(browser, address, { language, width, mode }) {
       });
     }
     await form.locator('[data-ep-live-save-profile]').click();
+    await page.locator(".ep-live-component-entry").first().waitFor({timeout:10000});
+    const initial=await page.evaluate(()=>window.__UX531_MATH_TEST);
+    assert.equal(initial.saves.length,1,"New learner saves genuine exam details once");
+    assert.equal(initial.saves[0].totalHours,null,"Unknown total time must not become zero or estimate");
+    assert.equal(initial.saves[0].mathHours,null,"Unknown Maths time must remain null");
+
+    // The same unified My plan later offers VOLUNTARY hours. Exercise both
+    // an invalid choice and successful existing-profile edit without a second page.
+    await page.locator('[data-ep-v58-plan-open]').click();
+    await page.locator('[data-ep-v58-profile-edit]').click();
+    const returning=page.locator('[data-ep-live-profile-form]');
+    assert.equal(await returning.locator('input').count(),4,
+      "Only returning learner's edit view offers two optional time fields");
+    await returning.locator('[name="total_hours"]').fill("16");
+    await returning.locator('[name="math_hours"]').fill("17");
+    await returning.locator('[data-ep-live-save-profile]').click();
+    assert.equal(await page.evaluate(()=>window.__UX531_MATH_TEST.saves.length),1,
+      "Invalid weekly budget must not produce another profile write");
+    await returning.locator('[name="math_hours"]').fill("8");
+    await returning.locator('[data-ep-live-save-profile]').click();
+    await page.locator('[data-ep-v58-profile-summary]').waitFor();
+    await page.locator('[data-ep-v58-plan-back]').click();
     await page.locator(".ep-live-component-entry").first().waitFor({timeout:10000});
     assert.equal(await page.locator(".ep-live-component-entry").count(),2,"P1 and P5 must remain separate");
     const cardP1 = page.locator('[data-ep-live-open-component="P1"]');
@@ -272,6 +293,13 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.equal(await page.locator(".ep-live-dashboard-profile").count(),0,
       "Do not duplicate saved plan details beside the route header");
     assert.equal(await page.locator("[data-ep-v58-plan-summary]").count(),1);
+    // Real browser regression: BOTH production modules are mounted. Give the
+    // old MutationObserver/async profile read enough time to try its hydrate.
+    await page.waitForTimeout(90);
+    assert.equal(await page.locator("[data-ep-exam-plan-card]").count(),0,
+      "No stale Exam Plan overlay may duplicate the v5.8 My plan card");
+    assert.equal(await page.locator("[data-ep-exam-plan-edit]").count(),0,
+      "The old profile editor must not compete with unified My plan");
     assert.match(await page.locator("[data-ep-v58-plan-summary]").innerText(),
       language==="en"?/My plan/:language==="uz"?/Mening rejam/:/Мой план/);
     const overviewOrder = await page.evaluate(()=>{
@@ -311,8 +339,8 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert(scope.document <= scope.viewport + 1,
       "Saved plan and two Paper cards overflow at "+width+": "+JSON.stringify(scope));
     const recorded = await page.evaluate(() => window.__UX531_MATH_TEST);
-    assert.equal(recorded.saves.length,1,"Exactly one synthetic save after validation");
-    assert.deepEqual(recorded.diag,["P1","P5"],"Independent diagnostic reads");
+    assert.equal(recorded.saves.length,2,"Initial optional-hours NULL save and explicit later time edit");
+    assert.deepEqual(recorded.diag,["P1","P5","P1","P5"],"Both dashboard loads separately read P1 and P5");
     assert.deepEqual(recorded.starts,[],"No exam attempt started by the visual test");
     assert.deepEqual(recorded.serverWrites,[],"No persistence outside synthetic memory");
     // The v5.8 overview keeps the two subject components ABOVE configuration.
@@ -438,6 +466,9 @@ async function caseRun(browser, address, { language, width, mode }) {
     }
     await page.locator("[data-ep-v58-plan-back]").click();
     await page.locator(".ep-v58-main-components").waitFor();
+    await page.waitForTimeout(50);
+    assert.equal(await page.locator("[data-ep-exam-plan-card]").count(),0,
+      "Returning from My plan must not resurrect the old duplicate card");
     await page.locator('[data-ep-live-open-component="P1"] .ep-live-component-copy').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
     await verifyLayout('P1 Route',true);
@@ -512,6 +543,26 @@ async function caseRun(browser, address, { language, width, mode }) {
         path:path.join(screens,"math-p1p5-plan-"+language+"-"+width+".png"),
         fullPage:true
       });
+    }
+    // Legacy-only route compatibility: an older dashboard without v5.8 My plan
+    // must still retain its existing edit action; never remove its API path.
+    if (language === "ru" && width === 390) {
+      await page.evaluate(() => {
+        document.getElementById("exam-prep-host-root").innerHTML =
+          '<section class="ep-host-shell ep-live">' +
+          '<section class="ep-live-dashboard-intro">Legacy route</section>' +
+          '<div class="ep-live-grid">' +
+          '<button data-ep-live-plan="P1" type="button">P1</button>' +
+          '<button data-ep-live-plan="P5" type="button">P5</button>' +
+          '</div></section>';
+      });
+      await page.locator("[data-ep-exam-plan-card]").waitFor();
+      assert.equal(await page.locator("[data-ep-exam-plan-card]").count(),1,
+        "Older route without v5.8 summary retains its previous Plan control");
+      await page.locator("[data-ep-exam-plan-edit]").click();
+      await page.locator("[data-ep-exam-plan-editor]").waitFor();
+      assert.equal(await page.locator("[data-ep-exam-plan-form]").count(),1,
+        "Legacy profile editor remains available for old-only route");
     }
     console.log("PASS UX531 Mathematics plan -> real P1/P5 dashboard",
       language,width,"P1 3/7 P5 0/9; no attempts or network");

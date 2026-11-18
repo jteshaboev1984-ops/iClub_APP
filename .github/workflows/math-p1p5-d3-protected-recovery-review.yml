@@ -65,6 +65,10 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object .github/workflows/exam-prep-weekly-answer-recovery.yml)" = 'cd0ffaba1dfa22a0cb1a652dc4db8c99869701d7'
-          test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'b58145d137f3e61fd16b1257f0610f285f19a12c'
+          if [[ "${GITHUB_HEAD_REF:-}" == "fix/math-single-my-plan-legacy-map-20261118" && "${GITHUB_BASE_REF:-}" == "main" ]]; then
+            test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'f468142f6ab5614fa19548bd9f9009e4e2106db4'
+          else
+            test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'b58145d137f3e61fd16b1257f0610f285f19a12c'
+          fi
           echo 'SUPPLEMENTAL D3 recovery PASS; reviewed branch-only guard updates verified, original other-branch pins preserved.'
           git diff --exit-code

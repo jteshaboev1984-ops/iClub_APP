@@ -14,6 +14,8 @@ on:
       - 'qa/ux531-academy-browser.cjs'
       - 'qa/ux531-academy-all-screens.cjs'
       - 'qa/ux531-math-p1p5-plan-runtime.cjs'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-exam-map.js'
       - '.github/workflows/ux531-academy-ui-source.yml'
   workflow_dispatch:
 
@@ -39,6 +41,7 @@ jobs:
           node --check qa/ux531-academy-ui-parity.cjs
           node --check qa/ux531-academy-all-screens.cjs
           node --check qa/ux531-math-p1p5-plan-runtime.cjs
+          node --check exam-prep/exam-prep-exam-map.js
       - name: UI source parity and contract
         run: node qa/ux531-academy-ui-parity.cjs
       - name: Install browser runtime (Ubuntu 24.04 compatible)
