@@ -16,13 +16,17 @@ on:
       - scripts/p2-05-profile-completeness-regression.cjs
       - .github/workflows/exam-prep-persistence-continuity.yml
   workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/exam-prep-persistence-continuity.yml
 
 permissions:
   contents: read
 
 jobs:
   persistence-continuity:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 Chromium is not supported on ubuntu-26.04.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Static safety checks
