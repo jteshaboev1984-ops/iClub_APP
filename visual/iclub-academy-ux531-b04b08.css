@@ -863,3 +863,70 @@ body.iclub-visual-v3 #exam-prep-host-root .ep-history-screen .ep-v58-tabs{
   body.iclub-visual-v3 #exam-prep-host-root .ep-v58-tab{font-size:12px;padding:7px 3px}
   body.iclub-visual-v3 #exam-prep-host-root .ep-v58-setting>summary{padding:12px}
 }
+
+/* One Back control: existing app topbar is primary. When embedded without
+   an active topbar Back, show an accessible fallback at the BOTTOM only. */
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-fallback-nav{
+  display:flex;justify-content:center;margin-top:16px;padding:0 2px 4px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-fallback-nav[hidden]{display:none!important}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-fallback-nav .ep-live-btn{
+  min-height:44px;width:100%;max-width:420px;white-space:normal;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-main-components .ep-live-component-entry{
+  cursor:pointer;
+}
+
+/* Mathematics History: three most recent; native expandable older rows in sets of five. */
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-archive{
+  margin-top:12px;border:1px solid #bfd3ef;border-radius:14px;
+  padding:0 11px 11px;background:#f7faff;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-archive>summary{
+  display:flex;align-items:center;min-height:48px;cursor:pointer;
+  font-weight:750;color:#20569b;padding:10px 4px;line-height:1.3;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-archive>summary:focus-visible,
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-more:focus-visible{
+  outline:3px solid #3774c7;outline-offset:2px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-archive .ep-history-list{
+  display:grid;gap:8px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-more{
+  display:block;min-height:44px;width:100%;margin-top:10px;
+  white-space:normal;overflow-wrap:normal;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-more[hidden]{display:none!important}
+body.iclub-visual-v3 #exam-prep-host-root .ep-history-cap-note{
+  font-size:11px;line-height:1.5;margin-top:10px;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-editor{
+  min-width:0;overflow-wrap:normal;
+}
+
+/* One visible value per setting: compact four-field profile summary in My plan.
+   The editor replaces, rather than repeats, these facts while editing. */
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-summary>div:first-child{
+  min-width:0;flex:1 1 auto;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-facts{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px 16px;margin-top:12px;min-width:0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-fact{
+  display:grid;gap:3px;min-width:0;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-fact small{
+  font-size:11px;font-weight:500;line-height:1.35;color:#4b6281;
+  overflow-wrap:anywhere;
+}
+body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-fact strong{
+  font-size:13px;font-weight:760;line-height:1.4;color:#163d73;
+  overflow-wrap:anywhere;
+}
+@media(max-width:390px){
+  body.iclub-visual-v3 #exam-prep-host-root .ep-v58-profile-facts{
+    grid-template-columns:minmax(0,1fr);gap:9px;
+  }
+}

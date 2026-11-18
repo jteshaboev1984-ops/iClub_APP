@@ -470,7 +470,7 @@
       document.head.appendChild(script);
     };
 
-    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-extrahard-v43-d03-noselfmark-20261109-s3-weekly-report-choice-ux531-mobile-polish-20261116");
+    if (src && /exam-prep-api\.js(?:\?|$)/.test(src)) load('script[data-exam-prep-live]', "examPrepLive", "exam-prep-live.js?v=p304aitutor1-subjectfix1-writtenexternal1-localized1-dueguard1-answerpreserve1-diagnostic1-uxlearning20261028-onestart1-timedack1-serverresume1-extrahard-v43-d03-noselfmark-20261109-s3-weekly-report-choice-ux531-native-back-single-arrow-uz-20261117-v5");
     load('script[data-exam-prep-written-understanding]', "examPrepWrittenUnderstanding", "exam-prep-written-understanding-ui.js?v=written4");
     load('script[data-exam-prep-integrity]', "examPrepIntegrity", "exam-prep-integrity.js?v=p243integrity2");
     load('script[data-exam-prep-learner-views]', "examPrepLearnerViews", "exam-prep-learner-views.js?v=p302theory1");

@@ -60,6 +60,9 @@ function makeSession() {
     }
   };
   const document = {
+    // The accepted UX calls this real DOM API for back-navigation visibility.
+    // No top bar exists in this isolated non-browser fixture.
+    getElementById() { return null; },
     querySelector(sel) {
       if (sel === "#courses-subject-hub") return hub;
       if (sel === "#exam-prep-host-root") return root;

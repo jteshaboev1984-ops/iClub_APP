@@ -107,8 +107,8 @@ jobs:
           grep -q 'id="subject-hub-exam-prep-entry"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'id="exam-prep-host-root"[^>]*hidden[^>]*aria-hidden="true"' index.html
           grep -q 'data-action="open-exam-prep"' index.html
-          grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement2|p213placement3|p214projection1|p214projection1-maprpc2|p016open1|p202closure1|p203paper2|p204june26ref1|p205readiness2|p206finalops1|p302fulltheory1|p302ux1|p304ux1|p304ux2|p304ux3|p304ux4|p305tutor1|p305tutor2|p331progress1)' index.html
-          grep -Eq 'exam-prep/exam-prep-host[.]js[?]v=(p014h1|p016open1|p304aitutor1|p304premium2)' index.html
+          grep -Eq 'exam-prep/exam-prep-api[.]js[?]v=(p014h1|p209map1|p210materials1|p213placement2|p213placement3|p214projection1|p214projection1-maprpc2|p016open1|p202closure1|p203paper2|p204june26ref1|p205readiness2|p206finalops1|p302fulltheory1|p302ux1|p304ux1|p304ux2|p304ux3|p304ux4|p305tutor1|p305tutor2|p331progress1|ux531-math-single-back-loader-v5|ux531-mobile-polish-20261116-loader-v2)' index.html
+          grep -Eq 'exam-prep/exam-prep-host[.]js[?]v=(p014h1|p016open1|p304aitutor1|p304premium2|p304premium2-mathv2reset1-allsubjects1-economics-limited-beta-noinvite-20261029)' index.html
           grep -Eq 'exam-prep/exam-prep-host[.]css[?]v=(p305followup1|math-s3-weekly-20261109)' index.html
           grep -q 'exam-prep-live.js?v=p304aitutor1' exam-prep/exam-prep-api.js
           grep -q 'exam-prep-learner-views.js?v=p302theory1' exam-prep/exam-prep-api.js
@@ -125,7 +125,10 @@ jobs:
           ! grep -q 'exam-prep-static-data.js' index.html
           ! grep -q '\.from(' exam-prep/exam-prep-api.js
           ! grep -q '\.from(' exam-prep/exam-prep-host.js
-          ! grep -q '\.from(' exam-prep/exam-prep-live.js
+          # Preserve no-direct-database-table-read guard while allowing only
+          # the exact standard Array.from uses already present in released UI.
+          # This is stricter than accepting any .from(...) call.
+          node -e 'const fs=require("node:fs");for(const [file,count] of [["exam-prep/exam-prep-live.js",1],["exam-prep/exam-prep-past-paper.js",2]]){const s=fs.readFileSync(file,"utf8");const all=[...s.matchAll(/\.from\s*\(/g)].length;const array=[...s.matchAll(/\bArray\.from\s*\(/g)].length;if(array!==count||all!==array){console.error("Unexpected direct .from() in "+file+" (total="+all+", Array.from="+array+")");process.exit(1)}}'
           ! grep -q 'ep-live-flow-style' exam-prep/exam-prep-live.js
           ! grep -q 'document.createElement("style")' exam-prep/exam-prep-live.js
           grep -q 'EXAM PREP CENTRALIZED LIVE FLOW v1' exam-prep/exam-prep-host.css
@@ -141,7 +144,7 @@ jobs:
           ! grep -q '\.from(' exam-prep/exam-prep-ai-ui.js
           ! grep -q '\.from(' exam-prep/exam-prep-exam-map.js
           ! grep -q '\.from(' exam-prep/exam-prep-materials.js
-          ! grep -q '\.from(' exam-prep/exam-prep-past-paper.js
+          # Checked by the exact all-.from vs Array.from guard above.
           ! grep -q 'ep-past-paper-style' exam-prep/exam-prep-past-paper.js
           ! grep -q 'document.createElement("style")' exam-prep/exam-prep-past-paper.js
           grep -q 'EXAM PREP CENTRALIZED PAST PAPER v1' exam-prep/exam-prep-host.css

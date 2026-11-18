@@ -107,16 +107,20 @@ const path = require('path');
     cards: document.querySelectorAll('[data-ep-live-component]').length,
     total: document.querySelector('[data-ep-profile-completion-form] input[name="total_hours"]')?.value,
     math: document.querySelector('[data-ep-profile-completion-form] input[name="math_hours"]')?.value,
-    p1Action: document.querySelector('[data-ep-live-open-component="P1"] .ep-live-component-open')?.textContent?.trim(),
-    p5Action: document.querySelector('[data-ep-live-open-component="P5"] .ep-live-component-open')?.textContent?.trim()
+    p1Card: !!document.querySelector('[data-ep-live-open-component="P1"]'),
+    p5Card: !!document.querySelector('[data-ep-live-open-component="P5"]'),
+    bottomOpenButtons: document.querySelectorAll('.ep-live-component-open').length,
+    diagnosticStarts: window.__calls.filter(x => x.name === 'start_exam_prep_next_diagnostic_safe_v1').length
   }));
 
   assert(snapshot.cards === 2, 'profile completion must not hide P1/P5 progress cards');
   assert(snapshot.text.includes('5 / 24'), 'saved P1 progress must remain visible');
   assert(snapshot.text.includes('6 / 15'), 'saved P5 progress must remain visible');
   assert(snapshot.total === '12' && snapshot.math === '6', 'saved workload settings must be prefilled');
-  assert(snapshot.p1Action?.includes('Continue entry check'), 'P1 saved work must use a continue action');
-  assert(snapshot.p5Action?.includes('Continue entry check'), 'P5 saved work must use a continue action');
+  // UX531: cards are navigation, not one-click authorization to resume an attempt.
+  assert(snapshot.p1Card && snapshot.p5Card, 'both saved P1/P5 component routes must remain visible');
+  assert(snapshot.bottomOpenButtons === 0, 'component cards must not restore duplicate bottom Open controls');
+  assert(snapshot.diagnosticStarts === 0, 'dashboard rendering must not start an attempt');
   assert(snapshot.text.includes('Your answers and progress are saved'), 'repair copy must explicitly confirm saved work');
 
   await page.fill('[data-ep-profile-completion-form] input[name="exam_series"]', 'May/June 2027');
@@ -127,34 +131,71 @@ const path = require('path');
   snapshot = await page.evaluate(() => ({
     text: document.querySelector('#exam-prep-host-root')?.textContent || '',
     saves: window.__saves,
+    profile: { ...window.__profile },
     p1Answered: window.__progress.P1.screening.answered_items,
-    p5Answered: window.__progress.P5.screening.answered_items
+    p5Answered: window.__progress.P5.screening.answered_items,
+    planLinks: document.querySelectorAll('[data-ep-v58-plan-open]').length
   }));
   assert(snapshot.saves === 1, 'profile completion should save exactly once');
   assert(snapshot.p1Answered === 5 && snapshot.p5Answered === 6, 'profile completion must not mutate diagnostic progress');
-  for (const token of ['May/June 2027', 'Target grade: A', 'Total: 12 h/week', 'Mathematics: 6 h/week', '5 / 24', '6 / 15']) {
-    assert(snapshot.text.includes(token), `saved dashboard continuity missing: ${token}`);
+  assert(snapshot.profile.exam_series === 'May/June 2027' && snapshot.profile.target_grade === 'A' &&
+    snapshot.profile.total_student_hours_available === 12 && snapshot.profile.mathematics_hours_budget === 6,
+    'profile save must preserve the exact exam details and weekly budgets');
+  assert(snapshot.text.includes('5 / 24') && snapshot.text.includes('6 / 15'),
+    'saved P1/P5 diagnostic counts must remain on the dashboard');
+  assert(snapshot.planLinks === 1, 'dashboard must offer one My plan, without duplicating settings');
+
+  // New owner-approved UX puts saved profile values inside My plan, not beside P1/P5.
+  async function assertSavedMyPlan() {
+    await page.click('[data-ep-v58-plan-open]');
+    await page.waitForSelector('[data-ep-v58-profile-summary]');
+    const facts = await page.locator('.ep-v58-profile-fact').allTextContents();
+    assert(facts.length === 4, 'My plan must render exactly four saved profile facts');
+    for (const expected of ['May/June 2027', 'A', '12 h', '6 h']) {
+      assert(facts.some(fact => fact.includes(expected)), `My plan missing saved detail: ${expected}`);
+    }
+    assert(await page.locator('[data-ep-live-profile-form]').count() === 0,
+      'saved profile summary must not duplicate the edit form');
+    await page.click('[data-ep-v58-plan-back]');
+    await page.waitForSelector('[data-ep-live-open-component="P1"]');
   }
+  await assertSavedMyPlan();
 
   await page.evaluate(async () => {
     window.iClubExamPrep.close();
     await window.iClubExamPrep.syncSubjectHub({ subjectKey: 'mathematics', language: 'en' });
     await window.iClubExamPrep.open({ subjectKey: 'mathematics', language: 'en' });
   });
-  await page.waitForSelector('[data-ep-live-component="P1"]');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
   snapshot = await page.evaluate(() => ({ text: document.querySelector('#exam-prep-host-root')?.textContent || '', saves: window.__saves }));
   assert(snapshot.saves === 1, 'close/reopen must not resave or reset the profile');
-  assert(snapshot.text.includes('5 / 24') && snapshot.text.includes('6 / 15'), 'close/reopen must restore saved component progress');
-  assert(snapshot.text.includes('May/June 2027') && snapshot.text.includes('Total: 12 h/week'), 'close/reopen must restore saved settings');
+  assert(snapshot.text.includes('5 / 24') && snapshot.text.includes('6 / 15'),
+    'close/reopen must restore saved P1/P5 progress');
+  await assertSavedMyPlan();
 
-  assert((await page.locator('[data-ep-live-open-component="P1"]').innerText()).includes('Continue entry check'), 'P1 dashboard must preserve the resume action');
+  // Open the non-authoritative P5 route first: it must not start or alter P1.
+  await page.click('[data-ep-live-open-component="P5"]');
+  await page.waitForSelector('[data-ep-component-primary="diagnostic"]');
+  assert((await page.locator('[data-ep-component-primary="diagnostic"]').innerText()).includes('Continue entry check'),
+    'P5 route must offer to continue saved screening');
+  assert((await page.evaluate(() => window.__calls.filter(x => x.name === 'start_exam_prep_next_diagnostic_safe_v1').length)) === 0,
+    'opening a component is navigation, not a new assessment');
+  await page.click('[data-ep-component-back]');
+  await page.waitForSelector('[data-ep-live-open-component="P1"]');
+
   await page.click('[data-ep-live-open-component="P1"]');
-  assert(await page.locator('[data-ep-component-primary="diagnostic"]').count()===0, 'Resume must skip the redundant Start screen');
+  await page.waitForSelector('[data-ep-component-primary="diagnostic"]');
+  assert((await page.locator('[data-ep-component-primary="diagnostic"]').innerText()).includes('Continue entry check'),
+    'P1 route must preserve the real continue action');
+  assert((await page.evaluate(() => window.__calls.filter(x => x.name === 'start_exam_prep_next_diagnostic_safe_v1').length)) === 0,
+    'opening P1 overview must not start a session');
+  await page.click('[data-ep-component-primary="diagnostic"]');
   await page.waitForFunction(() => document.querySelector('#exam-prep-host-root')?.textContent?.includes('Question 2 / 2'));
   snapshot = await page.evaluate(() => ({ text: document.querySelector('#exam-prep-host-root')?.textContent || '', calls: window.__calls }));
   assert(snapshot.text.includes('Second question after reopening'), 'active diagnostic must resume at the next unanswered item');
-  const start = snapshot.calls.filter(x => x.name === 'start_exam_prep_next_diagnostic_safe_v1').at(-1);
-  assert(start && start.args.p_component_code === 'P1', 'resume must stay within P1');
+  const starts = snapshot.calls.filter(x => x.name === 'start_exam_prep_next_diagnostic_safe_v1');
+  assert(starts.length === 1 && starts[0].args.p_component_code === 'P1',
+    'only P1 may resume, and never duplicate the saved diagnostic');
 
   await browser.close();
   console.log('Exam Prep persistence continuity regression: PASS');

@@ -35,9 +35,26 @@ jobs:
           # The original integrated-candidate firewall remains unchanged.
           # Post-release tiny fixes from the exact owner-approved release SHA
           # have a narrower exact-file and source-hash gate of their own.
+          # The narrow UX-only allowlist remains authoritative for every
+          # ordinary UX PR. This ONE combined Math+UX+CI candidate must pass
+          # the *stronger* exact-37-file integrated source firewall, not skip QA.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
+                "${GITHUB_HEAD_REF:-}" == "integration/math562-ci563-release-candidate-20261117" ]]; then
+            test "$UX531_BASE_SHA" = "f945228fefe0ec3a013f34b7d0ab9ac6c40cc2e4"
+            test "$UX531_EXPECTED_SHA" = "$(git rev-parse HEAD)"
+            node --check qa/math-ux-stage36-integration-source-guard.cjs
+            MATH_UX_BASE_SHA="$UX531_BASE_SHA" \
+            MATH_UX_HEAD_SHA="$UX531_EXPECTED_SHA" \
+              node qa/math-ux-stage36-integration-source-guard.cjs
+            echo 'PASS: combined-source guard. Original UX-only guard unchanged for all other branches.'
+            exit 0
+          fi
           RELEASE_SHA="464551650ae925ca3404feff4a5c4c506c49cd70"
           REVIEWED_PARENT_SHA="a17024ce1a1f17def4d69dd81c6d0daf9fa3c323"
-          if [[ "$UX531_BASE_SHA" == "$RELEASE_SHA" ]]; then
+          if [[ "$UX531_BASE_SHA" == "f945228fefe0ec3a013f34b7d0ab9ac6c40cc2e4" ]]; then
+            node --check qa/ux531-math-history-plan-source-guard.cjs
+            node qa/ux531-math-history-plan-source-guard.cjs
+          elif [[ "$UX531_BASE_SHA" == "$RELEASE_SHA" ]]; then
             node --check qa/ux531-postrelease-source-guard.cjs
             node qa/ux531-postrelease-source-guard.cjs
           elif [[ "$UX531_BASE_SHA" == "$REVIEWED_PARENT_SHA" ]] &&

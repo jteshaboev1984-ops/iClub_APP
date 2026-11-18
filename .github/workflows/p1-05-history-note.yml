@@ -11,13 +11,17 @@ on:
       - .github/scripts/p1_05_history_note_regression.js
       - .github/workflows/p1-05-history-note.yml
   workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/p1-05-history-note.yml
 
 permissions:
   contents: read
 
 jobs:
   history-note:
-    runs-on: ubuntu-latest
+    # Playwright 1.55 Chromium is not supported on ubuntu-26.04.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
