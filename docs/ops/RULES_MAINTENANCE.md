@@ -5,7 +5,7 @@
 ## Источники и границы
 
 - Постоянный [Rules Inbox](https://github.com/jteshaboev1984-ops/iClub_APP/issues/570) — первичный журнал решений, **не** task tracker.
-- Действующий реестр: [docs/ops/ICLUB_FEEDBACK_TO_RULES_REGISTER_2026-11-18.md](../../ICLUB_FEEDBACK_TO_RULES_REGISTER_2026-11-18.md) (ориентируйся на точный путь `docs/ops/ICLUB_FEEDBACK_TO_RULES_REGISTER_2026-11-18.md`).
+- Действующий реестр: [Реестр обратной связи](ICLUB_FEEDBACK_TO_RULES_REGISTER_2026-11-18.md).
 - Утверждённые предметные/продуктовые спецификации, `AGENTS.md`, `docs/ops/CHAT_PROTOCOL.md`, Issue/PR с последними комментариями и точным SHA имеют приоритет над датированными заметками.
 - Новые записи отсчитывать с момента создания Inbox; старый register — исходная историческая база. Не копировать всю историю обратно.
 - Никаких изменений банка, scoring, доступа учеников, live Supabase, тарифов или production.
