@@ -19,7 +19,7 @@ async function scenario(browser,language,width,existing){
     const old=existing?{exam_series:'May/June 2027',target_grade:'A',
       total_student_hours_available:12,mathematics_hours_budget:6,profile_revision:5}:null;
     const tracker=window.__D3TEST={
-      profile:old,saves:[],starts:[],weeklySaves:[],failed:false,
+      profile:old,saves:[],starts:[],weeklySaves:[],failed:false,diagnosticsComplete:false,
       choice:{contract_version:'voluntary_weekly_choice_s3_v1',
         choice_code:null,choice_recorded:false,chosen_math_minutes:old?360:null,
         p1_minutes:null,p5_minutes:null,schedule_revision:0,
@@ -38,7 +38,7 @@ async function scenario(browser,language,width,existing){
           mathematics_hours_budget:v.mathHours??original.mathematics_hours_budget??null};
         return ok({plan_rebuild_required:!!old,progress_retained:true});
       },
-      diagnosticProgress:async code=>ok({component_code:code,stage0_complete:false,
+      diagnosticProgress:async code=>ok({component_code:code,stage0_complete:tracker.diagnosticsComplete,
         screening:{required_items:code==='P1'?7:9,answered_items:0,
           required_areas:3,answered_areas:0}}),
       personalHorizon:async()=>ok(null),
@@ -97,6 +97,15 @@ async function scenario(browser,language,width,existing){
       'No duplicated legacy profile control');
     assert.equal(await page.locator('.ep-v58-profile-fact').count(),2,
       'no empty hour summary facts');
+    await page.locator('[data-ep-v58-setting=weekly] summary').click();
+    assert.equal(await page.locator('[data-ep-d3-time-pending]').count(),1,
+      'no fictitious personal hours before P1 and P5 diagnostics');
+    assert.equal(await page.locator('[data-ep-s3-save]').count(),0,
+      'no 90-minute or 45/45 suggestion before diagnostic');
+    await page.evaluate(()=>{window.__D3TEST.diagnosticsComplete=true});
+    await page.evaluate(language=>window.iClubExamPrep.open({language,subjectKey:'mathematics'}),language);
+    await page.waitForSelector('[data-ep-v58-plan-open]');
+    await page.click('[data-ep-v58-plan-open]');
     await page.locator('[data-ep-v58-setting=weekly] summary').click();
     assert.equal(await page.locator('input[name=ep-s3-choice]:checked').inputValue(),'change',
       'without hours allow explicit voluntary time selection');
