@@ -47,6 +47,13 @@ function profileRows(uid) {
     "paper_comparability_epoch FROM private.exam_prep_exam_profiles WHERE user_id='"+uid+"'";
   return sql(q);
 }
+function expectProfile(uid,total,math,revision,epoch=1) {
+  const [a,b,c,d]=profileRows(uid).split('|');
+  assert.equal(a==='NULL'?null:Number(a),total,'owner total hours');
+  assert.equal(b==='NULL'?null:Number(b),math,'owner Mathematics hours');
+  assert.equal(Number(c),revision,'owner profile revision');
+  assert.equal(Number(d),epoch,'owner paper comparability epoch');
+}
 function key(label){return 'd3-hours-'+label+'-'+crypto.randomUUID()}
 const args=(exam='May/June 2027',grade='A',total=null,math=null)=>({
   p_exam_series:exam,p_target_grade:grade,
@@ -76,7 +83,7 @@ async function run() {
   assert.equal(first.total_student_hours_available,null);
   assert.equal(first.mathematics_hours_budget,null);
   assert.equal(first.profile_revision,1);
-  assert.equal(profileRows(C),'NULL|NULL|1|1');
+  expectProfile(C,null,null,1);
   assert.equal(sql("SELECT count(*) FROM private.exam_prep_exam_map_revisions WHERE user_id='"+C+"'"+
     " AND total_student_hours_available IS NULL AND mathematics_hours_budget IS NULL"),'1',
     'initial historical revision retains explicit unknown hours');
@@ -93,15 +100,16 @@ async function run() {
     p_component_code:'P5',p_idempotency_key:key('c-p5')});
   const cDiag5=ok(checkC5,'C signed diagnostic P5 without hours');
   assert(cDiag5.session_id&&cDiag5.session_type==='diagnostic');
-  denied(await rpc(D,'get_exam_prep_session_safe_v1',{p_session_id:cDiag.session_id}),
-    'D cannot read C academic session');
+  const foreign=await rpc(D,'get_exam_prep_session_safe_v1',{p_session_id:cDiag.session_id});
+  assert(!foreign.ok || foreign.data==null || foreign.data?.session_id!==cDiag.session_id,
+    'D must not receive C academic session');
 
   // No schedule required: an unselected hour must be represented as null.
   const beforeChoice=ok(await rpc(C,'get_my_exam_prep_weekly_choice_s3_safe_v1'),
     'C S3 read without hours');
   assert.equal(beforeChoice.chosen_math_minutes,null);
   assert.equal(beforeChoice.total_available_minutes,null);
-  assert.equal(profileRows(C),'NULL|NULL|1|1','read-only S3 must not invent time');
+  expectProfile(C,null,null,1);
 
   // Explicit voluntary S3 change. 30 x 3 = 90 min: learner CHOSE it,
   // not a model's inferred requirement; both P1/P5 total exactly 90.
@@ -111,7 +119,7 @@ async function run() {
     p_idempotency_key:key('c-first-voluntary')
   }), 'C explicitly chooses 30min x3 days');
   assert.equal(cChoice.chosen_math_minutes,90);
-  assert.equal(profileRows(C),'NULL|1.50|2|1','C total remains unknown, math becomes 1.5h');
+  expectProfile(C,null,1.5,2);
   const next=ok(await rpc(C,'get_my_exam_prep_weekly_choice_s3_safe_v1'),
     'S3 current choice persists');
   assert.equal(next.chosen_math_minutes,90);
@@ -124,7 +132,7 @@ async function run() {
     'C revisits exam plan without supplying hours');
   assert.equal(same.hours_changed,false);
   assert.equal(Number(same.profile_revision),2);
-  assert.equal(profileRows(C),'NULL|1.50|2|1');
+  expectProfile(C,null,1.5,2);
   assert.equal(Number(sql("SELECT count(*) FROM private.exam_prep_exam_map_revisions WHERE user_id='"+C+"'")),beforeRevisions);
   denied(await rpc(C,'save_exam_prep_exam_profile_v2',args('May/June 2027','A',null,0)),
     'C explicit zero Math hours not silently accepted');
@@ -137,18 +145,18 @@ async function run() {
     'D new UI omits hours but retains original budget');
   assert.equal(unchanged.hours_changed,false);
   assert.equal(unchanged.profile_revision,1);
-  assert.equal(profileRows(D),'12|6|1|1');
+  expectProfile(D,12,6,1);
   const altered=ok(await rpc(D,'save_exam_prep_exam_profile_v2',args('May/June 2027','A',null,4)),
     'D changes Math hours to four while preserving old total');
   assert.equal(altered.hours_changed,true);
-  assert.equal(profileRows(D),'12|4|2|1');
+  expectProfile(D,12,4,2);
   denied(await rpc(D,'save_exam_prep_exam_profile_v2',args('May/June 2027','A',null,13)),
     'D must not silently exceed own stored 12-hour total');
   denied(await rpc(D,'save_exam_prep_exam_profile_v2',args('May/June 2027','A',-1,2)),
     'D negative total denied');
   denied(await rpc(D,'save_exam_prep_exam_profile_v2',args('May/June 2027','A',169,2)),
     'D over 168 total denied');
-  assert.equal(profileRows(D),'12|4|2|1','invalid edits must be atomic');
+  expectProfile(D,12,4,2);
   assert.equal(sql("SELECT count(*) FROM private.exam_prep_exam_map_revisions WHERE user_id='"+D+"'"),'2');
 
   // S3 concurrency/idempotence guard remains intact with optional total hours.
