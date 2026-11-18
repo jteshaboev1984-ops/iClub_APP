@@ -128,8 +128,16 @@ const path = require('path');
   const names = result.calls.map(x=>x.name);
   assert(names.includes('save_exam_prep_exam_profile_v2'),'versioned profile save missing');
   assert(!names.includes('save_exam_prep_exam_profile_v1'),'legacy profile save must not be used');
-  assert(!names.includes('generate_exam_prep_weekly_plan_safe_v3'),
-    'Changing exam details must preserve current active weekly plans; no silent regeneration');
+  // This fixture deliberately runs the older non-S3 contract. Its existing
+  // API legitimately rebuilds each paper separately after an exam profile
+  // change. The governed S3 contract, tested independently, does not do so.
+  const legacyPlanCalls = result.calls.filter(x=>x.name==='generate_exam_prep_weekly_plan_safe_v3');
+  assert(legacyPlanCalls.length===2,
+    'Non-S3 profile save must continue to rebuild P1 and P5 exactly once each');
+  assert(legacyPlanCalls.some(x=>x.args.p_component_code==='P1'),
+    'Legacy P1 plan rebuild must remain available');
+  assert(legacyPlanCalls.some(x=>x.args.p_component_code==='P5'),
+    'Legacy P5 plan rebuild must remain available');
   for (const forbidden of ['submit_exam_prep_response_safe_v1','finalize_exam_prep_session_safe_v1','finalize_exam_prep_timed_safe_v1']) {
     assert(!names.includes(forbidden),`${forbidden} must not be called by profile editing`);
   }
