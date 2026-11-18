@@ -87,7 +87,7 @@ async function run() {
   assert.equal(sql("SELECT count(*) FROM private.exam_prep_exam_map_revisions WHERE user_id='"+C+"'"+
     " AND total_student_hours_available IS NULL AND mathematics_hours_budget IS NULL"),'1',
     'initial historical revision retains explicit unknown hours');
-  const placement=sql("SELECT string_agg(component_code||'='||coalesce(status,'')||'/'||coalesce(reason,''),';' ORDER BY component_code) "+
+  const placement=sql("SELECT string_agg(component_code||'='||coalesce(placement_status,'')||'/'||coalesce(route_reason,''),';' ORDER BY component_code) "+
     "FROM private.exam_prep_component_placements WHERE user_id='"+C+"'");
   assert(!placement.includes('exam_profile_or_realistic_mathematics_budget_required'),
     'C placement cannot be hour-blocked: '+placement);
