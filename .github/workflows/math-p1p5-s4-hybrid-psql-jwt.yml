@@ -305,7 +305,7 @@ jobs:
           node --check scripts/p1p5-s4-stage-on-finalized-browser.cjs
           node scripts/p1p5-s4-stage-on-real-evidence-seed.cjs
           node scripts/p1p5-s4-stage-on-finalized-e2e.cjs
-      - name: D3-HOURS signed real learner scenarios: no hours, voluntary changes, historic retention
+      - name: "D3-HOURS signed real learner scenarios: no hours, voluntary changes, historic retention"
         run: |
           set -euo pipefail
           test "$P1P5_E2E_ISOLATED" = 'true'
