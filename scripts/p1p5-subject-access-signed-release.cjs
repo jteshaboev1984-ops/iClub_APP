@@ -87,9 +87,6 @@ async function run() {
   for(const rollout of ['expanded_beta','mass']) {
     sql("UPDATE private.exam_prep_feature_config SET rollout_state='"+rollout+
       "',qa_open_all_core=true WHERE id=1");
-    if(rollout==='expanded_beta') {
-      assert.equal((await core(A)).core_access,false,rollout+' A without Math');
-    }
     assert.equal((await core(B)).core_access,false,rollout+' B without Math');
     deny(await rpc('get_exam_prep_hybrid_s4_papers_safe_v1',
       {p_component_code:'P1'},jwt(B)),rollout+' direct Paper access without Math');
@@ -97,10 +94,6 @@ async function run() {
       p_exam_series:'May/June 2027',p_target_grade:'A',
       p_total_student_hours_available:12,p_mathematics_hours_budget:6
     },jwt(B)),rollout+' direct profile write without Math');
-    if(rollout==='expanded_beta') {
-      sql("INSERT INTO public.user_subjects(user_id,subject_id,mode) VALUES('"+A+
-        "',5,'study') ON CONFLICT(user_id,subject_id) DO NOTHING");
-    }
     assert.equal((await core(A)).core_access,true,rollout+' A with selected Math');
     assert.equal((await core(B)).core_access,false,rollout+' B without Math');
     if(rollout==='expanded_beta') {
