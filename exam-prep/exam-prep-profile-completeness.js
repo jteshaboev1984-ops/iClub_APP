@@ -22,7 +22,7 @@
 
   function copy() {
     if (language() === "uz") return {
-      title: "Imtihon rejasini to‘ldiring",
+      title: "Imtihon ma’lumotlarini to‘ldiring",
       body: "Javoblaringiz va progressingiz saqlangan. Faqat yetishmayotgan imtihon ma’lumotlarini to‘ldiring. Mavjud natijalar o‘zgarmaydi.",
       series: "Imtihon sessiyasi",
       target: "Maqsad baho",
@@ -33,7 +33,7 @@
       error: "Ma’lumotni saqlab bo‘lmadi. Qayta urinib ko‘ring."
     };
     if (language() === "en") return {
-      title: "Complete your exam plan",
+      title: "Complete exam details",
       body: "Your answers and progress are saved. Complete only the missing exam details. Your existing results will not change.",
       series: "Exam series",
       target: "Target grade",
@@ -44,7 +44,7 @@
       error: "The information could not be saved. Try again."
     };
     return {
-      title: "Дополните план экзамена",
+      title: "Дополните данные об экзамене",
       body: "Ваши ответы и прогресс сохранены. Дополните только недостающие данные об экзамене. Уже полученные результаты не изменятся.",
       series: "Экзаменационная сессия",
       target: "Целевая оценка",
@@ -66,9 +66,7 @@
       profile &&
       String(profile.exam_series || "").trim() &&
       String(profile.target_grade || "").trim() &&
-      Number(profile.total_student_hours_available) > 0 &&
-      Number(profile.mathematics_hours_budget) > 0 &&
-      Number(profile.mathematics_hours_budget) <= Number(profile.total_student_hours_available)
+      true // D3: hours are a voluntary schedule, never profile completeness
     );
   }
 
@@ -97,8 +95,6 @@
     const root = rootEl();
     if (!root || root.querySelector("[data-ep-profile-completion]")) return;
     const c = copy();
-    const total = Number(profile?.total_student_hours_available) > 0 ? Number(profile.total_student_hours_available) : "";
-    const math = Number(profile?.mathematics_hours_budget) > 0 ? Number(profile.mathematics_hours_budget) : "";
     const shell = root.querySelector(".ep-host-shell.ep-live");
     const dashboard = root.querySelector(".ep-live-dashboard-intro");
     const grid = root.querySelector(".ep-live-grid");
@@ -113,8 +109,6 @@
       <form class="ep-live-form" data-ep-profile-completion-form>
         <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile?.exam_series || "")}" placeholder="May/June 2027" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile?.target_grade || "")}" placeholder="A" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(total)}" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(math)}" required aria-required="true"></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(c.save)}</button></div>
       </form>
       <div data-ep-profile-completion-error role="alert" aria-live="assertive"></div>`;
@@ -128,10 +122,10 @@
     const form = event.currentTarget;
     const examSeries = String(form.elements.exam_series.value || "").trim();
     const targetGrade = String(form.elements.target_grade.value || "").trim().toUpperCase();
-    const totalHours = Number(form.elements.total_hours.value);
-    const mathHours = Number(form.elements.math_hours.value);
+    const totalHours = null;
+    const mathHours = null;
     const error = rootEl()?.querySelector("[data-ep-profile-completion-error]");
-    if (!examSeries || !targetGrade || !(totalHours > 0) || !(mathHours > 0) || mathHours > totalHours || totalHours > 168) {
+    if (!examSeries || !targetGrade) {
       if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`;
       return;
     }
