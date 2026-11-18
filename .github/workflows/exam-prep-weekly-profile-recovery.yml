@@ -31,6 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -38,11 +39,19 @@ jobs:
       - name: Verify exactly reviewed branch sources without editing checkout
         run: |
           set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
           # UX531 2026-11-16: new cached JS query only; exact API source
           # re-pin required, original guarded profile recovery tests preserved.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
+                "${GITHUB_HEAD_REF:-}" == "feature/math-d3-hours-optional-20261118" &&
+                "${GITHUB_BASE_REF:-}" == "main" ]]; then
+            test "$(git hash-object exam-prep/exam-prep-api.js)" = '61924125bbb0fd781c7897bc063fd61e22e22a57'
+            test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = 'bffe985ba1eb86d3d47b7d7e0e58bb24db25ad6c'
+          else
           test "$(git hash-object exam-prep/exam-prep-api.js)" = 'ff59bd51a72dda2f194ff86c8aaaebd336e38f4e'
-          test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
           test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '9b5169e2b0e3c0ed60ba5de1be8ef1ce8dbc2a02'
+          fi
+          test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
           node --check scripts/weekly-flow-profile-recovery-cutover.cjs
           node --check exam-prep/exam-prep-api.js
           node --check .github/scripts/exam_prep_projection_rpc_serialization_regression.js

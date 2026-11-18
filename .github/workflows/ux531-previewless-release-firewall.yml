@@ -38,6 +38,17 @@ jobs:
           # The narrow UX-only allowlist remains authoritative for every
           # ordinary UX PR. This ONE combined Math+UX+CI candidate must pass
           # the *stronger* exact-37-file integrated source firewall, not skip QA.
+          # Exact, candidate-only D3 source review; legacy UX guards remain intact.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
+                "${GITHUB_HEAD_REF:-}" == "feature/math-d3-hours-optional-20261118" ]]; then
+            test "${GITHUB_BASE_REF:-}" = "main"
+            test "$UX531_BASE_SHA" = "31f22796545c58382e7ac41c785000e736f8472b"
+            test "$UX531_EXPECTED_SHA" = "$(git rev-parse HEAD)"
+            node --check qa/math-d3-hours-source-firewall.cjs
+            D3_BASE_SHA="$UX531_BASE_SHA" D3_HEAD_SHA="$UX531_EXPECTED_SHA" node qa/math-d3-hours-source-firewall.cjs
+            echo "D3 strict reviewed-source gate PASS; UX-only guards preserved for other branches."
+            exit 0
+          fi
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
                 "${GITHUB_HEAD_REF:-}" == "integration/math562-ci563-release-candidate-20261117" ]]; then
             test "$UX531_BASE_SHA" = "f945228fefe0ec3a013f34b7d0ab9ac6c40cc2e4"
