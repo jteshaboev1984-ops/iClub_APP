@@ -95,7 +95,7 @@ const path = require('path');
 
   await page.click('[data-ep-v58-plan-open]');
   await page.waitForSelector('[data-ep-v58-plan-page]');
-  let text = await page.locator('[data-ep-v58-profile-facts]').textContent();
+  let text = await page.locator('.ep-v58-profile-facts').textContent();
   assert(text.includes('May/June 2027'), 'previously saved exam series must be retained');
   assert(text.includes('6'), 'saved Mathematics budget must remain readable');
   assert(await page.locator('[data-ep-v58-profile-editor]').count() === 0,
@@ -110,7 +110,7 @@ const path = require('path');
   await page.fill('[data-ep-live-profile-form] input[name="math_hours"]','5');
   await page.click('[data-ep-live-profile-form] button[type="submit"]');
   await page.waitForSelector('[data-ep-v58-profile-summary]');
-  text = await page.locator('[data-ep-v58-profile-facts]').textContent();
+  text = await page.locator('.ep-v58-profile-facts').textContent();
   assert(text.includes('Oct/Nov 2027'), 'updated exam series must be shown inside My plan');
   assert(text.includes('5'), 'explicit voluntary Maths time change must persist in the plan summary');
 

@@ -74,7 +74,7 @@ jobs:
           test "$(git hash-object .github/workflows/math-p1p5-d3-protected-recovery-review.yml)" = '33cf15c04ca5a290893e58d8b733883c31ce8b7f'
           test "$(git hash-object .github/workflows/p0-14-host-regression.yml)" = '3c9d1f5b0a31198b8f4c4947cba9697af6a1dd62'
           test "$(git hash-object .github/workflows/p2-09-exam-map-revision.yml)" = 'b63b2a4ba6e77e257c7397e2b770835085d07dc1'
-          test "$(git hash-object .github/scripts/p2_09_exam_map_ui_regression.js)" = '58ebebc331bdeb5ba1d21e27f6e80810dacff05e'
+          test "$(git hash-object .github/scripts/p2_09_exam_map_ui_regression.js)" = '4b9c9d3b7f3e64dc4cfcce117199f8c529ebeb5a'
           test "$(git hash-object exam-prep/exam-prep-live.js)" = 'e875085e55b4580df9659b27e7f32c8490fcd06a'
           test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
           node --check exam-prep/exam-prep-exam-map.js
