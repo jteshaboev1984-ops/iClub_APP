@@ -33,7 +33,7 @@
       mathShort: "Matematika",
       totalShort: "Jami",
       hours: "soat/hafta",
-      invalid: "Barcha maydonlarni tekshiring. Matematika vaqti 0 dan katta bo‘lishi va umumiy vaqtdan oshmasligi kerak.",
+      invalid: "Imtihon sessiyasi va maqsad bahoni tekshiring. Agar o‘qish soatlari kiritilsa, ular 0 dan katta bo‘lishi va matematika vaqti umumiy vaqtdan oshmasligi kerak.",
       error: "Ma’lumotni saqlab bo‘lmadi. Qayta urinib ko‘ring.",
       seriesChanged: "Imtihon sessiyasi yangilandi. Oldingi natijalar tarixda saqlanadi. Yangi sessiyaga tayyorgarlik yangi to‘liq ishlar asosida baholanadi; P1 va P5 alohida hisoblanadi.",
       planChanged: "Reja yangilandi. Oldingi progress, tuzatishlar va qayta tekshiruvlar saqlandi.",
@@ -54,7 +54,7 @@
       mathShort: "Mathematics",
       totalShort: "Total",
       hours: "h/week",
-      invalid: "Check all fields. Mathematics time must be above 0 and cannot exceed total study time.",
+      invalid: "Check the exam series and target grade. If study hours are entered, they must be positive, and Mathematics time cannot exceed total study time.",
       error: "The information could not be saved. Try again.",
       seriesChanged: "Your exam series has been updated. Previous results remain in your history. Readiness for the new series will be based on new full papers; P1 and P5 remain separate.",
       planChanged: "Your plan has been updated. Previous progress, corrections and scheduled checks are kept.",
@@ -75,7 +75,7 @@
       mathShort: "Математика",
       totalShort: "Всего",
       hours: "ч/нед.",
-      invalid: "Проверьте все поля. Время на математику должно быть больше 0 и не превышать общее учебное время.",
+      invalid: "Проверьте экзаменационную сессию и целевую оценку. Если часы указаны, они должны быть больше нуля, а время на математику не может превышать общее.",
       error: "Не удалось сохранить данные. Попробуйте ещё раз.",
       seriesChanged: "Экзаменационная сессия обновлена. Прежние результаты останутся в истории. Готовность к новой сессии будет оцениваться по новым полным работам; P1 и P5 по-прежнему учитываются отдельно.",
       planChanged: "План обновлён. Прежний прогресс, исправления и повторные проверки сохранены.",
@@ -97,9 +97,7 @@
 
   function profileComplete(profile) {
     return Boolean(
-      profile && String(profile.exam_series || "").trim() && String(profile.target_grade || "").trim() &&
-      Number(profile.total_student_hours_available) > 0 && Number(profile.mathematics_hours_budget) > 0 &&
-      Number(profile.mathematics_hours_budget) <= Number(profile.total_student_hours_available)
+      profile && String(profile.exam_series || "").trim() && String(profile.target_grade || "").trim()
     );
   }
 
@@ -179,8 +177,8 @@
       <form class="ep-live-form" data-ep-exam-plan-form>
         <label class="ep-live-field"><span>${esc(c.series)}</span><input name="exam_series" maxlength="80" value="${esc(profile.exam_series)}" required aria-required="true"></label>
         <label class="ep-live-field"><span>${esc(c.target)}</span><input name="target_grade" maxlength="40" value="${esc(profile.target_grade)}" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.total_student_hours_available)}" required aria-required="true"></label>
-        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.mathematics_hours_budget)}" required aria-required="true"></label>
+        <label class="ep-live-field"><span>${esc(c.total)}</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.total_student_hours_available??"")}"></label>
+        <label class="ep-live-field"><span>${esc(c.math)}</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.mathematics_hours_budget??"")}"></label>
         <div class="ep-live-actions"><button class="ep-live-btn" type="submit">${esc(window.iClubExamPrepWeeklyFlowEnabled === true ? c.saveStable : c.save)}</button><button class="ep-live-btn secondary" type="button" data-ep-exam-plan-cancel>${esc(c.cancel)}</button></div>
       </form><div data-ep-exam-plan-error role="alert" aria-live="assertive"></div>
     </div></section>`;
@@ -194,10 +192,17 @@
     const form = event.currentTarget;
     const examSeries = String(form.elements.exam_series.value || "").trim();
     const targetGrade = String(form.elements.target_grade.value || "").trim().toUpperCase();
-    const totalHours = Number(form.elements.total_hours.value);
-    const mathHours = Number(form.elements.math_hours.value);
+    const optionalHours = name => {
+      const raw=form.elements[name]?.value;
+      return raw == null || String(raw).trim()==="" ? null : Number(raw);
+    };
+    const totalHours=optionalHours("total_hours");
+    const mathHours=optionalHours("math_hours");
     const error = rootEl()?.querySelector("[data-ep-exam-plan-error]");
-    if (!examSeries || !targetGrade || !(totalHours > 0) || !(mathHours > 0) || mathHours > totalHours || totalHours > 168) {
+    if (!examSeries || !targetGrade ||
+        (totalHours !== null && (!Number.isFinite(totalHours) || totalHours<=0 || totalHours>168)) ||
+        (mathHours !== null && (!Number.isFinite(mathHours) || mathHours<=0 || mathHours>168)) ||
+        (totalHours !== null && mathHours !== null && mathHours>totalHours)) {
       if (error) error.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`;
       return;
     }

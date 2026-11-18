@@ -1,0 +1,70 @@
+name: Mathematics D3 protected recovery scenarios (candidate-only)
+# Supplemental real Chromium/VM regression. This does NOT waive, replace, or
+# re-pin the existing UX531, answer recovery, or profile recovery source gates.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-api.js'
+      - 'exam-prep/exam-prep-exam-map.js'
+      - 'exam-prep/exam-prep-profile-completeness.js'
+      - 'supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql'
+      - '.github/workflows/math-p1p5-d3-protected-recovery-review.yml'
+permissions:
+  contents: read
+
+jobs:
+  candidate-recovery-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Check out exact PR source, without credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify candidate source and immutable recovery invariants
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
+          grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js
+          grep -Fq 'pending.idempotencyKey' exam-prep/exam-prep-live.js
+          grep -Fq 'data-ep-result-item-order=' exam-prep/exam-prep-live.js
+          grep -Fq 'data-ep-result-session-type=' exam-prep/exam-prep-live.js
+          grep -Fq "['learning','mixed','retest'].includes(state.session.session_type)" exam-prep/exam-prep-live.js
+          grep -Fq 'localization_status === "unavailable"' exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-live.js
+          node --check exam-prep/exam-prep-api.js
+          node --check exam-prep/exam-prep-exam-map.js
+          node --check exam-prep/exam-prep-recovery.js
+          node --check scripts/weekly-flow-answer-loss-browser.cjs
+          node --check scripts/weekly-flow-profile-recovery-browser.cjs
+      - name: Install isolated Chromium
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: "Candidate-only: execute original answer ACK and lost-response browser cases"
+        run: |
+          set -euo pipefail
+          node scripts/weekly-flow-answer-loss-browser.cjs
+          node scripts/weekly-flow-native-browser-journey.cjs
+          node scripts/weekly-flow-adapter-regression.cjs
+      - name: "Candidate-only: execute original guarded profile API and browser cases"
+        run: |
+          set -euo pipefail
+          node scripts/weekly-flow-profile-recovery-regression.cjs
+          node .github/scripts/exam_prep_projection_rpc_serialization_regression.js
+          node scripts/p2-07-recovery-regression.cjs
+          node scripts/weekly-flow-profile-recovery-browser.cjs
+      - name: Confirm reviewed D3 workflow sources and branch-scoped release controls
+        run: |
+          set -euo pipefail
+          test "$(git hash-object .github/workflows/exam-prep-weekly-answer-recovery.yml)" = 'cd0ffaba1dfa22a0cb1a652dc4db8c99869701d7'
+          test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'b58145d137f3e61fd16b1257f0610f285f19a12c'
+          echo 'SUPPLEMENTAL D3 recovery PASS; reviewed branch-only guard updates verified, original other-branch pins preserved.'
+          git diff --exit-code

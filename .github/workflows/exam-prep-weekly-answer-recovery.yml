@@ -23,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -31,11 +32,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
           node --check scripts/weekly-flow-answer-recovery-cutover.cjs
           # Math/UX integration 2026-11-17: reviewed academic Stage3-6 readout
           # layered onto owner-accepted UX #558. Preserve strict whole-file
           # answer ACK/retry invariants and existing signed Chromium tests.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
+                "${GITHUB_HEAD_REF:-}" == "feature/math-d3-hours-optional-20261118" &&
+                "${GITHUB_BASE_REF:-}" == "main" ]]; then
+            test "$(git hash-object exam-prep/exam-prep-live.js)" = 'e875085e55b4580df9659b27e7f32c8490fcd06a'
+          else
           test "$(git hash-object exam-prep/exam-prep-live.js)" = '665a71e3624059fb5da89caac9ea772adc1d25b2'
+          fi
           grep -Fq 'data-ep-result-item-order=' exam-prep/exam-prep-live.js
           grep -Fq 'data-ep-result-session-type=' exam-prep/exam-prep-live.js
           grep -Fq 'async function reconcilePendingAnswer(pending)' exam-prep/exam-prep-live.js

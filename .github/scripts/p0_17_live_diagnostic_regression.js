@@ -139,8 +139,7 @@ if (!hostCss.includes('min-height: 44px')) throw new Error('mobile touch target 
 
   await page.fill('input[name="exam_series"]','Oct/Nov 2026');
   await page.fill('input[name="target_grade"]','A');
-  await page.fill('input[name="total_hours"]','12');
-  await page.fill('input[name="math_hours"]','6');
+  // D3: first entry requires only exam series and target; no time request.
   await page.click('[data-ep-live-save-profile]');
   await page.waitForFunction(()=>document.querySelector('[data-ep-live-open-component="P1"]'));
   r=await page.evaluate(()=>({

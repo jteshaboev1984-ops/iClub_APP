@@ -71,9 +71,9 @@
   function copy() {
     if (state.language === "uz") return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Imtihonga tayyorgarlik", safe: "Modulga kirish shaxsiy ruxsat bilan himoyalangan.",
-      profileTitle: "Imtihon rejangizni kiriting", profileText: "Shu ma’lumotlar asosida matematikaga ajratadigan haftalik vaqtingiz rejalashtiriladi.",
+      profileTitle: "Imtihon rejangizni kiriting", profileText: "Avval bilimingiz tekshiriladi, so‘ng shaxsiy o‘quv yo‘li tuziladi. Vaqtni keyinroq «Mening rejam» bo‘limida ixtiyoriy belgilaysiz.",
       series: "Imtihon sessiyasi", target: "Ko‘zlangan baho", total: "Haftasiga o‘qishga ajratilgan jami vaqt (soat)", math: "Haftasiga matematika uchun vaqt (soat)",
-      save: "Rejani saqlash", saving: "Saqlanmoqda…", invalid: "Soatlarni tekshiring: matematika vaqti 0 dan katta va umumiy vaqtdan oshmasligi kerak.",
+      save: "Rejani saqlash", saving: "Saqlanmoqda…", invalid: "Imtihon sessiyasi va maqsad bahoni tekshiring. Ixtiyoriy soatlar 0 dan katta va mos bo‘lishi kerak.",
       items: "savol", areas: "bo‘lim", start: "Kirish tekshiruvini boshlash", resume: "Tekshiruvni davom ettirish", complete: "Kirish tekshiruvi yakunlandi", loading: "Yuklanmoqda…",
       question: "Savol", submit: "Javobni yuborish", correct: "To‘g‘ri", incorrect: "Xatoni ko‘rib chiqing", finish: "Tekshiruv qismi yakunlandi. Natija yangilandi.",
       error: "Amalni bajarib bo‘lmadi. Qayta urinib ko‘ring.", back: "Orqaga", overview: "Umumiy ko‘rinish", plan: "Haftalik reja", openPlan: "Haftalik rejani ochish", priority: "Ustuvorlik", week: "Hafta",
@@ -121,9 +121,9 @@
     };
     if (state.language === "en") return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Exam preparation", safe: "Access to this module is protected by personal permission.",
-      profileTitle: "My plan", profileText: "This helps build a realistic weekly mathematics workload.",
+      profileTitle: "My plan", profileText: "Begin with a diagnostic. iClub will identify skills to work on; you can choose or adjust study time later in My plan. No hours are required.",
       series: "Exam series", target: "Target grade", total: "Total weekly study time (hours)", math: "Mathematics time (hours)",
-      save: "Save in My plan", saving: "Saving…", invalid: "Check the hours: mathematics time must be above 0 and cannot exceed total time.",
+      save: "Save in My plan", saving: "Saving…", invalid: "Check exam details. If study hours are entered, they must be positive and Mathematics cannot exceed the total.",
       items: "questions", areas: "areas", start: "Start entry check", resume: "Continue the check", complete: "Entry check complete", loading: "Loading…",
       question: "Question", submit: "Submit answer", correct: "Correct", incorrect: "Review this mistake", finish: "Check section complete. Progress updated.",
       error: "The action could not be completed. Try again.", back: "Back", overview: "Overview", plan: "Weekly plan", openPlan: "Open weekly plan", priority: "Priority", week: "Week",
@@ -171,9 +171,9 @@
     };
     return {
       title: "Cambridge AS Mathematics · Exam Prep", kicker: "Подготовка к экзамену", safe: "Доступ к модулю защищён персональным разрешением.",
-      profileTitle: "Мой план", profileText: "Это поможет системе построить реалистичную недельную нагрузку по математике.",
+      profileTitle: "Мой план", profileText: "Начните с диагностики. iClub определит темы для подготовки; время занятий можно указать позже в «Мой план». Для старта часы не нужны.",
       series: "Экзаменационная сессия", target: "Целевая оценка", total: "Общее учебное время в неделю (часы)", math: "Время на математику (часы)",
-      save: "Сохранить в «Мой план»", saving: "Сохраняем…", invalid: "Проверьте часы: время на математику должно быть больше 0 и не превышать общее время.",
+      save: "Сохранить в «Мой план»", saving: "Сохраняем…", invalid: "Проверьте данные экзамена. Если часы указаны, они должны быть положительными, а часы Mathematics не могут превышать общее время.",
       items: "вопросов", areas: "разделов", start: "Начать входную проверку", resume: "Продолжить проверку", complete: "Входная проверка завершена", loading: "Загрузка…",
       question: "Вопрос", submit: "Отправить ответ", correct: "Верно", incorrect: "Разберите эту ошибку", finish: "Часть проверки завершена. Прогресс обновлён.",
       error: "Не удалось выполнить действие. Попробуйте ещё раз.", back: "Назад", overview: "Обзор", plan: "Недельный план", openPlan: "Открыть недельный план", priority: "Приоритет", week: "Неделя",
@@ -675,8 +675,11 @@
       '<form class="ep-live-form" data-ep-live-profile-form>'+
       '<label class="ep-live-field"><span>'+esc(c.series)+'</span><input name="exam_series" maxlength="80" placeholder="Oct/Nov 2026" value="'+esc(p.exam_series||"")+'" required aria-required="true"></label>'+
       '<label class="ep-live-field"><span>'+esc(c.target)+'</span><input name="target_grade" maxlength="40" placeholder="A" value="'+esc(p.target_grade||"")+'" required aria-required="true"></label>'+
-      '<label class="ep-live-field"><span>'+esc(c.total)+'</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="'+esc(p.total_student_hours_available??"")+'" required aria-required="true"></label>'+
-      '<label class="ep-live-field"><span>'+esc(c.math)+'</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="'+esc(p.mathematics_hours_budget??"")+'" required aria-required="true"></label>'+
+      // The first visit has NO time questions. Returning learners may edit
+      // previous voluntary hours in the one existing My plan editor.
+      (state.profile ?
+        '<label class="ep-live-field"><span>'+esc(c.total)+'</span><input name="total_hours" type="number" min="0.5" max="168" step="0.5" value="'+esc(p.total_student_hours_available??"")+'"></label>'+
+        '<label class="ep-live-field"><span>'+esc(c.math)+'</span><input name="math_hours" type="number" min="0.5" max="168" step="0.5" value="'+esc(p.mathematics_hours_budget??"")+'"></label>' : '')+
       '<div class="ep-live-actions"><button class="ep-live-btn" type="submit" data-ep-live-save-profile>'+esc(c.save)+'</button></div></form>'+
       '<div data-ep-live-profile-error role="alert" aria-live="assertive"></div></div>';
   }
@@ -690,8 +693,18 @@
     event.preventDefault(); if (state.busy) return;
     const form = event.currentTarget;
     const isInitialSetup=!state.profile;
-    const values = { examSeries: form.elements.exam_series.value, targetGrade: form.elements.target_grade.value, totalHours: Number(form.elements.total_hours.value), mathHours: Number(form.elements.math_hours.value) };
-    if (!String(values.examSeries || "").trim() || !String(values.targetGrade || "").trim() || !(values.totalHours > 0) || !(values.mathHours > 0) || values.mathHours > values.totalHours || values.totalHours > 168) {
+    // Optional hours: absent fields/blank input serialize as NULL, not 0.
+    // The server retains an existing learner's stored budget when omitted.
+    const time = name => {
+      const raw = form.elements[name]?.value;
+      return raw == null || String(raw).trim() === "" ? null : Number(raw);
+    };
+    const values = { examSeries: form.elements.exam_series.value, targetGrade: form.elements.target_grade.value,
+      totalHours: time("total_hours"), mathHours: time("math_hours") };
+    if (!String(values.examSeries || "").trim() || !String(values.targetGrade || "").trim() ||
+      (values.totalHours !== null && (!Number.isFinite(values.totalHours) || values.totalHours<=0 || values.totalHours>168)) ||
+      (values.mathHours !== null && (!Number.isFinite(values.mathHours) || values.mathHours<=0 || values.mathHours>168)) ||
+      (values.totalHours !== null && values.mathHours !== null && values.mathHours>values.totalHours)) {
       const el = rootEl()?.querySelector("[data-ep-live-profile-error]"); if (el) el.innerHTML = `<div class="ep-live-error">${esc(copy().invalid)}</div>`; return;
     }
     // Keep the edited fields mounted when the server is unavailable; an error
@@ -1288,7 +1301,8 @@
       if (state.busy) return;
       const v = get();
       if (!v.valid) { show(c.invalid); return; }
-      if (v.budget > Number(state.profile?.total_student_hours_available || 0)) { show(c.exceeds); return; }
+      if (state.profile?.total_student_hours_available != null &&
+          v.budget > Number(state.profile.total_student_hours_available)) { show(c.exceeds); return; }
       state.busy = true; button.disabled = true; show("");
       const result = await internal.api.saveStudySchedule(v.minutes, v.days);
       if (!result?.ok) {
@@ -1494,11 +1508,27 @@
     const d = state.weeklyChoice;
     if (!d || d.contract_version !== "voluntary_weekly_choice_s3_v1") return "";
     const c = weeklyS3Copy();
-    const budget = Number(d.chosen_math_minutes || 0);
-    const choice = ["keep","redistribute","change"].includes(d.choice_code) ? d.choice_code : "keep";
+    const hasChosenTime=d.chosen_math_minutes!=null && Number(d.chosen_math_minutes)>0;
+    // No inferred split/time before BOTH component diagnostics. Existing
+    // owner-chosen hours remain editable even when screening is incomplete.
+    const diagnosticsReady=state.progress.P1?.stage0_complete===true &&
+      state.progress.P5?.stage0_complete===true;
+    if(!hasChosenTime && !diagnosticsReady) {
+      const note=({
+        ru:"Сначала завершите диагностику P1 и P5. После неё iClub покажет учебные приоритеты; часы можно указать добровольно. Подготовка доступна и без расписания.",
+        uz:"Avval P1 va P5 diagnostikasini tugating. So‘ng iClub ustuvor mavzularni ko‘rsatadi; o‘qish vaqtini ixtiyoriy kiritishingiz mumkin. Jadvalsiz ham o‘rganish mumkin.",
+        en:"Complete the P1 and P5 diagnostics first. iClub will then show your priorities; setting study hours is optional. You can study without a schedule."
+      })[state.language];
+      return "<section class='ep-live-card' data-ep-d3-time-pending><p class='ep-live-meta'>"+
+        esc(note)+"</p></section>";
+    }
+    const budget=hasChosenTime?Number(d.chosen_math_minutes):null;
+    // New learners can explicitly choose time here; never save it implicitly.
+    const choice=hasChosenTime && ["keep","redistribute","change"].includes(d.choice_code)
+      ? d.choice_code : "change";
     const checked = k => choice === k ? " checked" : "";
-    const savedP1 = d.p1_minutes == null ? "" : String(d.p1_minutes);
-    const savedP5 = d.p5_minutes == null ? "" : String(d.p5_minutes);
+    const savedP1 = d.p1_minutes == null ? (hasChosenTime?"":"45") : String(d.p1_minutes);
+    const savedP5 = d.p5_minutes == null ? (hasChosenTime?"":"45") : String(d.p5_minutes);
     const reports = Array.isArray(state.weeklyReports?.reports) ? state.weeklyReports.reports : [];
     const date = value => {
       const parsed = new Date(value);
@@ -1516,7 +1546,11 @@
         cell("P1",p1) + cell("P5",p5) + "</div></div>";
     }).join("");
     return "<section class='ep-live-s3' data-ep-s3>" +
-      "<p>" + esc(c.intro) + "</p>" +
+      "<p>" + esc(hasChosenTime?c.intro:({
+        ru:"Пример короткого режима: 30 минут × 3 дня, P1 и P5 по 45 минут. Это не персональный расчёт и ничего не сохраняется без вашего выбора. Можно изменить любые значения.",
+        uz:"Qisqa tartib namunasi: 30 daqiqa × 3 kun, P1 va P5 uchun 45 daqiqadan. Bu shaxsiy hisob emas; siz saqlamaguningizcha hech narsa yozilmaydi. Qiymatlarni o‘zgartirishingiz mumkin.",
+        en:"Example short routine: 30 minutes × 3 days, 45 minutes each for P1 and P5. This is not a personalized estimate and is never saved without your choice. You can change every value."
+      })[state.language]) + "</p>" +
       (Math.abs(Number(state.profile?.mathematics_hours_budget || 0)*60-budget)>0.5 ?
         "<div class='ep-live-s3-budget'>" + esc(c.total) + ": <strong>" + budget + " min</strong></div>": "") +
       "<div class='ep-live-s3-options'>" +
@@ -1528,7 +1562,7 @@
         "<label>" + esc(c.p5) + "<input type='number' data-ep-s3-p5 min='0' step='5' value='" + esc(savedP5) + "'></label>" +
       "</div><div class='ep-live-s3-split' data-ep-s3-newtime hidden>" +
         "<label>" + esc(c.daily) + "<input type='number' data-ep-s3-daily min='15' max='240' step='5' value='" + Number(d.study_minutes_per_day || 30) + "'></label>" +
-        "<label>" + esc(c.days) + "<input type='number' data-ep-s3-days min='1' max='7' value='" + Number(d.study_days_per_week || 5) + "'></label>" +
+        "<label>" + esc(c.days) + "<input type='number' data-ep-s3-days min='1' max='7' value='" + Number(d.study_days_per_week || (hasChosenTime ? 5 : 3)) + "'></label>" +
       "</div><button class='ep-live-btn secondary' data-ep-s3-save type='button'>" + esc(c.save) + "</button>" +
       "<div class='ep-live-meta' data-ep-s3-feedback role='status' aria-live='polite'></div>" +
       "<h3 class='ep-live-s3-report-title'>" + esc(c.report) + "</h3>" +
@@ -1571,7 +1605,8 @@
         show(c.invalidSplitStep); return;
       }
       if (choice !== "keep" && p1 + p5 !== sum) { show(c.invalid); return; }
-      if (choice === "change" && sum > Number(row.total_available_minutes)) {
+      if (choice === "change" && row.total_available_minutes != null &&
+          sum > Number(row.total_available_minutes)) {
         show(c.exceedsAvailable); return;
       }
       // Avoid a duplicate decision after success in the SAME active week.
@@ -1646,8 +1681,8 @@
     const facts=hasProfile?[
       [c.series,p.exam_series||t.none],
       [c.target,p.target_grade||t.none],
-      [c.total,Number(p.total_student_hours_available)>0?formatWeeklyHours(p.total_student_hours_available):t.none],
-      [c.math,Number(p.mathematics_hours_budget)>0?formatWeeklyHours(p.mathematics_hours_budget):t.none]
+      ...(Number(p.total_student_hours_available)>0?[[c.total,formatWeeklyHours(p.total_student_hours_available)]]:[]),
+      ...(Number(p.mathematics_hours_budget)>0?[[c.math,formatWeeklyHours(p.mathematics_hours_budget)]]:[])
     ]:[];
     const factItems=facts.map(([label,value])=>
       '<div class="ep-v58-profile-fact"><small>'+esc(label)+'</small><strong>'+esc(value)+'</strong></div>').join("");

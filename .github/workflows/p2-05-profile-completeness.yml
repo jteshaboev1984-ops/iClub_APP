@@ -1,6 +1,14 @@
 name: P2-05 Exam Profile Completeness Gate
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - exam-prep/exam-prep-api.js
+      - exam-prep/exam-prep-profile-completeness.js
+      - exam-prep/exam-prep-exam-map.js
+      - scripts/p2-05-profile-completeness-regression.cjs
+      - .github/workflows/p2-05-profile-completeness.yml
   push:
     branches:
       - main

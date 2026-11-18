@@ -10,13 +10,22 @@ const examMap = fs.readFileSync('exam-prep/exam-prep-exam-map.js', 'utf8');
 const materials = fs.readFileSync('exam-prep/exam-prep-materials.js', 'utf8');
 
 assert(profile.includes('data-ep-profile-completion-error role="alert" aria-live="assertive"'), 'profile completion errors must be announced');
-assert((profile.match(/required aria-required="true"/g) || []).length >= 4, 'profile completion required fields must expose aria-required');
+assert((profile.match(/required aria-required="true"/g) || []).length === 2 &&
+  profile.includes('name="exam_series"') && profile.includes('name="target_grade"'),
+  'D3 profile repair must mark exactly exam series and target grade as required');
+assert(!profile.includes('name="total_hours"')&&!profile.includes('name="math_hours"'),
+  'D3 repair must not ask for study hours or falsely mark them required');
 
 assert(materials.includes('class="ep-materials-card" role="status" aria-live="polite"'), 'materials loading state must be announced politely');
 assert(materials.includes('class="ep-materials-safe" role="alert" aria-live="assertive"'), 'materials load failure must be announced as an alert');
 
 assert(examMap.includes('data-ep-exam-plan-error role="alert" aria-live="assertive"'), 'exam-plan validation errors must be announced');
-assert((examMap.match(/required aria-required="true"/g) || []).length >= 4, 'exam-plan required fields must expose aria-required');
+assert((examMap.match(/required aria-required="true"/g) || []).length === 2,
+  'D3 exam plan requires only exam series and grade, both aria-required');
+assert(examMap.includes('name="total_hours"')&&examMap.includes('name="math_hours"')&&
+  !examMap.includes('name="total_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.total_student_hours??"")}" required') &&
+  !examMap.includes('name="math_hours" type="number" min="0.5" max="168" step="0.5" value="${esc(profile.mathematics_hours_budget??"")}" required'),
+  'D3 time fields remain available but never marked required');
 assert(examMap.includes('notice.setAttribute("role", "status")'), 'exam-plan saved notice must be a status');
 assert(examMap.includes('notice.setAttribute("aria-live", "polite")'), 'exam-plan saved notice must be polite');
 
