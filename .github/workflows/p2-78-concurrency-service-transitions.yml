@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
+      - 'supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql' # D3 needs exact-SHA 600/10 proof
       - 'supabase/tests/p1p5_stage_c_*.sql'
       - supabase/tests/p2_78_concurrency_service_setup.sql
       - supabase/tests/p2_78_concurrency_service_cleanup.sql
