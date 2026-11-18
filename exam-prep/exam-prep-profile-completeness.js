@@ -29,7 +29,7 @@
       total: "Haftalik umumiy o‘qish vaqti (soat)",
       math: "Matematika uchun vaqt (soat)",
       save: "Saqlash va davom etish",
-      invalid: "Barcha maydonlarni tekshiring. Matematika vaqti 0 dan katta bo‘lishi va umumiy vaqtdan oshmasligi kerak.",
+      invalid: "Imtihon sessiyasi va maqsad bahoni tekshiring.",
       error: "Ma’lumotni saqlab bo‘lmadi. Qayta urinib ko‘ring."
     };
     if (language() === "en") return {
@@ -40,7 +40,7 @@
       total: "Total weekly study time (hours)",
       math: "Mathematics time (hours)",
       save: "Save and continue",
-      invalid: "Check all fields. Mathematics time must be above 0 and cannot exceed total study time.",
+      invalid: "Check the exam series and target grade.",
       error: "The information could not be saved. Try again."
     };
     return {
@@ -51,7 +51,7 @@
       total: "Общее учебное время в неделю (часы)",
       math: "Время на математику (часы)",
       save: "Сохранить и продолжить",
-      invalid: "Проверьте все поля. Время на математику должно быть больше 0 и не превышать общее учебное время.",
+      invalid: "Проверьте экзаменационную сессию и целевую оценку.",
       error: "Не удалось сохранить данные. Попробуйте ещё раз."
     };
   }
