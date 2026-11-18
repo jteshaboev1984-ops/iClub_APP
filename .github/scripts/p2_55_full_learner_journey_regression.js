@@ -154,8 +154,7 @@ const path = require('path');
 
   await page.fill('input[name="exam_series"]','May/June 2027');
   await page.fill('input[name="target_grade"]','A');
-  await page.fill('input[name="total_hours"]','12');
-  await page.fill('input[name="math_hours"]','6');
+  // D3: first entry requires only exam series and target; no time request.
   await page.click('[data-ep-live-save-profile]');
   await page.waitForSelector('[data-ep-live-open-component="P1"]');
   await page.waitForSelector('[data-ep-live-open-component="P5"]');
