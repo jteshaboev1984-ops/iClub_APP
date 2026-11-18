@@ -8,6 +8,10 @@ on:
       - 'supabase/migrations/*exam_prep_math_s4*.sql'
       - 'exam-prep/exam-prep-api.js'
       - 'exam-prep/exam-prep-live.js'
+      - 'exam-prep/exam-prep-profile-completeness.js'
+      - 'exam-prep/exam-prep-exam-map.js'
+      - 'supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql'
+      - 'scripts/p1p5-d3-hours-signed-real-scenarios.cjs'
       - 'scripts/p1p5-s4-*.cjs'
       - 'scripts/p1p5-subject-access-signed-release.cjs'
       - 'supabase/migrations/*math_p1p5_subject_release_guard*.sql'
@@ -172,6 +176,8 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261115100103_math_p1p5_subject_release_guard_v1.sql
           # Candidate-only: apply to disposable PG17, never to hosted Supabase.
           psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/math_p1p5_subject_controlled_beta_guard_v1_dormant.sql
+          # D3 is a candidate, applied ONLY to this disposable PG17 harness.
+          psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql
 
       - name: Generate ephemeral JWT signing key and start local PostgREST
         shell: bash
@@ -293,6 +299,16 @@ jobs:
           node --check scripts/p1p5-s4-stage-on-finalized-browser.cjs
           node scripts/p1p5-s4-stage-on-real-evidence-seed.cjs
           node scripts/p1p5-s4-stage-on-finalized-e2e.cjs
+      - name: D3-HOURS signed real learner scenarios: no hours, voluntary changes, historic retention
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          node --check scripts/p1p5-d3-hours-signed-real-scenarios.cjs
+          node --check exam-prep/exam-prep-profile-completeness.js
+          node --check exam-prep/exam-prep-exam-map.js
+          node scripts/p1p5-d3-hours-signed-real-scenarios.cjs
       - name: Clean disposable PostgREST
         if: always()
         run: docker rm -f iclub-p1p5-local-postgrest >/dev/null 2>&1 || true
