@@ -71,8 +71,11 @@ const path = require('path');
           ...window.__profile,
           exam_series: args.p_exam_series,
           target_grade: args.p_target_grade,
-          total_student_hours_available: args.p_total_student_hours_available,
-          mathematics_hours_budget: args.p_mathematics_hours_budget
+          // D3: optional hours omitted by repair preserve prior owner choices.
+          total_student_hours_available: args.p_total_student_hours_available ??
+            window.__profile.total_student_hours_available,
+          mathematics_hours_budget: args.p_mathematics_hours_budget ??
+            window.__profile.mathematics_hours_budget
         };
         return { data: { ...window.__profile, progress_retained: true, plan_rebuild_required: false }, error: null };
       }
@@ -105,8 +108,7 @@ const path = require('path');
   let snapshot = await page.evaluate(() => ({
     text: document.querySelector('#exam-prep-host-root')?.textContent || '',
     cards: document.querySelectorAll('[data-ep-live-component]').length,
-    total: document.querySelector('[data-ep-profile-completion-form] input[name="total_hours"]')?.value,
-    math: document.querySelector('[data-ep-profile-completion-form] input[name="math_hours"]')?.value,
+    hoursAsked: document.querySelectorAll('[data-ep-profile-completion-form] input[name="total_hours"],[data-ep-profile-completion-form] input[name="math_hours"]').length,
     p1Card: !!document.querySelector('[data-ep-live-open-component="P1"]'),
     p5Card: !!document.querySelector('[data-ep-live-open-component="P5"]'),
     bottomOpenButtons: document.querySelectorAll('.ep-live-component-open').length,
@@ -116,7 +118,9 @@ const path = require('path');
   assert(snapshot.cards === 2, 'profile completion must not hide P1/P5 progress cards');
   assert(snapshot.text.includes('5 / 24'), 'saved P1 progress must remain visible');
   assert(snapshot.text.includes('6 / 15'), 'saved P5 progress must remain visible');
-  assert(snapshot.total === '12' && snapshot.math === '6', 'saved workload settings must be prefilled');
+  assert(snapshot.hoursAsked === 0, 'repair should not ask for old hours again');
+  assert((await page.evaluate(()=>window.__profile.mathematics_hours_budget))===6,
+    'previously saved hours remain unchanged before profile repair');
   // UX531: cards are navigation, not one-click authorization to resume an attempt.
   assert(snapshot.p1Card && snapshot.p5Card, 'both saved P1/P5 component routes must remain visible');
   assert(snapshot.bottomOpenButtons === 0, 'component cards must not restore duplicate bottom Open controls');
