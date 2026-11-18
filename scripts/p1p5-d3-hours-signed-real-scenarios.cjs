@@ -13,8 +13,8 @@ assert(process.env.CI === 'true' &&
   process.env.PGUSER === 'postgres', 'D3: disposable PG17 only');
 const secret = process.env.P1P5_E2E_JWT_SECRET;
 assert(secret && secret.length > 32, 'D3: ephemeral signing secret required');
-const C='33333333-3333-4333-8333-333333333393';
-const D='44444444-4444-4444-8444-444444444494';
+const C='f10a0222-aaa3-4a21-8111-bb4466000001';
+const D='f10a0222-aaa3-4a21-8111-bb4466000002';
 const e=x=>Buffer.from(JSON.stringify(x)).toString('base64url');
 function jwt(uid) {
   const now=Math.floor(Date.now()/1000);
