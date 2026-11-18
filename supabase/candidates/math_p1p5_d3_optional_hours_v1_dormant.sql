@@ -159,7 +159,7 @@ begin
     'note','Exam-plan changes never delete academic evidence. A genuine exam-series change starts a new full-paper comparability epoch; older papers remain visible history but do not count in the current readiness trend.'
   );
 end;
-$function$
+$function$;
 
 
 -- Fail-closed selective patch of the *installed* placement function.
@@ -263,7 +263,7 @@ begin
     'forecast_available',false
   );
 end;
-$function$
+$function$;
 
 
 -- Preserve existing signature, owner, SECURITY DEFINER, search_path and EXECUTE grants: get_exam_prep_shared_study_capacity_safe_v1.
@@ -397,7 +397,7 @@ begin
     'explanation','Elected weekly hours scaled by exact remaining time, shared by P1 and P5. Does not estimate the hours necessary to learn unverified skills; no study access is ever capped.'
   );
 end;
-$function$
+$function$;
 
 
 -- Preserve existing signature, owner, SECURITY DEFINER, search_path and EXECUTE grants: save_my_exam_prep_weekly_choice_s3_safe_v1.
@@ -509,7 +509,7 @@ BEGIN
    'no_study_cap',true,'academic_marks_changed',false,
    'historical_learning_preserved',true);
 END;
-$function$
+$function$;
 
 
 COMMIT;
