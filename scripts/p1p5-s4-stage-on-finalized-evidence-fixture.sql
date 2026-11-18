@@ -35,6 +35,15 @@ BEGIN
   INSERT INTO private.exam_prep_feature_entitlements(
     user_id,entitlement_status,core_access,ai_assist,mentor_care_entitled,valid_from
   ) VALUES(v_uid,'active',true,false,false,clock_timestamp()-interval '1 minute');
+  -- A real controlled-beta Mathematics learner selects Mathematics.
+  -- Only the disposable Stage-ON fixture creates this subject link.
+  -- Keep the historical fixture compatible where subject tables are absent.
+  IF to_regclass('public.user_subjects') IS NOT NULL
+     AND to_regclass('public.subjects') IS NOT NULL THEN
+    EXECUTE 'INSERT INTO public.user_subjects(user_id,subject_id) '||
+      'SELECT $1,5 FROM public.subjects WHERE id=5 ON CONFLICT DO NOTHING'
+      USING v_uid;
+  END IF;
   PERFORM set_config('request.jwt.claim.sub',v_uid::text,true);
   PERFORM set_config('request.jwt.claim.role','authenticated',true);
   PERFORM public.save_exam_prep_exam_profile_v2('May/June 2027','A',12,6);
