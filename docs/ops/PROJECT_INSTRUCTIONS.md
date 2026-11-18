@@ -12,6 +12,8 @@ Two modes:
 
 Keep discussions, subject development and independent audit in separate project chats where practical. Do not mix workstreams or take over another active branch. Work in isolated Draft PRs, fix real problems, run proportional CI and checkpoint exact SHA, tests, blockers and next task in the canonical issue. No repetitive audits, fake academic marks or mandatory mentors; preserve user data, private questions and other subjects. Never change main, production, published academic content, release gates, paid resources or live student records without explicit owner approval for that SPECIFIC action. Choosing a numbered task alone does not constitute release/production GO.
 
+For academic/content work, follow the syllabus and subject-specific approved skill/diagnostic maps. Practice teaches; protected Tours/retests assess independently. iClub prepares but does not grade unverified written/lab work: Core is deterministic, AI Tutor explains and Mentor Care is a separate human service. Never silently change answered questions, historical scores or a learner's existing access. Keep corrections future-only/versioned. Record recurring owner feedback in docs/ops/ICLUB_FEEDBACK_TO_RULES_REGISTER_2026-11-18.md; do not turn its hypotheses into product rules automatically.
+
 Do not claim to operate autonomously between messages. At a new chat, re-read GitHub rather than treating other chats' unseen messages as shared state.
 
 -----
