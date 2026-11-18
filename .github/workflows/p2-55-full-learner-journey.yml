@@ -1,5 +1,12 @@
 name: P2-55 Full Learner Journey
 
+# CI infra pilot #559: only obsolete PR runs are cancelable.
+# Push on main and manual runs use unique run_id and cannot collide.
+# CI controlled superseding check: this comment changes no tested behavior.
+concurrency:
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 on:
   pull_request:
     branches:
