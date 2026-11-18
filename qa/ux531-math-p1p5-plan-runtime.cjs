@@ -65,6 +65,7 @@ const html = [
   '<section id="courses-subject-hub" data-subject-key="mathematics">',
   '<div id="exam-prep-host-root"></div></section></main>',
   '<script src="/exam-prep/exam-prep-live.js"></script>',
+  '<script src="/exam-prep/exam-prep-exam-map.js"></script>',
   '</body></html>'
 ].join("");
 
@@ -76,7 +77,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html);
     return;
   }
-  if (!["/style.css", "/visual/iclub-visual-v3.css", "/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
+  if (!["/style.css", "/visual/iclub-visual-v3.css", "/exam-prep/exam-prep-live.js", "/exam-prep/exam-prep-exam-map.js", "/exam-prep/exam-prep-host.css", "/visual/iclub-academy-ux531-b04b08.css"].includes(p)) {
     res.writeHead(404).end(); return;
   }
   const file = path.join(root, p.slice(1));
@@ -202,6 +203,7 @@ async function caseRun(browser, address, { language, width, mode }) {
   try {
     await page.goto(address, {waitUntil:"domcontentloaded"});
     await page.waitForFunction(() => window.iClubExamPrep?.liveFlowVersion);
+    await page.waitForFunction(() => window.iClubExamPrepHostInternal?.examMapUiVersion === "p209map3");
     const opened = await page.evaluate(async language =>
       window.iClubExamPrep.open({subjectKey:"mathematics",language}), language);
     if (mode === "denied") {
@@ -272,6 +274,13 @@ async function caseRun(browser, address, { language, width, mode }) {
     assert.equal(await page.locator(".ep-live-dashboard-profile").count(),0,
       "Do not duplicate saved plan details beside the route header");
     assert.equal(await page.locator("[data-ep-v58-plan-summary]").count(),1);
+    // Real browser regression: BOTH production modules are mounted. Give the
+    // old MutationObserver/async profile read enough time to try its hydrate.
+    await page.waitForTimeout(90);
+    assert.equal(await page.locator("[data-ep-exam-plan-card]").count(),0,
+      "No stale Exam Plan overlay may duplicate the v5.8 My plan card");
+    assert.equal(await page.locator("[data-ep-exam-plan-edit]").count(),0,
+      "The old profile editor must not compete with unified My plan");
     assert.match(await page.locator("[data-ep-v58-plan-summary]").innerText(),
       language==="en"?/My plan/:language==="uz"?/Mening rejam/:/Мой план/);
     const overviewOrder = await page.evaluate(()=>{
@@ -438,6 +447,9 @@ async function caseRun(browser, address, { language, width, mode }) {
     }
     await page.locator("[data-ep-v58-plan-back]").click();
     await page.locator(".ep-v58-main-components").waitFor();
+    await page.waitForTimeout(50);
+    assert.equal(await page.locator("[data-ep-exam-plan-card]").count(),0,
+      "Returning from My plan must not resurrect the old duplicate card");
     await page.locator('[data-ep-live-open-component="P1"] .ep-live-component-copy').click();
     await page.locator('[data-ep-component-home="P1"]').waitFor();
     await verifyLayout('P1 Route',true);
@@ -512,6 +524,26 @@ async function caseRun(browser, address, { language, width, mode }) {
         path:path.join(screens,"math-p1p5-plan-"+language+"-"+width+".png"),
         fullPage:true
       });
+    }
+    // Legacy-only route compatibility: an older dashboard without v5.8 My plan
+    // must still retain its existing edit action; never remove its API path.
+    if (language === "ru" && width === 390) {
+      await page.evaluate(() => {
+        document.getElementById("exam-prep-host-root").innerHTML =
+          '<section class="ep-host-shell ep-live">' +
+          '<section class="ep-live-dashboard-intro">Legacy route</section>' +
+          '<div class="ep-live-grid">' +
+          '<button data-ep-live-plan="P1" type="button">P1</button>' +
+          '<button data-ep-live-plan="P5" type="button">P5</button>' +
+          '</div></section>';
+      });
+      await page.locator("[data-ep-exam-plan-card]").waitFor();
+      assert.equal(await page.locator("[data-ep-exam-plan-card]").count(),1,
+        "Older route without v5.8 summary retains its previous Plan control");
+      await page.locator("[data-ep-exam-plan-edit]").click();
+      await page.locator("[data-ep-exam-plan-editor]").waitFor();
+      assert.equal(await page.locator("[data-ep-exam-plan-form]").count(),1,
+        "Legacy profile editor remains available for old-only route");
     }
     console.log("PASS UX531 Mathematics plan -> real P1/P5 dashboard",
       language,width,"P1 3/7 P5 0/9; no attempts or network");

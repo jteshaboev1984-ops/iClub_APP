@@ -43,6 +43,12 @@ jobs:
           # UX531 2026-11-16: new cached JS query only; exact API source
           # re-pin required, original guarded profile recovery tests preserved.
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
+                "${GITHUB_HEAD_REF:-}" == "fix/math-single-my-plan-legacy-map-20261118" &&
+                "${GITHUB_BASE_REF:-}" == "main" ]]; then
+            test "${{ github.event.pull_request.base.sha }}" = "d69e8f7e2dcd287487a2926ccc5792e2dd0746ff"
+            test "$(git hash-object exam-prep/exam-prep-api.js)" = 'ddfb9f643d089c726ec5c84284359a5cea87b7f4'
+            test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '4c54b9d774b56a843aa1b98454758ef60cdd56fa'
+          elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
                 "${GITHUB_HEAD_REF:-}" == "feature/math-d3-hours-optional-20261118" &&
                 "${GITHUB_BASE_REF:-}" == "main" ]]; then
             test "$(git hash-object exam-prep/exam-prep-api.js)" = '61924125bbb0fd781c7897bc063fd61e22e22a57'

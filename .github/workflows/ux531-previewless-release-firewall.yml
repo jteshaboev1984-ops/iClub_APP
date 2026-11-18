@@ -39,6 +39,46 @@ jobs:
           # ordinary UX PR. This ONE combined Math+UX+CI candidate must pass
           # the *stronger* exact-37-file integrated source firewall, not skip QA.
           # Exact, candidate-only D3 source review; legacy UX guards remain intact.
+          # Targeted owner-requested UX531 postrelease repair. The old
+          # Academy and D3 source gates still apply to their own branches.
+          # Reject all other files and all drift from the reviewed main SHA.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
+                "${GITHUB_HEAD_REF:-}" == "fix/math-single-my-plan-legacy-map-20261118" ]]; then
+            test "${GITHUB_BASE_REF:-}" = "main"
+            test "$UX531_BASE_SHA" = "d69e8f7e2dcd287487a2926ccc5792e2dd0746ff"
+            test "$UX531_EXPECTED_SHA" = "$(git rev-parse HEAD)"
+            mapfile -t changed < <(git diff --name-only "$UX531_BASE_SHA" "$UX531_EXPECTED_SHA")
+            test "${#changed[@]}" -eq 8
+            for f in "${changed[@]}"; do
+              case "$f" in
+              ".github/workflows/exam-prep-weekly-profile-recovery.yml") ;;
+              ".github/workflows/math-p1p5-d3-protected-recovery-review.yml") ;;
+              ".github/workflows/ux531-academy-ui-source.yml") ;;
+              ".github/workflows/ux531-previewless-release-firewall.yml") ;;
+              "exam-prep/exam-prep-api.js") ;;
+              "exam-prep/exam-prep-exam-map.js") ;;
+              "index.html") ;;
+              "qa/ux531-math-p1p5-plan-runtime.cjs") ;;
+                *) echo "UNREVIEWED DEDUP FILE: $f"; exit 1 ;;
+              esac
+            done
+          test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '4c54b9d774b56a843aa1b98454758ef60cdd56fa'
+          test "$(git hash-object exam-prep/exam-prep-api.js)" = 'ddfb9f643d089c726ec5c84284359a5cea87b7f4'
+          test "$(git hash-object index.html)" = '075b589d32fd22120ac79556df893b9a02f1344a'
+          test "$(git hash-object qa/ux531-math-p1p5-plan-runtime.cjs)" = '5adae58cb6f49c55da80c4acfaf18b3e3e1f72a0'
+          test "$(git hash-object .github/workflows/ux531-academy-ui-source.yml)" = '051812918abf798fdaa63b9d96390b60fafdb565'
+          test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'f468142f6ab5614fa19548bd9f9009e4e2106db4'
+          test "$(git hash-object .github/workflows/math-p1p5-d3-protected-recovery-review.yml)" = '33cf15c04ca5a290893e58d8b733883c31ce8b7f'
+          test "$(git hash-object exam-prep/exam-prep-live.js)" = 'e875085e55b4580df9659b27e7f32c8490fcd06a'
+          test "$(git hash-object exam-prep/exam-prep-recovery.js)" = '5ba398241b2e2055c72362c9fa660b9f0c8f34c5'
+          node --check exam-prep/exam-prep-exam-map.js
+          node --check exam-prep/exam-prep-api.js
+          node --check qa/ux531-math-p1p5-plan-runtime.cjs
+          grep -Fq 'hasUnifiedMyPlan(root)' exam-prep/exam-prep-exam-map.js
+          echo 'PASS: strict 8-path single My plan repair; legacy guards unaffected.'
+          exit 0
+          fi
+
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
                 "${GITHUB_HEAD_REF:-}" == "feature/math-d3-hours-optional-20261118" ]]; then
             test "${GITHUB_BASE_REF:-}" = "main"

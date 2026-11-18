@@ -2,7 +2,7 @@
   "use strict";
 
   const internal = (window.iClubExamPrepHostInternal = window.iClubExamPrepHostInternal || {});
-  const VERSION = "p209map2";
+  const VERSION = "p209map3";
   let observer = null;
   let queued = false;
   let hydrating = false;
@@ -106,6 +106,13 @@
       Boolean(root?.querySelector('[data-ep-live-plan="P5"], [data-ep-live-start="P5"]'));
   }
 
+  // Academy v5.8 already owns the only visible My plan card and editor.
+  // Keep the older Exam Map view ONLY for pre-v5.8 dashboards. Checking on
+  // both sides of the async profile read avoids stale overlay insertions.
+  function hasUnifiedMyPlan(root) {
+    return Boolean(root?.querySelector("[data-ep-v58-plan-summary]"));
+  }
+
   function currentHeader(root) {
     return root?.querySelector(".ep-host-shell.ep-live > .ep-live-head")?.outerHTML || "";
   }
@@ -113,7 +120,7 @@
   async function hydrate() {
     queued = false;
     const root = rootEl();
-    if (!root || root.hidden || busy || !canUse() || !isDashboard(root)) return;
+    if (!root || root.hidden || busy || !canUse() || !isDashboard(root) || hasUnifiedMyPlan(root)) return;
     if (root.querySelector("[data-ep-exam-plan-card]")) return;
     if (typeof internal.api?.examProfile !== "function") return;
     if (hydrating) { hydrateAgain = true; return; }
@@ -140,7 +147,7 @@
     if (!profileComplete(profile) || rootEl() !== root || !root.isConnected || root.hidden ||
         root.getAttribute("aria-hidden") === "true" || busy || !canUse() ||
         root.querySelector(".ep-live-dashboard-intro") !== dashboard ||
-        !isDashboard(root) || root.querySelector("[data-ep-exam-plan-card]")) return;
+        !isDashboard(root) || hasUnifiedMyPlan(root) || root.querySelector("[data-ep-exam-plan-card]")) return;
 
     const c = copy();
     const card = document.createElement("div");
