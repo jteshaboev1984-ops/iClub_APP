@@ -12,6 +12,7 @@ on:
       - 'exam-prep/exam-prep-exam-map.js'
       - 'supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql'
       - 'scripts/p1p5-d3-hours-signed-real-scenarios.cjs'
+      - 'scripts/p1p5-d3-hours-chromium-multilang.cjs'
       - 'scripts/p1p5-s4-*.cjs'
       - 'scripts/p1p5-subject-access-signed-release.cjs'
       - 'supabase/migrations/*math_p1p5_subject_release_guard*.sql'
@@ -263,6 +264,11 @@ jobs:
           node --check scripts/p1p5-s3-chromium-mobile-three-language.cjs
           node scripts/p1p5-s3-chromium-mobile-three-language.cjs
 
+      - name: D3-HOURS RU UZ EN real Chromium first-entry, optional and retained hours
+        run: |
+          set -euo pipefail
+          node --check scripts/p1p5-d3-hours-chromium-multilang.cjs
+          node scripts/p1p5-d3-hours-chromium-multilang.cjs
       - name: S4 existing active diagnostic remains intact during Paper rehearsal
         run: |
           set -euo pipefail
