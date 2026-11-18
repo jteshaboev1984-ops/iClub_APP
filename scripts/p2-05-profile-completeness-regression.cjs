@@ -6,6 +6,7 @@ function assert(condition, message) {
 
 const api = fs.readFileSync('exam-prep/exam-prep-api.js', 'utf8');
 const guard = fs.readFileSync('exam-prep/exam-prep-profile-completeness.js', 'utf8');
+const examMap = fs.readFileSync('exam-prep/exam-prep-exam-map.js', 'utf8');
 
 assert(api.includes('exam-prep-profile-completeness.js?v=p205profile2'), 'profile completeness guard is not loaded by Exam Prep API');
 assert(api.includes('data-exam-prep-profile-completeness'), 'profile completeness loader marker missing');
@@ -34,5 +35,26 @@ for (const text of [
   'Javoblaringiz va progressingiz saqlangan',
   'Your answers and progress are saved'
 ]) assert(guard.includes(text), `required learner-safe copy missing: ${text}`);
+
+for (const message of [
+  'Imtihon sessiyasi va maqsad bahoni tekshiring.',
+  'Check the exam series and target grade.',
+  'Проверьте экзаменационную сессию и целевую оценку.'
+]) assert(guard.includes(message), 'Repair errors must reference only required exam fields: ' + message);
+
+for (const message of [
+  'Agar o‘qish soatlari kiritilsa',
+  'If study hours are entered, they must be positive',
+  'Если часы указаны, они должны быть больше нуля'
+]) assert(examMap.includes(message), 'Plan-editor errors must describe voluntary hours: ' + message);
+
+for (const source of [guard, examMap]) {
+  assert(!source.includes('Check all fields. Mathematics time must be above 0'),
+    'Outdated mandatory-hour English error text returned');
+  assert(!source.includes('Проверьте все поля. Время на математику должно быть больше 0'),
+    'Outdated mandatory-hour Russian error text returned');
+  assert(!source.includes('Barcha maydonlarni tekshiring. Matematika vaqti 0 dan katta'),
+    'Outdated mandatory-hour Uzbek error text returned');
+}
 
 console.log('P2-05 Exam Profile completeness regression: GREEN');
