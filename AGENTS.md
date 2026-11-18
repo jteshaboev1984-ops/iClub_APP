@@ -19,6 +19,13 @@ Project: iClub_APP (Telegram WebApp / web, Supabase and Vercel). These instructi
 - For implementation, work on an isolated branch with Draft PR by default, fix proven defects, run proportionate tests and record exact SHA and next work in the existing workstream checkpoint.
 - No new server, extra subscription, billable model, paid Supabase or provider calls without explicit approval. One ChatGPT session may sequentially plan, develop, review and test; those are phases, not independent background agents.
 
+## Academic Content, Tutor & History
+
+- Subject/question-bank changes must follow the approved syllabus, skill/diagnostic-facet map, rights/source QA and independent RU/UZ/EN answer review. Practice teaches; Tours and secure retests verify independently. Question counts alone are not approval.
+- iClub prepares learners; it is not an examiner. Written/lab work stays ungraded unless genuinely independently assessed. Core, explanatory AI Tutor and human Mentor Care are separate; AI never awards marks, mastery, readiness or progress.
+- A question with existing attempts is history: use future-only corrections, diagnostics or versioned replacement; no silent answer-key/option rewrites, score/certificate recalculation, or loss of learner access.
+- Preserve current owner decisions and subject-specific release gates; an approved plan, green synthetic CI or paid plan design is not a live learner release. See [feedback/rules register](docs/ops/ICLUB_FEEDBACK_TO_RULES_REGISTER_2026-11-18.md) for cases and hypotheses; do not duplicate it here.
+
 ## Transition / activation
 
 The architect authorized cutover on 2026-11-16. These GitHub-side instructions are ready for new chats once the owner installs docs/ops/PROJECT_INSTRUCTIONS.md into iClub ChatGPT Project settings. Previous chats are historical and must not be resumed as concurrent writers. A documentation-only merge is not a product release.
