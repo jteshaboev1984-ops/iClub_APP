@@ -11,10 +11,7 @@ BEGIN
      md5(pg_get_functiondef(to_regprocedure('public.save_exam_prep_exam_profile_v2(text,text,numeric,numeric)')))<>'54756ea0729fc7e4d036c9b756ba7d7c' THEN
     RAISE EXCEPTION 'd3_hours_function_source_drift_save_exam_prep_exam_profile_v2';
   END IF;
-  IF to_regprocedure('private.rebuild_exam_prep_placement_v1(uuid,text)') IS NULL OR
-     md5(pg_get_functiondef(to_regprocedure('private.rebuild_exam_prep_placement_v1(uuid,text)')))<>'bed1b685d585a0fca543b282510a5ab5' THEN
-    RAISE EXCEPTION 'd3_hours_function_source_drift_rebuild_exam_prep_placement_v1';
-  END IF;
+  -- Placement is checked structurally and patched in-place below.
   IF to_regprocedure('public.save_exam_prep_study_schedule_safe_v1(integer,integer)') IS NULL OR
      md5(pg_get_functiondef(to_regprocedure('public.save_exam_prep_study_schedule_safe_v1(integer,integer)')))<>'4fc23917d72a32751977081efd390233' THEN
     RAISE EXCEPTION 'd3_hours_function_source_drift_save_exam_prep_study_schedule_safe_v1';
@@ -165,142 +162,36 @@ end;
 $function$
 
 
--- Preserve existing signature, owner, SECURITY DEFINER, search_path and EXECUTE grants: rebuild_exam_prep_placement_v1.
-CREATE OR REPLACE FUNCTION private.rebuild_exam_prep_placement_v1(p_user_id uuid, p_component_code text DEFAULT NULL::text)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO ''
-AS $function$
-declare
-  v_program bigint;
-  v_rule private.exam_prep_placement_rule_versions%rowtype;
-  v_component text;
-  v_req_items int; v_req_areas int;
-  v_available_items int; v_available_areas int;
-  v_answered_items int; v_answered_areas int; v_objective int; v_correct int; v_accuracy numeric;
-  v_unknown int; v_blockers int; v_profile_complete boolean;
-  v_status text; v_route text; v_reason text; v_content_ready boolean; v_stage0 boolean; v_ambiguity boolean;
-begin
-  if p_user_id is null or not exists(select 1 from public.users u where u.id=p_user_id) then raise exception 'exam_prep_placement_user_not_found'; end if;
-  if p_component_code is not null and p_component_code not in ('P1','P5') then raise exception 'exam_prep_placement_invalid_component'; end if;
-
-  select pv.id into v_program from private.exam_prep_program_versions pv
-  where pv.program_key='math_as_p1_p5' and pv.version_key='p1_p5_canonical_v1_0' and pv.status='active';
-  if v_program is null then raise exception 'exam_prep_placement_program_missing'; end if;
-  select * into v_rule from private.exam_prep_placement_rule_versions r where r.program_version_id=v_program and r.status='active';
-  if v_rule.rule_version is null then raise exception 'exam_prep_placement_rule_missing'; end if;
-
-  insert into private.exam_prep_prerequisite_states(user_id,program_version_id,prerequisite_code,status,evidence_source,reason)
-  select p_user_id,v_program,n.prerequisite_code,'unknown','none','{}'::jsonb
-  from private.exam_prep_prerequisite_nodes n where n.program_version_id=v_program and n.is_mastery_crediting=false
-  on conflict(user_id,program_version_id,prerequisite_code) do nothing;
-
-  foreach v_component in array case when p_component_code is null then array['P1','P5'] else array[p_component_code] end loop
-    v_req_items:=case when v_component='P1' then v_rule.p1_broad_required_items else v_rule.p5_broad_required_items end;
-    v_req_areas:=case when v_component='P1' then v_rule.p1_broad_required_areas else v_rule.p5_broad_required_areas end;
-
-    select count(distinct ai.question_id),count(distinct s.official_syllabus_section)
-      into v_available_items,v_available_areas
-    from private.exam_prep_assessments a
-    join private.exam_prep_assessment_items ai on ai.assessment_id=a.id and ai.question_id is not null
-    join private.exam_prep_syllabus_nodes s on s.program_version_id=v_program and s.skill_code=ai.primary_skill_code and s.component_code=a.component_code
-    where a.component_code=v_component and a.assessment_type='diagnostic' and a.status='published';
-
-    with learner_diag as (
-      select e.*,si.question_id
-      from private.exam_prep_evidence_events e
-      join private.exam_prep_sessions ses on ses.id=e.session_id and ses.status='finalized' and ses.user_id=p_user_id
-      join private.exam_prep_responses r on r.id=e.response_id and r.session_id=ses.id and r.user_id=p_user_id
-      join private.exam_prep_session_items si on si.session_id=ses.id and si.item_order=r.item_order
-      where e.user_id=p_user_id and e.component_code=v_component and e.evidence_type='diagnostic'
-    )
-    select count(distinct ld.question_id),count(distinct s.official_syllabus_section),
-           count(*) filter(where ld.verification_status='app_verified' and ld.is_correct is not null),
-           count(*) filter(where ld.verification_status='app_verified' and ld.is_correct is true)
-      into v_answered_items,v_answered_areas,v_objective,v_correct
-    from learner_diag ld
-    join private.exam_prep_syllabus_nodes s on s.program_version_id=v_program and s.skill_code=ld.skill_code and s.component_code=v_component;
-    v_accuracy:=case when v_objective>0 then round((100.0*v_correct/v_objective)::numeric,2) else null end;
-
-    select count(distinct ps.prerequisite_code) filter(where ps.status='unknown'),
-           count(distinct ps.prerequisite_code) filter(where ps.status in ('blocker','retest_needed'))
-      into v_unknown,v_blockers
-    from private.exam_prep_prerequisite_states ps
-    where ps.user_id=p_user_id and ps.program_version_id=v_program
-      and exists(select 1 from private.exam_prep_prerequisite_edges pe where pe.program_version_id=v_program and pe.from_node_code=ps.prerequisite_code and pe.target_component_code=v_component and pe.is_mastery_crediting=false);
-
-    select exists(
-      select 1 from private.exam_prep_exam_profiles p
-      where p.user_id=p_user_id and p.program_version_id=v_program
-        and nullif(btrim(p.exam_series),'') is not null
+-- Fail-closed selective patch of the *installed* placement function.
+-- GitHub's disposable migration replay and current live SQL can have unrelated
+-- non-academic formatting/body differences. Do NOT overwrite those other rules
+-- with a copied production function; modify ONLY two unique, reviewed anchors.
+DO $d3_placement$
+DECLARE
+  v_oid oid:=to_regprocedure('private.rebuild_exam_prep_placement_v1(uuid,text)');
+  v_def text;
+  v_old text:=$d3_old$        and p.mathematics_hours_budget is not null and p.mathematics_hours_budget>0
+        and p.total_student_hours_available is not null and p.total_student_hours_available>0
+        and p.mathematics_hours_budget<=p.total_student_hours_available
+        and p.active_week_no>=1$d3_old$;
+  v_new text:=$d3_new$        and nullif(btrim(p.exam_series),'') is not null
         and nullif(btrim(p.target_grade),'') is not null
-        and p.active_week_no>=1
-    ) into v_profile_complete;
-
-    v_content_ready:=(coalesce(v_available_items,0)>=v_req_items and coalesce(v_available_areas,0)>=v_req_areas);
-    v_stage0:=false; v_ambiguity:=true; v_route:='pending_evidence';
-    if not v_profile_complete then
-      v_status:='not_started'; v_reason:='exam_profile_required_without_time_budget';
-    elsif not v_content_ready then
-      v_status:='content_blocked'; v_reason:=format('broad_screen_content_not_ready: available %s/%s items and %s/%s areas',coalesce(v_available_items,0),v_req_items,coalesce(v_available_areas,0),v_req_areas);
-    elsif coalesce(v_answered_items,0)<v_req_items or coalesce(v_answered_areas,0)<v_req_areas then
-      v_status:='screening_incomplete'; v_reason:=format('broad_screen_incomplete: answered %s/%s items and %s/%s areas',coalesce(v_answered_items,0),v_req_items,coalesce(v_answered_areas,0),v_req_areas);
-    elsif coalesce(v_blockers,0)>0 then
-      v_status:='confirmed'; v_route:='foundation'; v_reason:='foundation_due_to_explicit_prerequisite_blocker'; v_stage0:=true; v_ambiguity:=false;
-    else
-      v_status:='conservative_foundation'; v_route:='foundation'; v_reason:='conservative_core_route_no_approved_advanced_threshold'; v_stage0:=true; v_ambiguity:=true;
-    end if;
-
-    insert into private.exam_prep_component_placements(
-      user_id,program_version_id,component_code,rule_version,placement_status,route,profile_complete,content_ready,
-      screening_required_items,screening_required_areas,screening_available_items,screening_available_areas,
-      screening_answered_items,screening_answered_areas,screening_objective_items,screening_correct_items,screening_accuracy_pct,
-      prerequisite_unknown_count,prerequisite_blocker_count,ambiguity,advanced_skip_requires_human,stage0_complete,
-      route_reason,evidence_summary,derived_at
-    ) values(
-      p_user_id,v_program,v_component,v_rule.rule_version,v_status,v_route,v_profile_complete,v_content_ready,
-      v_req_items,v_req_areas,coalesce(v_available_items,0),coalesce(v_available_areas,0),
-      coalesce(v_answered_items,0),coalesce(v_answered_areas,0),coalesce(v_objective,0),coalesce(v_correct,0),v_accuracy,
-      coalesce(v_unknown,0),coalesce(v_blockers,0),v_ambiguity,true,v_stage0,v_reason,
-      jsonb_build_object('policy_status',v_rule.policy_status,'advanced_routes_auto_awarded',false),now()
-    )
-    on conflict(user_id,program_version_id,component_code,rule_version) do update set
-      placement_status=excluded.placement_status,route=excluded.route,profile_complete=excluded.profile_complete,
-      content_ready=excluded.content_ready,screening_required_items=excluded.screening_required_items,
-      screening_required_areas=excluded.screening_required_areas,screening_available_items=excluded.screening_available_items,
-      screening_available_areas=excluded.screening_available_areas,screening_answered_items=excluded.screening_answered_items,
-      screening_answered_areas=excluded.screening_answered_areas,screening_objective_items=excluded.screening_objective_items,
-      screening_correct_items=excluded.screening_correct_items,screening_accuracy_pct=excluded.screening_accuracy_pct,
-      prerequisite_unknown_count=excluded.prerequisite_unknown_count,prerequisite_blocker_count=excluded.prerequisite_blocker_count,
-      ambiguity=excluded.ambiguity,advanced_skip_requires_human=excluded.advanced_skip_requires_human,
-      stage0_complete=excluded.stage0_complete,route_reason=excluded.route_reason,evidence_summary=excluded.evidence_summary,derived_at=excluded.derived_at;
-
-    insert into private.exam_prep_component_access_gates(
-      user_id,program_version_id,component_code,rule_version,current_operational_stage,max_unlocked_stage,
-      placement_access,foundation_learning_access,advanced_route_access,mentor_required_for_core,gate_status,gate_reason,updated_at
-    ) values(
-      p_user_id,v_program,v_component,v_rule.rule_version,
-      case when v_stage0 then 1 else 0 end,case when v_stage0 then 1 else 0 end,
-      true,v_stage0,false,false,
-      case when not v_profile_complete then 'profile_required' when not v_content_ready then 'blocked_content'
-           when not v_stage0 then 'screening_required' else 'stage0_complete' end,
-      v_reason,now()
-    )
-    on conflict(user_id,program_version_id,component_code,rule_version) do update set
-      current_operational_stage=excluded.current_operational_stage,max_unlocked_stage=excluded.max_unlocked_stage,
-      placement_access=excluded.placement_access,foundation_learning_access=excluded.foundation_learning_access,
-      advanced_route_access=excluded.advanced_route_access,mentor_required_for_core=false,
-      gate_status=excluded.gate_status,gate_reason=excluded.gate_reason,updated_at=excluded.updated_at;
-
-    update private.exam_prep_stage_states ss set derived_at=now()
-    where ss.user_id=p_user_id and ss.program_version_id=v_program and ss.component_code=v_component and ss.engine_version='objective_state_v1';
-  end loop;
-
-  return jsonb_build_object('user_id',p_user_id,'program_version_id',v_program,'rule_version',v_rule.rule_version,'component',coalesce(p_component_code,'ALL'));
-end;
-$function$
-
+        and p.active_week_no>=1$d3_new$;
+BEGIN
+  IF v_oid IS NULL THEN RAISE EXCEPTION 'd3_placement_missing'; END IF;
+  IF NOT (SELECT p.prosecdef AND
+        coalesce(array_to_string(p.proconfig,','),'') LIKE '%search_path=%'
+      FROM pg_proc p WHERE p.oid=v_oid) THEN
+    RAISE EXCEPTION 'd3_placement_security_contract_changed';
+  END IF;
+  v_def:=pg_get_functiondef(v_oid);
+  IF length(v_def)-length(replace(v_def,v_old,''))<>length(v_old) OR
+     length(v_def)-length(replace(v_def,'exam_profile_or_realistic_mathematics_budget_required',''))<>length('exam_profile_or_realistic_mathematics_budget_required')
+  THEN RAISE EXCEPTION 'd3_placement_anchor_source_drift'; END IF;
+  v_def:=replace(replace(v_def,v_old,v_new),
+     'exam_profile_or_realistic_mathematics_budget_required','exam_profile_required_without_time_budget');
+  EXECUTE v_def;
+END $d3_placement$;
 
 -- Preserve existing signature, owner, SECURITY DEFINER, search_path and EXECUTE grants: save_exam_prep_study_schedule_safe_v1.
 CREATE OR REPLACE FUNCTION public.save_exam_prep_study_schedule_safe_v1(p_minutes_per_day integer, p_days_per_week integer)
