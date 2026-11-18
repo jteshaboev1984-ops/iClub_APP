@@ -71,6 +71,12 @@ jobs:
             psql -v ON_ERROR_STOP=1 -f "$f"
           done
 
+      - name: Apply narrowly scoped evaluator fix on disposable PG17
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261118122500_math_practice_v2_literal_answer_delimiter_v1.sql
+
+      - name: Check actual evaluator behavior with synthetic inputs (transaction ROLLBACK)
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_literal_answer_delimiter_v1.sql
+
       - name: Run Practice v2 runtime definition regressions
         shell: bash
         run: |
