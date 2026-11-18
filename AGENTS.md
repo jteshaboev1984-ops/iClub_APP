@@ -26,8 +26,9 @@ Project: iClub_APP (Telegram WebApp / web, Supabase and Vercel). These instructi
 - A question with existing attempts is history: use future-only corrections, diagnostics or versioned replacement; no silent answer-key/option rewrites, score/certificate recalculation, or loss of learner access.
 - Preserve current owner decisions and subject-specific release gates; an approved plan, green synthetic CI or paid plan design is not a live learner release. See [feedback/rules register](docs/ops/ICLUB_FEEDBACK_TO_RULES_REGISTER_2026-11-18.md) for cases and hypotheses; do not duplicate it here.
 
-## Transition / activation
+## Where instructions, product rules and one-off tasks live
 
-The architect authorized cutover on 2026-11-16. These GitHub-side instructions are ready for new chats once the owner installs docs/ops/PROJECT_INSTRUCTIONS.md into iClub ChatGPT Project settings. Previous chats are historical and must not be resumed as concurrent writers. A documentation-only merge is not a product release.
-
-See docs/ops/PROJECT_INSTRUCTIONS.md for the ready-to-paste ChatGPT Project instructions; adding a file to GitHub alone does not configure a ChatGPT chat.
+- **Chat/development instructions** are here, in `docs/ops/CHAT_PROTOCOL.md` and `docs/ops/PROJECT_INSTRUCTIONS.md`: how to work, verify and honor owner approval.
+- **Product and subject rules** come from the approved product/academic source contracts; the [feedback register](docs/ops/ICLUB_FEEDBACK_TO_RULES_REGISTER_2026-11-18.md) indexes enduring rules, scoped subject/UX requirements, historical cases and unapproved hypotheses. A case, example, date or hypothesis is **not** an implementation order.
+- **One-off work** lives in the current canonical GitHub Issue/PR and its latest checkpoints. Revalidate actual status, owner permissions and exact SHA before executing; never turn a completed or historical task into a standing instruction.
+- The one-time 2026-11-16 chat cutover and manual ChatGPT Project installation sequence are documented in `docs/ops/CHAT_PROTOCOL.md`; do not rerun them on every task. GitHub updates do not change ChatGPT settings. A docs-only merge never authorizes an app release.
