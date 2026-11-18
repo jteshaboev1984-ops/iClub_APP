@@ -77,6 +77,17 @@ BEGIN
   insert into public.users(id,first_name,last_name,language_code)
   values(v_user,'P206','Final Calibration','en');
 
+  -- New subject-scoped beta Core guard: a legitimate Mathematics learner
+  -- must have selected Mathematics before using exam-operations APIs.
+  -- Legacy ephemeral test schemas without selection tables remain supported.
+  -- This entire fixture is inside BEGIN/ROLLBACK; no learner data persists.
+  IF to_regclass('public.user_subjects') IS NOT NULL
+     AND to_regclass('public.subjects') IS NOT NULL THEN
+    EXECUTE 'INSERT INTO public.user_subjects(user_id,subject_id) '||
+      'SELECT $1,5 FROM public.subjects WHERE id=5 ON CONFLICT DO NOTHING'
+      USING v_user;
+  END IF;
+
   insert into private.exam_prep_feature_entitlements(
     user_id,entitlement_status,core_access,ai_assist,mentor_care_entitled,cohort_key,valid_from
   ) values(v_user,'active',true,false,false,'p206-final-calibration',now());
