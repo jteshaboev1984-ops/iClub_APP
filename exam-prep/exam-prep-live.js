@@ -1509,6 +1509,19 @@
     if (!d || d.contract_version !== "voluntary_weekly_choice_s3_v1") return "";
     const c = weeklyS3Copy();
     const hasChosenTime=d.chosen_math_minutes!=null && Number(d.chosen_math_minutes)>0;
+    // No inferred split/time before BOTH component diagnostics. Existing
+    // owner-chosen hours remain editable even when screening is incomplete.
+    const diagnosticsReady=state.progress.P1?.stage0_complete===true &&
+      state.progress.P5?.stage0_complete===true;
+    if(!hasChosenTime && !diagnosticsReady) {
+      const note=({
+        ru:"Сначала завершите диагностику P1 и P5. После неё iClub покажет учебные приоритеты; часы можно указать добровольно. Подготовка доступна и без расписания.",
+        uz:"Avval P1 va P5 diagnostikasini tugating. So‘ng iClub ustuvor mavzularni ko‘rsatadi; o‘qish vaqtini ixtiyoriy kiritishingiz mumkin. Jadvalsiz ham o‘rganish mumkin.",
+        en:"Complete the P1 and P5 diagnostics first. iClub will then show your priorities; setting study hours is optional. You can study without a schedule."
+      })[state.language];
+      return "<section class='ep-live-card' data-ep-d3-time-pending><p class='ep-live-meta'>"+
+        esc(note)+"</p></section>";
+    }
     const budget=hasChosenTime?Number(d.chosen_math_minutes):null;
     // New learners can explicitly choose time here; never save it implicitly.
     const choice=hasChosenTime && ["keep","redistribute","change"].includes(d.choice_code)
@@ -1533,7 +1546,11 @@
         cell("P1",p1) + cell("P5",p5) + "</div></div>";
     }).join("");
     return "<section class='ep-live-s3' data-ep-s3>" +
-      "<p>" + esc(c.intro) + "</p>" +
+      "<p>" + esc(hasChosenTime?c.intro:({
+        ru:"Пример короткого режима: 30 минут × 3 дня, P1 и P5 по 45 минут. Это не персональный расчёт и ничего не сохраняется без вашего выбора. Можно изменить любые значения.",
+        uz:"Qisqa tartib namunasi: 30 daqiqa × 3 kun, P1 va P5 uchun 45 daqiqadan. Bu shaxsiy hisob emas; siz saqlamaguningizcha hech narsa yozilmaydi. Qiymatlarni o‘zgartirishingiz mumkin.",
+        en:"Example short routine: 30 minutes × 3 days, 45 minutes each for P1 and P5. This is not a personalized estimate and is never saved without your choice. You can change every value."
+      })[state.language]) + "</p>" +
       (Math.abs(Number(state.profile?.mathematics_hours_budget || 0)*60-budget)>0.5 ?
         "<div class='ep-live-s3-budget'>" + esc(c.total) + ": <strong>" + budget + " min</strong></div>": "") +
       "<div class='ep-live-s3-options'>" +
