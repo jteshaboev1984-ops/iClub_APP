@@ -61,10 +61,10 @@ jobs:
           node .github/scripts/exam_prep_projection_rpc_serialization_regression.js
           node scripts/p2-07-recovery-regression.cjs
           node scripts/weekly-flow-profile-recovery-browser.cjs
-      - name: Confirm scope and unchanged original release controls
+      - name: Confirm reviewed D3 workflow sources and branch-scoped release controls
         run: |
           set -euo pipefail
-          test "$(git hash-object .github/workflows/exam-prep-weekly-answer-recovery.yml)" = 'c7d9ae1893a578c0d07940d0c29ba8cdf407c790'
-          test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = '2db90d6569f2c6643fcc06a50604809015237e76'
-          echo 'SUPPLEMENTAL D3 recovery behavior tests PASS; pinned original source gates remain independent and unwaived.'
+          test "$(git hash-object .github/workflows/exam-prep-weekly-answer-recovery.yml)" = 'cd0ffaba1dfa22a0cb1a652dc4db8c99869701d7'
+          test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'b58145d137f3e61fd16b1257f0610f285f19a12c'
+          echo 'SUPPLEMENTAL D3 recovery PASS; reviewed branch-only guard updates verified, original other-branch pins preserved.'
           git diff --exit-code

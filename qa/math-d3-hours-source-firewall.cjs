@@ -15,7 +15,7 @@ const PINNED=Object.freeze({
   ".github/workflows/exam-prep-weekly-answer-recovery.yml": "cd0ffaba1dfa22a0cb1a652dc4db8c99869701d7",
   ".github/workflows/exam-prep-weekly-goal-card-cutover.yml": "70d8d1e7da933f292a48fbdc5a8347926fa5519b",
   ".github/workflows/exam-prep-weekly-profile-recovery.yml": "b58145d137f3e61fd16b1257f0610f285f19a12c",
-  ".github/workflows/math-p1p5-d3-protected-recovery-review.yml": "7c44717088e2649658f557b77feadfde499214c8",
+  ".github/workflows/math-p1p5-d3-protected-recovery-review.yml": "35dacd35a7af6cb94a0412e344132f7042e65d73",
   ".github/workflows/math-p1p5-s4-hybrid-psql-jwt.yml": "aa6be1f1d55f303ef4dc854ab37807a9fd7fdb4e",
   ".github/workflows/p2-05-profile-completeness.yml": "f81773a229858830041afe97b88434c0b0373fef",
   ".github/workflows/p2-52-auxiliary-status-accessibility.yml": "9ab23814e3e68a9e38a0eca3bde42b90b0120746",
