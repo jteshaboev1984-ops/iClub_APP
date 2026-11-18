@@ -7,6 +7,7 @@ on:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql'
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
+      - 'supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql'
       - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
       - 'scripts/p1p5-s3-signed-virtual-periods.cjs'
       - 'scripts/p1p5-s3-chromium-mobile-three-language.cjs'
@@ -142,6 +143,13 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
 
 
+      - name: "D3-HOURS candidate installed ONLY in isolated signed PG17"
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql
       - name: Seed ONLY disposable authenticated learners
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
@@ -463,6 +471,13 @@ jobs:
           psql -v ON_ERROR_STOP=1 -c "update private.exam_prep_feature_config set rollout_state='off',core_enabled=false,ai_enabled=false,mentor_enabled=false,kill_switch=true,updated_at=now() where id=1" >>p273-rehearsal.log 2>&1
 
 
+      - name: "D3-HOURS candidate installed ONLY in isolated signed PG17"
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql
       - name: Seed ONLY disposable authenticated learners
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
