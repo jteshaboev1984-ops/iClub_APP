@@ -1,6 +1,6 @@
 # iClub — Chat work protocol v1
 
-Status: CUTOVER AUTHORIZED 2026-11-16; **ChatGPT Project instructions must still be installed by the owner** before new-chat commands are operational. This is NOT background execution and does not change a live application.
+Status: CUTOVER AUTHORIZED 2026-11-16; **owner confirmed updated ChatGPT Project instructions installed 2026-11-18**. Development coordination only; no background execution or live application changes.
 
 ## 1. Two entry modes
 
@@ -43,10 +43,10 @@ Return up to 3–5 **real** distinct numbered options (fewer if fewer are verifi
 
 - ChatGPT chats are NOT synchronized processes. GitHub is the durable shared work log, not message history. One project chat is used for one workstream; audits default to read-only assessment and send findings back to the responsible workstream.
 - A new chat has no reliable prior menu state; START must regenerate choices from live GitHub.
-- Current chats may keep working until the architect declares cutover. This staged protocol must not halt, redirect or overwrite their work. At cutover, re-read live main/issues/PRs; do not rely on staged SHA snapshots.
+- The 2026-11-16 cutover is completed according to the owner; previous chats are historical, not synchronized writers. For new work always re-read live main/issues/PRs; do not rely on staged SHA snapshots.
 - If GitHub, browser, Supabase or other required tools are unavailable, state what cannot be verified. Do not fabricate completion or CI status.
 
-## 6. Multi-step operational safeguards and activation checklist
+## 6. Multi-step operational safeguards and historical activation checklist
 
 - **Authority is layered:** architect-approved product/safety policy controls allowed behavior; actual branch/main/database/deployment evidence controls what exists; latest verified Issue checkpoint and exact-HEAD CI controls task status. A WORKSTREAMS pointer is not approval, a date is not a lock, and a PR title is not a test result.
 - **No implicit release approval:** choosing menu number "2" authorizes work on that described task, **not** merging, publication, changing feature flags, live production SQL, learner progress changes or a paid action. Explicit owner GO for the specific gated action remains required.
@@ -54,7 +54,7 @@ Return up to 3–5 **real** distinct numbered options (fewer if fewer are verifi
 - **Stale menu or missing tools:** if GitHub changes between START and selection, revalidate. If the chosen item is complete or incompatible, show refreshed options instead of guessing. If the connector is down, describe the missing evidence and limit work to safe available scope.
 - **Cheap checks:** prefer targeted tests and reuse unchanged exact-SHA evidence; do not infer that any Actions, model or cloud execution is always free. Never create paid resources or trigger billable runs without consent.
 
-### Cutover sequence (NOT automatic)
+### Historical cutover sequence (completed owner steps; not a recurring instruction)
 
 1. Until the architect says to transition, existing chats continue. Do not change their instructions/branches/PRs.
 2. After the architect stops making new old-chat requests, check that no in-flight work is still changing relevant branches; re-fetch current main, latest checkpoints, this docs PR and any colliding files. Resolve a changed main with a normal documented PR update (no forced rewrite).
@@ -62,3 +62,7 @@ Return up to 3–5 **real** distinct numbered options (fewer if fewer are verifi
 4. The architect replaces the **iClub ChatGPT Project instructions** with the approved text in docs/ops/PROJECT_INSTRUCTIONS.md. Editing GitHub cannot perform that UI action. Do not change settings while existing old chats are still active.
 5. In a new iClub project chat smoke-test: (a) START MATH returns real read-only numbered options, (b) a number executes only its still-valid work without an unauthorized release, (c) a direct discussion question does not modify code, (d) a concrete direct task executes, (e) a fresh chat START recovers GitHub state without relying on an old chat's menu.
 6. If any smoke test fails, keep existing code/releases untouched, repair instructions via a docs-only PR, and retry. The new model is not certified until the architect observes a successful chat-level test.
+
+## 7. Rules maintenance (applies after docs PR merge)
+
+New owner-approved standing decisions belong in [Rules Inbox](https://github.com/jteshaboev1984-ops/iClub_APP/issues/570), with source, scope and approval. Do not register every bug or one-off task. The review/deduplication/PR workflow is in `docs/ops/RULES_MAINTENANCE.md`. This is not authority to merge, deploy or change ChatGPT Settings. Recording a GitHub comment is an explicit write; do not do it during read-only START or audit turns. If GitHub write fails, say so.
