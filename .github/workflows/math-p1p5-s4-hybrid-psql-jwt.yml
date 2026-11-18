@@ -11,6 +11,7 @@ on:
       - 'scripts/p1p5-s4-*.cjs'
       - 'scripts/p1p5-subject-access-signed-release.cjs'
       - 'supabase/migrations/*math_p1p5_subject_release_guard*.sql'
+      - 'supabase/candidates/math_p1p5_subject_controlled_beta_guard_v1_dormant.sql'
       - 'scripts/p1p5-s2-signed-calendar-81-source.cjs'
       - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
       - 'scripts/p1p5-s3-chromium-mobile-three-language.cjs'
@@ -137,7 +138,7 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_isolated_http_auth_e2e_seed.sql > /tmp/p1p5-e2e-seed.log
           echo "Disposable seed applied; no live project, token or account involved"
-      - name: Isolated legacy Mathematics selection fixture and mass-only release guard
+      - name: Isolated Mathematics selection fixture and dormant beta subject guard
         env:
           PGOPTIONS: -c iclub.e2e_isolated=true
         shell: bash
@@ -169,6 +170,8 @@ jobs:
           END $synthetic_subjects$;
           SQL
           psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/20261115100103_math_p1p5_subject_release_guard_v1.sql
+          # Candidate-only: apply to disposable PG17, never to hosted Supabase.
+          psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/math_p1p5_subject_controlled_beta_guard_v1_dormant.sql
 
       - name: Generate ephemeral JWT signing key and start local PostgREST
         shell: bash
@@ -210,7 +213,7 @@ jobs:
             AND to_regprocedure('private.exam_prep_stage3_hybrid_operational_v1(uuid,bigint,text)') IS NOT NULL
             AND to_regprocedure('private.exam_prep_stage4_hybrid_operational_v1(uuid,bigint,text)') IS NOT NULL
             AND to_regprocedure('private.exam_prep_stage5_hybrid_operational_v1(uuid,bigint,text)') IS NOT NULL" | grep -qx t
-      - name: P1 P5 JWT subject selected release gate, beta unchanged
+      - name: P1 P5 JWT direct RPC subject guard, beta selection and cross-owner
         run: |
           set -euo pipefail
           node --check scripts/p1p5-subject-access-signed-release.cjs
