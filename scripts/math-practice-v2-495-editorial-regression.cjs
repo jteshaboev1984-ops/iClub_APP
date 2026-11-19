@@ -81,7 +81,7 @@ for(const [prefix,max] of Object.entries(counts))for(let skill=1;skill<=max;skil
       } else numericLocalePairs++;
     }
     if(q.qtype==='mcq'){
-      if(!Array.isArray(q.options)||q.options.length!==4||!q.options.some(o=>o.key===q.correct_answer))errors.push('MCQ bad key/options '+number);
+      if(!Array.isArray(q.options)||q.options.length!==4||!q.options.some(o=>o.key===q.answer))errors.push('MCQ bad key/options '+number);
       for(let i=0;i<(q.options||[]).length;i++){
         for(const lang of ['ru','uz'])if(enNumbers(q.options[i].text.en)!==enNumbers(q.options[i].text[lang]))
           errors.push('MCQ numeric locale divergence at index '+number);
