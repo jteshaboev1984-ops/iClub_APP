@@ -137,7 +137,7 @@ const {chromium}=require('playwright');
             reason:'season_not_started',
             history_snapshot:{
               ok:true,subject_key:'mathematics',season_no:1,
-              period_active:true,period_status:'closed',
+              period_active:true,period_status:'closed',practice_open:true,
               main:{attempts_count:2,archived_attempts_count:1,recent:[mk(301),mk(302)]},
               topic:{sessions_count:2,archived_sessions_count:1,recent:[mk(401),mk(402)]},
               archive_seasons:[{
@@ -154,8 +154,8 @@ const {chromium}=require('playwright');
           'verified Season1 must be available while Season2 dormant');
         assert.equal(await root.getAttribute('data-history-season'),'1');
         assert.equal(await root.locator('.iclub-ph-current-badge').textContent(),
-          {ru:'Завершённый сезон',uz:'Tugallangan mavsum',en:'Completed season'}[locale],
-          'closed Season1 must not claim to be the active/current season');
+          {ru:'Текущая практика',uz:'Joriy amaliyot',en:'Current practice'}[locale],
+          'Season1 Tours are closed but Practice stays available before S2');
         assert.equal(await root.locator('.iclub-ph-arrow').count(),2);
         assert.equal(await root.locator('.iclub-ph-arrow').first().isVisible(),false,
           'no synthetic previous Season0 swipe');
