@@ -170,9 +170,17 @@ begin
     return jsonb_build_object(
       'ok',true,'subject_key',v_key,'season_no',2,
       'period_active',false,'reason','season_not_started',
+      -- Subject-specific Practice stays in Season 1 despite Tour season
+      -- being closed; only this subject's official S2 Tour1 start cuts it over.
+      'practice_access',jsonb_build_object(
+        'open_season_no',1,
+        'season1_new_attempts_open',true,
+        'season2_new_attempts_open',false
+      ),
       'history_snapshot',jsonb_build_object(
         'ok',true,'subject_key',v_key,'season_no',1,
         'period_active',true,'period_status',v_s1_status,
+        'practice_open',true,
         'period_starts_at',v_s1_cutoff,
         'main',jsonb_build_object(
           'attempts_count',v_s1_main,
@@ -378,6 +386,13 @@ begin
 
   return jsonb_build_object(
     'ok',true,'subject_key',v_key,'season_no',2,'period_active',true,
+    -- S1 is now historical only. Same published question pool may be
+    -- served in S2, but all NEW attempts belong to the fresh S2 period.
+    'practice_access',jsonb_build_object(
+      'open_season_no',2,
+      'season1_new_attempts_open',false,
+      'season2_new_attempts_open',true
+    ),
     'period_starts_at',v_cutoff,
     'archive_seasons',v_archive_seasons,
     'main',jsonb_build_object(
