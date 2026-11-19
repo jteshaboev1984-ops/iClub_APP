@@ -651,8 +651,13 @@
   const lastScan=new Map();
   function academicButton(container,surface,recordId,questionId=null){
     const identifier=surface+":"+recordId+":"+(questionId||0);
-    if(container.querySelector?.('[data-iclub-ai-academic-button="'+identifier+'"]'))
+    const existing=container.querySelector?.(
+      '[data-iclub-ai-academic-button="'+identifier+'"]');
+    if(existing){
+      // Locale can change while the reviewed answer remains on screen.
+      existing.textContent=(academicLabels[localeNow()]||academicLabels.ru)[surface];
       return;
+    }
     const button=document.createElement("button");
     button.type="button";button.className="btn";
     button.dataset.iclubAiAcademicButton=identifier;
@@ -687,12 +692,22 @@
       const rows=container.querySelectorAll?.("[data-practice-ai-question-id]")||[];
       for(const row of rows){
         const questionId=Number(row.dataset.practiceAiQuestionId||0);
-        // The server returns ONLY wrong, finalized, source-published IDs.
-        if(positiveInt(questionId)&&available.includes(questionId))
-          academicButton(row,surface,id,questionId);
+        const allowed=positiveInt(questionId)&&available.includes(questionId);
+        const identifier=surface+":"+id+":"+questionId;
+        // Remove controls from a previously viewed attempt or revoked
+        // source. Only server-reported current IDs may remain clickable.
+        row.querySelectorAll("[data-iclub-ai-academic-button]").forEach(button=>{
+          if(!allowed||button.dataset.iclubAiAcademicButton!==identifier)
+            button.remove();
+        });
+        if(allowed)academicButton(row,surface,id,questionId);
       }
-    }else if(available.includes(id)){
-      academicButton(container,surface,id);
+    }else{
+      container.querySelectorAll("[data-iclub-ai-academic-button]").forEach(button=>{
+        if(!available.includes(id)||button.dataset.iclubAiAcademicButton!==surface+":"+id+":0")
+          button.remove();
+      });
+      if(available.includes(id))academicButton(container,surface,id);
     }
   }
   function setupAcademicAutoAttach(){
@@ -716,6 +731,17 @@
     document.addEventListener("iclub:practice-ai-context-changed",()=>{
       lastScan.delete("practice_error");void scanAcademic("practice_error");
     });
+    // Existing approved academic buttons are not newly attached on a
+    // language switch, so their displayed label must be refreshed too.
+    if(typeof MutationObserver==="function")
+      new MutationObserver(()=>{
+        for(const surface of Object.keys(scopeFor)){
+          lastScan.delete(surface);
+          void scanAcademic(surface);
+        }
+      }).observe(document.documentElement,{
+        attributes:true,attributeFilter:["lang"]
+      });
   }
 
   function resetOnIdentityChange(){
