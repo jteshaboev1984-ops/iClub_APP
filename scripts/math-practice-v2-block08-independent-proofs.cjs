@@ -20,7 +20,7 @@ const numbers=s=>(String(s||'').normalize('NFC').replace(/[−–—]/g,'-').mat
 function lineCoefficients(t){
  // Cover y=mx+c with exact rational slope/intercept before integer general form.
  const literal=norm(t);
- const m=/^y=([+-]?)(\\d*)x(?:\\/(\\d+))?([+-]\\d+(?:\\/\\d+)?)?$/.exec(literal);
+ const m=/^y=([+-]?)(\d*)x(?:\/(\d+))?([+-]\d+(?:\/\d+)?)?$/.exec(literal);
  if(m){
    const factor=(m[1]==='-'?-1:1)*Number(m[2]||1)/Number(m[3]||1);
    const pieces=(m[4]||'0').split('/');
