@@ -144,7 +144,10 @@ async function main(){
     });
     await page.locator('[data-iclub-ai-academic-button="practice_error:502:97"]').waitFor({timeout:9000});
     assert.equal(await page.locator('[data-iclub-ai-academic-button]').count(),1);
-    await page.getByRole("button",{name:"Объяснить ошибку"}).click();
+    // The floating Tutor panel normally covers content behind it. A real
+    // learner closes that panel before pressing a result card's action.
+    await page.evaluate(()=>window.iClubGlobalAiShell.close());
+    await page.getByRole("button",{name:"Объяснить ошибку"}).click({timeout:8000});
     await page.waitForFunction((text)=>document.querySelector("[data-global-ai-messages]")?.textContent?.includes(text),
       reviewReply,{timeout:8000});
     const selected=await page.evaluate(()=>window.__qa.academic);
@@ -164,7 +167,8 @@ async function main(){
     // Hold the second provider-free academic response in flight, replace
     // the result with a different attempt and then release the old reply.
     await page.evaluate(()=>{window.__qa.lang="ru";document.documentElement.lang="ru";window.__qa.hold=true;});
-    await page.getByRole("button",{name:"Объяснить ошибку"}).click();
+    await page.evaluate(()=>window.iClubGlobalAiShell.close());
+    await page.getByRole("button",{name:"Объяснить ошибку"}).click({timeout:8000});
     await page.waitForFunction(()=>window.__qa.ready===true,null,{timeout:8000});
     await page.evaluate(()=>document.getElementById("courses-practice-review")
       .dataset.practiceAiAttemptId="503");
