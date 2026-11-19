@@ -46,7 +46,7 @@
   const historyData=()=>{
     // While S2 has no official start, use only an authenticated S1 snapshot
     // from the same read-only RPC. Its top-level S2 progress remains INACTIVE.
-    const period=source?.ok===true&&period.period_active===true
+    const period=source?.ok===true&&source.period_active===true
       ?source:source?.history_snapshot;
     if(period?.ok!==true||period.period_active!==true||
       String(period.subject_key||'')!==sourceSubject)return null;
