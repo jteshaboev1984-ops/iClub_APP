@@ -89,7 +89,7 @@ select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111'
 
 do $check$
 declare
-  a jsonb; b jsonb; econ jsonb; topic jsonb;
+  a jsonb; b jsonb; econ jsonb; topic jsonb; topic_pre jsonb;
   sid bigint; ids bigint[];
 begin
   -- Math Tour1 undated in Season2 -> stay on archived S1 rules.
@@ -99,6 +99,16 @@ begin
   if 2001=any(ids) then
     raise exception 'undated Season2 incorrectly reopened Season1 correct answer';
   end if;
+  -- The old S1 client ID belongs to the historical window, not the new S2.
+  -- Timestamp below is synthetic fixture-only; production records untouched.
+  update public.practice_sessions_v4
+    set created_at='2026-10-30T12:00:00Z'
+    where id=(a->>'session_id')::bigint;
+  topic_pre:=public.start_practice_topic_drill_safe_v5(
+    'mathematics','Synthetic',null,'s1-topic-preswitch-001');
+  update public.practice_drill_sessions_v4
+    set created_at='2026-10-30T12:00:00Z'
+    where id=(topic_pre->>'session_id')::bigint;
   -- Only Math Tour1 launches. Econ Tour1 S2 stays undated.
   update public.tours
   set start_date='2026-11-01',end_date='2099-12-31',is_active=true
@@ -109,9 +119,33 @@ begin
   if cardinality(ids)<>10 or not(2001=any(ids)) then
     raise exception 'Math S2 failed to re-serve old correct question';
   end if;
+  -- Season1 closes for NEW and unfinished old client-session starts at
+  -- Mathematics S2 Tour1. Other subjects do not inherit that cutoff.
+  begin
+    perform public.start_practice_session_auto_safe_v5(501,'s2-pre-t1-math-001');
+    raise exception 'stale Math Season1 Tour client ID reopened after S2';
+  exception when sqlstate '55000' then
+    if SQLERRM<>'practice_previous_season_closed' then
+      raise exception 'wrong old Tour client error: %',SQLERRM;
+    end if;
+  end;
+  begin
+    perform public.start_practice_topic_drill_safe_v5(
+      'mathematics','Synthetic',null,'s1-topic-preswitch-001');
+    raise exception 'stale Math Season1 Topic client ID reopened after S2';
+  exception when sqlstate '55000' then
+    if SQLERRM<>'practice_previous_season_closed' then
+      raise exception 'wrong old Topic client error: %',SQLERRM;
+    end if;
+  end;
+  -- Same content IDs are served by new S2 sessions; old S1 is closed, but
+  -- the published Practice question bank was not republished or deleted.
   econ:=public.start_practice_session_auto_safe_v5(701,'s2-econ-s1-001');
   if (econ->>'question_count')::integer<>10 then
     raise exception 'Economics previous-season Practice locked by Mathematics S2';
+  end if;
+  if (public.start_practice_session_auto_safe_v5(701,'s2-econ-s1-001')->>'resumed')<>'true' then
+    raise exception 'Economics S1 idempotency must stay open until its own S2';
   end if;
   topic:=public.start_practice_topic_drill_safe_v5(
     'economics','Synthetic',null,'s2-econ-topic-s1-001');
