@@ -9,6 +9,7 @@ on:
       - 'scripts/p1p5-isolated-http-auth-e2e.cjs'
       - 'supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql'
       - 'supabase/candidates/math_p1p5_p016b_writer_contract_v1_dormant.sql'
+      - 'supabase/tests/p1p5_p016b_ephemeral_extra_hard_stub.sql'
       - 'scripts/p1p5-p016b-signed-http-cutover.cjs'
       - 'scripts/p1p5-p016b-writer-contract.test.cjs'
       - 'scripts/p1p5-s3-signed-voluntary-weekly-reports.cjs'
@@ -153,6 +154,14 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql
+      - name: "P0-16B limited extra-hard API fixture for older disposable migration replay"
+        env:
+          PGOPTIONS: -c iclub.e2e_isolated=true
+        run: |
+          set -euo pipefail
+          test "$P1P5_E2E_ISOLATED" = 'true'
+          test "$PGHOST" = '127.0.0.1'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/p1p5_p016b_ephemeral_extra_hard_stub.sql
       - name: "P0-16B install DORMANT future-only contract in isolated signed PG17"
         run: |
           set -euo pipefail
