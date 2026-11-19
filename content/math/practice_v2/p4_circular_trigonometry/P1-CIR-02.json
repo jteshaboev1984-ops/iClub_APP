@@ -51,9 +51,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
       "question": {
-        "en": "An arc has length 15 cm in a circle of radius 10 cm. Enter the angle in radians.",
-        "ru": "Длина дуги равна 15 см в окружности радиуса 10 см. Введите угол в радианах.",
-        "uz": "Radiusi 10 sm bo‘lgan aylanada yoy uzunligi 15 sm. Burchakni radianlarda kiriting."
+        "en": "An arc has length 15 cm in a circle of radius 10 cm. Enter the angle in radians. Give your answer as a decimal number.",
+        "ru": "Длина дуги равна 15 см в окружности радиуса 10 см. Введите угол в радианах. Ответ запишите десятичным числом.",
+        "uz": "Radiusi 10 sm bo‘lgan aylanada yoy uzunligi 15 sm. Burchakni radianlarda kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
@@ -228,9 +228,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
       "question": {
-        "en": "A sector has radius 8 cm and perimeter 26 cm. Enter its angle in radians.",
-        "ru": "Сектор имеет радиус 8 см и периметр 26 см. Введите его угол в радианах.",
-        "uz": "Sektor radiusi 8 sm va perimetri 26 sm. Uning burchagini radianlarda kiriting."
+        "en": "A sector has radius 8 cm and perimeter 26 cm. Enter its angle in radians. Give your answer as a decimal number.",
+        "ru": "Сектор имеет радиус 8 см и периметр 26 см. Введите его угол в радианах. Ответ запишите десятичным числом.",
+        "uz": "Sektor radiusi 8 sm va perimetri 26 sm. Uning burchagini radianlarda kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
