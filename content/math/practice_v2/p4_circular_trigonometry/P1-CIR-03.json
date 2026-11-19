@@ -274,13 +274,13 @@
         "P1-CIR-02"
       ],
       "role": "area_to_perimeter",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
       "question": {
-        "en": "A sector has radius 4 cm and area 8 cm². Enter its perimeter in centimetres.",
-        "ru": "Сектор имеет радиус 4 см и площадь 8 см². Введите его периметр в сантиметрах.",
-        "uz": "Sektor radiusi 4 sm va yuzi 8 sm². Uning perimetrini santimetrda kiriting."
+        "en": "An annular sector has central angle 2 radians and radii R>r>0. Its area is 5 cm², and R−r=1 cm. Enter its full perimeter in centimetres (both arcs and both straight edges).",
+        "ru": "Кольцевой сектор имеет центральный угол 2 радиана и радиусы R>r>0. Его площадь равна 5 см², а R−r=1 см. Введите полный периметр в сантиметрах (обе дуги и обе прямые стороны).",
+        "uz": "Halqasimon sektorning markaziy burchagi 2 radian, radiuslari R>r>0. Uning yuzi 5 sm² va R−r=1 sm. Ikkala yoy va ikkala to‘g‘ri kesmani qo‘shib, to‘liq perimetrni santimetrda kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -299,9 +299,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "From 8=½(4²)θ, θ=1. The arc length is s=4(1)=4 cm, so the perimeter is 4+2(4)=12 cm.",
-        "ru": "Из 8=½(4²)θ получаем θ=1. Длина дуги s=4(1)=4 см, поэтому периметр 4+2(4)=12 см.",
-        "uz": "8=½(4²)θ dan θ=1. Yoy uzunligi s=4(1)=4 sm, demak perimetr 4+2(4)=12 sm."
+        "en": "For the annular sector, area = ½(R²−r²)θ = R²−r² =5 because θ=2. Since R−r=1, (R−r)(R+r)=5 gives R+r=5 (so R=3 and r=2). The two arcs plus the two radial edges have perimeter θ(R+r)+2(R−r)=2(5)+2(1)=12 cm.",
+        "ru": "Для кольцевого сектора площадь = ½(R²−r²)θ = R²−r² =5, поскольку θ=2. Так как R−r=1, из (R−r)(R+r)=5 следует R+r=5 (значит R=3 и r=2). Суммарный периметр двух дуг и двух прямых сторон равен θ(R+r)+2(R−r)=2(5)+2(1)=12 см.",
+        "uz": "Halqasimon sektor yuzi = ½(R²−r²)θ = R²−r² =5, chunki θ=2. R−r=1 bo‘lgani uchun (R−r)(R+r)=5 dan R+r=5 (ya’ni R=3 va r=2). Ikkala yoy va ikkala to‘g‘ri tomon perimetri θ(R+r)+2(R−r)=2(5)+2(1)=12 sm."
       },
       "ai_source_skill": "P1-CIR-03",
       "status": "draft"
