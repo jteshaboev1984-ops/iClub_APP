@@ -38,7 +38,20 @@ const cases={
 205(q){const D=(-12)**2-4*3*12;assert.equal(D,0);mcq(q,s=>/line is tangent to the circle/i.test(s));},
 206:q=>input(q,-2+3),
 207:q=>input(q,-(2)/(2)),
-208:q=>input(q,(2)+(-8)),
+208(q){
+ assert.equal(q.difficulty,'hard');
+ assert.ok(q.question.en.includes('diameter endpoints')&&q.question.ru.includes('диаметра')&&q.question.uz.includes('diametri'));
+ const A=[0,-3],B=[2,1];
+ const centre=A.map((v,i)=>(v+B[i])/2);
+ const radius=Math.hypot(B[0]-A[0],B[1]-A[1])/2;
+ const normalLength=Math.hypot(2,-1);
+ const offset=2*centre[0]-centre[1];
+ const solutions=[-offset-radius*normalLength,-offset+radius*normalLength];
+ assert.equal(solutions.length,2);
+ assert.ok(solutions.every(p=>close(Math.abs(offset+p)/normalLength,radius)));
+ assert.ok(solutions[0]!==solutions[1]);
+ input(q,solutions.reduce((x,y)=>x+y,0));
+},
 209:q=>mcq(q,s=>norm(s)==='|k|<4'),
 210:q=>mcq(q,s=>norm(s)==='k=0or8'),
 211:q=>mcq(q,s=>norm(s)==='p<9'),
