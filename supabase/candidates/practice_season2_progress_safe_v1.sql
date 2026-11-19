@@ -33,6 +33,19 @@ declare
   v_topic_correct integer := 0;
   v_topic_answered integer := 0;
   v_archive_seasons jsonb := '[]'::jsonb;
+  -- Closed/current Season 1 History preview while Season 2 has no approved
+  -- Tour1 opening. NO S2 fresh-progress cutoff is applied for this snapshot.
+  v_s1_start date;
+  v_s1_status text;
+  v_s1_cutoff timestamptz;
+  v_s1_main integer := 0;
+  v_s1_early_main integer := 0;
+  v_s1_topic integer := 0;
+  v_s1_early_topic integer := 0;
+  v_s1_main_recent jsonb := '[]'::jsonb;
+  v_s1_early_main_recent jsonb := '[]'::jsonb;
+  v_s1_topic_recent jsonb := '[]'::jsonb;
+  v_s1_early_topic_recent jsonb := '[]'::jsonb;
 begin
   if v_uid is null then
     raise exception 'not_authenticated' using errcode='28000';
@@ -56,24 +69,136 @@ begin
     and t.start_date is not null and t.end_date is not null
     and t.start_date <= t.end_date
   limit 1;
-  if v_start is null then
+  -- In the Season 2 draft/future state, expose only the subject-owner's
+  -- actual Season 1 and verifiably pre-Season1 records as a read-only
+  -- History snapshot. The top-level period remains INACTIVE, so the
+  -- original Practice stats and progress never inherit an S1 cutoff.
+  if v_start is null or
+     statement_timestamp() < (v_start::timestamp at time zone 'Asia/Tashkent')
+  then
+    select t.start_date,sn.status
+      into v_s1_start,v_s1_status
+    from public.seasons sn
+    join public.tours t on t.season_id=sn.id
+      and t.subject_id=v_subject and t.tour_no=1
+    where sn.season_no=1 and sn.status in ('current','closed')
+      and t.start_date is not null and t.end_date is not null
+      and t.start_date<=t.end_date
+    order by t.start_date asc limit 1;
+    if v_s1_start is null or
+       statement_timestamp() <
+         (v_s1_start::timestamp at time zone 'Asia/Tashkent')
+    then
+      return jsonb_build_object(
+        'ok',true,'subject_key',v_key,'season_no',2,
+        'period_active',false,'reason','season_not_started'
+      );
+    end if;
+    v_s1_cutoff := v_s1_start::timestamp at time zone 'Asia/Tashkent';
+
+    select count(*) filter(where created_at>=v_s1_cutoff)::integer,
+           count(*) filter(where created_at<v_s1_cutoff)::integer
+      into v_s1_main,v_s1_early_main
+    from public.practice_attempts
+    where subject_id=v_subject and user_id=v_uid
+      and coalesce(is_lab,false) is false;
+
+    select coalesce(jsonb_agg(to_jsonb(a.*) order by a.created_at desc,a.id desc),'[]'::jsonb)
+      into v_s1_main_recent
+    from (select id,score,percent,time_seconds,created_at
+      from public.practice_attempts
+      where subject_id=v_subject and user_id=v_uid
+        and coalesce(is_lab,false) is false
+        and created_at>=v_s1_cutoff
+      order by created_at desc,id desc limit 20) a;
+
+    select coalesce(jsonb_agg(to_jsonb(a.*) order by a.created_at desc,a.id desc),'[]'::jsonb)
+      into v_s1_early_main_recent
+    from (select id,score,percent,time_seconds,created_at
+      from public.practice_attempts
+      where subject_id=v_subject and user_id=v_uid
+        and coalesce(is_lab,false) is false
+        and created_at<v_s1_cutoff
+      order by created_at desc,id desc limit 20) a;
+
+    select count(*) filter(where created_at>=v_s1_cutoff)::integer,
+           count(*) filter(where created_at<v_s1_cutoff)::integer
+      into v_s1_topic,v_s1_early_topic
+    from public.practice_drill_sessions_v4
+    where subject_id=v_subject and user_id=v_uid
+      and status='finalized' and drill_type='rec_topic'
+      and left(client_session_id,22)='practice_topic_choice_';
+
+    select coalesce(jsonb_agg(to_jsonb(t.*) order by t.created_at desc,t.id desc),'[]'::jsonb)
+      into v_s1_topic_recent
+    from (
+      select q.id,q.topic,q.created_at,
+             count(a.session_id)::integer as total,
+             count(a.session_id) filter(where a.is_correct is true)::integer as correct
+      from (
+        select id,topic,created_at
+        from public.practice_drill_sessions_v4
+        where subject_id=v_subject and user_id=v_uid
+          and status='finalized' and drill_type='rec_topic'
+          and left(client_session_id,22)='practice_topic_choice_'
+          and created_at>=v_s1_cutoff
+        order by created_at desc,id desc limit 20
+      ) q
+      left join public.practice_drill_answers_v4 a on a.session_id=q.id
+      group by q.id,q.topic,q.created_at
+    ) t;
+
+    select coalesce(jsonb_agg(to_jsonb(t.*) order by t.created_at desc,t.id desc),'[]'::jsonb)
+      into v_s1_early_topic_recent
+    from (
+      select q.id,q.topic,q.created_at,
+             count(a.session_id)::integer as total,
+             count(a.session_id) filter(where a.is_correct is true)::integer as correct
+      from (
+        select id,topic,created_at
+        from public.practice_drill_sessions_v4
+        where subject_id=v_subject and user_id=v_uid
+          and status='finalized' and drill_type='rec_topic'
+          and left(client_session_id,22)='practice_topic_choice_'
+          and created_at<v_s1_cutoff
+        order by created_at desc,id desc limit 20
+      ) q
+      left join public.practice_drill_answers_v4 a on a.session_id=q.id
+      group by q.id,q.topic,q.created_at
+    ) t;
+
     return jsonb_build_object(
       'ok',true,'subject_key',v_key,'season_no',2,
-      'period_active',false,'reason','season_not_started'
+      'period_active',false,'reason','season_not_started',
+      'history_snapshot',jsonb_build_object(
+        'ok',true,'subject_key',v_key,'season_no',1,
+        'period_active',true,'period_status',v_s1_status,
+        'period_starts_at',v_s1_cutoff,
+        'main',jsonb_build_object(
+          'attempts_count',v_s1_main,
+          'archived_attempts_count',v_s1_early_main,
+          'recent',v_s1_main_recent,'archived_recent',v_s1_early_main_recent
+        ),
+        'topic',jsonb_build_object(
+          'sessions_count',v_s1_topic,
+          'archived_sessions_count',v_s1_early_topic,
+          'recent',v_s1_topic_recent,'archived_recent',v_s1_early_topic_recent
+        ),
+        'archive_seasons',case when v_s1_early_main+v_s1_early_topic>0
+        then jsonb_build_array(jsonb_build_object(
+          'key','legacy',
+          'main',jsonb_build_object(
+            'attempts_count',v_s1_early_main,'recent',v_s1_early_main_recent),
+          'topic',jsonb_build_object(
+            'sessions_count',v_s1_early_topic,'recent',v_s1_early_topic_recent)
+        )) else '[]'::jsonb end
+      )
     );
   end if;
 
-  -- Valid period exists only once its Tour 1 calendar date is reached.
-  -- Tour 1 may have completed and is_active=false after the start; that
-  -- must NOT retroactively erase the date boundary.
-  -- Explicit local season boundary, including cross-midnight Tashkent cases.
+  -- Valid Season 2 period exists only after its official Tour1 boundary.
+  -- Tour1 can be closed; do not retroactively unset its verified cutoff.
   v_cutoff := v_start::timestamp at time zone 'Asia/Tashkent';
-  if statement_timestamp() < v_cutoff then
-    return jsonb_build_object(
-      'ok',true,'subject_key',v_key,'season_no',2,
-      'period_active',false,'reason','season_not_started'
-    );
-  end if;
 
   select count(*) filter(where created_at < v_cutoff)::integer,
          count(*) filter(where created_at >= v_cutoff)::integer
