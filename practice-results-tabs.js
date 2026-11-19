@@ -2,9 +2,9 @@
 (function () {
   'use strict';
   const COPY = Object.freeze({
-    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку'},
-    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish'},
-    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt'}
+    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Статистика по туру',startTopic:'Начать практику по теме'},
+    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Tur statistikasi',startTopic:'Mavzu bo‘yicha boshlash'},
+    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'Tour statistics',startTopic:'Start topic practice'}
   });
   const ROOT_ID = 'courses-practice-start';
   const lang = () => {
@@ -640,12 +640,18 @@
     const tourTab = create('practice-results-tab-tours','practice-results-panel-tours');
     const topicTab = create('practice-results-tab-topics','practice-results-panel-topics');
     bar.append(tourTab,topicTab);
-    root.insertBefore(bar,picker);
-    // Active Tour + related Practice is primary, before the mode switch.
+    // Owner-approved order: stats first, then learning mode, choice,
+    // contextual Start/Resume, then latest attempts. Keep the real Tour state
+    // in the overview; do not duplicate a banner above the stats.
+    const overview=node('section','iclub-practice-overview');
+    const overviewTitle=node('strong','iclub-practice-overview-label');
+    overview.append(overviewTitle,hero);
     const currentTour=node('section','iclub-practice-current-tour');
     currentTour.dataset.practiceCurrentTour='true';
     currentTour.setAttribute('aria-live','polite');
-    root.insertBefore(currentTour,bar);
+    overview.append(currentTour);
+    root.insertBefore(overview,picker);
+    root.insertBefore(bar,picker);
 
     const tourPanel=document.createElement('section');
     tourPanel.id='practice-results-panel-tours';
@@ -653,7 +659,7 @@
     tourPanel.setAttribute('role','tabpanel');
     tourPanel.setAttribute('aria-labelledby',tourTab.id);
     root.insertBefore(tourPanel,picker);
-    [picker,hero,last,actions].forEach(el=>tourPanel.appendChild(el));
+    [picker,actions,last].forEach(el=>tourPanel.appendChild(el));
     const tourSeasonHistory=node('div','iclub-s2-history');
     tourSeasonHistory.dataset.practiceS2History='tours';
     tourSeasonHistory.hidden=true;
@@ -671,7 +677,15 @@
     resumed.type='button';
     resumed.setAttribute('data-action','practice-resume');
     resumed.hidden=true;
-    topicPanel.append(resumed,topics);
+    const topicActions=node('div','practice-topic-start-actions');
+    const topicStart=node('button','btn primary practice-topic-start');
+    topicStart.type='button';
+    topicStart.id='practice-start-topic-btn';
+    topicStart.disabled=true;
+    topicActions.append(resumed,topicStart);
+    const topicRecent=node('div','practice-topic-history-placement');
+    topicRecent.id='practice-topic-history-placement';
+    topicPanel.append(topics,topicActions,topicRecent);
     const topicSeasonHistory=node('div','iclub-s2-history');
     topicSeasonHistory.dataset.practiceS2History='topics';
     topicSeasonHistory.hidden=true;
@@ -692,6 +706,8 @@
     const label=()=>{
       const c=COPY[lang()];
       tourTab.textContent=c.tours; topicTab.textContent=c.topics;
+      overviewTitle.textContent=c.stats;
+      topicStart.textContent=c.startTopic;
       syncResume();
     };
     const centerSelected=()=>{

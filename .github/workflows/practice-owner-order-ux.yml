@@ -1,0 +1,48 @@
+name: Practice owner order and topic catalog UI regression
+on:
+  pull_request:
+    branches: [ux/practice-history-standalone-20261119]
+    paths:
+      - 'practice-results-tabs.js'
+      - 'practice-results-tabs.css'
+      - 'practice-topic-choice.js'
+      - 'scripts/practice-owner-order-chromium.cjs'
+      - '.github/workflows/practice-owner-order-ux.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: practice-owner-order-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  chromium-ui-fixture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Exact-source JS syntax
+        run: |
+          set -euo pipefail
+          node --check practice-results-tabs.js
+          node --check practice-topic-choice.js
+          node --check practice-history-screen.js
+          node --check app.js
+          node --check scripts/practice-owner-order-chromium.cjs
+      - name: Chromium source-only Practice order and retry
+        env:
+          PRACTICE_ORDER_SCREEN_DIR: artifacts/practice-owner-order
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node scripts/practice-owner-order-chromium.cjs
+      - name: Save read-only synthetic screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-owner-order-${{ github.sha }}
+          path: artifacts/practice-owner-order/*.png
+          retention-days: 14
+          if-no-files-found: warn
