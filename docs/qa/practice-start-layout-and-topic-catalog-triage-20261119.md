@@ -1,0 +1,44 @@
+# #574 · Practice start regrouping + Topic catalog loading incident — 2026-11-19
+
+Status: **isolated Draft UX candidate / topic load incident OPEN, not reproduced in user client**.
+Scope: Mathematics, Economics, Chemistry, Biology, Informatics Practice. No release approval.
+
+## 1. Owner-accepted main Practice order
+The owner explicitly chose this exact vertical order, preserving the existing app, academic rules and access:
+1. **Statistics first.** Keep the real subject, selected Tour metrics, best score/time, progress trend only when applicable, and truthful active/last/upcoming Tour status. Do not invent progress or active Tours.
+2. **Tour / Topic switch.** Existing accessible two-category learning tabs, independent from the standalone History screen.
+3. **Tour or Topic selection.** Preserve horizontally scrollable Tour chips / current lock gates. Topic mode retains the existing authenticated topic search and bounded catalog. A topic selection is **not** a quiz start.
+4. **Start / Resume action.** Tour mode retains existing Practice start/restart/paused-draft logic; Topic mode has an explicitly selected-topic Start CTA and the existing Resume CTA, with session protections untouched.
+5. **Recent attempts.** Tour's existing attempts table is after the action; Topic's existing owner-scoped summary/history goes after the action. Keep it accessible for Season 1 until signed new History parity is ready. The previously approved compact **History** link remains below both tab panels, opens the separate Courses-stack screen (PR #583), never embeds the long archive into Practice.
+
+**Note:** The global Statistics overview is the existing **selected Tour** summary; do not imply it is a computed Topic mastery score. Preserve RU/UZ/EN, Academy OS visual tokens, 44px targets and single host Back.
+
+Code ownership: separate child of approved source [#583](https://github.com/jteshaboev1984-ops/iClub_APP/pull/583) → #581 → #579. Changes are layout-only except adding a distinct client-side selected Topic state/Start click. Backend eligibility, score, attempt creation, access and period boundaries are unchanged.
+
+## 2. Reported incident — “Practice topics failed to load”
+
+**Owner observation (2026-11-19):** Current iClub app could not load available Practice topics. Exact subject, screen, timestamp, network response and browser console error are **not available**, so **do not mark the incident fixed or assume root cause**.
+
+### Verified source path
+- `practice-results-tabs.js` → open **By Topic** mode, expands `.practice-topic-choice-toggle`.
+- `practice-topic-choice.js` `mount → load` invokes `window.sb.rpc('get_practice_available_topics_safe_v1',{p_subject_key:subjectKey})` after the topic choice panel is opened. Expects `data.ok===true` and a `topics` array. Error path shows generic “Could not load topics” and Retry.
+- Live `public.get_practice_available_topics_safe_v1(text)` is present, `SECURITY DEFINER`, `EXECUTE` granted to `authenticated` and not `anon`. All five referenced subjects are active.
+- **Live Supabase PostgreSQL 17.6, READ-ONLY**, authenticated role with a synthetic non-existent UUID, no history reads/edits, no learner data output: RPC returned `ok=true` with eligible-topic counts **mathematics 9, chemistry 41, biology 19, economics 11, informatics 37** on 2026-11-19. This verifies the live DB function + its candidate catalog for this test context **only**, NOT the user’s actual HTTP/JWT/browser session. No changes to Supabase.
+- A bounded, aggregate search over `edge_logs/postgrest_logs` for this named RPC between **09:30 and 12:45 UTC 2026-11-19** returned no matching paths; log coverage/retention and path normalization cannot establish whether the user's request fired.
+
+### Status, possible layers, and required follow-up (OPEN)
+**NOT reproduced.** A functioning SQL RPC does not prove the live browser fetch works. Do not change SQL grants, RLS, protected answers or topic bank on speculation.
+
+1. Open current deployed mobile Telegram WebApp/web Practice for each enabled subject, switch **By Topic**, expand topic selector. Record environment, approximate timestamp, subject key, anonymous/authenticated `role` (never copy token), expected and actual message.
+2. Inspect DevTools Network **RPC path only** `/rest/v1/rpc/get_practice_available_topics_safe_v1`, HTTP status and sanitized error code/message (no JWT, question text, keys, user ID). Distinguish **request absent** (client mount/session/cache/JS), **401/403** (auth or grants), **404/PGRST202** (route/schema-cache), **429/5xx** (availability), **200 + ok=false/[]** (candidate filtering), and timeout/offline.
+3. Verify registered anonymous Supabase client session refresh and correct subject key on tab open/re-entry and after switching subjects; check late results do not overwrite another subject. Test Retry actually repeats the request and reports a safe failure to the learner.
+4. Reproduce using an isolated Chromium UI shell plus signed JWT → PostgREST against PostgreSQL 17 fixture, then compare with **actual deployed** source SHA and authenticated mobile/desktop browser capture before approving any fix. If proven client issue, create narrowly scoped follow-up in Practice; if server issue, propose read-only prerequisite/source patch with PG17 and permission verification.
+5. Confirm Topic Start/Resume remains blocked until eligible topic is explicitly selected; never let a catalog error trigger an attempt or expose locked questions. Keep verified Tour Practice functional if Topic service fails.
+
+**Definition of done:** user-observed failure reproduced with sanitized HTTP/console trace OR concretely disproved on the same deployed version/session; root cause and independent fix validated with exact SHA, RU/UZ/EN, mobile and desktop, subject switching, auth/error/retry and access controls. Until then status **OPEN / not root-caused**.
+
+## 3. Release and lineage limits
+- Source and browser acceptance are distinct from live release; current hosted Season2 Tour1 dates are undated/draft and new Season2 period RPC is not installed.
+- Preserve historic Season1 results, Tour attempts, certified/ranked outcomes, private banks, session owners. No deletion, regrade, scores/mastery/entitlement changes.
+- Do not modify `main`, production Vercel, live Supabase SQL, Tour dates, topic content, bank, or rate plans without separate owner GO.
+- Record exact child PR HEAD and CI outcomes in canonical #574 when they are available. Integrate via owner review of #583 / UX531, not by merging directly to main.
