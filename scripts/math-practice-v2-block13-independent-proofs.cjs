@@ -13,11 +13,11 @@ const input=(q,n)=>{assert.equal(q.qtype,'input');assert.ok(close(num(q.answer_c
 assert.equal(q.answer_contract.number_only,true);for(let v of q.answer_contract.accepted_examples||[])assert.ok(close(num(v),n));for(let v of q.answer_contract.rejected_examples||[])assert.ok(!close(num(v),n));};
 const C=(n,r)=>{let v=1;for(let i=1;i<=r;i++)v=v*(n-i+1)/i;return Math.round(v);};
 const tokens=s=>(String(s||'').normalize('NFC').replace(/[−–—]/g,'-').match(/(?<!\p{L})[-+]?\d+(?:[.,]\d+)?/gu)||[]).map(v=>v.replace(',','.')).sort().join('|');
-const sequences=(s)=>{const matches=String(s).match(/-?\d+(?:\/\d+)?/g)||[];return matches.map(x=>x.includes('/')?Number(x.split('/')[0])/Number(x.split('/')[1]):+x).slice(0,4);};
+const sequences=(s)=>{const matches=norm(s).match(/-?\d+(?:\/\d+)?/g)||[];return matches.map(x=>x.includes('/')?Number(x.split('/')[0])/Number(x.split('/')[1]):+x).slice(0,4);};
 const isAP=a=>a.length>=3&&a.slice(2).every((v,i)=>close(v-a[i+1],a[1]-a[0]));
 const isGP=a=>a.length>=3&&a[0]!==0&&a.slice(2).every((v,i)=>close(v/a[i+1],a[1]/a[0]));
 const tests={
-301:q=>choose(q,s=>norm(s)==='C(7,r)2^(7-r)(-3x)^r'&&C(7,2)*2**5*(-3)**2===15120),
+301:q=>choose(q,s=>norm(s)==='C(7,r)2^(7-r)(-3x)^r'&&C(7,2)*2**5*(-3)**2===6048),
 302:q=>input(q,3**5),
 303:q=>input(q,C(8,6)),
 304:q=>input(q,35/C(7,1)),
