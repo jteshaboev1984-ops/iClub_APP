@@ -1223,14 +1223,6 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 #courses-practice-start .iclub-practice-current-tour-sub {
   font-size:12px;color:var(--academy-text-soft,#5a759b);line-height:1.45
 }
-#courses-practice-start .iclub-practice-current-tour-action {
-  margin-left:auto;min-height:40px;padding:8px 12px;
-  border:1px solid var(--academy-edge,#ccdcf4);
-  border-radius:var(--academy-radius-sm,11px);
-  background:var(--academy-paper-blue,#f3f8ff);
-  color:#2057a1;font-size:13px;font-weight:750;cursor:pointer
-}
-#courses-practice-start .iclub-practice-current-tour-action:focus-visible,
 #courses-practice-start .iclub-s2-history-bottom-details summary:focus-visible {
   outline:3px solid var(--academy-focus,#377bdf);outline-offset:2px
 }
@@ -1259,9 +1251,6 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 }
 @media(max-width:360px){
   #courses-practice-start .iclub-practice-current-tour {padding:12px}
-  #courses-practice-start .iclub-practice-current-tour-action {
-    margin-left:0;flex:1 1 100%
-  }
 }
 
 
@@ -1609,9 +1598,6 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
   background:var(--academy-paper-blue,#f3f8ff);
   box-shadow:none;
   border-radius:var(--academy-radius-sm,11px);
-}
-.iclub-visual-v3 #courses-practice-start .iclub-practice-overview .iclub-practice-current-tour-action {
-  min-height:40px;background:var(--academy-paper,#fff);
 }
 .iclub-visual-v3 #courses-practice-start .practice-results-tabs {
   margin:0 0 14px;
