@@ -497,7 +497,7 @@
         "P1-INT-01"
       ],
       "role": "difference_between_points",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -536,7 +536,7 @@
         "P1-INT-01"
       ],
       "role": "reverse_point_condition",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
