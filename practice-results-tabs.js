@@ -2,9 +2,9 @@
 (function () {
   'use strict';
   const COPY = Object.freeze({
-    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Статистика по туру',startTopic:'Начать практику по теме'},
-    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Tur statistikasi',startTopic:'Mavzu bo‘yicha boshlash'},
-    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'Tour statistics',startTopic:'Start topic practice'}
+    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Статистика по туру'},
+    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Tur statistikasi'},
+    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'Tour statistics'}
   });
   const ROOT_ID = 'courses-practice-start';
   const lang = () => {
@@ -677,12 +677,11 @@
     resumed.type='button';
     resumed.setAttribute('data-action','practice-resume');
     resumed.hidden=true;
+    // Topic tiles already invoke the existing guarded Start handler directly.
+    // Only a paused draft needs a separate Resume button in this mode.
     const topicActions=node('div','practice-topic-start-actions');
-    const topicStart=node('button','btn primary practice-topic-start');
-    topicStart.type='button';
-    topicStart.id='practice-start-topic-btn';
-    topicStart.disabled=true;
-    topicActions.append(resumed,topicStart);
+    topicActions.hidden=true;
+    topicActions.append(resumed);
     const topicRecent=node('div','practice-topic-history-placement');
     topicRecent.id='practice-topic-history-placement';
     topicPanel.append(topics,topicActions,topicRecent);
@@ -698,6 +697,7 @@
     const syncResume=()=>{
       const visible=realResume && realResume.style.display !== 'none' && !realResume.disabled;
       resumed.hidden=!visible;
+      topicActions.hidden=!visible;
       resumed.textContent=COPY[lang()].resume;
     };
     if (realResume) new MutationObserver(syncResume).observe(realResume,{attributes:true,attributeFilter:['style','disabled']});
@@ -707,7 +707,6 @@
       const c=COPY[lang()];
       tourTab.textContent=c.tours; topicTab.textContent=c.topics;
       overviewTitle.textContent=c.stats;
-      topicStart.textContent=c.startTopic;
       syncResume();
     };
     const centerSelected=()=>{

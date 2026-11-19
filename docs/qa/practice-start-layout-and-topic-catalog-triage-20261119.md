@@ -7,13 +7,13 @@ Scope: Mathematics, Economics, Chemistry, Biology, Informatics Practice. No rele
 The owner explicitly chose this exact vertical order, preserving the existing app, academic rules and access:
 1. **Statistics first.** Keep the real subject, selected Tour metrics, best score/time, progress trend only when applicable, and truthful active/last/upcoming Tour status. Do not invent progress or active Tours.
 2. **Tour / Topic switch.** Existing accessible two-category learning tabs, independent from the standalone History screen.
-3. **Tour or Topic selection.** Preserve horizontally scrollable Tour chips / current lock gates. Topic mode retains the existing authenticated topic search and bounded catalog. A topic selection is **not** a quiz start.
-4. **Start / Resume action.** Tour mode retains existing Practice start/restart/paused-draft logic; Topic mode has an explicitly selected-topic Start CTA and the existing Resume CTA, with session protections untouched.
+3. **Tour or Topic selection.** Preserve horizontally scrollable Tour chips / current lock gates. Topic mode retains the existing authenticated topic search and bounded catalog. **Owner update, 2026-11-19:** tapping an eligible Topic tile **starts Topic Practice immediately**, using the original protected start handler; no separate Topic Start button.
+4. **Start / Resume action.** Tour mode retains existing Practice start/restart/paused-draft logic; Topic mode uses the topic tile itself as its **Start** action. The original **Resume** CTA is shown only when a paused attempt exists; it is not duplicated with an extra Start button. Existing session protections are unchanged.
 5. **Recent attempts.** Tour's existing attempts table is after the action; Topic's existing owner-scoped summary/history goes after the action. Keep it accessible for Season 1 until signed new History parity is ready. The previously approved compact **History** link remains below both tab panels, opens the separate Courses-stack screen (PR #583), never embeds the long archive into Practice.
 
 **Note:** The global Statistics overview is the existing **selected Tour** summary; do not imply it is a computed Topic mastery score. Preserve RU/UZ/EN, Academy OS visual tokens, 44px targets and single host Back.
 
-Code ownership: separate child of approved source [#583](https://github.com/jteshaboev1984-ops/iClub_APP/pull/583) → #581 → #579. Changes are layout-only except adding a distinct client-side selected Topic state/Start click. Backend eligibility, score, attempt creation, access and period boundaries are unchanged.
+Code ownership: separate child of approved source [#583](https://github.com/jteshaboev1984-ops/iClub_APP/pull/583) → #581 → #579. Changes preserve the original one-tap Topic Start flow and guarded original callback; the prior intermediate selected-topic + extra Start button candidate was superseded by the owner's explicit correction. Backend eligibility, score, attempt creation, access and period boundaries are unchanged.
 
 ## 2. Reported incident — “Practice topics failed to load”
 
@@ -33,7 +33,7 @@ Code ownership: separate child of approved source [#583](https://github.com/jtes
 2. Inspect DevTools Network **RPC path only** `/rest/v1/rpc/get_practice_available_topics_safe_v1`, HTTP status and sanitized error code/message (no JWT, question text, keys, user ID). Distinguish **request absent** (client mount/session/cache/JS), **401/403** (auth or grants), **404/PGRST202** (route/schema-cache), **429/5xx** (availability), **200 + ok=false/[]** (candidate filtering), and timeout/offline.
 3. Verify registered anonymous Supabase client session refresh and correct subject key on tab open/re-entry and after switching subjects; check late results do not overwrite another subject. Test Retry actually repeats the request and reports a safe failure to the learner.
 4. Reproduce using an isolated Chromium UI shell plus signed JWT → PostgREST against PostgreSQL 17 fixture, then compare with **actual deployed** source SHA and authenticated mobile/desktop browser capture before approving any fix. If proven client issue, create narrowly scoped follow-up in Practice; if server issue, propose read-only prerequisite/source patch with PG17 and permission verification.
-5. Confirm Topic Start/Resume remains blocked until eligible topic is explicitly selected; never let a catalog error trigger an attempt or expose locked questions. Keep verified Tour Practice functional if Topic service fails.
+5. Confirm only an **eligible fetched Topic tile click** starts Topic Practice (once while start is in flight), Resume appears only for an existing paused attempt, and a catalog error/Retry never starts an attempt or exposes locked questions. Keep verified Tour Practice functional if Topic service fails.
 
 **Definition of done:** user-observed failure reproduced with sanitized HTTP/console trace OR concretely disproved on the same deployed version/session; root cause and independent fix validated with exact SHA, RU/UZ/EN, mobile and desktop, subject switching, auth/error/retry and access controls. Until then status **OPEN / not root-caused**.
 
