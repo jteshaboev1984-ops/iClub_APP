@@ -17,7 +17,7 @@ RETURNS bigint LANGUAGE plpgsql AS $stub$
 BEGIN
  INSERT INTO cron.iclub_ai_daily_cleanup_schedule_test
  VALUES(job_name,schedule,command)
- ON CONFLICT (job_name) DO UPDATE SET
+ ON CONFLICT ON CONSTRAINT iclub_ai_daily_cleanup_schedule_test_pkey DO UPDATE SET
  schedule=excluded.schedule,command=excluded.command;
  RETURN 1;
 END;
