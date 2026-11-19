@@ -80,6 +80,8 @@ jobs:
           node scripts/practice-season2-progress-signed-http.cjs
 
       - name: Chromium validation of accepted 3+5 Practice history UI
+        env:
+          PRACTICE_S2_SCREENSHOT_DIR: artifacts/practice-season2-owner-acceptance
         run: |
           set -euo pipefail
           node --check app.js
@@ -88,6 +90,15 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
           node scripts/practice-season2-history-chromium.cjs
+
+      - name: Save visual acceptance screenshots (synthetic test data only)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-season2-owner-acceptance-${{ github.sha }}
+          path: artifacts/practice-season2-owner-acceptance/*.png
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: No production access
         run: echo 'Synthetic PostgreSQL 17 only. No live Supabase or Vercel integration.'
