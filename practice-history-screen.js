@@ -7,21 +7,21 @@
   const ROOT_ID='practice-history-content';
   const COPY={
     ru:{title:'История практики',subtitle:'Результаты тренировок по турам, темам и сезонам.',
-      tours:'По турам',topics:'По темам',season:'Сезон',archive:'Архив прошлых сезонов',
+      tours:'По турам',topics:'По темам',season:'Сезон',currentSeason:'Текущий сезон',archive:'Архив прошлых сезонов',
       earlier:'Ранние записи',empty:'В этом разделе пока нет результатов.',
       noData:'История сезонов пока недоступна. Ранее сохранённые попытки не удалены.',
       more:'Показать ещё',limited:'Показаны последние записи. Более ранние результаты сохранены.',
       newer:'К более новому сезону',older:'К более раннему сезону',count:'записей',
       legacyNote:'Записи, для которых не подтверждён официальный сезон.'},
     uz:{title:'Amaliyot tarixi',subtitle:'Mashqlar natijalari turlar, mavzular va mavsumlar bo‘yicha.',
-      tours:'Turlar bo‘yicha',topics:'Mavzular bo‘yicha',season:'Mavsum',archive:'Oldingi mavsumlar arxivi',
+      tours:'Turlar bo‘yicha',topics:'Mavzular bo‘yicha',season:'Mavsum',currentSeason:'Joriy mavsum',archive:'Oldingi mavsumlar arxivi',
       earlier:'Avvalgi natijalar',empty:'Bu bo‘limda hozircha natija yo‘q.',
       noData:'Mavsumlar tarixi hozircha mavjud emas. Oldingi urinishlar o‘chirilmagan.',
       more:'Yana ko‘rsatish',limited:'So‘nggi natijalar ko‘rsatilmoqda. Avvalgilari saqlangan.',
       newer:'Yangiroq mavsumga',older:'Oldinroq mavsumga',count:'natija',
       legacyNote:'Rasmiy mavsumi tasdiqlanmagan avvalgi natijalar.'},
     en:{title:'Practice history',subtitle:'Practice results across tours, topics and seasons.',
-      tours:'By tour',topics:'By topic',season:'Season',archive:'Previous seasons',
+      tours:'By tour',topics:'By topic',season:'Season',currentSeason:'Current season',archive:'Previous seasons',
       earlier:'Earlier entries',empty:'No results in this section yet.',
       noData:'Season history is not available yet. Earlier attempts have not been deleted.',
       more:'Show 5 more',limited:'Only recent entries are shown. Older results remain saved.',
@@ -144,8 +144,9 @@
     next.setAttribute('aria-label',c.older);
     const identity=el('div','iclub-ph-season-identity');
     const seasonName=el('strong','iclub-ph-season-name');
+    const currentBadge=el('span','iclub-ph-current-badge',c.currentSeason);
     const position=el('small','iclub-ph-season-position');
-    identity.append(seasonName,position);
+    identity.append(currentBadge,seasonName,position);
     navigator.append(previous,identity,next);
     const indicators=el('div','iclub-ph-dots');
     const tabs=el('div','iclub-ph-tabs');
@@ -171,6 +172,7 @@
     const repaint=()=>{
       const s=seasons[seasonIndex];
       seasonName.textContent=c.season+' '+s.no;
+      currentBadge.hidden=seasonIndex!==0;
       position.textContent=seasons.length>1?(seasonIndex+1)+' / '+seasons.length:'';
       previous.disabled=seasonIndex===0;
       next.disabled=seasonIndex===seasons.length-1;
