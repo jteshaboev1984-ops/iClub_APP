@@ -205,6 +205,19 @@ async function main(){
     assert.equal(await page.locator("[data-iclub-ai-academic-button]").count(),0,
       "Old learner's approved Practice question button survived account switch");
 
+    // Return to an entitled learner without changing route, attempt, locale
+    // or review DOM. Old implementation only rescanned after DOM mutations:
+    // the review button could stay absent until navigating away and back.
+    await page.evaluate(()=>{
+      window.__qa.userId="00000000-0000-4000-8000-000000000031";
+      for(const cb of [...window.__qa.authListeners])
+        cb("SIGNED_IN",{user:{id:window.__qa.userId}});
+    });
+    await page.locator('[data-iclub-ai-academic-button="practice_error:502:97"]')
+      .waitFor({timeout:8000});
+    assert.equal(await page.locator("[data-iclub-ai-academic-button]").count(),1,
+      "Entitled learner did not regain their own approved action on unchanged review");
+
     await page.evaluate(()=>{
       document.getElementById("courses-practice-review").classList.remove("is-active");
       document.getElementById("courses-practice-quiz").classList.add("is-active");
@@ -218,6 +231,7 @@ async function main(){
     console.log("PASS: source-approved practice_error 502:97 → same Tutor, RU/EN/UZ action");
     console.log("PASS: held academic reply refused after switch 502→503, stale controls removed");
     console.log("PASS: account 31→32 removes previous learner's approved-source actions");
+    console.log("PASS: account 32→31 restores eligible review action without navigation");
     console.log("PASS: active Practice quiz hides Tutor; zero external/model network or learner data writes");
   }finally{
     if(browser)await browser.close();
