@@ -36,6 +36,7 @@
       emptyCopy: "Выбери быстрый запрос или напиши свой вопрос.",
       betaIntro: "Помогу освоить Practice, разбор ошибок и учебные материалы. Объяснения учебных задач пока готовятся.",
       betaScope: "Пока доступны проверенные подсказки по работе с iClub. Учебные объяснения подключаем постепенно.",
+      academicSourceUnavailable: "Для этого учебного вопроса пока нет доступного утверждённого объяснения iClub. Основное обучение и материалы предмета остаются доступны.",
       input: "Спросить iClub AI…",
       send: "Отправить",
       appHere: "Что можно делать здесь?",
@@ -102,6 +103,7 @@
       emptyCopy: "Tezkor so‘rovni tanla yoki o‘z savolingni yoz.",
       betaIntro: "Practice, xatolar tahlili va o‘quv materiallaridan foydalanishga yordam beraman. Masalalar izohi hali tayyorlanmoqda.",
       betaScope: "Hozircha iClub’dan foydalanish bo‘yicha tekshirilgan yordam mavjud. Fanlarga oid izohlar keyinroq qo‘shiladi.",
+      academicSourceUnavailable: "Bu o‘quv savoli uchun iClub’da hozircha tasdiqlangan izoh mavjud emas. Asosiy o‘qish va fan materiallaridan foydalanishingiz mumkin.",
       input: "iClub AI'dan so‘rash…",
       send: "Yuborish",
       appHere: "Bu yerda nima qilish mumkin?",
@@ -168,6 +170,7 @@
       emptyCopy: "Choose a quick prompt or type your own question.",
       betaIntro: "I can guide you through Practice, mistake review and study resources. Subject explanations are being prepared.",
       betaScope: "Verified help with iClub is available now. Subject explanations are being added gradually.",
+      academicSourceUnavailable: "There is no approved iClub explanation available for this study question yet. Your regular learning and subject materials remain available.",
       input: "Ask iClub AI…",
       send: "Send",
       appHere: "What can I do here?",
@@ -1672,7 +1675,14 @@
       if (["in_development", "subject_not_ready", "approved_source_missing",
            "source_not_ready", "no_source", "topic_not_released"].includes(reason)
           || data.mode === "in_development") {
-        appendMessage(threadKey, "assistant", window.iClubAiV21BetaClient ? copy().betaScope : copy().inDevelopment, "notice");
+        // A typed, source-bound learner question needs an honest academic no-source
+        // reply; general prepared navigation help retains its existing wording.
+        // No provider fallback, grade write, or new academic permission is introduced.
+        const academicQuestion = Boolean(academicContext || practiceContext ||
+          (context.academic && promptKey === "" && cleanText.length > 0));
+        appendMessage(threadKey, "assistant", academicQuestion
+          ? copy().academicSourceUnavailable
+          : (window.iClubAiV21BetaClient ? copy().betaScope : copy().inDevelopment), "notice");
         return;
       }
 
