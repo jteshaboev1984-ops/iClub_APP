@@ -298,13 +298,13 @@
       "primary_skill": "P1-SER-04",
       "secondary_skills": [],
       "role": "geometric_condition",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "The expressions k−2, 6 and 18 are consecutive non-zero terms of a geometric progression. Enter k.",
-        "ru": "Выражения k−2, 6 и 18 — последовательные ненулевые члены геометрической прогрессии. Введите k.",
-        "uz": "k−2, 6 va 18 ifodalar geometrik progressiyaning ketma-ket nol bo‘lmagan hadlari. k ni kiriting."
+        "en": "A geometric progression has second term u₂=6 and fourth term u₄=54. Its first term is positive and equals k−2. Enter k.",
+        "ru": "У геометрической прогрессии второй член u₂=6, четвёртый член u₄=54. Первый член положителен и равен k−2. Введите k.",
+        "uz": "Geometrik progressiyaning ikkinchi hadi u₂=6, to‘rtinchi hadi u₄=54. Birinchi hadi musbat bo‘lib, k−2 ga teng. k ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -322,9 +322,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "For consecutive GP terms, 6²=(k−2)18. Thus 36=18(k−2), so k−2=2 and k=4.",
-        "ru": "Для последовательных членов GP: 6²=(k−2)18. Тогда 36=18(k−2), поэтому k−2=2 и k=4.",
-        "uz": "Ketma-ket GP hadlari uchun 6²=(k−2)18. Demak 36=18(k−2), k−2=2 va k=4."
+        "en": "For a geometric progression u₄/u₂=r²=54/6=9, so r=3 or r=−3. Since the first term u₁=u₂/r is positive and u₂=6>0, only r=3 is allowed. Thus u₁=6/3=2=k−2, giving k=4.",
+        "ru": "В геометрической прогрессии u₄/u₂=r²=54/6=9, поэтому r=3 или r=−3. Так как первый член u₁=u₂/r положителен и u₂=6>0, подходит только r=3. Следовательно u₁=6/3=2=k−2, откуда k=4.",
+        "uz": "Geometrik progressiyada u₄/u₂=r²=54/6=9, demak r=3 yoki r=−3. Birinchi had u₁=u₂/r musbat va u₂=6>0 bo‘lgani uchun faqat r=3 mos keladi. Shunday qilib, u₁=6/3=2=k−2, bundan k=4."
       },
       "ai_source_skill": "P1-SER-04",
       "status": "draft"
