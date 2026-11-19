@@ -19,7 +19,7 @@ const verified="Проверенный результат: 7 из 10. Обуче
 const reviewReply="Подтверждённая ошибка: проверьте применение формулы.";
 let web,browser;
 async function main(){
-  const seen={prepared:[],academic:[],available:[],external:[],errors:[]};
+  const seen={prepared:[],recoveries:[],academic:[],available:[],external:[],errors:[]};
   try{
     web=http.createServer((req,res)=>{
       res.writeHead(200,{"content-type":"text/html; charset=utf-8","cache-control":"no-store"});
@@ -85,6 +85,24 @@ async function main(){
           :{ok:true,mode:"verified_summary",message:verified,provider_called:false,
               academic_state_changed:false})});
       }
+      // The existing Tutor safely probes canonical PC4 for a previously
+      // persisted answer when a verified Practice screen opens. This is
+      // a provider-FREE 'resume' read, never a new generated 'ask'.
+      if(url===BASE+"/functions/v1/iclub-ai-practice-freeform"){
+        const headers={"content-type":"application/json",
+          "access-control-allow-origin":origin,
+          "access-control-allow-methods":"POST, OPTIONS",
+          "access-control-allow-headers":"authorization, apikey, content-type"};
+        if(route.request().method()==="OPTIONS")
+          return route.fulfill({status:204,headers,body:""});
+        const body=route.request().postDataJSON();
+        assert.equal(body.operation,"resume",
+          "Model dispatch attempted during provider-free Tutor QA");
+        seen.recoveries.push(body);
+        return route.fulfill({status:409,headers,
+          body:JSON.stringify({ok:false,reason:"no_pending_answer",
+            provider_called:false,academic_state_changed:false})});
+      }
       seen.external.push(url);
       return route.abort("blockedbyclient");
     });
@@ -133,7 +151,9 @@ async function main(){
     assert(selected.some(x=>x.intent==="academic"&&x.surface==="practice_error"&&
       x.record_id===502&&x.question_id===97),"Server-bounded academic answer not requested");
     assert.equal(await page.locator("[data-global-ai-quick] button").count()<=3,true);
-    assert.equal(seen.external.length,0,"Unexpected network call from provider-free Tutor");
+    assert.equal(seen.external.length,0,
+      "Unexpected network call from provider-free Tutor: "+JSON.stringify(seen.external));
+    assert(seen.recoveries.length>0,"Existing server-side PC4 recovery preflight disappeared");
 
     // Real browser language mutation must update an already attached button.
     await page.evaluate(()=>{window.__qa.lang="en";document.documentElement.lang="en";});
