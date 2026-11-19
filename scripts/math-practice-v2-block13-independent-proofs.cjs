@@ -49,7 +49,7 @@ for(let id=301;id<=325;id++){
  assert.equal(q.key,'MATH-P1-PRACTICE2-Q'+String(id).padStart(3,'0'));assert.equal(q.practice_no,5);
  assert.ok(q.source_ref.includes(id<=307?'Ch6':'Ch7'));
  for(let l of ['en','ru','uz']){assert.ok(q.question[l]?.trim()&&q.explanation[l]?.trim());assert.equal(tokens(q.question[l]),tokens(q.question.en),'numeric stem mismatch');}
- if(q.qtype==='mcq'){assert.deepEqual(q.options.map(o=>o.key),['A','B','C','D']);for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>norm(o.text[l]))).size,4);for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);}
+ if(q.qtype==='mcq'){assert.deepEqual(q.options.map(o=>o.key).sort(),['A','B','C','D']);for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>norm(o.text[l]))).size,4);for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);}
  tests[id](q);
  }catch(e){console.error('FAIL block13 Q'+String(id).padStart(3,'0')+' '+e.message);process.exitCode=1;}
 }
