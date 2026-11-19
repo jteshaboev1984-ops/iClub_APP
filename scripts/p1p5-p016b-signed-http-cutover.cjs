@@ -3,6 +3,8 @@
 // Signed PostgREST JWT -> disposable PG17 P0-16B cutover: NO hosted resources.
 const assert=require("node:assert/strict");
 const crypto=require("node:crypto");
+const path=require("node:path");
+const {chromium}=require("playwright");
 const {execFileSync}=require("node:child_process");
 const HOST="http://127.0.0.1:3000";
 const ID="11111111-1111-4111-8111-111111111191";
@@ -56,6 +58,84 @@ async function blocked(name,args,auth,build,reason){
     /exam_prep_writer_contract_stale/.test(result.data?.message||""),
     reason+" should be refused before any mutation (HTTP "+result.status+")");
 }
+// Real Chromium + real signed PostgREST and PostgreSQL 17. The request
+// builder below is transport-compatible, not the official Supabase SDK.
+// All backend responses and the P0-16B rejection come from actual PG17.
+async function browserCutover(oldJwt,freshJwt){
+  const before=fingerprint();
+  const browser=await chromium.launch({headless:true});
+  try{
+    async function newPage(jwt,lang){
+      const page=await browser.newPage({viewport:{width:390,height:844}});
+      await page.route(HOST+"/",r=>r.fulfill({status:200,contentType:"text/html",
+        body:'<!doctype html><html lang="'+lang+'"><body><main>Saving answer</main></body></html>'}));
+      await page.goto(HOST+"/");
+      await page.evaluate(({jwt,lang})=>{
+        window.i18n={getLang:()=>lang};
+        window.__p016bToken=jwt;
+        window.__p016bSent=[];
+        window.sb={rpc(name,args={}){
+          const req={headers:{"x-client-info":"supabase-js-web/2"},
+            then(resolve,reject){
+              window.__p016bSent.push(req.headers["x-client-info"]);
+              const headers={...req.headers,Authorization:"Bearer "+window.__p016bToken,
+                "content-type":"application/json",Accept:"application/json"};
+              return fetch("/rpc/"+name,{method:"POST",headers,body:JSON.stringify(args)})
+                .then(async response=>{
+                  const json=await response.json();
+                  return response.ok?{data:json,error:null}:
+                    {data:null,error:{code:json.code,message:json.message}};
+                }).then(resolve,reject);
+            }
+          };
+          return req;
+        }};
+      },{jwt,lang});
+      await page.addScriptTag({path:path.resolve("exam-prep/exam-prep-api.js")});
+      return page;
+    }
+    for(const lang of ["ru","uz","en"]){
+      const page=await newPage(oldJwt,lang);
+      try{
+        const response=await page.evaluate(()=>window.iClubExamPrepHostInternal.api.submitResponse(
+          "00000000-0000-4000-8000-000000000001",1,
+          {artifact:{text:"Synthetic P1/P5 unsent written answer"}},
+          "p016b-"+document.documentElement.lang,25,document.documentElement.lang));
+        assert.equal(response.reason,"client_update_required","Old JWT must be denied in real Chromium");
+        const ui=await page.evaluate(()=>{
+          const notice=document.getElementById("math-p016b-stale-notice");
+          const text=notice?.querySelector("textarea");
+          return {role:notice?.getAttribute("role"),draft:text?.value,
+            readonly:text?.readOnly,
+            count:document.querySelectorAll("#math-p016b-stale-notice").length,
+            headers:window.__p016bSent,
+            url:location.href};
+        });
+        assert.equal(ui.role,"alertdialog");
+        assert.equal(ui.draft,"Synthetic P1/P5 unsent written answer");
+        assert.equal(ui.readonly,true);
+        assert.equal(ui.count,1);
+        assert.equal(ui.url,HOST+"/","No automatic reload on stale error");
+        assert(ui.headers.length>=1&&ui.headers.every(h=>h?.includes("iclub.math/"+VERSION)),
+          "Math-only marker must reach real PostgREST transport");
+      } finally {await page.close();}
+    }
+    // Three real stale-browser refusals must not modify even the
+    // synthetic owner history; only the subsequent fresh browser may write.
+    assert.equal(fingerprint(),before,"Three rejected real browser writes preserved all history");
+    const page=await newPage(freshJwt,"en");
+    try{
+      const saved=await page.evaluate(()=>window.iClubExamPrepHostInternal.api.saveExamProfile({
+        examSeries:"June 2027",targetGrade:"A"
+      }));
+      assert.equal(saved.ok,true,"Matching fresh browser + signed JWT must save via real PG17");
+      assert.equal(await page.locator("#math-p016b-stale-notice").count(),0);
+      const sent=await page.evaluate(()=>window.__p016bSent);
+      assert(sent.length>=1&&sent.every(h=>h?.includes("iclub.math/"+VERSION)));
+    } finally {await page.close();}
+  } finally {await browser.close();}
+}
+
 (async()=>{
   // Fail closed preflight: require the exact two synthetic users and DISABLED
   // guard before touching even the disposable config row.
@@ -87,6 +167,7 @@ async function blocked(name,args,auth,build,reason){
       "WHERE user_id='"+ID+"'::uuid"),stateFingerprint,
       "stale token/build getters must not rewrite Stage projections");
     assert.equal(fingerprint(),before,"Stale getter must not modify owned history");
+    await browserCutover(old,fresh);
     const accepted=await rpc("save_exam_prep_exam_profile_v2",profile,fresh,VERSION);
     assert(accepted.ok,"Fresh signed JWT + matching Math build must resume saved profile: "+
       JSON.stringify({status:accepted.status,error:accepted.data?.message}));
@@ -95,5 +176,5 @@ async function blocked(name,args,auth,build,reason){
   }
   assert.equal(sql("SELECT writer_min_jwt_iat IS NULL AND writer_client_contract IS NULL "+
     "FROM private.exam_prep_feature_config WHERE program_key='math_as_p1_p5'"),"t");
-  console.log("P0-16B PASS: signed old JWT denied; refreshed JWT with cached old build denied; unchanged P1/P5 history; safe stale getters; fresh compatible client resumes; opt-in OFF");
+  console.log("P0-16B PASS: real signed old JWT and stale build denied; RU/UZ/EN Chromium copy recovery after form removal; safe projections; fresh browser writes; cutover resets OFF");
 })().catch(err=>{console.error(err);process.exitCode=1;});
