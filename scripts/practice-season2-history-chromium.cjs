@@ -40,7 +40,13 @@ const {chromium}=require('playwright');
      const period={ok:true,period_active:true,subject_key:'mathematics',
        period_starts_at:'2026-11-01T00:00:00+05:00',main:{
          attempts_count:80,archived_attempts_count:40,recent,archived_recent:archived
-       },topic:{sessions_count:73,archived_sessions_count:30,recent,archived_recent:archived}};
+       },topic:{sessions_count:73,archived_sessions_count:30,recent,archived_recent:archived},
+       archive_seasons:[
+        {key:'season-1',season_no:1,main:{attempts_count:28,recent:archived},
+          topic:{sessions_count:20,recent:archived}},
+        {key:'legacy',season_no:null,main:{attempts_count:12,recent:archived.slice(0,12)},
+          topic:{sessions_count:10,recent:archived.slice(0,10)}}
+       ]};
      const rendered=window.iClubPracticeSeason2HistoryV1?.render(period,'mathematics',locale);
      const currentTour=window.iClubPracticeCurrentTourV1?.render({
        activeTourNo:2,lastCompletedTourNo:1,selectedTourNo:2
@@ -127,12 +133,55 @@ const {chromium}=require('playwright');
      assert.equal(await current.locator('.iclub-s2-history-earlier .iclub-s2-history-row').count(),10);
      const archive=page.locator('[data-practice-s2-archive] .iclub-s2-history-bottom-details');
      if(await archive.getAttribute('open')===null)await archive.locator('summary').first().click();
-     await page.waitForFunction(()=>document.querySelectorAll(
-       '[data-practice-s2-archive] .iclub-s2-history-bottom-content > .iclub-s2-history-current'
-     ).length===2);
-     const archivedGroups=page.locator('[data-practice-s2-archive] .iclub-s2-history-bottom-content > .iclub-s2-history-current');
-     assert.equal(await archivedGroups.nth(mode==='tours'?0:1).locator('.iclub-s2-history-rows > .iclub-s2-history-row').count(),3,
-       'selected archive group not initially latest 3');
+     assert.equal(await archive.locator('.iclub-s2-archive-navigator').count(),1,
+       'missing compact premium season navigator');
+     assert.equal(await archive.locator('.iclub-s2-archive-tab').count(),2,
+       'Tours and Topics must remain two distinct accessible archive categories');
+     await archive.locator('#practice-archive-mode-'+mode).click();
+     assert.equal(await archive.getAttribute('data-archive-type'),mode,
+       'archive segmented mode did not switch');
+     assert.equal(await archive.locator('.iclub-s2-archive-panel > .iclub-s2-history-current').count(),1,
+       'long stacked history: archive must show only one category');
+     assert.equal(await archive.locator('.iclub-s2-archive-panel .iclub-s2-history-rows > .iclub-s2-history-row').count(),3,
+       'archived season initial history must show 3');
+     const selected=archive.locator('#practice-archive-mode-'+mode);
+     assert.equal(await selected.getAttribute('aria-selected'),'true',
+       'archive category mode not accessible to keyboard/screen readers');
+     assert.equal(await archive.getAttribute('data-archive-season'),'season-1');
+     assert.equal(await archive.locator('.iclub-s2-archive-dot').count(),2,
+       'verified archived season and pre-season legacy require two indicators');
+     if(mode==='topics'){
+       const nav=archive.locator('.iclub-s2-archive-direction').last();
+       await nav.click();
+       assert.equal(await archive.getAttribute('data-archive-season'),'legacy',
+         'arrow must advance to verified old pre-season records');
+       assert.equal(await archive.getAttribute('data-archive-type'),'topics',
+         'season swipe must NOT change Tour/Topic category');
+       assert.equal(await nav.isDisabled(),true,'last season must not wrap or show further years');
+       // Real Chromium touch-event handling: swipe right returns to Season 1.
+       await page.evaluate(()=>{
+         const target=document.querySelector('.iclub-s2-history-bottom-content');
+         const evt=(type,x)=>{const event=new Event(type,{bubbles:true});
+           Object.defineProperty(event,type==='touchstart'?'touches':'changedTouches',
+             {value:[{clientX:x,clientY:250}]});
+           target.dispatchEvent(event);};
+         evt('touchstart',75);evt('touchend',170);
+       });
+       assert.equal(await archive.getAttribute('data-archive-season'),'season-1',
+         'horizontal gesture must switch verified seasons without altering category');
+       assert.equal(await archive.getAttribute('data-archive-type'),'topics');
+       // A vertical gesture must keep the current period.
+       await page.evaluate(()=>{
+         const target=document.querySelector('.iclub-s2-history-bottom-content');
+         const evt=(type,x,y)=>{const event=new Event(type,{bubbles:true});
+           Object.defineProperty(event,type==='touchstart'?'touches':'changedTouches',
+             {value:[{clientX:x,clientY:y}]});
+           target.dispatchEvent(event);};
+         evt('touchstart',220,150);evt('touchend',180,260);
+       });
+       assert.equal(await archive.getAttribute('data-archive-season'),'season-1',
+         'vertical page scroll may not change the season');
+     }
      assert((await page.locator(selector+' .iclub-s2-history-note').count())>=1,
        'partial server cap disclosure absent');
      if(screenshotDir && ((language==='ru'&&width===375&&mode==='tours')||

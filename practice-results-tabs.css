@@ -1263,3 +1263,138 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
     margin-left:0;flex:1 1 100%
   }
 }
+
+
+/* #574 · Premium Academy OS historical Practice rail.
+   Tour/Topic category is an exclusive accessible segmented control.
+   A horizontal finger gesture changes VERIFIED prior periods only. */
+#courses-practice-start .iclub-s2-history-bottom-details[open] {
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:var(--academy-radius-lg,20px);
+  background:var(--academy-paper,#fff);
+  padding:0 12px 16px;
+  box-shadow:var(--academy-quiet-shadow,0 3px 11px rgba(28,74,138,.045));
+}
+#courses-practice-start .iclub-s2-history-bottom-details summary {
+  list-style:none;
+}
+#courses-practice-start .iclub-s2-history-bottom-details summary::-webkit-details-marker {display:none}
+#courses-practice-start .iclub-s2-history-bottom-caption {
+  justify-content:space-between;
+  gap:10px;
+}
+#courses-practice-start .iclub-s2-history-bottom-caption::after {
+  content:'⌄';
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;
+  color:#2057a1;font-size:19px;line-height:1;
+  transition:transform .18s ease;
+}
+#courses-practice-start .iclub-s2-history-bottom-details[open] > .iclub-s2-history-bottom-caption::after {
+  transform:rotate(180deg);
+}
+#courses-practice-start .iclub-s2-history-bottom-content {
+  display:grid;gap:12px;padding:9px 1px 2px;
+  min-width:0;touch-action:pan-y;
+}
+#courses-practice-start .iclub-s2-archive-navigator {
+  display:grid;grid-template-columns:44px minmax(0,1fr) 44px;
+  gap:5px;align-items:center;
+  background:var(--academy-paper-blue,#f3f8ff);
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:15px;
+  padding:7px;
+  color:var(--academy-text,#142b50);
+}
+#courses-practice-start .iclub-s2-archive-direction {
+  height:44px;width:44px;
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:12px;
+  background:var(--academy-paper,#fff);
+  color:#2057a1;font:inherit;font-size:26px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+#courses-practice-start .iclub-s2-archive-direction:disabled {
+  opacity:.38;cursor:default;
+}
+#courses-practice-start .iclub-s2-archive-direction[hidden] {display:none!important}
+#courses-practice-start .iclub-s2-archive-navigator:has(.iclub-s2-archive-direction[hidden]) {
+  grid-template-columns:1fr;
+}
+#courses-practice-start .iclub-s2-archive-season-identity {
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  min-width:0;text-align:center;line-height:1.3;
+}
+#courses-practice-start .iclub-s2-archive-season-name {
+  font-size:15px;font-weight:820;color:var(--academy-text,#142b50);
+  overflow-wrap:anywhere;
+}
+#courses-practice-start .iclub-s2-archive-season-position {
+  font-size:11px;color:var(--academy-text-soft,#5a759b);
+  font-variant-numeric:tabular-nums;min-height:13px;
+}
+#courses-practice-start .iclub-s2-archive-dots {
+  min-height:6px;display:flex;align-items:center;justify-content:center;
+  gap:5px;
+}
+#courses-practice-start .iclub-s2-archive-dot {
+  width:6px;height:6px;border-radius:50%;
+  background:#b5c9e6;
+  transition:width .18s ease,background-color .18s ease;
+}
+#courses-practice-start .iclub-s2-archive-dot.is-active {
+  width:18px;border-radius:9px;background:#3071e1;
+}
+#courses-practice-start .iclub-s2-archive-tabs {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:4px;padding:4px;
+  background:#eff5ff;border-radius:13px;
+}
+#courses-practice-start .iclub-s2-archive-tab {
+  width:100%;min-width:0;min-height:44px;
+  padding:9px 8px;
+  border:1px solid transparent;border-radius:10px;
+  background:transparent;color:var(--academy-text-soft,#5a759b);
+  font:inherit;font-size:13px;font-weight:760;line-height:1.25;
+  cursor:pointer;transition:background-color .16s ease,border-color .16s ease;
+}
+#courses-practice-start .iclub-s2-archive-tab.is-selected {
+  background:var(--academy-paper,#fff);
+  border-color:var(--academy-edge,#ccdcf4);
+  color:#2057a1;
+  box-shadow:0 2px 8px rgba(20,63,121,.075);
+}
+#courses-practice-start .iclub-s2-archive-tab:focus-visible,
+#courses-practice-start .iclub-s2-archive-direction:focus-visible {
+  outline:3px solid var(--academy-focus,#377bdf);outline-offset:2px;
+}
+#courses-practice-start .iclub-s2-archive-panel {
+  min-width:0;overflow-wrap:anywhere;
+}
+#courses-practice-start .iclub-s2-archive-panel .iclub-s2-history-current {
+  padding:2px 0;border:0;box-shadow:none;background:transparent;
+}
+#courses-practice-start .iclub-s2-archive-panel .iclub-s2-history-caption {
+  color:var(--academy-text-soft,#5a759b);
+  font-size:12px;font-weight:720;
+}
+#courses-practice-start .iclub-s2-archive-panel .iclub-s2-history-row {
+  background:var(--academy-paper,#fff);
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:12px;
+}
+#courses-practice-start .iclub-s2-archive-panel .iclub-s2-history-earlier summary:focus-visible,
+#courses-practice-start .iclub-s2-archive-panel .iclub-s2-history-more:focus-visible {
+  outline:3px solid var(--academy-focus,#377bdf);outline-offset:2px;
+}
+@media(max-width:359px) {
+  #courses-practice-start .iclub-s2-history-bottom-details[open] {padding:0 9px 12px}
+  #courses-practice-start .iclub-s2-archive-season-name {font-size:14px}
+  #courses-practice-start .iclub-s2-archive-tab {font-size:12px;padding-inline:5px}
+}
+@media(prefers-reduced-motion:reduce){
+  #courses-practice-start .iclub-s2-history-bottom-caption::after,
+  #courses-practice-start .iclub-s2-archive-dot,
+  #courses-practice-start .iclub-s2-archive-tab {transition:none}
+}

@@ -528,17 +528,17 @@
       previous:'Предыдущие сезоны',earlier:'Более ранние записи',
       more:'Показать ещё',partial:'Показаны только последние записи. Остальные результаты сохранены в истории.',
       empty:'В новом сезоне пока нет завершённых попыток.',
-      main:'Практика по турам',topic:'Практика по темам',attempts:'попыток'},
+      main:'Практика по турам',topic:'Практика по темам',attempts:'попыток',records:'Записей',beforeSeason:'До первого сезона',season:'Сезон',previousSeason:'К более новому периоду',nextSeason:'К более раннему периоду',swipeHint:'Листайте сезоны свайпом',noArchived:'В этой категории записей нет.'},
     uz:{title:'Amaliyot tarixi · 2-mavsum',archive:'Oldingi mavsumlar arxivi',olderSeason:'1-mavsum va avvalgi',since:'Boshlanish sanasi',current:'Yangi natijalar',
       previous:'Oldingi mavsumlar',earlier:'Avvalgi natijalar',
       more:'Yana ko‘rsatish',partial:'Faqat so‘nggi natijalar ko‘rsatilmoqda. Qolganlari tarixda saqlangan.',
       empty:'Yangi mavsumda hali yakunlangan urinishlar yo‘q.',
-      main:'Turlar bo‘yicha amaliyot',topic:'Mavzular bo‘yicha amaliyot',attempts:'urinish'},
+      main:'Turlar bo‘yicha amaliyot',topic:'Mavzular bo‘yicha amaliyot',attempts:'urinish',records:'Natijalar',beforeSeason:'Birinchi mavsumdan oldin',season:'Mavsum',previousSeason:'Yangiroq davrga',nextSeason:'Oldinroq davrga',swipeHint:'Mavsumlarni surib almashtiring',noArchived:'Bu toifada natija yo‘q.'},
     en:{title:'Practice history · Season 2',archive:'Previous seasons archive',olderSeason:'Season 1 and earlier',since:'Counting from',current:'New results',
       previous:'Previous seasons',earlier:'Earlier entries',
       more:'Show more',partial:'Only recent entries are shown. Older results remain in history.',
       empty:'No completed attempts this season yet.',
-      main:'Practice by tour',topic:'Practice by topic',attempts:'attempts'}
+      main:'Practice by tour',topic:'Practice by topic',attempts:'attempts',records:'Records',beforeSeason:'Before Season 1',season:'Season',previousSeason:'Newer period',nextSeason:'Older period',swipeHint:'Swipe to change season',noArchived:'No records in this category.'}
   };
   function renderSeason2Period(period,subjectKey,language){
     const root=document.getElementById(ROOT_ID);
@@ -577,7 +577,7 @@
     function appendLimited(holder,rows,offset,n,kind){
       for(const row of rows.slice(offset,offset+n))holder.append(item(row,kind));
     }
-    function historyGroup(container,rows,total,heading,kind,collapsed){
+    function historyGroup(container,rows,total,heading,kind,collapsed,emptyMessage=c.empty){
       const size=Math.max(0,Math.trunc(Number(total)||0));
       const sample=Array.isArray(rows)?rows.slice(0,20):[];
       if(collapsed&&size===0)return;
@@ -592,7 +592,7 @@
         if(initialized)return;
         initialized=true;
         appendLimited(body,sample,0,3,kind);shown=Math.min(3,sample.length);
-        if(!sample.length)body.append(node('p','iclub-s2-history-empty',c.empty));
+        if(!sample.length)body.append(node('p','iclub-s2-history-empty',emptyMessage));
         if(sample.length>3){
           const earlier=node('details','iclub-s2-history-earlier');
           earlier.append(node('summary','',c.earlier+' ('+(sample.length-3)+')'));
@@ -630,23 +630,150 @@
       historyGroup(block,source?.recent,count,c.current,kind,false);
       holder.append(block);
     }
-    // One quiet archive BELOW the learning tabs. Never duplicate it in both modes.
+    // One quiet archive BELOW both learning panels. The swipe changes
+    // verified historical PERIODS; the visible tabs change Tour / Topic type.
+    // This is read-only presentation, NEVER another attempt launcher.
     if(archiveHolder){
-      const mainArchived=Number(period?.main?.archived_attempts_count||0);
-      const topicArchived=Number(period?.topic?.archived_sessions_count||0);
-      if(mainArchived+topicArchived>0){
+      const mainArchived=Math.max(0,Number(period?.main?.archived_attempts_count)||0);
+      const topicArchived=Math.max(0,Number(period?.topic?.archived_sessions_count)||0);
+      const expectedCount=mainArchived+topicArchived;
+      const raw=Array.isArray(period?.archive_seasons)?period.archive_seasons:[];
+      const seasons=raw.filter(entry=>entry&&typeof entry==='object').map(entry=>{
+        const seasonNo=Number(entry.season_no);
+        const validSeason=Number.isInteger(seasonNo)&&seasonNo>=1;
+        const key=validSeason?'season-'+seasonNo:
+          entry.key==='legacy'?'legacy':entry.key==='previous'?'previous':null;
+        if(!key)return null;
+        const main=Math.max(0,Math.trunc(Number(entry.main?.attempts_count)||0));
+        const topic=Math.max(0,Math.trunc(Number(entry.topic?.sessions_count)||0));
+        return {key,seasonNo:validSeason?seasonNo:null,main,topic,
+          mainRows:Array.isArray(entry.main?.recent)?entry.main.recent:[],
+          topicRows:Array.isArray(entry.topic?.recent)?entry.topic.recent:[]};
+      }).filter(entry=>entry&&(entry.main+entry.topic)>0);
+      // An older RPC returns one *aggregate* bucket: never invent a
+      // historical season breakdown from attempt timestamps in the browser.
+      const reconciled=seasons.reduce((sum,entry)=>sum+entry.main+entry.topic,0)===expectedCount;
+      const available=reconciled&&seasons.length?seasons:[{
+        key:'previous',seasonNo:null,main:mainArchived,topic:topicArchived,
+        mainRows:period.main?.archived_recent||[],
+        topicRows:period.topic?.archived_recent||[]
+      }];
+      if(expectedCount>0){
         const archive=node('details','iclub-s2-history-bottom-details');
         archive.append(node('summary','iclub-s2-history-bottom-caption',
-          c.archive+' · '+(mainArchived+topicArchived)));
+          c.archive+' · '+expectedCount));
         const content=node('div','iclub-s2-history-bottom-content');
-        content.append(node('p','iclub-s2-history-note',c.olderSeason));
-        if(mainArchived>0)historyGroup(content,period.main?.archived_recent,
-          mainArchived,c.main,'tours',false);
-        if(topicArchived>0)historyGroup(content,period.topic?.archived_recent,
-          topicArchived,c.topic,'topics',false);
+        const navigator=node('div','iclub-s2-archive-navigator');
+        navigator.setAttribute('aria-label',c.archive);
+        const previous=node('button','iclub-s2-archive-direction','‹');
+        const next=node('button','iclub-s2-archive-direction','›');
+        previous.type=next.type='button';
+        previous.setAttribute('aria-label',c.previousSeason);
+        next.setAttribute('aria-label',c.nextSeason);
+        const seasonIdentity=node('div','iclub-s2-archive-season-identity');
+        const seasonTitle=node('strong','iclub-s2-archive-season-name');
+        const seasonPosition=node('small','iclub-s2-archive-season-position');
+        seasonIdentity.append(seasonTitle,seasonPosition);
+        navigator.append(previous,seasonIdentity,next);
+        const dots=node('div','iclub-s2-archive-dots');
+        dots.setAttribute('aria-hidden','true');
+        const tabs=node('div','iclub-s2-archive-tabs');
+        tabs.setAttribute('role','tablist');
+        tabs.setAttribute('aria-label',c.archive);
+        const panel=node('section','iclub-s2-archive-panel');
+        panel.id='practice-archive-selected-history';
+        panel.setAttribute('role','tabpanel');
+        const modeButtons={};
+        for(const kind of ['tours','topics']){
+          const button=node('button','iclub-s2-archive-tab',kind==='tours'?c.main:c.topic);
+          button.type='button';
+          button.setAttribute('role','tab');
+          button.setAttribute('aria-controls',panel.id);
+          button.id='practice-archive-mode-'+kind;
+          tabs.append(button);
+          modeButtons[kind]=button;
+        }
+        content.append(navigator,dots,tabs,panel);
+        let position=0;
+        let kind=root.dataset.practiceResultsMode==='topics'?'topics':'tours';
+        const seasonLabel=entry=>entry.seasonNo!==null?
+          c.season+' '+entry.seasonNo:
+          (entry.key==='legacy'?c.beforeSeason:c.olderSeason);
+        const paint=()=>{
+          const entry=available[position];
+          archive.dataset.archiveSeason=entry.key;
+          archive.dataset.archiveType=kind;
+          seasonTitle.textContent=seasonLabel(entry);
+          seasonPosition.textContent=available.length>1?
+            (position+1)+' / '+available.length:'';
+          previous.disabled=position===0;
+          next.disabled=position===available.length-1;
+          previous.hidden=next.hidden=available.length<2;
+          dots.replaceChildren();
+          if(available.length>=2&&available.length<=6){
+            for(let i=0;i<available.length;i++){
+              const dot=node('span','iclub-s2-archive-dot');
+              if(i===position)dot.classList.add('is-active');
+              dots.append(dot);
+            }
+          }
+          for(const type of ['tours','topics']){
+            const selected=type===kind,button=modeButtons[type];
+            button.setAttribute('aria-selected',String(selected));
+            button.tabIndex=selected?0:-1;
+            button.classList.toggle('is-selected',selected);
+          }
+          panel.setAttribute('aria-labelledby',modeButtons[kind].id);
+          panel.replaceChildren();
+          const count=kind==='tours'?entry.main:entry.topic;
+          const rows=kind==='tours'?entry.mainRows:entry.topicRows;
+          historyGroup(panel,rows,count,c.records,kind,false,c.noArchived);
+        };
+        const chooseSeason=target=>{
+          if(target<0||target>=available.length||target===position)return;
+          position=target;paint();
+        };
+        previous.addEventListener('click',()=>chooseSeason(position-1));
+        next.addEventListener('click',()=>chooseSeason(position+1));
+        for(const type of ['tours','topics']){
+          modeButtons[type].addEventListener('click',()=>{kind=type;paint();});
+        }
+        tabs.addEventListener('keydown',event=>{
+          if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+          event.preventDefault();
+          kind=event.key==='Home'||event.key==='ArrowLeft'?'tours':'topics';
+          paint();modeButtons[kind].focus();
+        });
+        // Touch-only horizontal season navigation. Vertical document scroll
+        // remains native. No wrap-around, no hijacking Tour chips/Telegram Back.
+        let startTouch=null;
+        content.addEventListener('touchstart',event=>{
+          if(event.touches.length!==1){startTouch=null;return;}
+          const touch=event.touches[0];
+          startTouch={x:touch.clientX,y:touch.clientY};
+        },{passive:true});
+        content.addEventListener('touchend',event=>{
+          if(!startTouch||event.changedTouches.length!==1)return;
+          const touch=event.changedTouches[0];
+          const dx=touch.clientX-startTouch.x,dy=touch.clientY-startTouch.y;
+          startTouch=null;
+          if(Math.abs(dx)>=58&&Math.abs(dx)>Math.abs(dy)*1.45){
+            chooseSeason(position+(dx<0?1:-1));
+          }
+        },{passive:true});
+        content.addEventListener('touchcancel',()=>{startTouch=null;},{passive:true});
+        archive.addEventListener('toggle',()=>{
+          if(archive.open){
+            // Read the current learning mode on every open; archive remains
+            // a separate read-only filter, never an active Practice route.
+            kind=root.dataset.practiceResultsMode==='topics'?'topics':'tours';
+            paint();
+          }
+        });
         archive.append(content);
         archiveHolder.append(archive);
         archiveHolder.hidden=false;
+        paint();
       }
     }
     return true;
