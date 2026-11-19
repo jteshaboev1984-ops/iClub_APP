@@ -360,7 +360,7 @@
       "primary_skill": "P1-SER-05",
       "secondary_skills": [],
       "role": "parameter_convergence",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
@@ -421,7 +421,7 @@
       "primary_skill": "P1-SER-05",
       "secondary_skills": [],
       "role": "non_convergence",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
@@ -482,7 +482,7 @@
       "primary_skill": "P1-SER-05",
       "secondary_skills": [],
       "role": "inverse_second_term",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
