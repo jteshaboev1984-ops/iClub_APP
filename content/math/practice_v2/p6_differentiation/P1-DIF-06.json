@@ -9,7 +9,7 @@
       "primary_skill": "P1-DIF-06",
       "secondary_skills": [],
       "role": "rectangle_linked_rate",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
@@ -72,7 +72,7 @@
         "P1-CIR-03"
       ],
       "role": "decreasing_circle_rate",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
@@ -349,7 +349,7 @@
       "primary_skill": "P1-DIF-06",
       "secondary_skills": [],
       "role": "reverse_given_volume_model",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {

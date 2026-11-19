@@ -488,7 +488,7 @@
         "P1-TRI-04"
       ],
       "role": "identity_equation",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
@@ -588,7 +588,7 @@
         "P1-TRI-01"
       ],
       "role": "transformed_equation",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
@@ -651,7 +651,7 @@
         "P1-TRI-01"
       ],
       "role": "radian_interval",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {

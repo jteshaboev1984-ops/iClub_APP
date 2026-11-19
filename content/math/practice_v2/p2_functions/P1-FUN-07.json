@@ -397,8 +397,8 @@
       "practice_no": 2,
       "primary_skill": "P1-FUN-07",
       "secondary_skills": [],
-      "role": "reverse_problem",
-      "difficulty": "hard",
+      "role": "representation_variation",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {

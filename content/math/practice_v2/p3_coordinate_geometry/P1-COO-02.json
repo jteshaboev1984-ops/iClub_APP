@@ -9,7 +9,7 @@
       "primary_skill": "P1-COO-02",
       "secondary_skills": [],
       "role": "reverse_distance",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
@@ -46,7 +46,7 @@
       "primary_skill": "P1-COO-02",
       "secondary_skills": [],
       "role": "reverse_midpoint",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
@@ -411,7 +411,7 @@
       "primary_skill": "P1-COO-02",
       "secondary_skills": [],
       "role": "intersection",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
@@ -448,7 +448,7 @@
       "primary_skill": "P1-COO-02",
       "secondary_skills": [],
       "role": "line_form",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
@@ -509,7 +509,7 @@
       "primary_skill": "P1-COO-02",
       "secondary_skills": [],
       "role": "reverse_midpoint",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {

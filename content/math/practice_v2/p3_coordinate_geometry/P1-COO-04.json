@@ -426,7 +426,7 @@
         "P1-QUA-01"
       ],
       "role": "radius_from_expanded",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
@@ -487,7 +487,7 @@
       "primary_skill": "P1-COO-04",
       "secondary_skills": [],
       "role": "parameter_centre",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {

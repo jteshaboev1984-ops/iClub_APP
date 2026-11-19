@@ -364,7 +364,7 @@
       "primary_skill": "P1-DIF-05",
       "secondary_skills": [],
       "role": "domain_interval",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
@@ -464,7 +464,7 @@
       "primary_skill": "P1-DIF-05",
       "secondary_skills": [],
       "role": "local_sign_reasoning",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {

@@ -50,7 +50,7 @@
         "P1-INT-03"
       ],
       "role": "area_below_axis",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -114,7 +114,7 @@
         "P1-QUA-03"
       ],
       "role": "line_parabola_area",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
