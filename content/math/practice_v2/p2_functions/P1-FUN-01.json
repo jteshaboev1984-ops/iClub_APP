@@ -13,9 +13,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "Which relation defines y as a function of x?",
-        "ru": "Какое соотношение задаёт y как функцию от x?",
-        "uz": "Qaysi munosabat y ni x ning funksiyasi sifatida aniqlaydi?"
+        "en": "Which statement correctly defines y as a function of x?",
+        "ru": "Какое утверждение правильно определяет y как функцию x?",
+        "uz": "Qaysi tasdiq y ni x ning funksiyasi sifatida to‘g‘ri ta’riflaydi?"
       },
       "options": [
         {
@@ -59,7 +59,7 @@
       "explanation": {
         "en": "A function assigns exactly one output to each allowed input. Different inputs may share an output; that affects one-to-one behavior, not whether the relation is a function.",
         "ru": "Функция сопоставляет каждому допустимому входу ровно один выход. Разные входы могут давать один и тот же выход: это влияет на взаимную однозначность, но не на само определение функции.",
-        "uz": "Funksiya har bir ruxsat etilgan kirishga aynan bitta chiqish mos qo‘yadi. Turli kirishlar bir xil chiqish berishi mumkin; bu one-to-one xususiyatiga ta’sir qiladi, lekin funksiyaning o‘z ta’rifiga emas."
+        "uz": "Funksiya har bir ruxsat etilgan kirishga aynan bitta chiqish mos qo‘yadi. Turli kirishlar bir xil chiqish berishi mumkin; bu injektiv (birga-bir) xususiyatiga ta’sir qiladi, lekin funksiyaning o‘z ta’rifiga emas."
       },
       "ai_source_skill": "P1-FUN-01",
       "status": "draft"
@@ -137,7 +137,7 @@
       "question": {
         "en": "Which mapping is one-to-one?",
         "ru": "Какое отображение является взаимно однозначным?",
-        "uz": "Qaysi moslik one-to-one?"
+        "uz": "Qaysi moslik injektiv (birga-bir)?"
       },
       "options": [
         {
@@ -181,7 +181,7 @@
       "explanation": {
         "en": "A one-to-one function never sends two different inputs to the same output. The mapping 1→5, 2→7, 3→9 has a different output for every input.",
         "ru": "Во взаимно однозначной функции два разных входа не могут давать один и тот же выход. В отображении 1→5, 2→7, 3→9 каждому входу соответствует свой выход.",
-        "uz": "One-to-one funksiyada ikki xil kirish bir xil chiqish bermaydi. 1→5, 2→7, 3→9 moslikda har bir kirishning chiqishi alohida."
+        "uz": "injektiv (birga-bir) funksiyada ikki xil kirish bir xil chiqish bermaydi. 1→5, 2→7, 3→9 moslikda har bir kirishning chiqishi alohida."
       },
       "ai_source_skill": "P1-FUN-01",
       "status": "draft"
@@ -242,7 +242,7 @@
       "explanation": {
         "en": "An inverse function reverses the mapping: if f(a)=b, then f⁻¹(b)=a. It is not the reciprocal 1/f(x), and an inverse function requires suitable one-to-one behavior.",
         "ru": "Обратная функция обращает отображение: если f(a)=b, то f⁻¹(b)=a. Это не 1/f(x), а существование обратной функции требует подходящей взаимной однозначности.",
-        "uz": "Teskari funksiya moslikni teskarilaydi: agar f(a)=b bo‘lsa, f⁻¹(b)=a. Bu 1/f(x) emas; teskari funksiya uchun mos one-to-one xususiyati kerak."
+        "uz": "Teskari funksiya moslikni teskarilaydi: agar f(a)=b bo‘lsa, f⁻¹(b)=a. Bu 1/f(x) emas; teskari funksiya uchun mos injektiv (birga-bir) xususiyati kerak."
       },
       "ai_source_skill": "P1-FUN-01",
       "status": "draft"
@@ -320,7 +320,7 @@
       "question": {
         "en": "Which statement is enough to show that a function is not one-to-one?",
         "ru": "Какого утверждения достаточно, чтобы показать, что функция не является взаимно однозначной?",
-        "uz": "Funksiya one-to-one emasligini ko‘rsatish uchun qaysi tasdiq yetarli?"
+        "uz": "Funksiya injektiv (birga-bir) emasligini ko‘rsatish uchun qaysi tasdiq yetarli?"
       },
       "options": [
         {
@@ -364,7 +364,7 @@
       "explanation": {
         "en": "One counterexample is enough: if a≠b but f(a)=f(b), the function is not one-to-one on that domain.",
         "ru": "Достаточно одного контрпримера: если a≠b, но f(a)=f(b), функция не является взаимно однозначной на этой области.",
-        "uz": "Bitta qarshi misol yetarli: agar a≠b, ammo f(a)=f(b) bo‘lsa, funksiya shu sohada one-to-one emas."
+        "uz": "Bitta qarshi misol yetarli: agar a≠b, ammo f(a)=f(b) bo‘lsa, funksiya shu sohada injektiv (birga-bir) emas."
       },
       "ai_source_skill": "P1-FUN-01",
       "status": "draft"
@@ -416,7 +416,7 @@
           "text": {
             "en": "f is a function but is not one-to-one.",
             "ru": "f является функцией, но не является взаимно однозначной.",
-            "uz": "f funksiya, lekin one-to-one emas."
+            "uz": "f funksiya, lekin injektiv (birga-bir) emas."
           },
           "diagnostic_code": null
         }
@@ -425,7 +425,7 @@
       "explanation": {
         "en": "Each input has one output, so f is a function. But −2 and 3 both map to 5, so different inputs share an output and f is not one-to-one.",
         "ru": "Каждый вход имеет ровно один выход, поэтому f — функция. Но −2 и 3 оба переходят в 5, значит разные входы дают одинаковый выход и f не взаимно однозначна.",
-        "uz": "Har bir kirish aynan bitta chiqishga ega, demak f funksiya. Ammo −2 va 3 ikkalasi ham 5 ga o‘tadi, shuning uchun turli kirishlar bir xil chiqish beradi va f one-to-one emas."
+        "uz": "Har bir kirish aynan bitta chiqishga ega, demak f funksiya. Ammo −2 va 3 ikkalasi ham 5 ga o‘tadi, shuning uchun turli kirishlar bir xil chiqish beradi va f injektiv (birga-bir) emas."
       },
       "ai_source_skill": "P1-FUN-01",
       "status": "draft"
