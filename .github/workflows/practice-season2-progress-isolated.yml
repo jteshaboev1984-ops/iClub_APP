@@ -7,6 +7,10 @@ on:
       - 'supabase/tests/practice_season2_progress_safe_isolated.sql'
       - '.github/workflows/practice-season2-progress-isolated.yml'
       - 'scripts/practice-season2-progress-signed-http.cjs'
+      - 'scripts/practice-season2-history-chromium.cjs'
+      - 'practice-results-tabs.js'
+      - 'practice-results-tabs.css'
+      - 'app.js'
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,7 +20,7 @@ concurrency:
 jobs:
   isolated-pg17:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 18
     services:
       postgres:
         image: postgres:17
@@ -74,6 +78,16 @@ jobs:
           set -euo pipefail
           node --check scripts/practice-season2-progress-signed-http.cjs
           node scripts/practice-season2-progress-signed-http.cjs
+
+      - name: Chromium validation of accepted 3+5 Practice history UI
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check practice-results-tabs.js
+          node --check scripts/practice-season2-history-chromium.cjs
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node scripts/practice-season2-history-chromium.cjs
 
       - name: No production access
         run: echo 'Synthetic PostgreSQL 17 only. No live Supabase or Vercel integration.'
