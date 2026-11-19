@@ -23,6 +23,12 @@ BEGIN
  IF has_function_privilege('anon',
    'public.iclub_ai_practice_redact_expired24_service(integer)','EXECUTE')
  THEN RAISE EXCEPTION 'Direct anon function EXECUTE leaked'; END IF;
+ out:=public.iclub_ai_practice_strict24_admission_probe_v1();
+ IF out->>'reason' IS DISTINCT FROM 'not_authorized'
+ THEN RAISE EXCEPTION 'Learner bypassed strict24 admission: %',out; END IF;
+ IF has_function_privilege('authenticated',
+   'public.iclub_ai_practice_strict24_admission_probe_v1()','EXECUTE')
+ THEN RAISE EXCEPTION 'Learner can directly probe strict24 gate'; END IF;
 END $test$;
 
 SET LOCAL request.jwt.claim.role='service_role';
@@ -35,6 +41,9 @@ BEGIN
  out:=public.iclub_ai_practice_redact_expired24_service(101);
  IF out->>'reason' IS DISTINCT FROM 'invalid_limit'
  THEN RAISE EXCEPTION 'Unbounded cleanup allowed: %',out; END IF;
+ out:=public.iclub_ai_practice_strict24_admission_probe_v1();
+ IF out->>'reason' IS DISTINCT FROM 'not_enabled'
+ THEN RAISE EXCEPTION 'New strict retention gate switched ON prematurely: %',out; END IF;
 END $test$;
 
 -- These test-only UUIDs never existed on production.
@@ -80,6 +89,40 @@ VALUES
 UPDATE private.iclub_ai_practice_answer_retention24_control
 SET enabled=true,cutover_at=clock_timestamp()-interval '26 hours'
 WHERE singleton=1;
+
+DO $strict$
+DECLARE result jsonb; count_after integer;
+BEGIN
+ -- The strict policy cannot be satisfied by an ordinary scheduled UPDATE:
+ -- before ANY paid request we must deny unproven answer storage.
+ result:=public.iclub_ai_practice_strict24_admission_probe_v1();
+ IF result->>'reason' IS DISTINCT FROM
+      'strict_24h_physical_retention_not_proven'
+    OR result->>'provider_allowed' IS DISTINCT FROM 'false'
+ THEN RAISE EXCEPTION 'Unproved strict24 admitted a provider: %',result; END IF;
+
+ -- Even a caller that skipped the admission preflight cannot persist a
+ -- future new plaintext answer while strict policy is enabled.
+ BEGIN
+  INSERT INTO private.iclub_ai_practice_receipts_v1(
+   request_id,user_id,attempt_ref,locale,request_fingerprint,
+   context_fingerprint,source_fingerprint,status,answer,answer_hash,
+   received_at,expires_at)
+  VALUES(
+   '11111111-1111-4111-8111-111111111106',
+   '00000000-0000-4000-8000-000000000011',506,'en',
+   repeat('a',64),repeat('b',64),repeat('c',64),'ready',
+   'Synthetic forbidden new plaintext after strict admission cutoff.',
+   repeat('d',64),clock_timestamp(),clock_timestamp()+interval '24 hours');
+  RAISE EXCEPTION 'Unproved future plaintext was inserted';
+ EXCEPTION WHEN check_violation THEN NULL;
+ END;
+ SELECT count(*) INTO count_after
+ FROM private.iclub_ai_practice_receipts_v1
+ WHERE request_id='11111111-1111-4111-8111-111111111106';
+ IF count_after<>0 THEN RAISE EXCEPTION 'Forbidden plaintext receipt remains'; END IF;
+ RAISE NOTICE 'PASS PC4 strict24 negative gate: provider admission denied and post-cutover plaintext refused';
+END $strict$;
 
 DO $test$
 DECLARE
