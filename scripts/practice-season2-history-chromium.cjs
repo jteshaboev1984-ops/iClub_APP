@@ -4,9 +4,12 @@
 // pattern and new Season2 period. No real learners, questions or DB calls.
 const assert=require('node:assert/strict');
 const path=require('node:path');
+const fs=require('node:fs');
 const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const screenshotDir=process.env.PRACTICE_S2_SCREENSHOT_DIR||'';
+ if(screenshotDir)fs.mkdirSync(screenshotDir,{recursive:true});
  try{
   for(const language of ['ru','uz','en']){
    for(const width of [320,375,430,1440]){
@@ -76,6 +79,13 @@ const {chromium}=require('playwright');
      const selector='[data-practice-s2-history="'+mode+'"]';
      assert.equal(await page.locator(selector+' .iclub-s2-history-current .iclub-s2-history-row').count(),3);
      const current=page.locator(selector+' .iclub-s2-history-current');
+     if(screenshotDir && ((language==='ru'&&width===375&&mode==='tours')||
+        (language==='uz'&&width===320&&mode==='topics')||
+        (language==='en'&&width===1440&&mode==='topics'))){
+       await page.locator(selector+' .iclub-s2-history-block').screenshot({
+         path:path.join(screenshotDir,'practice-season2-'+language+'-'+width+'-'+mode+'-recent.png'),
+         animations:'disabled',timeout:15000});
+     }
      await current.locator('.iclub-s2-history-earlier summary').click();
      await page.waitForFunction(sel=>document.querySelectorAll(sel).length===5,
        selector+' .iclub-s2-history-current .iclub-s2-history-earlier .iclub-s2-history-row');
@@ -87,6 +97,13 @@ const {chromium}=require('playwright');
        selector+' .iclub-s2-history-archive > .iclub-s2-history-rows > .iclub-s2-history-row');
      assert((await page.locator(selector+' .iclub-s2-history-note').count())>=1,
        'partial server cap disclosure absent');
+     if(screenshotDir && ((language==='ru'&&width===375&&mode==='tours')||
+        (language==='uz'&&width===320&&mode==='topics')||
+        (language==='en'&&width===1440&&mode==='topics'))){
+       await page.locator(selector+' .iclub-s2-history-block').screenshot({
+         path:path.join(screenshotDir,'practice-season2-'+language+'-'+width+'-'+mode+'-archive.png'),
+         animations:'disabled',timeout:15000});
+     }
     }
     const dedicated=page.locator('#my-rec-topic-history-body .iclub-s2-history-earlier');
     await dedicated.locator('summary').click();
