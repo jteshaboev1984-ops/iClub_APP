@@ -13,8 +13,8 @@ const files=git("diff","--name-only",BASE,"HEAD").split("\n").filter(Boolean);
 const exact={
   ".github/workflows/exam-prep-p1p5-isolated-http-e2e.yml":"85627b1df2acf6dad6c42d164890d05aaa19bb2c",
   ".github/workflows/math-p016b-contract-review.yml":"41c7b410be09a3bc9abb794ab3139718ab5704df",
-  ".github/workflows/exam-prep-weekly-profile-recovery.yml":"1ab78927033f5f9dec622b78682569199cfa2702",
-  ".github/workflows/math-p1p5-d3-protected-recovery-review.yml":"75d9b5212ee29c037ed4218216da32feecb2d554",
+  ".github/workflows/exam-prep-weekly-profile-recovery.yml":"3fea42213937715255aa12a31c9aa96d8e02d8ec",
+  ".github/workflows/math-p1p5-d3-protected-recovery-review.yml":"e8773d4e30cf6a9c505e08fc64c71d0e88ffef7f",
   "exam-prep/exam-prep-api.js":"7beda6c230626800fc0df70ffdcb29bf967cf37c",
   "index.html":"80583c592d934adfe464a32d953b29040845f086",
   "scripts/p1p5-p016b-signed-http-cutover.cjs":"ebe9c1d9b75690455d498f2106b728e2bde43a6a",
