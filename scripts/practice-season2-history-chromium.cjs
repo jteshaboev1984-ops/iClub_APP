@@ -45,6 +45,7 @@ const {chromium}=require('playwright');
     assert.equal(out.topicRows,3,'topic history must initially show latest 3');
     assert.equal(out.tourRows,3,'previous Tour history initially shows 3');
     for(const mode of ['tours','topics']){
+     await page.locator('#practice-results-tab-'+mode).click();
      const selector='[data-practice-s2-history="'+mode+'"]';
      assert.equal(await page.locator(selector+' .iclub-s2-history-current .iclub-s2-history-row').count(),3);
      const current=page.locator(selector+' .iclub-s2-history-current');
