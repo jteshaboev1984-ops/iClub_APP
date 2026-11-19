@@ -68,11 +68,17 @@ async function main(){
       const url=route.request().url();
       if(url.startsWith(origin+"/"))return route.continue();
       if(url===BASE+"/functions/v1/iclub-ai-practice-prepared"){
+        const headers={"content-type":"application/json",
+          "access-control-allow-origin":origin,
+          "access-control-allow-methods":"POST, OPTIONS",
+          "access-control-allow-headers":"authorization, apikey, content-type",
+          "vary":"Origin"};
+        if(route.request().method()==="OPTIONS")
+          return route.fulfill({status:204,headers,body:""});
         const body=route.request().postDataJSON();
         seen.prepared.push(body);
         assert.equal(body.intent,"practice_prepared");
-        return route.fulfill({status:200,headers:{"content-type":"application/json",
-          "access-control-allow-origin":origin},body:JSON.stringify(
+        return route.fulfill({status:200,headers,body:JSON.stringify(
           body.purpose==="practice_visibility"
           ?{ok:true,available:true,mode:"availability",provider_called:false,
               academic_state_changed:false}
