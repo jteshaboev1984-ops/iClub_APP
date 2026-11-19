@@ -11,19 +11,23 @@ assert.equal(git("rev-parse","HEAD"),process.env.P016B_HEAD_SHA,"Head drift");
 git("merge-base","--is-ancestor",BASE,"HEAD");
 const files=git("diff","--name-only",BASE,"HEAD").split("\n").filter(Boolean);
 const exact={
-  ".github/workflows/exam-prep-p1p5-isolated-http-e2e.yml":"1e8d64319630e657f60c152452afb805ba00dca4",
+  ".github/workflows/exam-prep-p1p5-isolated-http-e2e.yml":"85627b1df2acf6dad6c42d164890d05aaa19bb2c",
   ".github/workflows/math-p016b-contract-review.yml":"41c7b410be09a3bc9abb794ab3139718ab5704df",
-  "exam-prep/exam-prep-api.js":"4675fcd8191985aee1f019a94d56880f01e93c78",
+  ".github/workflows/exam-prep-weekly-profile-recovery.yml":"1ab78927033f5f9dec622b78682569199cfa2702",
+  ".github/workflows/math-p1p5-d3-protected-recovery-review.yml":"75d9b5212ee29c037ed4218216da32feecb2d554",
+  "exam-prep/exam-prep-api.js":"368b89eb76dd5ea7972f3e733cfcd292ecab154f",
   "index.html":"80583c592d934adfe464a32d953b29040845f086",
   "scripts/p1p5-p016b-signed-http-cutover.cjs":"2bcada7bed81c7843af376de6be28028a6ed3767",
   "scripts/p1p5-p016b-writer-contract.test.cjs":"42f8a0a5366227771e5d1a8d9787998c435f0482",
   "supabase/candidates/math_p1p5_p016b_writer_contract_v1_dormant.sql":"2bea09b163b4f181e3cad1f23bc63a1e9917d7fd",
+  "supabase/tests/p1p5_p016b_ephemeral_extra_hard_stub.sql":"3c42822a09a5375da6af96cfc63a179aa5c69e53",
   "docs/math-p1p5-p016b-stale-tab-writer-fence-20261119.md":"72e07c342e95e9f3c96210cdbd7f790feb187aa0"
 };
 const self=new Set(["qa/math-p016b-source-firewall.cjs",
   ".github/workflows/ux531-previewless-release-firewall.yml"]);
 const allow=new Set([...Object.keys(exact),...self]);
-assert.equal(files.length,allow.size,"Unexpected P0-16B diff scope");
+assert.equal(files.length,13,"Unexpected P0-16B diff scope");
+assert.equal(allow.size,13,"Guard must only allow the exact 13 reviewed files");
 for(const path of files)assert(allow.has(path),"Unreviewed file: "+path);
 for(const path of allow)assert(files.includes(path),"Missing reviewed file: "+path);
 for(const [path,sha] of Object.entries(exact))
@@ -45,4 +49,4 @@ cp.execFileSync("node",["--check","exam-prep/exam-prep-api.js"]);
 cp.execFileSync("node",["--check","scripts/p1p5-p016b-writer-contract.test.cjs"]);
 cp.execFileSync("node",["--check","scripts/p1p5-p016b-signed-http-cutover.cjs"]);
 cp.execFileSync("node",["scripts/p1p5-p016b-writer-contract.test.cjs"],{stdio:"inherit"});
-console.log("P0-16B STRICT 10-PATH SOURCE PASS; baseline and 8 blob pins; offline-only contract; original UX531 unchanged");
+console.log("P0-16B STRICT 13-PATH SOURCE PASS; baseline and 8 blob pins; offline-only contract; original UX531 unchanged");
