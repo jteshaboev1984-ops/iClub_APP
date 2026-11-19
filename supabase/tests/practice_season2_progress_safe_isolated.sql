@@ -36,6 +36,7 @@ insert into public.seasons values
 -- Intentional mismatch: seasons.start_date is NOT the approved Practice cutoff.
 insert into public.tours values
  (499,1,5,1,'2026-10-31','2026-11-01',false),
+ (498,1,4,1,'2026-10-31','2026-11-01',false),
  (500,2,5,1,'2026-11-01','2026-11-07',true),
  (501,2,4,1,null,null,false);
 insert into public.practice_attempts values
@@ -68,6 +69,11 @@ begin
   if v->>'period_active' <> 'false' or v->>'reason' <> 'season_not_started' then
     raise exception 'draft season improperly triggered Practice reset';
   end if;
+  if (v->'practice_access'->>'open_season_no')::int<>1
+     or (v->'practice_access'->>'season1_new_attempts_open')::boolean is not true
+     or (v->'practice_access'->>'season2_new_attempts_open')::boolean is not false
+     or (v->'history_snapshot'->>'practice_open')::boolean is not true
+  then raise exception 'Season1 Practice must remain open while S2 draft';end if;
   if (v->'history_snapshot'->>'period_active')<>'true'
      or (v->'history_snapshot'->>'season_no')::int<>1
      or v->'history_snapshot'->>'period_status'<>'closed'
@@ -78,9 +84,9 @@ begin
   then
     raise exception 'closed Season1 fallback missing or mislabeled while S2 draft';
   end if;
-  if (public.get_practice_season2_progress_safe_v1('chemistry') ? 'history_snapshot') then
-    raise exception 'subject without valid Season1 Tour1 inherited wrong fallback';
-  end if;
+  if (public.get_practice_season2_progress_safe_v1('chemistry')->'practice_access'->>'open_season_no')::int<>1
+     or (public.get_practice_season2_progress_safe_v1('chemistry')->'history_snapshot'->>'practice_open')::boolean is not true
+  then raise exception 'other subject Season1 Practice closed without own S2 Tour1';end if;
   begin
     perform count(*) from public.practice_attempts;
     raise exception 'authenticated raw attempts access unexpectedly allowed';
@@ -97,6 +103,9 @@ declare v jsonb;
 begin
   v:=public.get_practice_season2_progress_safe_v1('Mathematics');
   if v->>'period_active' <> 'true'
+     or (v->'practice_access'->>'open_season_no')::int<>2
+     or (v->'practice_access'->>'season1_new_attempts_open')::boolean is not false
+     or (v->'practice_access'->>'season2_new_attempts_open')::boolean is not true
      or (v->'main'->>'attempts_count')::integer <> 2
      or (v->'main'->>'archived_attempts_count')::integer <> 1
      or (v->'main'->'best'->>'id')::integer <> 103
@@ -115,9 +124,9 @@ begin
      or left(v->>'period_starts_at',19) <> '2026-10-31T19:00:00' then
     raise exception 'Practice S2 owner/period filter regression (metadata only)';
   end if;
-  if (public.get_practice_season2_progress_safe_v1('chemistry')->>'period_active') <> 'false' then
-    raise exception 'undated Chemistry Tour1 wrongly inherited Mathematics season cutoff';
-  end if;
+  if (public.get_practice_season2_progress_safe_v1('chemistry')->>'period_active') <> 'false'
+     or (public.get_practice_season2_progress_safe_v1('chemistry')->'practice_access'->>'open_season_no')::int<>1
+  then raise exception 'Chemistry S1 Practice closed by unrelated Math S2';end if;
   begin
     perform public.get_practice_season2_progress_safe_v1('unknown');
     raise exception 'unknown subject was accepted';
@@ -143,6 +152,8 @@ select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111'
 do $per_subject$
 begin
   if (public.get_practice_season2_progress_safe_v1('chemistry')->>'period_active') <> 'true'
+     or (public.get_practice_season2_progress_safe_v1('chemistry')->'practice_access'->>'open_season_no')::int<>2
+     or (public.get_practice_season2_progress_safe_v1('chemistry')->'practice_access'->>'season1_new_attempts_open')::boolean is not false
      or (public.get_practice_season2_progress_safe_v1('chemistry')->'main'->>'attempts_count')::int <> 0
      or (public.get_practice_season2_progress_safe_v1('chemistry')->'main'->>'archived_attempts_count')::int <> 1
   then
@@ -243,9 +254,9 @@ begin
      or (h->'main'->'recent'->0->>'id')::int<>103
   then raise exception 'owner-scoped S1 fallback / legacy split regression';
   end if;
-  if (public.get_practice_season2_progress_safe_v1('chemistry') ? 'history_snapshot') then
-    raise exception 'S1 cutoff leaked to undated other subject';
-  end if;
+  if (public.get_practice_season2_progress_safe_v1('chemistry')->'practice_access'->>'open_season_no')::int<>1
+     or (public.get_practice_season2_progress_safe_v1('chemistry')->'history_snapshot'->>'practice_open')::boolean is not true
+  then raise exception 'undated Chemistry should remain S1 Practice despite Math S2 draft';end if;
 end $s1_fallback$;
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',false);
 do $owner_isolation$

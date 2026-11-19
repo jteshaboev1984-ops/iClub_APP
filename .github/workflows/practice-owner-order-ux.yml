@@ -1,7 +1,7 @@
 name: Practice owner order and topic catalog UI regression
 on:
   pull_request:
-    branches: [ux/practice-history-standalone-20261119, ux/practice-start-layout-ordered-20261119, ux/practice-topic-direct-start-20261119]
+    branches: [ux/practice-history-standalone-20261119, ux/practice-start-layout-ordered-20261119, ux/practice-topic-direct-start-20261119, ux/practice-accepted-order-integration-20261119]
     paths:
       - 'practice-results-tabs.js'
       - 'practice-results-tabs.css'

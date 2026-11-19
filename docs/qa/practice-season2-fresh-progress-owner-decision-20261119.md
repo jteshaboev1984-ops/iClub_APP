@@ -67,3 +67,23 @@ Owner instructed the Practice History work to follow the **recently accepted iCl
 2. Confirm actual Practice UI integration on the exact draft SHA, including refreshed Season2 mastered counts, older best-history labeling, 3+5 disclosure and separate archive in three languages. Do not reuse an earlier SHA's CI as proof.
 3. Verify signed authenticated HTTP/PostgREST E2E against disposable PostgreSQL 17 and real Chromium UI (320–1440px), existing Practice client regression workflows and question-preservation rules. Resolve only actual failures; no silent test bypass.
 4. Owner must separately approve **merge, any live SQL, UI release, official Tour1 dates, and season activation**. No permission to delete, truncate, reset archived learner data or retime previous attempts.
+
+## Owner-approved Season1 Practice availability until Season2 launches (2026-11-19)
+
+**Owner's explicit correction:** “до открытия 2 сезона можно оставить открытым практику 1 сезона и закрыт когда откроется 2 сезон.” This confirms *Practice access*, not retroactive Tour status. The record remains season- and subject-scoped; it does not authorize a new Tour, changing dates, republishing a bank, or deleting previous attempts.
+
+**Lifecycle contract, per individual subject:**
+
+| Verified state | New Practice starts | Existing Tour / certificates | Read-only History |
+| --- | --- | --- | --- |
+| S1 officially opened; S2 draft/undated/future | **S1 Practice stays open**, even when S1 Tours are already officially closed | S1 Tour remains closed, no changes | S1 current Practice results and older pre-S1 records are accessible; do not say S1 Tours are currently active |
+| This subject's S2 Tour1 start reached at **00:00 Asia/Tashkent**, valid start/end + season `current` or `closed` | **S1 Practice closes for new starts; S2 Practice opens**, with a fresh period count | S1 Tour remains closed; S2 Tour gates unchanged | S1 records remain available via previous season, with no reset/regrade |
+| Mathematics S2 starts but Chemistry/Economics/Biology/Informatics S2 Tour1 is still undated | **Only Mathematics switches**. Each other subject remains in S1 Practice | Other-subject Tours are not started by Mathematics | Subject-owned S1 records remain accessible |
+
+“Closes” here means **no new S1 period attempts** and no reopening unfinished S1 client session IDs through either staged v5 Start endpoint after official per-subject S2 cutoff. Same published Practice question pool may be reused for *new* S2 sessions; bank generation does not change, and completed records remain immutable. The separate existing Practice answer/finalize/resume flows need an explicit cross-midnight in-progress-session review before full release; this Draft does **not** claim to have closed every possible already-open browser session or deleted paused drafts. Never silently discard a saved draft or misattribute a late S1 finalization to S2.
+
+**Source-only candidate:** Staged owner-scoped read RPC `get_practice_season2_progress_safe_v1` now returns `practice_access` with `open_season_no=1`, `season1_new_attempts_open=true` until S2 opens; the same RPC flips to `open_season_no=2`, `season1_new_attempts_open=false` after subject-specific S2 activation. The earlier S1 `history_snapshot` also marks `practice_open=true`. In the Academy OS statistic-area status banner, show small RU/UZ/EN captions without a duplicate Start button; the separate History uses the **“Текущая практика”** badge while S1 Practice is open even though S1 Tours are closed, and **“Текущий сезон”** once S2 is officially active. Historical S1 becomes a previous season, without fake Season 0.
+
+Staged `start_practice_session_auto_safe_v5` / `start_practice_topic_drill_safe_v5` already choose the latest published per-subject Tour1 season (not the global `current` season). Added a narrow idempotency guard refusing unfinished pre-S2 client IDs after S2 cutover for that subject only. Current published functions are **unchanged** until a separately authorized migration. All tests use disposable PostgreSQL17, synthetic sessions, signed JWT/PostgREST only where explicitly exercised, and multilingual Chromium. Owner-approved visual order and Topic one-tap Start remain unchanged.
+
+**Release HOLD:** all five hosted Season2 Tour1 dates remain NULL/draft at last read-only checkpoint; new RPC and staged v5 selectors are not installed. Do not publish SQL / enable seasons from an acceptance of UI. The old Topic-catalog-load incident, cross-boundary already-open draft/submission audit, UX531 integrated source release firewall, and >20-row cursor retrieval remain separate gates.

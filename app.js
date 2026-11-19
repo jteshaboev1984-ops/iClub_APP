@@ -5597,6 +5597,7 @@ async function getPracticeTourCards(subjectKey) {
     !pools.length
   ) {
     return {
+      subjectKey,
       currentTourNo,
       selectedTourNo: currentTourNo,
       cards: []
@@ -5697,7 +5698,7 @@ async function getPracticeTourCards(subjectKey) {
   const lastCompleted=rawCards.slice().reverse().find(c=>c.stateName==='past')||null;
   const nextUpcoming=rawCards.find(c=>c.stateName==='locked'&&
     !!tourByNo.get(c.tourNo)?.start_date)||null;
-  return { currentTourNo, selectedTourNo, cards: rawCards, season2Period,
+  return { subjectKey, currentTourNo, selectedTourNo, cards: rawCards, season2Period,
     periodCutoff,activeTourNo:activeCard?.tourNo||null,
     lastCompletedTourNo:lastCompleted?.tourNo||null,
     nextUpcomingTourNo:nextUpcoming?.tourNo||null };

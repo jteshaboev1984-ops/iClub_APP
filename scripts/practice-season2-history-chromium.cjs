@@ -49,6 +49,8 @@ const {chromium}=require('playwright');
     const early=Array.from({length:4},(_,i)=>mk(i+70));
     const period={ok:true,period_active:true,season_no:2,
       subject_key:'mathematics',period_starts_at:'2026-11-01T00:00:00+05:00',
+      practice_access:{open_season_no:2,season1_new_attempts_open:false,
+        season2_new_attempts_open:true},
       main:{attempts_count:80,archived_attempts_count:28+4,
         recent,archived_recent:archived},
       topic:{sessions_count:73,archived_sessions_count:20+4,
@@ -62,7 +64,8 @@ const {chromium}=require('playwright');
         topic:{sessions_count:4,recent:early}}]};
     const accepted=window.iClubPracticeSeason2HistoryV1.render(period,'mathematics',locale);
     const active=window.iClubPracticeCurrentTourV1.render(
-      {activeTourNo:2,lastCompletedTourNo:1,selectedTourNo:2},locale);
+      {subjectKey:'mathematics',activeTourNo:2,lastCompletedTourNo:1,
+       selectedTourNo:2,season2Period:period},locale);
     const legacyTopic={ok:true,subject_key:'mathematics',
       completed_sessions:99,last:recent[0],
       recent:recent.map(r=>({...r,session_id:r.id,review:[]}))};
@@ -82,6 +85,10 @@ const {chromium}=require('playwright');
    const practice=page.locator('#courses-practice-start');
    const focus=practice.locator('[data-practice-current-tour]');
    assert((await focus.textContent()).includes('2'),'real active Tour number missing');
+   assert.equal(await focus.getAttribute('data-practice-open-season'),'2',
+     'active S2 Practice not shown as open after cutover');
+   assert.equal(await focus.locator('.iclub-practice-season-access').count(),1,
+     'subject-specific S2 Practice access caption missing');
    assert.equal(await focus.locator('.iclub-practice-current-tour-action').count(),0,
      'obsolete quick action breaks accepted stats → choice → action order');
    assert.equal(await practice.locator('.practice-start-actions button[data-action="practice-start"]').count(),1,

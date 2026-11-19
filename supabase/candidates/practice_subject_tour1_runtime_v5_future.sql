@@ -59,6 +59,26 @@ begin
     if v_s.pool_id<>p_pool_id then
       raise exception 'client_session_scope_mismatch' using errcode='22023';
     end if;
+    -- A retry using an old S1 client_session_id must not reopen an unfinished
+    -- S1 session after this SUBJECT's official S2 Tour1 cutoff. Finalized
+    -- sessions remain untouched/readable through their original history APIs.
+    if v_s.status not in ('finalized','completed','closed')
+       and exists (
+         select 1 from public.seasons sn
+         join public.tours t on t.season_id=sn.id
+          and t.subject_id=v_s.subject_id and t.tour_no=1
+         where sn.season_no=2 and sn.status in ('current','closed')
+           and t.start_date is not null and t.end_date is not null
+           and t.start_date<=t.end_date
+           and (t.start_date::timestamp at time zone 'Asia/Tashkent')
+               <= statement_timestamp()
+           and v_s.created_at <
+               (t.start_date::timestamp at time zone 'Asia/Tashkent')
+       )
+    then
+      raise exception 'practice_previous_season_closed' using errcode='55000';
+    end if;
+
     return jsonb_build_object(
       'session_id',v_s.id,
       'status',v_s.status,
@@ -675,6 +695,26 @@ exception
     if v_s.pool_id<>p_pool_id then
       raise exception 'client_session_scope_mismatch' using errcode='22023';
     end if;
+    -- A retry using an old S1 client_session_id must not reopen an unfinished
+    -- S1 session after this SUBJECT's official S2 Tour1 cutoff. Finalized
+    -- sessions remain untouched/readable through their original history APIs.
+    if v_s.status not in ('finalized','completed','closed')
+       and exists (
+         select 1 from public.seasons sn
+         join public.tours t on t.season_id=sn.id
+          and t.subject_id=v_s.subject_id and t.tour_no=1
+         where sn.season_no=2 and sn.status in ('current','closed')
+           and t.start_date is not null and t.end_date is not null
+           and t.start_date<=t.end_date
+           and (t.start_date::timestamp at time zone 'Asia/Tashkent')
+               <= statement_timestamp()
+           and v_s.created_at <
+               (t.start_date::timestamp at time zone 'Asia/Tashkent')
+       )
+    then
+      raise exception 'practice_previous_season_closed' using errcode='55000';
+    end if;
+
 
     return jsonb_build_object(
       'session_id',v_s.id,
@@ -748,6 +788,26 @@ begin
     if v_s.drill_type<>'rec_topic' then
       raise exception 'client_session_scope_mismatch' using errcode='22023';
     end if;
+    -- A retry using an old S1 client_session_id must not reopen an unfinished
+    -- S1 session after this SUBJECT's official S2 Tour1 cutoff. Finalized
+    -- sessions remain untouched/readable through their original history APIs.
+    if v_s.status not in ('finalized','completed','closed')
+       and exists (
+         select 1 from public.seasons sn
+         join public.tours t on t.season_id=sn.id
+          and t.subject_id=v_s.subject_id and t.tour_no=1
+         where sn.season_no=2 and sn.status in ('current','closed')
+           and t.start_date is not null and t.end_date is not null
+           and t.start_date<=t.end_date
+           and (t.start_date::timestamp at time zone 'Asia/Tashkent')
+               <= statement_timestamp()
+           and v_s.created_at <
+               (t.start_date::timestamp at time zone 'Asia/Tashkent')
+       )
+    then
+      raise exception 'practice_previous_season_closed' using errcode='55000';
+    end if;
+
     return jsonb_build_object(
       'session_id',v_s.id,
       'status',v_s.status,
@@ -1124,6 +1184,26 @@ exception
     if v_s.drill_type<>'rec_topic' then
       raise exception 'client_session_scope_mismatch' using errcode='22023';
     end if;
+    -- A retry using an old S1 client_session_id must not reopen an unfinished
+    -- S1 session after this SUBJECT's official S2 Tour1 cutoff. Finalized
+    -- sessions remain untouched/readable through their original history APIs.
+    if v_s.status not in ('finalized','completed','closed')
+       and exists (
+         select 1 from public.seasons sn
+         join public.tours t on t.season_id=sn.id
+          and t.subject_id=v_s.subject_id and t.tour_no=1
+         where sn.season_no=2 and sn.status in ('current','closed')
+           and t.start_date is not null and t.end_date is not null
+           and t.start_date<=t.end_date
+           and (t.start_date::timestamp at time zone 'Asia/Tashkent')
+               <= statement_timestamp()
+           and v_s.created_at <
+               (t.start_date::timestamp at time zone 'Asia/Tashkent')
+       )
+    then
+      raise exception 'practice_previous_season_closed' using errcode='55000';
+    end if;
+
 
     return jsonb_build_object(
       'session_id',v_s.id,
