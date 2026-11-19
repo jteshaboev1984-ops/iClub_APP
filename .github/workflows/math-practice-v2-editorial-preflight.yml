@@ -33,6 +33,7 @@ on:
       - 'scripts/math-practice-v2-block18-independent-proofs.cjs'
       - 'scripts/math-practice-v2-block19-independent-proofs.cjs'
       - 'scripts/math-practice-v2-block20-independent-proofs.cjs'
+      - 'scripts/math-practice-v2-mcq-set-ambiguity.cjs'
       - 'supabase/preflight/math_practice_v2_104_editorial_readonly.sql'
       - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
       - '.github/workflows/math-practice-v2-editorial-preflight.yml'
@@ -93,6 +94,8 @@ jobs:
           node scripts/math-practice-v2-block19-independent-proofs.cjs
           node --check scripts/math-practice-v2-block20-independent-proofs.cjs
           node scripts/math-practice-v2-block20-independent-proofs.cjs
+          node --check scripts/math-practice-v2-mcq-set-ambiguity.cjs
+          node scripts/math-practice-v2-mcq-set-ambiguity.cjs
           node scripts/math-practice-v2-495-editorial-regression.cjs > "$RUNNER_TEMP/practice-all-495-independent-language-and-options.json"
           node scripts/math-practice-v2-editorial-future-only-contract.cjs > "$RUNNER_TEMP/practice-editorial-metadata.json"
           node - "$RUNNER_TEMP/practice-editorial-metadata.json" <<'NODE'
