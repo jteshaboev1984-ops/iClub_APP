@@ -60,8 +60,13 @@ const {chromium}=require('playwright');
              return new Promise(resolve=>{window.__releaseTopicStart=resolve;});
            }
          });
-         window.iClubPracticeCurrentTourV1.render(
-           {activeTourNo:1,lastCompletedTourNo:null,selectedTourNo:1},language);
+         window.iClubPracticeCurrentTourV1.render({
+           subjectKey:'mathematics',activeTourNo:1,
+           lastCompletedTourNo:null,selectedTourNo:1,
+           season2Period:{ok:true,subject_key:'mathematics',period_active:false,
+             practice_access:{open_season_no:1,season1_new_attempts_open:true,
+               season2_new_attempts_open:false}}
+         },language);
          window.iClubPracticeSeason2HistoryV1.render(
            {ok:true,period_active:false},'mathematics',language);
        },locale);
@@ -91,6 +96,29 @@ const {chromium}=require('playwright');
        assert.equal(order.statsOnce,1,'must preserve original stats');
        assert.equal(order.historyEntryOnce,1,'single standalone History link');
        assert.equal(order.currentTourOnce,1,'genuine Tour state must remain');
+       const access=root.locator('.iclub-practice-current-tour');
+       assert.equal(await access.getAttribute('data-practice-open-season'),'1',
+         'S1 Practice remains open while S2 is dormant');
+       assert((await access.locator('.iclub-practice-season-access').textContent()).length>=10,
+         'S1 availability caption missing');
+       // Official S2 per-subject state flips only the current Practice period.
+       await page.evaluate(language=>window.iClubPracticeCurrentTourV1.render({
+         subjectKey:'mathematics',activeTourNo:1,lastCompletedTourNo:null,
+         season2Period:{ok:true,subject_key:'mathematics',period_active:true,
+           practice_access:{open_season_no:2,season1_new_attempts_open:false,
+             season2_new_attempts_open:true}}
+       },language),locale);
+       assert.equal(await access.getAttribute('data-practice-open-season'),'2',
+         'S1 not closed when subject S2 opens');
+       // A cross-subject or invalid RPC is never permitted to claim access.
+       await page.evaluate(language=>window.iClubPracticeCurrentTourV1.render({
+         subjectKey:'mathematics',activeTourNo:1,
+         season2Period:{ok:true,subject_key:'chemistry',period_active:true,
+           practice_access:{open_season_no:2,season1_new_attempts_open:false,
+             season2_new_attempts_open:true}}
+       },language),locale);
+       assert.equal(await access.locator('.iclub-practice-season-access').count(),0,
+         'foreign subject season status must not be rendered');
        assert.equal(await root.locator('.iclub-practice-current-tour-action').count(),0,
          'stats banner must not duplicate Tour Start above mode and choice');
        assert.equal(await root.locator('#practice-results-panel-tours .practice-start-actions button[data-action="practice-start"]').count(),1,
