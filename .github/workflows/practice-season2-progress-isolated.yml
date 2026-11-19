@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   isolated-pg17:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 18
     services:
       postgres:
