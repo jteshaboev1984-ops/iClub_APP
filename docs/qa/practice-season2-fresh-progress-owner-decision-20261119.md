@@ -35,6 +35,22 @@ Read live GitHub `main` (not an unmerged UX screenshot) before implementation:
 
 **Known independent follow-up:** the My Recommendations area still provides its signed all-time Topic/Tour history and per-question review. Its records must not be mistaken for a second-season total. A later server-cursor/history integration may extend older than 20 records; the present source candidate is intentionally not a full-history fetch or destructive reset.
 
+## Academy OS visual parity — 2026-11-19
+
+Owner instructed the Practice History work to follow the **recently accepted iClub Academy OS visual style**, not introduce a competing color palette or alternative app navigation.
+
+**Verified source of truth:** current released `main` `visual/iclub-academy-ux531-b04b08.css`, which defines `--academy-paper: #fff`, `--academy-text: #142b50`, `--academy-edge: #ccdcf4`, `--academy-radius-lg: 20px`, `--academy-quiet-shadow`, focus `--academy-focus: #377bdf`, and the existing sapphire family. Approved behavior for Exam Prep History is in `exam-prep/exam-prep-live.js` (3 recent + 5 older), and the existing Practice History module remains `practice-results-tabs.js`.
+
+**Applied in Draft #579 only:**
+- Replaced the new Season 2 History's earlier ad hoc `--v3-*` card defaults with the **exact inherited Academy OS tokens** for paper/ink/edge/radius/quiet shadow/text contrast and keyboard focus. History uses *quiet white cards*, **not** a second competitive-blue hero; the accepted topbar and the single Back authority remain unchanged.
+- The topical all-time history preview inside the Practice Topic selector is visually suppressed **only** while an authenticated server says Season 2 period is active. This avoids duplicate/conflicting lifetime totals under new Season 2 totals. The old preview is restored before Season 2; all underlying records stay intact and older results are available in the new archive.
+- Removed redundant repetition of the "new results" label before the period date. The history explicitly identifies the Season 2 start date without making up user scores or dates. RU/UZ/EN use the same functional structure.
+- No CSS changes to the released shared Academy files, no `index.html`, `topbar`, Exam Prep, UX-owned #562, rating, Tour or global navigation changes.
+
+**Visual contract tested against *actual Academy OS CSS*** by `scripts/practice-season2-history-chromium.cjs` (rather than using test-local assumed colors): computed background `rgb(255,255,255)`, edge `rgb(204,220,244)`, radius `20px`, ink `rgb(20,43,80)`, soft elevation present; ensure duplicate all-time Topic history is hidden during active S2 and restored when not active. Tests run with real Chromium in RU/UZ/EN at 320/375/430/1440 px along with native 3+5 disclosure and no horizontal overflow. No real-user screenshot or owner phone approval is claimed.
+
+**Remaining product consideration (not part of this styling edit):** there is no user-friendly Tour number on legacy `public.practice_attempts`; the new history safely shows attempt date and actual percentage without inventing a tour. Any future linked display must join verified owner-authorized `practice_sessions_v4` and `practice_pools` records without exposing additional student data. Likewise, showing archive records beyond the 20-row API sample requires a separate cursor-paginated read-only design.
+
 ## Remaining release acceptance
 
 1. Validate exact PR HEAD in CI and independently inspect affected live schema read-only; do not assume previous CI still applies after future edits.
