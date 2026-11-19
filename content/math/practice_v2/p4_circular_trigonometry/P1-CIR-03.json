@@ -505,9 +505,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
       "question": {
-        "en": "An annular sector has outer radius 8 cm, inner radius 4 cm and area 36 cm². Enter its angle in radians.",
-        "ru": "Кольцевой сектор имеет внешний радиус 8 см, внутренний радиус 4 см и площадь 36 см². Введите его угол в радианах.",
-        "uz": "Halqasimon sektor tashqi radiusi 8 sm, ichki radiusi 4 sm va yuzi 36 sm². Uning burchagini radianlarda kiriting."
+        "en": "An annular sector has outer radius 8 cm, inner radius 4 cm and area 36 cm². Enter its angle in radians. Give your answer as a decimal number.",
+        "ru": "Кольцевой сектор имеет внешний радиус 8 см, внутренний радиус 4 см и площадь 36 см². Введите его угол в радианах. Ответ запишите десятичным числом.",
+        "uz": "Halqasimon sektor tashqi radiusi 8 sm, ichki radiusi 4 sm va yuzi 36 sm². Uning burchagini radianlarda kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
