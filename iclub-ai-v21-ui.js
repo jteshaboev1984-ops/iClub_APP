@@ -341,6 +341,26 @@
       }
       const skill = examPrepSkillContext();
       if (skill) return { ...skill, screenCode: "exam_prep_skill" };
+      // A finalized Practice result/review is ONE existing Tutor conversation,
+      // but its messages belong to this attempt, not the next attempt opened
+      // on the same screen. DOM IDs select only UI threads, never authorize
+      // learner data: every server request still checks ownership/finalization.
+      if (screenCode === "practice-result" || screenCode === "practice-review") {
+        const screen = document.getElementById("courses-" + screenCode);
+        const attemptRef = Number(screen?.dataset?.practiceAiAttemptId || 0);
+        if (screen?.classList.contains("is-active") &&
+            Number.isSafeInteger(attemptRef) && attemptRef > 0) {
+          const title = String(document.getElementById("subject-hub-title")?.textContent || "");
+          const key = subjectKeyFromText(title);
+          return {
+            threadKey: "practice_attempt_" + attemptRef,
+            subjectKey: key || "general",scopeCode: "global",
+            screenCode,academic: Boolean(key),componentCode: "",skillCode: "",
+            subjectLabel: subjectName(key),
+            subtitle: key ? subjectName(key) : (copy().sectionNames?.courses || copy().subtitleGeneral)
+          };
+        }
+      }
       // Never infer a current subject from a stale hub heading on the catalogue.
       if (screenCode !== "all-subjects") {
         const title = String(document.getElementById("subject-hub-title")?.textContent || "").trim();
@@ -1000,7 +1020,9 @@
         en:"Recover my answer"}[locale()];
       prompts.unshift({key:"",label:retryLabel,practiceRetry:true});
     }
-    for (const prompt of prompts) {
+    // A recoverable PC4 answer is itself a priority action; even after
+    // prepending it, never exceed the approved three screen actions.
+    for (const prompt of prompts.slice(0,3)) {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "iclub-global-ai-quick-btn";
@@ -1509,6 +1531,17 @@
       state.bootstrap?.visible === true &&
       !currentBlocked() &&
       isEligibleView() &&
+      (!academicContext || (()=>{
+        const screen=academicContext.surface==="practice_error"
+          ? "practice-review" : academicContext.surface==="tour_archive"
+          ? "tour-review" : "";
+        const el=screen&&document.getElementById("courses-"+screen);
+        const refName=screen==="tour-review"
+          ? "iclubAiTourAttemptId" : "practiceAiAttemptId";
+        return Boolean(screen&&activeViewName()==="courses"&&
+          activeCoursesScreen()===screen&&el?.classList.contains("is-active")&&
+          Number(el.dataset?.[refName]||0)===academicContext.recordId);
+      })()) &&
       (!practiceContext || (()=>{
         const current=practiceScope();
         return current?.attemptRef===practiceContext.attemptRef&&
@@ -2016,7 +2049,9 @@
     const courseView = document.getElementById("view-courses");
     if (courseView) {
       state.viewObserver.observe(courseView, {
-        subtree: true, attributes: true, attributeFilter: ["class"]
+        subtree: true, attributes: true,
+        attributeFilter: ["class","data-practice-ai-attempt-id",
+          "data-iclub-ai-tour-attempt-id"]
       });
     }
     const subjectTitle = document.getElementById("subject-hub-title");
