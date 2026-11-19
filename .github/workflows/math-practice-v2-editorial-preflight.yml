@@ -1,5 +1,8 @@
 name: Mathematics Practice v2 editorial 104-item preflight
 on:
+  push:
+    branches:
+      - qa/math-practice-v2-ambiguity-q400-20261119
   pull_request:
     branches:
       - main
