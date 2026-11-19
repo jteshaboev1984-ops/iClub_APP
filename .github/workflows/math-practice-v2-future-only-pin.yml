@@ -1,0 +1,45 @@
+name: Mathematics Practice future-only 81 pinned versions
+on:
+  push:
+    branches:
+      - qa/math-practice-future-only-81-contenthash-pin-20261119
+  pull_request:
+    branches:
+      - academic/math-practice-hard-transfer-algebra-3items-20261119
+    paths:
+      - 'scripts/math-practice-v2-future-only-81-live-pin-contract.cjs'
+      - 'scripts/math-practice-v2-editorial-future-only-contract.cjs'
+      - 'supabase/preflight/math_practice_v2_81_future_only_hash_pin_readonly.sql'
+      - 'content/math/practice_v2/**/*.json'
+      - '.github/workflows/math-practice-v2-future-only-pin.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-old-versions-no-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Checkout candidate with pinned historical source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify immutable live pins, authored candidate IDs and source-only transition
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-future-only-81-live-pin-contract.cjs
+          node scripts/math-practice-v2-future-only-81-live-pin-contract.cjs
+      - name: Confirm no live connection or mutation exists in this job
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          sql=Path('supabase/preflight/math_practice_v2_81_future_only_hash_pin_readonly.sql').read_text(encoding='utf-8')
+          body=re.sub(r'--[^\n]*','',sql)
+          assert re.match(r'^\s*with\s+expected\b',body,re.I)
+          assert not re.search(r'\b(insert|update|delete|truncate|alter|drop|create|grant|revoke|call|execute|copy|do)\b',body,re.I)
+          assert body.count('::bigint,')==81
+          print('PASS 81 pinned versions / SELECT-only / no authenticated provider and no production writes')
+          PY
