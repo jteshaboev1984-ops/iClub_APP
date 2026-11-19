@@ -418,7 +418,7 @@
       "primary_skill": "P1-SER-02",
       "secondary_skills": [],
       "role": "ratio_recognition",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
