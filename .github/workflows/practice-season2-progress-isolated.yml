@@ -6,6 +6,7 @@ on:
       - 'supabase/candidates/practice_season2_progress_safe_v1.sql'
       - 'supabase/tests/practice_season2_progress_safe_isolated.sql'
       - '.github/workflows/practice-season2-progress-isolated.yml'
+      - 'scripts/practice-season2-progress-signed-http.cjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -40,5 +41,39 @@ jobs:
           set -euo pipefail
           psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 -U postgres -d postgres \
             -f supabase/tests/practice_season2_progress_safe_isolated.sql
+      - name: Activate fixture period and launch signed local PostgREST
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d postgres \
+            -c "UPDATE public.seasons SET status='current',start_date='2026-11-01' WHERE id=2;"
+          secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$secret"
+          echo "PRACTICE_SEASON2_JWT_SECRET=$secret" >> "$GITHUB_ENV"
+          echo "PRACTICE_SEASON2_ISOLATED=true" >> "$GITHUB_ENV"
+          echo "PGHOST=127.0.0.1" >> "$GITHUB_ENV"
+          echo "PGDATABASE=postgres" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+          docker run -d --rm --name iclub-practice-s2-pgrst --network host \
+            -e PGRST_DB_URI="postgres://postgres:isolated-test-only@127.0.0.1:5432/postgres" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$secret" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 40); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then exit 0; fi
+            sleep 2
+          done
+          docker logs --tail 25 iclub-practice-s2-pgrst
+          exit 1
+
+      - name: Signed JWT owner/subject and archive E2E
+        run: |
+          set -euo pipefail
+          node --check scripts/practice-season2-progress-signed-http.cjs
+          node scripts/practice-season2-progress-signed-http.cjs
+
       - name: No production access
         run: echo 'Synthetic PostgreSQL 17 only. No live Supabase or Vercel integration.'
