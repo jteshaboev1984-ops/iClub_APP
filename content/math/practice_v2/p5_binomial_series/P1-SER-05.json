@@ -169,9 +169,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "The second term gives ar=15/4, and S∞=a/(1−r)=20 gives a=20(1−r). Hence 20r(1−r)=15/4, so 16r²−16r+3=0=(4r−1)(4r−3). Thus r=1/4 or r=3/4. The restriction 0<r<1/2 selects r=1/4=0.25.",
-        "ru": "Из второго члена ar=15/4, а из S∞=a/(1−r)=20 получаем a=20(1−r). Поэтому 20r(1−r)=15/4 и 16r²−16r+3=0=(4r−1)(4r−3). Отсюда r=1/4 или r=3/4. Условие 0<r<1/2 оставляет r=1/4=0.25.",
-        "uz": "Ikkinchi haddan ar=15/4, S∞=a/(1−r)=20 dan esa a=20(1−r). Shunday qilib, 20r(1−r)=15/4 va 16r²−16r+3=0=(4r−1)(4r−3). Demak, r=1/4 yoki r=3/4. 0<r<1/2 sharti r=1/4=0.25 ni tanlaydi."
+        "en": "The second term gives ar=15/4, and S∞=a/(1−r)=20 gives a=20(1−r). Hence 20r(1−r)=15/4, so 16r²−16r+3=0, or equivalently (4r−1)(4r−3)=0. Thus r=1/4 or r=3/4. The restriction 0<r<1/2 selects r=1/4=0.25.",
+        "ru": "Из второго члена ar=15/4, а из S∞=a/(1−r)=20 получаем a=20(1−r). Поэтому 20r(1−r)=15/4 и 16r²−16r+3=0, то есть (4r−1)(4r−3)=0. Отсюда r=1/4 или r=3/4. Условие 0<r<1/2 оставляет r=1/4=0.25.",
+        "uz": "Ikkinchi haddan ar=15/4, S∞=a/(1−r)=20 dan esa a=20(1−r). Shunday qilib, 20r(1−r)=15/4 va 16r²−16r+3=0, ya’ni (4r−1)(4r−3)=0. Demak, r=1/4 yoki r=3/4. 0<r<1/2 sharti r=1/4=0.25 ni tanlaydi."
       },
       "ai_source_skill": "P1-SER-05",
       "status": "draft"
