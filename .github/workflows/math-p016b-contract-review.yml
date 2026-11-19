@@ -1,0 +1,34 @@
+name: Mathematics P0-16B dormant writer contract review
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'exam-prep/exam-prep-api.js'
+      - 'index.html'
+      - 'supabase/candidates/math_p1p5_p016b_writer_contract_v1_dormant.sql'
+      - 'scripts/p1p5-p016b-writer-contract.test.cjs'
+      - 'scripts/p1p5-p016b-signed-http-cutover.cjs'
+      - '.github/workflows/math-p016b-contract-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract-review:
+    name: OFF by default and RU UZ EN stale-draft protection
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check exact source and runtime
+        run: |
+          set -euo pipefail
+          node --check exam-prep/exam-prep-api.js
+          node --check scripts/p1p5-p016b-writer-contract.test.cjs
+          node --check scripts/p1p5-p016b-signed-http-cutover.cjs
+          node scripts/p1p5-p016b-writer-contract.test.cjs
+          test ! -f supabase/migrations/20261119_exam_prep_p016b_writer_contract_v1.sql
