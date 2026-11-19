@@ -23,6 +23,9 @@ const {chromium}=require('playwright');
       '<section id="courses-my-rec-topic-history"><div id="my-rec-topic-history-title"></div>'+
       '<div id="my-rec-topic-history-subtitle"></div><div id="my-rec-topic-history-body"></div></section>'+
       '<section id="courses-my-rec-topic-review"><div id="my-rec-topic-review-body"></div></section></body></html>');
+    // Match the actual released style.css font stack (CI fixture has no app shell).
+    await page.addStyleTag({content:
+      'html,body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}*{box-sizing:border-box;}'});
     await page.addStyleTag({path:path.resolve('practice-results-tabs.css')});
     // Load the actually released Academy OS visual source, NOT invented test colors.
     await page.addStyleTag({path:path.resolve('visual/iclub-academy-ux531-b04b08.css')});
@@ -48,6 +51,14 @@ const {chromium}=require('playwright');
        tourRows:document.querySelectorAll('#tour-history .iclub-sx-tour-history-row').length};
     },language);
     assert(out.rendered,'period render failed');
+    const intendedDay=new Date('2026-11-01T00:00:00+05:00')
+       .toLocaleDateString(language==='en'?'en-GB':language==='uz'?'uz-UZ':'ru-RU',
+        {timeZone:'Asia/Tashkent'});
+    const actualDay=await page.locator(
+      '[data-practice-s2-history="tours"] .iclub-s2-history-block > .iclub-s2-history-note'
+    ).first().textContent();
+    assert(actualDay.includes(intendedDay),
+      'Season2 start date shifted away from local Asia/Tashkent: '+actualDay);
     assert.equal(out.topicRows,3,'topic history must initially show latest 3');
     assert.equal(out.tourRows,3,'previous Tour history initially shows 3');
     const academy=await page.evaluate(()=>{
