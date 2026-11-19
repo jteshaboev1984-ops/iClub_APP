@@ -1,0 +1,202 @@
+{
+  "manifest": {
+    "version": "economics_9708_batch3c_v0",
+    "scope": "A Level choice and production/revenue teaching explanations",
+    "basis": "Cambridge 9708 2026-2028 v2; supplied Economics Coursebook 4th edition",
+    "status": "Unpublished original drafts",
+    "copyright_review": "pending",
+    "academic_review": "pending",
+    "no_live_data_changes": true
+  },
+  "cards": [
+    {
+      "syllabus_point": "7.2.3",
+      "provisional_skill_key": "ECON-9708-7.2.3-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 31,
+      "tour": 4,
+      "locale": "en",
+      "title": "Substitution, income and total price effects",
+      "explanations": {
+        "main": "A change in the price of one good rotates the budget line. The substitution effect is the change in the chosen bundle caused by the change in relative prices while holding utility constant; for a price fall it increases demand for that good under standard preferences. The income effect is the further change as purchasing power changes. For a normal good, a price fall generates a positive income effect, reinforcing substitution. For an inferior good the income effect opposes substitution. A Giffen good is an exceptional inferior good whose opposing income effect is large enough to outweigh substitution, so quantity demanded falls when its price falls. Compare the initial optimum, a hypothetical compensated choice, and the final optimum using a correctly labelled indifference/budget diagram.",
+        "simple": "When a good becomes cheaper, you tend to substitute toward it. You also become able to buy more with the same income. These are two different effects.",
+        "alternative": "For a normal good both effects of its price fall increase the quantity chosen. For an inferior good, income effect works against substitution. For a Giffen good, the negative income effect dominates, so the final quantity falls after the price fall.",
+        "focus": "Can every inferior good be called Giffen? No. What makes a Giffen good unusual? The income effect outweighs substitution."
+      },
+      "worked_example": "Diagram exercise: x-axis quantity X, y-axis quantity Y. Original and new budget lines pivot around the unchanged Y-intercept after X price changes. Mark E0, compensated Ec and final E1; then separate substitution E0→Ec from income Ec→E1.",
+      "diagram_blueprint_en": "Budget line rotates after price change; original equilibrium E0, compensated E_c on initial indifference curve isolating substitution, final E1 on new indifference curve isolating income. Draw separate normal/inferior/Giffen cases; exact compensated technique to be approved by educator.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.2.3",
+      "provisional_skill_key": "ECON-9708-7.2.3-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 31,
+      "tour": 4,
+      "locale": "ru",
+      "title": "Эффекты замещения, дохода и изменения цены",
+      "explanations": {
+        "main": "Изменение цены одного товара поворачивает бюджетную линию. Эффект замещения — изменение выбранного набора из-за относительных цен при сохранении прежнего уровня полезности; при снижении цены он обычно увеличивает спрос на подешевевший товар. Эффект дохода — дополнительная реакция на изменение покупательной способности. У нормального блага снижение цены вызывает положительный эффект дохода, усиливающий замещение. У низшего блага эффект дохода направлен противоположно. Товар Гиффена — особое низшее благо, у которого отрицательный эффект дохода настолько велик, что превышает эффект замещения: при снижении цены покупаемое количество уменьшается. На графике различай исходный выбор, условный компенсированный и новый выбор.",
+        "simple": "Когда товар дешевеет, его легче выбрать вместо другого: эффект замещения. Одновременно покупательная способность растёт: эффект дохода.",
+        "alternative": "Для нормального товара оба эффекта снижения цены увеличивают спрос. Для низшего товара эффект дохода противоположен замещению. Для товара Гиффена этот противодействующий эффект сильнее.",
+        "focus": "Любой низший товар — товар Гиффена? Нет. Что отличает Гиффена? Эффект дохода по модулю больше эффекта замещения."
+      },
+      "worked_example": "На осях покажи количество X и Y. Снижение цены X поворачивает бюджетную линию вокруг её точки пересечения с осью Y. Раздели E0→Ec (замещение) и Ec→E1 (доход).",
+      "diagram_blueprint_en": "Budget line rotates after price change; original equilibrium E0, compensated E_c on initial indifference curve isolating substitution, final E1 on new indifference curve isolating income. Draw separate normal/inferior/Giffen cases; exact compensated technique to be approved by educator.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.2.3",
+      "provisional_skill_key": "ECON-9708-7.2.3-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 31,
+      "tour": 4,
+      "locale": "uz",
+      "title": "O‘rnini bosish, daromad va umumiy narx ta’siri",
+      "explanations": {
+        "main": "Bir tovar narxi o‘zgarsa, byudjet chizig‘i buriladi. O‘rnini bosish ta’siri nisbiy narx o‘zgargani uchun, foydalilik darajasi o‘zgarmas deb qaralganda, tanlangan savatning o‘zgarishidir; narx pasaysa, odatiy sharoitda shu tovarga talab ortadi. Daromad ta’siri esa xarid quvvatining o‘zgarishiga qo‘shimcha javobdir. Normal tovar narxi tushsa, ijobiy daromad ta’siri o‘rnini bosishni kuchaytiradi. Past sifatli tovar uchun daromad ta’siri unga qarama-qarshi bo‘ladi. Giffen tovarida qarama-qarshi daromad ta’siri kuchliroq: narx tushganida talab miqdori ham kamayishi mumkin. Grafikda dastlabki tanlovni, kompensatsiyalangan oraliq tanlovni va yakuniy tanlovni ajrat.",
+        "simple": "Tovar arzonlashsa, uni boshqasining o‘rniga tanlash osonlashadi — o‘rnini bosish ta’siri. Shu bilan birga xarid quvvati oshadi — daromad ta’siri.",
+        "alternative": "Normal tovarda narx pasayganda ikkala ta’sir talabni oshiradi. Past sifatli tovarda daromad ta’siri qarama-qarshi. Giffen tovarida u kuchliroq bo‘lib, miqdor kamayadi.",
+        "focus": "Har qanday past sifatli tovar Giffen tovarimi? Yo‘q. Giffen tovarini nima farqlaydi? Daromad ta’siri o‘rnini bosish ta’siridan kuchli."
+      },
+      "worked_example": "Gorizontal o‘qda X, vertikal o‘qda Y miqdori bo‘lsin. X narxi o‘zgarsa, byudjet chizig‘i Y o‘qidagi kesishish nuqtasi atrofida buriladi. E0→Ec va Ec→E1 bosqichlarini ajrat.",
+      "diagram_blueprint_en": "Budget line rotates after price change; original equilibrium E0, compensated E_c on initial indifference curve isolating substitution, final E1 on new indifference curve isolating income. Draw separate normal/inferior/Giffen cases; exact compensated technique to be approved by educator.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.5.1",
+      "provisional_skill_key": "ECON-9708-7.5.1-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 34,
+      "tour": 4,
+      "locale": "en",
+      "title": "Total, average and marginal product",
+      "explanations": {
+        "main": "In the short run some productive inputs are fixed and another input such as labour can vary. Total product (TP) is total output. Average product (AP) is output per unit of the variable input, TP/L. Marginal product (MP) is the additional output from one more unit of the input, ΔTP/ΔL. Diminishing marginal returns begin when successive extra units of the variable input add less output while other inputs remain fixed. TP may still rise as MP falls, so a decreasing MP is not the same as falling total production. Plot product curves carefully: MP crosses AP at AP's maximum under usual smooth assumptions.",
+        "simple": "Total is everything produced. Average is production per worker. Marginal is the extra output from one extra worker. Diminishing marginal returns mean the extra output starts shrinking, not necessarily that total output falls.",
+        "alternative": "One machine with fixed capacity is shared by additional workers. Early additional workers may raise specialisation; later workers crowd the same machine, so each new worker adds fewer units despite a rising total.",
+        "focus": "If MP falls from 5 to 3 but remains positive, what happens to TP? It still rises, by 3 units for one extra worker."
+      },
+      "worked_example": "Suppose TP for 0,1,2,3 workers is 0,5,9,12. At 3 workers AP=12/3=4; the third worker's MP=12−9=3. MP sequence is 5,4,3.",
+      "diagram_blueprint_en": "Horizontal labour input L, vertical TP for one curve; separate AP and MP panel against L. Initially MP can rise; diminishing returns starts when MP begins falling, not necessarily when TP falls.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.5.1",
+      "provisional_skill_key": "ECON-9708-7.5.1-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 34,
+      "tour": 4,
+      "locale": "ru",
+      "title": "Общий, средний и предельный продукт",
+      "explanations": {
+        "main": "В краткосрочном периоде часть факторов производства фиксирована, а один фактор, например труд, можно изменять. Общий продукт (TP) — весь выпуск. Средний продукт (AP) — выпуск на единицу переменного фактора: TP/L. Предельный продукт (MP) — дополнительный выпуск от ещё одной единицы фактора: ΔTP/ΔL. Убывающая предельная отдача начинается, когда каждый следующий работник добавляет меньше выпуска при неизменных остальных ресурсах. При этом TP может продолжать расти: снижение MP не означает падения общего выпуска. При стандартных гладких кривых MP пересекает AP в точке максимума AP.",
+        "simple": "Общий продукт — всё произведённое. Средний — на одного работника. Предельный — добавка от следующего работника. Когда добавка уменьшается, это убывающая предельная отдача.",
+        "alternative": "Представь станок фиксированной мощности. Сначала дополнительные рабочие помогают разделить задачи, затем начинают мешать друг другу. Новые рабочие увеличивают выпуск всё слабее, хотя общий выпуск может расти.",
+        "focus": "MP снизился с 5 до 3, но остаётся положительным. Что происходит с TP? Он увеличивается ещё на 3."
+      },
+      "worked_example": "TP при 0,1,2,3 работниках: 0,5,9,12. При трёх работниках AP=12/3=4, MP третьего работника=12−9=3. MP: 5,4,3.",
+      "diagram_blueprint_en": "Horizontal labour input L, vertical TP for one curve; separate AP and MP panel against L. Initially MP can rise; diminishing returns starts when MP begins falling, not necessarily when TP falls.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.5.1",
+      "provisional_skill_key": "ECON-9708-7.5.1-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 34,
+      "tour": 4,
+      "locale": "uz",
+      "title": "Jami, o‘rtacha va chegaraviy mahsulot",
+      "explanations": {
+        "main": "Qisqa muddatda ayrim ishlab chiqarish omillari o‘zgarmaydi, mehnat kabi omilni esa o‘zgartirish mumkin. Jami mahsulot (TP) — umumiy ishlab chiqarish. O‘rtacha mahsulot (AP) o‘zgaruvchan omil birligiga to‘g‘ri keladigan ishlab chiqarish: TP/L. Chegaraviy mahsulot (MP) esa qo‘shimcha bir birlik resurs kiritilgandagi ishlab chiqarish o‘sishi: ΔTP/ΔL. Kamayib boruvchi chegaraviy unumdorlik qo‘shimcha ishchining mahsulotga qo‘shgan hissasi kamayganda boshlanadi, boshqa omillar o‘zgarmaydi. MP pasayib, hali musbat bo‘lsa, TP o‘sishda davom etadi. Odatdagi uzluksiz grafiklarda MP, AP maksimumida uni kesib o‘tadi.",
+        "simple": "TP — jami mahsulot, AP — bitta ishchiga to‘g‘ri kelgan mahsulot, MP — qo‘shimcha ishchi bergan yangi mahsulot. MP kamayganda TP darhol kamaymaydi.",
+        "alternative": "Bitta stanokni tobora ko‘proq ishchi ishlatadi. Dastlab vazifalarni bo‘lishish foyda beradi; keyin ishchilar bir-biriga xalaqit qiladi. Natijada har yangi ishchining hissasi kamayadi.",
+        "focus": "MP 5 dan 3 ga tushdi, ammo musbat. TP nima qiladi? Yana 3 birlikka oshadi."
+      },
+      "worked_example": "0,1,2,3 ishchida TP 0,5,9,12. Uch ishchida AP=12/3=4, uchinchi ishchining MP=12−9=3. MP ketma-ketligi 5,4,3.",
+      "diagram_blueprint_en": "Horizontal labour input L, vertical TP for one curve; separate AP and MP panel against L. Initially MP can rise; diminishing returns starts when MP begins falling, not necessarily when TP falls.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.5.8",
+      "provisional_skill_key": "ECON-9708-7.5.8-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 34,
+      "tour": 4,
+      "locale": "en",
+      "title": "Total, average and marginal revenue",
+      "explanations": {
+        "main": "Total revenue (TR) is price times quantity sold: P×Q. Average revenue (AR)=TR/Q equals unit price for a single-priced product. Marginal revenue (MR)=ΔTR/ΔQ is the change in TR from an additional unit. When a firm must cut its price on all units to sell more, MR can be below the price/AR because the lower price also affects earlier units. A competitive price-taking firm faces AR=MR=P, whereas a firm with downward-sloping demand generally has a downward-sloping MR curve below AR. Calculating revenue is different from selecting profit-maximising output, which also requires marginal cost.",
+        "simple": "TR: all sales income. AR: sales income per unit. MR: extra revenue from the next unit. If selling one extra unit forces a price cut on all units, MR is smaller than that unit's price.",
+        "alternative": "Use demand P=20−Q. At Q=1,2,3, prices are 19,18,17, so total revenue is 19,36,51. The next units add 17 and 15, even though prices are 18 and 17.",
+        "focus": "If price falls from 19 to 18 as sales rise from one to two units, is MR of the second unit 18? No, TR rises from 19 to 36, so MR=17."
+      },
+      "worked_example": "Q=1: TR=19. Q=2: TR=36, AR=18, MR=17. Q=3: TR=51, AR=17, MR=15. For discrete Q, MR=TR(Q)−TR(Q−1).",
+      "diagram_blueprint_en": "Price P and quantity Q; separate AR-demand and MR curves under downward-sloping inverse demand. For a price-taking firm AR=MR=P; under downward-sloping demand MR is below AR. Include TR table for integer Q.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.5.8",
+      "provisional_skill_key": "ECON-9708-7.5.8-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 34,
+      "tour": 4,
+      "locale": "ru",
+      "title": "Общая, средняя и предельная выручка",
+      "explanations": {
+        "main": "Общая выручка (TR) равна цене, умноженной на количество проданных единиц: P×Q. Средняя выручка (AR)=TR/Q и при единой цене равна цене единицы товара. Предельная выручка (MR)=ΔTR/ΔQ — изменение общей выручки от дополнительной единицы. Если ради увеличения продаж приходится снижать цену на все единицы, MR может быть меньше AR, потому что ранее продававшиеся единицы тоже дешевеют. При совершенной конкуренции фирма принимает цену, поэтому AR=MR=P. При убывающем спросе MR обычно лежит ниже AR. Для выбора выпуска, максимизирующего прибыль, нужна также информация о предельных издержках.",
+        "simple": "TR — весь доход от продаж. AR — доход на единицу товара. MR — прибавка выручки от ещё одной единицы. Если ради неё дешевеют и прежние единицы, MR меньше цены.",
+        "alternative": "Пусть спрос задаётся P=20−Q. При Q=1,2,3 цены равны 19,18,17, а TR — 19,36,51. Дополнительные единицы прибавляют 17 и 15, хотя их цены 18 и 17.",
+        "focus": "Если цена упала с 19 до 18, а продажи выросли с одной до двух единиц, MR второй единицы равна 18? Нет: 36−19=17."
+      },
+      "worked_example": "Q=1: TR=19. Q=2: TR=36, AR=18, MR=17. Q=3: TR=51, AR=17, MR=15. При дискретном выпуске MR=TR(Q)−TR(Q−1).",
+      "diagram_blueprint_en": "Price P and quantity Q; separate AR-demand and MR curves under downward-sloping inverse demand. For a price-taking firm AR=MR=P; under downward-sloping demand MR is below AR. Include TR table for integer Q.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    },
+    {
+      "syllabus_point": "7.5.8",
+      "provisional_skill_key": "ECON-9708-7.5.8-BASE",
+      "level": "A_LEVEL_ADDITION",
+      "book_chapter": 34,
+      "tour": 4,
+      "locale": "uz",
+      "title": "Jami, o‘rtacha va chegaraviy tushum",
+      "explanations": {
+        "main": "Jami tushum (TR) narxning sotilgan miqdorga ko‘paytmasi: P×Q. O‘rtacha tushum (AR)=TR/Q; mahsulot bitta narxda sotilsa, AR narxga teng. Chegaraviy tushum (MR)=ΔTR/ΔQ — yana bir birlik sotilgandagi jami tushum o‘zgarishi. Ko‘proq sotish uchun barcha birliklarning narxini pasaytirish kerak bo‘lsa, MR narx va ARdan past bo‘lishi mumkin, chunki oldingi birliklar ham arzonlashadi. Raqobatli narxni qabul qiluvchi firmada AR=MR=P, pasayuvchi talabga ega firmada MR odatda ARdan past bo‘ladi. Eng foydali ishlab chiqarishni aniqlash uchun chegaraviy xarajat ham kerak.",
+        "simple": "TR — barcha savdodan tushum. AR — bitta birlikka o‘rtacha tushum. MR — keyingi birlikdan tushumning qo‘shimcha o‘sishi. Narx barcha birlik uchun tushsa, MR narxdan kichik bo‘lishi mumkin.",
+        "alternative": "Talab P=20−Q. Q=1,2,3 da narx 19,18,17; TR esa 19,36,51. Ikkinchi va uchinchi birlik tushumni mos ravishda 17 va 15 ga oshiradi.",
+        "focus": "Narx 19 dan 18 ga tushib, sotuv bir birlikdan ikkiga ko‘paysa, ikkinchi birlik MRsi 18 mi? Yo‘q, TR 19 dan 36 ga oshgan: MR=17."
+      },
+      "worked_example": "Q=1: TR=19. Q=2: TR=36, AR=18, MR=17. Q=3: TR=51, AR=17, MR=15. Butun birliklarda MR=TR(Q)−TR(Q−1).",
+      "diagram_blueprint_en": "Price P and quantity Q; separate AR-demand and MR curves under downward-sloping inverse demand. For a price-taking firm AR=MR=P; under downward-sloping demand MR is below AR. Include TR table for integer Q.",
+      "academic_approval": false,
+      "language_approval": false,
+      "runtime_allowed": false,
+      "question_id": null
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d" viewBox="0 0 600 420" width="600" height="420"><title id="t">Price elasticity along a straight line</title><desc id="d">Q equals 10 minus P. The same straight demand curve is elastic near the upper end, unit elastic at midpoint, and inelastic near the lower end.</desc><rect x="0" y="0" width="600" height="420" fill="#ffffff"/><style>text{font-family:Inter,Arial,sans-serif;fill:#263447;font-size:14px} .axis{stroke:#516073;stroke-width:2.3} .guide{stroke:#98a6b5;stroke-width:1.5;stroke-dasharray:6 6} .strong{font-weight:700} .small{font-size:12px;fill:#5c6a79} .large{font-weight:700;font-size:17px}</style><text x="32" y="31" class="large">Price elasticity on one straight demand curve</text>
+<path class="axis" d="M90 60 V342 H530"/><text x="36" y="62" class="strong">P</text><text x="522" y="368" class="strong">Q</text>
+<line x1="90" y1="70" x2="510" y2="340" stroke="#2563eb" stroke-width="3.6"/><text x="485" y="326" fill="#2563eb" class="strong">D</text>
+<path class="guide" d="M174 124 H90 M174 124 V340 M300 205 H90 M300 205 V340 M426 286 H90 M426 286 V340"/>
+<g fill="#0f9884" stroke="#ffffff" stroke-width="2"><circle cx="174" cy="124" r="6"/><circle cx="300" cy="205" r="6"/><circle cx="426" cy="286" r="6"/></g>
+<text x="183" y="113" class="strong">A: |PED| = 4</text><text x="312" y="196" class="strong">B: |PED| = 1</text><text x="315" y="281" class="strong">C: |PED| = 0.25</text>
+<text x="76" y="129" class="small">8</text><text x="76" y="210" class="small">5</text><text x="76" y="291" class="small">2</text>
+<text x="171" y="360" class="small">2</text><text x="297" y="360" class="small">5</text><text x="423" y="360" class="small">8</text>
+<text x="102" y="386" class="small">Q = 10 − P   •   point PED = gradient × P/Q</text></svg>
