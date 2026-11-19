@@ -34,6 +34,8 @@ on:
       - supabase/tests/iclub_ai_practice_pc4_financial_audit_isolated.sql
       - supabase/tests/iclub_ai_practice_recover_pc4_isolated.sql
       - supabase/tests/iclub_ai_practice_receipt_pc4_isolated.sql
+      - supabase/candidates/iclub_ai_practice_answer_retention24_isolated.sql
+      - supabase/tests/iclub_ai_practice_answer_retention24_isolated.sql
       - supabase/tests/iclub_ai_practice_prepared_isolated.sql
       - .github/workflows/practice-ai-prepared-isolated.yml
       - iclub-ai-v21-beta-client.js
@@ -89,6 +91,14 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_receipt_pc4_isolated.sql
+
+      - name: PC4 24-hour answer retention isolated PostgreSQL17 rehearsal (rollback)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_practice_answer_retention24_isolated.sql
 
       - name: Check prepared Edge TypeScript
         uses: denoland/setup-deno@v2
