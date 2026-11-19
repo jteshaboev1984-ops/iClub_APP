@@ -581,13 +581,13 @@
   const CURRENT_TOUR_COPY={
     ru:{active:'Активный тур',practice:'Практика этого тура',
       previous:'Последний завершённый тур',upcoming:'Следующий тур',
-      empty:'Туры ещё не опубликованы',go:'К практике'},
+      empty:'Туры ещё не опубликованы'},
     uz:{active:'Faol tur',practice:'Shu tur amaliyoti',
       previous:'Oxirgi yakunlangan tur',upcoming:'Keyingi tur',
-      empty:'Turlar hali e’lon qilinmagan',go:'Amaliyotga'},
+      empty:'Turlar hali e’lon qilinmagan'},
     en:{active:'Active tour',practice:'Practice for this tour',
       previous:'Last completed tour',upcoming:'Upcoming tour',
-      empty:'Tours are not published yet',go:'Open Practice'}
+      empty:'Tours are not published yet'}
   };
   function renderCurrentTourHeadline(picker,language){
     const root=document.getElementById(ROOT_ID);
@@ -605,11 +605,6 @@
     holder.append(title);
     if(picker?.activeTourNo){
       holder.append(node('small','iclub-practice-current-tour-sub',c.practice));
-      const btn=node('button','iclub-practice-current-tour-action',c.go);
-      btn.type='button';
-      btn.dataset.action='practice-select-tour';
-      btn.dataset.tourNo=String(picker.activeTourNo);
-      holder.append(btn);
     }
     holder.dataset.tourState=picker?.activeTourNo?'active':
       picker?.lastCompletedTourNo?'completed':'upcoming';

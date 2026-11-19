@@ -91,6 +91,10 @@ const {chromium}=require('playwright');
        assert.equal(order.statsOnce,1,'must preserve original stats');
        assert.equal(order.historyEntryOnce,1,'single standalone History link');
        assert.equal(order.currentTourOnce,1,'genuine Tour state must remain');
+       assert.equal(await root.locator('.iclub-practice-current-tour-action').count(),0,
+         'stats banner must not duplicate Tour Start above mode and choice');
+       assert.equal(await root.locator('#practice-results-panel-tours .practice-start-actions button[data-action="practice-start"]').count(),1,
+         'one Tour Start should remain below the Tour selector');
        const statText=await root.locator('.iclub-practice-overview-label').textContent();
        assert(statText.length>4,'stats heading missing');
        assert.equal(await root.locator('#practice-restart-btn').count(),1,'Tour start missing');
