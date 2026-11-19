@@ -581,13 +581,19 @@
   const CURRENT_TOUR_COPY={
     ru:{active:'Активный тур',practice:'Практика этого тура',
       previous:'Последний завершённый тур',upcoming:'Следующий тур',
-      empty:'Туры ещё не опубликованы'},
+      empty:'Туры ещё не опубликованы',
+      season1Open:'Практика Сезона 1 открыта до начала Сезона 2',
+      season2Open:'Практика Сезона 2 открыта · Сезон 1 в истории'},
     uz:{active:'Faol tur',practice:'Shu tur amaliyoti',
       previous:'Oxirgi yakunlangan tur',upcoming:'Keyingi tur',
-      empty:'Turlar hali e’lon qilinmagan'},
+      empty:'Turlar hali e’lon qilinmagan',
+      season1Open:'2-mavsum boshlanguncha 1-mavsum amaliyoti ochiq',
+      season2Open:'2-mavsum amaliyoti ochiq · 1-mavsum tarixda'},
     en:{active:'Active tour',practice:'Practice for this tour',
       previous:'Last completed tour',upcoming:'Upcoming tour',
-      empty:'Tours are not published yet'}
+      empty:'Tours are not published yet',
+      season1Open:'Season 1 Practice is open until Season 2 begins',
+      season2Open:'Season 2 Practice is open · Season 1 in History'}
   };
   function renderCurrentTourHeadline(picker,language){
     const root=document.getElementById(ROOT_ID);
@@ -605,6 +611,19 @@
     holder.append(title);
     if(picker?.activeTourNo){
       holder.append(node('small','iclub-practice-current-tour-sub',c.practice));
+    }
+    const access=picker?.season2Period?.practice_access;
+    if(picker?.season2Period?.ok===true&&
+       String(picker.season2Period.subject_key||'')===String(picker?.subjectKey||'')&&
+       ((access?.open_season_no===1&&access.season1_new_attempts_open===true&&
+         access.season2_new_attempts_open===false)||
+        (access?.open_season_no===2&&access.season1_new_attempts_open===false&&
+         access.season2_new_attempts_open===true))){
+      holder.append(node('small','iclub-practice-season-access',
+        access.open_season_no===1?c.season1Open:c.season2Open));
+      holder.dataset.practiceOpenSeason=String(access.open_season_no);
+    }else{
+      delete holder.dataset.practiceOpenSeason;
     }
     holder.dataset.tourState=picker?.activeTourNo?'active':
       picker?.lastCompletedTourNo?'completed':'upcoming';
