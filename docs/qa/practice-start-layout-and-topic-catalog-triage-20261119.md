@@ -42,3 +42,20 @@ Code ownership: separate child of approved source [#583](https://github.com/jtes
 - Preserve historic Season1 results, Tour attempts, certified/ranked outcomes, private banks, session owners. No deletion, regrade, scores/mastery/entitlement changes.
 - Do not modify `main`, production Vercel, live Supabase SQL, Tour dates, topic content, bank, or rate plans without separate owner GO.
 - Record exact child PR HEAD and CI outcomes in canonical #574 when they are available. Integrate via owner review of #583 / UX531, not by merging directly to main.
+
+## 4. Architect visual acceptance / integration checkpoint (2026-11-19)
+
+**Visual layout accepted:** Architect accepted both Tour/Topic screen compositions as design previews. This **does not** authorize merge to main, Vercel production deployment or live SQL migration. Topic tile **direct one-tap launch** remains the selected behavior; no second Topic Start button.
+
+**Source adjustment after acceptance:** The current-Tour statistics banner previously included a second `К практике` shortcut above the mode switch. This duplicated Tour Start and violated the accepted block order. The isolated integration candidate removes only that shortcut, leaving genuine Tour status/subject statistics in the overview and original Tour Start/Resume after Tour selection. The existing Topic one-tap launch and paused-attempt Resume remain untouched.
+
+### Read-only historical fallback candidate (no live deployment)
+Current live Supabase has **Season1 closed** with verified subject Tour1 starts, while **Season2 is draft/undated**. The staged Season2 progress RPC is **not installed** in production. If a new History viewer relied exclusively on `period_active===true` for S2, existing Season1 users would see an unavailable screen, hiding accessible old results even though underlying history remains intact.
+
+The proposed change extends **the same staged read-only** `supabase/candidates/practice_season2_progress_safe_v1.sql` with a `history_snapshot` field **only while S2 is dormant**. Snapshot includes a genuine owner-scoped Season1 aggregate and the separate *pre-Season1* bucket. It uses only authenticated `auth.uid()`, subject-specific verified Tour1 date, finalized Topic sessions, last 20 sanitized result metadata per category, and ordinary Practice attempts excluding labs. It does not return question text, answers, explanations, keys or personal identifiers. Status of Season1 is taken from `seasons.status` so a **closed** season displays **“Завершённый сезон”**, never falsely **“Текущий сезон”**. Once S2 begins, existing S2 progress/History behavior is unchanged.
+
+**Safety contract:** The top-level S2 `period_active=false` and `period_starts_at` remains absent when dormant, so existing Practice Tour performance selectors **must not be reset to Season1 boundaries**. The nested `history_snapshot` is used only by `practice-history-screen.js`. Its legacy bucket is a disclosure inside the oldest season, not fictitious Season 0; no extra swipe choices. This is a bounded preview, not cursor pagination/full history.
+
+**Acceptance tests proposed in the isolated child:** exact-source PG17 `supabase/tests/practice_season2_progress_safe_isolated.sql` validates S1/legacy separation and cross-owner/other-subject isolation; signed JWT/PostgREST verifies S2 unchanged; Chromium `scripts/practice-history-standalone-chromium.cjs` tests dormant-S2 closed-S1 status in RU/UZ/EN × 320/375/430/1440. The separate owner-order Chromium checks no duplicate Tour shortcut. **Only claim PASS after exact-HEAD CI completes.**
+
+**Still HOLD:** S2 SQL candidate requires separate owner authorization for production installation and main integration; no installed History snapshot exists today. The real user's Topic catalog loading failure remains **OPEN / unknown client-specific HTTP/JWT cause** and is not fixed by this history work. Full older records >20 per lane still need a separate owner-scoped cursor API before claiming complete archives.
