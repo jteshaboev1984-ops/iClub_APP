@@ -96,7 +96,7 @@ for(const [prefix,max] of Object.entries(counts))for(let skill=1;skill<=max;skil
       }catch(e){if(!/unparsed|unsupported|invalid|missing|atom/.test(String(e.message)))throw e;}
     }else if(q.qtype==='input'){
       approvedInput++;
-      if(/^-?\\d+\\.\\d+$/.test(str(q.answer_contract?.canonical_answer))){
+      if(/^-?\d+\.\d+$/.test(str(q.answer_contract?.canonical_answer))){
         decimalAnswerQuestions++;
         // Q268 already asks for a 1-decimal-place rounded result in all three languages.
         const rounded=number===268&&/1 decimal place/i.test(str(q.question.en))&&
