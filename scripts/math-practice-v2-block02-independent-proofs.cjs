@@ -73,7 +73,7 @@ const tests={
    const b=-2*vertexX,c=yIntercept;
    const roots=quadratic(1,b,c);
    assert.equal(roots.length,2);
-   for(const x of roots)assert.ok(near(x*x+b*x+c,0));
+   for(const x of roots)assert.ok(approx(x*x+b*x+c,0));
    assert.ok(roots.some(x=>x<0)&&roots.some(x=>x>0));
    input(q,Math.max(...roots));
   },
