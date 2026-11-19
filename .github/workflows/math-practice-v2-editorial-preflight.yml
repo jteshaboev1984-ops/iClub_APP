@@ -30,10 +30,10 @@ jobs:
           node - "$RUNNER_TEMP/practice-editorial-metadata.json" <<'NODE'
           const fs = require('node:fs');
           const a = JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(a.questions!==495||a.edited!==31||a.unchanged!==464||
-             a.editorial_equal_key!==29||a.future_version_required!==2||
+          if(a.questions!==495||a.edited!==32||a.unchanged!==463||
+             a.editorial_equal_key!==30||a.future_version_required!==2||
              a.history_sensitive_candidates!==3)process.exit(1);
-          console.log('PASS 495 authored items, 31 reviewed changes, 29 editorial / 2 future-version, 3 history-sensitive; protected text/keys omitted');
+          console.log('PASS 495 authored items, 32 reviewed changes, 30 editorial / 2 future-version, 3 history-sensitive; protected text/keys omitted');
           NODE
       - name: Reject accidental write statements in the database preflight
         run: |
