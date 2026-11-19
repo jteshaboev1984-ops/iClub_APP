@@ -668,7 +668,7 @@
         "P1-INT-01"
       ],
       "role": "constant_integral_parameter",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
