@@ -113,5 +113,36 @@ function fixture({stale=false,lang="ru",draft=""}={}){
     assert.equal(t.nodes.length,1,"One notice after multiple errors");
     assert.equal(t.win.reloads,0,"No auto retry/reload on stale token");
   }
-  console.log("P0-16B PASS: 39 source-guarded writers, 3 stale-safe projections, RU/UZ/EN per-request version marker + lossless in-memory draft notice");
+  // Real host replaces some assessment forms with a loading screen before
+  // PostgREST returns. Verify the exact rejected answer remains copyable
+  // without any input still attached to the document.
+  for(const lang of ["ru","uz","en"]){
+    for(const [name,call,expected] of [
+      ["written",t=>t.api.submitResponse("session",1,{artifact:{text:"Unsent written proof"}}, "retry-key",15,lang),"Unsent written proof"],
+      ["input",t=>t.api.submitResponse("session",2,{answer:"x²+1"}, "retry-key",15,lang),"x²+1"],
+      ["mcq",t=>t.api.submitResponse("session",3,{picked_index:2}, "retry-key",15,lang),"MCQ option #3"],
+      ["extra-hard",t=>t.api.extraHardSubmit("attempt","Original written explanation","key",lang),"Original written explanation"]
+    ]){
+      const t=fixture({stale:true,lang,draft:""});
+      assert.equal(t.document.querySelector('textarea[name="ep_live_written_answer"]'),null,
+        "The input really must be absent in this regression");
+      const denied=await call(t);
+      assert.equal(denied.reason,"client_update_required",name+" rejection");
+      assert.equal(t.nodes.length,1,"One accessible notice "+lang+"/"+name);
+      const saved=t.nodes[0].children[0].children.find(x=>x.tag==="textarea");
+      assert.equal(saved?.value,expected,"Copy EXACT rejected payload "+lang+"/"+name);
+      assert.equal(saved.readOnly,true);
+      assert.equal(t.win.reloads,0);
+      const buttons=t.nodes[0].children[0].children.filter(x=>x.tag==="button");
+      await buttons[0].handlers.click();
+      assert.equal(t.win.copied,expected,"Copy before manual refresh");
+    }
+  }
+  // Profile-only errors must not serialize server IDs or exam metadata into
+  // the rescue textarea. No unsent answer was present in this scenario.
+  const noDraft=fixture({stale:true,lang:"en"});
+  await noDraft.api.saveExamProfile({examSeries:"June 2027",targetGrade:"A"});
+  assert(!noDraft.nodes[0].children[0].children.some(x=>x.tag==="textarea"),
+    "Never expose unrelated RPC payloads as rejected answers");
+  console.log("P0-16B PASS: signed writer source, RU/UZ/EN marker, current and removed-form draft rescue, MCQ, written and Extra Hard");
 })().catch(e=>{console.error(e);process.exitCode=1;});

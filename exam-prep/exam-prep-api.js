@@ -29,10 +29,29 @@
     return true;
   }
 
+  // A rejected response RPC may arrive AFTER the host replaced its answer form
+  // with a loading screen. Recover only the rejected owned request's answer,
+  // never identifiers, auth tokens, a grade or a whole RPC payload.
+  function rejectedAnswerDraft(name, args) {
+    if (name === "submit_my_exam_prep_extra_hard_safe_v1") {
+      return typeof args?.p_response_text === "string" ? args.p_response_text : "";
+    }
+    if (name !== "submit_exam_prep_response_safe_v1") return "";
+    const payload = args?.p_payload;
+    if (!payload || typeof payload !== "object") return "";
+    if (typeof payload.artifact?.text === "string") return payload.artifact.text;
+    if (typeof payload.answer === "string") return payload.answer;
+    if (typeof payload.answer === "number" && Number.isFinite(payload.answer)) return String(payload.answer);
+    if (Number.isInteger(payload.picked_index) && payload.picked_index >= 0) {
+      return "MCQ option #" + (payload.picked_index + 1);
+    }
+    return "";
+  }
+
   // A rejected cached tab must not silently reload and erase an unsubmitted
   // written answer. Show an accessible, in-memory recovery notice outside
   // the screen that legacy renderError() may replace; no persistent storage or PII logs.
-  function showStaleBuildNotice() {
+  function showStaleBuildNotice(requestDraft = "") {
     if (typeof document === "undefined" || !document.body ||
         document.getElementById("math-p016b-stale-notice")) return;
     const lang = String(window.i18n?.getLang?.() || document.documentElement?.lang || "en").toLowerCase();
@@ -43,7 +62,9 @@
     })[lang] || {title:"Update Exam Prep",body:"Copy unsent answers before refreshing. Saved progress is retained.",copy:"Copy my draft answer",copied:"Draft copied",reload:"Refresh page"};
     const answer = document.querySelector('textarea[name="ep_live_written_answer"],input[name="ep_live_text_answer"],input[name="ep_recovery_text_answer"]');
     const selected = document.querySelector('input[name="ep_live_answer"]:checked');
-    const draft = answer?.value || (selected ? String(selected.value) : "");
+    // Prefer the exact rejected answer to any later DOM state. The form may
+    // already be gone; never write the draft to storage or an event/log.
+    const draft = requestDraft || answer?.value || (selected ? String(selected.value) : "");
     const panel=document.createElement("section");
     panel.id="math-p016b-stale-notice";
     panel.setAttribute("role","alertdialog");
@@ -95,7 +116,7 @@
       attachMathWriterContract(request);
       const { data, error } = await request;
       if (error && /exam_prep_writer_contract_stale/.test(String(error.message || ""))) {
-        showStaleBuildNotice();
+        showStaleBuildNotice(rejectedAnswerDraft(name, args));
         emit("iclub:exam-prep-update-required", { reason:"writer_contract_stale" });
         return fail("client_update_required", error);
       }

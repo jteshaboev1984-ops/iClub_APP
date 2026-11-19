@@ -53,7 +53,7 @@ jobs:
                 "${GITHUB_BASE_REF:-}" == "main" ]]; then
             # Candidate-only reviewed API writer header; untouched map and recovery.
             test "${{ github.event.pull_request.base.sha }}" = "f30adcd4b6b4cbc230fa375418e5aa56f95e49d2"
-            test "$(git hash-object exam-prep/exam-prep-api.js)" = '7beda6c230626800fc0df70ffdcb29bf967cf37c'
+            test "$(git hash-object exam-prep/exam-prep-api.js)" = '8c169de6323f3d3cdcaea56b5d479547b1ee65d3'
             test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '4c54b9d774b56a843aa1b98454758ef60cdd56fa'
           elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
                 "${GITHUB_HEAD_REF:-}" == "feature/math-d3-hours-optional-20261118" &&
