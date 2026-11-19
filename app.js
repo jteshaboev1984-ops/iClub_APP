@@ -12483,6 +12483,7 @@ function bindRatingsUI() {
     "lessons",
     "video",
     "practice-start",
+    "practice-history",
     "practice-quiz",
     "practice-result",
     "practice-review",
@@ -12606,6 +12607,11 @@ function bindRatingsUI() {
 
   // The Practice start/result screens may become the stack root. Do not
   // unexpectedly send the learner to Home when Back should stay in Practice.
+  if (state.courses.stack.length <= 1 && top === "practice-history") {
+    replaceCourses("practice-start");
+    renderPracticeStart();
+    return;
+  }
   if (state.courses.stack.length <= 1 && top === "practice-start") {
     replaceCourses("subject-hub");
     renderSubjectHub();
@@ -12631,6 +12637,8 @@ function bindRatingsUI() {
     renderToursStart();
   } else if (next === "practice-start") {
     renderPracticeStart();
+  } else if (next === "practice-history") {
+    window.iClubPracticeHistoryScreenV1?.render?.();
   } else if (next === "subject-hub") {
     renderSubjectHub();
   } else if (next === "books") {
@@ -12674,7 +12682,7 @@ function canCoursesBack() {
 
   // Practice can be the sole entry in the stack after finishing or exiting a
   // topic drill. A visible back control must always have a safe destination.
-  if (["practice-start","practice-result","practice-review","practice-recs"].includes(top)) return true;
+  if (["practice-start","practice-history","practice-result","practice-review","practice-recs"].includes(top)) return true;
 
   return state.courses.stack.length > 1;
 }
@@ -21027,6 +21035,14 @@ async function loadTopicHistoryScreen(){
   if(key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-rec-topic-history")return;
   window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),key,data,unavailable);
 }
+// Read-only standalone History is a real Courses-stack screen.
+window.addEventListener("iclub-practice-open-history",event=>{
+  const key=String(event?.detail?.subjectKey||"");
+  if(!key||key!==String(state?.courses?.subjectKey||"")||
+     getCoursesTopScreen()!=="practice-start")return;
+  pushCourses("practice-history");
+  window.iClubPracticeHistoryScreenV1?.render?.();
+});
 window.addEventListener("iclub-practice-open-history-list",event=>{
   const key=String(event?.detail?.subjectKey||"");
   if(!key||key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-recs")return;

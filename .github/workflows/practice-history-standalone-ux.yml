@@ -1,0 +1,49 @@
+name: Practice History standalone visual acceptance
+on:
+  pull_request:
+    branches: ['ux/practice-archive-season-swipe-20261119']
+    paths:
+      - 'practice-history-screen.js'
+      - 'practice-results-tabs.js'
+      - 'practice-results-tabs.css'
+      - 'index.html'
+      - 'app.js'
+      - 'scripts/practice-history-standalone-chromium.cjs'
+      - '.github/workflows/practice-history-standalone-ux.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: practice-history-standalone-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  chromium-ui-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify exact source syntax
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check practice-history-screen.js
+          node --check practice-results-tabs.js
+          node --check scripts/practice-history-standalone-chromium.cjs
+      - name: Run isolated Chromium RU UZ EN (no production)
+        env:
+          PRACTICE_HISTORY_SCREEN_DIR: artifacts/practice-history-standalone
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node scripts/practice-history-standalone-chromium.cjs
+      - name: Screenshots for owner visual acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-history-standalone-${{ github.sha }}
+          path: artifacts/practice-history-standalone/*.png
+          if-no-files-found: warn
+          retention-days: 14

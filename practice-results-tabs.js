@@ -543,240 +543,38 @@
   function renderSeason2Period(period,subjectKey,language){
     const root=document.getElementById(ROOT_ID);
     if(!root)return false;
-    const holders=['tours','topics'].map(key=>root.querySelector('[data-practice-s2-history="'+key+'"]'));
-    const archiveHolder=root.querySelector('[data-practice-s2-archive]');
     const valid=period?.ok===true&&period?.period_active===true&&
       String(period.subject_key||'')===String(subjectKey||'');
     root.dataset.practiceS2Active=valid?'true':'false';
-    holders.forEach(holder=>{if(holder){holder.replaceChildren();holder.hidden=!valid;}});
-    if(archiveHolder){archiveHolder.replaceChildren();archiveHolder.hidden=true;}
-    if(!valid)return false;
-    const locale=['ru','uz','en'].includes(language)?language:lang();
-    const c=PERIOD_COPY[locale],fmt=stamp=>{
-      const d=new Date(String(stamp||''));
-      return Number.isFinite(d.getTime())?
-        d.toLocaleDateString(locale==='en'?'en-GB':locale==='uz'?'uz-UZ':'ru-RU',{timeZone:'Asia/Tashkent'}):'';
-    };
-    function item(row,kind){
-      const el=node('div','iclub-s2-history-row');
-      const left=node('span','iclub-s2-history-row-left');
-      const topic=kind==='topics'?String(row?.topic||c.topic).slice(0,120):c.main;
-      left.append(node('strong','',topic),node('small','',fmt(row?.created_at)));
-      const right=node('span','iclub-s2-history-score');
-      if(kind==='topics'){
-        const score=Number(row?.correct),total=Number(row?.total);
-        right.textContent=Number.isInteger(score)&&Number.isInteger(total)&&total>0&&score>=0&&score<=total?
-          score+' / '+total:'—';
-      }else{
-        const percent=Number(row?.percent);
-        right.textContent=row?.percent!=null&&Number.isFinite(percent)&&percent>=0&&percent<=100?
-          Math.round(percent)+'%':'—';
-      }
-      el.append(left,right);return el;
+    for(const holder of root.querySelectorAll('[data-practice-s2-history]')){
+      holder.replaceChildren();holder.hidden=true;
     }
-    function appendLimited(holder,rows,offset,n,kind){
-      for(const row of rows.slice(offset,offset+n))holder.append(item(row,kind));
-    }
-    function historyGroup(container,rows,total,heading,kind,collapsed,emptyMessage=c.empty){
-      const size=Math.max(0,Math.trunc(Number(total)||0));
-      const sample=Array.isArray(rows)?rows.slice(0,20):[];
-      if(collapsed&&size===0)return;
-      const main=collapsed?node('details','iclub-s2-history-archive'):node('div','iclub-s2-history-current');
-      const title=collapsed?node('summary','iclub-s2-history-caption',heading+' · '+size):
-        node('strong','iclub-s2-history-caption',heading+' · '+size);
-      main.append(title);
-      const body=node('div','iclub-s2-history-rows');
-      main.append(body);
-      let initialized=false,shown=0;
-      const draw=()=>{
-        if(initialized)return;
-        initialized=true;
-        appendLimited(body,sample,0,3,kind);shown=Math.min(3,sample.length);
-        if(!sample.length)body.append(node('p','iclub-s2-history-empty',emptyMessage));
-        if(sample.length>3){
-          const earlier=node('details','iclub-s2-history-earlier');
-          earlier.append(node('summary','',c.earlier+' ('+(sample.length-3)+')'));
-          const older=node('div','iclub-s2-history-rows');earlier.append(older);
-          const more=node('button','iclub-s2-history-more');
-          more.type='button';more.hidden=true;earlier.append(more);
-          let displayed=0;
-          const append=()=>{
-            const batch=sample.slice(3+displayed,3+displayed+5);
-            batch.forEach(row=>older.append(item(row,kind)));
-            displayed+=batch.length;
-            const left=sample.length-3-displayed;
-            more.hidden=left<=0;
-            if(left>0)more.textContent=c.more+' ('+Math.min(5,left)+')';
-          };
-          earlier.addEventListener('toggle',()=>{if(earlier.open&&displayed===0)append();});
-          more.addEventListener('click',append);
-          main.append(earlier);
-        }
-        if(size>sample.length)main.append(node('p','iclub-s2-history-note',c.partial));
-      };
-      if(collapsed)main.addEventListener('toggle',()=>{if(main.open)draw();});
-      else draw();
-      container.append(main);
-    }
-    for(const [idx,kind] of ['tours','topics'].entries()){
-      const holder=holders[idx];if(!holder)continue;
-      const source=kind==='tours'?period.main:period.topic;
-      const count=kind==='tours'?source?.attempts_count:source?.sessions_count;
-      const prev=kind==='tours'?source?.archived_attempts_count:source?.archived_sessions_count;
-      const block=node('section','iclub-s2-history-block');
-      block.append(node('h2','iclub-s2-history-title',c.title));
-      const start=fmt(period.period_starts_at);
-      if(start)block.append(node('p','iclub-s2-history-note',c.since+' '+start));
-      historyGroup(block,source?.recent,count,c.current,kind,false);
-      holder.append(block);
-    }
-    // One quiet archive BELOW both learning panels. The swipe changes
-    // verified historical PERIODS; the visible tabs change Tour / Topic type.
-    // This is read-only presentation, NEVER another attempt launcher.
-    if(archiveHolder){
-      const mainArchived=Math.max(0,Number(period?.main?.archived_attempts_count)||0);
-      const topicArchived=Math.max(0,Number(period?.topic?.archived_sessions_count)||0);
-      const expectedCount=mainArchived+topicArchived;
-      const raw=Array.isArray(period?.archive_seasons)?period.archive_seasons:[];
-      const seasons=raw.filter(entry=>entry&&typeof entry==='object').map(entry=>{
-        const seasonNo=Number(entry.season_no);
-        const validSeason=Number.isInteger(seasonNo)&&seasonNo>=1;
-        const key=validSeason?'season-'+seasonNo:
-          entry.key==='legacy'?'legacy':entry.key==='previous'?'previous':null;
-        if(!key)return null;
-        const main=Math.max(0,Math.trunc(Number(entry.main?.attempts_count)||0));
-        const topic=Math.max(0,Math.trunc(Number(entry.topic?.sessions_count)||0));
-        return {key,seasonNo:validSeason?seasonNo:null,main,topic,
-          mainRows:Array.isArray(entry.main?.recent)?entry.main.recent:[],
-          topicRows:Array.isArray(entry.topic?.recent)?entry.topic.recent:[]};
-      }).filter(entry=>entry&&(entry.main+entry.topic)>0);
-      // An older RPC returns one *aggregate* bucket: never invent a
-      // historical season breakdown from attempt timestamps in the browser.
-      const reconciled=seasons.reduce((sum,entry)=>sum+entry.main+entry.topic,0)===expectedCount;
-      const available=reconciled&&seasons.length?seasons:[{
-        key:'previous',seasonNo:null,main:mainArchived,topic:topicArchived,
-        mainRows:period.main?.archived_recent||[],
-        topicRows:period.topic?.archived_recent||[]
-      }];
-      if(expectedCount>0){
-        const archive=node('details','iclub-s2-history-bottom-details');
-        archive.append(node('summary','iclub-s2-history-bottom-caption',
-          c.archive+' · '+expectedCount));
-        const content=node('div','iclub-s2-history-bottom-content');
-        const navigator=node('div','iclub-s2-archive-navigator');
-        navigator.setAttribute('aria-label',c.archive);
-        const previous=node('button','iclub-s2-archive-direction','‹');
-        const next=node('button','iclub-s2-archive-direction','›');
-        previous.type=next.type='button';
-        previous.setAttribute('aria-label',c.previousSeason);
-        next.setAttribute('aria-label',c.nextSeason);
-        const seasonIdentity=node('div','iclub-s2-archive-season-identity');
-        const seasonTitle=node('strong','iclub-s2-archive-season-name');
-        const seasonPosition=node('small','iclub-s2-archive-season-position');
-        seasonIdentity.append(seasonTitle,seasonPosition);
-        navigator.append(previous,seasonIdentity,next);
-        const dots=node('div','iclub-s2-archive-dots');
-        dots.setAttribute('aria-hidden','true');
-        const tabs=node('div','iclub-s2-archive-tabs');
-        tabs.setAttribute('role','tablist');
-        tabs.setAttribute('aria-label',c.archive);
-        const panel=node('section','iclub-s2-archive-panel');
-        panel.id='practice-archive-selected-history';
-        panel.setAttribute('role','tabpanel');
-        const modeButtons={};
-        for(const kind of ['tours','topics']){
-          const button=node('button','iclub-s2-archive-tab',kind==='tours'?c.main:c.topic);
-          button.type='button';
-          button.setAttribute('role','tab');
-          button.setAttribute('aria-controls',panel.id);
-          button.id='practice-archive-mode-'+kind;
-          tabs.append(button);
-          modeButtons[kind]=button;
-        }
-        content.append(navigator,dots,tabs,panel);
-        let position=0;
-        let kind=root.dataset.practiceResultsMode==='topics'?'topics':'tours';
-        const seasonLabel=entry=>entry.seasonNo!==null?
-          c.season+' '+entry.seasonNo:
-          (entry.key==='legacy'?c.beforeSeason:c.olderSeason);
-        const paint=()=>{
-          const entry=available[position];
-          archive.dataset.archiveSeason=entry.key;
-          archive.dataset.archiveType=kind;
-          seasonTitle.textContent=seasonLabel(entry);
-          seasonPosition.textContent=available.length>1?
-            (position+1)+' / '+available.length:'';
-          previous.disabled=position===0;
-          next.disabled=position===available.length-1;
-          previous.hidden=next.hidden=available.length<2;
-          dots.replaceChildren();
-          if(available.length>=2&&available.length<=6){
-            for(let i=0;i<available.length;i++){
-              const dot=node('span','iclub-s2-archive-dot');
-              if(i===position)dot.classList.add('is-active');
-              dots.append(dot);
-            }
-          }
-          for(const type of ['tours','topics']){
-            const selected=type===kind,button=modeButtons[type];
-            button.setAttribute('aria-selected',String(selected));
-            button.tabIndex=selected?0:-1;
-            button.classList.toggle('is-selected',selected);
-          }
-          panel.setAttribute('aria-labelledby',modeButtons[kind].id);
-          panel.replaceChildren();
-          const count=kind==='tours'?entry.main:entry.topic;
-          const rows=kind==='tours'?entry.mainRows:entry.topicRows;
-          historyGroup(panel,rows,count,c.records,kind,false,c.noArchived);
-        };
-        const chooseSeason=target=>{
-          if(target<0||target>=available.length||target===position)return;
-          position=target;paint();
-        };
-        previous.addEventListener('click',()=>chooseSeason(position-1));
-        next.addEventListener('click',()=>chooseSeason(position+1));
-        for(const type of ['tours','topics']){
-          modeButtons[type].addEventListener('click',()=>{kind=type;paint();});
-        }
-        tabs.addEventListener('keydown',event=>{
-          if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
-          event.preventDefault();
-          kind=event.key==='Home'||event.key==='ArrowLeft'?'tours':'topics';
-          paint();modeButtons[kind].focus();
-        });
-        // Touch-only horizontal season navigation. Vertical document scroll
-        // remains native. No wrap-around, no hijacking Tour chips/Telegram Back.
-        let startTouch=null;
-        content.addEventListener('touchstart',event=>{
-          if(event.touches.length!==1){startTouch=null;return;}
-          const touch=event.touches[0];
-          startTouch={x:touch.clientX,y:touch.clientY};
-        },{passive:true});
-        content.addEventListener('touchend',event=>{
-          if(!startTouch||event.changedTouches.length!==1)return;
-          const touch=event.changedTouches[0];
-          const dx=touch.clientX-startTouch.x,dy=touch.clientY-startTouch.y;
-          startTouch=null;
-          if(Math.abs(dx)>=58&&Math.abs(dx)>Math.abs(dy)*1.45){
-            chooseSeason(position+(dx<0?1:-1));
-          }
-        },{passive:true});
-        content.addEventListener('touchcancel',()=>{startTouch=null;},{passive:true});
-        archive.addEventListener('toggle',()=>{
-          if(archive.open){
-            // Read the current learning mode on every open; archive remains
-            // a separate read-only filter, never an active Practice route.
-            kind=root.dataset.practiceResultsMode==='topics'?'topics':'tours';
-            paint();
-          }
-        });
-        archive.append(content);
-        archiveHolder.append(archive);
-        archiveHolder.hidden=false;
-        paint();
-      }
-    }
-    return true;
+    window.iClubPracticeHistoryScreenV1?.setData?.(period,subjectKey,language);
+    const slot=root.querySelector('[data-practice-s2-archive]');
+    if(!slot)return false;
+    slot.replaceChildren();
+    slot.hidden=false;
+    const labels=({
+      ru:['История практики','Результаты тренировок по турам, темам и сезонам.'],
+      uz:['Amaliyot tarixi','Mashqlar natijalari turlar, mavzular va mavsumlar bo‘yicha.'],
+      en:['Practice history','Practice results across tours, topics and seasons.']
+    })[language]||['История практики','Результаты тренировок по турам, темам и сезонам.'];
+    const entry=node('button','iclub-practice-history-entry');
+    entry.type='button';
+    entry.setAttribute('aria-label',labels[0]+'. '+labels[1]);
+    const icon=node('span','iclub-practice-history-icon','▤');
+    icon.setAttribute('aria-hidden','true');
+    const text=node('span','iclub-practice-history-text');
+    text.append(node('strong','',labels[0]),node('small','',labels[1]));
+    const arrow=node('span','iclub-practice-history-arrow','›');
+    arrow.setAttribute('aria-hidden','true');
+    entry.append(icon,text,arrow);
+    entry.addEventListener('click',()=>window.dispatchEvent(
+      new CustomEvent('iclub-practice-open-history',{
+        detail:{subjectKey:String(subjectKey||'')}
+      })));
+    slot.append(entry);
+    return valid;
   }
   window.iClubPracticeSeason2HistoryV1=Object.freeze({render:renderSeason2Period});
 
