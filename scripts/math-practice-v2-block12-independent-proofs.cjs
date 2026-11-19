@@ -25,7 +25,19 @@ const tests={
 282:q=>mcq(q,s=>norm(s)==='x=60°,120°'&&near(sin(60),Math.sqrt(3)/2)&&near(sin(120),Math.sqrt(3)/2)),
 283:q=>mcq(q,s=>norm(s)==='x=150°,210°'&&near(cos(150),-Math.sqrt(3)/2)&&near(cos(210),-Math.sqrt(3)/2)),
 284:q=>mcq(q,s=>norm(s)==='x=45°,225°'&&near(tan(45-15),1/Math.sqrt(3))&&near(tan(225-15),1/Math.sqrt(3))),
-285:q=>input(q,[0,90,180,270].filter(x=>near(sin(2*x),0)).length),
+285(q){
+ assert.equal(q.difficulty,'hard','factorised translated trigonometric equations require multi-step reasoning');
+ assert.ok(q.question.en.includes('distinct solutions')&&q.question.ru.includes('различных решений')&&q.question.uz.includes('turli yechimi'));
+ const first=[60,180],second=[120,240];
+ for(const x of first)assert.ok(near(sin(x-30),1/2),'translated sine root');
+ for(const x of second)assert.ok(near(cos(x),-1/2),'cosine root');
+ const solutions=[...new Set([...first,...second])];
+ const expression=x=>(2*sin(x-30)-1)*(2*cos(x)+1);
+ assert.equal(solutions.length,4);
+ assert.ok(solutions.every(x=>x>=0&&x<360&&near(expression(x),0)));
+ for(const probe of [0,30,90,150,210,270,300,359])assert.ok(!near(expression(probe),0),'unlisted solution candidate');
+ input(q,solutions.length);
+},
 286:q=>mcq(q,s=>norm(s)==='x=60°,240°'&&near(cos(60+30),0)&&near(cos(240+30),0)),
 287:q=>mcq(q,s=>norm(s)==='x=0°,360°'&&near(cos(360),1)),
 288:q=>mcq(q,s=>norm(s)==='x=-135°,-45°'&&near(sin(-135),-Math.SQRT2/2)),
