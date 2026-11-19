@@ -15,7 +15,7 @@
       "question": {
         "en": "Which function is one-to-one on all real numbers?",
         "ru": "Какая функция взаимно однозначна на всех действительных числах?",
-        "uz": "Qaysi funksiya barcha haqiqiy sonlarda one-to-one?"
+        "uz": "Qaysi funksiya barcha haqiqiy sonlarda injektiv (birga-bir)?"
       },
       "options": [
         {
@@ -59,7 +59,7 @@
       "explanation": {
         "en": "A non-constant linear function is one-to-one on all real numbers. Each of the even-power functions gives the same output for some different inputs.",
         "ru": "Непостоянная линейная функция взаимно однозначна на всех действительных числах. Функции с чётной степенью дают одинаковые выходы для некоторых разных входов.",
-        "uz": "Doimiy bo‘lmagan chiziqli funksiya barcha haqiqiy sonlarda one-to-one. Juft darajali funksiyalarda ayrim turli kirishlar bir xil chiqish beradi."
+        "uz": "Doimiy bo‘lmagan chiziqli funksiya barcha haqiqiy sonlarda injektiv (birga-bir). Juft darajali funksiyalarda ayrim turli kirishlar bir xil chiqish beradi."
       },
       "ai_source_skill": "P1-FUN-04",
       "status": "draft"
@@ -274,7 +274,7 @@
       "question": {
         "en": "For f(x)=(x−2)²+6, which domain restriction makes f one-to-one and decreasing?",
         "ru": "Для f(x)=(x−2)²+6 какое ограничение области делает f взаимно однозначной и убывающей?",
-        "uz": "f(x)=(x−2)²+6 uchun qaysi soha cheklovi f ni one-to-one va kamayuvchi qiladi?"
+        "uz": "f(x)=(x−2)²+6 uchun qaysi soha cheklovi f ni injektiv (birga-bir) va kamayuvchi qiladi?"
       },
       "options": [
         {
@@ -318,7 +318,7 @@
       "explanation": {
         "en": "The vertex is at x=2. On x≤2 the left branch is strictly decreasing as x increases toward 2, so it is one-to-one and decreasing.",
         "ru": "Вершина находится при x=2. На x≤2 левая ветвь строго убывает при движении x к 2, поэтому функция взаимно однозначна и убывает.",
-        "uz": "Cho‘qqi x=2 da. x≤2 da chap tarmoq x 2 ga yaqinlashganda qat’iy kamayadi, shuning uchun funksiya one-to-one va kamayuvchi."
+        "uz": "Cho‘qqi x=2 da. x≤2 da chap tarmoq x 2 ga yaqinlashganda qat’iy kamayadi, shuning uchun funksiya injektiv (birga-bir) va kamayuvchi."
       },
       "ai_source_skill": "P1-FUN-04",
       "status": "draft"
@@ -335,7 +335,7 @@
       "question": {
         "en": "A one-to-one function f has domain [1,6] and range [−3,8]. What is the domain of f⁻¹?",
         "ru": "Взаимно однозначная функция f имеет область определения [1,6] и область значений [−3,8]. Какова область определения f⁻¹?",
-        "uz": "One-to-one f funksiyaning aniqlanish sohasi [1,6], qiymatlar to‘plami [−3,8]. f⁻¹ ning aniqlanish sohasi qaysi?"
+        "uz": "injektiv (birga-bir) f funksiyaning aniqlanish sohasi [1,6], qiymatlar to‘plami [−3,8]. f⁻¹ ning aniqlanish sohasi qaysi?"
       },
       "options": [
         {
@@ -501,7 +501,7 @@
       "question": {
         "en": "A one-to-one function f has domain x>2 and range y<5. Which statement about f⁻¹ is correct?",
         "ru": "Взаимно однозначная функция f имеет область x>2 и область значений y<5. Какое утверждение о f⁻¹ верно?",
-        "uz": "One-to-one f funksiyaning sohasi x>2, qiymatlar to‘plami y<5. f⁻¹ haqida qaysi tasdiq to‘g‘ri?"
+        "uz": "injektiv (birga-bir) f funksiyaning sohasi x>2, qiymatlar to‘plami y<5. f⁻¹ haqida qaysi tasdiq to‘g‘ri?"
       },
       "options": [
         {
@@ -562,7 +562,7 @@
       "question": {
         "en": "If f is one-to-one and f(6)=−2, which statement must be true?",
         "ru": "Если f взаимно однозначна и f(6)=−2, какое утверждение обязательно верно?",
-        "uz": "Agar f one-to-one va f(6)=−2 bo‘lsa, qaysi tasdiq albatta to‘g‘ri?"
+        "uz": "Agar f injektiv (birga-bir) va f(6)=−2 bo‘lsa, qaysi tasdiq albatta to‘g‘ri?"
       },
       "options": [
         {
