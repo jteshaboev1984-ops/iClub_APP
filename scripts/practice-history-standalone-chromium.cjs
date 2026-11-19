@@ -78,8 +78,10 @@ const {chromium}=require('playwright');
         assert.equal(await root.locator('#iclub-ph-tab-topics').getAttribute('aria-selected'),'true');
         assert.equal(await root.locator('.iclub-ph-results > .iclub-ph-early').count(),1,
           'pre-Season1 records must be retained under oldest season');
-        assert.equal(await root.locator('.iclub-ph-row').count(),3,
-          'older legacy rows are collapsed by default');
+        assert.equal(await root.locator('.iclub-ph-results > .iclub-ph-current-list .iclub-ph-row').count(),3,
+          'current visible period shows only three records; earlier rows stay in closed details');
+        assert.equal(await root.locator('.iclub-ph-early').getAttribute('open'),null,
+          'early history disclosure must be closed by default');
         if(screenshot&&screens)await page.screenshot({path:path.join(screens,'practice-history-season1-topics-'+locale+'-'+width+'.png'),animations:'disabled'});
         // No fictitious Season 0 / "before first season" swipe choice.
         assert.equal(await older.isDisabled(),true);
