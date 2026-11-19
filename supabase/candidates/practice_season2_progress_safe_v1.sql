@@ -32,6 +32,7 @@ declare
   v_topic_archive jsonb := '[]'::jsonb;
   v_topic_correct integer := 0;
   v_topic_answered integer := 0;
+  v_archive_seasons jsonb := '[]'::jsonb;
 begin
   if v_uid is null then
     raise exception 'not_authenticated' using errcode='28000';
@@ -168,9 +169,92 @@ begin
     order by s.created_at desc,s.id desc
   ) t;
 
+
+  -- Verified per-subject prior periods for a compact Season swipe control.
+  -- Only published/closed Tour1 calendar boundaries may establish a season.
+  -- Pre-first-season attempts use an explicitly labeled legacy bucket; never
+  -- pretend they belonged to Season 1. Empty buckets are not swipe choices.
+  -- This preserves the existing archive totals and owner read-only scope.
+  with recognized as (
+    select distinct on (sn.season_no)
+      sn.season_no,
+      (t.start_date::timestamp at time zone 'Asia/Tashkent') as lower_cutoff
+    from public.seasons sn
+    join public.tours t on t.season_id=sn.id
+      and t.subject_id=v_subject and t.tour_no=1
+    where sn.season_no < 2
+      and sn.status in ('current','closed')
+      and t.start_date is not null and t.end_date is not null
+      and t.start_date<=t.end_date and t.start_date<v_start
+    order by sn.season_no,t.start_date asc
+  ), boundaries as (
+    select ('season-'||r.season_no)::text as bucket_key,
+           r.season_no, r.lower_cutoff,
+           lead(r.lower_cutoff,1,v_cutoff) over (order by r.lower_cutoff,r.season_no)
+             as upper_cutoff
+    from recognized r
+  ), buckets as (
+    select bucket_key,season_no,lower_cutoff,upper_cutoff from boundaries
+    union all
+    select 'legacy'::text,null::integer,null::timestamptz,min(lower_cutoff)
+    from recognized having min(lower_cutoff) is not null
+    union all
+    select 'previous'::text,null::integer,null::timestamptz,v_cutoff
+    where not exists (select 1 from recognized)
+  ), summarized as (
+    select b.*,
+      (select count(*)::integer from public.practice_attempts pa
+        where pa.user_id=v_uid and pa.subject_id=v_subject
+          and coalesce(pa.is_lab,false) is false
+          and pa.created_at < b.upper_cutoff
+          and (b.lower_cutoff is null or pa.created_at>=b.lower_cutoff)) as main_count,
+      (select coalesce(jsonb_agg(to_jsonb(m.*) order by m.created_at desc,m.id desc),'[]'::jsonb)
+        from (select pa.id,pa.score,pa.percent,pa.time_seconds,pa.created_at
+          from public.practice_attempts pa
+          where pa.user_id=v_uid and pa.subject_id=v_subject
+            and coalesce(pa.is_lab,false) is false
+            and pa.created_at < b.upper_cutoff
+            and (b.lower_cutoff is null or pa.created_at>=b.lower_cutoff)
+          order by pa.created_at desc,pa.id desc limit 20) m) as main_recent,
+      (select count(*)::integer from public.practice_drill_sessions_v4 sd
+        where sd.user_id=v_uid and sd.subject_id=v_subject
+          and sd.status='finalized' and sd.drill_type='rec_topic'
+          and left(sd.client_session_id,22)='practice_topic_choice_'
+          and sd.created_at < b.upper_cutoff
+          and (b.lower_cutoff is null or sd.created_at>=b.lower_cutoff)) as topic_count,
+      (select coalesce(jsonb_agg(to_jsonb(t.*) order by t.created_at desc,t.id desc),'[]'::jsonb)
+        from (
+          select sd.id,sd.topic,sd.created_at,
+            count(a.session_id)::integer as total,
+            count(a.session_id) filter(where a.is_correct is true)::integer as correct
+          from (
+            select ss.id,ss.topic,ss.created_at
+            from public.practice_drill_sessions_v4 ss
+            where ss.user_id=v_uid and ss.subject_id=v_subject
+              and ss.status='finalized' and ss.drill_type='rec_topic'
+              and left(ss.client_session_id,22)='practice_topic_choice_'
+              and ss.created_at < b.upper_cutoff
+              and (b.lower_cutoff is null or ss.created_at>=b.lower_cutoff)
+            order by ss.created_at desc,ss.id desc limit 20
+          ) sd
+          left join public.practice_drill_answers_v4 a on a.session_id=sd.id
+          group by sd.id,sd.topic,sd.created_at
+          order by sd.created_at desc,sd.id desc
+        ) t) as topic_recent
+    from buckets b
+  )
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'key',z.bucket_key,'season_no',z.season_no,
+    'main',jsonb_build_object('attempts_count',z.main_count,'recent',z.main_recent),
+    'topic',jsonb_build_object('sessions_count',z.topic_count,'recent',z.topic_recent)
+  ) order by z.lower_cutoff desc nulls last),'[]'::jsonb)
+  into v_archive_seasons
+  from summarized z where z.main_count+z.topic_count>0;
+
   return jsonb_build_object(
     'ok',true,'subject_key',v_key,'season_no',2,'period_active',true,
     'period_starts_at',v_cutoff,
+    'archive_seasons',v_archive_seasons,
     'main',jsonb_build_object(
       'attempts_count',coalesce(v_current_main,0),
       'archived_attempts_count',coalesce(v_prior_main,0),
