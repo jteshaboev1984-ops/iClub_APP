@@ -479,22 +479,39 @@
     section.dataset.sxTourGroup='1';
     section.append(node('h2','',t.history),node('p','',t.previous));
     const list=node('div','iclub-sx-tour-history-list');
-    past.forEach((item,i)=>{
+    const appendRow=(item,i,holder)=>{
       const row=node('div','iclub-sx-tour-history-row');
-      if(i>=3){row.hidden=true;row.dataset.sxTourExtra='1';}
       row.append(node('span','iclub-sx-tour-history-index',String(i+1).padStart(2,'0')));
       const middle=node('span','iclub-sx-tour-history-description');
       middle.append(node('strong','',t.tour+String(item.tour_no)));
       middle.append(node('small','',tourRecDate(item,locale)));
       row.append(middle,node('strong','iclub-sx-tour-history-score',tourRecScore(item)));
-      list.append(row);
-    });
+      holder.append(row);
+    };
+    past.slice(0,3).forEach((row,i)=>appendRow(row,i,list));
     section.append(list);
     if(past.length>3){
-      const expand=node('button','iclub-sx-tour-expand',t.more+' '+String(past.length-3)+' ⌄');
-      expand.type='button';expand.dataset.sxTourExpand='1';
-      expand.setAttribute('aria-expanded','false');
-      section.append(expand);
+      const older=past.slice(3),label=PERIOD_COPY[locale];
+      const disclosure=node('details','iclub-s2-history-earlier');
+      disclosure.append(node('summary','',label.earlier+' ('+older.length+')'));
+      const rows=node('div','iclub-sx-tour-history-list');disclosure.append(rows);
+      const more=node('button','iclub-s2-history-more');
+      more.type='button';more.hidden=true;disclosure.append(more);
+      let shown=0;
+      const append=()=>{
+        older.slice(shown,shown+5).forEach((item,i)=>appendRow(item,shown+i+3,rows));
+        shown=Math.min(older.length,shown+5);
+        const remaining=older.length-shown;
+        more.hidden=remaining===0;
+        if(remaining)more.textContent=label.more+' ('+Math.min(5,remaining)+')';
+      };
+      disclosure.addEventListener('toggle',()=>{if(disclosure.open&&shown===0)append();});
+      more.addEventListener('click',append);
+      section.append(disclosure);
+    }
+    const total=Number(data.attempts_count);
+    if(Number.isInteger(total)&&total>rows.length){
+      section.append(node('p','iclub-s2-history-note',PERIOD_COPY[locale].partial));
     }
     holder.append(section);
     return true;
