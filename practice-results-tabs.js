@@ -524,17 +524,17 @@
   // Server returns at most 20 rows per lane; this is NOT cursor pagination.
   // Read-only; no action here creates/regrades/deletes an attempt.
   const PERIOD_COPY={
-    ru:{title:'История практики · Сезон 2',since:'Отсчёт с',current:'Новые результаты',
+    ru:{title:'История практики · Сезон 2',archive:'Архив прошлых сезонов',olderSeason:'Сезон 1 и ранее',since:'Отсчёт с',current:'Новые результаты',
       previous:'Предыдущие сезоны',earlier:'Более ранние записи',
       more:'Показать ещё',partial:'Показаны только последние записи. Остальные результаты сохранены в истории.',
       empty:'В новом сезоне пока нет завершённых попыток.',
       main:'Практика по турам',topic:'Практика по темам',attempts:'попыток'},
-    uz:{title:'Amaliyot tarixi · 2-mavsum',since:'Boshlanish sanasi',current:'Yangi natijalar',
+    uz:{title:'Amaliyot tarixi · 2-mavsum',archive:'Oldingi mavsumlar arxivi',olderSeason:'1-mavsum va avvalgi',since:'Boshlanish sanasi',current:'Yangi natijalar',
       previous:'Oldingi mavsumlar',earlier:'Avvalgi natijalar',
       more:'Yana ko‘rsatish',partial:'Faqat so‘nggi natijalar ko‘rsatilmoqda. Qolganlari tarixda saqlangan.',
       empty:'Yangi mavsumda hali yakunlangan urinishlar yo‘q.',
       main:'Turlar bo‘yicha amaliyot',topic:'Mavzular bo‘yicha amaliyot',attempts:'urinish'},
-    en:{title:'Practice history · Season 2',since:'Counting from',current:'New results',
+    en:{title:'Practice history · Season 2',archive:'Previous seasons archive',olderSeason:'Season 1 and earlier',since:'Counting from',current:'New results',
       previous:'Previous seasons',earlier:'Earlier entries',
       more:'Show more',partial:'Only recent entries are shown. Older results remain in history.',
       empty:'No completed attempts this season yet.',
@@ -544,10 +544,12 @@
     const root=document.getElementById(ROOT_ID);
     if(!root)return false;
     const holders=['tours','topics'].map(key=>root.querySelector('[data-practice-s2-history="'+key+'"]'));
+    const archiveHolder=root.querySelector('[data-practice-s2-archive]');
     const valid=period?.ok===true&&period?.period_active===true&&
       String(period.subject_key||'')===String(subjectKey||'');
     root.dataset.practiceS2Active=valid?'true':'false';
     holders.forEach(holder=>{if(holder){holder.replaceChildren();holder.hidden=!valid;}});
+    if(archiveHolder){archiveHolder.replaceChildren();archiveHolder.hidden=true;}
     if(!valid)return false;
     const locale=['ru','uz','en'].includes(language)?language:lang();
     const c=PERIOD_COPY[locale],fmt=stamp=>{
@@ -626,12 +628,69 @@
       const start=fmt(period.period_starts_at);
       if(start)block.append(node('p','iclub-s2-history-note',c.since+' '+start));
       historyGroup(block,source?.recent,count,c.current,kind,false);
-      historyGroup(block,source?.archived_recent,prev,c.previous,kind,true);
       holder.append(block);
+    }
+    // One quiet archive BELOW the learning tabs. Never duplicate it in both modes.
+    if(archiveHolder){
+      const mainArchived=Number(period?.main?.archived_attempts_count||0);
+      const topicArchived=Number(period?.topic?.archived_sessions_count||0);
+      if(mainArchived+topicArchived>0){
+        const archive=node('details','iclub-s2-history-bottom-details');
+        archive.append(node('summary','iclub-s2-history-bottom-caption',
+          c.archive+' · '+(mainArchived+topicArchived)));
+        const content=node('div','iclub-s2-history-bottom-content');
+        content.append(node('p','iclub-s2-history-note',c.olderSeason));
+        if(mainArchived>0)historyGroup(content,period.main?.archived_recent,
+          mainArchived,c.main,'tours',false);
+        if(topicArchived>0)historyGroup(content,period.topic?.archived_recent,
+          topicArchived,c.topic,'topics',false);
+        archive.append(content);
+        archiveHolder.append(archive);
+        archiveHolder.hidden=false;
+      }
     }
     return true;
   }
   window.iClubPracticeSeason2HistoryV1=Object.freeze({render:renderSeason2Period});
+
+  const CURRENT_TOUR_COPY={
+    ru:{active:'Активный тур',practice:'Практика этого тура',
+      previous:'Последний завершённый тур',upcoming:'Следующий тур',
+      empty:'Туры ещё не опубликованы',go:'К практике'},
+    uz:{active:'Faol tur',practice:'Shu tur amaliyoti',
+      previous:'Oxirgi yakunlangan tur',upcoming:'Keyingi tur',
+      empty:'Turlar hali e’lon qilinmagan',go:'Amaliyotga'},
+    en:{active:'Active tour',practice:'Practice for this tour',
+      previous:'Last completed tour',upcoming:'Upcoming tour',
+      empty:'Tours are not published yet',go:'Open Practice'}
+  };
+  function renderCurrentTourHeadline(picker,language){
+    const root=document.getElementById(ROOT_ID);
+    const holder=root?.querySelector('[data-practice-current-tour]');
+    if(!holder)return false;
+    holder.replaceChildren();
+    const c=CURRENT_TOUR_COPY[CURRENT_TOUR_COPY[language]?language:lang()];
+    const no=Number(picker?.activeTourNo||picker?.lastCompletedTourNo||
+      picker?.nextUpcomingTourNo||0);
+    const status=picker?.activeTourNo?c.active:
+      picker?.lastCompletedTourNo?c.previous:
+      picker?.nextUpcomingTourNo?c.upcoming:c.empty;
+    const title=node('strong','iclub-practice-current-tour-title',
+      no?status+' · '+no:status);
+    holder.append(title);
+    if(picker?.activeTourNo){
+      holder.append(node('small','iclub-practice-current-tour-sub',c.practice));
+      const btn=node('button','iclub-practice-current-tour-action',c.go);
+      btn.type='button';
+      btn.dataset.action='practice-select-tour';
+      btn.dataset.tourNo=String(picker.activeTourNo);
+      holder.append(btn);
+    }
+    holder.dataset.tourState=picker?.activeTourNo?'active':
+      picker?.lastCompletedTourNo?'completed':'upcoming';
+    return true;
+  }
+  window.iClubPracticeCurrentTourV1=Object.freeze({render:renderCurrentTourHeadline});
 
   function install() {
     const root = document.getElementById(ROOT_ID);
@@ -657,6 +716,11 @@
     const topicTab = create('practice-results-tab-topics','practice-results-panel-topics');
     bar.append(tourTab,topicTab);
     root.insertBefore(bar,picker);
+    // Active Tour + related Practice is primary, before the mode switch.
+    const currentTour=node('section','iclub-practice-current-tour');
+    currentTour.dataset.practiceCurrentTour='true';
+    currentTour.setAttribute('aria-live','polite');
+    root.insertBefore(currentTour,bar);
 
     const tourPanel=document.createElement('section');
     tourPanel.id='practice-results-panel-tours';
@@ -687,6 +751,10 @@
     topicSeasonHistory.dataset.practiceS2History='topics';
     topicSeasonHistory.hidden=true;
     topicPanel.append(topicSeasonHistory);
+    const bottomArchive=node('section','iclub-s2-history-bottom');
+    bottomArchive.dataset.practiceS2Archive='true';
+    bottomArchive.hidden=true;
+    root.insertBefore(bottomArchive,topicPanel.nextSibling);
     const realResume=document.getElementById('practice-resume-btn');
     const syncResume=()=>{
       const visible=realResume && realResume.style.display !== 'none' && !realResume.disabled;
@@ -728,6 +796,9 @@
       else openTopics();
       syncResume();
     }
+    window.iClubPracticeTabsV1=Object.freeze({select:next=>{
+      if(next==='tours'||next==='topics')choose(next);
+    }});
     tourTab.addEventListener('click',()=>choose('tours'));
     topicTab.addEventListener('click',()=>choose('topics'));
     bar.addEventListener('keydown',event=>{
