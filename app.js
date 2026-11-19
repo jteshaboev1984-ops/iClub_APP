@@ -17422,11 +17422,14 @@ window.iClubPracticeTopicChoice?.mount({
             Date.parse(String(row?.created_at||''))>=Date.parse(periodCutoff);
           const lastDb=Array.isArray(data.last) ?
             data.last.filter(samePeriod).map(normalizeDbAttempt).filter(row=>row.id>0) : [];
-          // The old all-time best may belong to the previous season. Do NOT
-          // fabricate a lifetime Season 2 best from a capped latest-N sample.
-          const bestDb=data.best&&samePeriod(data.best)?
-            normalizeDbAttempt(data.best):null;
-          h={best:bestDb,last:lastDb};
+          // If the lifetime best is from Season 1, show the best among the
+          // bounded *recent Season 2* entries with an honest range label.
+          // Never claim it is the entire Season 2 best when >30 attempts exist.
+          const exactBest=Boolean(data.best&&samePeriod(data.best));
+          const bestDb=exactBest?normalizeDbAttempt(data.best):
+            (lastDb.slice().sort((a,b)=>b.percent-a.percent||
+              a.durationSec-b.durationSec||b.ts-a.ts)[0]||null);
+          h={best:bestDb,last:lastDb,bestIsRecentSample:!!periodCutoff&&!exactBest&&!!bestDb};
         }
       }
     } catch {}
@@ -17439,6 +17442,14 @@ window.iClubPracticeTopicChoice?.mount({
 
     const best = h?.best || null;
     const last = Array.isArray(h?.last) ? h.last : [];
+    const resultLabel=document.querySelector('#courses-practice-start .practice-hero-metrics .practice-metric-label');
+    if(resultLabel){
+      resultLabel.textContent=periodCutoff?
+        (h?.bestIsRecentSample?tr3("Лучший из последних 30 попыток",
+          "So‘nggi 30 urinish ichidagi eng yaxshisi","Best of last 30 attempts"):
+          tr3("Лучший результат · Сезон 2","Eng yaxshi natija · 2-mavsum","Best result · Season 2")):
+        (t("practice_best_result")||tr3("Лучший результат","Eng yaxshi natija","Best result"));
+    }
 
     if (best) {
       if (bestScoreEl) {
