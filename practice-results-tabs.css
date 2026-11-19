@@ -1643,26 +1643,14 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 .iclub-visual-v3 #courses-practice-start .practice-topic-start-actions {
   display:grid;gap:10px;
 }
-.iclub-visual-v3 #courses-practice-start .practice-topic-start {
-  width:100%;min-height:46px;margin:0;
-}
-.iclub-visual-v3 #courses-practice-start .practice-topic-start:disabled {
-  opacity:.48;cursor:not-allowed;
+.iclub-visual-v3 #courses-practice-start .practice-topic-start-actions[hidden] {
+  display:none!important;
 }
 .iclub-visual-v3 #courses-practice-start .practice-topic-resume {
   margin:0;
 }
-.iclub-visual-v3 #courses-practice-start .practice-topic-choice-item.is-selected {
-  background:var(--academy-paper-blue,#f3f8ff);
-  border-color:#3071e1;
-  box-shadow:0 0 0 1px rgba(48,113,225,.11);
-}
-.iclub-visual-v3 #courses-practice-start .practice-topic-choice-item.is-selected
- .practice-topic-choice-item-action {
-  color:#2057a1;font-weight:820;
-}
 .iclub-visual-v3 #courses-practice-start .practice-topic-choice-item:focus-visible,
-.iclub-visual-v3 #courses-practice-start .practice-topic-start:focus-visible {
+.iclub-visual-v3 #courses-practice-start .practice-topic-resume:focus-visible {
   outline:3px solid var(--academy-focus,#377bdf);outline-offset:2px;
 }
 .iclub-visual-v3 #courses-practice-start .practice-topic-history-placement {
