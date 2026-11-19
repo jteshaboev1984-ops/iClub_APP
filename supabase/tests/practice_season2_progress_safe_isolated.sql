@@ -200,6 +200,8 @@ begin
 end
 $season_rail$;
 reset role;
-raise notice 'SEASON_ARCHIVE_SWIPE_PERIODS_PASS';
+do $season_rail_notice$ begin
+  raise notice 'SEASON_ARCHIVE_SWIPE_PERIODS_PASS';
+end $season_rail_notice$;
 
 rollback;
