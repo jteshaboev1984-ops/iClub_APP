@@ -218,7 +218,7 @@ begin
     'finalizer_version','v5'
   );
 end;
-$function$
+$function$;
 
 revoke all on function public.finalize_practice_session_safe_v5(bigint,integer)
   from public,anon;
