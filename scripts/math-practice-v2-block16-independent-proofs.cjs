@@ -42,7 +42,7 @@ const tests={
 assert.equal(Q.size,25);
 for(let id=376;id<=400;id++){
 try{const q=Q.get(id);assert.ok(q);assert.equal(q.key,'MATH-P1-PRACTICE2-Q'+String(id).padStart(3,'0'));
- assert.equal(q.practice_no,6);assert.ok(q.source_ref.includes('Ch8'));
+ assert.equal(q.practice_no,6);assert.ok(q.source_ref.includes(id<400?'Ch8':'Ch9'));
  if(calibrated.has(id))assert.equal(q.difficulty,'medium');
  for(const l of ['en','ru','uz']){assert.ok(q.question[l]?.trim()&&q.explanation[l]?.trim());assert.equal(numbers(q.question[l]),numbers(q.question.en),'trilingual numeric mismatch');}
  if(q.qtype==='mcq'){
