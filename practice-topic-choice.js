@@ -5,7 +5,7 @@
   "use strict";
   const COPY = {
     ru: { title:"Выберите тему", desc:"Выберите тему для отдельной практики.",
-      open:"Выбрать тему", close:"Скрыть темы", select:"Выбрать", selected:"Выбрано", search:"Поиск темы",
+      open:"Выбрать тему", close:"Скрыть темы", search:"Поиск темы",
       searchPlaceholder:"Найти тему…", loading:"Загружаем доступные темы…",
       empty:"Пока нет доступных тем для практики.",
       filtered:"Темы не найдены", error:"Не удалось загрузить темы. Попробуйте ещё раз.",
@@ -17,7 +17,7 @@
       historyUnavailable:"История попыток по темам сейчас недоступна.",
       historyRetry:"Повторить" },
     uz: { title:"Mavzuni tanlang", desc:"Tur amaliyotidan alohida mavzu bo‘yicha amaliyot qiling.",
-      open:"Mavzuni tanlash", close:"Mavzularni yashirish", select:"Tanlash", selected:"Tanlandi", search:"Mavzuni qidirish",
+      open:"Mavzuni tanlash", close:"Mavzularni yashirish", search:"Mavzuni qidirish",
       searchPlaceholder:"Mavzuni topish…", loading:"Mavzular yuklanmoqda…",
       empty:"Hozircha mavzular bo‘yicha amaliyot mavjud emas.",
       filtered:"Mavzu topilmadi", error:"Mavzularni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
@@ -29,7 +29,7 @@
       historyUnavailable:"Mavzular bo‘yicha urinishlar tarixini hozir yuklab bo‘lmadi.",
       historyRetry:"Qayta urinish" },
     en: { title:"Choose a topic", desc:"Practise a specific topic independently from your Tour practice.",
-      open:"Choose topic", close:"Hide topics", select:"Select", selected:"Selected", search:"Search topics",
+      open:"Choose topic", close:"Hide topics", search:"Search topics",
       searchPlaceholder:"Find a topic…", loading:"Loading available topics…",
       empty:"No topic practice is currently available.",
       filtered:"No matching topics", error:"Could not load topics. Please try again.",
@@ -92,29 +92,12 @@
     const note=element("p","practice-topic-choice-note",c.note);
     const history=element("section","practice-topic-history");
     history.hidden=true;
-    // On the reorganized screen, the complete topic history belongs AFTER
-    // the start/resume actions. Existing screens without an outlet are unchanged.
-    const historyOutlet=document.getElementById("practice-topic-history-placement");
+    // Preserve latest Topic attempts below Start/Resume in the grouped Practice
+    // screen; original fallback layout stays unchanged if no outlet is present.
+    const historyOutlet=document.getElementById('practice-topic-history-placement');
     host.append(header,panel,note);
     if(historyOutlet)historyOutlet.replaceChildren(history);
     else host.append(history);
-    const separateStart=document.getElementById("practice-start-topic-btn");
-    let selectedTopic=null;
-    let selectionBusy=false;
-    if(separateStart){
-      separateStart.disabled=true;
-      separateStart.onclick=async()=>{
-        if(!selectedTopic||selectionBusy||ownSerial!==mountSerial)return;
-        selectionBusy=true;separateStart.disabled=true;
-        const choice=selectedTopic;
-        try{await onStart(choice);}
-        finally{
-          selectionBusy=false;
-          if(ownSerial===mountSerial&&separateStart.isConnected)
-            separateStart.disabled=!selectedTopic;
-        }
-      };
-    }
 
     function safeResult(row) {
       if (!row || typeof row!=="object") return null;
@@ -224,32 +207,14 @@
       for(const row of filtered.slice(0,limit)) {
         const button=element("button","practice-topic-choice-item");
         button.type="button";
-        button.disabled=busy||selectionBusy;
+        button.disabled=busy;
         const info=element("span","practice-topic-choice-item-info");
         info.append(element("strong","",row.topic),
                     element("small","",itemCountLabel(row.question_count,lang,c)));
-        const chosen=separateStart&&selectedTopic===row.topic;
-        const action=element("span","practice-topic-choice-item-action",
-          separateStart?(chosen?c.selected:c.select):c.start);
-        if(separateStart){
-          button.setAttribute("aria-pressed",String(Boolean(chosen)));
-          button.classList.toggle("is-selected",Boolean(chosen));
-        }
+        const action=element("span","practice-topic-choice-item-action",c.start);
         button.append(info,action);
         button.addEventListener("click",async()=>{
-          if(busy || selectionBusy || ownSerial!==mountSerial) return;
-          if(separateStart){
-            selectedTopic=row.topic;
-            separateStart.disabled=false;
-            for(const candidate of list.querySelectorAll(".practice-topic-choice-item")){
-              const isSelected=candidate===button;
-              candidate.setAttribute("aria-pressed",String(isSelected));
-              candidate.classList.toggle("is-selected",isSelected);
-              const label=candidate.querySelector(".practice-topic-choice-item-action");
-              if(label)label.textContent=isSelected?c.selected:c.select;
-            }
-            return;
-          }
+          if(busy || ownSerial!==mountSerial) return;
           busy=true;
           panel.querySelectorAll("button,input").forEach(el=>{el.disabled=true;});
           try { await onStart(row.topic); }
@@ -296,11 +261,7 @@
         if (ownSerial===mountSerial) list.removeAttribute("aria-busy");
       }
     }
-    search.addEventListener("input",()=>{
-      limit=10;selectedTopic=null;
-      if(separateStart)separateStart.disabled=true;
-      render();
-    });
+    search.addEventListener("input",()=>{limit=10;render();});
     more.addEventListener("click",()=>{limit+=10;render();});
     toggle.addEventListener("click",()=>{
       const next=panel.hidden;
