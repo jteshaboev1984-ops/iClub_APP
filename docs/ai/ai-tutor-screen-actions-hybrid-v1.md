@@ -45,3 +45,29 @@ JavaScript и CSS обязаны принимать одно и то же реш
 Инварианты: Core независимо работает при AI OFF; не менять таблицы и данные реальных учеников, `localStorage`, результаты, предыдущие оценки; server-only provider keys; отсутствие AI в активном экзамене; одни и те же академические факты на трёх языках; нет автоматических расходов; один существующий Tutor без новых панелей.
 
 QA этапа 1: изолированный Chromium с настоящими JS-файлами проверяет Home, предмет, Practice, смену языков RU/UZ/EN, конкретный approved prepared route, отсутствие модельных вызовов; существующие GoTrue/PostgreSQL/Deno/PC1–PC4 проверки, защита активных Tours/Exam Prep и Core regression. Никаких платных провайдерских вызовов, Preview или real-user accounts для теста. Merge только при зелёной целевой проверке и неизменившемся main.
+
+## Continuation plan — 2026-11-19 (Issue #412)
+
+This section is a **task-specific implementation plan**, not a new standing rule, tariff decision or authorization to release. Prior sections describe the already accepted 2026-10-29 screen map and must not be re-run as a new implementation.
+
+### Package A — existing Tutor delivers learner-safe educational help (START HERE)
+1. Trace the already deployed provider-free routes and the existing `iclub-ai-v21-ui.js`, `iclub-ai-v21-beta-client.js`, `practice-ai-ui.js`, `exam-prep/exam-prep-ai-ui.js` without introducing a second AI window. Reuse genuine server-owned finalized Practice result/approved source context and existing 243 Mathematics P1/P5 Tutor Cards; preserve Exam Prep's existing controlled behavior.
+2. On a typed subject/academic question with **no approved source or no enabled academic route**, show a clear RU/UZ/EN academic-source-unavailable explanation rather than pretending a topic was taught or redirecting it to paid general chat. Retain existing prepared product help for nonacademic questions. This first change is provider-free and does not grant new capabilities.
+3. Test subject/assessment/current user transitions with existing CI. Do not claim browser E2E from source-only assertions; a real authenticated browser/HTTP pass and learner visual acceptance remain separate release evidence. Existing unmerged Practice AI Draft #366 owns overlapping experimental source: do not edit that branch, replay it, or replace its protected code with stale definitions.
+
+### Package B — reliability / privacy / budget preparation
+- Reuse existing request IDs, service-only source retrieval, saved receipts and per-route limits. Identify missing correlation of UI ↔ server request ↔ outcome/latency/token estimate/spend; store only minimal authorized metadata, **not all learner prompts/responses** by default.
+- Confirm explicit provider timeout, unknown-charge replay behavior, 429 / unavailable model messaging, source/prompt/model version bindings and AI-OFF Core preservation. Test only real gaps, not a new observability platform or speculative provider-failover system.
+- Owner must approve any new minors' consent/retention policy, paid budget ceiling, production/security change or wider learner access.
+
+### Package C — limited model-backed educational clarification (HOLD)
+- Only after A/B pass and owner sets an explicit small cross-route spend ceiling: a learner deliberately submits a question tied to an **authorized approved** source. Server chooses whether a model call is allowed; no model call on opening a screen. Respect subject/locales, provenance, output validation, safe unavailable response and existing financial receipts.
+- No blanket generation ON, new provider, checkout/tariffs, fine-tuning, compulsory RAG/vector DB, semantic cache, multiple agents or auto-switch to paid backup models. Keep subject expansions separately governed.
+
+### Package D — evaluate and extend (HOLD)
+- Start with **30–50** targeted cases (RU/UZ/EN, exact P1/P5 source, finalized Practice, no-source, protected attempt, missing auth, model failure and request accounting) rather than a mandatory huge generated corpus. Evals should check grounding, factual correctness, usefulness, non-disclosure and source stability; human/reviewer calibration is independent of an LLM-as-judge score.
+- Record request IDs, counts and latency/errors/cost with privacy by default; review feedback and delayed unaided Practice learning. Expand Economics → Chemistry → Biology → Informatics only when reviewed original source cards and academic release gates permit. Never award marks/progress via AI.
+
+### Evidence and GO
+- Use the existing `docs/ai/ai-edge-route-inventory-v1.md` as the historical + current route ledger, this implementation contract as the task-level spec and Issue #412 as the live checkpoint. Do **not** create redundant PRD/API/runbook files for already documented functions.
+- Package A changes may be developed in a **separate Draft PR** and tested without production writes. Merge to `main`, Vercel deploy, Supabase/Edge write, paid-model usage, feature activation and academic publication require **specific owner GO**. Branch SHAs and test results, not dated checklists, determine completion.
