@@ -5241,6 +5241,28 @@ function formatAnswerForDisplay(q, rawAnswer) {
 }
    
 // --- Practice stage helpers + DB-first practice set builder ---
+async function getPracticeSubjectSeasonId(subjectId) {
+  // Use this subject's Tour 1; a global current season must not lock others.
+  const fallback=await getSeasonOneId();
+  if(!window.sb||!subjectId)return fallback;
+  try{
+    const published=await loadPublishedSeasonRows();
+    if(!published.length)return fallback;
+    const ids=published.map(x=>Number(x.id)).filter(Boolean);
+    const {data,error}=await window.sb.from("tours")
+      .select("season_id,start_date,end_date")
+      .eq("subject_id",Number(subjectId)).eq("tour_no",1)
+      .in("season_id",ids);
+    if(error||!Array.isArray(data))return fallback;
+    const today=getLocalTodayISO();
+    const eligible=published.filter(sn=>data.some(t=>
+      Number(t.season_id)===Number(sn.id)&&!!t.start_date&&!!t.end_date&&
+      String(t.start_date)<=String(t.end_date)&&String(t.start_date)<=today
+    )).sort((a,b)=>b.season_no-a.season_no);
+    return Number(eligible[0]?.id)||fallback;
+  }catch{return fallback;}
+}
+
 async function getPracticeStageContext(subjectKey) {
   if (!window.sb) return null;
 
@@ -5248,7 +5270,7 @@ async function getPracticeStageContext(subjectKey) {
   if (!subjectId) return null;
 
   const seasonId =
-    await getCurrentSeasonId();
+    await getPracticeSubjectSeasonId(subjectId);
 
   if (!seasonId) return null;
 
@@ -5274,9 +5296,7 @@ async function getPracticeStageContext(subjectKey) {
   const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
   const totalTours = tours.length;
 
-  const pad2 = (n) => String(n).padStart(2, "0");
-  const d0 = new Date();
-  const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
+  const todayISO = getLocalTodayISO();
 
   const isInWindow = (row) => {
     const sd = row?.start_date
@@ -5514,9 +5534,12 @@ function setSelectedPracticeTourNo(subjectKey, tourNo) {
 }
 
 function getLocalTodayISO() {
-  const d0 = new Date();
-  const p = (n) => String(n).padStart(2, "0");
-  return `${d0.getFullYear()}-${p(d0.getMonth() + 1)}-${p(d0.getDate())}`;
+  // Tour dates follow Uzbekistan calendar day, independent of the device TZ.
+  const parts=new Intl.DateTimeFormat('en-US',{
+    timeZone:'Asia/Tashkent',year:'numeric',month:'2-digit',day:'2-digit'
+  }).formatToParts(new Date());
+  const part=k=>parts.find(p=>p.type===k)?.value||'';
+  return [part('year'),part('month'),part('day')].join('-');
 }
 
 function isTourRowInWindow(
@@ -5623,15 +5646,18 @@ async function getPracticeTourCards(subjectKey) {
       let stateName = "available";
 
       if (tourRow) {
-        if (tourRow?.is_active === true && isTourRowInWindow(tourRow, todayISO)) {
-          stateName = "active";
-        } else if (tourRow?.start_date && String(tourRow.start_date) > todayISO) {
-          stateName = "locked";
+        if (!tourRow.start_date || !tourRow.end_date ||
+            String(tourRow.start_date)>String(tourRow.end_date)) {
+          stateName="locked"; // Undated is never active or completed.
+        } else if (tourRow.is_active===true && isTourRowInWindow(tourRow,todayISO)) {
+          stateName="active";
+        } else if (String(tourRow.end_date)<todayISO) {
+          stateName="past";
         } else {
-          stateName = "past";
+          stateName="locked";
         }
       } else {
-        stateName = tourNo <= currentTourNo ? (tourNo === currentTourNo ? "active" : "past") : "locked";
+        stateName=tourNo<=currentTourNo?"past":"locked";
       }
 
       const total = Number(stats?.totalCount || 0);
@@ -5661,13 +5687,20 @@ async function getPracticeTourCards(subjectKey) {
   const selectedCard = rawCards.find(c => c.tourNo === selectedRaw && !c.isLocked);
   const fallbackCard =
     rawCards.find(c => c.isActive && !c.isLocked) ||
-    rawCards.find(c => !c.isLocked) ||
+    rawCards.slice().reverse().find(c => !c.isLocked) ||
     rawCards[0];
 
   const selectedTourNo = Number(selectedCard?.tourNo || fallbackCard?.tourNo || currentTourNo || 1);
   setSelectedPracticeTourNo(subjectKey, selectedTourNo);
 
-  return { currentTourNo, selectedTourNo, cards: rawCards, season2Period, periodCutoff };
+  const activeCard=rawCards.find(c=>c.isActive&&!c.isLocked)||null;
+  const lastCompleted=rawCards.slice().reverse().find(c=>c.stateName==='past')||null;
+  const nextUpcoming=rawCards.find(c=>c.stateName==='locked'&&
+    !!tourByNo.get(c.tourNo)?.start_date)||null;
+  return { currentTourNo, selectedTourNo, cards: rawCards, season2Period,
+    periodCutoff,activeTourNo:activeCard?.tourNo||null,
+    lastCompletedTourNo:lastCompleted?.tourNo||null,
+    nextUpcomingTourNo:nextUpcoming?.tourNo||null };
 }
 
    function updatePracticeStartButtonForTour(tourNo, canResume = false) {
@@ -17349,6 +17382,7 @@ function addMyRecsFromAttempt(attempt) {
     if (!isCurrent()) return;
     const season2Period=picker?.season2Period||null;
     window.iClubPracticeSeason2HistoryV1?.render?.(season2Period,subjectKey,currentLang());
+    window.iClubPracticeCurrentTourV1?.render?.(picker,currentLang());
     const periodCutoff=picker?.periodCutoff||null;
     const selectedTourNo = Number(picker?.selectedTourNo || 1);
 updatePracticeStartButtonForTour(selectedTourNo, false);
