@@ -18,11 +18,26 @@
 
 - `supabase/candidates/practice_season2_progress_safe_v1.sql`: no table updates; user-owned and subject-filtered read-only results; main Practice current attempt count, best, recent; separate archived main attempt count; voluntary topic practice current/archived session counts and correct/answered totals.
 - `supabase/tests/practice_season2_progress_safe_isolated.sql`: ephemeral PostgreSQL 17 fixture verifies draft/current/closed, Asia/Tashkent day boundary, lab exclusion, cross-user/subject privacy, unauthorized access, no changes to old answers or scores.
-- No changes to `app.js`, `practice-results-tabs.js`, database schema on production, Tour/Exam Prep runtime or academic content banks.
+- `app.js` now uses the read-only season boundary only when the API explicitly confirms active Season 2. Current Tour Practice mastered-question counts exclude old attempts; the prior attempts and local history are not deleted. Current-period records are filtered by their server creation timestamp. An old all-time best is **never** represented as the Season 2 best; if only a capped 30-entry sample is available, its derived best is honestly labeled as a recent-sample best.
+- `practice-results-tabs.js` and its existing stylesheet add consistent, non-destructive Practice History presentation for both Tour and Topic tabs. Uses the accepted Mathematics Exam Prep **three recent + native <details> + five per click** pattern, with a bounded recent sample and separate collapsible previous-season archive. Historic owner review controls remain in the dedicated Topic history. No changes to `index.html`, the UX531-owned integration branch, Tour/Exam Prep runtimes or academic banks.
+- This staged client is **not live**, and production database schema remains unchanged. When the new RPC is not installed or Season 2 is still draft, the new period UI stays hidden and existing history remains. The main Practice start view has new-period stats; legacy all-time My Recommendations and dedicated review history remain accessible, without pretending their rows are Season-2-only.
+
+## UI history source reconciliation — accepted Exam Prep versus Practice
+
+Read live GitHub `main` (not an unmerged UX screenshot) before implementation:
+
+- `exam-prep/exam-prep-live.js`: `historyListMarkup` + `bindHistoryDisclosure` show **three recent results**, a native disclosure, then **five older** per click. Core and ungraded Paper stay separate. Existing RPC limits (20 Core, 30 Paper) are displayed honestly as a limited sample, not invented cursor pagination.
+- `exam-prep/exam-prep-host.css`: subtle bordered history rows, compact labels/dates, mobile one-column layouts, native keyboard-accessible controls. Exam Prep Paper execution is ungraded; this does not imply Practice Paper scores.
+- `practice-results-tabs.js`: before this work Tour history used a bespoke 3+show-all button and Topic history displayed a five-row preview. In this source Draft both now use the **same 3+5 disclosure behavior** as Exam Prep while keeping original safe review listeners. Previously unbounded button expansion is retired; no attempt deletion.
+- New Season 2 Practice history is visible inside existing **By Tour / By Topic** panels, without adding duplicate global navigation or changing iClub stack headers. It shows new attempts separately from a native **Previous seasons** disclosure and a small honest note if an older sample exceeds the 20-row cap. It is a *read-only history preview*, not server-side cursor pagination.
+- UI copy in **RU / UZ / EN**; CSS is scoped to Practice surfaces and reuses existing sapphire tokens, quiet borders, keyboard focus ring and responsive layout. Check 320/375/430/1440 widths and correct tab mode.
+- `scripts/practice-season2-history-chromium.cjs`: synthetic real Chromium DOM test added to PostgreSQL17/HTTP workflow; covers both existing histories and new period history, disclosure batches, capped-note, three languages and four viewports. Do not report pass until exact-head CI completes.
+
+**Known independent follow-up:** the My Recommendations area still provides its signed all-time Topic/Tour history and per-question review. Its records must not be mistaken for a second-season total. A later server-cursor/history integration may extend older than 20 records; the present source candidate is intentionally not a full-history fetch or destructive reset.
 
 ## Remaining release acceptance
 
 1. Validate exact PR HEAD in CI and independently inspect affected live schema read-only; do not assume previous CI still applies after future edits.
-2. Connect the owner-approved Period 2 counters into Practice UI in a dedicated, conflict-checked implementation package; show archived results separately and retain accessibility in RU/UZ/EN.
-3. Run signed authenticated HTTP/PostgREST E2E against disposable PostgreSQL 17 and Chromium UI checks; confirm session boundary and no history deletion, RLS/EXECUTE, no unintended effect on older periods.
+2. Confirm actual Practice UI integration on the exact draft SHA, including refreshed Season2 mastered counts, older best-history labeling, 3+5 disclosure and separate archive in three languages. Do not reuse an earlier SHA's CI as proof.
+3. Verify signed authenticated HTTP/PostgREST E2E against disposable PostgreSQL 17 and real Chromium UI (320–1440px), existing Practice client regression workflows and question-preservation rules. Resolve only actual failures; no silent test bypass.
 4. Owner must separately approve **merge, any live SQL, UI release, start_date assignment, and season activation**. No permission to delete, truncate, reset archived learner data or retime previous attempts.
