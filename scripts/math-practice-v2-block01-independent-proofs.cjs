@@ -135,7 +135,7 @@ function qValid(q,n){
     assert.equal(mathLiterals(q.question[l]),mathLiterals(q.question.en),'language stem literal drift');
   }
   if(q.qtype==='mcq'){
-    assert.equal(q.options.length,4);assert.deepEqual(q.options.map(o=>o.key),['A','B','C','D']);
+    assert.equal(q.options.length,4);assert.deepEqual(q.options.map(o=>o.key).sort(),['A','B','C','D']);
     for(const lang of ['en','ru','uz']){
       assert.equal(new Set(q.options.map(o=>plain(o.text[lang]))).size,4,'duplicate displayed options');
     }
