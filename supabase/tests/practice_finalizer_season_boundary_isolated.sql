@@ -140,11 +140,11 @@ declare
   v_s2 timestamptz;
   v_chem timestamptz;
 begin
-  select created_at into v_s1 from public.practice_attempts pa
+  select pa.created_at into v_s1 from public.practice_attempts pa
     join public.practice_sessions_v4 s on s.legacy_attempt_id=pa.id where s.id=1;
-  select created_at into v_s2 from public.practice_attempts pa
+  select pa.created_at into v_s2 from public.practice_attempts pa
     join public.practice_sessions_v4 s on s.legacy_attempt_id=pa.id where s.id=2;
-  select created_at into v_chem from public.practice_attempts pa
+  select pa.created_at into v_chem from public.practice_attempts pa
     join public.practice_sessions_v4 s on s.legacy_attempt_id=pa.id where s.id=3;
   if v_s1 is distinct from '2026-10-31T12:00:00Z'::timestamptz
      or v_s2<'2026-11-01T00:00:00Z'::timestamptz
