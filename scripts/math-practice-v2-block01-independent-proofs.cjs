@@ -8,7 +8,7 @@ const ROOT_CONTENT=path.join(ROOT,'content/math/practice_v2/p1_quadratics');
 const FILES=['P1-QUA-01','P1-QUA-02','P1-QUA-03'];
 const all=FILES.flatMap(f=>JSON.parse(fs.readFileSync(path.join(ROOT_CONTENT,f+'.json'),'utf8')).questions);
 const qs=new Map(all.filter(q=>Number(q.key.slice(-3))<=25).map(q=>[Number(q.key.slice(-3)),q]));
-const plain=s=>String(s||'').normalize('NFKC').replace(/[−–—]/g,'-').replace(/\s+/g,'').replace(/,/g,'.');
+const plain=s=>String(s||'').normalize('NFC').replace(/[−–—]/g,'-').replace(/\s+/g,'').replace(/,/g,'.');
 const n=s=>{const v=plain(s);return /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(v)?Number(v):NaN};
 const close=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<1e-9;
 const matches=(a,b)=>a.length===b.length&&a.every((x,i)=>close(x,b[i]));
@@ -124,7 +124,7 @@ const cases={
   },
   25:q=>exactInput(q,(7+Math.sqrt(49-4*2*3))/(2*2)),
 };
-function mathLiterals(s){return (plain(s).match(/(?<![A-Za-z])[+-]?\d+(?:\.\d+)?/g)||[]).sort().join('|');}
+function mathLiterals(s){return (String(s||'').normalize('NFC').replace(/[−–—]/g,'-').match(/(?<!\p{L})[-+]?\d+(?:[.,]\d+)?/gu)||[]).map(v=>v.replace(',','.')).sort().join('|');}
 function qValid(q,n){
   assert.equal(q.key,'MATH-P1-PRACTICE2-Q'+String(n).padStart(3,'0'));
   assert.equal(q.practice_no,1);assert.ok(/^P1-QUA-0[123]$/.test(q.primary_skill));
