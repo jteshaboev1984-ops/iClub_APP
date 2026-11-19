@@ -14,7 +14,18 @@ const choice=(q,p)=>{assert.equal(q.qtype,'mcq');let a=q.options.filter(o=>p(o.t
 const tokens=s=>(String(s||'').normalize('NFC').replace(/[−–—]/g,'-').match(/(?<!\p{L})[-+]?\d+(?:[.,]\d+)?/gu)||[]).map(z=>z.replace(',','.')).sort().join('|');
 const lowerDifficulty=new Map([[356,'medium'],[357,'easy'],[358,'medium'],[366,'medium'],[367,'medium']]);
 const tests={
-351:q=>input(q,1-5/(20/3)),
+351(q){
+ assert.equal(q.difficulty,'hard','inverse convergence with two roots and a branch condition');
+ for(const l of ['en','ru','uz'])assert.ok(q.question[l].includes('0<r<1/2')&&q.explanation[l].includes('16r²−16r+3'));
+ const D=16**2-4*16*3;
+ const roots=[(16-Math.sqrt(D))/(2*16),(16+Math.sqrt(D))/(2*16)];
+ assert.equal(roots.length,2);
+ for(const r of roots){const a=20*(1-r);assert.ok(near(a*r,15/4)&&near(a/(1-r),20));}
+ const allowed=roots.filter(r=>r>0&&r<1/2);
+ assert.equal(allowed.length,1,'unique ratio needs explicit stated bound');
+ assert.ok(near(allowed[0],1/4));
+ input(q,allowed[0]);
+},
 352:q=>input(q,30*(1-.4)),
 353:q=>choice(q,t=>norm(t)==='-1<k<3'&&[-.9,0,2.99].every(k=>Math.abs((k-1)/2)<1)),
 354(q){const v=6/(1-.5)-6*(1-.5**4)/(1-.5);input(q,v);},

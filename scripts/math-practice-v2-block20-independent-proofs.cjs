@@ -42,7 +42,15 @@ const verify={
  487:q=>input(q,volume(x=>-((3-x)**3)/3,0,3)),
  488:q=>input(q,2*volume(x=>x*x/2+x,0,3)),
  489:q=>input(q,Math.sqrt(12*3)),
- 490:q=>input(q,Math.cbrt(9*3)),
+ 490(q){
+  assert.equal(q.difficulty,'hard','two independent area/volume constraints demand elimination');
+  for(const l of ['en','ru','uz'])assert.ok(q.question[l].includes('k>0')&&q.question[l].includes('9π')&&q.explanation[l].includes('k²a³=27'));
+  const area=9/2,volumeCoefficient=9;
+  const a=(2*area)**2/(3*volumeCoefficient);
+  const k=(2*area)/(a*a);
+  assert.ok(a>0&&k>0&&near(k*a*a/2,area)&&near(k*k*a**3/3,volumeCoefficient));
+  input(q,a);
+ },
  491(q){assert.ok(1/2>1/3);mcq(q,t=>/Under y=√x$/.test(t));},
  492:q=>input(q,3*volume(x=>4*x**3/3+2*x*x+x,0,1)),
  493:q=>mcq(q,t=>near(piCoeff(t),2**2*3)),
