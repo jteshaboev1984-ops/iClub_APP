@@ -131,12 +131,9 @@
       return Number.isInteger(good)&&Number.isInteger(all)&&all>0&&good>=0&&good<=all?good+' / '+all:'—';
     };
     const list=node('div','iclub-topic-history-recent');
-    // The latest completed attempt has a dedicated summary above. Do not
-    // display that same session again in the compact history preview.
     const recentAttempts=Array.isArray(data.recent)?data.recent:[];
-    const previewAttempts=compact?recentAttempts.slice(1,3):recentAttempts.slice(0,5);
-    for(const attempt of previewAttempts){
-      if(score(attempt)==='—')continue;
+    const makeRow=attempt=>{
+      if(score(attempt)==='—')return null;
       const button=node('button','iclub-topic-history-row');
       button.type='button';
       button.setAttribute('aria-label',(locale==='ru'?'Разбор: ':locale==='uz'?'Tahlil: ':'Review: ')+String(attempt.topic||'')+', '+score(attempt));
@@ -148,15 +145,39 @@
       const ratio=Number(attempt.correct)/Number(attempt.total);
       const state=ratio===1?'good':ratio<=.2?'bad':'neutral';
       const icon=node('span','iclub-sx-history-icon '+state,state==='good'?'✓':state==='bad'?'!':'↺');
-      icon.setAttribute('aria-hidden','true');
-      button.prepend(icon);
+      icon.setAttribute('aria-hidden','true');button.prepend(icon);
       right.append(node('span','iclub-topic-history-row-score '+state,score(attempt)));
       right.append(node('span','iclub-topic-history-arrow','›'));
       button.append(info,right);
       button.addEventListener('click',()=>openTopicAttempt(attempt,data.subject_key));
-      list.append(button);
-    }
+      return button;
+    };
+    const primary=compact?recentAttempts.slice(1,3):recentAttempts.slice(0,3);
+    primary.map(makeRow).filter(Boolean).forEach(row=>list.append(row));
     if(!compact||list.children.length)holder.append(list);
+    if(!compact&&recentAttempts.length>3){
+      const older=recentAttempts.slice(3);
+      const disclosure=node('details','iclub-s2-history-earlier');
+      const label=PERIOD_COPY[locale];
+      disclosure.append(node('summary','',label.earlier+' ('+older.length+')'));
+      const rows=node('div','iclub-topic-history-recent');disclosure.append(rows);
+      const more=node('button','iclub-s2-history-more');
+      more.type='button';more.hidden=true;disclosure.append(more);
+      let shown=0;
+      const append=()=>{
+        older.slice(shown,shown+5).map(makeRow).filter(Boolean).forEach(row=>rows.append(row));
+        shown=Math.min(older.length,shown+5);
+        const remaining=older.length-shown;
+        more.hidden=remaining===0;
+        if(remaining)more.textContent=label.more+' ('+Math.min(5,remaining)+')';
+      };
+      disclosure.addEventListener('toggle',()=>{if(disclosure.open&&shown===0)append();});
+      more.addEventListener('click',append);
+      holder.append(disclosure);
+    }
+    if(!compact&&count>recentAttempts.length){
+      holder.append(node('p','iclub-s2-history-note',PERIOD_COPY[locale].partial));
+    }
     return true;
   }
   function renderTopicReview(language) {
