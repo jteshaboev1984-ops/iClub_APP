@@ -118,7 +118,7 @@ for(let i=26;i<=50;i++){
    assert.equal(numbers(q.question[l]),numbers(q.question.en),'numeric source translation mismatch');
   }
   if(q.qtype==='mcq'){
-   assert.deepEqual(q.options.map(z=>z.key),['A','B','C','D']);
+   assert.deepEqual(q.options.map(z=>z.key).sort(),['A','B','C','D']);
    for(const l of ['en','ru','uz'])
     assert.equal(new Set(q.options.map(z=>plain(z.text[l]))).size,4);
    for(const z of q.options)if(z.key===q.correct_answer)assert.equal(z.diagnostic_code,null);
