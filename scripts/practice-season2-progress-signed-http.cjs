@@ -56,7 +56,10 @@ async function post(token,key='mathematics'){
  assert.equal(c.result?.topic?.sessions_count,0,'fresh user topic not at zero');
  const other=await post(jwt(A),'chemistry');
  assert(other.ok,'other subject denied');
- assert.equal(other.result?.main?.attempts_count,1,'subject count incorrect');
+ assert.equal(other.result?.period_active,false,
+   'undated other-subject Tour1 must not inherit Mathematics reset');
+ assert.equal(other.result?.reason,'season_not_started',
+   'undated subject period should remain dormant');
  const unknown=await post(jwt(A),'unknown');
  assert(!unknown.ok,'unknown subject accepted');
  console.log('PRACTICE_SEASON2_SIGNED_HTTP_PASS: owner isolation, new/archived main and topic counts, no history mutation');
