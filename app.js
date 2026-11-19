@@ -5346,16 +5346,19 @@ async function getPracticePoolQuestionIds(poolId) {
     .filter(Boolean);
 }
 
-async function getClosedPracticeQuestionIds(subjectId, uid, questionIds) {
+async function getClosedPracticeQuestionIds(subjectId, uid, questionIds, sinceAt = null) {
   if (!window.sb || !subjectId || !uid || !Array.isArray(questionIds) || !questionIds.length) {
     return new Set();
   }
 
-  const attemptsRes = await window.sb
+  let attemptsQuery = window.sb
     .from("practice_attempts")
     .select("id")
     .eq("user_id", uid)
     .eq("subject_id", subjectId);
+  // A fresh academic period does not republish or reset the question bank.
+  if (sinceAt) attemptsQuery = attemptsQuery.gte("created_at", sinceAt);
+  const attemptsRes = await attemptsQuery;
 
   const attemptIds = (Array.isArray(attemptsRes?.data) ? attemptsRes.data : [])
     .map(x => Number(x?.id))
@@ -5547,6 +5550,19 @@ async function getPracticeTourCards(subjectKey) {
   const currentTourNo =
     Number(ctx?.practiceTourNo || 1) || 1;
 
+  let season2Period=null;
+  try {
+    if (window.sb?.rpc) {
+      const {data,error}=await window.sb.rpc("get_practice_season2_progress_safe_v1",
+        {p_subject_key:subjectKey});
+      if(!error&&data?.ok===true&&String(data.subject_key||'')===String(subjectKey))
+        season2Period=data;
+    }
+  } catch (_) {}
+  const periodCutoff=season2Period?.period_active===true &&
+    Number.isFinite(Date.parse(String(season2Period.period_starts_at||''))) ?
+      String(season2Period.period_starts_at) : null;
+
   const pools =
     Array.isArray(ctx?.pools)
       ? ctx.pools
@@ -5601,7 +5617,7 @@ async function getPracticeTourCards(subjectKey) {
 
       let stats = null;
       if (hasPool) {
-        stats = await computePracticeStageStats(subjectKey, tourNo).catch(() => null);
+        stats = await computePracticeStageStats(subjectKey, tourNo, periodCutoff).catch(() => null);
       }
 
       let stateName = "available";
@@ -5651,7 +5667,7 @@ async function getPracticeTourCards(subjectKey) {
   const selectedTourNo = Number(selectedCard?.tourNo || fallbackCard?.tourNo || currentTourNo || 1);
   setSelectedPracticeTourNo(subjectKey, selectedTourNo);
 
-  return { currentTourNo, selectedTourNo, cards: rawCards };
+  return { currentTourNo, selectedTourNo, cards: rawCards, season2Period, periodCutoff };
 }
 
    function updatePracticeStartButtonForTour(tourNo, canResume = false) {
@@ -5737,7 +5753,7 @@ function renderPracticeTourPicker(cards, selectedTourNo) {
   }
 }
    
-async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
+async function computePracticeStageStats(subjectKey, forcedTourNo = null, sinceAt = null) {
   const uid = await getAuthUid().catch(() => null);
   if (!uid) {
     return {
@@ -5778,7 +5794,7 @@ async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
   }
 
   const allIds = await getPracticePoolQuestionIds(poolId);
-  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allIds);
+  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allIds, sinceAt);
 
   const totalCount = allIds.length;
   const masteredCount = Array.from(closedIds).length;
@@ -17331,11 +17347,13 @@ function addMyRecsFromAttempt(attempt) {
    return (async () => {
     const picker = await getPracticeTourCards(subjectKey);
     if (!isCurrent()) return;
-
+    const season2Period=picker?.season2Period||null;
+    window.iClubPracticeSeason2HistoryV1?.render?.(season2Period,subjectKey,currentLang());
+    const periodCutoff=picker?.periodCutoff||null;
     const selectedTourNo = Number(picker?.selectedTourNo || 1);
 updatePracticeStartButtonForTour(selectedTourNo, false);
 
-const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo);
+const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo, periodCutoff);
 if (!isCurrent()) return;
 const startBtn = document.getElementById("practice-restart-btn");
 if (startBtn?.dataset.premiumLoadingBlocked === "1") {
@@ -17369,7 +17387,8 @@ window.iClubPracticeTopicChoice?.mount({
         ? tr3(`Осталось ${open}`, `${open} ta qoldi`, `${open} left`)
         : "";
 
-      stageMetaEl.textContent = [titlePart, progressPart, leftPart].filter(Boolean).join(" • ");
+      const periodTitle=periodCutoff ? tr3("Сезон 2","2-mavsum","Season 2") : "";
+      stageMetaEl.textContent = [titlePart,periodTitle,progressPart,leftPart].filter(Boolean).join(" • ");
     }
 
         let h = null;
@@ -17399,22 +17418,23 @@ window.iClubPracticeTopicChoice?.mount({
             };
           };
 
-          const bestDb = data.best ? normalizeDbAttempt(data.best) : null;
-          const lastDb = Array.isArray(data.last)
-            ? data.last.map(normalizeDbAttempt).filter(row => Number(row.id || 0) > 0)
-            : [];
-
-          h = {
-            best: bestDb,
-            last: lastDb
-          };
+          const samePeriod=row=>!periodCutoff ||
+            Date.parse(String(row?.created_at||''))>=Date.parse(periodCutoff);
+          const lastDb=Array.isArray(data.last) ?
+            data.last.filter(samePeriod).map(normalizeDbAttempt).filter(row=>row.id>0) : [];
+          // The old all-time best may belong to the previous season. Do NOT
+          // fabricate a lifetime Season 2 best from a capped latest-N sample.
+          const bestDb=data.best&&samePeriod(data.best)?
+            normalizeDbAttempt(data.best):null;
+          h={best:bestDb,last:lastDb};
         }
       }
     } catch {}
     if (!isCurrent()) return;
 
     if (!h) {
-      h = loadPracticeHistory(subjectKey, selectedTourNo);
+      h = periodCutoff?{best:null,last:[]}:
+        loadPracticeHistory(subjectKey,selectedTourNo);
     }
 
     const best = h?.best || null;
