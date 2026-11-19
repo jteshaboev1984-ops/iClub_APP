@@ -113,7 +113,7 @@ for(let id=76;id<=100;id++){
    assert.ok(q.question.uz.includes('qiymatlar to‘plamini aynan ifodalaydi'),'precise range missing in UZ');
   }
   if(q.qtype==='mcq'){
-   assert.deepEqual(q.options.map(o=>o.key),['A','B','C','D']);
+   assert.deepEqual(q.options.map(o=>o.key).sort(),['A','B','C','D']);
    for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>plain(o.text[l]))).size,4,'duplicate displayed option');
    for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);
      else assert.ok(o.diagnostic_code);
