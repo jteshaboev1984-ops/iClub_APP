@@ -8,7 +8,7 @@ on:
     paths:
       - 'content/math/practice_v2/**/*.json'
       - 'scripts/math-practice-v2-editorial-future-only-contract.cjs'
-      - 'supabase/preflight/math_practice_v2_31_editorial_readonly.sql'
+      - 'supabase/preflight/math_practice_v2_32_editorial_readonly.sql'
       - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
       - '.github/workflows/math-practice-v2-editorial-preflight.yml'
   workflow_dispatch:
@@ -67,7 +67,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p=Path('supabase/preflight/math_practice_v2_31_editorial_readonly.sql')
+          p=Path('supabase/preflight/math_practice_v2_32_editorial_readonly.sql')
           sql=re.sub(r'--[^\n]*','',p.read_text())
           assert re.match(r'^\s*with\s+expected\b',sql,re.I)
           assert not re.search(r'\b(insert|update|delete|truncate|alter|drop|create|grant|revoke|call|copy|execute|do)\b',sql,re.I)
