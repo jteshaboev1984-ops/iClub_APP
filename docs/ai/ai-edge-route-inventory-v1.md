@@ -36,7 +36,9 @@ On 2026-11-19 the **actual deployed source bundles** for all four routes previou
 
 These four are **not claimed to match GitHub**: checked-in matching entrypoints and auxiliary modules are still absent in the inspected `main` tree. Do not silently copy these private deployed files into a public PR as a “quick source registry”; a source-location and release-provenance decision is owner-gated. Separate source review may find existing commits outside `main`; no such correspondence was established by this inspection.
 
-The existing four repo-backed historical parity results below are **dated 2026-10-29**; this inspection did not recompute them. Production Supabase was read-only (no inference request, no data edit, no feature switch).
+**Current exact source comparison — 2026-11-19:** compared the actual deployed file text against current GitHub `main` file text for the four repo-backed routes. **All five actual source files matched byte-for-byte**: `exam-prep-ai/index.ts` (v17), `practice-ai/index.ts` (v5), `iclub-ai-practice-prepared/index.ts` (v1), and `iclub-ai-practice-freeform/index.ts` plus `practice_freeform_pc3_core.ts` (v4). These are source-equivalence results, **not** an HTTP authorization or live-production quality acceptance.
+
+Production Supabase was read-only (no inference request, data edit or feature switch).
 
 ## Product contract
 
