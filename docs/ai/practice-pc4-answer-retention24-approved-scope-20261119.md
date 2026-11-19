@@ -17,7 +17,11 @@ This policy applies to **Practice PC4 answer recovery text**, not Exam Prep Tuto
 
 Existing `expires_at` defaults to `received_at + 24 hours`, and current recovery RPCs reject expired requests. This is an **access deadline**, not an automatic erase. As verified on 2026-11-19, the existing `ready/acknowledged` database check requires answer text to remain non-null and blocks a naive `UPDATE answer=NULL`.
 
-A scheduled cleanup can remove text **after** its deadline, but scheduling is not an exact 24-hour guarantee: a minute-based job may run slightly late or fail. Before any production release, the owner must approve an implementation/monitoring method that fulfills the 24-hour retention expectation, including what happens if cleanup is delayed. Never claim "automatically deleted at exactly 24h" until proven.
+A scheduled cleanup can remove text **after** its deadline, but scheduling is not an exact 24-hour guarantee: a minute-based job may run late or fail. **Even a successful `UPDATE answer=NULL` is not proof of physical erasure.** PostgreSQL retains old row versions for transaction/vacuum mechanics, and WAL, replicas, backups and restore points can preserve old content after a logical update. Official references: [PostgreSQL 17 routine vacuuming](https://www.postgresql.org/docs/17/routine-vacuuming.html) and [Supabase backup and PITR](https://supabase.com/docs/guides/platform/backups).
+
+**Owner's further decision, 2026-11-19: strict option A.** The 24-hour limit must not be weakened to allow late cleanup. Under this interpretation, the current PostgreSQL plaintext + periodic cleanup prototype is **NOT an acceptable production implementation**, regardless of successful synthetic redaction tests.
+
+**Fail-closed next-stage design contract:** No *new* durable plaintext PC4 recovery storage or funded model dispatch can be enabled until source-verified infrastructure demonstrates that recoverable answer **text** is absent from all disallowed copies after the deadline (including backup/recovery implications). Prefer evaluating an answer encrypted at rest with a strictly expiring independently controlled decryption capability, with no plaintext in persistent logs/WAL/backups, **but cryptographic expiry must not be mislabeled as physical erasure of ciphertext**. If robust recovery for the full window cannot be provided without violating the rule, pause the paid candidate rather than silently shorten recovery or extend retention. Any new key store, paid service, backup policy or change in learner UX needs separate owner approval and independent security evidence.
 
 ## Isolated-only engineering rehearsal
 
@@ -26,6 +30,7 @@ The separate draft, `supabase/candidates/iclub_ai_practice_answer_retention24_is
 - Adds `answer_redacted_at` and a replacement check constraint that still requires a live `ready/acknowledged` response, but permits **explicitly expired-and-redacted** receipts with null text/hash.
 - Adds a disabled service-only retention control. A later authorized activation must set a **non-backdated cutoff**; entries created before activation are excluded. The draft does not activate anything.
 - Provides a bounded, service-role-only, idempotent deletion of **answer text and answer hash**, not full receipt rows. No request UUID, answer text, learner data or financial amount is exposed in its response.
+- Demonstrates an **isolated-only, service-role admission probe that refuses any paid model dispatch** while strict retention remains unproven, plus a last-resort DB trigger that refuses **new plaintext storage after synthetic cutover**. These negative controls are **not yet integrated into the real Edge dispatch path** and cannot alone serve as release approval. The existing redaction procedure remains a data-minimization tool only, **not** a 24h physical-erasure guarantee.
 - Does **not** create a cron job, enable a paid model, change current service RPCs or move academic data.
 
 `supabase/tests/iclub_ai_practice_answer_retention24_isolated.sql` verifies synthetic old vs new receipts, ready/acknowledged, expired/unexpired, unknown charge, OFF gate, unauthorized users, batch bounds, repeat calls, financial data integrity and irreversible redaction. It uses a transaction and **ROLLBACK**, even on disposable PostgreSQL 17. It is not a live production acceptance test.
@@ -36,7 +41,7 @@ No migration, live data mutation, scheduling or merge now. Before any later prod
 
 - Review the exact deployed PC4 schema and current `main` against this candidate and test with actual isolated signed auth and E2E; preserve source/version gates.
 - Review a **forward-only** production migration and activation time. Never backdate the cutoff or automatically process existing records.
-- Approve how strictly to meet the 24-hour physical erase target (schedule, monitoring, late-run recovery and evidence of successful cleanup) without exposing answer text in logs.
+- Strict 24-hour limit is **already approved**: do not ask to relax it. Independently prove a storage/recovery design that prevents post-deadline access **and** disallowed retained plaintext across PostgreSQL/WAL/backups, or leave new text persistence and paid dispatch OFF. A periodic cleanup alone fails this gate; a cryptographic-expiry alternative is only a candidate and needs separately reviewed key custody, backups and no-plaintext trace.
 - Demonstrate money/quota reconciliation, shared-cost unknowns, `ready/acknowledged` replay/ACK consistency, permission boundary and no academic progress change.
 - Request separate explicit consent to handle the **two existing expired text-bearing receipts**; **Question 2 = B means leave them unchanged until then**.
 
