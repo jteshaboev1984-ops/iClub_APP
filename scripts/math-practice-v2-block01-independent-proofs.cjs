@@ -27,7 +27,7 @@ function exactInput(q,expected){
   for(const v of q.answer_contract.accepted_examples||[])assert.ok(close(n(v),expected),'invalid accepted example');
   for(const v of q.answer_contract.rejected_examples||[])assert.ok(!close(n(v),expected),'true answer rejected by contract');
 }
-function point(s){const m=/^\((-?\d+),(-?\d+)\)$/.exec(plain(s));return m?[Number(m[1]),Number(m[2])]:null;}
+function point(s){const coords=String(s).normalize('NFC').replace(/[−–—]/g,'-').replace(/\s+/g,'');const m=/^\((-?\d+),(-?\d+)\)$/.exec(coords);return m?[Number(m[1]),Number(m[2])]:null;}
 function polynomial(s){
   const left=plain(s).replace(/-/g,'+-').split('=')[0];
   const c={a:0,b:0,c:0};for(let t of left.split('+').filter(Boolean)){
