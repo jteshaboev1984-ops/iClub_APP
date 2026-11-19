@@ -627,9 +627,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "The equation x² + px + q = 0 has roots −2 and 5. A number r is then added to the constant term, giving x² + px + q + r = 0 with a repeated root. Find r.",
-        "ru": "Уравнение x² + px + q = 0 имеет корни −2 и 5. Затем к свободному члену добавляют число r, получая x² + px + q + r = 0 с кратным корнем. Найдите r.",
-        "uz": "x² + px + q = 0 tenglamaning ildizlari −2 va 5. So‘ng ozod hadga r soni qo‘shilib, x² + px + q + r = 0 takroriy ildizli tenglama hosil qilinadi. r ni toping."
+        "en": "The equation x² + px + q = 0 has roots −2 and 5. A number r is then added to the constant term, giving x² + px + q + r = 0 with a repeated root. Find r. Enter the answer as a decimal number.",
+        "ru": "Уравнение x² + px + q = 0 имеет корни −2 и 5. Затем к свободному члену добавляют число r, получая x² + px + q + r = 0 с кратным корнем. Найдите r. Ответ запишите десятичным числом.",
+        "uz": "x² + px + q = 0 tenglamaning ildizlari −2 va 5. So‘ng ozod hadga r soni qo‘shilib, x² + px + q + r = 0 takroriy ildizli tenglama hosil qilinadi. r ni toping. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
