@@ -42,6 +42,10 @@ const {chromium}=require('playwright');
          attempts_count:80,archived_attempts_count:40,recent,archived_recent:archived
        },topic:{sessions_count:73,archived_sessions_count:30,recent,archived_recent:archived}};
      const rendered=window.iClubPracticeSeason2HistoryV1?.render(period,'mathematics',locale);
+     const currentTour=window.iClubPracticeCurrentTourV1?.render({
+       activeTourNo:2,lastCompletedTourNo:1,selectedTourNo:2
+     },locale);
+     if(!currentTour)throw Error('active Tour presentation missing');
      const topic={ok:true,subject_key:'mathematics',completed_sessions:99,
        recent:recent.map(r=>({...r,session_id:r.id,review:[]})),last:recent[0]};
      window.iClubPracticeTopicHistoryV1.renderHistoryPage(locale,'mathematics',topic,false);
@@ -51,6 +55,22 @@ const {chromium}=require('playwright');
        tourRows:document.querySelectorAll('#tour-history .iclub-sx-tour-history-row').length};
     },language);
     assert(out.rendered,'period render failed');
+    const focus=page.locator('[data-practice-current-tour]');
+    assert((await focus.textContent()).includes('2'),'active Tour number missing');
+    assert.equal(await focus.locator('[data-action="practice-select-tour"][data-tour-no="2"]').count(),1,
+      'active Tour Practice quick action absent');
+    const lowArchive=page.locator('[data-practice-s2-archive]');
+    assert.equal(await lowArchive.locator('details.iclub-s2-history-bottom-details').count(),1,
+      'one low-noise previous-season archive required');
+    assert.equal(await lowArchive.locator('details.iclub-s2-history-bottom-details').getAttribute('open'),null,
+      'previous seasons must be collapsed by default');
+    const placement=await page.evaluate(()=>{
+      const root=document.getElementById('courses-practice-start');
+      const archive=root.querySelector('[data-practice-s2-archive]');
+      const panels=root.querySelector('#practice-results-panel-topics');
+      return !!(panels.compareDocumentPosition(archive)&Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+    assert(placement,'archive not after the Practice learning panels');
     // Locale date punctuation differs between Node's ICU and Chromium's ICU.
     // Compare using Chromium's formatter (the same runtime that renders the UI).
     const intendedDay=await page.evaluate(lang=>
@@ -105,16 +125,20 @@ const {chromium}=require('playwright');
        selector+' .iclub-s2-history-current .iclub-s2-history-earlier .iclub-s2-history-row');
      await current.locator('.iclub-s2-history-more').click();
      assert.equal(await current.locator('.iclub-s2-history-earlier .iclub-s2-history-row').count(),10);
-     const archive=page.locator(selector+' .iclub-s2-history-archive');
-     await archive.locator('summary').first().click();
-     await page.waitForFunction(sel=>document.querySelectorAll(sel).length===3,
-       selector+' .iclub-s2-history-archive > .iclub-s2-history-rows > .iclub-s2-history-row');
+     const archive=page.locator('[data-practice-s2-archive] .iclub-s2-history-bottom-details');
+     if(await archive.getAttribute('open')===null)await archive.locator('summary').first().click();
+     await page.waitForFunction(()=>document.querySelectorAll(
+       '[data-practice-s2-archive] .iclub-s2-history-bottom-content > .iclub-s2-history-current'
+     ).length===2);
+     const archivedGroups=page.locator('[data-practice-s2-archive] .iclub-s2-history-bottom-content > .iclub-s2-history-current');
+     assert.equal(await archivedGroups.nth(mode==='tours'?0:1).locator('.iclub-s2-history-rows > .iclub-s2-history-row').count(),3,
+       'selected archive group not initially latest 3');
      assert((await page.locator(selector+' .iclub-s2-history-note').count())>=1,
        'partial server cap disclosure absent');
      if(screenshotDir && ((language==='ru'&&width===375&&mode==='tours')||
         (language==='uz'&&width===320&&mode==='topics')||
         (language==='en'&&width===1440&&mode==='topics'))){
-       await page.locator(selector+' .iclub-s2-history-block').screenshot({
+       await page.locator('[data-practice-s2-archive]').screenshot({
          path:path.join(screenshotDir,'practice-season2-'+language+'-'+width+'-'+mode+'-archive.png'),
          animations:'disabled',timeout:15000});
      }
@@ -135,7 +159,8 @@ const {chromium}=require('playwright');
     assert(w<=1,'horizontal overflow at '+width+': '+w);
     const hidden=await page.evaluate(()=>{
       window.iClubPracticeSeason2HistoryV1.render({ok:true,period_active:false},'mathematics',document.documentElement.lang);
-      return [...document.querySelectorAll('[data-practice-s2-history]')].every(x=>x.hidden);
+      return [...document.querySelectorAll('[data-practice-s2-history]')].every(x=>x.hidden) &&
+        document.querySelector('[data-practice-s2-archive]').hidden;
     });
     assert(hidden,'draft/unknown Season2 must not show new period');
     const oldRestored=await page.evaluate(()=>
