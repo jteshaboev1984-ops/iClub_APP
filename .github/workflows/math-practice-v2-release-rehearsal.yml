@@ -71,6 +71,12 @@ jobs:
             psql -v ON_ERROR_STOP=1 -f "$f"
           done
 
+      - name: Apply narrowly scoped evaluator fix on disposable PG17
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261118122500_math_practice_v2_literal_answer_delimiter_v1.sql
+
+      - name: Check actual evaluator behavior with synthetic inputs (transaction ROLLBACK)
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_literal_answer_delimiter_v1.sql
+
       - name: Run Practice v2 runtime definition regressions
         shell: bash
         run: |
@@ -93,6 +99,39 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_matrix.sql | tee math-practice-v2-runtime-rehearsal.log
           grep -q 'MATHEMATICS_PRACTICE_V2_RUNTIME_REHEARSAL_GREEN' math-practice-v2-runtime-rehearsal.log
+
+      - name: Seed signed HTTP Practice learners in disposable PostgreSQL17
+        run: psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_literal_answer_signed_http_seed.sql
+
+      - name: Launch local signed PostgREST (disposable only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          disposable_secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$disposable_secret"
+          echo "PRACTICE_V4_JWT_SECRET=$disposable_secret" >> "$GITHUB_ENV"
+          echo "PRACTICE_V4_ISOLATED=true" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+          docker run -d --rm --name iclub-practice-v4-pgrst --network host \
+            -e PGRST_DB_URI="postgres://postgres:postgres@127.0.0.1:5432/postgres" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$disposable_secret" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 40); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then exit 0; fi
+            sleep 2
+          done
+          docker logs --tail 25 iclub-practice-v4-pgrst
+          exit 1
+
+      - name: Verify signed HTTP Practice scoring, owner firewall, idempotence and non-Math
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-literal-signed-http.cjs
+          node scripts/math-practice-v2-literal-signed-http.cjs
 
       - name: Upload runtime rehearsal diagnostics
         if: always()
