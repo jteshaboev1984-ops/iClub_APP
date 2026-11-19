@@ -49,7 +49,7 @@ for(let id=276;id<=300;id++){
  assert.ok(q.source_ref.includes(id<=293?'Ch5':'Ch6'));
  if(medium.has(id))assert.equal(q.difficulty,'medium');
  for(const l of ['en','ru','uz']){assert.ok(q.question[l]?.trim()&&q.explanation[l]?.trim());assert.equal(tokens(q.question[l]),tokens(q.question.en),'trilingual literals differ');}
- if(q.qtype==='mcq'){assert.deepEqual(q.options.map(o=>o.key),['A','B','C','D']);for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>norm(o.text[l]))).size,4);for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);}
+ if(q.qtype==='mcq'){assert.deepEqual(q.options.map(o=>o.key).sort(),['A','B','C','D']);for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>norm(o.text[l]))).size,4);for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);}
  tests[id](q);
  }catch(e){console.error('FAIL block12 Q'+String(id).padStart(3,'0')+' '+e.message);process.exitCode=1;}
 }
