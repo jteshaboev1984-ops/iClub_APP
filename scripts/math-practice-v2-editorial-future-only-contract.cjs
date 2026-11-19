@@ -97,6 +97,19 @@ for (const folder of folders) {
         if(/^question\.(en|ru|uz)$/.test(p) || p==='explanation.uz' || permitted.has(p)) continue;
         errors.push('Unreviewed/semantic payload change at item '+id+' field '+p);
       }
+      if(id===7965){
+        for(const lang of ['en','ru','uz']){
+          if(!String(q.explanation?.[lang]||'').includes('√(36−24)') ||
+             String(q.explanation[lang]).includes('√36−24'))
+            errors.push('Missing grouped discriminant in '+lang+' explanation at '+id);
+        }
+        // Independently verify the quadratic formula's roots satisfy x²−6x+6=0.
+        for(const sign of [-1,1]){
+          const root=(6+sign*Math.sqrt(36-24))/2;
+          if(Math.abs(root*root-6*root+6)>1e-10)
+            errors.push('Quadratic root proof failed at '+id);
+        }
+      }
       if(!EXPECTED_IDS.has(id))errors.push('Unapproved question edited: '+id);
       if(FUTURE_VERSION_REQUIRED.has(id)&&!paths.some(p=>p.startsWith('options.')||p.startsWith('question.')))
         errors.push('Versioned question change missing: '+id);
