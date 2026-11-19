@@ -49,6 +49,28 @@ for(const token of ['m.content_hash=e.old_content_hash','current_active_pool_lin
 const generation=read('docs/practice-bank-generations-release-gate.md');
 assert.ok(generation.includes('Routine question fixes do not change generation'),
  'existing Practice generation policy changed');
+// Existing v5 server submission uses the session's fixed question_ids but
+// also demands q.is_active. A future-only cutover must NOT set old q.is_active
+// false: it would invalidate answers to already-issued, still-open sessions.
+const scorer=read('supabase/migrations/20261007006700_math_practice_v2_deterministic_feedback_v5.sql');
+for(const name of ['submit_practice_session_answer_safe_v5','submit_practice_drill_answer_safe_v5']){
+ const m=scorer.match(new RegExp('create or replace function public\\.'+name+'\\([\\s\\S]*?\\$function\\$;', 'i'));
+ assert.ok(m,'published scoring contract missing: '+name);
+ assert.match(m[0],/p_question_id=any\(v_s.question_ids\)/,
+  'scoring must keep session-authorized question ID');
+ assert.match(m[0],/q\.is_active is true/,
+  'old question must remain active for in-progress evaluation');
+}
+const selector=read('supabase/migrations/20261007006000_math_practice_v2_selector_v5.sql');
+const topic=read('supabase/migrations/20261007005000_math_practice_v2_topic_drill_pool_gate_v1.sql');
+const mistakes=read('supabase/migrations/20261007006500_math_practice_v2_current_mistakes_v5.sql');
+for(const [name,source] of [['auto selector',selector],['topic drill',topic],['mistakes drill',mistakes]]){
+ assert.ok(source.includes('ppq.is_active is true') && source.includes('q.is_active is true'),
+  'new sessions must be gated by active pool membership: '+name);
+}
+// Thus a version cutover should retire OLD *pool membership* for future
+// selection but preserve old q row, key, metadata and exact content hash.
+// No SQL is executed by this script.
 const combined=rows.map(r=>({
  id:r.id,published_hash:r.published_hash,baseline_authored_hash:all.get(r.id).old_sha256,
  candidate_authored_hash:all.get(r.id).new_sha256}));
@@ -58,4 +80,6 @@ console.log(JSON.stringify({p1_total:495,protected_future_only:81,editorial:31,
   old_and_new_source_and_live_pin_manifest_sha256:digest,
   selector:'do not change bank generation for routine question fixes',
   sql_read_only:true,old_ids_immutable:true,
+  old_question_rows_remain_active_for_in_progress_sessions:true,
+  new_selectors_require_current_pool_membership:true,
   status:'source_guard_ready_production_release_NOT_AUTHORIZED'},null,2));
