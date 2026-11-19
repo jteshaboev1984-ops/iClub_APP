@@ -87,9 +87,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "The geometric progression is 8,−4,2,−1,... Enter its 6th term.",
-        "ru": "Геометрическая прогрессия: 8,−4,2,−1,... Введите её 6-й член.",
-        "uz": "Geometrik progressiya 8,−4,2,−1,... . 6-hadini kiriting."
+        "en": "The geometric progression is 8,−4,2,−1,... Enter its 6th term. Give your answer as a decimal number.",
+        "ru": "Геометрическая прогрессия: 8,−4,2,−1,... Введите её 6-й член. Ответ запишите десятичным числом.",
+        "uz": "Geometrik progressiya 8,−4,2,−1,... . 6-hadini kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
@@ -572,9 +572,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "A value starts at 5000 and is multiplied by 0.9 each year. Enter the value after 4 years.",
-        "ru": "Начальная стоимость равна 5000 и каждый год умножается на 0.9. Введите стоимость через 4 года.",
-        "uz": "Boshlang‘ich qiymat 5000 va har yili 0.9 ga ko‘payadi. 4 yildan keyingi qiymatni kiriting."
+        "en": "A value starts at 5000 and is multiplied by 0.9 each year. Enter the value after 4 years. Give your answer as a decimal number.",
+        "ru": "Начальная стоимость равна 5000 и каждый год умножается на 0.9. Введите стоимость через 4 года. Ответ запишите десятичным числом.",
+        "uz": "Boshlang‘ich qiymat 5000 va har yili 0.9 ga ko‘payadi. 4 yildan keyingi qiymatni kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
