@@ -1223,6 +1223,12 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 #courses-practice-start .iclub-practice-current-tour-sub {
   font-size:12px;color:var(--academy-text-soft,#5a759b);line-height:1.45
 }
+/* Product rule: only the server-verified subject's Practice season is open.
+   This is a quiet access caption, not another start button or progress claim. */
+#courses-practice-start .iclub-practice-season-access {
+  display:block;font-size:12px;line-height:1.45;
+  color:var(--academy-text-soft,#5a759b);font-weight:700;
+}
 #courses-practice-start .iclub-s2-history-bottom-details summary:focus-visible {
   outline:3px solid var(--academy-focus,#377bdf);outline-offset:2px
 }
