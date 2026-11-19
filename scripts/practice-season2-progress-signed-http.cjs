@@ -39,6 +39,9 @@ async function post(token,key='mathematics'){
  const a=await post(jwt(A));
  assert(a.ok,'signed A denied '+a.status);
  assert.equal(a.result?.period_active,true,'season 2 not active');
+ assert.equal(a.result?.practice_access?.open_season_no,2,'S2 math must be the only open new-attempt period');
+ assert.equal(a.result?.practice_access?.season1_new_attempts_open,false,'S1 math still open after S2');
+ assert.equal(a.result?.practice_access?.season2_new_attempts_open,true,'S2 math not open');
  assert.equal(a.result?.main?.attempts_count,2,'wrong current main count');
  assert.equal(a.result?.main?.archived_attempts_count,1,'history not preserved separately');
  assert.equal(a.result?.main?.best?.id,103,'best current contaminated');
@@ -58,9 +61,15 @@ async function post(token,key='mathematics'){
  assert(other.ok,'other subject denied');
  assert.equal(other.result?.period_active,false,
    'undated other-subject Tour1 must not inherit Mathematics reset');
+ assert.equal(other.result?.practice_access?.open_season_no,1,
+   'undated Chemistry must keep S1 Practice open');
+ assert.equal(other.result?.practice_access?.season1_new_attempts_open,true,
+   'Math S2 cannot close Chemistry S1 Practice');
+ assert.equal(other.result?.history_snapshot?.practice_open,true,
+   'Chemistry S1 History must remain available');
  assert.equal(other.result?.reason,'season_not_started',
    'undated subject period should remain dormant');
  const unknown=await post(jwt(A),'unknown');
  assert(!unknown.ok,'unknown subject accepted');
- console.log('PRACTICE_SEASON2_SIGNED_HTTP_PASS: owner isolation, new/archived main and topic counts, no history mutation');
+ console.log('PRACTICE_SEASON_ACCESS_SIGNED_HTTP_PASS: Math S2 closes only Math S1, Chemistry S1 stays open; owner isolation and history intact');
 })().catch(e=>{console.error('PRACTICE_SEASON2_SIGNED_HTTP_FAILED:',e.message);process.exit(1)});
