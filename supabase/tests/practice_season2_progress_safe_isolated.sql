@@ -16,7 +16,7 @@ create table public.practice_attempts(
 );
 create table public.practice_drill_sessions_v4(
  id bigint primary key,user_id uuid,subject_id bigint,created_at timestamptz,
- status text,drill_type text,client_session_id text
+ status text,drill_type text,client_session_id text,topic text
 );
 create table public.practice_drill_answers_v4(
  id bigint primary key,session_id bigint,is_correct boolean
@@ -36,11 +36,11 @@ insert into public.practice_attempts values
  (105,'22222222-2222-4222-8222-222222222222',5,'2026-11-04T10:00:00+00',false,10,100,30),
  (106,'11111111-1111-4111-8111-111111111111',4,'2026-11-04T10:00:00+00',false,7,70,50);
 insert into public.practice_drill_sessions_v4 values
- (201,'11111111-1111-4111-8111-111111111111',5,'2026-10-31T18:59:59+00','finalized','rec_topic','practice_topic_choice_old'),
- (202,'11111111-1111-4111-8111-111111111111',5,'2026-10-31T19:00:00+00','finalized','rec_topic','practice_topic_choice_new'),
- (203,'11111111-1111-4111-8111-111111111111',5,'2026-11-02T10:00:00+00','in_progress','rec_topic','practice_topic_choice_open'),
- (204,'22222222-2222-4222-8222-222222222222',5,'2026-11-02T10:00:00+00','finalized','rec_topic','practice_topic_choice_other'),
- (205,'11111111-1111-4111-8111-111111111111',5,'2026-11-03T10:00:00+00','finalized','another_drill','not_topic_choice_foo');
+ (201,'11111111-1111-4111-8111-111111111111',5,'2026-10-31T18:59:59+00','finalized','rec_topic','practice_topic_choice_old','Synthetic topic'),
+ (202,'11111111-1111-4111-8111-111111111111',5,'2026-10-31T19:00:00+00','finalized','rec_topic','practice_topic_choice_new','Synthetic topic'),
+ (203,'11111111-1111-4111-8111-111111111111',5,'2026-11-02T10:00:00+00','in_progress','rec_topic','practice_topic_choice_open','Synthetic topic'),
+ (204,'22222222-2222-4222-8222-222222222222',5,'2026-11-02T10:00:00+00','finalized','rec_topic','practice_topic_choice_other','Synthetic topic'),
+ (205,'11111111-1111-4111-8111-111111111111',5,'2026-11-03T10:00:00+00','finalized','another_drill','not_topic_choice_foo','Synthetic topic');
 insert into public.practice_drill_answers_v4 values
  (301,201,true),(302,202,true),(303,202,false),(304,203,true),(305,204,true);
 
@@ -82,6 +82,13 @@ begin
      or (v->'topic'->>'archived_sessions_count')::integer <> 1
      or (v->'topic'->>'correct')::integer <> 1
      or (v->'topic'->>'answered')::integer <> 2
+     or jsonb_array_length(v->'main'->'recent') <> 2
+     or jsonb_array_length(v->'main'->'archived_recent') <> 1
+     or (v->'main'->'archived_recent'->0->>'id')::integer <> 101
+     or jsonb_array_length(v->'topic'->'recent') <> 1
+     or jsonb_array_length(v->'topic'->'archived_recent') <> 1
+     or (v->'topic'->'recent'->0->>'correct')::integer <> 1
+     or (v->'topic'->'recent'->0->>'total')::integer <> 2
      or left(v->>'period_starts_at',19) <> '2026-10-31T19:00:00' then
     raise exception 'Practice S2 owner/period filter regression (metadata only)';
   end if;
