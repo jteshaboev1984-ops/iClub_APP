@@ -1,4 +1,4 @@
-name: Mathematics Practice v2 editorial 31-item preflight
+name: Mathematics Practice v2 editorial 32-item preflight
 on:
   pull_request:
     branches:
@@ -24,7 +24,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: Verify exactly 31 governed source corrections and history-safe boundary
+      - name: Verify exactly 32 governed source corrections and history-safe boundary
         run: |
           set -euo pipefail
           node --check scripts/math-practice-v2-editorial-future-only-contract.cjs
