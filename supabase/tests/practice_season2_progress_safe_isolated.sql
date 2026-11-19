@@ -10,6 +10,10 @@ as $$ select coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),
 
 create table public.subjects(id bigint primary key,subject_key text unique,is_active boolean);
 create table public.seasons(id bigint primary key,season_no integer,status text,start_date date);
+create table public.tours(
+ id bigint primary key,season_id bigint,subject_id bigint,tour_no smallint,
+ start_date date,end_date date,is_active boolean
+);
 create table public.practice_attempts(
  id bigint primary key,user_id uuid,subject_id bigint,
  created_at timestamptz,is_lab boolean,score integer,percent integer,time_seconds integer
@@ -27,7 +31,11 @@ grant execute on function auth.uid() to authenticated,anon;
 insert into public.subjects values
  (5,'mathematics',true),(4,'chemistry',true);
 insert into public.seasons values
- (2,2,'draft',null);
+ (2,2,'draft','2026-11-03');
+-- Intentional mismatch: seasons.start_date is NOT the approved Practice cutoff.
+insert into public.tours values
+ (500,2,5,1,'2026-11-01','2026-11-07',true),
+ (501,2,4,1,null,null,false);
 insert into public.practice_attempts values
  (101,'11111111-1111-4111-8111-111111111111',5,'2026-10-31T18:59:59+00',false,6,60,100),
  (102,'11111111-1111-4111-8111-111111111111',5,'2026-10-31T19:00:00+00',false,8,80,90),
@@ -92,8 +100,8 @@ begin
      or left(v->>'period_starts_at',19) <> '2026-10-31T19:00:00' then
     raise exception 'Practice S2 owner/period filter regression (metadata only)';
   end if;
-  if (public.get_practice_season2_progress_safe_v1('chemistry')->'main'->>'attempts_count')::int <> 1 then
-    raise exception 'subject separation failed';
+  if (public.get_practice_season2_progress_safe_v1('chemistry')->>'period_active') <> 'false' then
+    raise exception 'undated Chemistry Tour1 wrongly inherited Mathematics season cutoff';
   end if;
   begin
     perform public.get_practice_season2_progress_safe_v1('unknown');
@@ -111,6 +119,25 @@ begin
 end
 $audit$;
 reset role;
+
+-- Each subject begins ONLY with its own Tour1 official calendar start.
+update public.tours set start_date='2026-11-05',end_date='2026-11-11',
+  is_active=true where id=501;
+set role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+do $per_subject$
+begin
+  if (public.get_practice_season2_progress_safe_v1('chemistry')->>'period_active') <> 'true'
+     or (public.get_practice_season2_progress_safe_v1('chemistry')->'main'->>'attempts_count')::int <> 0
+     or (public.get_practice_season2_progress_safe_v1('chemistry')->'main'->>'archived_attempts_count')::int <> 1
+  then
+    raise exception 'chemistry own Tour1 start boundary not respected';
+  end if;
+end
+$per_subject$;
+reset role;
+-- Restore undated Chemistry for the subsequent signed HTTP test fixture.
+update public.tours set start_date=null,end_date=null,is_active=false where id=501;
 update public.seasons set status='closed' where id=2;
 set role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
