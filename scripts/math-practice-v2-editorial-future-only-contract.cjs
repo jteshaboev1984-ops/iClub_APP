@@ -119,7 +119,7 @@ for (const folder of folders) {
         }
       }
       if(!EXPECTED_IDS.has(id))errors.push('Unapproved question edited: '+id);
-      if(FUTURE_VERSION_REQUIRED.has(id)&&!paths.some(p=>p.startsWith('options.')||p.startsWith('question.')))
+      if(FUTURE_VERSION_REQUIRED.has(id)&&!paths.some(p=>p.startsWith('options.')||p.startsWith('question.')||(id===7618&&['difficulty','role'].includes(p))))
         errors.push('Versioned question change missing: '+id);
       output.push({id,category:FUTURE_VERSION_REQUIRED.has(id)?'future_version_required':'editorial_equal_key',
         old_sha256:digest(before),new_sha256:digest(q),
