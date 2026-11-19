@@ -44,7 +44,7 @@ const tests={
 assert.equal(Q.size,25);
 for(let id=426;id<=450;id++){
  try{const q=Q.get(id);assert.ok(q);assert.equal(q.key,'MATH-P1-PRACTICE2-Q'+String(id).padStart(3,'0'));
- assert.equal(q.practice_no,id<=429?6:7);assert.ok(q.source_ref.includes(id<=429?'Ch8':'Ch10'));
+ assert.equal(q.practice_no,id<=429?6:7);assert.ok(q.source_ref.includes(id<=429?'Ch9':'Ch10'));
  if(calibrated.has(id))assert.equal(q.difficulty,'medium');
  for(const l of ['en','ru','uz']){assert.ok(q.question[l]?.trim()&&q.explanation[l]?.trim());assert.equal(nums(q.question[l]),nums(q.question.en),'numeric language drift');}
  if(q.qtype==='mcq'){assert.deepEqual(q.options.map(o=>o.key).sort(),['A','B','C','D']);for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>norm(o.text[l]))).size,4);for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);}
