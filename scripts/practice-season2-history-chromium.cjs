@@ -51,9 +51,12 @@ const {chromium}=require('playwright');
        tourRows:document.querySelectorAll('#tour-history .iclub-sx-tour-history-row').length};
     },language);
     assert(out.rendered,'period render failed');
-    const intendedDay=new Date('2026-11-01T00:00:00+05:00')
-       .toLocaleDateString(language==='en'?'en-GB':language==='uz'?'uz-UZ':'ru-RU',
-        {timeZone:'Asia/Tashkent'});
+    // Locale date punctuation differs between Node's ICU and Chromium's ICU.
+    // Compare using Chromium's formatter (the same runtime that renders the UI).
+    const intendedDay=await page.evaluate(lang=>
+      new Date('2026-11-01T00:00:00+05:00').toLocaleDateString(
+        lang==='en'?'en-GB':lang==='uz'?'uz-UZ':'ru-RU',
+        {timeZone:'Asia/Tashkent'}),language);
     const actualDay=await page.locator(
       '[data-practice-s2-history="tours"] .iclub-s2-history-block > .iclub-s2-history-note'
     ).first().textContent();
