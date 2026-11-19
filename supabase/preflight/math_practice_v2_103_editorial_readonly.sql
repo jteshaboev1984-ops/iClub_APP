@@ -3,9 +3,7 @@
 -- Gate is valid BEFORE an individually approved future-serving cutover only.
 with expected(question_id) as (
   select unnest(array[
-    7506,7553,7555,7556,7558,7559,7573,7581,7586,7587,7590,7591,
-    7593,7594,7597,7598,7599,7686,7710,7714,7727,7754,7761,7796,
-    7809,7818,7829,7835,7838,7894,7900,7965
+    7506,7553,7555,7556,7558,7559,7562,7565,7569,7570,7573,7581,7586,7587,7590,7591,7593,7594,7597,7598,7599,7618,7642,7644,7645,7652,7653,7654,7662,7672,7673,7686,7699,7708,7710,7714,7716,7717,7724,7726,7727,7736,7737,7745,7746,7747,7754,7761,7762,7763,7764,7765,7774,7776,7777,7796,7799,7809,7812,7813,7814,7818,7828,7829,7835,7838,7840,7841,7842,7850,7851,7860,7861,7862,7863,7873,7890,7892,7893,7894,7900,7901,7910,7923,7924,7925,7926,7927,7928,7929,7930,7941,7948,7949,7950,7951,7953,7955,7956,7965,7970,7977,7979
   ]::bigint[])
 ), observed as (
  select e.question_id, q.id present_id,
@@ -37,9 +35,9 @@ select count(*) target_count,
  coalesce(sum(classic_answers),0) classic_answer_rows,
  coalesce(sum(session_answers),0) session_answer_rows,
  coalesce(sum(drill_answers),0) drill_answer_rows,
- (count(*)=32 and count(distinct question_id)=32 and count(present_id)=32 and
-  count(*) filter(where published_eligible is true)=32 and
-  count(*) filter(where active_pool_count=1)=32 and
+ (count(*)=103 and count(distinct question_id)=103 and count(present_id)=103 and
+  count(*) filter(where published_eligible is true)=103 and
+  count(*) filter(where active_pool_count=1)=103 and
   coalesce(sum(tour_links),0)=0 and
   count(*) filter(where classic_answers+session_answers+drill_answers>0)>=3) as preflight_ready
 from observed;

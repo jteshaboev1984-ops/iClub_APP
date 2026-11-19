@@ -512,7 +512,7 @@
       "primary_skill": "P1-INT-01",
       "secondary_skills": [],
       "role": "mixed_coefficient",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -555,7 +555,7 @@
       "primary_skill": "P1-INT-01",
       "secondary_skills": [],
       "role": "linear_power_coefficient",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -592,7 +592,7 @@
       "primary_skill": "P1-INT-01",
       "secondary_skills": [],
       "role": "fractional_transfer",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -629,7 +629,7 @@
       "primary_skill": "P1-INT-01",
       "secondary_skills": [],
       "role": "mixed_linear_power",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -690,7 +690,7 @@
       "primary_skill": "P1-INT-01",
       "secondary_skills": [],
       "role": "reverse_inner_factor",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {

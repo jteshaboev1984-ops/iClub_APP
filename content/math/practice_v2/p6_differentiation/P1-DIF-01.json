@@ -351,7 +351,7 @@
       "primary_skill": "P1-DIF-01",
       "secondary_skills": [],
       "role": "reverse_rate",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
       "question": {
@@ -388,7 +388,7 @@
       "primary_skill": "P1-DIF-01",
       "secondary_skills": [],
       "role": "difference_quotient_reverse",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
       "question": {

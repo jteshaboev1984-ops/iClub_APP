@@ -352,7 +352,7 @@
       "primary_skill": "P1-TRI-04",
       "secondary_skills": [],
       "role": "mixed_identity",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
@@ -413,7 +413,7 @@
       "primary_skill": "P1-TRI-04",
       "secondary_skills": [],
       "role": "factor_identity",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
@@ -474,7 +474,7 @@
       "primary_skill": "P1-TRI-04",
       "secondary_skills": [],
       "role": "reciprocal_structure",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
@@ -537,7 +537,7 @@
         "P1-TRI-01"
       ],
       "role": "domain_condition",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
