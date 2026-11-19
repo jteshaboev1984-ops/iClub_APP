@@ -5,6 +5,24 @@
 > **Tracker:** [Temporary master plan and progress — issue #412](https://github.com/jteshaboev1984-ops/iClub_APP/issues/412).
 > **Scope:** documentation of existing routes; no change to frontend, database, auth, budgets, or provider settings.
 
+## Current runtime delta — SELECT-only 2026-11-19
+
+This **does not rewrite the historical 2026-10-29 route/source comparison below**. New source parity claims require fresh file-by-file inspection. Current GitHub main at observation: `74e291b0fba989084387a6fe137871db07f10fbd`.
+
+| Actual control / evidence | Current value | Interpretation |
+| --- | --- | --- |
+| Global AI runtime | UI ON; gateway ON; generation OFF; rollout `consented_beta_v21` | General Tutor can show permitted prepared help, not arbitrary generated subject answers |
+| v2.1 beta | Beta ON; prepared ON; generation OFF; 1 consent-enabled member | Limited optional prepared route, not open rollout |
+| Academic v2.1 | Enabled; provider OFF | Does not authorize generative academic answers |
+| Mathematics Exam Prep | Provider generation ON; 3 active entitlements; 243 approved runtime Tutor Cards | Independent controlled route already active; **do not turn it OFF** |
+| General Practice AI | `enabled=false`, generation OFF; separate Practice context ON, question-error OFF | Existing post-result contracts are not mass activation |
+| Cross-route AI spending | Enforced all-route spend control OFF | Mandatory explicit owner budget decision before expanding billable routes |
+| Plans/payment | Plans UI OFF, checkout OFF | No tariff or payment rollout in this workstream |
+
+Current **deployed** JWT-verified Edge routes include `exam-prep-ai` v17, `practice-ai` v5, `iclub-ai-v21-prepared` v5, `iclub-ai-v21-freeform-beta` v5, `iclub-ai-practice-prepared` v1 and `iclub-ai-practice-freeform` v4. An ACTIVE Edge function is not by itself evidence that all students may invoke it. Source parity for deployed-only routes remains subject to the restricted provenance check below.
+
+**Tracked next:** use existing auth, bounded context, approved source-card and provider-free response first; version prompt/source/model when they actually change, correlate request ID and outcomes without raw student text, apply current error/timeout/unknown-charge handling, and test RU/UZ/EN in the existing learner shell. New provider generation, security boundary changes, minors' retention policy or production switches require separate owner decisions. See [Issue #412](https://github.com/jteshaboev1984-ops/iClub_APP/issues/412).
+
 ## Product contract
 
 There is **one learner-facing iClub AI Tutor**, not separate competing chat windows.
