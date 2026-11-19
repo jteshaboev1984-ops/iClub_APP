@@ -50,7 +50,7 @@
         "P1-INT-01"
       ],
       "role": "definite_linear_combination",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -419,7 +419,7 @@
         "P1-INT-01"
       ],
       "role": "parameter_integral",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -458,7 +458,7 @@
         "P1-INT-01"
       ],
       "role": "reversed_limits",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -503,7 +503,7 @@
         "P1-INT-01"
       ],
       "role": "symmetry_signed",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -566,7 +566,7 @@
         "P1-INT-01"
       ],
       "role": "improper_parameter",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
