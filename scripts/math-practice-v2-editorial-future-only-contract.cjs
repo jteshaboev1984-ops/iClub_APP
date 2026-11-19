@@ -16,7 +16,7 @@ const BANK = path.join(ROOT, 'content/math/practice_v2');
 const EXPECTED_IDS = new Set([
   7506,7553,7555,7556,7558,7559,7573,7581,7586,7587,7590,7591,
   7593,7594,7597,7598,7599,7686,7710,7714,7727,7754,7761,7796,
-  7809,7818,7829,7835,7838,7894,7900
+  7809,7818,7829,7835,7838,7894,7900,7965
 ]);
 const FUTURE_VERSION_REQUIRED = new Set([7573, 7686]);
 const HISTORY_SENSITIVE = new Set([7710,7714,7754]);
@@ -97,6 +97,19 @@ for (const folder of folders) {
         if(/^question\.(en|ru|uz)$/.test(p) || p==='explanation.uz' || permitted.has(p)) continue;
         errors.push('Unreviewed/semantic payload change at item '+id+' field '+p);
       }
+      if(id===7965){
+        for(const lang of ['en','ru','uz']){
+          if(!String(q.explanation?.[lang]||'').includes('√(36−24)') ||
+             String(q.explanation[lang]).includes('√36−24'))
+            errors.push('Missing grouped discriminant in '+lang+' explanation at '+id);
+        }
+        // Independently verify the quadratic formula's roots satisfy x²−6x+6=0.
+        for(const sign of [-1,1]){
+          const root=(6+sign*Math.sqrt(36-24))/2;
+          if(Math.abs(root*root-6*root+6)>1e-10)
+            errors.push('Quadratic root proof failed at '+id);
+        }
+      }
       if(!EXPECTED_IDS.has(id))errors.push('Unapproved question edited: '+id);
       if(FUTURE_VERSION_REQUIRED.has(id)&&!paths.some(p=>p.startsWith('options.')||p.startsWith('question.')))
         errors.push('Versioned question change missing: '+id);
@@ -112,7 +125,7 @@ if(checked!==495||allKeys.size!==495||skillFiles!==45)
   errors.push('Coverage must remain 495 questions / 45 skill files');
 if(input!==218||mcq!==277)errors.push('Answer-type totals changed');
 if(!equals(perPool,[68,80,68,77,66,70,66]))errors.push('Pool membership counts changed');
-if(output.length!==31||actual.size!==31)errors.push('Exactly 31 distinct approved edits required');
+if(output.length!==32||actual.size!==32)errors.push('Exactly 32 distinct approved edits required');
 if(output.filter(x=>x.category==='future_version_required').length!==2)
   errors.push('Two semantic / changed distractor items require future-only versioning');
 if(output.filter(x=>x.history_sensitive).length!==3)
@@ -126,7 +139,7 @@ const summary = {
   source_baseline:BASE,questions:checked,skill_files:skillFiles,
   mcq,input,practice_pool_sizes:perPool,
   unchanged:checked-output.length,edited:output.length,
-  editorial_equal_key:29,future_version_required:2,
+  editorial_equal_key:30,future_version_required:2,
   history_sensitive_candidates:3,
   changed_id_set_sha256:digest(output.map(x=>x.id).sort((a,b)=>a-b)),
   // Only digests, item IDs and classification; never print stems, answers or keys.

@@ -5,7 +5,7 @@ with expected(question_id) as (
   select unnest(array[
     7506,7553,7555,7556,7558,7559,7573,7581,7586,7587,7590,7591,
     7593,7594,7597,7598,7599,7686,7710,7714,7727,7754,7761,7796,
-    7809,7818,7829,7835,7838,7894,7900
+    7809,7818,7829,7835,7838,7894,7900,7965
   ]::bigint[])
 ), observed as (
  select e.question_id, q.id present_id,
@@ -37,9 +37,9 @@ select count(*) target_count,
  coalesce(sum(classic_answers),0) classic_answer_rows,
  coalesce(sum(session_answers),0) session_answer_rows,
  coalesce(sum(drill_answers),0) drill_answer_rows,
- (count(*)=31 and count(distinct question_id)=31 and count(present_id)=31 and
-  count(*) filter(where published_eligible is true)=31 and
-  count(*) filter(where active_pool_count=1)=31 and
+ (count(*)=32 and count(distinct question_id)=32 and count(present_id)=32 and
+  count(*) filter(where published_eligible is true)=32 and
+  count(*) filter(where active_pool_count=1)=32 and
   coalesce(sum(tour_links),0)=0 and
   count(*) filter(where classic_answers+session_answers+drill_answers>0)>=3) as preflight_ready
 from observed;

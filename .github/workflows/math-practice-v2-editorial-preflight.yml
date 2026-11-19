@@ -1,13 +1,15 @@
-name: Mathematics Practice v2 editorial 31-item preflight
+name: Mathematics Practice v2 editorial 32-item preflight
 on:
   pull_request:
     branches:
       - main
       - fix/math-practice-v2-495-content-qa-20261119
+      - feature/math-practice-v2-editorial-preflight-20261119
     paths:
       - 'content/math/practice_v2/**/*.json'
       - 'scripts/math-practice-v2-editorial-future-only-contract.cjs'
-      - 'supabase/preflight/math_practice_v2_31_editorial_readonly.sql'
+      - 'supabase/preflight/math_practice_v2_32_editorial_readonly.sql'
+      - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
       - '.github/workflows/math-practice-v2-editorial-preflight.yml'
   workflow_dispatch:
 permissions:
@@ -22,26 +24,50 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: Verify exactly 31 governed source corrections and history-safe boundary
+      - name: Verify exactly 32 governed source corrections and history-safe boundary
         run: |
           set -euo pipefail
           node --check scripts/math-practice-v2-editorial-future-only-contract.cjs
+          node scripts/math-practice-v2-495-editorial-regression.cjs > "$RUNNER_TEMP/practice-all-495-independent-language-and-options.json"
           node scripts/math-practice-v2-editorial-future-only-contract.cjs > "$RUNNER_TEMP/practice-editorial-metadata.json"
           node - "$RUNNER_TEMP/practice-editorial-metadata.json" <<'NODE'
           const fs = require('node:fs');
           const a = JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(a.questions!==495||a.edited!==31||a.unchanged!==464||
-             a.editorial_equal_key!==29||a.future_version_required!==2||
+          if(a.questions!==495||a.edited!==32||a.unchanged!==463||
+             a.editorial_equal_key!==30||a.future_version_required!==2||
              a.history_sensitive_candidates!==3)process.exit(1);
-          console.log('PASS 495 authored items, 31 reviewed changes, 29 editorial / 2 future-version, 3 history-sensitive; protected text/keys omitted');
+          console.log('PASS 495 authored items, 32 reviewed changes, 30 editorial / 2 future-version, 3 history-sensitive; protected text/keys omitted');
           NODE
+      - name: Verify metadata-only item-by-item review ledger
+        run: |
+          python3 - <<'PY'
+          import csv
+          from pathlib import Path
+          p=Path("docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv")
+          with p.open(newline="",encoding="utf-8") as f:
+              rows=list(csv.DictReader(f))
+          assert len(rows)==495
+          ids=[int(r["question_id"]) for r in rows]
+          assert sorted(ids)==list(range(7485,7980))
+          assert len({r["primary_skill"] for r in rows})==45
+          assert sum(r["qtype"]=="mcq" for r in rows)==277
+          assert sum(r["qtype"]=="input" for r in rows)==218
+          assert sum(r["new_candidate_status"]=="NEW_EXPLANATION_RADICAND_FIX" for r in rows)==1
+          assert sum(r["new_candidate_status"]=="FUTURE_VERSION_REQUIRED" for r in rows)==2
+          assert all(r["has_prior_answers"] in ("YES","NO") for r in rows)
+          assert all(r["en_stem_options_key_review"]=="AI_REVIEWED_EN_20261119" for r in rows)
+          assert all(r["ru_uz_full_semantic_review"] in
+                     ("NO_EXHAUSTIVE_HUMAN_SEMANTIC_SIGNOFF","TARGETED_SOURCE_CORRECTION_DRAFT")
+                     for r in rows)
+          print("PASS 495 per-question metadata rows, no protected stems/answers and honest scope")
+          PY
       - name: Reject accidental write statements in the database preflight
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p=Path('supabase/preflight/math_practice_v2_31_editorial_readonly.sql')
+          p=Path('supabase/preflight/math_practice_v2_32_editorial_readonly.sql')
           sql=re.sub(r'--[^\n]*','',p.read_text())
           assert re.match(r'^\s*with\s+expected\b',sql,re.I)
           assert not re.search(r'\b(insert|update|delete|truncate|alter|drop|create|grant|revoke|call|copy|execute|do)\b',sql,re.I)

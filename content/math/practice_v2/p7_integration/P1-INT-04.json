@@ -589,9 +589,9 @@
       ],
       "correct_answer": "A",
       "explanation": {
-        "en": "Set x²−5x+4=x−2. Then x²−6x+6=0, giving x=(6±√36−24)/2=3±√3.",
-        "ru": "Приравниваем x²−5x+4=x−2. Получаем x²−6x+6=0, откуда x=(6±√36−24)/2=3±√3.",
-        "uz": "x²−5x+4=x−2 deb olamiz. x²−6x+6=0, shundan x=(6±√36−24)/2=3±√3."
+        "en": "Set x²−5x+4=x−2. Then x²−6x+6=0, giving x=(6±√(36−24))/2=3±√3.",
+        "ru": "Приравниваем x²−5x+4=x−2. Получаем x²−6x+6=0, откуда x=(6±√(36−24))/2=3±√3.",
+        "uz": "x²−5x+4=x−2 deb olamiz. x²−6x+6=0, shundan x=(6±√(36−24))/2=3±√3."
       },
       "ai_source_skill": "P1-INT-04",
       "status": "draft"
