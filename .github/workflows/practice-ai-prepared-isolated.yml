@@ -24,6 +24,7 @@ on:
       - scripts/practice-ai-freeform-canonical-e2e.cjs
       - scripts/practice-ai-unified-tutor-browser-e2e.cjs
       - scripts/ai-tutor-academic-unavailable-regression.cjs
+      - scripts/ai-tutor-practice-attempt-bridge-browser.cjs
       - scripts/fixtures/practice-ai-unified-tutor-local-only.html
       - iclub-ai-v21-ui.css
       - supabase/functions/iclub-ai-practice-freeform/index.ts
@@ -210,6 +211,7 @@ jobs:
           set -euo pipefail
           node scripts/practice-ai-prepared-browser-smoke.cjs
           node scripts/practice-ai-unified-tutor-browser-e2e.cjs
+          node scripts/ai-tutor-practice-attempt-bridge-browser.cjs
       - name: Real Edge to isolated PostgreSQL browser flow
         shell: bash
         run: |
