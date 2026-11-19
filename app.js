@@ -24184,6 +24184,7 @@ if (action === "practice-select-tour") {
   const tourNo = Number(btn.dataset.tourNo || 0);
   if (tourNo > 0) {
     setSelectedPracticeTourNo(state.courses.subjectKey, tourNo);
+    window.iClubPracticeTabsV1?.select?.('tours');
     updatePracticeStartButtonForTour(tourNo, false);
     await renderPracticeStart();
   }
