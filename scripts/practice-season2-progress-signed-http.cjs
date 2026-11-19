@@ -34,7 +34,7 @@ async function post(token,key='mathematics'){
 (async()=>{
  const anon=await post(null);
  assert(!anon.ok && anon.status>=400,'anonymous can read season progress');
- const expired=await post(jwt(A,-30));
+ const expired=await post(jwt(A,-3600)); // Outside PostgREST JWT clock-skew allowance
  assert(!expired.ok && expired.status>=400,'expired token succeeded');
  const a=await post(jwt(A));
  assert(a.ok,'signed A denied '+a.status);
