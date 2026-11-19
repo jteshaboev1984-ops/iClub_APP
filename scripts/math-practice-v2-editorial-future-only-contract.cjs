@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// Source-only, read-only history-safe gate for Math Practice v2's 37 governed candidate corrections.
+// Source-only, read-only history-safe gate for Math Practice v2's 43 governed candidate corrections.
 // No database access, answer-key output, generation bump or automatic publication.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -15,10 +15,10 @@ const ROOT = path.resolve(__dirname, '..');
 const BANK = path.join(ROOT, 'content/math/practice_v2');
 const EXPECTED_IDS = new Set([
   7506,7553,7555,7556,7558,7559,7562,7565,7569,7570,7573,7581,7586,7587,7590,7591,
-  7593,7594,7597,7598,7599,7618,7686,7710,7714,7727,7754,7761,7796,
+  7593,7594,7597,7598,7599,7618,7642,7644,7645,7652,7653,7654,7686,7710,7714,7727,7754,7761,7796,
   7809,7818,7829,7835,7838,7894,7900,7965
 ]);
-const FUTURE_VERSION_REQUIRED = new Set([7573, 7618, 7686]);
+const FUTURE_VERSION_REQUIRED = new Set([7573, 7618, 7642,7644,7645,7652,7653,7654,7686]);
 const HISTORY_SENSITIVE = new Set([7710,7714,7754]);
 const OPTION_TEXT_ALLOWED = new Map([
   [7559,new Set(['options.3.text.uz'])],
@@ -94,7 +94,7 @@ for (const folder of folders) {
       if(!paths.length)continue;
       const permitted=OPTION_TEXT_ALLOWED.get(id)||new Set();
       for(const p of paths){
-        if(/^question\.(en|ru|uz)$/.test(p) || p==='explanation.uz' || (id===7965 && /^explanation\.(en|ru)$/.test(p)) || (id===7618 && ['difficulty','role'].includes(p)) || permitted.has(p)) continue;
+        if(/^question\.(en|ru|uz)$/.test(p) || p==='explanation.uz' || (id===7965 && /^explanation\.(en|ru)$/.test(p)) || (id===7618 && ['difficulty','role'].includes(p)) || ([7642,7644,7645,7652,7653,7654].includes(id)&&p==='difficulty') || permitted.has(p)) continue;
         errors.push('Unreviewed/semantic payload change at item '+id+' field '+p);
       }
       if([7562,7565,7569,7570].includes(id)){
@@ -103,6 +103,9 @@ for (const folder of folders) {
            !String(q.question?.uz||'').includes('qiymatlar to‘plamini aynan ifodalaydi'))
           errors.push('Exact-range trilingual stem contract failed for item '+id);
       }
+      const calibrated = new Map([[7642,'easy'],[7644,'medium'],[7645,'medium'],[7652,'medium'],[7653,'easy'],[7654,'easy']]);
+      if(calibrated.has(id) && (q.difficulty!==calibrated.get(id) || paths.length!==1 || paths[0]!=='difficulty'))
+        errors.push('Unexpected reasoning-demand calibration payload at '+id);
       if(id===7618 && (q.difficulty!=='easy' || q.role!=='representation_variation'))
         errors.push('Q134 difficulty/role academic calibration drift');
       if(id===7965){
@@ -119,7 +122,7 @@ for (const folder of folders) {
         }
       }
       if(!EXPECTED_IDS.has(id))errors.push('Unapproved question edited: '+id);
-      if(FUTURE_VERSION_REQUIRED.has(id)&&!paths.some(p=>p.startsWith('options.')||p.startsWith('question.')||(id===7618&&['difficulty','role'].includes(p))))
+      if(FUTURE_VERSION_REQUIRED.has(id)&&!paths.some(p=>p.startsWith('options.')||p.startsWith('question.')||p==='difficulty'||(id===7618&&p==='role')))
         errors.push('Versioned question change missing: '+id);
       output.push({id,category:FUTURE_VERSION_REQUIRED.has(id)?'future_version_required':'editorial_equal_key',
         old_sha256:digest(before),new_sha256:digest(q),
@@ -133,9 +136,9 @@ if(checked!==495||allKeys.size!==495||skillFiles!==45)
   errors.push('Coverage must remain 495 questions / 45 skill files');
 if(input!==218||mcq!==277)errors.push('Answer-type totals changed');
 if(!equals(perPool,[68,80,68,77,66,70,66]))errors.push('Pool membership counts changed');
-if(output.length!==37||actual.size!==37)errors.push('Exactly 37 distinct approved edits required');
-if(output.filter(x=>x.category==='future_version_required').length!==3)
-  errors.push('Three substantive / timing-changing items require future-only versioning');
+if(output.length!==43||actual.size!==43)errors.push('Exactly 43 distinct approved edits required');
+if(output.filter(x=>x.category==='future_version_required').length!==9)
+  errors.push('Nine substantive / timing-changing items require future-only versioning');
 if(output.filter(x=>x.history_sensitive).length!==3)
   errors.push('Three history-sensitive decimal items must stay visible in preflight');
 if(errors.length){
@@ -147,7 +150,7 @@ const summary = {
   source_baseline:BASE,questions:checked,skill_files:skillFiles,
   mcq,input,practice_pool_sizes:perPool,
   unchanged:checked-output.length,edited:output.length,
-  editorial_equal_key:34,future_version_required:3,
+  editorial_equal_key:34,future_version_required:9,
   history_sensitive_candidates:3,
   changed_id_set_sha256:digest(output.map(x=>x.id).sort((a,b)=>a-b)),
   // Only digests, item IDs and classification; never print stems, answers or keys.
