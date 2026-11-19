@@ -523,7 +523,7 @@
         "P1-COO-04"
       ],
       "role": "parameter_tangency",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
