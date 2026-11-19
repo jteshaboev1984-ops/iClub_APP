@@ -5,6 +5,8 @@ on:
     paths:
       - 'supabase/candidates/practice_season2_progress_safe_v1.sql'
       - 'supabase/tests/practice_season2_progress_safe_isolated.sql'
+      - 'supabase/candidates/practice_subject_tour1_runtime_v5_future.sql'
+      - 'supabase/tests/practice_subject_tour1_runtime_selector_isolated.sql'
       - '.github/workflows/practice-season2-progress-isolated.yml'
       - 'scripts/practice-season2-progress-signed-http.cjs'
       - 'scripts/practice-season2-history-chromium.cjs'
@@ -45,6 +47,27 @@ jobs:
           set -euo pipefail
           psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 -U postgres -d postgres \
             -f supabase/tests/practice_season2_progress_safe_isolated.sql
+      - name: Verify future-serving per-subject Practice selectors on separate synthetic PG17
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          createdb -h 127.0.0.1 -U postgres practice_selector
+          export PGHOST=127.0.0.1 PGUSER=postgres PGDATABASE=practice_selector
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_fixture.sql
+          for source in \
+            supabase/migrations/20261007002000_math_practice_v2_unicode_minus_normalization_v1.sql \
+            supabase/migrations/20261007003000_math_practice_v2_close_legacy_answer_oracles_v1.sql \
+            supabase/migrations/20261007004000_math_practice_v2_metadata_foundation_v1.sql \
+            supabase/migrations/20261007005000_math_practice_v2_topic_drill_pool_gate_v1.sql \
+            supabase/migrations/20261007006000_math_practice_v2_selector_v5.sql
+          do
+            psql -X -v ON_ERROR_STOP=1 -f "$source"
+          done
+          psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/practice_subject_tour1_runtime_v5_future.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/practice_subject_tour1_runtime_selector_isolated.sql
+
       - name: Activate fixture period and launch signed local PostgREST
         shell: bash
         env:
