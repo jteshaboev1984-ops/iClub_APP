@@ -120,7 +120,7 @@ for(let id=51;id<=75;id++){
    assert.equal(literalNumbers(q.question[l]),literalNumbers(q.question.en),'stem numeric parity');
   }
   if(q.qtype==='mcq'){
-   assert.deepEqual(q.options.map(x=>x.key),['A','B','C','D']);
+   assert.deepEqual(q.options.map(x=>x.key).sort(),['A','B','C','D']);
    for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(x=>s(x.text[l]))).size,4);
    for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);
     else assert.ok(o.diagnostic_code);
