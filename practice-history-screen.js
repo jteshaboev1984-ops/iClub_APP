@@ -7,21 +7,21 @@
   const ROOT_ID='practice-history-content';
   const COPY={
     ru:{title:'История практики',subtitle:'Результаты тренировок по турам, темам и сезонам.',
-      tours:'По турам',topics:'По темам',season:'Сезон',currentSeason:'Текущий сезон',archive:'Архив прошлых сезонов',
+      tours:'По турам',topics:'По темам',season:'Сезон',currentSeason:'Текущий сезон',completedSeason:'Завершённый сезон',archive:'Архив прошлых сезонов',
       earlier:'Ранние записи',empty:'В этом разделе пока нет результатов.',
       noData:'История сезонов пока недоступна. Ранее сохранённые попытки не удалены.',
       more:'Показать ещё',limited:'Показаны последние записи. Более ранние результаты сохранены.',
       newer:'К более новому сезону',older:'К более раннему сезону',count:'записей',
       legacyNote:'Записи, для которых не подтверждён официальный сезон.'},
     uz:{title:'Amaliyot tarixi',subtitle:'Mashqlar natijalari turlar, mavzular va mavsumlar bo‘yicha.',
-      tours:'Turlar bo‘yicha',topics:'Mavzular bo‘yicha',season:'Mavsum',currentSeason:'Joriy mavsum',archive:'Oldingi mavsumlar arxivi',
+      tours:'Turlar bo‘yicha',topics:'Mavzular bo‘yicha',season:'Mavsum',currentSeason:'Joriy mavsum',completedSeason:'Tugallangan mavsum',archive:'Oldingi mavsumlar arxivi',
       earlier:'Avvalgi natijalar',empty:'Bu bo‘limda hozircha natija yo‘q.',
       noData:'Mavsumlar tarixi hozircha mavjud emas. Oldingi urinishlar o‘chirilmagan.',
       more:'Yana ko‘rsatish',limited:'So‘nggi natijalar ko‘rsatilmoqda. Avvalgilari saqlangan.',
       newer:'Yangiroq mavsumga',older:'Oldinroq mavsumga',count:'natija',
       legacyNote:'Rasmiy mavsumi tasdiqlanmagan avvalgi natijalar.'},
     en:{title:'Practice history',subtitle:'Practice results across tours, topics and seasons.',
-      tours:'By tour',topics:'By topic',season:'Season',currentSeason:'Current season',archive:'Previous seasons',
+      tours:'By tour',topics:'By topic',season:'Season',currentSeason:'Current season',completedSeason:'Completed season',archive:'Previous seasons',
       earlier:'Earlier entries',empty:'No results in this section yet.',
       noData:'Season history is not available yet. Earlier attempts have not been deleted.',
       more:'Show 5 more',limited:'Only recent entries are shown. Older results remain saved.',
@@ -44,16 +44,20 @@
       {timeZone:'Asia/Tashkent'}):'';
   };
   const historyData=()=>{
-    if(!source?.ok||source.period_active!==true||
-      String(source.subject_key||'')!==sourceSubject)return null;
-    const currentNo=Number(source.season_no);
+    // While S2 has no official start, use only an authenticated S1 snapshot
+    // from the same read-only RPC. Its top-level S2 progress remains INACTIVE.
+    const period=source?.ok===true&&period.period_active===true
+      ?source:source?.history_snapshot;
+    if(period?.ok!==true||period.period_active!==true||
+      String(period.subject_key||'')!==sourceSubject)return null;
+    const currentNo=Number(period.season_no);
     if(!Number.isInteger(currentNo)||currentNo<1)return null;
     const current={key:'season-'+currentNo,no:currentNo,
-      tours:{count:positive(source.main?.attempts_count),rows:source.main?.recent||[]},
-      topics:{count:positive(source.topic?.sessions_count),rows:source.topic?.recent||[]}};
-    const archivedTours=positive(source.main?.archived_attempts_count);
-    const archivedTopics=positive(source.topic?.archived_sessions_count);
-    const raw=Array.isArray(source.archive_seasons)?source.archive_seasons:[];
+      tours:{count:positive(period.main?.attempts_count),rows:period.main?.recent||[]},
+      topics:{count:positive(period.topic?.sessions_count),rows:period.topic?.recent||[]}};
+    const archivedTours=positive(period.main?.archived_attempts_count);
+    const archivedTopics=positive(period.topic?.archived_sessions_count);
+    const raw=Array.isArray(period.archive_seasons)?period.archive_seasons:[];
     const entries=raw.map(a=>{
       const no=Number(a?.season_no);
       const isSeason=Number.isInteger(no)&&no>=1&&no<currentNo;
@@ -69,8 +73,8 @@
       entries.length=0; // never claim a precise historic season from inconsistent RPC rows
       if(archivedTours+archivedTopics>0)entries.push({
         key:'previous',no:null,
-        tours:{count:archivedTours,rows:source.main?.archived_recent||[]},
-        topics:{count:archivedTopics,rows:source.topic?.archived_recent||[]}
+        tours:{count:archivedTours,rows:period.main?.archived_recent||[]},
+        topics:{count:archivedTopics,rows:period.topic?.archived_recent||[]}
       });
     }
     const seasons=entries.filter(e=>e.no!==null&&(e.tours.count+e.topics.count)>0)
@@ -84,7 +88,7 @@
       topics:{count:old.reduce((n,e)=>n+e.topics.count,0),
         rows:old.flatMap(e=>e.topics.rows).slice(0,20)}
     }:null;
-    return {seasons:[current,...seasons],early};
+    return {seasons:[current,...seasons],early,periodStatus:period.period_status||'current'};
   };
   function historyRows(holder,items,total,kind){
     const copy=loc(),rows=Array.isArray(items)?items.slice(0,20):[];
@@ -133,7 +137,7 @@
     host.replaceChildren();
     const data=historyData();
     if(!data){host.append(el('p','iclub-ph-empty',c.noData));return false;}
-    const {seasons,early}=data;
+    const {seasons,early,periodStatus}=data;
     seasonIndex=Math.min(Math.max(seasonIndex,0),seasons.length-1);
     const root=el('div','iclub-ph-root');
     const navigator=el('div','iclub-ph-season-nav');
@@ -172,6 +176,7 @@
     const repaint=()=>{
       const s=seasons[seasonIndex];
       seasonName.textContent=c.season+' '+s.no;
+      currentBadge.textContent=periodStatus==='closed'?c.completedSeason:c.currentSeason;
       currentBadge.hidden=seasonIndex!==0;
       position.textContent=seasons.length>1?(seasonIndex+1)+' / '+seasons.length:'';
       previous.disabled=seasonIndex===0;
