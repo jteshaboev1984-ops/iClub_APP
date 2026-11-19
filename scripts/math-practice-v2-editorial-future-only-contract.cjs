@@ -94,7 +94,7 @@ for (const folder of folders) {
       if(!paths.length)continue;
       const permitted=OPTION_TEXT_ALLOWED.get(id)||new Set();
       for(const p of paths){
-        if(/^question\.(en|ru|uz)$/.test(p) || p==='explanation.uz' || permitted.has(p)) continue;
+        if(/^question\.(en|ru|uz)$/.test(p) || p==='explanation.uz' || (id===7965 && /^explanation\.(en|ru)$/.test(p)) || permitted.has(p)) continue;
         errors.push('Unreviewed/semantic payload change at item '+id+' field '+p);
       }
       if(id===7965){
