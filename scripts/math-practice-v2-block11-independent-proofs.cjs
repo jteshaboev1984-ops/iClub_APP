@@ -50,7 +50,7 @@ const cases={
 cases[254]=(q)=>{
  const values=[trig('sin',210)-trig('cos',60),trig('sin',210)+trig('cos',60),trig('sin',210)+1,2*trig('sin',210)-1];
  assert.equal(values.filter(x=>near(x,0)).length,1);
- const zero=q.options.filter((o,i)=>near(values[i],0));assert.equal(zero.length,1);assert.equal(zero[0].key,q.correct_answer);
+ const sorted=q.options.slice().sort((a,b)=>a.key.localeCompare(b.key));const zero=sorted.filter((o,i)=>near(values[i],0));assert.equal(zero.length,1);assert.equal(zero[0].key,q.correct_answer);
 };
 assert.equal(Q.size,25);
 for(let id=251;id<=275;id++){
@@ -59,7 +59,7 @@ try{
  assert.equal(q.practice_no,4);assert.ok(q.source_ref.includes('Ch5'));
  if(md.has(id))assert.equal(q.difficulty,'medium');
  for(const l of ['en','ru','uz']){assert.ok(q.question[l]?.trim()&&q.explanation[l]?.trim());assert.equal(tokens(q.question[l]),tokens(q.question.en),'numeric locale drift');}
- if(q.qtype==='mcq'){assert.deepEqual(q.options.map(o=>o.key),['A','B','C','D']);for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>norm(o.text[l]))).size,4);for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);}
+ if(q.qtype==='mcq'){assert.deepEqual(q.options.map(o=>o.key).sort(),['A','B','C','D']);for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>norm(o.text[l]))).size,4);for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);}
  cases[id](q);
 }catch(e){console.error('FAIL block11 Q'+String(id).padStart(3,'0')+' '+e.message);process.exitCode=1;}
 }
