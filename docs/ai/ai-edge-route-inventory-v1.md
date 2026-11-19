@@ -23,6 +23,21 @@ Current **deployed** JWT-verified Edge routes include `exam-prep-ai` v17, `pract
 
 **Tracked next:** use existing auth, bounded context, approved source-card and provider-free response first; version prompt/source/model when they actually change, correlate request ID and outcomes without raw student text, apply current error/timeout/unknown-charge handling, and test RU/UZ/EN in the existing learner shell. New provider generation, security boundary changes, minors' retention policy or production switches require separate owner decisions. See [Issue #412](https://github.com/jteshaboev1984-ops/iClub_APP/issues/412).
 
+## Read-only deployed-only source inspection — 2026-11-19 (Package B2)
+
+On 2026-11-19 the **actual deployed source bundles** for all four routes previously marked “GitHub source unavailable” were retrieved through the operator-authorized Supabase Edge Function read API. This improves our understanding of the live implementation; it does **not** create auditable source-control provenance or authorize release. The code itself, private operator predicates and confidential policy details are intentionally **not copied into this repository or Issue**.
+
+| Deployed-only route | Retrieved runtime version and source files | Verified from read-only inspection | Still unverified / required gate |
+| --- | --- | --- | --- |
+| `iclub-ai-v21-prepared` | v5; `index.ts` | General prepared Help route has authenticated-user and eligibility/consent paths; no direct OpenAI API call in this bundle | Exact reviewed Git commit/blob source, disposable signed HTTP authorization tests and deployment-to-source chain |
+| `iclub-ai-v21-freeform-beta` | v5; `index.ts`, `freeform_beta_pilot.ts` | Model-backed route uses server-side authorization, approved Help source, independent quota and money-admission controls | Prove effective currently-off rollout, pricing/unknown-charge reconciliation and exact source provenance before any paid enable |
+| `iclub-ai-paid-canary` | v2; `index.ts`, `policy.ts` | Separate operator-canary mechanism with request reservation and fixed test material, not a student Tutor feature | Operator-only HTTP security and source lineage; do not activate |
+| `iclub-ai-qa-global` | v1; `index.ts`, `policy.ts` | Function metadata reports `verify_jwt=false`. Its handler independently checks authenticated identity and a dedicated operator authorization RPC **before** reaching the provider path | **Dedicated signed/anonymous/expired/non-operator HTTP checks** still needed; handler checks must not be equated with proven safety, nor the metadata flag alone with an exploit |
+
+These four are **not claimed to match GitHub**: checked-in matching entrypoints and auxiliary modules are still absent in the inspected `main` tree. Do not silently copy these private deployed files into a public PR as a “quick source registry”; a source-location and release-provenance decision is owner-gated. Separate source review may find existing commits outside `main`; no such correspondence was established by this inspection.
+
+The existing four repo-backed historical parity results below are **dated 2026-10-29**; this inspection did not recompute them. Production Supabase was read-only (no inference request, no data edit, no feature switch).
+
 ## Product contract
 
 There is **one learner-facing iClub AI Tutor**, not separate competing chat windows.
