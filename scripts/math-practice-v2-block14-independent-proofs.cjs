@@ -30,7 +30,18 @@ const tests={
 336:q=>mcq(q,t=>near(number(t),54/3**3)),
 337:q=>input(q,GP(64,.5,5)),
 338:q=>input(q,Math.log(486/2)/Math.log(3)+1),
-339:q=>input(q,6*6/18+2),
+339(q){
+ assert.equal(q.difficulty,'hard');
+ for(const l of ['en','ru','uz'])assert.ok(q.question[l].includes('u₂=6')&&q.question[l].includes('u₄=54'));
+ const second=6,fourth=54,r2=fourth/second;
+ const possible=[-Math.sqrt(r2),Math.sqrt(r2)];
+ for(const r of possible)assert.ok(near(second*r*r,fourth));
+ const allowed=possible.filter(r=>second/r>0);
+ assert.equal(allowed.length,1);
+ const first=second/allowed[0];
+ assert.ok(first>0&&near(first*allowed[0],second)&&near(first*allowed[0]**3,fourth));
+ input(q,first+2);
+},
 340:q=>mcq(q,t=>near(number(t),12*12/48)),
 341:q=>mcq(q,t=>near(frac(t),9-3+1-1/3)),
 342:q=>input(q,21/(1+2+4)),

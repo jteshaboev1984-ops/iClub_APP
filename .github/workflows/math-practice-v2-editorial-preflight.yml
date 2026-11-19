@@ -1,8 +1,8 @@
-name: Mathematics Practice v2 academic 109-item preflight
+name: Mathematics Practice v2 academic 112-item preflight
 on:
   push:
     branches:
-      - academic/math-practice-hard-transfer-geometry-3items-20261119
+      - academic/math-practice-hard-transfer-algebra-3items-20261119
   pull_request:
     branches:
       - main
@@ -12,6 +12,7 @@ on:
       - qa/math-practice-v2-independent-batch-gates-20261119
       - qa/math-practice-v2-ambiguity-q400-20261119
       - academic/math-practice-hard-transfer-3items-20261119
+      - academic/math-practice-hard-transfer-geometry-3items-20261119
     paths:
       - 'content/math/practice_v2/**/*.json'
       - 'scripts/math-practice-v2-editorial-future-only-contract.cjs'
@@ -36,7 +37,7 @@ on:
       - 'scripts/math-practice-v2-block19-independent-proofs.cjs'
       - 'scripts/math-practice-v2-block20-independent-proofs.cjs'
       - 'scripts/math-practice-v2-mcq-set-ambiguity.cjs'
-      - 'supabase/preflight/math_practice_v2_109_editorial_readonly.sql'
+      - 'supabase/preflight/math_practice_v2_112_editorial_readonly.sql'
       - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
       - '.github/workflows/math-practice-v2-editorial-preflight.yml'
   workflow_dispatch:
@@ -52,7 +53,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: Verify exactly 109 governed source corrections and history-safe boundary
+      - name: Verify exactly 112 governed source corrections and history-safe boundary
         run: |
           set -euo pipefail
           node --check scripts/math-practice-v2-editorial-future-only-contract.cjs
@@ -103,10 +104,10 @@ jobs:
           node - "$RUNNER_TEMP/practice-editorial-metadata.json" <<'NODE'
           const fs = require('node:fs');
           const a = JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(a.questions!==495||a.edited!==109||a.unchanged!==386||
-             a.editorial_equal_key!==31||a.future_version_required!==78||
+          if(a.questions!==495||a.edited!==112||a.unchanged!==383||
+             a.editorial_equal_key!==31||a.future_version_required!==81||
              a.history_sensitive_candidates!==16)process.exit(1);
-          console.log('PASS 495 authored items, 109 reviewed changes, 31 editorial / 78 future-version, 16 history-sensitive; protected text/keys omitted');
+          console.log('PASS 495 authored items, 112 reviewed changes, 31 editorial / 81 future-version, 16 history-sensitive; protected text/keys omitted');
           NODE
       - name: Verify metadata-only item-by-item review ledger
         run: |
@@ -123,7 +124,7 @@ jobs:
           assert sum(r["qtype"]=="mcq" for r in rows)==277
           assert sum(r["qtype"]=="input" for r in rows)==218
           assert sum(r["new_candidate_status"]=="NEW_EXPLANATION_RADICAND_FIX" for r in rows)==1
-          assert sum(r["new_candidate_status"]=="FUTURE_VERSION_REQUIRED" for r in rows)==78
+          assert sum(r["new_candidate_status"]=="FUTURE_VERSION_REQUIRED" for r in rows)==81
           assert all(r["has_prior_answers"] in ("YES","NO") for r in rows)
           assert all(r["en_stem_options_key_review"]=="AI_REVIEWED_EN_20261119" for r in rows)
           assert all(r["ru_uz_full_semantic_review"] in
@@ -137,7 +138,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p=Path('supabase/preflight/math_practice_v2_109_editorial_readonly.sql')
+          p=Path('supabase/preflight/math_practice_v2_112_editorial_readonly.sql')
           sql=re.sub(r'--[^\n]*','',p.read_text())
           assert re.match(r'^\s*with\s+expected\b',sql,re.I)
           assert not re.search(r'\b(insert|update|delete|truncate|alter|drop|create|grant|revoke|call|copy|execute|do)\b',sql,re.I)

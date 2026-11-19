@@ -29,7 +29,16 @@ function transformedVertex(s){
 const literalNumbers=s=>(String(s||'').normalize('NFC').replace(/[−–—]/g,'-')
  .match(/(?<!\p{L})[-+]?\d+(?:[.,]\d+)?/gu)||[]).map(x=>x.replace(',','.')).sort().join('|');
 const tests={
- 101:q=>input(q,(4*5+5)-(4*3+5)),
+ 101(q){
+   assert.equal(q.difficulty,'hard');
+   for(const l of ['en','ru','uz'])assert.ok(q.question[l].includes('f⁻¹(−1)=2')&&q.question[l].includes('f⁻¹(0)=6'));
+   const x1=2,y1=-1,x2=6,y2=0;
+   const a=(y2-y1)/(x2-x1),b=y1-a*x1;
+   assert.ok(a>0&&near(a*x1+b,y1)&&near(a*x2+b,y2));
+   const inverse=y=>(y-b)/a;
+   assert.ok(near(inverse(-1),2)&&near(inverse(0),6));
+   input(q,inverse(5)-inverse(3));
+  },
  102(q){const f=x=>(x-2)**2+6;assert.ok(f(0)>f(1)&&f(1)>f(2));choice(q,t=>norm(t)==='x≤2');},
  103:q=>choice(q,t=>norm(t)==='[-3,8]'),
  104(q){const r=Math.sqrt(27-2);input(q,-1+r);},
