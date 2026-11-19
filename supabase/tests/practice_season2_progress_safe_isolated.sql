@@ -68,6 +68,19 @@ begin
   if v->>'period_active' <> 'false' or v->>'reason' <> 'season_not_started' then
     raise exception 'draft season improperly triggered Practice reset';
   end if;
+  if (v->'history_snapshot'->>'period_active')<>'true'
+     or (v->'history_snapshot'->>'season_no')::int<>1
+     or v->'history_snapshot'->>'period_status'<>'closed'
+     or (v->'history_snapshot'->'main'->>'attempts_count')::int<>3
+     or (v->'history_snapshot'->'topic'->>'sessions_count')::int<>2
+     or (v->'history_snapshot'->'main'->>'archived_attempts_count')::int<>0
+     or jsonb_array_length(v->'history_snapshot'->'archive_seasons')<>0
+  then
+    raise exception 'closed Season1 fallback missing or mislabeled while S2 draft';
+  end if;
+  if (public.get_practice_season2_progress_safe_v1('chemistry') ? 'history_snapshot') then
+    raise exception 'subject without valid Season1 Tour1 inherited wrong fallback';
+  end if;
   begin
     perform count(*) from public.practice_attempts;
     raise exception 'authenticated raw attempts access unexpectedly allowed';
@@ -203,5 +216,51 @@ reset role;
 do $season_rail_notice$ begin
   raise notice 'SEASON_ARCHIVE_SWIPE_PERIODS_PASS';
 end $season_rail_notice$;
+
+-- The previous S1 History must remain discoverable while S2 is draft,
+-- including owner records preceding the verified Season1 Tour1 boundary.
+-- S2 reset stays dormant and no completed Season1 is called "current".
+update public.seasons set status='draft' where id=2;
+set role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+do $s1_fallback$
+declare v jsonb; h jsonb; a jsonb;
+begin
+  v:=public.get_practice_season2_progress_safe_v1('mathematics');
+  h:=v->'history_snapshot';
+  a:=h->'archive_seasons';
+  if v->>'period_active'<>'false'
+     or (h->>'season_no')::int<>1
+     or h->>'period_status'<>'closed'
+     or (h->'main'->>'attempts_count')::int<>3
+     or (h->'topic'->>'sessions_count')::int<>2
+     or (h->'main'->>'archived_attempts_count')::int<>1
+     or (h->'topic'->>'archived_sessions_count')::int<>1
+     or jsonb_array_length(a)<>1
+     or a->0->>'key'<>'legacy'
+     or (a->0->'main'->>'attempts_count')::int<>1
+     or (a->0->'topic'->>'sessions_count')::int<>1
+     or (h->'main'->'recent'->0->>'id')::int<>103
+  then raise exception 'owner-scoped S1 fallback / legacy split regression';
+  end if;
+  if (public.get_practice_season2_progress_safe_v1('chemistry') ? 'history_snapshot') then
+    raise exception 'S1 cutoff leaked to undated other subject';
+  end if;
+end $s1_fallback$;
+select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',false);
+do $owner_isolation$
+declare h jsonb;
+begin
+  h:=public.get_practice_season2_progress_safe_v1('mathematics')->'history_snapshot';
+  if (h->'main'->>'attempts_count')::int<>1
+    or (h->'topic'->>'sessions_count')::int<>1
+    or (h->'main'->>'archived_attempts_count')::int<>0
+    or (h->'main'->'recent'->0->>'id')::int<>105
+  then raise exception 'cross-user S1 fallback data exposed or omitted';end if;
+end $owner_isolation$;
+reset role;
+do $s1_fallback_notice$ begin
+  raise notice 'PRACTICE_S1_DORMANT_S2_HISTORY_PG17_PASS';
+end $s1_fallback_notice$;
 
 rollback;
