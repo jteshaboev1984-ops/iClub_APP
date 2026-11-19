@@ -6,6 +6,7 @@ on:
       - fix/math-practice-v2-495-content-qa-20261119
       - feature/math-practice-v2-editorial-preflight-20261119
       - qa/math-practice-v2-all495-deep-pass-20261119
+      - qa/math-practice-v2-independent-batch-gates-20261119
     paths:
       - 'content/math/practice_v2/**/*.json'
       - 'scripts/math-practice-v2-editorial-future-only-contract.cjs'
