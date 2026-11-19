@@ -76,9 +76,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
-        "en": "A circle radius decreases at 0.2 cm s⁻¹. When r=4 cm, dA/dt=aπ cm² s⁻¹. Enter a.",
-        "ru": "Радиус окружности уменьшается со скоростью 0.2 см с⁻¹. При r=4 см dA/dt=aπ см² с⁻¹. Введите a.",
-        "uz": "Aylana radiusi 0.2 sm s⁻¹ tezlikda kamayadi. r=4 sm da dA/dt=aπ sm² s⁻¹. a ni kiriting."
+        "en": "A circle radius decreases at 0.2 cm s⁻¹. When r=4 cm, dA/dt=aπ cm² s⁻¹. Enter a. Give your answer as a decimal number.",
+        "ru": "Радиус окружности уменьшается со скоростью 0.2 см с⁻¹. При r=4 см dA/dt=aπ см² с⁻¹. Введите a. Ответ запишите десятичным числом.",
+        "uz": "Aylana radiusi 0.2 sm s⁻¹ tezlikda kamayadi. r=4 sm da dA/dt=aπ sm² s⁻¹. a ni kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
@@ -310,9 +310,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
-        "en": "Positive x and y satisfy x²+y²=100. At an instant x=6, y=8 and dx/dt=3. Enter dy/dt.",
-        "ru": "Положительные x и y удовлетворяют x²+y²=100. В некоторый момент x=6, y=8 и dx/dt=3. Введите dy/dt.",
-        "uz": "Musbat x va y uchun x²+y²=100. Bir paytda x=6, y=8 va dx/dt=3. dy/dt ni kiriting."
+        "en": "Positive x and y satisfy x²+y²=100. At an instant x=6, y=8 and dx/dt=3. Enter dy/dt. Give your answer as a decimal number.",
+        "ru": "Положительные x и y удовлетворяют x²+y²=100. В некоторый момент x=6, y=8 и dx/dt=3. Введите dy/dt. Ответ запишите десятичным числом.",
+        "uz": "Musbat x va y uchun x²+y²=100. Bir paytda x=6, y=8 va dx/dt=3. dy/dt ni kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
