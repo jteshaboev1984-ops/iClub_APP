@@ -1171,3 +1171,31 @@
   #courses-practice-start .iclub-s2-history-block {padding:12px}
   #courses-practice-start .iclub-s2-history-row {padding:10px;gap:8px}
 }
+
+
+/* Same disclosure typography/keyboard geometry for Practice recommendation
+   history and the dedicated topic History screen. No scores or routing changed. */
+:is(#courses-my-recs,#courses-my-rec-topic-history) .iclub-s2-history-earlier {
+  display:grid;gap:8px;margin-top:10px;padding-top:12px;
+  border-top:1px solid var(--v3-border,#e0e7f3)
+}
+:is(#courses-my-recs,#courses-my-rec-topic-history) .iclub-s2-history-earlier summary {
+  display:flex;align-items:center;min-height:44px;padding:4px 2px;
+  color:var(--v3-primary,#2457d6);cursor:pointer;
+  font-size:13px;font-weight:760;line-height:1.4
+}
+:is(#courses-my-recs,#courses-my-rec-topic-history) .iclub-s2-history-more {
+  width:100%;min-height:44px;font:inherit;font-size:13px;font-weight:750;
+  border:1px solid var(--v3-premium-blue-line,#d6e3f7);
+  border-radius:11px;background:var(--v3-primary-soft,#eef3ff);
+  color:var(--v3-primary,#2457d6);cursor:pointer
+}
+:is(#courses-my-recs,#courses-my-rec-topic-history) .iclub-s2-history-more[hidden]{display:none!important}
+:is(#courses-my-recs,#courses-my-rec-topic-history) .iclub-s2-history-note {
+  margin:8px 0 2px;color:var(--v3-muted,#66778d);
+  font-size:12px;line-height:1.5
+}
+:is(#courses-my-recs,#courses-my-rec-topic-history) .iclub-s2-history-earlier summary:focus-visible,
+:is(#courses-my-recs,#courses-my-rec-topic-history) .iclub-s2-history-more:focus-visible {
+  outline:3px solid rgba(36,87,214,.3);outline-offset:2px
+}
