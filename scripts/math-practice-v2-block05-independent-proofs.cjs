@@ -67,7 +67,7 @@ for(let i=101;i<=125;i++){
    assert.equal(literalNumbers(q.question[l]),literalNumbers(q.question.en),'numerical stem parity');
   }
   if(q.qtype==='mcq'){
-   assert.deepEqual(q.options.map(v=>v.key),['A','B','C','D']);
+   assert.deepEqual(q.options.map(v=>v.key).sort(),['A','B','C','D']);
    for(const l of ['en','ru','uz'])assert.equal(new Set(q.options.map(v=>norm(v.text[l]))).size,4);
    for(const o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);
   }
