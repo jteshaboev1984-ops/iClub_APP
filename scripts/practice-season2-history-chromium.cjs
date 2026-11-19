@@ -1,224 +1,161 @@
 #!/usr/bin/env node
 'use strict';
-// #574: real synthetic Chromium DOM for the accepted Exam Prep 3+5 history
-// pattern and new Season2 period. No real learners, questions or DB calls.
+// #574 · Accepted Practice standalone History + existing Topic/Tour history.
+// Synthetic DOM/learner data only. No Supabase, question contents or writes.
 const assert=require('node:assert/strict');
 const path=require('node:path');
 const fs=require('node:fs');
 const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
- const screenshotDir=process.env.PRACTICE_S2_SCREENSHOT_DIR||'';
- if(screenshotDir)fs.mkdirSync(screenshotDir,{recursive:true});
+ const screenshots=process.env.PRACTICE_S2_SCREENSHOT_DIR||'';
+ if(screenshots)fs.mkdirSync(screenshots,{recursive:true});
  try{
-  for(const language of ['ru','uz','en']){
-   for(const width of [320,375,430,1440]){
-    const page=await browser.newPage({viewport:{width,height:850}});
-    await page.setContent('<!doctype html><html lang="'+language+'"><body class="iclub-visual-v3">'+
-      '<section id="courses-practice-start"><div id="practice-tour-picker"></div>'+
-      '<div class="practice-hero"></div><div class="practice-last"></div>'+
-      '<div class="practice-start-actions"></div><div id="practice-topic-choice">'+
-      '<section class="practice-topic-history">Previous all-time topic history</section></div></section>'+
-      '<section id="courses-my-recs"><div id="topic-history"></div><div id="tour-history"></div></section>'+
-      '<section id="courses-my-rec-topic-history"><div id="my-rec-topic-history-title"></div>'+
-      '<div id="my-rec-topic-history-subtitle"></div><div id="my-rec-topic-history-body"></div></section>'+
-      '<section id="courses-my-rec-topic-review"><div id="my-rec-topic-review-body"></div></section></body></html>');
-    // Match the actual released style.css font stack (CI fixture has no app shell).
-    await page.addStyleTag({content:
-      'html,body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}*{box-sizing:border-box;}'});
-    await page.addStyleTag({path:path.resolve('practice-results-tabs.css')});
-    // Load the actually released Academy OS visual source, NOT invented test colors.
-    await page.addStyleTag({path:path.resolve('visual/iclub-academy-ux531-b04b08.css')});
-    await page.addScriptTag({path:path.resolve('practice-results-tabs.js')});
-    const out=await page.evaluate(locale=>{
-     const mk=(i,season)=>({id:i,created_at:'2026-11-0'+(i%8+1)+'T12:00:00Z',
-       percent:i%101,score:i%10,time_seconds:45+i,topic:'Synthetic topic '+i,
-       correct:i%6,total:6,finished_at:'2026-11-08T12:00:00Z',tour_no:i%7+1,
-       answers_total:10});
-     const recent=Array.from({length:20},(_,i)=>mk(i+1,2));
-     const archived=Array.from({length:20},(_,i)=>mk(i+31,1));
-     const period={ok:true,period_active:true,subject_key:'mathematics',
-       period_starts_at:'2026-11-01T00:00:00+05:00',main:{
-         attempts_count:80,archived_attempts_count:40,recent,archived_recent:archived
-       },topic:{sessions_count:73,archived_sessions_count:30,recent,archived_recent:archived},
-       archive_seasons:[
-        {key:'season-1',season_no:1,main:{attempts_count:28,recent:archived},
-          topic:{sessions_count:20,recent:archived}},
-        {key:'legacy',season_no:null,main:{attempts_count:12,recent:archived.slice(0,12)},
-          topic:{sessions_count:10,recent:archived.slice(0,10)}}
-       ]};
-     const rendered=window.iClubPracticeSeason2HistoryV1?.render(period,'mathematics',locale);
-     const currentTour=window.iClubPracticeCurrentTourV1?.render({
-       activeTourNo:2,lastCompletedTourNo:1,selectedTourNo:2
-     },locale);
-     if(!currentTour)throw Error('active Tour presentation missing');
-     const topic={ok:true,subject_key:'mathematics',completed_sessions:99,
-       recent:recent.map(r=>({...r,session_id:r.id,review:[]})),last:recent[0]};
-     window.iClubPracticeTopicHistoryV1.renderHistoryPage(locale,'mathematics',topic,false);
-     window.iClubPracticeTourHistoryV1.render(
-       document.getElementById('tour-history'),{ok:true,last:recent,attempts_count:100},false,locale);
-     return {rendered,topicRows:document.querySelectorAll('#my-rec-topic-history-body .iclub-topic-history-row').length,
-       tourRows:document.querySelectorAll('#tour-history .iclub-sx-tour-history-row').length};
-    },language);
-    assert(out.rendered,'period render failed');
-    const focus=page.locator('[data-practice-current-tour]');
-    assert((await focus.textContent()).includes('2'),'active Tour number missing');
-    assert.equal(await focus.locator('[data-action="practice-select-tour"][data-tour-no="2"]').count(),1,
-      'active Tour Practice quick action absent');
-    const lowArchive=page.locator('[data-practice-s2-archive]');
-    assert.equal(await lowArchive.locator('details.iclub-s2-history-bottom-details').count(),1,
-      'one low-noise previous-season archive required');
-    assert.equal(await lowArchive.locator('details.iclub-s2-history-bottom-details').getAttribute('open'),null,
-      'previous seasons must be collapsed by default');
-    const placement=await page.evaluate(()=>{
-      const root=document.getElementById('courses-practice-start');
-      const archive=root.querySelector('[data-practice-s2-archive]');
-      const panels=root.querySelector('#practice-results-panel-topics');
-      return !!(panels.compareDocumentPosition(archive)&Node.DOCUMENT_POSITION_FOLLOWING);
+  for(const language of ['ru','uz','en'])for(const width of [320,375,430,1440]){
+   const page=await browser.newPage({viewport:{width,height:850},hasTouch:true});
+   await page.setContent('<!doctype html><html lang="'+language+'"><body class="iclub-visual-v3">'+
+    '<section id="courses-practice-start" class="stack-screen is-active">'+
+    '<div id="practice-tour-picker"><div class="practice-tour-chip-row">'+
+    '<button class="practice-tour-chip is-selected">Tour 2</button></div></div>'+
+    '<div class="practice-hero"></div><div class="practice-last"></div>'+
+    '<div class="practice-start-actions"><button id="practice-resume-btn"'+
+    ' style="display:none" data-action="practice-resume">Resume</button>'+
+    '<button id="practice-restart-btn" data-action="practice-start">Start</button></div>'+
+    '<section id="practice-topic-choice"><section class="practice-topic-history">'+
+    'Previous all-time topic history</section></section></section>'+
+    '<section id="courses-practice-history" class="stack-screen">'+
+    '<div id="practice-history-title"></div><div id="practice-history-subtitle"></div>'+
+    '<div id="practice-history-content"></div></section>'+
+    '<section id="courses-my-recs"><div id="topic-history"></div><div id="tour-history"></div></section>'+
+    '<section id="courses-my-rec-topic-history"><div id="my-rec-topic-history-title"></div>'+
+    '<div id="my-rec-topic-history-subtitle"></div><div id="my-rec-topic-history-body"></div></section>'+
+    '<section id="courses-my-rec-topic-review"><div id="my-rec-topic-review-body"></div></section>'+
+    '</body></html>');
+   await page.addStyleTag({content:
+    'html,body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;'+
+    'background:#f5f8fe;color:#142b50}*{box-sizing:border-box}'+
+    '.stack-screen{display:none}.stack-screen.is-active{display:block}'});
+   await page.addStyleTag({path:path.resolve('practice-results-tabs.css')});
+   await page.addStyleTag({path:path.resolve('visual/iclub-academy-ux531-b04b08.css')});
+   await page.addScriptTag({path:path.resolve('practice-history-screen.js')});
+   await page.addScriptTag({path:path.resolve('practice-results-tabs.js')});
+   const setup=await page.evaluate(locale=>{
+    const mk=(id)=>({id,created_at:'2026-11-02T12:00:00+05:00',
+      percent:70,score:7,time_seconds:50+id,topic:'Synthetic topic '+id,
+      correct:4,total:6,finished_at:'2026-11-02T12:00:00+05:00',
+      tour_no:id%7+1,answers_total:10});
+    const recent=Array.from({length:20},(_,i)=>mk(i+1));
+    const archived=Array.from({length:20},(_,i)=>mk(i+31));
+    const early=Array.from({length:4},(_,i)=>mk(i+70));
+    const period={ok:true,period_active:true,season_no:2,
+      subject_key:'mathematics',period_starts_at:'2026-11-01T00:00:00+05:00',
+      main:{attempts_count:80,archived_attempts_count:28+4,
+        recent,archived_recent:archived},
+      topic:{sessions_count:73,archived_sessions_count:20+4,
+        recent,archived_recent:archived},
+      archive_seasons:[
+       {key:'season-1',season_no:1,
+        main:{attempts_count:28,recent:archived},
+        topic:{sessions_count:20,recent:archived}},
+       {key:'legacy',
+        main:{attempts_count:4,recent:early},
+        topic:{sessions_count:4,recent:early}}]};
+    const accepted=window.iClubPracticeSeason2HistoryV1.render(period,'mathematics',locale);
+    const active=window.iClubPracticeCurrentTourV1.render(
+      {activeTourNo:2,lastCompletedTourNo:1,selectedTourNo:2},locale);
+    const legacyTopic={ok:true,subject_key:'mathematics',
+      completed_sessions:99,last:recent[0],
+      recent:recent.map(r=>({...r,session_id:r.id,review:[]}))};
+    window.iClubPracticeTopicHistoryV1.renderHistoryPage(
+      locale,'mathematics',legacyTopic,false);
+    window.iClubPracticeTourHistoryV1.render(
+      document.getElementById('tour-history'),
+      {ok:true,last:recent,attempts_count:100},false,locale);
+    window.addEventListener('iclub-practice-open-history',()=>{
+      document.getElementById('courses-practice-start').classList.remove('is-active');
+      document.getElementById('courses-practice-history').classList.add('is-active');
+      window.iClubPracticeHistoryScreenV1.render();
     });
-    assert(placement,'archive not after the Practice learning panels');
-    // Locale date punctuation differs between Node's ICU and Chromium's ICU.
-    // Compare using Chromium's formatter (the same runtime that renders the UI).
-    const intendedDay=await page.evaluate(lang=>
-      new Date('2026-11-01T00:00:00+05:00').toLocaleDateString(
-        lang==='en'?'en-GB':lang==='uz'?'uz-UZ':'ru-RU',
-        {timeZone:'Asia/Tashkent'}),language);
-    const actualDay=await page.locator(
-      '[data-practice-s2-history="tours"] .iclub-s2-history-block > .iclub-s2-history-note'
-    ).first().textContent();
-    assert(actualDay.includes(intendedDay),
-      'Season2 start date shifted away from local Asia/Tashkent: '+actualDay);
-    assert.equal(out.topicRows,3,'topic history must initially show latest 3');
-    assert.equal(out.tourRows,3,'previous Tour history initially shows 3');
-    const academy=await page.evaluate(()=>{
-      const body=getComputedStyle(document.body);
-      const card=document.querySelector('[data-practice-s2-history="tours"] .iclub-s2-history-block');
-      const cs=getComputedStyle(card);
-      const legacy=document.querySelector('#practice-topic-choice .practice-topic-history');
-      return {
-        rootTheme:body.getPropertyValue('--academy-paper').trim(),
-        background:cs.backgroundColor,
-        border:cs.borderTopColor,
-        radius:cs.borderTopLeftRadius,
-        ink:cs.color,
-        shadow:cs.boxShadow,
-        oldTopicHidden:getComputedStyle(legacy).display==='none',
-        duplicateSeasonDate:card.textContent?.includes('Новые результаты · Новые результаты')||false
-      };
-    });
-    assert.equal(academy.rootTheme,'#fff','accepted Academy OS tokens did not load');
-    assert.equal(academy.background,'rgb(255, 255, 255)','History has different paper than Academy OS');
-    assert.equal(academy.border,'rgb(204, 220, 244)','History does not use accepted Academy OS border');
-    assert.equal(academy.radius,'20px','History does not use accepted Academy OS card radius');
-    assert.equal(academy.ink,'rgb(20, 43, 80)','History has noncanonical Academy OS text');
-    assert(academy.shadow!=='none','History lacks quiet Academy OS elevation');
-    assert(academy.oldTopicHidden,'outdated lifetime Topic history duplicates fresh Season 2 view');
-    assert(!academy.duplicateSeasonDate,'duplicate period/heading copy');
-    for(const mode of ['tours','topics']){
-     await page.locator('#practice-results-tab-'+mode).click();
-     const selector='[data-practice-s2-history="'+mode+'"]';
-     assert.equal(await page.locator(selector+' .iclub-s2-history-current .iclub-s2-history-row').count(),3);
-     const current=page.locator(selector+' .iclub-s2-history-current');
-     if(screenshotDir && ((language==='ru'&&width===375&&mode==='tours')||
-        (language==='uz'&&width===320&&mode==='topics')||
-        (language==='en'&&width===1440&&mode==='topics'))){
-       await page.locator(selector+' .iclub-s2-history-block').screenshot({
-         path:path.join(screenshotDir,'practice-season2-'+language+'-'+width+'-'+mode+'-recent.png'),
-         animations:'disabled',timeout:15000});
-     }
-     await current.locator('.iclub-s2-history-earlier summary').click();
-     await page.waitForFunction(sel=>document.querySelectorAll(sel).length===5,
-       selector+' .iclub-s2-history-current .iclub-s2-history-earlier .iclub-s2-history-row');
-     await current.locator('.iclub-s2-history-more').click();
-     assert.equal(await current.locator('.iclub-s2-history-earlier .iclub-s2-history-row').count(),10);
-     const archive=page.locator('[data-practice-s2-archive] .iclub-s2-history-bottom-details');
-     if(await archive.getAttribute('open')===null)await archive.locator('summary').first().click();
-     assert.equal(await archive.locator('.iclub-s2-archive-navigator').count(),1,
-       'missing compact premium season navigator');
-     assert.equal(await archive.locator('.iclub-s2-archive-tab').count(),2,
-       'Tours and Topics must remain two distinct accessible archive categories');
-     await archive.locator('#practice-archive-mode-'+mode).click();
-     assert.equal(await archive.getAttribute('data-archive-type'),mode,
-       'archive segmented mode did not switch');
-     assert.equal(await archive.locator('.iclub-s2-archive-panel > .iclub-s2-history-current').count(),1,
-       'long stacked history: archive must show only one category');
-     assert.equal(await archive.locator('.iclub-s2-archive-panel .iclub-s2-history-rows > .iclub-s2-history-row').count(),3,
-       'archived season initial history must show 3');
-     const selected=archive.locator('#practice-archive-mode-'+mode);
-     assert.equal(await selected.getAttribute('aria-selected'),'true',
-       'archive category mode not accessible to keyboard/screen readers');
-     assert.equal(await archive.getAttribute('data-archive-season'),'season-1');
-     assert.equal(await archive.locator('.iclub-s2-archive-dot').count(),2,
-       'verified archived season and pre-season legacy require two indicators');
-     if(mode==='topics'){
-       const nav=archive.locator('.iclub-s2-archive-direction').last();
-       await nav.click();
-       assert.equal(await archive.getAttribute('data-archive-season'),'legacy',
-         'arrow must advance to verified old pre-season records');
-       assert.equal(await archive.getAttribute('data-archive-type'),'topics',
-         'season swipe must NOT change Tour/Topic category');
-       assert.equal(await nav.isDisabled(),true,'last season must not wrap or show further years');
-       // Real Chromium touch-event handling: swipe right returns to Season 1.
-       await page.evaluate(()=>{
-         const target=document.querySelector('.iclub-s2-history-bottom-content');
-         const evt=(type,x)=>{const event=new Event(type,{bubbles:true});
-           Object.defineProperty(event,type==='touchstart'?'touches':'changedTouches',
-             {value:[{clientX:x,clientY:250}]});
-           target.dispatchEvent(event);};
-         evt('touchstart',75);evt('touchend',170);
-       });
-       assert.equal(await archive.getAttribute('data-archive-season'),'season-1',
-         'horizontal gesture must switch verified seasons without altering category');
-       assert.equal(await archive.getAttribute('data-archive-type'),'topics');
-       // A vertical gesture must keep the current period.
-       await page.evaluate(()=>{
-         const target=document.querySelector('.iclub-s2-history-bottom-content');
-         const evt=(type,x,y)=>{const event=new Event(type,{bubbles:true});
-           Object.defineProperty(event,type==='touchstart'?'touches':'changedTouches',
-             {value:[{clientX:x,clientY:y}]});
-           target.dispatchEvent(event);};
-         evt('touchstart',220,150);evt('touchend',180,260);
-       });
-       assert.equal(await archive.getAttribute('data-archive-season'),'season-1',
-         'vertical page scroll may not change the season');
-     }
-     assert((await page.locator(selector+' .iclub-s2-history-note').count())>=1,
-       'partial server cap disclosure absent');
-     if(screenshotDir && ((language==='ru'&&width===375&&mode==='tours')||
-        (language==='uz'&&width===320&&mode==='topics')||
-        (language==='en'&&width===1440&&mode==='topics'))){
-       await page.locator('[data-practice-s2-archive]').screenshot({
-         path:path.join(screenshotDir,'practice-season2-'+language+'-'+width+'-'+mode+'-archive.png'),
-         animations:'disabled',timeout:15000});
-     }
-    }
-    const dedicated=page.locator('#my-rec-topic-history-body .iclub-s2-history-earlier');
-    await dedicated.locator('summary').click();
-    await page.waitForFunction(()=>document.querySelectorAll('#my-rec-topic-history-body .iclub-s2-history-earlier .iclub-topic-history-row').length===5);
-    await dedicated.locator('.iclub-s2-history-more').click();
-    assert.equal(await dedicated.locator('.iclub-topic-history-row').count(),10);
-    const tour=page.locator('#tour-history .iclub-s2-history-earlier');
-    await tour.locator('summary').click();
-    await page.waitForFunction(()=>document.querySelectorAll('#tour-history .iclub-s2-history-earlier .iclub-sx-tour-history-row').length===5);
-    await tour.locator('.iclub-s2-history-more').click();
-    assert.equal(await tour.locator('.iclub-sx-tour-history-row').count(),10);
-    assert((await page.locator('#my-rec-topic-history-body .iclub-s2-history-note').count())===1,
-      'topic server cap must be described honestly');
-    const w=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
-    assert(w<=1,'horizontal overflow at '+width+': '+w);
-    const hidden=await page.evaluate(()=>{
-      window.iClubPracticeSeason2HistoryV1.render({ok:true,period_active:false},'mathematics',document.documentElement.lang);
-      return [...document.querySelectorAll('[data-practice-s2-history]')].every(x=>x.hidden) &&
-        document.querySelector('[data-practice-s2-archive]').hidden;
-    });
-    assert(hidden,'draft/unknown Season2 must not show new period');
-    const oldRestored=await page.evaluate(()=>
-      getComputedStyle(document.querySelector('#practice-topic-choice .practice-topic-history')).display!=='none'
-    );
-    assert(oldRestored,'legacy Practice history not restored before Season 2');
-    await page.close();
+    return {accepted,active};
+   },language);
+   assert(setup.accepted&&setup.active,'S2 period and active Tour status failed');
+   const practice=page.locator('#courses-practice-start');
+   const focus=practice.locator('[data-practice-current-tour]');
+   assert((await focus.textContent()).includes('2'),'real active Tour number missing');
+   assert.equal(await focus.locator('.iclub-practice-current-tour-action').count(),0,
+     'obsolete quick action breaks accepted stats → choice → action order');
+   assert.equal(await practice.locator('.practice-start-actions button[data-action="practice-start"]').count(),1,
+     'primary Tour Start after selection missing');
+   assert.equal(await practice.locator('.iclub-practice-history-entry').count(),1,
+     'one compact standalone History entry required');
+   assert.equal(await practice.locator('.iclub-s2-history-block').count(),0,
+     'old embedded period panels must not be duplicated');
+   assert.equal(await practice.locator('.iclub-s2-history-bottom-details').count(),0,
+     'old embedded archive must be removed');
+   assert.equal(await page.locator('#my-rec-topic-history-body .iclub-topic-history-row').count(),3,
+     'independent Topic History must show three recent');
+   assert.equal(await page.locator('#tour-history .iclub-sx-tour-history-row').count(),3,
+     'independent Tour History must show three recent');
+   const theme=await practice.evaluate(el=>{
+     const entry=el.querySelector('.iclub-practice-history-entry');
+     const cs=getComputedStyle(entry),body=getComputedStyle(document.body);
+     const old=el.querySelector('#practice-topic-choice .practice-topic-history');
+     return {token:body.getPropertyValue('--academy-paper').trim(),
+       border:cs.borderTopColor,color:cs.color,
+       oldTopicHidden:getComputedStyle(old).display==='none'};
+   });
+   assert.equal(theme.token,'#fff','Academy OS paper token absent');
+   assert.equal(theme.border,'rgb(204, 220, 244)','History entry border diverged from Academy OS');
+   assert(theme.oldTopicHidden,'stale Topic History duplicates active S2 view');
+   for(const mode of ['topics','tours']){
+    await practice.locator('#practice-results-tab-'+mode).click();
+    assert.equal(await practice.locator('#practice-results-panel-'+mode).isVisible(),true);
+    assert.equal(await practice.locator('#practice-results-panel-'+
+      (mode==='tours'?'topics':'tours')).isVisible(),false);
    }
+   // Existing user-owned recommendation histories retain 3 + 5 disclosure.
+   const topicHolder=page.locator('#my-rec-topic-history-body .iclub-s2-history-earlier');
+   await topicHolder.locator('summary').click();
+   await page.waitForFunction(()=>
+     document.querySelectorAll('#my-rec-topic-history-body .iclub-s2-history-earlier .iclub-topic-history-row').length===5);
+   await topicHolder.locator('.iclub-s2-history-more').click();
+   assert.equal(await topicHolder.locator('.iclub-topic-history-row').count(),10,
+     'existing Topic 3+5 must not be regressed');
+   const tourHolder=page.locator('#tour-history .iclub-s2-history-earlier');
+   await tourHolder.locator('summary').click();
+   await page.waitForFunction(()=>
+     document.querySelectorAll('#tour-history .iclub-s2-history-earlier .iclub-sx-tour-history-row').length===5);
+   await tourHolder.locator('.iclub-s2-history-more').click();
+   assert.equal(await tourHolder.locator('.iclub-sx-tour-history-row').count(),10,
+     'existing Tour 3+5 must not be regressed');
+   assert.equal(await page.locator('#my-rec-topic-history-body .iclub-s2-history-note').count(),1,
+     'older server records cap note lost');
+   // The accepted History screen, not Practice itself, owns season swipe.
+   await practice.locator('.iclub-practice-history-entry').click();
+   const history=page.locator('#courses-practice-history .iclub-ph-root');
+   assert.equal(await history.count(),1,'genuine standalone History not opened');
+   assert.equal(await history.getAttribute('data-history-season'),'2');
+   assert.equal(await history.locator('.iclub-ph-current-badge').textContent(),
+     {ru:'Текущий сезон',uz:'Joriy mavsum',en:'Current season'}[language]);
+   await history.locator('.iclub-ph-arrow').last().click();
+   assert.equal(await history.getAttribute('data-history-season'),'1');
+   assert.equal(await history.locator('.iclub-ph-early').count(),1,
+     'pre-Season1 attempt disclosure missing');
+   assert.equal(await history.locator('.iclub-ph-current-badge').isVisible(),false,
+     'historical season may not be labeled current');
+   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+   assert(overflow<=1,'horizontal overflow '+language+'/'+width+': '+overflow);
+   if(screenshots && language==='ru'&&width===375)
+     await page.screenshot({path:path.join(screenshots,'practice-season2-integrated-history-ru-375.png'),animations:'disabled'});
+   // Draft S2 still allows the compact entry but no fictitious S2 history.
+   await page.evaluate(()=>window.iClubPracticeSeason2HistoryV1.render(
+     {ok:true,period_active:false,subject_key:'mathematics'},'mathematics',document.documentElement.lang));
+   assert.equal(await practice.locator('.iclub-practice-history-entry').count(),1,
+     'History access must remain visible for Season1 learner');
+   assert.equal(await practice.locator('[data-practice-s2-active="true"]').count(),0,
+     'draft S2 may not be represented as current');
+   await page.close();
   }
-  console.log('PRACTICE_SEASON2_HISTORY_CHROMIUM_3_5_PASS: RU/UZ/EN, 320/375/430/1440, archive, no write');
- }finally{await browser.close()}
-})().catch(e=>{console.error('PRACTICE_SEASON2_HISTORY_CHROMIUM_FAILED:',e.message);process.exit(1)});
+  console.log('PRACTICE_SEASON2_ACCEPTED_HISTORY_CHROMIUM_PASS: 3 locales, 4 widths, Tour/Topic 3+5, single standalone History, no phantom Season0/duplicate action');
+ }finally{await browser.close();}
+})().catch(e=>{console.error('PRACTICE_SEASON2_HISTORY_CHROMIUM_FAILED:',e.stack||e.message);process.exit(1)});
