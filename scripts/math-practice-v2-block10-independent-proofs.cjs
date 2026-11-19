@@ -33,7 +33,17 @@ const tests={
 236:q=>mcq(q,t=>near(Number(norm(t).replace('cm','')),Math.sqrt(24*2/(3/4)))),
 237:q=>mcq(q,t=>norm(t)==='12πcm²'&&near(area(6,120*Math.PI/180),12*Math.PI)),
 238:q=>mcq(q,t=>norm(t)==='6π-9√3cm²'&&area(6,Math.PI/3)-.5*36*Math.sin(Math.PI/3)>0),
-239(q){let theta=8/(.5*16);input(q,2*4+arc(4,theta));},
+239(q){
+ assert.equal(q.difficulty,'hard');
+ assert.ok(q.question.en.includes('annular sector')&&q.question.ru.includes('Кольцевой сектор')&&q.question.uz.includes('Halqasimon sektor'));
+ const angle=2,sectorArea=5,radialWidth=1;
+ const radiusSum=2*sectorArea/(angle*radialWidth);
+ const R=(radiusSum+radialWidth)/2,r=(radiusSum-radialWidth)/2;
+ assert.ok(R>r&&r>0);
+ assert.ok(near(.5*(R*R-r*r)*angle,sectorArea),'annular-sector area constraint');
+ const perimeter=angle*(R+r)+2*(R-r);
+ input(q,perimeter);
+},
 240:q=>mcq(q,t=>near(Number(norm(t).replace('cm²','')),area(6,2)-area(3,2))),
 241:q=>mcq(q,t=>norm(t)==='4π-8cm²'&&area(4,Math.PI/2)-8>0),
 242:q=>mcq(q,t=>near(scalar(t),area(10,1)/arc(10,1))),
