@@ -528,17 +528,17 @@
       previous:'Предыдущие сезоны',earlier:'Более ранние записи',
       more:'Показать ещё',partial:'Показаны только последние записи. Остальные результаты сохранены в истории.',
       empty:'В новом сезоне пока нет завершённых попыток.',
-      main:'Практика по турам',topic:'Практика по темам',attempts:'попыток',records:'Записей',beforeSeason:'До первого сезона',season:'Сезон',previousSeason:'Предыдущий сезон',nextSeason:'Следующий сезон',swipeHint:'Листайте сезоны свайпом',noArchived:'В этой категории записей нет.'},
+      main:'Практика по турам',topic:'Практика по темам',attempts:'попыток',records:'Записей',beforeSeason:'До первого сезона',season:'Сезон',previousSeason:'К более новому периоду',nextSeason:'К более раннему периоду',swipeHint:'Листайте сезоны свайпом',noArchived:'В этой категории записей нет.'},
     uz:{title:'Amaliyot tarixi · 2-mavsum',archive:'Oldingi mavsumlar arxivi',olderSeason:'1-mavsum va avvalgi',since:'Boshlanish sanasi',current:'Yangi natijalar',
       previous:'Oldingi mavsumlar',earlier:'Avvalgi natijalar',
       more:'Yana ko‘rsatish',partial:'Faqat so‘nggi natijalar ko‘rsatilmoqda. Qolganlari tarixda saqlangan.',
       empty:'Yangi mavsumda hali yakunlangan urinishlar yo‘q.',
-      main:'Turlar bo‘yicha amaliyot',topic:'Mavzular bo‘yicha amaliyot',attempts:'urinish',records:'Natijalar',beforeSeason:'Birinchi mavsumdan oldin',season:'Mavsum',previousSeason:'Oldingi mavsum',nextSeason:'Keyingi mavsum',swipeHint:'Mavsumlarni surib almashtiring',noArchived:'Bu toifada natija yo‘q.'},
+      main:'Turlar bo‘yicha amaliyot',topic:'Mavzular bo‘yicha amaliyot',attempts:'urinish',records:'Natijalar',beforeSeason:'Birinchi mavsumdan oldin',season:'Mavsum',previousSeason:'Yangiroq davrga',nextSeason:'Oldinroq davrga',swipeHint:'Mavsumlarni surib almashtiring',noArchived:'Bu toifada natija yo‘q.'},
     en:{title:'Practice history · Season 2',archive:'Previous seasons archive',olderSeason:'Season 1 and earlier',since:'Counting from',current:'New results',
       previous:'Previous seasons',earlier:'Earlier entries',
       more:'Show more',partial:'Only recent entries are shown. Older results remain in history.',
       empty:'No completed attempts this season yet.',
-      main:'Practice by tour',topic:'Practice by topic',attempts:'attempts',records:'Records',beforeSeason:'Before Season 1',season:'Season',previousSeason:'Previous season',nextSeason:'Next season',swipeHint:'Swipe to change season',noArchived:'No records in this category.'}
+      main:'Practice by tour',topic:'Practice by topic',attempts:'attempts',records:'Records',beforeSeason:'Before Season 1',season:'Season',previousSeason:'Newer period',nextSeason:'Older period',swipeHint:'Swipe to change season',noArchived:'No records in this category.'}
   };
   function renderSeason2Period(period,subjectKey,language){
     const root=document.getElementById(ROOT_ID);
