@@ -47,6 +47,69 @@ ALTER TABLE private.iclub_ai_practice_answer_retention24_control ENABLE ROW LEVE
 REVOKE ALL ON private.iclub_ai_practice_answer_retention24_control
  FROM PUBLIC,anon,authenticated;
 
+-- Strict 24h requirement: the scheduled redactor below is NOT proof of
+-- physical erasure. PostgreSQL retains previous tuple versions and WAL; backups
+-- can preserve earlier text. Until a separately reviewed non-plaintext
+-- recovery design meets the rule, activation of strict mode must fail CLOSED.
+-- This isolated-only gate is a demonstration contract, not a live admission
+-- integration. The existing provider caller MUST check before any budget hold
+-- or model dispatch; installing a write guard alone would be too late.
+CREATE OR REPLACE FUNCTION public.iclub_ai_practice_strict24_admission_probe_v1()
+RETURNS jsonb LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path TO '' AS $admit$
+DECLARE v_on boolean;
+BEGIN
+ IF current_setting('iclub.isolated_practice_context',true) IS DISTINCT FROM 'true'
+ THEN RETURN jsonb_build_object('ok',false,'reason','isolated_only'); END IF;
+ IF (auth.jwt()->>'role') IS DISTINCT FROM 'service_role'
+ THEN RETURN jsonb_build_object('ok',false,'reason','not_authorized'); END IF;
+ SELECT enabled INTO v_on
+ FROM private.iclub_ai_practice_answer_retention24_control WHERE singleton=1;
+ IF v_on IS DISTINCT FROM true
+ THEN RETURN jsonb_build_object('ok',false,'reason','not_enabled'); END IF;
+ -- There is no verified ephemeral key store / no-plaintext recovery
+ -- implementation yet. Never mistake a cron success for one.
+ RETURN jsonb_build_object('ok',false,
+   'reason','strict_24h_physical_retention_not_proven',
+   'provider_allowed',false);
+END;
+$admit$;
+REVOKE ALL ON FUNCTION public.iclub_ai_practice_strict24_admission_probe_v1()
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.iclub_ai_practice_strict24_admission_probe_v1()
+ TO service_role;
+
+-- Additional last-resort protection in the disposable database: when the
+-- owner-specified future cutoff is enabled, NO new plaintext AI answer may be
+-- persisted. Historical/pre-cutover rows remain untouched, existing TEXT
+-- redaction (answer->NULL) is still allowed. A future recovery design
+-- must replace this prototype *only after* strict 24h proof is accepted.
+CREATE OR REPLACE FUNCTION private.iclub_ai_practice_strict24_plaintext_guard_v1()
+RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
+SET search_path TO '' AS $guard$
+DECLARE v_on boolean; v_cutover timestamptz;
+BEGIN
+ SELECT enabled,cutover_at INTO v_on,v_cutover
+ FROM private.iclub_ai_practice_answer_retention24_control WHERE singleton=1;
+ IF v_on IS TRUE AND v_cutover IS NOT NULL AND
+    NEW.received_at>=v_cutover AND NEW.answer IS NOT NULL AND
+    (TG_OP='INSERT' OR OLD.answer IS DISTINCT FROM NEW.answer)
+ THEN
+   RAISE EXCEPTION 'strict24 plaintext persistence not authorized'
+     USING ERRCODE='23514';
+ END IF;
+ RETURN NEW;
+END;
+$guard$;
+REVOKE ALL ON FUNCTION private.iclub_ai_practice_strict24_plaintext_guard_v1()
+ FROM PUBLIC,anon,authenticated;
+DROP TRIGGER IF EXISTS iclub_ai_practice_strict24_plaintext_guard_v1
+ ON private.iclub_ai_practice_receipts_v1;
+CREATE TRIGGER iclub_ai_practice_strict24_plaintext_guard_v1
+ BEFORE INSERT OR UPDATE ON private.iclub_ai_practice_receipts_v1
+ FOR EACH ROW EXECUTE FUNCTION
+ private.iclub_ai_practice_strict24_plaintext_guard_v1();
+
 -- Service-only, bounded, no answer/PII in output, no learner-visible route.
 -- Does not delete receipts or anything in the money/quota ledgers.
 -- Does not retry a provider request or touch uncertain-charge records.
