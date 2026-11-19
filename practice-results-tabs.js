@@ -480,6 +480,120 @@
   }
   window.iClubPracticeTourHistoryV1=Object.freeze({render:tourRecHistory,renderLatest:tourRecLatest});
 
+
+  // Season 2 Practice history follows the ACCEPTED Mathematics Exam Prep approach:
+  // 3 recent items, native <details> for older, five more per click.
+  // Server returns at most 20 rows per lane; this is NOT cursor pagination.
+  // Read-only; no action here creates/regrades/deletes an attempt.
+  const PERIOD_COPY={
+    ru:{title:'История Practice · Сезон 2',current:'Новые результаты',
+      previous:'Предыдущие сезоны',earlier:'Более ранние записи',
+      more:'Показать ещё',partial:'Показаны только последние записи. Остальные результаты сохранены в истории.',
+      empty:'В новом сезоне пока нет завершённых попыток.',
+      main:'Практика по турам',topic:'Практика по темам',attempts:'попыток'},
+    uz:{title:'Practice tarixi · 2-mavsum',current:'Yangi natijalar',
+      previous:'Oldingi mavsumlar',earlier:'Avvalgi natijalar',
+      more:'Yana ko‘rsatish',partial:'Faqat so‘nggi natijalar ko‘rsatilmoqda. Qolganlari tarixda saqlangan.',
+      empty:'Yangi mavsumda hali yakunlangan urinishlar yo‘q.',
+      main:'Turlar bo‘yicha amaliyot',topic:'Mavzular bo‘yicha amaliyot',attempts:'urinish'},
+    en:{title:'Practice history · Season 2',current:'New results',
+      previous:'Previous seasons',earlier:'Earlier entries',
+      more:'Show more',partial:'Only recent entries are shown. Older results remain in history.',
+      empty:'No completed attempts this season yet.',
+      main:'Practice by tour',topic:'Practice by topic',attempts:'attempts'}
+  };
+  function renderSeason2Period(period,subjectKey,language){
+    const root=document.getElementById(ROOT_ID);
+    if(!root)return false;
+    const holders=['tours','topics'].map(key=>root.querySelector('[data-practice-s2-history="'+key+'"]'));
+    const valid=period?.ok===true&&period?.period_active===true&&
+      String(period.subject_key||'')===String(subjectKey||'');
+    holders.forEach(holder=>{if(holder){holder.replaceChildren();holder.hidden=!valid;}});
+    if(!valid)return false;
+    const locale=['ru','uz','en'].includes(language)?language:lang();
+    const c=PERIOD_COPY[locale],fmt=stamp=>{
+      const d=new Date(String(stamp||''));
+      return Number.isFinite(d.getTime())?
+        d.toLocaleDateString(locale==='en'?'en-GB':locale==='uz'?'uz-UZ':'ru-RU'):'';
+    };
+    function item(row,kind){
+      const el=node('div','iclub-s2-history-row');
+      const left=node('span','iclub-s2-history-row-left');
+      const topic=kind==='topics'?String(row?.topic||c.topic).slice(0,120):c.main;
+      left.append(node('strong','',topic),node('small','',fmt(row?.created_at)));
+      const right=node('span','iclub-s2-history-score');
+      if(kind==='topics'){
+        const score=Number(row?.correct),total=Number(row?.total);
+        right.textContent=Number.isInteger(score)&&Number.isInteger(total)&&total>0&&score>=0&&score<=total?
+          score+' / '+total:'—';
+      }else{
+        const percent=Number(row?.percent);
+        right.textContent=row?.percent!=null&&Number.isFinite(percent)&&percent>=0&&percent<=100?
+          Math.round(percent)+'%':'—';
+      }
+      el.append(left,right);return el;
+    }
+    function appendLimited(holder,rows,offset,n,kind){
+      for(const row of rows.slice(offset,offset+n))holder.append(item(row,kind));
+    }
+    function historyGroup(container,rows,total,heading,kind,collapsed){
+      const size=Math.max(0,Math.trunc(Number(total)||0));
+      const sample=Array.isArray(rows)?rows.slice(0,20):[];
+      if(collapsed&&size===0)return;
+      const main=collapsed?node('details','iclub-s2-history-archive'):node('div','iclub-s2-history-current');
+      const title=collapsed?node('summary','iclub-s2-history-caption',heading+' · '+size):
+        node('strong','iclub-s2-history-caption',heading+' · '+size);
+      main.append(title);
+      const body=node('div','iclub-s2-history-rows');
+      main.append(body);
+      let initialized=false,shown=0;
+      const draw=()=>{
+        if(initialized)return;
+        initialized=true;
+        appendLimited(body,sample,0,3,kind);shown=Math.min(3,sample.length);
+        if(!sample.length)body.append(node('p','iclub-s2-history-empty',c.empty));
+        if(sample.length>3){
+          const earlier=node('details','iclub-s2-history-earlier');
+          earlier.append(node('summary','',c.earlier+' ('+(sample.length-3)+')'));
+          const older=node('div','iclub-s2-history-rows');earlier.append(older);
+          const more=node('button','iclub-s2-history-more');
+          more.type='button';more.hidden=true;earlier.append(more);
+          let displayed=0;
+          const append=()=>{
+            const batch=sample.slice(3+displayed,3+displayed+5);
+            batch.forEach(row=>older.append(item(row,kind)));
+            displayed+=batch.length;
+            const left=sample.length-3-displayed;
+            more.hidden=left<=0;
+            if(left>0)more.textContent=c.more+' ('+Math.min(5,left)+')';
+          };
+          earlier.addEventListener('toggle',()=>{if(earlier.open&&displayed===0)append();});
+          more.addEventListener('click',append);
+          main.append(earlier);
+        }
+        if(size>sample.length)main.append(node('p','iclub-s2-history-note',c.partial));
+      };
+      if(collapsed)main.addEventListener('toggle',()=>{if(main.open)draw();});
+      else draw();
+      container.append(main);
+    }
+    for(const [idx,kind] of ['tours','topics'].entries()){
+      const holder=holders[idx];if(!holder)continue;
+      const source=kind==='tours'?period.main:period.topic;
+      const count=kind==='tours'?source?.attempts_count:source?.sessions_count;
+      const prev=kind==='tours'?source?.archived_attempts_count:source?.archived_sessions_count;
+      const block=node('section','iclub-s2-history-block');
+      block.append(node('h2','iclub-s2-history-title',c.title));
+      const start=fmt(period.period_starts_at);
+      if(start)block.append(node('p','iclub-s2-history-note',c.current+' · '+start));
+      historyGroup(block,source?.recent,count,c.current,kind,false);
+      historyGroup(block,source?.archived_recent,prev,c.previous,kind,true);
+      holder.append(block);
+    }
+    return true;
+  }
+  window.iClubPracticeSeason2HistoryV1=Object.freeze({render:renderSeason2Period});
+
   function install() {
     const root = document.getElementById(ROOT_ID);
     if (!root || root.dataset.practiceResultsTabsReady === 'true') return;
@@ -512,6 +626,10 @@
     tourPanel.setAttribute('aria-labelledby',tourTab.id);
     root.insertBefore(tourPanel,picker);
     [picker,hero,last,actions].forEach(el=>tourPanel.appendChild(el));
+    const tourSeasonHistory=node('div','iclub-s2-history');
+    tourSeasonHistory.dataset.practiceS2History='tours';
+    tourSeasonHistory.hidden=true;
+    tourPanel.append(tourSeasonHistory);
 
     const topicPanel=document.createElement('section');
     topicPanel.id='practice-results-panel-topics';
@@ -526,6 +644,10 @@
     resumed.setAttribute('data-action','practice-resume');
     resumed.hidden=true;
     topicPanel.append(resumed,topics);
+    const topicSeasonHistory=node('div','iclub-s2-history');
+    topicSeasonHistory.dataset.practiceS2History='topics';
+    topicSeasonHistory.hidden=true;
+    topicPanel.append(topicSeasonHistory);
     const realResume=document.getElementById('practice-resume-btn');
     const syncResume=()=>{
       const visible=realResume && realResume.style.display !== 'none' && !realResume.disabled;
