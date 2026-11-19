@@ -113,7 +113,7 @@
         "P1-INT-03"
       ],
       "role": "parameter_from_volume",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -434,7 +434,7 @@
         "P1-INT-03"
       ],
       "role": "constant_radius_volume",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
@@ -536,7 +536,7 @@
         "P1-INT-03"
       ],
       "role": "reverse_parameter_root_volume",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
