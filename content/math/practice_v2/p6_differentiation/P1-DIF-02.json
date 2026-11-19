@@ -401,7 +401,7 @@
       "primary_skill": "P1-DIF-02",
       "secondary_skills": [],
       "role": "rational_linear_combination",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
       "question": {
@@ -462,7 +462,7 @@
       "primary_skill": "P1-DIF-02",
       "secondary_skills": [],
       "role": "reverse_derivative_value",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
       "question": {
@@ -499,7 +499,7 @@
       "primary_skill": "P1-DIF-02",
       "secondary_skills": [],
       "role": "fractional_reverse",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
       "question": {
@@ -536,7 +536,7 @@
       "primary_skill": "P1-DIF-02",
       "secondary_skills": [],
       "role": "second_derivative_expression",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch8 Differentiation, printed pp. 138–153",
       "question": {
