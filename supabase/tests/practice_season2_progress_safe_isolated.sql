@@ -5,7 +5,8 @@ create role authenticated;
 create role anon;
 create schema auth;
 create function auth.uid() returns uuid language sql stable
-as $ select coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),\n  nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid $;
+as $$ select coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),
+  nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid $$;
 
 create table public.subjects(id bigint primary key,subject_key text unique,is_active boolean);
 create table public.seasons(id bigint primary key,season_no integer,status text,start_date date);
