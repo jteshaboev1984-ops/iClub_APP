@@ -7,6 +7,7 @@ on:
     paths:
       - 'supabase/migrations/*exam_prep*.sql'
       - 'supabase/candidates/math_p1p5_d3_optional_hours_v1_dormant.sql' # D3 needs exact-SHA 600/10 proof
+      - 'supabase/candidates/math_p1p5_p016b_writer_contract_v1_dormant.sql' # P0-16B exact-SHA 600/10 evidence
       - 'supabase/tests/p1p5_stage_c_*.sql'
       - supabase/tests/p2_78_concurrency_service_setup.sql
       - supabase/tests/p2_78_concurrency_service_cleanup.sql

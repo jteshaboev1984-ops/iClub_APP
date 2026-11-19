@@ -15,6 +15,7 @@ const exact={
   ".github/workflows/math-p016b-contract-review.yml":"41c7b410be09a3bc9abb794ab3139718ab5704df",
   ".github/workflows/exam-prep-weekly-profile-recovery.yml":"3fea42213937715255aa12a31c9aa96d8e02d8ec",
   ".github/workflows/math-p1p5-d3-protected-recovery-review.yml":"e8773d4e30cf6a9c505e08fc64c71d0e88ffef7f",
+  ".github/workflows/p2-78-concurrency-service-transitions.yml":"6ea1309e18858d63c6a374785f5cdb8821b82698",
   "exam-prep/exam-prep-api.js":"7beda6c230626800fc0df70ffdcb29bf967cf37c",
   "index.html":"80583c592d934adfe464a32d953b29040845f086",
   "scripts/p1p5-p016b-signed-http-cutover.cjs":"ebe9c1d9b75690455d498f2106b728e2bde43a6a",
@@ -26,8 +27,8 @@ const exact={
 const self=new Set(["qa/math-p016b-source-firewall.cjs",
   ".github/workflows/ux531-previewless-release-firewall.yml"]);
 const allow=new Set([...Object.keys(exact),...self]);
-assert.equal(files.length,13,"Unexpected P0-16B diff scope");
-assert.equal(allow.size,13,"Guard must only allow the exact 13 reviewed files");
+assert.equal(files.length,14,"Unexpected P0-16B diff scope");
+assert.equal(allow.size,14,"Guard must only allow the exact 13 reviewed files");
 for(const path of files)assert(allow.has(path),"Unreviewed file: "+path);
 for(const path of allow)assert(files.includes(path),"Missing reviewed file: "+path);
 for(const [path,sha] of Object.entries(exact))
@@ -49,4 +50,4 @@ cp.execFileSync("node",["--check","exam-prep/exam-prep-api.js"]);
 cp.execFileSync("node",["--check","scripts/p1p5-p016b-writer-contract.test.cjs"]);
 cp.execFileSync("node",["--check","scripts/p1p5-p016b-signed-http-cutover.cjs"]);
 cp.execFileSync("node",["scripts/p1p5-p016b-writer-contract.test.cjs"],{stdio:"inherit"});
-console.log("P0-16B STRICT 13-PATH SOURCE PASS; baseline and 8 blob pins; offline-only contract; original UX531 unchanged");
+console.log("P0-16B STRICT 14-PATH SOURCE PASS; baseline and 8 blob pins; offline-only contract; original UX531 unchanged");
