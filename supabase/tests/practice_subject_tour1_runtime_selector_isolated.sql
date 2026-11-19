@@ -11,10 +11,12 @@ insert into public.tours(id,subject_id,season_id,tour_no,start_date,end_date,is_
  (11,5,1,1,'2026-04-21','2026-04-26',false),
  (12,7,1,1,'2026-04-21','2026-04-26',false),
  (21,5,2,1,null,null,false),
- (22,7,2,1,null,null,false);
+ (22,7,2,1,null,null,false),
+ (23,5,2,2,'2099-01-01','2099-01-07',false);
 insert into public.practice_pools(id,subject_id,tour_no,title,is_active) values
  (501,5,1,'Synthetic Math Practice',true),
- (701,7,1,'Synthetic Econ Practice',true);
+ (701,7,1,'Synthetic Econ Practice',true),
+ (502,5,2,'Future Math Practice',true);
 
 insert into public.questions(
  id,subject_id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,
@@ -58,6 +60,24 @@ select 2000+g,'s2_synthetic_'||g,'math_p1_practice_v2_2026_10_07',1,
        'published',true,now(),now()
 from generate_series(1,10) g;
 
+-- Future Tour2 exercise remains locked after Tour1's published launch.
+insert into public.questions(
+  id,subject_id,topic,subtopic,difficulty,qtype,question_text,
+  options_text,correct_answer,explanation,is_active,quality_status
+) values(2101,5,'Future Topic','Basics','easy','mcq',
+  'Synthetic future Tour2','A|B|C|D','A','Synthetic',true,'published');
+insert into public.practice_pool_questions(pool_id,question_id,order_no,is_active)
+ values(502,2101,1,true);
+insert into private.practice_v2_question_meta(
+  question_id,content_key,release_version,practice_no,primary_skill_code,
+  secondary_skill_codes,question_role,source_ref,answer_contract,content_hash,
+  qa_math_status,qa_language_status,qa_technical_status,qa_tour_separation_status,
+  lifecycle_state,is_runtime_allowed,approved_at,published_at
+) values(2101,'s2_future_synthetic',
+  'math_p1_practice_v2_2026_10_07',2,'ALG_1','{}'::text[],
+  'direct_application','Synthetic','{"kind":"mcq"}'::jsonb,'future',
+  'passed','passed','passed','passed','published',true,now(),now());
+
 insert into public.practice_attempts(
  id,user_id,subject_id,created_at,is_lab,score,percent,time_seconds
 ) values(900,'11111111-1111-4111-8111-111111111111',5,
@@ -98,6 +118,24 @@ begin
   if (topic->>'question_count')::integer<1 then
     raise exception 'Economics Topic Practice locked by Mathematics S2';
   end if;
+  -- Negative gates: Tour2 has not started, including topic drill entry.
+  begin
+    perform public.start_practice_session_auto_safe_v5(502,'s2-future-locked-001');
+    raise exception 'future Tour2 Practice was incorrectly unlocked';
+  exception when sqlstate '55000' then
+    if SQLERRM<>'practice_pool_locked' then
+      raise exception 'future Tour2 denied for wrong reason: %',SQLERRM;
+    end if;
+  end;
+  begin
+    perform public.start_practice_topic_drill_safe_v5(
+      'mathematics','Future Topic',null,'s2-future-topic-locked-001');
+    raise exception 'future Tour2 topic drill was incorrectly unlocked';
+  exception when sqlstate '55000' then
+    if SQLERRM<>'practice_drill_no_questions' then
+      raise exception 'future topic drill denied for wrong reason: %',SQLERRM;
+    end if;
+  end;
   -- No past attempt or grade rewriting; even current sessions are new records.
   if (select count(*) from public.practice_attempts)<>1
      or (select count(*) from public.practice_answers)<>1 then
