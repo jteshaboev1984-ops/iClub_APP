@@ -776,11 +776,13 @@
         // there were no old buttons, the newly entitled learner would see
         // no fresh action until navigating away and back.
         const epoch=authEpoch;
-        queueMicrotask(()=>{
+        // Defer auth-dependent status/getUser reads until the Supabase
+        // auth-event callback has completed (avoids auth lock re-entry).
+        setTimeout(()=>{
           if(epoch!==authEpoch)return;
           for(const surface of Object.keys(scopeFor))
             if(active(scopeFor[surface].screen))void scanAcademic(surface);
-        });
+        },0);
       }
     });
   }catch{}
