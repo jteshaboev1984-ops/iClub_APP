@@ -103,16 +103,17 @@
     let selectionBusy=false;
     if(separateStart){
       separateStart.disabled=true;
-      separateStart.addEventListener("click",async()=>{
+      separateStart.onclick=async()=>{
         if(!selectedTopic||selectionBusy||ownSerial!==mountSerial)return;
         selectionBusy=true;separateStart.disabled=true;
-        try{await onStart(selectedTopic);}
+        const choice=selectedTopic;
+        try{await onStart(choice);}
         finally{
           selectionBusy=false;
           if(ownSerial===mountSerial&&separateStart.isConnected)
             separateStart.disabled=!selectedTopic;
         }
-      });
+      };
     }
 
     function safeResult(row) {
@@ -223,7 +224,7 @@
       for(const row of filtered.slice(0,limit)) {
         const button=element("button","practice-topic-choice-item");
         button.type="button";
-        button.disabled=busy;
+        button.disabled=busy||selectionBusy;
         const info=element("span","practice-topic-choice-item-info");
         info.append(element("strong","",row.topic),
                     element("small","",itemCountLabel(row.question_count,lang,c)));
@@ -236,7 +237,7 @@
         }
         button.append(info,action);
         button.addEventListener("click",async()=>{
-          if(busy || ownSerial!==mountSerial) return;
+          if(busy || selectionBusy || ownSerial!==mountSerial) return;
           if(separateStart){
             selectedTopic=row.topic;
             separateStart.disabled=false;
