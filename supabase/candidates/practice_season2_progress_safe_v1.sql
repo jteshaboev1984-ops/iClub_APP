@@ -44,11 +44,16 @@ begin
     raise exception 'subject_not_found' using errcode='P0002';
   end if;
 
-  select start_date into v_start
-  from public.seasons
-  where season_no=2
-    and status in ('current','closed')
-    and start_date is not null
+  -- Owner-approved season boundary: this SUBJECT'S officially scheduled Tour 1,
+  -- NOT seasons.start_date and NOT Mathematics Tour 1 for other subjects.
+  select t.start_date into v_start
+  from public.seasons sn
+  join public.tours t on t.season_id=sn.id
+                     and t.subject_id=v_subject and t.tour_no=1
+  where sn.season_no=2
+    and sn.status in ('current','closed')
+    and t.start_date is not null and t.end_date is not null
+    and t.start_date <= t.end_date
   limit 1;
   if v_start is null then
     return jsonb_build_object(
@@ -57,6 +62,9 @@ begin
     );
   end if;
 
+  -- Valid period exists only once its Tour 1 calendar date is reached.
+  -- Tour 1 may have completed and is_active=false after the start; that
+  -- must NOT retroactively erase the date boundary.
   -- Explicit local season boundary, including cross-midnight Tashkent cases.
   v_cutoff := v_start::timestamp at time zone 'Asia/Tashkent';
   if statement_timestamp() < v_cutoff then
