@@ -13,14 +13,19 @@
 
   function attachMathWriterContract(request) {
     // Per-request PostgrestBuilder headers: never mutate the shared Supabase
-    // client's headers used by Chemistry, Economics, Practice or Tours.
+    // client or add a custom header that could fail the CORS preflight.
     const headers = request?.headers;
     if (!headers || typeof headers !== "object") return false;
-    if (typeof headers.set === "function") {
-      headers.set("x-iclub-math-writer-build", MATH_WRITER_CONTRACT);
-    } else {
-      headers["x-iclub-math-writer-build"] = MATH_WRITER_CONTRACT;
-    }
+    // Existing SDK identification is already CORS-allowed. Keep its value
+    // and add a Math-only per-request compatibility marker.
+    const name = "x-client-info";
+    const before = typeof headers.get === "function"
+      ? String(headers.get(name) || "")
+      : String(headers[name] || headers["X-Client-Info"] || "");
+    const marker = "iclub.math/" + MATH_WRITER_CONTRACT;
+    const next = before ? before + "; " + marker : marker;
+    if (typeof headers.set === "function") headers.set(name, next);
+    else headers[name] = next;
     return true;
   }
 

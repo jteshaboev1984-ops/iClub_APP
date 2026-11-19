@@ -39,8 +39,11 @@ BEGIN
   IF v_contract IS NOT NULL THEN
     v_headers:=nullif(current_setting('request.headers',true),'');
     v_sent:=CASE WHEN v_headers IS NOT NULL
-      THEN v_headers::jsonb->>'x-iclub-math-writer-build' ELSE NULL END;
-    IF v_sent IS DISTINCT FROM v_contract THEN RETURN false; END IF;
+      THEN v_headers::jsonb->>'x-client-info' ELSE NULL END;
+    -- CORS-allowed SDK identification plus a spoofable compatibility marker.
+    -- NOT an authorization credential; JWT+Core owner access remain required.
+    IF v_sent IS NULL OR position('iclub.math/'||v_contract IN v_sent)=0
+    THEN RETURN false; END IF;
   END IF;
   RETURN true;
 END

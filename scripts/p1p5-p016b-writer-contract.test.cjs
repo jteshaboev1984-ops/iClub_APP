@@ -61,7 +61,7 @@ function fixture({stale=false,lang="ru",draft=""}={}){
   const win={
     iClubExamPrepHostInternal:{},i18n:{getLang:()=>lang},
     sb:{rpc(name,args){
-      const req={headers:{},then(resolve,reject){
+      const req={headers:{"x-client-info":"supabase-js-web/2"},then(resolve,reject){
         calls.push({name,args,headers:{...req.headers}});
         const result=stale?
           {data:null,error:{code:"42501",message:"exam_prep_writer_contract_stale"}}:
@@ -86,7 +86,8 @@ function fixture({stale=false,lang="ru",draft=""}={}){
     assert.equal(ok.ok,true,lang+" working client");
     assert.equal(t.calls.length,1);
     assert.equal(t.calls[0].name,"save_exam_prep_exam_profile_v2");
-    assert.equal(t.calls[0].headers["x-iclub-math-writer-build"],build);
+    assert.equal(t.calls[0].headers["x-client-info"],"supabase-js-web/2; iclub.math/"+build,
+      "SDK identity is preserved on only this Math request");
     assert.equal(t.win.sb.rest,undefined,"Cannot mutate shared Supabase headers");
     assert.equal(t.nodes.length,0,"No update notice on normal requests");
     assert.equal(t.win.reloads,0,"Never reload automatically");

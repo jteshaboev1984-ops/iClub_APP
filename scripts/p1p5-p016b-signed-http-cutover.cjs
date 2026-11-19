@@ -38,7 +38,7 @@ function token(iat){
 async function rpc(name,args,access,build){
   const headers={"content-type":"application/json","accept":"application/json",
     Authorization:"Bearer "+access};
-  if(build)headers["x-iclub-math-writer-build"]=build;
+  headers["x-client-info"]="supabase-js-web/2"+(build?"; iclub.math/"+build:"");
   const res=await fetch(HOST+"/rpc/"+name,{method:"POST",headers,body:JSON.stringify(args||{})});
   const body=await res.text();
   let data;try{data=JSON.parse(body);}catch{data=null;}

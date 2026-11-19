@@ -15,13 +15,13 @@ const exact={
   ".github/workflows/math-p016b-contract-review.yml":"41c7b410be09a3bc9abb794ab3139718ab5704df",
   ".github/workflows/exam-prep-weekly-profile-recovery.yml":"1ab78927033f5f9dec622b78682569199cfa2702",
   ".github/workflows/math-p1p5-d3-protected-recovery-review.yml":"75d9b5212ee29c037ed4218216da32feecb2d554",
-  "exam-prep/exam-prep-api.js":"368b89eb76dd5ea7972f3e733cfcd292ecab154f",
+  "exam-prep/exam-prep-api.js":"7beda6c230626800fc0df70ffdcb29bf967cf37c",
   "index.html":"80583c592d934adfe464a32d953b29040845f086",
-  "scripts/p1p5-p016b-signed-http-cutover.cjs":"2bcada7bed81c7843af376de6be28028a6ed3767",
-  "scripts/p1p5-p016b-writer-contract.test.cjs":"42f8a0a5366227771e5d1a8d9787998c435f0482",
-  "supabase/candidates/math_p1p5_p016b_writer_contract_v1_dormant.sql":"2bea09b163b4f181e3cad1f23bc63a1e9917d7fd",
+  "scripts/p1p5-p016b-signed-http-cutover.cjs":"ebe9c1d9b75690455d498f2106b728e2bde43a6a",
+  "scripts/p1p5-p016b-writer-contract.test.cjs":"cf8f5c2bb98b560a041cea03877ca098e140a2dc",
+  "supabase/candidates/math_p1p5_p016b_writer_contract_v1_dormant.sql":"b91c2b89559da9205d73fe2ae94d882c0455cc67",
   "supabase/tests/p1p5_p016b_ephemeral_extra_hard_stub.sql":"3c42822a09a5375da6af96cfc63a179aa5c69e53",
-  "docs/math-p1p5-p016b-stale-tab-writer-fence-20261119.md":"72e07c342e95e9f3c96210cdbd7f790feb187aa0"
+  "docs/math-p1p5-p016b-stale-tab-writer-fence-20261119.md":"cfa9ab98c9079d7f8734f4bc19e8753533f7e699"
 };
 const self=new Set(["qa/math-p016b-source-firewall.cjs",
   ".github/workflows/ux531-previewless-release-firewall.yml"]);
