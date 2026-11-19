@@ -452,7 +452,7 @@
       "primary_skill": "P1-SER-03",
       "secondary_skills": [],
       "role": "context_sum",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
@@ -489,7 +489,7 @@
       "primary_skill": "P1-SER-03",
       "secondary_skills": [],
       "role": "inverse_sum_difference",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
@@ -526,7 +526,7 @@
       "primary_skill": "P1-SER-03",
       "secondary_skills": [],
       "role": "sum_to_term",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
