@@ -553,7 +553,7 @@
     const c=PERIOD_COPY[locale],fmt=stamp=>{
       const d=new Date(String(stamp||''));
       return Number.isFinite(d.getTime())?
-        d.toLocaleDateString(locale==='en'?'en-GB':locale==='uz'?'uz-UZ':'ru-RU'):'';
+        d.toLocaleDateString(locale==='en'?'en-GB':locale==='uz'?'uz-UZ':'ru-RU',{timeZone:'Asia/Tashkent'}):'';
     };
     function item(row,kind){
       const el=node('div','iclub-s2-history-row');
