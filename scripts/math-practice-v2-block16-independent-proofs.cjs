@@ -37,7 +37,22 @@ const tests={
 397:q=>mcq(q,t=>norm(t)==='y=-16'&&near(3*2**2-12,0)),
 398:q=>input(q,Math.sqrt((9+3)/3)),
 399:q=>mcq(q,t=>norm(t)==='y=-x+2;y=x'),
-400:q=>mcq(q,t=>norm(t)==='x>2')
+400:q=>{
+  assert.ok(q.question.en.includes('complete set of x-values')&&q.question.en.includes('dy/dx>0'));
+  assert.ok(q.question.ru.includes('все значения x')&&q.question.ru.includes('dy/dx>0'));
+  assert.ok(q.question.uz.includes('barcha x qiymatlarini')&&q.question.uz.includes('dy/dx>0'));
+  // The old wording allowed any increasing subinterval; require the full
+  // positive-derivative solution set, not a proper subset.
+  const derivative=x=>2*x-4;
+  const interval=t=>{
+    const m=/^x>(-?\d+(?:\.\d+)?)$/.exec(norm(t));
+    if(!m)return false;
+    const lower=+m[1];
+    const probes=[-10,0,1.999,2,2.001,3,4,4.001,10];
+    return probes.every(x=>(x>lower)===(derivative(x)>0));
+  };
+  mcq(q,interval);
+}
 };
 assert.equal(Q.size,25);
 for(let id=376;id<=400;id++){
