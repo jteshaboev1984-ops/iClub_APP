@@ -31,16 +31,19 @@ async function main(){
     const page=await browser.newPage({viewport:{width:390,height:844}});
     page.on("pageerror",e=>seen.errors.push(e.message));
     await page.addInitScript(()=>{
-      const USER="00000000-0000-4000-8000-000000000031";
-      window.__qa={lang:"ru",hold:false,release:null,ready:false,academic:[],available:[]};
+      window.__qa={lang:"ru",hold:false,release:null,ready:false,academic:[],available:[],
+        userId:"00000000-0000-4000-8000-000000000031",authListeners:[]};
       window.i18n={getLang:()=>window.__qa.lang};
       window.sb={
         supabaseUrl:"https://mmmduffgpvwjdpruzikw.supabase.co",
         supabaseKey:"QA_PUBLIC_KEY_"+ "z".repeat(64),
         auth:{
-          getUser:async()=>({data:{user:{id:USER}},error:null}),
+          getUser:async()=>({data:{user:window.__qa.userId?{id:window.__qa.userId}:null},error:null}),
           getSession:async()=>({data:{session:{access_token:"QA_LOCAL_JWT_"+"k".repeat(64)}},error:null}),
-          onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})
+          onAuthStateChange:fn=>{
+            window.__qa.authListeners.push(fn);
+            return {data:{subscription:{unsubscribe(){}}}};
+          }
         },
         rpc:async()=>({data:null,error:{message:"No hosted RPC in isolated browser"}}),
         functions:{invoke:async (_name,{body})=>{
@@ -48,7 +51,10 @@ async function main(){
             ok:true,eligible:true,consented:true,candidate:false},error:null};
           if(body.intent==="academic_available"){
             window.__qa.available.push(body);
-            return {data:{ok:true,available:body.record_id===502?[97]:[]},error:null};
+            return {data:{ok:true,available:
+              body.record_id===502 &&
+              window.__qa.userId==="00000000-0000-4000-8000-000000000031"
+                ?[97]:[]},error:null};
           }
           if(body.intent==="academic"){
             window.__qa.academic.push(body);
@@ -182,6 +188,23 @@ async function main(){
     await page.waitForFunction(()=>!document.querySelector('[data-iclub-ai-academic-button="practice_error:502:97"]'),
       null,{timeout:8000});
 
+    // The review DOM can outlive an auth change. A source button authorized
+    // for learner A must disappear for learner B even on the same attempt ID.
+    await page.evaluate(()=>document.getElementById("courses-practice-review")
+      .dataset.practiceAiAttemptId="502");
+    await page.locator('[data-iclub-ai-academic-button="practice_error:502:97"]')
+      .waitFor({timeout:8000});
+    await page.evaluate(()=>{
+      window.__qa.userId="00000000-0000-4000-8000-000000000032";
+      for(const cb of [...window.__qa.authListeners])
+        cb("SIGNED_IN",{user:{id:window.__qa.userId}});
+    });
+    await page.waitForFunction(()=>!document.querySelector("[data-iclub-ai-academic-button]"),
+      null,{timeout:8000});
+    await page.waitForTimeout(300);
+    assert.equal(await page.locator("[data-iclub-ai-academic-button]").count(),0,
+      "Old learner's approved Practice question button survived account switch");
+
     await page.evaluate(()=>{
       document.getElementById("courses-practice-review").classList.remove("is-active");
       document.getElementById("courses-practice-quiz").classList.add("is-active");
@@ -194,6 +217,7 @@ async function main(){
     console.log("PASS: different attempt on same screen uses isolated chat, does not carry old result");
     console.log("PASS: source-approved practice_error 502:97 → same Tutor, RU/EN/UZ action");
     console.log("PASS: held academic reply refused after switch 502→503, stale controls removed");
+    console.log("PASS: account 31→32 removes previous learner's approved-source actions");
     console.log("PASS: active Practice quiz hides Tutor; zero external/model network or learner data writes");
   }finally{
     if(browser)await browser.close();
