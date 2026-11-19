@@ -768,8 +768,20 @@
   }
   try{
     window.sb?.auth?.onAuthStateChange?.((event)=>{
-      if(["SIGNED_OUT","USER_DELETED","SIGNED_IN"].includes(event))
-        resetOnIdentityChange();
+      if(!["SIGNED_OUT","USER_DELETED","SIGNED_IN"].includes(event))return;
+      resetOnIdentityChange();
+      if(event==="SIGNED_IN"){
+        // The review DOM may be unchanged after an account switch. Removing
+        // the previous learner's actions cannot be the only trigger: if
+        // there were no old buttons, the newly entitled learner would see
+        // no fresh action until navigating away and back.
+        const epoch=authEpoch;
+        queueMicrotask(()=>{
+          if(epoch!==authEpoch)return;
+          for(const surface of Object.keys(scopeFor))
+            if(active(scopeFor[surface].screen))void scanAcademic(surface);
+        });
+      }
     });
   }catch{}
   if(document.readyState==="loading")
