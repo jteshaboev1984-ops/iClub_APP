@@ -27,6 +27,9 @@ declare
   v_current_topic integer := 0;
   v_best jsonb;
   v_recent jsonb := '[]'::jsonb;
+  v_archived_recent jsonb := '[]'::jsonb;
+  v_topic_recent jsonb := '[]'::jsonb;
+  v_topic_archive jsonb := '[]'::jsonb;
   v_topic_correct integer := 0;
   v_topic_answered integer := 0;
 begin
@@ -87,7 +90,17 @@ begin
     from public.practice_attempts
     where subject_id=v_subject and user_id=v_uid
       and coalesce(is_lab,false) is false and created_at>=v_cutoff
-    order by created_at desc,id desc limit 5
+    order by created_at desc,id desc limit 20
+  ) t;
+
+  select coalesce(jsonb_agg(to_jsonb(t.*) order by t.created_at desc,t.id desc),'[]'::jsonb)
+  into v_archived_recent
+  from (
+    select id,score,percent,time_seconds,created_at
+    from public.practice_attempts
+    where subject_id=v_subject and user_id=v_uid
+      and coalesce(is_lab,false) is false and created_at<v_cutoff
+    order by created_at desc,id desc limit 20
   ) t;
 
   select count(*) filter(where created_at < v_cutoff)::integer,
@@ -107,19 +120,60 @@ begin
     and s.status='finalized' and s.drill_type='rec_topic'
     and left(s.client_session_id,22)='practice_topic_choice_';
 
+  -- Read-only, bounded records for the same 3+5 disclosure used in Exam Prep.
+  -- They are samples of at most 20, NOT cursor pagination or full archive.
+  select coalesce(jsonb_agg(to_jsonb(t.*) order by t.created_at desc,t.id desc),'[]'::jsonb)
+  into v_topic_recent
+  from (
+    select s.id,s.topic,s.created_at,
+           count(a.session_id)::integer as total,
+           count(a.session_id) filter(where a.is_correct is true)::integer as correct
+    from (
+      select id,topic,created_at
+      from public.practice_drill_sessions_v4
+      where subject_id=v_subject and user_id=v_uid and created_at>=v_cutoff
+        and status='finalized' and drill_type='rec_topic'
+        and left(client_session_id,22)='practice_topic_choice_'
+      order by created_at desc,id desc limit 20
+    ) s
+    left join public.practice_drill_answers_v4 a on a.session_id=s.id
+    group by s.id,s.topic,s.created_at
+    order by s.created_at desc,s.id desc
+  ) t;
+
+  select coalesce(jsonb_agg(to_jsonb(t.*) order by t.created_at desc,t.id desc),'[]'::jsonb)
+  into v_topic_archive
+  from (
+    select s.id,s.topic,s.created_at,
+           count(a.session_id)::integer as total,
+           count(a.session_id) filter(where a.is_correct is true)::integer as correct
+    from (
+      select id,topic,created_at
+      from public.practice_drill_sessions_v4
+      where subject_id=v_subject and user_id=v_uid and created_at<v_cutoff
+        and status='finalized' and drill_type='rec_topic'
+        and left(client_session_id,22)='practice_topic_choice_'
+      order by created_at desc,id desc limit 20
+    ) s
+    left join public.practice_drill_answers_v4 a on a.session_id=s.id
+    group by s.id,s.topic,s.created_at
+    order by s.created_at desc,s.id desc
+  ) t;
+
   return jsonb_build_object(
     'ok',true,'subject_key',v_key,'season_no',2,'period_active',true,
     'period_starts_at',v_cutoff,
     'main',jsonb_build_object(
       'attempts_count',coalesce(v_current_main,0),
       'archived_attempts_count',coalesce(v_prior_main,0),
-      'best',v_best,'recent',v_recent
+      'best',v_best,'recent',v_recent,'archived_recent',v_archived_recent
     ),
     'topic',jsonb_build_object(
       'sessions_count',coalesce(v_current_topic,0),
       'archived_sessions_count',coalesce(v_prior_topic,0),
       'correct',coalesce(v_topic_correct,0),
-      'answered',coalesce(v_topic_answered,0)
+      'answered',coalesce(v_topic_answered,0),
+      'recent',v_topic_recent,'archived_recent',v_topic_archive
     )
   );
 end
