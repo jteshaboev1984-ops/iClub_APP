@@ -84,7 +84,20 @@ Only after a common server-owned cross-subject next-actions contract exists.
 
 The server decides priorities/actions from canonical learning data. AI only explains those priorities and progress in learner-friendly language; AI does not invent the study program.
 
-## Current execution point
+## Runtime checkpoint — 2026-11-19 (supersedes historical execution point below)
+
+Verified against GitHub `main` `74e291b0fba989084387a6fe137871db07f10fbd` and SELECT-only Supabase state. This is a **state snapshot**, not a product-rule change or release authorization. Check [Issue #412](https://github.com/jteshaboev1984-ops/iClub_APP/issues/412) for later actual SHA, approval and implementation progress.
+
+- Existing `iclub-ai-v21-ui.js` and `iclub-ai-v21-beta-client.js` are loaded by `index.html`; existing Mathematics Exam Prep also has separate contextual `exam-prep-ai-ui.js`. Do not add a competing new Tutor window. Preserve already-released Exam Prep AI.
+- Global AI runtime: `ui_enabled=true`, `gateway_enabled=true`, `generation_enabled=false`; rollout `consented_beta_v21`. v2.1 prepared + beta routes ON, freeform generation OFF; academic provider OFF. One consent-enabled v2.1 beta account in current record (not a public rollout).
+- Existing Exam Prep `generation_enabled=true` with three active feature entitlements and **243** runtime-allowed approved P1/P5 Tutor Cards. The old statement below that *all* production AI is OFF is **outdated**.
+- General Practice AI policy `enabled=false` and `generation_enabled=false`; existing independent Practice-context gate ON but question-specific error explanations OFF. No silent general availability.
+- Global all-route spend ceiling implementation exists but `enabled=false`. Do not increase paid route use or activate it before specific owner-approved ceilings/reconciliation. Existing Exam Prep generation remains as-is.
+- Before broadening learner access, honor the open protected-content access hold in Issue #412 without publishing private reproduction steps. Existing Practice/Tour/Exam Prep history remains immutable.
+- The next execution is **four small packages**, detailed in `docs/ai/ai-tutor-screen-actions-hybrid-v1.md`: (A) provider-free learner-context handoff, (B) targeted reliability/trace/privacy/cost readiness, (C) separately approved limited paid clarification beta, (D) quality-based subject expansion. This is an **implementation order**, not an order to enable features.
+- Reuse reviewed prepared help, source-version binding, existing Edge/RPC contracts, and existing targeted CI. No mandatory vector DB/RAG, extra server, multi-agent layer, always-on streaming, paid judge or backup model until a concrete need is demonstrated.
+
+## Historical execution point — originally written 2026-09-25; NOT current state
 
 AI-1 engineering is complete: the Exam Prep provider adapter, server-side spend/concurrency admission, production-safe Edge deployment and funded provider quality acceptance are GREEN. The funded quality run passed 18/18 cases across P1/P5 and RU/UZ/EN. Real-learner activation remains intentionally on HOLD: production stays AI-off/shadow with zero AI entitlements until the Core real-beta evidence gate and a separate activation decision.
 
