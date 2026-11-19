@@ -1,6 +1,5 @@
 -- #574 · disposable PostgreSQL 17 only; NO production data.
 \set ON_ERROR_STOP on
-begin;
 
 create role authenticated;
 create role anon;
@@ -46,6 +45,8 @@ insert into public.practice_drill_answers_v4 values
 
 \i supabase/candidates/practice_season2_progress_safe_v1.sql
 
+-- All evaluation steps rolled back; source fixture lives only in disposable PG17.
+begin;
 -- No raw read access to answer, attempt or session tables for authenticated.
 set role authenticated;
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
