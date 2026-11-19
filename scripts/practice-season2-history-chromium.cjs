@@ -14,12 +14,15 @@ const {chromium}=require('playwright');
     await page.setContent('<!doctype html><html lang="'+language+'"><body class="iclub-visual-v3">'+
       '<section id="courses-practice-start"><div id="practice-tour-picker"></div>'+
       '<div class="practice-hero"></div><div class="practice-last"></div>'+
-      '<div class="practice-start-actions"></div><div id="practice-topic-choice"></div></section>'+
+      '<div class="practice-start-actions"></div><div id="practice-topic-choice">'+
+      '<section class="practice-topic-history">Previous all-time topic history</section></div></section>'+
       '<section id="courses-my-recs"><div id="topic-history"></div><div id="tour-history"></div></section>'+
       '<section id="courses-my-rec-topic-history"><div id="my-rec-topic-history-title"></div>'+
       '<div id="my-rec-topic-history-subtitle"></div><div id="my-rec-topic-history-body"></div></section>'+
       '<section id="courses-my-rec-topic-review"><div id="my-rec-topic-review-body"></div></section></body></html>');
     await page.addStyleTag({path:path.resolve('practice-results-tabs.css')});
+    // Load the actually released Academy OS visual source, NOT invented test colors.
+    await page.addStyleTag({path:path.resolve('visual/iclub-academy-ux531-b04b08.css')});
     await page.addScriptTag({path:path.resolve('practice-results-tabs.js')});
     const out=await page.evaluate(locale=>{
      const mk=(i,season)=>({id:i,created_at:'2026-11-0'+(i%8+1)+'T12:00:00Z',
@@ -44,6 +47,30 @@ const {chromium}=require('playwright');
     assert(out.rendered,'period render failed');
     assert.equal(out.topicRows,3,'topic history must initially show latest 3');
     assert.equal(out.tourRows,3,'previous Tour history initially shows 3');
+    const academy=await page.evaluate(()=>{
+      const body=getComputedStyle(document.body);
+      const card=document.querySelector('[data-practice-s2-history="tours"] .iclub-s2-history-block');
+      const cs=getComputedStyle(card);
+      const legacy=document.querySelector('#practice-topic-choice .practice-topic-history');
+      return {
+        rootTheme:body.getPropertyValue('--academy-paper').trim(),
+        background:cs.backgroundColor,
+        border:cs.borderTopColor,
+        radius:cs.borderTopLeftRadius,
+        ink:cs.color,
+        shadow:cs.boxShadow,
+        oldTopicHidden:getComputedStyle(legacy).display==='none',
+        duplicateSeasonDate:card.textContent?.includes('Новые результаты · Новые результаты')||false
+      };
+    });
+    assert.equal(academy.rootTheme,'#fff','accepted Academy OS tokens did not load');
+    assert.equal(academy.background,'rgb(255, 255, 255)','History has different paper than Academy OS');
+    assert.equal(academy.border,'rgb(204, 220, 244)','History does not use accepted Academy OS border');
+    assert.equal(academy.radius,'20px','History does not use accepted Academy OS card radius');
+    assert.equal(academy.ink,'rgb(20, 43, 80)','History has noncanonical Academy OS text');
+    assert(academy.shadow!=='none','History lacks quiet Academy OS elevation');
+    assert(academy.oldTopicHidden,'outdated lifetime Topic history duplicates fresh Season 2 view');
+    assert(!academy.duplicateSeasonDate,'duplicate period/heading copy');
     for(const mode of ['tours','topics']){
      await page.locator('#practice-results-tab-'+mode).click();
      const selector='[data-practice-s2-history="'+mode+'"]';
@@ -80,6 +107,10 @@ const {chromium}=require('playwright');
       return [...document.querySelectorAll('[data-practice-s2-history]')].every(x=>x.hidden);
     });
     assert(hidden,'draft/unknown Season2 must not show new period');
+    const oldRestored=await page.evaluate(()=>
+      getComputedStyle(document.querySelector('#practice-topic-choice .practice-topic-history')).display!=='none'
+    );
+    assert(oldRestored,'legacy Practice history not restored before Season 2');
     await page.close();
    }
   }
