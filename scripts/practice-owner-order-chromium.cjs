@@ -55,7 +55,10 @@ const {chromium}=require('playwright');
          };
          window.iClubPracticeTopicChoice.mount({
            subjectKey:'mathematics',language,
-           onStart:topic=>{window.__startTopics.push(topic);}
+           onStart:topic=>{
+             window.__startTopics.push(topic);
+             return new Promise(resolve=>{window.__releaseTopicStart=resolve;});
+           }
          });
          window.iClubPracticeCurrentTourV1.render(
            {activeTourNo:1,lastCompletedTourNo:null,selectedTourNo:1},language);
@@ -94,15 +97,36 @@ const {chromium}=require('playwright');
        assert.equal(await root.locator('#practice-resume-btn').count(),1,'existing resume missing');
        await root.locator('#practice-results-tab-topics').click();
        await page.waitForFunction(()=>document.querySelectorAll('.practice-topic-choice-item').length===2);
-       const topicBtn=root.locator('#practice-start-topic-btn');
-       assert.equal(await topicBtn.isDisabled(),true,'no topic may auto-start');
-       await root.locator('.practice-topic-choice-item').first().click();
-       assert.equal(await topicBtn.isDisabled(),false,'selecting topic enables explicit start');
-       const pre=await page.evaluate(()=>window.__startTopics.length);
-       assert.equal(pre,0,'selection must NOT launch attempt');
-       await topicBtn.click();
-       const started=await page.evaluate(()=>window.__startTopics);
-       assert.deepEqual(started,['Synthetic algebra'],'start must use only selected topic');
+       assert.equal(await root.locator('#practice-start-topic-btn').count(),0,
+         'no duplicate Topic Start button is allowed');
+       assert.equal(await root.locator('.practice-topic-start-actions').isVisible(),false,
+         'empty Resume holder must not occupy space');
+       const chooseTopic=root.locator('.practice-topic-choice-item').first();
+       assert.equal(await chooseTopic.locator('.practice-topic-choice-item-action').textContent(),
+         {ru:'Начать',uz:'Boshlash',en:'Start'}[locale],
+         'topic tile is the immediate launch control');
+       assert.equal((await page.evaluate(()=>window.__startTopics)).length,0);
+       await chooseTopic.click();
+       assert.deepEqual(await page.evaluate(()=>window.__startTopics),['Synthetic algebra'],
+         'clicking eligible topic starts that topic immediately');
+       assert.equal(await chooseTopic.isDisabled(),true,
+         'topic choices must lock while a start is in flight');
+       await page.evaluate(()=>{
+         document.querySelector('.practice-topic-choice-item').click();
+       });
+       assert.equal((await page.evaluate(()=>window.__startTopics)).length,1,
+         'second click while start pending must not create a second launch');
+       await page.evaluate(()=>window.__releaseTopicStart());
+       await page.waitForFunction(()=>!document.querySelector('.practice-topic-choice-item').disabled);
+       const resume=root.locator('#practice-resume-btn');
+       await resume.evaluate(el=>{el.style.display='block';});
+       await page.waitForFunction(()=>!document.querySelector('#practice-topic-resume-btn').hidden);
+       assert.equal(await root.locator('.practice-topic-start-actions').isVisible(),true,
+         'resume holder should show only for paused attempts');
+       assert.equal(await root.locator('#practice-topic-resume-btn').count(),1);
+       assert.equal(await root.locator('#practice-start-topic-btn').count(),0);
+       await resume.evaluate(el=>{el.style.display='none';});
+       await page.waitForFunction(()=>document.querySelector('.practice-topic-start-actions').hidden);
        const orderTopicHistory=await root.evaluate(el=>{
          const part=el.querySelector('#practice-results-panel-topics');
          const action=part.querySelector('.practice-topic-start-actions');
@@ -111,7 +135,8 @@ const {chromium}=require('playwright');
        });
        assert(orderTopicHistory,'topic recent history must follow Start/Resume');
        assert.equal(await root.locator('#practice-topic-history-placement .practice-topic-history').count(),1);
-       assert.equal(await root.locator('.practice-topic-choice-item[aria-pressed="true"]').count(),1);
+       assert.equal(await root.locator('.practice-topic-choice-item[aria-pressed]').count(),0,
+         'one-tap mode must not expose a separate selection state');
        const capture=out&&locale==='ru'&&width===375;
        if(capture){
          await root.locator('#practice-results-panel-topics').screenshot({
@@ -127,12 +152,13 @@ const {chromium}=require('playwright');
          });
        },locale);
        await page.waitForFunction(()=>!!document.querySelector('.practice-topic-choice-retry'));
-       assert.equal(await root.locator('#practice-start-topic-btn').isDisabled(),true);
+       assert.equal(await root.locator('.practice-topic-choice-item').count(),0);
+       assert.equal(await root.locator('#practice-start-topic-btn').count(),0);
        await page.evaluate(()=>{window.__simulateTopicFailure=false;});
        await root.locator('#practice-topic-choice .practice-topic-choice-retry').last().click();
        await page.waitForFunction(()=>document.querySelectorAll('.practice-topic-choice-item').length===2);
-       assert.equal(await root.locator('#practice-start-topic-btn').isDisabled(),true,
-         'Retry must never select topic or launch an attempt');
+       assert.equal(await root.locator('#practice-start-topic-btn').count(),0,
+         'Retry must not restore a redundant start button');
        assert.equal((await page.evaluate(()=>window.__startTopics)).length,1);
        await root.locator('#practice-results-tab-tours').click();
        assert.equal(await root.locator('#practice-results-panel-topics').isVisible(),false);
@@ -145,6 +171,6 @@ const {chromium}=require('playwright');
        await page.close();
      }
    }
-   console.log('PRACTICE_OWNER_ORDER_TOPIC_CATALOG_CHROMIUM_PASS: RU UZ EN / 320 375 430 1440, stats-switch-choice-CTA-recent, explicit topic select, RPC error+retry');
+   console.log('PRACTICE_OWNER_ORDER_TOPIC_CATALOG_CHROMIUM_PASS: RU UZ EN / 320 375 430 1440, stats-switch-choice-CTA-recent, one-tap topic start, in-flight duplicate lock, conditional Resume, RPC error+retry');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e.stack||e.message);process.exit(1)});
