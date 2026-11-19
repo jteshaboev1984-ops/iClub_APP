@@ -56,7 +56,7 @@ function evalSimple(original,x) {
   if(index!==tokens.length||!Number.isFinite(value))throw Error('invalid arithmetic');
   return value;
 }
-let machineComparable=0,numericLocalePairs=0,approvedInput=0,semanticExceptions=0;
+let machineComparable=0,numericLocalePairs=0,approvedInput=0,semanticExceptions=0,decimalAnswerQuestions=0;
 for(const [prefix,max] of Object.entries(counts))for(let skill=1;skill<=max;skill++){
   const skillCode='P1-'+prefix+'-'+String(skill).padStart(2,'0');
   const filename=path.join(root,folders[prefix],skillCode+'.json');
@@ -96,6 +96,16 @@ for(const [prefix,max] of Object.entries(counts))for(let skill=1;skill<=max;skil
       }catch(e){if(!/unparsed|unsupported|invalid|missing|atom/.test(String(e.message)))throw e;}
     }else if(q.qtype==='input'){
       approvedInput++;
+      if(/^-?\\d+\\.\\d+$/.test(str(q.answer_contract?.canonical_answer))){
+        decimalAnswerQuestions++;
+        // Q268 already asks for a 1-decimal-place rounded result in all three languages.
+        const rounded=number===268&&/1 decimal place/i.test(str(q.question.en))&&
+          /1 десятичн/i.test(str(q.question.ru))&&/bir kasr xonasigacha/i.test(str(q.question.uz));
+        const explicit=/decimal number/i.test(str(q.question.en))&&
+          /десятичным числом/i.test(str(q.question.ru))&&
+          /o‘nli son ko‘rinishida/i.test(str(q.question.uz));
+        if(!rounded&&!explicit)errors.push('ambiguous decimal input format at index '+number);
+      }
       if(!q.answer_contract?.canonical_answer||!Array.isArray(q.answer_contract.accepted_examples)||
         !Array.isArray(q.answer_contract.rejected_examples))errors.push('input contract at index '+number);
     }else errors.push('unknown qtype at index '+number);
@@ -109,11 +119,13 @@ const sizes=[0,0,0,0,0,0,0];for(const row of rows){
  const index=cutoffs.findIndex(x=>n<=x);sizes[index]++;
 }
 if(JSON.stringify(sizes)!==JSON.stringify(expectedPoolSizes))errors.push('pool size drift');
+if(decimalAnswerQuestions!==15)errors.push('decimal scalar audit count drift');
 if(rows.length-approvedInput!==expectedQTypes.mcq||approvedInput!==expectedQTypes.input)
   errors.push('question format totals changed');
 console.log(JSON.stringify({reviewedSourceItems:rows.length,skillFiles:Object.values(counts).reduce((a,b)=>a+b,0),
   qtypes:{mcq:rows.length-approvedInput,input:approvedInput},poolSizes:sizes,
   numericLocalePairs,reviewedSemanticNumberExceptions:semanticExceptions,
   algebraicallyComparableMCQs:machineComparable,
+  decimalAnswerQuestions,
   errorCount:errors.length},null,2));
 if(errors.length){for(const e of errors)console.error('ERROR:',e);process.exit(1);}
