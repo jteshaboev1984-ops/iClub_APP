@@ -48,7 +48,16 @@ for(let id=326;id<=350;id++){
 try{const q=Q.get(id);assert.ok(q);assert.equal(q.key,'MATH-P1-PRACTICE2-Q'+String(id).padStart(3,'0'));
 assert.equal(q.practice_no,5);assert.ok(q.source_ref.includes('Ch7'));
 if(newMedium.has(id))assert.equal(q.difficulty,'medium');
-for(let l of ['en','ru','uz']){assert.ok(q.question[l]?.trim()&&q.explanation[l]?.trim());assert.equal(tokens(q.question[l]),tokens(q.question.en),'locale number mismatch');}
+for(let l of ['en','ru','uz']){
+  assert.ok(q.question[l]?.trim()&&q.explanation[l]?.trim());
+  if(id===344&&l==='uz'){
+    // English 'triples' and Russian 'утраивается' are expressed with a 3 in Uzbek.
+    assert.ok(/triples each hour/i.test(q.question.en)&&/утраивается/.test(q.question.ru)&&/3 marta/.test(q.question.uz));
+    const uz=tokens(q.question.uz).split('|'),en=tokens(q.question.en).split('|');
+    const pos=uz.indexOf('3');assert.ok(pos>=0);uz.splice(pos,1);
+    assert.deepEqual(uz,en,'Uzbek multiplier paraphrase no longer equivalent');
+  } else assert.equal(tokens(q.question[l]),tokens(q.question.en),'locale number mismatch');
+}
 if(q.qtype==='mcq'){assert.deepEqual(q.options.map(o=>o.key),['A','B','C','D']);for(let l of ['en','ru','uz'])assert.equal(new Set(q.options.map(o=>norm(o.text[l]))).size,4);for(let o of q.options)if(o.key===q.correct_answer)assert.equal(o.diagnostic_code,null);else assert.ok(o.diagnostic_code);}
 tests[id](q);
 }catch(e){console.error('FAIL block14 Q'+String(id).padStart(3,'0')+' '+e.message);process.exitCode=1;}
