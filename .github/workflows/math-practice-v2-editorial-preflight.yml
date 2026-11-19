@@ -1,0 +1,50 @@
+name: Mathematics Practice v2 editorial 31-item preflight
+on:
+  pull_request:
+    branches:
+      - main
+      - fix/math-practice-v2-495-content-qa-20261119
+    paths:
+      - 'content/math/practice_v2/**/*.json'
+      - 'scripts/math-practice-v2-editorial-future-only-contract.cjs'
+      - 'supabase/preflight/math_practice_v2_31_editorial_readonly.sql'
+      - '.github/workflows/math-practice-v2-editorial-preflight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-and-history-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - name: Checkout with pinned source history
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify exactly 31 governed source corrections and history-safe boundary
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-editorial-future-only-contract.cjs
+          node scripts/math-practice-v2-editorial-future-only-contract.cjs > "$RUNNER_TEMP/practice-editorial-metadata.json"
+          node - "$RUNNER_TEMP/practice-editorial-metadata.json" <<'NODE'
+          const fs = require('node:fs');
+          const a = JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          if(a.questions!==495||a.edited!==31||a.unchanged!==464||
+             a.editorial_equal_key!==29||a.future_version_required!==2||
+             a.history_sensitive_candidates!==3)process.exit(1);
+          console.log('PASS 495 authored items, 31 reviewed changes, 29 editorial / 2 future-version, 3 history-sensitive; protected text/keys omitted');
+          NODE
+      - name: Reject accidental write statements in the database preflight
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('supabase/preflight/math_practice_v2_31_editorial_readonly.sql')
+          sql=re.sub(r'--[^\n]*','',p.read_text())
+          assert re.match(r'^\s*with\s+expected\b',sql,re.I)
+          assert not re.search(r'\b(insert|update|delete|truncate|alter|drop|create|grant|revoke|call|copy|execute|do)\b',sql,re.I)
+          assert 'preflight_ready' in sql
+          print('PASS preflight is a SELECT-only, non-disclosing source')
+          PY
