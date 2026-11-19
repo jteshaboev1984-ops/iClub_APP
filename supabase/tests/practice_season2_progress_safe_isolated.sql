@@ -31,9 +31,11 @@ grant execute on function auth.uid() to authenticated,anon;
 insert into public.subjects values
  (5,'mathematics',true),(4,'chemistry',true);
 insert into public.seasons values
+ (1,1,'closed',null),
  (2,2,'draft','2026-11-03');
 -- Intentional mismatch: seasons.start_date is NOT the approved Practice cutoff.
 insert into public.tours values
+ (499,1,5,1,'2026-10-31','2026-11-01',false),
  (500,2,5,1,'2026-11-01','2026-11-07',true),
  (501,2,4,1,null,null,false);
 insert into public.practice_attempts values
@@ -161,4 +163,43 @@ begin
  raise notice 'PRACTICE_SEASON2_PROGRESS_PG17_SYNTHETIC_PASS';
 end
 $integrity$;
+
+-- Historical period swipe contract: S1 is identified only by the released
+-- Tour1 cutoff; older legacy work never inherits the Season1 label.
+-- These rows are synthetic and remain in the outer ROLLBACK.
+insert into public.practice_attempts values
+ (107,'11111111-1111-4111-8111-111111111111',5,'2026-10-30T12:00:00Z',false,3,30,170);
+insert into public.practice_drill_sessions_v4 values
+ (206,'11111111-1111-4111-8111-111111111111',5,
+ '2026-10-30T12:00:00Z','finalized','rec_topic','practice_topic_choice_legacy','Synthetic historical topic');
+insert into public.practice_drill_answers_v4 values (306,206,true);
+
+set role authenticated;
+select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',false);
+do $season_rail$
+declare v jsonb; a jsonb;
+begin
+  v:=public.get_practice_season2_progress_safe_v1('mathematics');
+  a:=v->'archive_seasons';
+  if jsonb_array_length(a) <> 2
+    or a->0->>'key'<>'season-1'
+    or (a->0->>'season_no')::int<>1
+    or (a->0->'main'->>'attempts_count')::int<>1
+    or (a->0->'topic'->>'sessions_count')::int<>1
+    or a->1->>'key'<>'legacy'
+    or (a->1->'main'->>'attempts_count')::int<>1
+    or (a->1->'topic'->>'sessions_count')::int<>1
+    or (v->'main'->>'archived_attempts_count')::int<>2
+    or (v->'topic'->>'archived_sessions_count')::int<>2
+    or (select sum((x->'main'->>'attempts_count')::int) from jsonb_array_elements(a) x)<>2
+  then
+    raise exception 'Season swipe periods mislabel or omit owner history';
+  end if;
+  if (public.get_practice_season2_progress_safe_v1('chemistry')->>'period_active')<>'false'
+  then raise exception 'Chemistry season inherited Mathematics Tour1';end if;
+end
+$season_rail$;
+reset role;
+raise notice 'SEASON_ARCHIVE_SWIPE_PERIODS_PASS';
+
 rollback;
