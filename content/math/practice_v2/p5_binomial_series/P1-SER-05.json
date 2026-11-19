@@ -149,8 +149,8 @@
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
         "en": "A convergent geometric series has first term a>0 and common ratio r with 0<r<1/2. Its second term is 15/4 and its sum to infinity is 20. Find r. Enter a decimal number.",
-        "ru": "Сходящийся геометрический ряд имеет первый член a>0 и знаменатель r, где 0<r<1/2. Второй член равен 15/4, а сумма до бесконечности равна 20. Найдите r. Введите десятичное число.",
-        "uz": "Yaqinlashuvchi geometrik qatorning birinchi hadi a>0 va umumiy nisbati r bo‘lib, 0<r<1/2. Uning ikkinchi hadi 15/4, cheksiz yig‘indisi esa 20. r ni toping. Javobni o‘nli son bilan kiriting."
+        "ru": "Сходящийся геометрический ряд имеет первый член a>0 и знаменатель r, где 0<r<1/2. Второй член равен 15/4, а сумма до бесконечности равна 20. Найдите r. Ответ запишите десятичным числом.",
+        "uz": "Yaqinlashuvchi geometrik qatorning birinchi hadi a>0 va umumiy nisbati r bo‘lib, 0<r<1/2. Uning ikkinchi hadi 15/4, cheksiz yig‘indisi esa 20. r ni toping. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
