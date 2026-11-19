@@ -1,0 +1,44 @@
+name: Practice Season 2 progress read-only PostgreSQL17
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/candidates/practice_season2_progress_safe_v1.sql'
+      - 'supabase/tests/practice_season2_progress_safe_isolated.sql'
+      - '.github/workflows/practice-season2-progress-isolated.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: practice-season2-progress-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  isolated-pg17:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-test-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate Season 2 scoped Practice progress without touching history
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 -U postgres -d postgres \
+            -f supabase/tests/practice_season2_progress_safe_isolated.sql
+      - name: No production access
+        run: echo 'Synthetic PostgreSQL 17 only. No live Supabase or Vercel integration.'
