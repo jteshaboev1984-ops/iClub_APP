@@ -1,4 +1,4 @@
-name: Mathematics Practice v2 editorial 83-item preflight
+name: Mathematics Practice v2 editorial 92-item preflight
 on:
   pull_request:
     branches:
@@ -26,7 +26,8 @@ on:
       - 'scripts/math-practice-v2-block15-independent-proofs.cjs'
       - 'scripts/math-practice-v2-block16-independent-proofs.cjs'
       - 'scripts/math-practice-v2-block17-independent-proofs.cjs'
-      - 'supabase/preflight/math_practice_v2_83_editorial_readonly.sql'
+      - 'scripts/math-practice-v2-block18-independent-proofs.cjs'
+      - 'supabase/preflight/math_practice_v2_92_editorial_readonly.sql'
       - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
       - '.github/workflows/math-practice-v2-editorial-preflight.yml'
   workflow_dispatch:
@@ -42,7 +43,7 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: Verify exactly 83 governed source corrections and history-safe boundary
+      - name: Verify exactly 92 governed source corrections and history-safe boundary
         run: |
           set -euo pipefail
           node --check scripts/math-practice-v2-editorial-future-only-contract.cjs
@@ -80,15 +81,17 @@ jobs:
           node scripts/math-practice-v2-block16-independent-proofs.cjs
           node --check scripts/math-practice-v2-block17-independent-proofs.cjs
           node scripts/math-practice-v2-block17-independent-proofs.cjs
+          node --check scripts/math-practice-v2-block18-independent-proofs.cjs
+          node scripts/math-practice-v2-block18-independent-proofs.cjs
           node scripts/math-practice-v2-495-editorial-regression.cjs > "$RUNNER_TEMP/practice-all-495-independent-language-and-options.json"
           node scripts/math-practice-v2-editorial-future-only-contract.cjs > "$RUNNER_TEMP/practice-editorial-metadata.json"
           node - "$RUNNER_TEMP/practice-editorial-metadata.json" <<'NODE'
           const fs = require('node:fs');
           const a = JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
-          if(a.questions!==495||a.edited!==83||a.unchanged!==412||
-             a.editorial_equal_key!==32||a.future_version_required!==51||
-             a.history_sensitive_candidates!==3)process.exit(1);
-          console.log('PASS 495 authored items, 83 reviewed changes, 32 editorial / 51 future-version, 3 history-sensitive; protected text/keys omitted');
+          if(a.questions!==495||a.edited!==92||a.unchanged!==403||
+             a.editorial_equal_key!==32||a.future_version_required!==60||
+             a.history_sensitive_candidates!==9)process.exit(1);
+          console.log('PASS 495 authored items, 92 reviewed changes, 32 editorial / 60 future-version, 9 history-sensitive; protected text/keys omitted');
           NODE
       - name: Verify metadata-only item-by-item review ledger
         run: |
@@ -105,7 +108,7 @@ jobs:
           assert sum(r["qtype"]=="mcq" for r in rows)==277
           assert sum(r["qtype"]=="input" for r in rows)==218
           assert sum(r["new_candidate_status"]=="NEW_EXPLANATION_RADICAND_FIX" for r in rows)==1
-          assert sum(r["new_candidate_status"]=="FUTURE_VERSION_REQUIRED" for r in rows)==51
+          assert sum(r["new_candidate_status"]=="FUTURE_VERSION_REQUIRED" for r in rows)==60
           assert all(r["has_prior_answers"] in ("YES","NO") for r in rows)
           assert all(r["en_stem_options_key_review"]=="AI_REVIEWED_EN_20261119" for r in rows)
           assert all(r["ru_uz_full_semantic_review"] in
@@ -119,7 +122,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p=Path('supabase/preflight/math_practice_v2_83_editorial_readonly.sql')
+          p=Path('supabase/preflight/math_practice_v2_92_editorial_readonly.sql')
           sql=re.sub(r'--[^\n]*','',p.read_text())
           assert re.match(r'^\s*with\s+expected\b',sql,re.I)
           assert not re.search(r'\b(insert|update|delete|truncate|alter|drop|create|grant|revoke|call|copy|execute|do)\b',sql,re.I)
