@@ -30,10 +30,10 @@ function lineCoefficients(txt){
      let m=/^(-?\d*)x$/.exec(t);if(m){coeff[0]+=Number(m[1]===''?1:m[1]==='-'?-1:m[1]);continue;}
      m=/^(-?\d*)y$/.exec(t);if(m){coeff[1]+=Number(m[1]===''?1:m[1]==='-'?-1:m[1]);continue;}
      if(/^[-]?\d+$/.test(t)){coeff[2]+=+t;continue;}
-     throw Error('unsupported line form');
+     return null;
    }return coeff;
  };
- const a=parse(parts[0]),b=parse(parts[1]);return a.map((v,i)=>v-b[i]);
+ const a=parse(parts[0]),b=parse(parts[1]);return a&&b?a.map((v,i)=>v-b[i]):null;
 }
 const belongs=(str,x,y)=>{const c=lineCoefficients(str);return !!c&&near(c[0]*x+c[1]*y+c[2],0);};
 const sameLine=(s,abc)=>{const coeff=lineCoefficients(s);if(!coeff)return false;
