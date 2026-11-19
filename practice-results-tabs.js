@@ -524,17 +524,17 @@
   // Server returns at most 20 rows per lane; this is NOT cursor pagination.
   // Read-only; no action here creates/regrades/deletes an attempt.
   const PERIOD_COPY={
-    ru:{title:'История Practice · Сезон 2',current:'Новые результаты',
+    ru:{title:'История практики · Сезон 2',since:'Отсчёт с',current:'Новые результаты',
       previous:'Предыдущие сезоны',earlier:'Более ранние записи',
       more:'Показать ещё',partial:'Показаны только последние записи. Остальные результаты сохранены в истории.',
       empty:'В новом сезоне пока нет завершённых попыток.',
       main:'Практика по турам',topic:'Практика по темам',attempts:'попыток'},
-    uz:{title:'Practice tarixi · 2-mavsum',current:'Yangi natijalar',
+    uz:{title:'Amaliyot tarixi · 2-mavsum',since:'Boshlanish sanasi',current:'Yangi natijalar',
       previous:'Oldingi mavsumlar',earlier:'Avvalgi natijalar',
       more:'Yana ko‘rsatish',partial:'Faqat so‘nggi natijalar ko‘rsatilmoqda. Qolganlari tarixda saqlangan.',
       empty:'Yangi mavsumda hali yakunlangan urinishlar yo‘q.',
       main:'Turlar bo‘yicha amaliyot',topic:'Mavzular bo‘yicha amaliyot',attempts:'urinish'},
-    en:{title:'Practice history · Season 2',current:'New results',
+    en:{title:'Practice history · Season 2',since:'Counting from',current:'New results',
       previous:'Previous seasons',earlier:'Earlier entries',
       more:'Show more',partial:'Only recent entries are shown. Older results remain in history.',
       empty:'No completed attempts this season yet.',
@@ -546,6 +546,7 @@
     const holders=['tours','topics'].map(key=>root.querySelector('[data-practice-s2-history="'+key+'"]'));
     const valid=period?.ok===true&&period?.period_active===true&&
       String(period.subject_key||'')===String(subjectKey||'');
+    root.dataset.practiceS2Active=valid?'true':'false';
     holders.forEach(holder=>{if(holder){holder.replaceChildren();holder.hidden=!valid;}});
     if(!valid)return false;
     const locale=['ru','uz','en'].includes(language)?language:lang();
@@ -623,7 +624,7 @@
       const block=node('section','iclub-s2-history-block');
       block.append(node('h2','iclub-s2-history-title',c.title));
       const start=fmt(period.period_starts_at);
-      if(start)block.append(node('p','iclub-s2-history-note',c.current+' · '+start));
+      if(start)block.append(node('p','iclub-s2-history-note',c.since+' '+start));
       historyGroup(block,source?.recent,count,c.current,kind,false);
       historyGroup(block,source?.archived_recent,prev,c.previous,kind,true);
       holder.append(block);
