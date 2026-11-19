@@ -1204,3 +1204,62 @@
    Hidden, not destroyed: pre-season legacy History still renders normally. */
 body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 #practice-topic-choice .practice-topic-history{display:none!important}
+
+
+/* Practice · approved focus hierarchy: current Tour first, learning action next,
+   previous-season archive once at the bottom. Canonical Academy OS only. */
+#courses-practice-start .iclub-practice-current-tour {
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;
+  margin:12px 0 16px;padding:13px 15px;
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:var(--academy-radius-lg,20px);
+  background:var(--academy-paper,#fff);
+  color:var(--academy-text,#142b50);
+  box-shadow:var(--academy-quiet-shadow,0 3px 11px rgba(28,74,138,.045))
+}
+#courses-practice-start .iclub-practice-current-tour-title {
+  font-size:14px;font-weight:800;line-height:1.45
+}
+#courses-practice-start .iclub-practice-current-tour-sub {
+  font-size:12px;color:var(--academy-text-soft,#5a759b);line-height:1.45
+}
+#courses-practice-start .iclub-practice-current-tour-action {
+  margin-left:auto;min-height:40px;padding:8px 12px;
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:var(--academy-radius-sm,11px);
+  background:var(--academy-paper-blue,#f3f8ff);
+  color:#2057a1;font-size:13px;font-weight:750;cursor:pointer
+}
+#courses-practice-start .iclub-practice-current-tour-action:focus-visible,
+#courses-practice-start .iclub-s2-history-bottom-details summary:focus-visible {
+  outline:3px solid var(--academy-focus,#377bdf);outline-offset:2px
+}
+#courses-practice-start .iclub-s2-history-bottom[hidden] {display:none!important}
+#courses-practice-start .iclub-s2-history-bottom {
+  margin:22px 0 8px;min-width:0;
+  border-top:1px solid var(--academy-edge,#ccdcf4);
+  padding-top:12px
+}
+#courses-practice-start .iclub-s2-history-bottom-details {
+  padding:4px 0 12px;min-width:0
+}
+#courses-practice-start .iclub-s2-history-bottom-caption {
+  display:flex;align-items:center;cursor:pointer;
+  min-height:44px;padding:8px 6px;
+  color:var(--academy-text-soft,#5a759b);
+  font-size:13px;font-weight:750;line-height:1.45
+}
+#courses-practice-start .iclub-s2-history-bottom-content {
+  display:grid;gap:12px;padding:12px 4px 4px
+}
+#courses-practice-start .iclub-s2-history-bottom-content>.iclub-s2-history-current {
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:var(--academy-radius-sm,11px);padding:12px;
+  background:var(--academy-paper,#fff)
+}
+@media(max-width:360px){
+  #courses-practice-start .iclub-practice-current-tour {padding:12px}
+  #courses-practice-start .iclub-practice-current-tour-action {
+    margin-left:0;flex:1 1 100%
+  }
+}
