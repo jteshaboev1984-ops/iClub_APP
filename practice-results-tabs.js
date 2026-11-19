@@ -2,9 +2,9 @@
 (function () {
   'use strict';
   const COPY = Object.freeze({
-    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Статистика',startTopic:'Начать практику по теме'},
-    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Statistika',startTopic:'Mavzu bo‘yicha boshlash'},
-    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'Statistics',startTopic:'Start topic practice'}
+    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Статистика по туру',startTopic:'Начать практику по теме'},
+    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Tur statistikasi',startTopic:'Mavzu bo‘yicha boshlash'},
+    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'Tour statistics',startTopic:'Start topic practice'}
   });
   const ROOT_ID = 'courses-practice-start';
   const lang = () => {
