@@ -649,6 +649,19 @@
       root:"courses-tour-review",record:"iclubAiTourAttemptId"}
   };
   const lastScan=new Map();
+  // A prepared academic action belongs to the authorized user who obtained
+  // it, not merely to the screen's persistent attempt ID. Invalidate scans
+  // and drop old actions synchronously on an authentication identity change.
+  let academicScanEpoch=0;
+  function clearAcademicActions(){
+    academicScanEpoch++;
+    lastScan.clear();
+    for(const conf of Object.values(scopeFor)){
+      document.getElementById(conf.container)
+        ?.querySelectorAll("[data-iclub-ai-academic-button]")
+        .forEach(button=>button.remove());
+    }
+  }
   function academicButton(container,surface,recordId,questionId=null){
     const identifier=surface+":"+recordId+":"+(questionId||0);
     const existing=container.querySelector?.(
@@ -684,9 +697,11 @@
     if(!positiveInt(id)||!container)return;
     const key=surface+":"+id+":"+localeNow();
     if(lastScan.get(surface)===key)return;
+    const epoch=academicScanEpoch;
     lastScan.set(surface,key);
     const available=await availableAcademic({surface,recordId:id,locale:localeNow()});
-    if(!active(conf.screen)||!el?.isConnected||Number(el.dataset?.[conf.record]||0)!==id)
+    if(epoch!==academicScanEpoch||!active(conf.screen)||!el?.isConnected||
+       Number(el.dataset?.[conf.record]||0)!==id||key!==surface+":"+id+":"+localeNow())
       return;
     if(surface==="practice_error"){
       const rows=container.querySelectorAll?.("[data-practice-ai-question-id]")||[];
@@ -747,6 +762,7 @@
   function resetOnIdentityChange(){
     sequence++;authEpoch++;permission=null;lastUser="";
     statusInFlight=null;
+    clearAcademicActions();
     removeInvite();
     document.getElementById(dialogId)?.remove();
   }
