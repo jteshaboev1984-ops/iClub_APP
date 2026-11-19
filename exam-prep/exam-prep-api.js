@@ -5,6 +5,66 @@
   const API_SCRIPT_SRC = typeof document !== "undefined" ? String(document.currentScript?.src || "") : "";
   let capabilitiesInFlight = null;
   let projectionRpcTail = Promise.resolve();
+  // P0-16B: compatibility marker for the Mathematics PostgREST write fence.
+  // This is not a credential or proof of authentic browser code: signed JWT
+  // and Core subject authorization remain server-owned. The server only
+  // requires this marker after a separate explicit release activation.
+  const MATH_WRITER_CONTRACT = "math-p1p5-p016b-v1";
+
+  function attachMathWriterContract(client) {
+    const headers = client?.rest?.headers;
+    if (!headers || typeof headers !== "object") return false;
+    if (typeof headers.set === "function") {
+      headers.set("x-iclub-math-writer-build", MATH_WRITER_CONTRACT);
+    } else {
+      headers["x-iclub-math-writer-build"] = MATH_WRITER_CONTRACT;
+    }
+    return true;
+  }
+
+  // A rejected cached tab must not silently reload and erase an unsubmitted
+  // written answer. Show an accessible, in-memory recovery notice outside
+  // the screen that legacy renderError() may replace; no localStorage/PII logs.
+  function showStaleBuildNotice() {
+    if (typeof document === "undefined" || !document.body ||
+        document.getElementById("math-p016b-stale-notice")) return;
+    const lang = String(window.i18n?.getLang?.() || document.documentElement?.lang || "en").toLowerCase();
+    const t = ({
+      ru: { title:"Обновите Exam Prep", body:"Эта вкладка использует старую версию. Результаты на сервере сохранены. Если вы ещё не отправили ответ, скопируйте его перед обновлением страницы.", copy:"Скопировать мой ответ", copied:"Ответ скопирован", reload:"Обновить страницу" },
+      uz: { title:"Exam Prep ilovasini yangilang", body:"Bu sahifa eski versiyada. Serverda saqlangan natijalar qoladi. Yuborilmagan javobingiz bo‘lsa, sahifani yangilashdan oldin uni nusxalang.", copy:"Javobimni nusxalash", copied:"Javob nusxalandi", reload:"Sahifani yangilash" },
+      en: { title:"Update Exam Prep", body:"This tab has an outdated version. Server-saved progress is retained. Copy any unsent answer before refreshing the page.", copy:"Copy my draft answer", copied:"Draft copied", reload:"Refresh page" }
+    })[lang] || {title:"Update Exam Prep",body:"Copy unsent answers before refreshing. Saved progress is retained.",copy:"Copy my draft answer",copied:"Draft copied",reload:"Refresh page"};
+    const answer = document.querySelector('textarea[name="ep_live_written_answer"],input[name="ep_live_text_answer"],input[name="ep_recovery_text_answer"]');
+    const selected = document.querySelector('input[name="ep_live_answer"]:checked');
+    const draft = answer?.value || (selected ? String(selected.value) : "");
+    const panel=document.createElement("section");
+    panel.id="math-p016b-stale-notice";
+    panel.setAttribute("role","alertdialog");
+    panel.setAttribute("aria-modal","true");
+    panel.setAttribute("aria-label",t.title);
+    panel.style.cssText="position:fixed;inset:0;z-index:2147483000;background:rgba(12,26,48,.78);display:flex;align-items:center;justify-content:center;padding:18px";
+    const card=document.createElement("div");
+    card.style.cssText="background:#fff;color:#132540;border-radius:16px;padding:22px;max-width:480px;width:100%;max-height:90vh;overflow:auto;font:16px/1.5 system-ui,sans-serif";
+    const title=document.createElement("h2");title.textContent=t.title;
+    const body=document.createElement("p");body.textContent=t.body;
+    card.append(title,body);
+    if(draft){
+      const saved=document.createElement("textarea");saved.readOnly=true;saved.value=draft;saved.rows=4;
+      saved.setAttribute("aria-label",t.copy);
+      saved.style.cssText="width:100%;box-sizing:border-box;resize:vertical";
+      const copy=document.createElement("button");copy.type="button";copy.textContent=t.copy;
+      copy.addEventListener("click",async()=>{
+        try { await window.navigator.clipboard.writeText(saved.value);copy.textContent=t.copied; }
+        catch (_) { saved.focus();saved.select(); }
+      });
+      card.append(saved,copy);
+    }
+    const reload=document.createElement("button");reload.type="button";reload.textContent=t.reload;
+    reload.style.cssText="display:block;margin-top:14px;padding:10px 16px";
+    reload.addEventListener("click",()=>window.location.reload());
+    card.append(reload);panel.append(card);document.body.append(panel);
+    reload.focus();
+  }
 
   // Some learner-facing "reads" rebuild server-side projections. Multiple app
   // surfaces can request them during the same transition, so keep those
@@ -24,7 +84,13 @@
     try {
       const client = window.sb;
       if (!client || typeof client.rpc !== "function") return fail("supabase_unavailable");
+      attachMathWriterContract(client);
       const { data, error } = await client.rpc(name, args || {});
+      if (error && /exam_prep_writer_contract_stale/.test(String(error.message || ""))) {
+        showStaleBuildNotice();
+        emit("iclub:exam-prep-update-required", { reason:"writer_contract_stale" });
+        return fail("client_update_required", error);
+      }
       if (error) return fail("rpc_error", error);
       return Object.freeze({ ok: true, data });
     } catch (error) {
@@ -440,6 +506,7 @@
   }
   async function finalCalibration(componentCode) { return rpc("get_exam_prep_final_calibration_safe_v1", { p_component_code: componentArg(componentCode) }); }
 
+  root.mathWriterContract = MATH_WRITER_CONTRACT;
   root.api = Object.freeze({
     capabilities,
     examProfile, saveExamProfile, examMapStatus,
