@@ -323,7 +323,7 @@
       "primary_skill": "P1-CIR-02",
       "secondary_skills": [],
       "role": "revolution_interpretation",
-      "difficulty": "hard",
+      "difficulty": "easy",
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
       "question": {
@@ -384,7 +384,7 @@
       "primary_skill": "P1-CIR-02",
       "secondary_skills": [],
       "role": "transfer",
-      "difficulty": "hard",
+      "difficulty": "medium",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
       "question": {
