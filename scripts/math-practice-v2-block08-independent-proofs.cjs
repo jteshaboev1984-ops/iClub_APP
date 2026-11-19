@@ -18,7 +18,16 @@ for(const e of q.answer_contract.rejected_examples||[])assert.ok(!near(numeric(e
 };
 const numbers=s=>(String(s||'').normalize('NFC').replace(/[−–—]/g,'-').match(/(?<!\p{L})[-+]?\d+(?:[.,]\d+)?/gu)||[]).map(x=>x.replace(',','.')).sort().join('|');
 function lineCoefficients(t){
- const s=norm(t).split('=');if(s.length!==2)return null;
+ // Cover y=mx+c with exact rational slope/intercept before integer general form.
+ const literal=norm(t);
+ const m=/^y=([+-]?)(\\d*)x(?:\\/(\\d+))?([+-]\\d+(?:\\/\\d+)?)?$/.exec(literal);
+ if(m){
+   const factor=(m[1]==='-'?-1:1)*Number(m[2]||1)/Number(m[3]||1);
+   const pieces=(m[4]||'0').split('/');
+   const intercept=Number(pieces[0])/Number(pieces[1]||1);
+   return [factor,-1,intercept];
+ }
+ const s=literal.split('=');if(s.length!==2)return null;
  const calc=z=>{let c=[0,0,0];for(const term of z.replace(/-/g,'+-').split('+').filter(Boolean)){
  let m=/^(-?\d*)x$/.exec(term);if(m){c[0]+=Number(m[1]===''?1:m[1]==='-'?-1:m[1]);continue;}
  m=/^(-?\d*)y$/.exec(term);if(m){c[1]+=Number(m[1]===''?1:m[1]==='-'?-1:m[1]);continue;}
