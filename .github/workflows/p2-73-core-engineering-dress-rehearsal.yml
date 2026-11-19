@@ -2,6 +2,7 @@ name: P2-73 Core Engineering Dress Rehearsal
 
 # CI #559 stage 2: replace only outdated runs of this workflow within the SAME PR.
 # Push/main and workflow_dispatch runs retain unique run IDs; all three rehearsal seeds stay intact.
+# Controlled superseding SHA probe: comment-only change, all job checks unchanged.
 concurrency:
   group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
