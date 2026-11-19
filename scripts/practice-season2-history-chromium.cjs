@@ -50,23 +50,25 @@ const {chromium}=require('playwright');
      assert.equal(await page.locator(selector+' .iclub-s2-history-current .iclub-s2-history-row').count(),3);
      const current=page.locator(selector+' .iclub-s2-history-current');
      await current.locator('.iclub-s2-history-earlier summary').click();
-     assert.equal(await current.locator('.iclub-s2-history-earlier .iclub-s2-history-row').count(),5);
+     await page.waitForFunction(sel=>document.querySelectorAll(sel).length===5,
+       selector+' .iclub-s2-history-current .iclub-s2-history-earlier .iclub-s2-history-row');
      await current.locator('.iclub-s2-history-more').click();
      assert.equal(await current.locator('.iclub-s2-history-earlier .iclub-s2-history-row').count(),10);
      const archive=page.locator(selector+' .iclub-s2-history-archive');
      await archive.locator('summary').first().click();
-     assert.equal(await archive.locator('.iclub-s2-history-rows > .iclub-s2-history-row').count(),3);
+     await page.waitForFunction(sel=>document.querySelectorAll(sel).length===3,
+       selector+' .iclub-s2-history-archive > .iclub-s2-history-rows > .iclub-s2-history-row');
      assert((await page.locator(selector+' .iclub-s2-history-note').count())>=1,
        'partial server cap disclosure absent');
     }
     const dedicated=page.locator('#my-rec-topic-history-body .iclub-s2-history-earlier');
     await dedicated.locator('summary').click();
-    assert.equal(await dedicated.locator('.iclub-topic-history-row').count(),5);
+    await page.waitForFunction(()=>document.querySelectorAll('#my-rec-topic-history-body .iclub-s2-history-earlier .iclub-topic-history-row').length===5);
     await dedicated.locator('.iclub-s2-history-more').click();
     assert.equal(await dedicated.locator('.iclub-topic-history-row').count(),10);
     const tour=page.locator('#tour-history .iclub-s2-history-earlier');
     await tour.locator('summary').click();
-    assert.equal(await tour.locator('.iclub-sx-tour-history-row').count(),5);
+    await page.waitForFunction(()=>document.querySelectorAll('#tour-history .iclub-s2-history-earlier .iclub-sx-tour-history-row').length===5);
     await tour.locator('.iclub-s2-history-more').click();
     assert.equal(await tour.locator('.iclub-sx-tour-history-row').count(),10);
     assert((await page.locator('#my-rec-topic-history-body .iclub-s2-history-note').count())===1,
