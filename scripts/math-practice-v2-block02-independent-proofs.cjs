@@ -7,7 +7,7 @@ const base=path.resolve(__dirname,'../content/math/practice_v2/p1_quadratics');
 const files=['P1-QUA-03','P1-QUA-04','P1-QUA-05'];
 const qs=new Map(files.flatMap(k=>JSON.parse(fs.readFileSync(path.join(base,k+'.json'),'utf8')).questions)
  .filter(q=>+q.key.slice(-3)>=26&&+q.key.slice(-3)<=50).map(q=>[+q.key.slice(-3),q]));
-const plain=s=>String(s||'').normalize('NFKC').replace(/[−–—]/g,'-').replace(/\s+/g,'').replace(/,/g,'.');
+const plain=s=>String(s||'').normalize('NFC').replace(/[−–—]/g,'-').replace(/\s+/g,'').replace(/,/g,'.');
 const number=s=>/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(plain(s))?Number(plain(s)):NaN;
 const approx=(a,b)=>Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<1e-9;
 function eqSet(a,b){return a.length===b.length&&a.slice().sort((x,y)=>x-y).every((x,i)=>approx(x,b.slice().sort((x,y)=>x-y)[i]));}
@@ -107,7 +107,7 @@ const tests={
  49(q){const roots=quadratic(1,-4,0).filter(x=>x>0);assert.equal(roots.length,1);input(q,roots[0]);},
  50(q){const roots=quadratic(1,-2,4);qOption(q,t=>approx(number(t),roots.length));}
 };
-function numbers(s){return (plain(s).match(/(?<![A-Za-z])[-+]?\d+(?:\.\d+)?/g)||[]).sort().join('|');}
+function numbers(s){return (String(s||'').normalize('NFC').replace(/[−–—]/g,'-').match(/(?<!\p{L})[-+]?\d+(?:[.,]\d+)?/gu)||[]).map(v=>v.replace(',','.')).sort().join('|');}
 assert.equal(qs.size,25,'all 25 source questions required');
 for(let i=26;i<=50;i++){
  try{
