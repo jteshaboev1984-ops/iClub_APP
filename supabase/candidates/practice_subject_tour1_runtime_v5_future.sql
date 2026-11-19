@@ -952,9 +952,10 @@ begin
       and (not v_use_subtopic or q.subtopic=v_subtopic)
       and lower(coalesce(q.difficulty,'medium'))='easy'
       and (
-        (t.id is not null and t.is_active is true
+        (t.id is not null
          and t.start_date is not null and t.end_date is not null
-         and t.start_date <= v_today)
+         and t.start_date <= t.end_date and t.start_date <= v_today
+         and (t.is_active is true or t.end_date < v_today))
         or (t.id is null and p.tour_no <= v_current_tour)
       )
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
@@ -987,9 +988,10 @@ begin
       and (not v_use_subtopic or q.subtopic=v_subtopic)
       and lower(coalesce(q.difficulty,'medium')) not in ('easy','hard')
       and (
-        (t.id is not null and t.is_active is true
+        (t.id is not null
          and t.start_date is not null and t.end_date is not null
-         and t.start_date <= v_today)
+         and t.start_date <= t.end_date and t.start_date <= v_today
+         and (t.is_active is true or t.end_date < v_today))
         or (t.id is null and p.tour_no <= v_current_tour)
       )
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
@@ -1022,9 +1024,10 @@ begin
       and (not v_use_subtopic or q.subtopic=v_subtopic)
       and lower(coalesce(q.difficulty,'medium'))='hard'
       and (
-        (t.id is not null and t.is_active is true
+        (t.id is not null
          and t.start_date is not null and t.end_date is not null
-         and t.start_date <= v_today)
+         and t.start_date <= t.end_date and t.start_date <= v_today
+         and (t.is_active is true or t.end_date < v_today))
         or (t.id is null and p.tour_no <= v_current_tour)
       )
       and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
@@ -1063,9 +1066,10 @@ begin
         and (not v_use_subtopic or q.subtopic=v_subtopic)
         and not (q.id=any(v_qids))
         and (
-          (t.id is not null and t.is_active is true
-           and t.start_date is not null and t.end_date is not null
-           and t.start_date <= v_today)
+          (t.id is not null
+         and t.start_date is not null and t.end_date is not null
+         and t.start_date <= t.end_date and t.start_date <= v_today
+         and (t.is_active is true or t.end_date < v_today))
           or (t.id is null and p.tour_no <= v_current_tour)
         )
         and (((not v_is_math or v_allow_legacy_math) and m.question_id is null) or (m.lifecycle_state='published' and m.is_runtime_allowed is true))
