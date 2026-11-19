@@ -26,7 +26,7 @@
 
   // A rejected cached tab must not silently reload and erase an unsubmitted
   // written answer. Show an accessible, in-memory recovery notice outside
-  // the screen that legacy renderError() may replace; no localStorage/PII logs.
+  // the screen that legacy renderError() may replace; no persistent storage or PII logs.
   function showStaleBuildNotice() {
     if (typeof document === "undefined" || !document.body ||
         document.getElementById("math-p016b-stale-notice")) return;
