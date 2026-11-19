@@ -60,7 +60,7 @@ function fixture({stale=false,lang="ru",draft=""}={}){
   };
   const win={
     iClubExamPrepHostInternal:{},i18n:{getLang:()=>lang},
-    sb:{rpc(name,args){
+    sb:{auth:{async refreshSession(){win.refreshes++;return {data:{session:{access_token:"synthetic-updated-jwt"}},error:null};}},rpc(name,args){
       const req={headers:{"x-client-info":"supabase-js-web/2"},then(resolve,reject){
         calls.push({name,args,headers:{...req.headers}});
         const result=stale?
@@ -72,7 +72,7 @@ function fixture({stale=false,lang="ru",draft=""}={}){
     }},
     navigator:{clipboard:{async writeText(value){win.copied=value;}}},
     location:{reload(){win.reloads++;}},
-    reloads:0,
+    reloads:0,refreshes:0,
     dispatchEvent(event){events.push(event.type);}
   };
   const sandbox={window:win,document,CustomEvent:class{constructor(type,obj){this.type=type;this.detail=obj?.detail;}},setTimeout};
@@ -112,6 +112,24 @@ function fixture({stale=false,lang="ru",draft=""}={}){
     await t.api.saveExamProfile({examSeries:"June 2027",targetGrade:"A"});
     assert.equal(t.nodes.length,1,"One notice after multiple errors");
     assert.equal(t.win.reloads,0,"No auto retry/reload on stale token");
+    assert.equal(t.win.refreshes,0,"JWT never refreshed automatically");
+    await card.children.at(-1).handlers.click();
+    assert.equal(t.win.refreshes,1,"Explicit JWT refresh before user reload");
+    assert.equal(t.win.reloads,1,"Reload only after renewed session");
+  }
+  // Failure during explicit JWT refresh must preserve an unsent draft,
+  // keep the old tab, and offer a retry without automatic navigation.
+  for(const lang of ["ru","uz","en"]){
+    const t=fixture({stale:true,lang,draft:"Synthetic unsent answer"});
+    t.win.sb.auth.refreshSession=async()=>({data:null,error:{message:"offline"}});
+    await t.api.saveExamProfile({examSeries:"June 2027",targetGrade:"A"});
+    const card=t.nodes[0].children[0],reload=card.children.at(-1);
+    await reload.handlers.click();
+    assert.equal(t.win.reloads,0,"No reload after token refresh error");
+    assert.equal(reload.disabled,false,"Allow deliberate retry");
+    assert.equal(card.children.find(x=>x.tag==="textarea")?.value,"Synthetic unsent answer");
+    const notice=card.children.find(x=>x.tag==="p" && x.attributes.role==="status");
+    assert(notice && notice.hidden===false && notice.textContent.length>10);
   }
   // Real host replaces some assessment forms with a loading screen before
   // PostgREST returns. Verify the exact rejected answer remains copyable

@@ -87,9 +87,35 @@
       });
       card.append(saved,copy);
     }
+    // Plain reload can reuse a JWT issued before the server's min_iat.
+    // Require an explicit fresh signed session, then and only then reload.
+    // On any failure, retain the exact unsent answer in this dialog.
+    const refreshText=({
+      ru:{working:"Обновляем защищённый сеанс…",failed:"Не удалось обновить сеанс. Скопируйте ответ и попробуйте снова или войдите в другой вкладке."},
+      uz:{working:"Seans yangilanmoqda…",failed:"Seans yangilanmadi. Javobni nusxalang va qayta urinib ko‘ring yoki boshqa oynada qayta kiring."},
+      en:{working:"Refreshing secure session…",failed:"Session refresh failed. Copy your draft and retry or sign in from another tab."}
+    })[lang] || {working:"Refreshing secure session…",failed:"Session refresh failed. Copy your answer before retrying."};
+    const status=document.createElement("p");status.hidden=true;status.setAttribute("role","status");
+    card.append(status);
     const reload=document.createElement("button");reload.type="button";reload.textContent=t.reload;
     reload.style.cssText="display:block;margin-top:14px;padding:10px 16px";
-    reload.addEventListener("click",()=>window.location.reload());
+    reload.addEventListener("click",async()=>{
+      if(reload.disabled) return;
+      reload.disabled=true;
+      reload.textContent=refreshText.working;
+      try{
+        const auth=window.sb?.auth;
+        if(typeof auth?.refreshSession!=="function") throw new Error("refresh_unavailable");
+        const result=await auth.refreshSession();
+        if(result?.error || !result?.data?.session?.access_token) throw new Error("refresh_failed");
+        window.location.reload();
+      }catch(_){
+        status.textContent=refreshText.failed;
+        status.hidden=false;
+        reload.disabled=false;
+        reload.textContent=t.reload;
+      }
+    });
     card.append(reload);panel.append(card);document.body.append(panel);
     reload.focus();
   }

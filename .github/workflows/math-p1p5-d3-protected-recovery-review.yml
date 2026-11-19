@@ -68,7 +68,7 @@ jobs:
           if [[ "${GITHUB_HEAD_REF:-}" == "fix/math-single-my-plan-legacy-map-20261118" && "${GITHUB_BASE_REF:-}" == "main" ]]; then
             test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'f468142f6ab5614fa19548bd9f9009e4e2106db4'
           elif [[ "${GITHUB_HEAD_REF:-}" == "security/math-p016b-stale-build-writer-fence-20261119" && "${GITHUB_BASE_REF:-}" == "main" ]]; then
-            test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = '40ee36e3739307bf66a84313ea7fa3cac2731e8d'
+            test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = '6a77011c549cb360b70f2a6b2de3115081fc605b'
           else
             test "$(git hash-object .github/workflows/exam-prep-weekly-profile-recovery.yml)" = 'b58145d137f3e61fd16b1257f0610f285f19a12c'
           fi

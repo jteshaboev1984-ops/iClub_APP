@@ -13,16 +13,16 @@ const files=git("diff","--name-only",BASE,"HEAD").split("\n").filter(Boolean);
 const exact={
   ".github/workflows/exam-prep-p1p5-isolated-http-e2e.yml":"85627b1df2acf6dad6c42d164890d05aaa19bb2c",
   ".github/workflows/math-p016b-contract-review.yml":"41c7b410be09a3bc9abb794ab3139718ab5704df",
-  ".github/workflows/exam-prep-weekly-profile-recovery.yml":"40ee36e3739307bf66a84313ea7fa3cac2731e8d",
-  ".github/workflows/math-p1p5-d3-protected-recovery-review.yml":"f9bb4085ab1f1751a3105dd904b609eee6589288",
+  ".github/workflows/exam-prep-weekly-profile-recovery.yml":"6a77011c549cb360b70f2a6b2de3115081fc605b",
+  ".github/workflows/math-p1p5-d3-protected-recovery-review.yml":"7869c46852e973d0f9cfaf300b035713f27d6ead",
   ".github/workflows/p2-78-concurrency-service-transitions.yml":"6ea1309e18858d63c6a374785f5cdb8821b82698",
-  "exam-prep/exam-prep-api.js":"8c169de6323f3d3cdcaea56b5d479547b1ee65d3",
-  "index.html":"879781388f433098c248c19dd70f04b6416c8819",
+  "exam-prep/exam-prep-api.js":"60a1ab37e29447ea9fd78eefd6583a902ade4abd",
+  "index.html":"982ec90f67ff0132309bebc84f138742cdccc201",
   "scripts/p1p5-p016b-signed-http-cutover.cjs":"0b3c27e48e73232cdae21ff6f50efff25035b561",
-  "scripts/p1p5-p016b-writer-contract.test.cjs":"38cc3a2f0cf0732c8118366da69551632990e699",
+  "scripts/p1p5-p016b-writer-contract.test.cjs":"5d517928fa9d0c3995e60ce619929ee5927896d8",
   "supabase/candidates/math_p1p5_p016b_writer_contract_v1_dormant.sql":"b91c2b89559da9205d73fe2ae94d882c0455cc67",
   "supabase/tests/p1p5_p016b_ephemeral_extra_hard_stub.sql":"3c42822a09a5375da6af96cfc63a179aa5c69e53",
-  "docs/math-p1p5-p016b-stale-tab-writer-fence-20261119.md":"a362340fa215ab56961b217843cf28b1203909c2"
+  "docs/math-p1p5-p016b-stale-tab-writer-fence-20261119.md":"462c367f39084b0da6bb8a2708e84baf87ed549d"
 };
 const self=new Set(["qa/math-p016b-source-firewall.cjs",
   ".github/workflows/ux531-previewless-release-firewall.yml"]);
