@@ -1,0 +1,29 @@
+# Mathematics P1/P5 · P0-16B old-tab writer contract (SOURCE CANDIDATE, 2026-11-19)
+
+**Owner scope:** implement/close the documented security engineering issue in isolation. This is NOT a merge, public rollout, live SQL migration, old-user token invalidation or learner cleanup approval. Canonical checkpoint: [Issue #450](https://github.com/jteshaboev1984-ops/iClub_APP/issues/450). Earlier historical source drafts [#493](https://github.com/jteshaboev1984-ops/iClub_APP/pull/493) and [#495](https://github.com/jteshaboev1984-ops/iClub_APP/pull/495) are **not merged** or blindly replayed.
+
+## Fresh inspected production-shaped boundary
+
+- Current base `main=f30adcd4b6b4cbc230fa375418e5aa56f95e49d2`; published `controlled_beta` stays unchanged.
+- SELECT-only catalog query on the existing Supabase identified **163** named Exam Prep public RPCs, **126** authenticated-executable, **103** with direct owner/Core access marker, **37** direct-DML bodies (28 directly Core-guarded, nine other eligibility/beta/Mentor/Chemistry paths).
+- Exactly **40** current Core-guarded mutation-named RPCs have a unique `v_uid := private.exam_prep_require_core_access_v1();` anchor. **39** are selected for version/cutover checks. The 40th, `record_exam_prep_integrity_event_safe_v1`, intentionally retains append-only anti-cheat telemetry from an old tab and its existing owner guard.
+- Three getter RPCs (`get_exam_prep_state_safe_v1`, `get_exam_prep_placement_safe_v1`, `get_exam_prep_diagnostic_progress_safe_v1`) rebuild stored academic projections as a *read* side effect; a stale tab must not trigger those rebuilds. Preserve historical read access while omitting only the side-effecting rebuild for an old tab.
+- The historic #493 trigger inventory found 129 non-internal trigger bindings on 83 private Exam Prep tables (52 functions, 66 direct DML-text bindings, 70 qualified transitive candidates). This is a reachability triage inventory, **not** a finding of 70 vulnerabilities or proof of complete Edge/dynamic source closure.
+
+## Proposed behavior, off until an explicit cutover
+
+`supabase/candidates/math_p1p5_p016b_writer_contract_v1_dormant.sql` adds two independent nullable settings to the *existing* feature row: `writer_min_jwt_iat` (signed JWT issue-time floor) and `writer_client_contract` (expected browser writer protocol). **Both default NULL = OFF**, and the candidate has no `UPDATE` of the feature row.
+
+Server-side mutation guards execute after the existing owner/Core selection guard, with strict function signature/source, `SECURITY DEFINER`, `search_path` and ACL checks. The JWT time is verified by PostgREST-signed request claims. The `x-iclub-math-writer-build` header is attached only to individual Mathematics Exam Prep PostgREST requests, not to the shared Supabase client or other subjects. **This header is an honest browser compatibility marker; a malicious client can forge it. It is not a security credential and does not replace JWT, per-user ownership, authorization or RLS.**
+
+When a real cutoff is later activated, older signed JWTs and honest old cached JS with a newly refreshed JWT are rejected **before** the guarded write. Existing P1/P5 session IDs, idempotency keys, submitted objective answers, written correctness unknown, verified progress, Practice, Tours and certificates are not rewritten. An old tab can still view saved projections without initiating a rebuild. For the new client, a stale error triggers RU/UZ/EN clear guidance and a non-destructive user-directed answer-copy notice; there is no automatic reload, storage write, retry, or grade assignment.
+
+**Unsent answers in already-running historical JS cannot be retroactively copied by code that was not loaded in that browser tab.** Before any live cutoff, an independently reviewed change-management strategy must validate old-client pending-answer UX and a safe learner communication window. The source package does not claim this risk has disappeared.
+
+## Evidence / release gate
+
+Source-only Node/VM coverage: three locales, request-scoped browser marker, rejection banner, in-memory draft copy, no automatic refresh, gate stays opt-in. Dedicated signed-HTTP/PostgREST/PostgreSQL17 test: same synthetic owner, old signed JWT denied, refreshed JWT with old cached build denied, matching new build permitted, no mutation on rejection, stale getter projections unchanged, reset NULL settings. Existing Mathematics Chromium diagnostic and signed S4/Stage D suites must still pass. Review the exact source SHA and CI once complete; a previous PR's green run is **not** evidence for this candidate.
+
+**Residual engineering before declaring the overall P0-16B closed:** account for indirect nested/trigger/Edge/Dynamic SQL writer routes and any privileged helpers outside the 39 exposed Core entries; independent security review of version marker spoofing, anti-cheat retention, active browser tabs and rollback; versioned release migration design and separately owner-authorized production go/no-go. Never create a new permission system or block normal learners by merely installing a nullable config column. Never replay #495's old migration stack over a newer main.
+
+The source candidate may be tested only on disposable PG17. No hosted production schema/flag/user-content operation or main merge is authorized by this document.
