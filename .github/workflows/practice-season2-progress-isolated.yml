@@ -1,7 +1,7 @@
 name: Practice Season 2 progress read-only PostgreSQL17
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feat/practice-season2-progress-read-20261119]
     paths:
       - 'supabase/candidates/practice_season2_progress_safe_v1.sql'
       - 'supabase/tests/practice_season2_progress_safe_isolated.sql'
