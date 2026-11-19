@@ -62,7 +62,17 @@ const cases={
  421:q=>input(q,4*Math.sqrt(64)),
  422:q=>input(q,(3*(-2)**2+12)/4),
  423(q){const x=-3,dd=6*x+6;assert.ok(dd<0);mcq(q,t=>/Local maximum/i.test(t));},
- 424:q=>input(q,12/4),
+ 424(q){
+  assert.equal(q.difficulty,'hard');
+  assert.ok(q.question.en.includes('internal partition')&&q.question.ru.includes('перегородка')&&q.question.uz.includes('ichki to‘siq'));
+  const availableFence=18;
+  // Two outer depths plus one internal partition and the far horizontal side.
+  const A=x=>x*(availableFence-3*x),dA=x=>availableFence-6*x,ddA=-6;
+  const stationary=availableFence/6;
+  assert.ok(stationary>0&&stationary<availableFence/3&&near(dA(stationary),0)&&ddA<0);
+  assert.ok(A(stationary)>A(stationary-.25)&&A(stationary)>A(stationary+.25));
+  input(q,stationary);
+ },
  425(q){const d=x=>3*x*x;assert.ok(near(d(0),0)&&d(-.2)>0&&d(.2)>0);
    mcq(q,t=>/Stationary point of inflexion/i.test(t));
   }
