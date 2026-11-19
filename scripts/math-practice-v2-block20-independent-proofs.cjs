@@ -39,7 +39,7 @@ const verify={
  484:q=>mcq(q,t=>near(piCoeff(t),volume(x=>4*x**3/3,0,1))),
  485:q=>input(q,volume(x=>x*x,0,3)),
  486(q){const k=Math.sqrt((288/5)/(32/5));mcq(q,t=>near(number(t),k));},
- 487:q=>input(q,volume(x=>-(3-x)**3/3,0,3)),
+ 487:q=>input(q,volume(x=>-((3-x)**3)/3,0,3)),
  488:q=>input(q,2*volume(x=>x*x/2+x,0,3)),
  489:q=>input(q,Math.sqrt(12*3)),
  490:q=>input(q,Math.cbrt(9*3)),
