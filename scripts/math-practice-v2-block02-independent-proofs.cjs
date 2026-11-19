@@ -66,7 +66,17 @@ function condition(src,x){
 function interval(q,truth,values){qOption(q,t=>values.every(x=>condition(t,x)===truth(x)));}
 const tests={
  26(q){const roots=quadratic(1,4,-1);qOption(q,t=>eqSet(rootsOption(t),roots));},
- 27:q=>input(q,Math.max(...quadratic(1,3,-28))),
+ 27(q){
+   assert.equal(q.difficulty,'hard');
+   assert.ok(q.question.en.includes('vertex at x=1/2')&&q.question.ru.includes('x=1/2')&&q.question.uz.includes('1/2'));
+   const vertexX=.5,yIntercept=-12;
+   const b=-2*vertexX,c=yIntercept;
+   const roots=quadratic(1,b,c);
+   assert.equal(roots.length,2);
+   for(const x of roots)assert.ok(near(x*x+b*x+c,0));
+   assert.ok(roots.some(x=>x<0)&&roots.some(x=>x>0));
+   input(q,Math.max(...roots));
+  },
  28(q){assert.deepEqual(quadratic(1,6,13),[]);qOption(q,t=>/no real roots/i.test(t));},
  29:q=>input(q,Math.max(...quadratic(3,-5,-2))),
  30(q){const roots=quadratic(4,4,-3);qOption(q,t=>eqSet(rootsOption(t),roots));},
