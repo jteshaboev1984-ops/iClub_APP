@@ -320,9 +320,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "The expressions k−2, k+3 and 3k−1 are consecutive terms of an arithmetic progression. Enter k.",
-        "ru": "Выражения k−2, k+3 и 3k−1 — последовательные члены арифметической прогрессии. Введите k.",
-        "uz": "k−2, k+3 va 3k−1 ifodalar arifmetik progressiyaning ketma-ket hadlari. k ni kiriting."
+        "en": "The expressions k−2, k+3 and 3k−1 are consecutive terms of an arithmetic progression. Enter k. Give your answer as a decimal number.",
+        "ru": "Выражения k−2, k+3 и 3k−1 — последовательные члены арифметической прогрессии. Введите k. Ответ запишите десятичным числом.",
+        "uz": "k−2, k+3 va 3k−1 ifodalar arifmetik progressiyaning ketma-ket hadlari. k ni kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
