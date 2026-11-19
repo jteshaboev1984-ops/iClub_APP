@@ -100,7 +100,7 @@ for(const [prefix,max] of Object.entries(counts))for(let skill=1;skill<=max;skil
         decimalAnswerQuestions++;
         // Q268 already asks for a 1-decimal-place rounded result in all three languages.
         const rounded=number===268&&/1 decimal place/i.test(str(q.question.en))&&
-          /1 десятичн/i.test(str(q.question.ru))&&/bir kasr xonasigacha/i.test(str(q.question.uz));
+          /1 десятичн/i.test(str(q.question.ru))&&/1 kasr xonasigacha/i.test(str(q.question.uz));
         const explicit=/decimal number/i.test(str(q.question.en))&&
           /десятичным числом/i.test(str(q.question.ru))&&
           /o‘nli son ko‘rinishida/i.test(str(q.question.uz));
