@@ -54,6 +54,9 @@ jobs:
       - name: Run global Practice v2 QA
         run: node scripts/math-practice-v2-global-qa.cjs
 
+      - name: Verify all 495 approved Mathematics Practice questions and candidate editorial corrections
+        run: node scripts/math-practice-v2-495-editorial-regression.cjs
+
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 
