@@ -11,8 +11,10 @@
   // requires this marker after a separate explicit release activation.
   const MATH_WRITER_CONTRACT = "math-p1p5-p016b-v1";
 
-  function attachMathWriterContract(client) {
-    const headers = client?.rest?.headers;
+  function attachMathWriterContract(request) {
+    // Per-request PostgrestBuilder headers: never mutate the shared Supabase
+    // client's headers used by Chemistry, Economics, Practice or Tours.
+    const headers = request?.headers;
     if (!headers || typeof headers !== "object") return false;
     if (typeof headers.set === "function") {
       headers.set("x-iclub-math-writer-build", MATH_WRITER_CONTRACT);
@@ -84,8 +86,9 @@
     try {
       const client = window.sb;
       if (!client || typeof client.rpc !== "function") return fail("supabase_unavailable");
-      attachMathWriterContract(client);
-      const { data, error } = await client.rpc(name, args || {});
+      const request = client.rpc(name, args || {});
+      attachMathWriterContract(request);
+      const { data, error } = await request;
       if (error && /exam_prep_writer_contract_stale/.test(String(error.message || ""))) {
         showStaleBuildNotice();
         emit("iclub:exam-prep-update-required", { reason:"writer_contract_stale" });
