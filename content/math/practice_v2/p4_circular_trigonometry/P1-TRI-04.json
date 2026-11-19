@@ -318,9 +318,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
-        "en": "For an angle x, sin x=3/5 and cos x=4/5. Enter tan x.",
-        "ru": "Для угла x известно sin x=3/5 и cos x=4/5. Введите tan x.",
-        "uz": "x burchak uchun sin x=3/5 va cos x=4/5. tan x ni kiriting."
+        "en": "For an angle x, sin x=3/5 and cos x=4/5. Enter tan x. Give your answer as a decimal number.",
+        "ru": "Для угла x известно sin x=3/5 и cos x=4/5. Введите tan x. Ответ запишите десятичным числом.",
+        "uz": "x burchak uchun sin x=3/5 va cos x=4/5. tan x ni kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
