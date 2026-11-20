@@ -8,6 +8,7 @@ on:
       - qa/math-practice-future-only-81-contenthash-pin-20261119
     paths:
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
+      - 'scripts/math-practice-v2-future-only-81-stage-generator.cjs'
       - 'supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql'
       - 'supabase/tests/math_practice_future_only_atomic_switch_pg17.sql'
       - '.github/workflows/math-practice-v2-future-only-atomic-pg17.yml'
@@ -41,6 +42,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Generate all 81 staged versions without printing academic content
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-future-only-81-stage-generator.cjs
+          private_dir="$(mktemp -d)"
+          chmod 700 "$private_dir"
+          trap 'rm -rf "$private_dir"' EXIT
+          node scripts/math-practice-v2-future-only-81-stage-generator.cjs --out "$private_dir/stage.sql"
+          node - "$private_dir/stage.sql" <<'NODE'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const sql=fs.readFileSync(process.argv[2],'utf8');
+          assert.ok(sql.includes('jsonb_array_length(v_items)<>81'));
+          assert.ok(sql.includes("qa_math_status,qa_language_status,qa_technical_status,qa_tour_separation_status"));
+          assert.ok(sql.includes("'pending','pending','pending','pending'"));
+          assert.ok(sql.includes("v_new_id,v_old_link.order_no,false"));
+          assert.ok(!sql.includes('delete from public.practice_answers'));
+          console.log('PASS 81 original staged questions, inactive memberships and pending QA; no protected content printed');
+          NODE
       - name: Run actual future-only swap and rollback in disposable PG17
         run: |
           set -euo pipefail
