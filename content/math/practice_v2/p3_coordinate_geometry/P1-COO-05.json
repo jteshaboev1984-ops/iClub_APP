@@ -562,9 +562,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
-        "en": "A chord has endpoints A(1,2) and B(5,6). Which equation could contain the centre of the circle?",
-        "ru": "Хорда имеет концы A(1,2) и B(5,6). На какой прямой может лежать центр окружности?",
-        "uz": "Vatar uchlari A(1,2) va B(5,6). Aylana markazi qaysi chiziqda yotishi mumkin?"
+        "en": "A chord has endpoints A(1,2) and B(5,6). On which line must the centre of the circle lie?",
+        "ru": "Хорда окружности имеет концы A(1,2) и B(5,6). На какой прямой обязательно лежит центр окружности?",
+        "uz": "Aylana vatarining uchlari A(1,2) va B(5,6). Aylana markazi qaysi chiziqda albatta yotadi?"
       },
       "options": [
         {
