@@ -2,7 +2,8 @@
 -- HOLD / NOT A PRODUCTION MIGRATION. No actual book text, correct keys or
 -- per-question permutations are committed. This template reads a payload
 -- ONLY from a TEMP table in a dedicated disposable CI database, applies
--- 112 same-ID synthetic updates and ALWAYS rolls back the transaction.
+-- 7 source-pinned same-ID editorial fixes BEFORE 112 MCQ permutations and 4
+-- existing-ID stem changes; the entire transaction is ALWAYS rolled back. and ALWAYS rolls back the transaction.
 -- Owner-private live-bank dry-run is distinct and has NOT been run here.
 BEGIN;
 SET LOCAL statement_timeout='25s';
@@ -13,6 +14,10 @@ DECLARE
  v_doc jsonb := (SELECT payload FROM pg_temp.math_s2_private_plan);
  v_row jsonb;
  v_rep jsonb;
+ v_editorial jsonb;
+ v_edit_field text;
+ v_edit_change jsonb;
+ v_editorial_count integer:=0;
  v_old public.questions%rowtype;
  v_tour_no int;
  v_mcq_md5 text;
@@ -33,6 +38,7 @@ BEGIN
     OR v_doc->>'status' IS DISTINCT FROM 'OFFLINE_HOLD_REHEARSAL_NO_LIVE_DB_WRITES'
     OR jsonb_array_length(v_doc->'mcq')<>112
     OR jsonb_array_length(v_doc->'localized_stem_replacements')<>4
+    OR jsonb_array_length(v_doc->'editorial_same_id_corrections')<>7
  THEN RAISE EXCEPTION 'MATH_S2_INVALID_PRIVATE_PLAN_SHAPE'; END IF;
  IF (SELECT count(DISTINCT (j.value->>'old_question_id')::bigint)
       FROM jsonb_array_elements(v_doc->'mcq') j)<>112
@@ -69,6 +75,72 @@ BEGIN
   IF v_mcq_md5 IS DISTINCT FROM v_doc->'per_tour_preflight_mcq_md5'->>v_tour_no::text
   THEN RAISE EXCEPTION 'MATH_S2_SOURCE_PIN_DRIFT'; END IF;
  END LOOP;
+
+ -- Localized/editorial repairs come FIRST: the later 112-option rekey must
+ -- permute the corrected Russian options rather than overwrite them.
+ FOR v_editorial IN SELECT value FROM jsonb_array_elements(v_doc->'editorial_same_id_corrections') LOOP
+  v_id := (v_editorial->>'question_id')::bigint;
+  IF v_editorial->>'apply_before_112_mcq_permutation' IS DISTINCT FROM 'true'
+    OR (SELECT count(*) FROM jsonb_array_elements(v_doc->'mcq') x
+        WHERE (x.value->>'old_question_id')::bigint=v_id)<>1
+    OR EXISTS(SELECT 1 FROM jsonb_array_elements(v_doc->'localized_stem_replacements') x
+        WHERE (x.value->>'target_id')::bigint=v_id)
+    OR (SELECT count(*) FROM public.tour_questions tq JOIN public.tours t ON t.id=tq.tour_id
+        JOIN public.seasons s ON s.id=t.season_id
+        WHERE tq.question_id=v_id AND s.season_no=2 AND t.subject_id=5 AND tq.is_active)<>1
+   THEN RAISE EXCEPTION 'MATH_S2_EDITORIAL_NOT_EXCLUSIVE_S2_MCQS'; END IF;
+  IF EXISTS(SELECT 1 FROM public.tour_answers a WHERE a.question_id=v_id)
+    OR EXISTS(SELECT 1 FROM public.tour_session_answers_v4 a WHERE a.question_id=v_id)
+    OR EXISTS(SELECT 1 FROM public.practice_answers a WHERE a.question_id=v_id)
+    OR EXISTS(SELECT 1 FROM public.practice_session_answers_v4 a WHERE a.question_id=v_id)
+    OR EXISTS(SELECT 1 FROM public.practice_drill_answers_v4 a WHERE a.question_id=v_id)
+    OR EXISTS(SELECT 1 FROM public.tour_session_runtime_v4 a WHERE v_id=ANY(a.question_ids))
+   THEN RAISE EXCEPTION 'MATH_S2_EDITORIAL_ITEM_ALREADY_USED'; END IF;
+  SELECT * INTO v_old FROM public.questions q WHERE q.id=v_id FOR UPDATE;
+  IF v_old.id IS NULL OR v_old.subject_id<>5 OR v_old.qtype<>'mcq'
+      OR jsonb_typeof(v_editorial->'changes')<>'object'
+      OR (SELECT count(*) FROM jsonb_each(v_editorial->'changes'))<1
+      OR (SELECT count(*) FROM jsonb_each(v_editorial->'changes'))>3
+   THEN RAISE EXCEPTION 'MATH_S2_EDITORIAL_BAD_SHAPE'; END IF;
+  FOR v_edit_field,v_edit_change IN
+    SELECT key,value FROM jsonb_each(v_editorial->'changes')
+  LOOP
+   IF v_edit_field NOT IN('question_text_en','question_text_ru',
+                         'question_text_uz','options_text_ru')
+      OR v_edit_change->'before' IS NULL OR v_edit_change->'after' IS NULL
+      OR v_edit_change->'before'=v_edit_change->'after'
+   THEN RAISE EXCEPTION 'MATH_S2_EDITORIAL_UNSUPPORTED_FIELD'; END IF;
+   IF v_edit_field='options_text_ru' THEN
+     IF v_old.options_text_ru::jsonb IS DISTINCT FROM (v_edit_change->'before')
+       OR jsonb_typeof(v_edit_change->'after')<>'array'
+       OR jsonb_array_length(v_edit_change->'after')<>4
+       OR v_edit_change->'before'->(ascii(v_old.correct_answer)-65)
+           IS DISTINCT FROM v_edit_change->'after'->(ascii(v_old.correct_answer)-65)
+     THEN RAISE EXCEPTION 'MATH_S2_EDITORIAL_OPTION_MEANING_CHANGED'; END IF;
+     UPDATE public.questions SET
+       options_text_ru=(v_edit_change->'after')::text,
+       options_text=(v_edit_change->'after')::text
+       WHERE id=v_id;
+   ELSE
+     IF to_jsonb(v_old)->v_edit_field IS DISTINCT FROM (v_edit_change->'before')
+        OR jsonb_typeof(v_edit_change->'after')<>'string'
+        OR nullif(trim(v_edit_change->>'after'),'') IS NULL
+     THEN RAISE EXCEPTION 'MATH_S2_EDITORIAL_SOURCE_DRIFT'; END IF;
+     CASE v_edit_field
+       WHEN 'question_text_en' THEN UPDATE public.questions SET question_text_en=v_edit_change->>'after' WHERE id=v_id;
+       WHEN 'question_text_ru' THEN UPDATE public.questions SET question_text_ru=v_edit_change->>'after',question_text=v_edit_change->>'after' WHERE id=v_id;
+       WHEN 'question_text_uz' THEN UPDATE public.questions SET question_text_uz=v_edit_change->>'after' WHERE id=v_id;
+     END CASE;
+   END IF;
+   SELECT * INTO v_old FROM public.questions q WHERE q.id=v_id;
+  END LOOP;
+  v_editorial_count:=v_editorial_count+1;
+ END LOOP;
+ IF v_editorial_count<>7 OR
+    (SELECT count(DISTINCT (x.value->>'question_id')::bigint)
+     FROM jsonb_array_elements(v_doc->'editorial_same_id_corrections') x)<>7
+ THEN RAISE EXCEPTION 'MATH_S2_EDITORIAL_NOT_SEVEN_DISTINCT'; END IF;
+
  FOR v_row IN SELECT value FROM jsonb_array_elements(v_doc->'mcq') LOOP
   v_id:=(v_row->>'old_question_id')::bigint;
   v_tour_no:=(v_row->>'tour_no')::integer;
