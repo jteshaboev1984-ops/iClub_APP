@@ -342,9 +342,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
-        "en": "If sin⁻¹(a)=30° in degree mode, enter a.",
-        "ru": "Если sin⁻¹(a)=30° в режиме градусов, введите a.",
-        "uz": "Daraja rejimida sin⁻¹(a)=30° bo‘lsa, a ni kiriting."
+        "en": "If sin⁻¹(a)=30° in degree mode, enter a. Give your answer as a decimal number.",
+        "ru": "Если sin⁻¹(a)=30° в режиме градусов, введите a. Ответ запишите десятичным числом.",
+        "uz": "Daraja rejimida sin⁻¹(a)=30° bo‘lsa, a ni kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
