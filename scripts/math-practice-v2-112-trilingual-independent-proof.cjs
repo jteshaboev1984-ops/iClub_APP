@@ -112,13 +112,55 @@ assert.equal(explained,112);
 // Report precisely which source items need manual semantic reconciliation.
 // Treat numeric lexical differences as review prompts rather than silently
 // declaring 112 independent professional approvals.
-const unique=[...new Set(findings.map(x=>x.id+':'+x.lang+':'+x.field))];
+const unique=[...new Set(findings.map(x=>x.id+':'+x.lang+':'+x.field))].sort();
+// Six expression-number mismatches were inspected in all source languages.
+// All are NON-SEMANTIC: EN uses repeated literal numerals, RU/UZ paraphrase
+// with the same equations, UZ explicitly says "3 times" for "triples",
+// or RU/UZ write f^-1 where EN only says "inverse". These are enumerated
+// and bound to mathematical source conditions, not a general bypass.
+const reviewedEquivalences=[
+  '7562:ru:explanation_math_tokens','7562:uz:explanation_math_tokens',
+  '7569:ru:explanation_math_tokens',
+  '7590:ru:explanation_math_tokens','7590:uz:explanation_math_tokens',
+  '7828:uz:question_math_tokens'
+].sort();
+function guardEquivalences(){
+  const a=items.get(7562);
+  for(const lang of ['en','ru','uz']){
+    assert.ok(a.explanation[lang].includes('f(5)=9+1=10')&&
+      a.explanation[lang].includes('1≤f(x)≤10'),
+      'range endpoints must be the same in all three explanations');
+  }
+  const b=items.get(7569);
+  for(const lang of ['en','ru','uz'])
+    assert.ok(b.explanation[lang].includes('−1<f(x)≤4'),
+      'open/closed endpoints diverge between translations');
+  const c=items.get(7590);
+  for(const lang of ['en','ru','uz']){
+    assert.ok(c.question[lang].includes('x>2')&&c.question[lang].includes('y<5')&&
+      c.explanation[lang].includes('x<5')&&c.explanation[lang].includes('y>2'),
+      'inverse domain/range inequality semantics differ');
+  }
+  const d=items.get(7828);
+  assert.ok(/triples each hour/.test(d.question.en)&&
+    /утраивается каждый час/.test(d.question.ru)&&
+    /3 marta oshadi/.test(d.question.uz),
+    'triple-per-hour translations changed');
+  for(const lang of ['en','ru','uz'])
+    assert.ok(d.explanation[lang].includes('100·3⁵=100·243=24300'),
+      'triple-per-hour arithmetic drifted');
+}
+guardEquivalences();
+assert.deepEqual(unique,reviewedEquivalences,
+  'unexpected new math-number translation disparity');
+const unresolved=unique.filter(x=>!reviewedEquivalences.includes(x));
 console.log(JSON.stringify({scope:112,trilingual_sections:locales,
   math_reproofs:9,conserved_previous_edits:103,
   mcq,input,locale_math_token_review_findings:unique.length,
-  review_identifiers:unique.slice(0,60),
-  verified_human_expert_signoff:false,qa_status:unique.length?'NEEDS_TARGETED_REVIEW':'SOURCE_RULES_PASS',
+  explicitly_checked_equivalent_phrasings:reviewedEquivalences.length,
+  unresolved_numeric_language_findings:unresolved.length,
+  verified_human_expert_signoff:false,qa_status:unresolved.length?'NEEDS_TARGETED_REVIEW':'SOURCE_RULES_PASS_NOT_HUMAN_SIGNOFF',
   production_writes:0,protected_content_printed:false}));
-if(unique.length){
+if(unresolved.length){
   process.exitCode=2;
 }
