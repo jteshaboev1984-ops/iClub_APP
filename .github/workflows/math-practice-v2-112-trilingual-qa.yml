@@ -1,0 +1,31 @@
+name: Mathematics Practice 112 tri-locale mathematical equivalence QA
+on:
+  push:
+    branches:
+      - qa/math-practice-112-trilingual-semantic-oracles-20261120
+  pull_request:
+    branches:
+      - qa/math-practice-editorial31-independent-oracles-20261120
+    paths:
+      - 'scripts/math-practice-v2-112-trilingual-independent-proof.cjs'
+      - 'content/math/practice_v2/**'
+      - '.github/workflows/math-practice-v2-112-trilingual-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trilingual-source-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify actual 112 changed source items and nine independent multi-step oracles
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-112-trilingual-independent-proof.cjs
+          node scripts/math-practice-v2-112-trilingual-independent-proof.cjs
+          node scripts/math-practice-v2-editorial31-independent-oracles.cjs
+      - name: Academic authority
+        run: echo 'Source-side numerical and trilingual invariant validation is not a human expert signoff, and cannot publish/approve private question content.'
