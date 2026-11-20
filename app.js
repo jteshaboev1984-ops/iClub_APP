@@ -17344,6 +17344,17 @@ function addMyRecsFromAttempt(attempt) {
   const titleEl = $("#practice-subject-title");
   if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj?.title || subjectKey || "—");
 
+  // Topic Practice has its own authenticated catalog/History RPC. Mount it
+  // BEFORE awaiting the separate Tour selector, per-Tour questions or stats:
+  // those may be slow/offline without making the Topic mode unavailable.
+  // This does not bootstrap auth or launch a Practice attempt; topic loading
+  // remains user-triggered by opening the selector with an explicit Retry.
+  window.iClubPracticeTopicChoice?.mount({
+    subjectKey,
+    language: currentLang(),
+    onStart: (topic) => startPracticeByRec({ topic, subtopic: null }, "practice")
+  });
+
   const stageMetaEl = $("#practice-stage-meta");
   if (stageMetaEl) stageMetaEl.textContent = tr3("Загружаем статистику", "Statistika yuklanmoqda", "Loading statistics");
 
@@ -17406,12 +17417,6 @@ if (startBtn?.dataset.premiumLoadingBlocked === "1") {
 
 renderPracticeTourPicker(picker.cards, selectedTourNo);
 updatePracticeStartButtonForTour(selectedTourNo, false);
-// Topic practice is independent of Tour attempts; the server catalog only lists eligible topics.
-window.iClubPracticeTopicChoice?.mount({
-  subjectKey,
-  language: currentLang(),
-  onStart: (topic) => startPracticeByRec({ topic, subtopic: null }, "practice")
-});
      
     const done = Number(stageStats?.masteredCount || 0);
     const total = Number(stageStats?.totalCount || 0);
