@@ -6,13 +6,22 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'content/math/practice_v2/**'
+      # The one-time 10-item QA is not a global release gate for later batches.
+      - 'content/math/practice_v2/p2_functions/P1-FUN-08.json'
+      - 'content/math/practice_v2/p3_coordinate_geometry/P1-COO-03.json'
+      - 'content/math/practice_v2/p4_circular_trigonometry/P1-CIR-03.json'
+      - 'content/math/practice_v2/p5_binomial_series/P1-SER-01.json'
+      - 'content/math/practice_v2/p5_binomial_series/P1-SER-02.json'
+      - 'content/math/practice_v2/p6_differentiation/P1-DIF-04.json'
+      - 'content/math/practice_v2/p6_differentiation/P1-DIF-06.json'
+      - 'content/math/practice_v2/p7_integration/P1-INT-01.json'
+      - 'content/math/practice_v2/p7_integration/P1-INT-02.json'
+      - 'content/math/practice_v2/p7_integration/P1-INT-05.json'
       - 'scripts/math-practice-confirmed10-source-guard.cjs'
       - 'scripts/math-practice-v2-confirmed10-stage-generator.cjs'
       - 'scripts/math-practice-confirmed10-pg17-fixture.cjs'
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
       - 'supabase/tests/math_practice_confirmed10_future_only_pg17.sql'
-      - '.github/workflows/math-practice-confirmed10-release-pg17.yml'
 permissions:
   contents: read
 jobs:
