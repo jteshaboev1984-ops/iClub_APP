@@ -146,9 +146,9 @@
         {
           "key": "D",
           "text": {
-            "en": "−3x−1",
-            "ru": "−3x−1",
-            "uz": "−3x−1"
+            "en": "3x−3",
+            "ru": "3x−3",
+            "uz": "3x−3"
           },
           "diagnostic_code": "FUN03_SUBSTITUTION"
         }
