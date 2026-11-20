@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// #574: 10 already-published corrections + 2 new isolated academic fixes.
+// #574: 10 already-published corrections + 5 newly reviewed scoped source fixes.
 // Check all 495 authored questions vs real original main; fail on any other
 // key/text/locale/difficulty change. No protected solution printed in CI.
 const assert=require('node:assert/strict');
@@ -10,6 +10,7 @@ const root=path.resolve(__dirname,'..');
 const bank=path.join(root,'content/math/practice_v2');
 const baseline='296bf21df09a808152b4ae4e153ddcec8aec85cd';
 const expected=new Map([
+ [7573,['options']],[7686,['question']],[7710,['question']],
  [7624,['options','correct_answer']],[7662,['options','correct_answer']],
  [7724,['question']],[7791,['explanation']],
  [7797,['options','correct_answer']],[7881,['options','correct_answer']],
@@ -62,10 +63,69 @@ for(const folder of folderList){
        'correct mathematical option changed '+id+' '+lang);
      const semantics=o=>stable({text:o.text,diagnostic_code:o.diagnostic_code});
      const pool=arr=>arr.map(o=>JSON.stringify(semantics(o))).sort();
-     assert.deepEqual(pool(q.options),pool(before.options),
+     if(id!==7573)assert.deepEqual(pool(q.options),pool(before.options),
        'distractor or diagnostic semantics changed');
      if(rekey.has(id))assert.notEqual(before.correct_answer,q.correct_answer);
      if(id===7893)assert.equal(before.correct_answer,q.correct_answer);
+    }
+    if(id===7573){
+     // g(f(x)) = 1-(3x-2): one correct expression, four distinct polynomials.
+     assert.equal(before.correct_answer,q.correct_answer);
+     assert.ok(eq(q.question,before.question)&&eq(q.explanation,before.explanation));
+     for(const key of ['A','B','C'])assert.ok(eq(q.options.find(o=>o.key===key),
+       before.options.find(o=>o.key===key)),'Q089 unchanged options A-C');
+     const oldD=before.options.find(o=>o.key==='D'),newD=q.options.find(o=>o.key==='D');
+     assert.equal(oldD.diagnostic_code,newD.diagnostic_code);
+     for(const lang of languages){
+      assert.equal(newD.text[lang],'3x−3','Q089 unique wrong distractor');
+      assert.equal(oldD.text[lang],'−3x−1','Q089 former redundant distractor');
+      assert.equal(new Set(q.options.map(o=>o.text[lang])).size,4);
+     }
+     // Evaluate all options independently at x=0; a repeat in any locale fails.
+     const values=q.options.map(o=>{
+      const s=o.text.en.replace(/−/g,'-').replace(/\s+/g,'');
+      if(s==='3(1-x)-2')return 1;
+      if(s==='1-3x-2')return -1;
+      if(s==='3-3x')return 3;
+      if(s==='3x-3')return -3;
+      throw Error('Q089 unrecognized expression');
+     });
+     assert.equal(new Set(values).size,4);
+     const expectedValue=1-(3*0-2);
+     assert.equal(values[q.options.findIndex(o=>o.key===q.correct_answer)],expectedValue);
+    }
+    if(id===7686){
+     assert.ok(eq(q.options,before.options));
+     assert.ok(eq(q.explanation,before.explanation));
+     assert.equal(q.correct_answer,before.correct_answer);
+     assert.match(q.question.en,/must the centre/);
+     assert.match(q.question.ru,/обязательно лежит/);
+     assert.match(q.question.uz,/albatta yotadi/);
+     // Midpoint (3,4), AB slope +1 -> perpendicular bisector y=-x+7.
+     // Test three different allowable centres, not a single lucky intersection.
+     const lineValue=(s,x)=>{
+      const m=/^y=([−-]?)x([+−-]\d+)$/.exec(s);
+      assert.ok(m,'Q202 non-linear distractor');
+      return (m[1]? -1:1)*x+Number(m[2].replace('−','-'));
+     };
+     const allCentres=[2,3,4].map(x=>[x,7-x]);
+     const matching=q.options.filter(o=>allCentres.every(([x,y])=>
+       lineValue(o.text.en,x)===y));
+     assert.equal(matching.length,1,'Q202 must have exactly one mandatory locus');
+     assert.equal(matching[0].key,q.correct_answer);
+     for(const lang of languages)assert.deepEqual(q.options.map(o=>o.text[lang]),
+       q.options.map(o=>o.text.en),'Q202 math options differ across locales');
+    }
+    if(id===7710){
+     assert.ok(eq(q.explanation,before.explanation));
+     assert.ok(eq(q.answer_contract,before.answer_contract));
+     assert.equal(q.qtype,'input');
+     assert.equal(Number(q.answer_contract.canonical_answer),15/10);
+     assert.ok(q.answer_contract.accepted_examples.includes('1.5'));
+     assert.ok(q.answer_contract.accepted_examples.includes('1,5'));
+     assert.match(q.question.en,/decimal number/);
+     assert.match(q.question.ru,/десятичным числом/);
+     assert.match(q.question.uz,/o‘nli son/);
     }
     if(id===7791){
      assert.equal(q.explanation.ru,before.explanation.ru);
@@ -124,7 +184,7 @@ for(const folder of folderList){
   }
  }
 }
-assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,12);
+assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,15);
 assert.equal(found.size,expected.size);assert.equal(mcq,277);assert.equal(input,218);
 const all={A:0,B:0,C:0,D:0};
 for(let practice=1;practice<=7;practice++){
@@ -149,6 +209,6 @@ for(let practice=1;practice<=7;practice++){
 assert.deepEqual(all,{A:68,B:70,C:71,D:68},
  'correct-answer placement deviates from reviewed 277-question distribution');
 console.log(JSON.stringify({source_guard:'PASS',authored:495,mcq:277,input:218,
- corrected:12,published_prior:10,new_source_proposals:2,unrelated_change_count:0,practice_batches:7,
+ corrected:15,published_prior:10,new_source_proposals:5,unrelated_change_count:0,practice_batches:7,
  anti_pattern_cycles:0,retained_option_semantics:true,
  answer_distribution:'balanced',protected_keys_printed:false}));
