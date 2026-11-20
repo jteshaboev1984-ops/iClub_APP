@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 // #574: stage an explicitly selected 10-item published batch OR the isolated
-// Q400/Q481 two-item proposal, with pinned original hashes. Reuses #599
+// Q400/Q481 two-item or Q089/Q202/Q226 three-item proposal, pinned. Reuses #599
 // proven private future-only version and rollback contract.
 // NEVER commit the generated SQL or execute on hosted Supabase without the
 // owner-approved cutover. Does not grant academic QA or publish any question.
@@ -11,10 +11,13 @@ const root=path.resolve(__dirname,'..');
 const args=process.argv.slice(2);
 const batchArg=args.indexOf('--batch');
 const mode=batchArg>=0?args[batchArg+1]:'hotfix10';
-assert.ok(['hotfix10','q400q481'].includes(mode),'unsupported governed release batch');
-const release=mode==='hotfix10'?'math_p1_practice_v2_fix_20261120'
-  :'math_p1_practice_v2_q400_q481_20261120';
-const suffix=mode==='hotfix10'?'-V20261120':'-V20261120Q400Q481';
+const releases={
+ hotfix10:{name:'math_p1_practice_v2_fix_20261120',suffix:'-V20261120'},
+ q400q481:{name:'math_p1_practice_v2_q400_q481_20261120',suffix:'-V20261120Q400Q481'},
+ q089q202q226:{name:'math_p1_practice_v2_q089_q202_q226_20261120',suffix:'-V20261120Q089Q202Q226'}
+};
+assert.ok(Object.hasOwn(releases,mode),'unsupported governed release batch');
+const release=releases[mode].name,suffix=releases[mode].suffix;
 const baselineSpecs=[
  {id:7624,code:'P1-FUN-08',file:'p2_functions/P1-FUN-08.json',old_hash:'b0ccf462b7bafa14abfcf88940a4a5a878b96ec0b7a4a161b558ea812fdb0d67'},
  {id:7662,code:'P1-COO-03',file:'p3_coordinate_geometry/P1-COO-03.json',old_hash:'4361c8f4aaa539da3d0edee194298c83b114a9cdcc8030571db0d46c4dd266a7'},
@@ -34,7 +37,16 @@ const nextTwo=[
  {id:7965,code:'P1-INT-04',file:'p7_integration/P1-INT-04.json',
   old_hash:'600d6bd3df9bc1409c72ece9fd249095b44101858c378d040b84b36ce9b5201e'}
 ];
-const specs=mode==='hotfix10'?baselineSpecs:nextTwo;
+const nextThree=[
+ {id:7573,code:'P1-FUN-03',file:'p2_functions/P1-FUN-03.json',
+  old_hash:'2be7d4b6e952e591890789d0870e6dca5519353c4b8b0a9c718f09454c437ec1'},
+ {id:7686,code:'P1-COO-05',file:'p3_coordinate_geometry/P1-COO-05.json',
+  old_hash:'6efedc3b71f46e88e9084c021cd0e5b11ba4bdb8009a38b0100eb0a05a425289'},
+ {id:7710,code:'P1-CIR-02',file:'p4_circular_trigonometry/P1-CIR-02.json',
+  old_hash:'19928acd031087d741fe251b9fc4bb6f7b0f11e4840d89a61133a8ad3fe7feb6'}
+];
+const specs=mode==='hotfix10'?baselineSpecs:
+  mode==='q400q481'?nextTwo:nextThree;
 const expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
