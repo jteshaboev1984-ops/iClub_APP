@@ -1,0 +1,81 @@
+name: Practice signed real UI History PG17 (no production)
+on:
+  push:
+    branches:
+      - qa/practice-history-signed-real-ui-20261120
+  pull_request:
+    branches:
+      - fix/practice-topic-catalog-independent-mount-20261120
+    paths:
+      - 'scripts/practice-history-signed-real-ui-pg17.cjs'
+      - '.github/workflows/practice-history-signed-real-ui-pg17.yml'
+      - 'practice-history-screen.js'
+      - 'practice-results-tabs.js'
+      - 'supabase/candidates/practice_season2_progress_safe_v1.sql'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  signed-actual-practice-history:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-test-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: isolated-test-only
+      PGDATABASE: postgres
+      PRACTICE_S2_REAL_UI_ISOLATED: "true"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Start disposable Season1/Season2 PostgreSQL and real read-only RPC
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/practice_season2_progress_safe_isolated.sql \
+            >/dev/null
+          psql -X -v ON_ERROR_STOP=1 \
+            -c "UPDATE public.seasons SET status='current',start_date='2026-11-01' WHERE id=2;"
+      - name: Launch signed local PostgREST with ephemeral test credentials
+        run: |
+          set -euo pipefail
+          secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$secret"
+          echo "PRACTICE_SEASON2_JWT_SECRET=$secret" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+          docker run -d --rm --name iclub-history-ui-pgrst --network host \
+            -e PGRST_DB_URI="postgres://postgres:isolated-test-only@127.0.0.1:5432/postgres" \
+            -e PGRST_DB_SCHEMA="public" \
+            -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$secret" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 35); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - name: Run signed Chromium actual Practice History UX in three locales
+        run: |
+          set -euo pipefail
+          node --check scripts/practice-history-signed-real-ui-pg17.cjs
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node scripts/practice-history-signed-real-ui-pg17.cjs
+      - name: Boundary
+        run: echo 'PG17 and signed local HTTP only. No published bank changes, no production credentials or app release.'
