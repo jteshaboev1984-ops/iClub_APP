@@ -128,7 +128,7 @@ async function postRaw(base,fn,subject,token){
   assert(authChem.ok&&authChem.data?.topics?.[0]?.question_count===1,'cross-subject catalog wrong');
   const hA=await postRaw(url,'get_practice_topic_history_safe_v1','mathematics',signed(A));
   const hB=await postRaw(url,'get_practice_topic_history_safe_v1','mathematics',signed(B));
-  assert(hA.ok&&hA.data.completed_sessions===2,'owner A history wrong');
+  assert(hA.ok&&hA.data.completed_sessions===3,'owner A history wrong after earlier signed HTTP finalizes S1 session #104');
   assert(hB.ok&&hB.data.completed_sessions===1,'owner B History not isolated');
   assert(!JSON.stringify(hB.data).includes('"session_id":100'),
    'other owner old S1 attempt appeared in History');
@@ -248,7 +248,7 @@ async function postRaw(base,fn,subject,token){
       {p_subject_key:key}),item.subject);
      assert(h.data?.ok===true,'genuine owner History HTTP unavailable');
      if(item.subject==='mathematics')
-      assert.equal(h.data.completed_sessions,item.uid===A?2:1,'owner History leak');
+      assert.equal(h.data.completed_sessions,item.uid===A?3:1,'owner History leak');
      if(item.subject==='chemistry')
       assert.equal(h.data.completed_sessions,1,'Chemistry S1 Topic history unavailable');
      assert.equal(await page.evaluate(()=>window.__starts.length),0,'catalog auto-started an attempt');
