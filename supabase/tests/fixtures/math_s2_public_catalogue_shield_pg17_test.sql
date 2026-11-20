@@ -64,7 +64,7 @@ AS $function$
     on q.id = ids.question_id
    and q.is_active is true
   order by ids.request_order;
-$function$
+$function$;
 
 GRANT EXECUTE ON FUNCTION public.get_safe_questions_by_ids(bigint[]) TO anon,authenticated;
 
