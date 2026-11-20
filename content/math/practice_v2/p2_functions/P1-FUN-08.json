@@ -204,23 +204,23 @@
         {
           "key": "C",
           "text": {
-            "en": "(6,4/3)",
-            "ru": "(6,4/3)",
-            "uz": "(6,4/3)"
-          },
-          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "(2,4)",
             "ru": "(2,4)",
             "uz": "(2,4)"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "(6,4/3)",
+            "ru": "(6,4/3)",
+            "uz": "(6,4/3)"
+          },
+          "diagnostic_code": "FUN08_TRANSFORM_TYPE"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "C",
       "explanation": {
         "en": "To obtain the original input 6 inside f(3x), solve 3x=6, giving x=2. The output remains 4, so the new point is (2,4).",
         "ru": "Чтобы внутри f получить исходный аргумент 6, решаем 3x=6 и получаем x=2. Выход остаётся равным 4, поэтому новая точка — (2,4).",
