@@ -151,7 +151,7 @@ jobs:
           node --check scripts/practice-topic-crosscutover-signed-http.cjs
           node scripts/practice-topic-crosscutover-signed-http.cjs
           psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres \
-            -d practice_topic_cutover -c "DO \\$audit\\$ BEGIN
+            -d practice_topic_cutover -c "DO \$audit\$ BEGIN
               IF (SELECT count(*) FROM public.practice_drill_sessions_v4
                  WHERE id=104 AND status='finalized'
                    AND created_at='2026-10-31T12:00:00Z'
@@ -160,7 +160,7 @@ jobs:
                    WHERE session_id=104 AND question_id=15)<>1
               THEN RAISE EXCEPTION 'signed HTTP Topic history period changed'; END IF;
               RAISE NOTICE 'PRACTICE_S1_TOPIC_HTTP_HISTORY_PG17_PASS';
-            END \\$audit\\$;"
+            END \$audit\$;"
 
       - name: Chromium validation of accepted 3+5 Practice history UI
         env:
