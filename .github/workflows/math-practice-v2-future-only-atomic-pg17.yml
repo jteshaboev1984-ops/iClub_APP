@@ -1,0 +1,51 @@
+name: Mathematics Practice future-only atomic switch PG17
+on:
+  push:
+    branches:
+      - qa/math-practice-future-only-atomic-switch-pg17-20261120
+  pull_request:
+    branches:
+      - qa/math-practice-future-only-81-contenthash-pin-20261119
+    paths:
+      - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
+      - 'supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql'
+      - 'supabase/tests/math_practice_future_only_atomic_switch_pg17.sql'
+      - '.github/workflows/math-practice-v2-future-only-atomic-pg17.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgresql-17:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ephemeral-fixture-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: ephemeral-fixture-only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Run actual future-only swap and rollback in disposable PG17
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_atomic_switch_pg17.sql
+      - name: Boundary
+        run: echo 'DISPOSABLE PG17 ONLY; NO production credentials, no live Supabase write, no deployment.'
