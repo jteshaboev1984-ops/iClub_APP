@@ -8,6 +8,9 @@ begin
  if not exists(select 1 from pg_roles where rolname='authenticated') then
    execute 'create role authenticated';
  end if;
+ if not exists(select 1 from pg_roles where rolname='anon') then
+   execute 'create role anon';
+ end if;
 end $roles$;
 create schema auth;
 create schema private;
