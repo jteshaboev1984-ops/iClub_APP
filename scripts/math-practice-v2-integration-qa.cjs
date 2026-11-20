@@ -19,7 +19,9 @@ const EXPECTED={
  },
  difficultyBand:{easy:[14,20],medium:[22,30],hard:[22,30]},
  correctLetterBand:[6,8],
- maxSameCorrectRun:2
+ // Approved P1 content architecture §13 allows at most three same letters;
+ // stronger 495-question hotfix guard separately rejects short 2–4 motifs.
+ maxSameCorrectRun:3
 };
 
 const LANGS=['en','ru','uz'],MCQ_KEYS=['A','B','C','D'];
