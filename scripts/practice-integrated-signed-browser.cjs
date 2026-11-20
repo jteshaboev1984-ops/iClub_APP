@@ -52,7 +52,6 @@ const allowed=new Map([
  ['/practice-history-screen.js','practice-history-screen.js'],
  ['/practice-topic-choice.css','practice-topic-choice.css'],
  ['/practice-results-tabs.css','practice-results-tabs.css'],
- ['/practice-history-screen.css','practice-history-screen.css'],
  ['/academy.css','visual/iclub-academy-ux531-b04b08.css']
 ]);
 const upstream=new Map([
@@ -165,7 +164,7 @@ async function postRaw(base,fn,subject,token){
       '.stack-screen{display:none}.stack-screen.is-active{display:block}main{max-width:1500px}'+
       '.section{padding:12px}.h1{font-weight:750;font-size:20px}'});
      for(const file of ['practice-topic-choice.css','practice-results-tabs.css',
-      'practice-history-screen.css','academy.css'])
+      'academy.css'])
       await page.addStyleTag({url:url+'/'+file});
      for(const file of ['practice-topic-choice.js','practice-history-screen.js','practice-results-tabs.js'])
       await page.addScriptTag({url:url+'/'+file});
