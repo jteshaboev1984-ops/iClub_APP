@@ -85,7 +85,10 @@ WITH tm AS (
  (SELECT count(*) FROM public.question_version_links a
    WHERE a.old_question_id IN(SELECT id FROM s2ids)
      OR a.new_question_id IN(SELECT id FROM s2ids))::int version_links,
- (SELECT count(*) FROM public.safe_questions_public v JOIN s2ids q ON q.id=v.id)::int public_catalogue_visible_rows
+ (SELECT count(*) FROM public.safe_questions_public v JOIN s2ids q ON q.id=v.id)::int public_catalogue_visible_rows,
+ (SELECT count(*) FROM public.get_safe_questions_by_ids(
+   (SELECT coalesce(array_agg(id ORDER BY id),array[]::bigint[]) FROM s2ids)
+ ))::int public_id_lookup_rpc_visible_rows
 )
 SELECT
  (SELECT count(*) FROM tm)::int math_s2_tours,
@@ -102,12 +105,16 @@ SELECT
  uc.other_tour_assignments,uc.any_practice_assignments,
  uc.exam_prep_reservations,uc.version_links,
  uc.public_catalogue_visible_rows,
+ uc.public_id_lookup_rpc_visible_rows,
  (uc.s2_attempts+uc.s2_runtime+uc.tour_answers+uc.tour_session_answers
   +uc.practice_answers+uc.practice_session_answers+uc.practice_drill_answers
   +uc.practice_sessions_issued+uc.practice_drill_sessions_issued+uc.tour_sessions_issued
   +uc.other_tour_assignments+uc.any_practice_assignments
   +uc.exam_prep_reservations+uc.version_links)=0 AS no_recorded_use_or_scope_references,
  uc.public_catalogue_visible_rows=0 AS public_catalogue_sealed,
+ uc.public_id_lookup_rpc_visible_rows=0 AS public_id_lookup_sealed,
+ (uc.public_catalogue_visible_rows=0 AND uc.public_id_lookup_rpc_visible_rows=0)
+   AS public_bank_surfaces_sealed,
  (SELECT jsonb_agg(jsonb_build_object('tour',tour_no,'md5',manifest_md5) ORDER BY tour_no)
     FROM per_tour) manifest,
  (SELECT count(*)=7 FROM per_tour WHERE links=20 AND ids=20 AND orders=20
