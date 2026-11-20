@@ -65,10 +65,10 @@ def validate(doc):
         if sum(q["old_key"] != q["new_key"] for q in ordered) < 11:
             raise BankHold("insufficient_answer_position_changes")
     replacements = doc.get("replacements_after_rekey")
-    if not isinstance(replacements, list) or len(replacements) != 3:
-        raise BankHold("requires_three_original_replacements")
-    if sum(q["replace_stem_source"] == "private_fresh_item" for q in rows) != 3:
-        raise BankHold("three_only_fresh_stems")
+    if not isinstance(replacements, list) or len(replacements) != 4:
+        raise BankHold("requires_four_original_replacements")
+    if sum(q["replace_stem_source"] == "private_fresh_item" for q in rows) != 4:
+        raise BankHold("four_only_fresh_stems")
     rep_ids = set()
     for r in replacements:
         id_ = r.get("replacement_for_question_id")
@@ -87,7 +87,7 @@ def validate(doc):
             if not all(isinstance(r.get(field+"_"+lang), str) and r[field+"_"+lang].strip()
                        for field in ("question_text", "explanation")):
                 raise BankHold("missing_localized_stem_or_explanation")
-    return {"tours": 7, "mcq": 112, "semantic_replacements": 3,
+    return {"tours": 7, "mcq": 112, "semantic_replacements": 4,
             "moved_answer_positions": sum(q["old_key"] != q["new_key"] for q in rows),
             "source_records_modified": 0, "release_authorized": False}
 
