@@ -9,6 +9,8 @@ on:
     paths:
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
       - 'scripts/math-practice-v2-future-only-81-stage-generator.cjs'
+      - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
+      - 'supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql'
       - 'supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql'
       - 'supabase/tests/math_practice_future_only_atomic_switch_pg17.sql'
       - '.github/workflows/math-practice-v2-future-only-atomic-pg17.yml'
@@ -66,5 +68,19 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql
           psql -v ON_ERROR_STOP=1 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_atomic_switch_pg17.sql
+      - name: Execute all 81 actual authored staging records on a second disposable PG17 database
+        run: |
+          set -euo pipefail
+          temp_dir="$(mktemp -d)"
+          chmod 700 "$temp_dir"
+          trap 'rm -rf "$temp_dir"' EXIT
+          node --check scripts/math-practice-v2-future-only-81-test-fixture.cjs
+          node scripts/math-practice-v2-future-only-81-stage-generator.cjs --out "$temp_dir/stage.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs --stage "$temp_dir/stage.sql" --out "$temp_dir/fixture.sql"
+          createdb -T template0 math81
+          psql -v ON_ERROR_STOP=1 -d math81 -f "$temp_dir/fixture.sql"
+          psql -v ON_ERROR_STOP=1 -d math81 -f "$temp_dir/stage.sql"
+          psql -v ON_ERROR_STOP=1 -d math81 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
+          psql -v ON_ERROR_STOP=1 -d math81 -f supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql
       - name: Boundary
         run: echo 'DISPOSABLE PG17 ONLY; NO production credentials, no live Supabase write, no deployment.'
