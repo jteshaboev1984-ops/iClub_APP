@@ -11,7 +11,10 @@ const stage=fs.readFileSync(path.resolve(args[stageArg+1]),'utf8');
 const m=stage.match(/v_items jsonb := '((?:''|[^'])*)'::jsonb;/);
 assert.ok(m,'staging fixture must use canonical generated staging payload');
 const payload=JSON.parse(m[1].replace(/''/g,"'"));
-assert.equal(payload.length,81);
+const expIndex=args.indexOf('--expect');
+const expected=expIndex<0?81:Number(args[expIndex+1]);
+assert.ok([2,81].includes(expected),'only existing 81 and owner-pinned two-item source fixtures are supported');
+assert.equal(payload.length,expected);
 assert.equal(new Set(payload.map(q=>q.old_id)).size,81);
 const codes=new Map();
 for(const q of payload)for(const d of q.diagnostics||[]){
@@ -120,6 +123,6 @@ sql.push("insert into public.practice_drill_answers_v4(session_id,question_id,us
 sql.push('commit;');
 const outFile=path.resolve(args[outArg+1]);
 fs.writeFileSync(outFile,sql.join('\n')+'\n',{flag:'wx',mode:0o600});
-console.log(JSON.stringify({fixture_old_versions:81,active_old_memberships:81,
+console.log(JSON.stringify({fixture_old_versions:expected,active_old_memberships:expected,
  diagnostic_catalog_codes:codes.size,old_in_progress_session_fixtures:2,
  status:'DISPOSABLE_SYNTHETIC_ONLY',protected_text_printed:false}));
