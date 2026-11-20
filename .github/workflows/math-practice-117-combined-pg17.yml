@@ -14,6 +14,7 @@ on:
       - 'scripts/math-practice-v2-117-bundle-fixture.cjs'
       - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
       - 'supabase/tests/math_practice_117_combined_transaction_pg17.sql'
+      - 'scripts/math-practice-v2-117-actual-renderer-chromium.cjs'
       - '.github/workflows/math-practice-117-combined-pg17.yml'
   workflow_dispatch:
 permissions:
@@ -87,6 +88,16 @@ jobs:
             -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d math117 \
             -f supabase/tests/math_practice_117_combined_transaction_pg17.sql
+      - name: Install ephemeral Chromium for exact authored Practice quiz renderer
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Actual quiz rendering of all 117, EN/RU/UZ, four mobile/desktop widths
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-117-actual-renderer-chromium.cjs
+          node scripts/math-practice-v2-117-actual-renderer-chromium.cjs
       - name: Remove private SQL generated from approved academic source
         if: always()
         run: |
