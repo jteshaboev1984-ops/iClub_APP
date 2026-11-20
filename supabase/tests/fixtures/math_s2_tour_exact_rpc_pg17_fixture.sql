@@ -192,7 +192,9 @@ GRANT EXECUTE ON FUNCTION public.submit_tour_answer_safe_v4(bigint,bigint,text,i
 GRANT USAGE ON SCHEMA public TO anon,authenticated,service_role;
 INSERT INTO public.seasons(id,season_no) VALUES (91,1),(92,2);
 INSERT INTO public.tours(id,subject_id,season_id,tour_no) VALUES
- (999201,5,92,1),(999101,5,91,1),(999301,4,92,1);
+ (999201,5,92,1),(999202,5,92,2),(999203,5,92,3),
+ (999204,5,92,4),(999205,5,92,5),(999206,5,92,6),(999207,5,92,7),
+ (999101,5,91,1),(999301,4,92,1);
 INSERT INTO public.questions(id,subject_id,qtype,correct_answer,is_active) VALUES
  (995001,5,'input','1/2',true),
  (995002,5,'input','4.5',true),
@@ -202,10 +204,22 @@ INSERT INTO public.questions(id,subject_id,qtype,correct_answer,is_active) VALUE
  (995006,5,'input','9/2',true),
  (995011,5,'input','1/2',true),
  (995021,4,'input','1/2',true);
+-- Total 28 invented S2 Math input samples, mirroring the real input count.
+-- Four fractional canonical strings and one decimal .5 canonical key;
+-- none of these are hidden production Tour keys.
+INSERT INTO public.questions(id,subject_id,qtype,correct_answer,is_active)
+ VALUES (995030,5,'input','3/4',true);
+INSERT INTO public.questions(id,subject_id,qtype,correct_answer,is_active)
+ SELECT n,5,'input',(n-995030)::text,true
+ FROM generate_series(995031,995052) AS n;
+
 INSERT INTO public.tour_questions(tour_id,question_id,is_active) VALUES
  (999201,995001,true),(999201,995002,true),(999201,995003,true),
  (999201,995004,true),(999201,995005,true),(999201,995006,true),
  (999101,995011,true),(999301,995021,true);
+INSERT INTO public.tour_questions(tour_id,question_id,is_active)
+ SELECT 999202 + ((id-995030) % 6), id,true
+ FROM public.questions WHERE id BETWEEN 995030 AND 995052;
 INSERT INTO public.tour_session_runtime_v4(attempt_id,user_id,question_ids,finalized_at)
  VALUES
  (996101,'11111111-1111-4111-8111-111111111111',
