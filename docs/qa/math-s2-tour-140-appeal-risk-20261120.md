@@ -1,0 +1,37 @@
+# Mathematics Season 2 Tours — 140-question appeal-risk checkpoint (2026-11-20)
+
+Scope: source-based academic and server read-only audit for canonical Issue #574. Current checked main 296bf21df09a808152b4ae4e153ddcec8aec85cd. Merged original content audit #7 is historical evidence, not today's launch authorization. The controlling current curriculum is Cambridge 9709 P1 (2026–2027) and the approved Complete Pure Mathematics 1 source map: Tour 1 Ch1; Tour 2 Ch2; Tour 3 Ch3; Tour 4 Ch4–5; Tour 5 Ch6–7; Tour 6 Ch8–9; Tour 7 Ch10. Do not revert to obsolete Tour Map v1.
+
+## Existing bank was REUSED; no new 140-item generation
+Fresh Supabase SELECT-only facts: seven Season 2 Mathematics Tour containers, all inactive and undated; 140 live links, 140 unique IDs, exactly 20 per Tour, 6 easy / 9 medium / 5 hard, 16 MCQ / 4 input, one hard image per Tour. Missing EN/RU/UZ stems, explanations, reference, time limit: 0. Missing or malformed MCQ options: 0. Direct question-ID overlap with Season 1 or current Math Practice: 0; repeated normalized English stem in this 140: 0.
+
+All 140 English stems/option arrays/keys/explanations received an additional model-assisted first-pass read; no new confirmed wrong EN key was found. This is NOT independent human mathematics or trilingual academic signoff. Numeric signatures matched across 140 EN/RU/UZ stem/options. Restricted mathematical-symbol check flagged ten explanatory notation differences; direct inspection showed shortened RU/UZ derivations or localized units in these ten. That is not proof of perfect semantics in all 140.
+
+Answer key frequencies A/B/C/D: Tour1 4/4/4/4; Tour2 4/4/4/4; Tour3 5/4/3/4; Tour4 4/4/4/4; Tour5 4/4/4/4; Tour6 4/4/4/4; Tour7 4/5/3/4. The blanket 4/4/4/4 claim in merged historical PR #7 no longer matches current source. Do not rearrange published choices just to change distribution.
+
+Approximate English stem cross-match against 655 previous Season1/Practice records produced 32 candidate pairs at normalized character 3-gram Dice >=0.80, including within-S2 pairs. A high similarity is a manual-independence review candidate, not proof of the same question/answer. Some known examples have different parameters and keys.
+
+### Non-secret question/order manifest fingerprints
+Tour1 daba380760f5ab182accf732871bbd32
+Tour2 1c6407c1f524068d60ee0a3ccd8b5c5d
+Tour3 86d1de9ccf5d25557246c2b15f347f54
+Tour4 08191ccaba6206f67c6c87d5e077e9fa
+Tour5 9384683bc6e9e25c2864b0365c41a872
+Tour6 c8061f853325d7c9c0fec4f045e6c5e4
+Tour7 dcadbf7a270335ac7d3d8acb7aec1b5e
+
+## Confirmed scoring defect (learner-impacting)
+Live public.iclub_eval_tour_question_safe_v4 source MD5: 7f564255956fbe61ab8d1a14cade9389.
+Live public.iclub_tour_input_is_correct_v4 source MD5: b1d4ca1a333c05c3018f0d71cd1b0cd1.
+
+The current general input scorer compares fractions as literal normalized strings instead of equal rational values. On actual Math S2 stored inputs, live SELECT-only score evidence: 28/28 canonical accepted, 0/4 mathematically equivalent doubled numerator/denominator fractions accepted, 0/1 equivalent fractional representation of a decimal accepted. Affected IDs: 6047, 6089, 6121, 6126, 6136. This is a justified potential appeal, not speculation.
+
+This isolated Draft stages an uninstalled SQL candidate at supabase/candidates/math_s2_tour_input_equivalence_v1_hold.sql and a read-only test at supabase/candidates/math_s2_tour_input_equivalence_v1_readonly_test.sql. The SQL candidate adds a private rational equivalence function and limits its use to current Season 2 Mathematics Tour membership. It pins the original evaluator source hash and preserves the original Chemistry branches, all other subjects, MCQ and Season1 behavior. No answer keys or protected stems in GitHub.
+
+## Release prerequisites (not silently waived)
+1. Execute the uninstalled candidate and test on DISPOSABLE PG17, with real signed JWT/PostgREST and Chromium; verify numeric equivalence, malformed and wrong input denial, cross-user access, retry and versioned history. **Current SHA has no verified PG17 execution yet.**
+2. Independent EN/RU/UZ academic checking of all 140 key/distractor uniqueness, diagrams, precision/format and the 32 similarity candidates; correct any found ambiguity in a history-safe future-only version. Do not manufacture new questions before checking existing valid content.
+3. Verify the seven live visual assets/rendering and actual Math-only 7x20 Tour gate: unique attempt, timers, anti-cheat, scores, ratings, certificates, season isolation, rollback. Owner alone chooses Tour dates and grants production GO.
+4. Keep Season 2 draft/undated. No main merge, live migration, learner history change, source publication or paid service authorized by this checkpoint.
+
+**Verdict: structural bank PASS; rational input scoring FAIL; final academic/security acceptance PENDING; Season2 release HOLD.**
