@@ -157,19 +157,30 @@ SELECT jsonb_build_object(
   'options_text_uz',(SELECT jsonb_agg(
     CASE WHEN k=ascii(p.new_key)-65 THEN 'SYN_CORRECT_UZ'
          ELSE 'SYN_DISTRACTOR_UZ_'||k END ORDER BY k) FROM generate_series(0,3) k)
- ) ORDER BY p.tour_no,p.order_no) FROM s2_planned_rows p WHERE p.fresh)
+ ) ORDER BY p.tour_no,p.order_no) FROM s2_planned_rows p WHERE p.fresh),
+ 'editorial_same_id_corrections',
+ jsonb_build_array(
+ jsonb_build_object('question_id',999107,'apply_before_112_mcq_permutation',true,'changes',jsonb_build_object('question_text_ru',jsonb_build_object('before','SYN_RU_1_7','after','SYN_CORRECTED_RU_1_7'))),
+ jsonb_build_object('question_id',999209,'apply_before_112_mcq_permutation',true,'changes',jsonb_build_object('options_text_ru',jsonb_build_object('before',jsonb_build_array('A_RU','B_RU','C_RU','D_RU'),'after',jsonb_build_array('A_RU','B_RU_EDIT','C_RU_EDIT','D_RU_EDIT')))),
+ jsonb_build_object('question_id',999307,'apply_before_112_mcq_permutation',true,'changes',jsonb_build_object('question_text_uz',jsonb_build_object('before','SYN_UZ_3_7','after','SYN_CORRECTED_UZ_3_7'))),
+ jsonb_build_object('question_id',999407,'apply_before_112_mcq_permutation',true,'changes',jsonb_build_object('question_text_ru',jsonb_build_object('before','SYN_RU_4_7','after','SYN_CORRECTED_RU_4_7'))),
+ jsonb_build_object('question_id',999507,'apply_before_112_mcq_permutation',true,'changes',jsonb_build_object('question_text_en',jsonb_build_object('before','SYN_EN_5_7','after','SYN_CORRECTED_EN_5_7'),'question_text_ru',jsonb_build_object('before','SYN_RU_5_7','after','SYN_CORRECTED_RU_5_7'),'question_text_uz',jsonb_build_object('before','SYN_UZ_5_7','after','SYN_CORRECTED_UZ_5_7'))),
+ jsonb_build_object('question_id',999607,'apply_before_112_mcq_permutation',true,'changes',jsonb_build_object('question_text_ru',jsonb_build_object('before','SYN_RU_6_7','after','SYN_CORRECTED_RU_6_7'))),
+ jsonb_build_object('question_id',999707,'apply_before_112_mcq_permutation',true,'changes',jsonb_build_object('question_text_en',jsonb_build_object('before','SYN_EN_7_7','after','SYN_CORRECTED_EN_7_7'),'question_text_ru',jsonb_build_object('before','SYN_RU_7_7','after','SYN_CORRECTED_RU_7_7'),'question_text_uz',jsonb_build_object('before','SYN_UZ_7_7','after','SYN_CORRECTED_UZ_7_7')))
+ )
 ) AS payload;
 DO $fixture_guard$
 DECLARE v_doc jsonb := (SELECT payload FROM pg_temp.math_s2_private_plan);
 BEGIN
  IF jsonb_array_length(v_doc->'mcq')<>112
  OR jsonb_array_length(v_doc->'localized_stem_replacements')<>4
+ OR jsonb_array_length(v_doc->'editorial_same_id_corrections')<>7
  OR (SELECT count(*) FROM public.tour_questions tq
      JOIN public.tours t ON t.id=tq.tour_id WHERE t.season_id=902 AND t.subject_id=5)<>140
  THEN RAISE EXCEPTION 'invented_bank_fixture_mismatch'; END IF;
 END $fixture_guard$;
 
--- This public code is run with the same shape of 112/4 payload as the private
+-- This public code is run with the same shape of 112/4/7 payload as the private
 -- owner-only file, but with wholly invented data and different example IDs.
 -- The template itself has mandatory ROLLBACK and cannot publish any contents.
 \i supabase/candidates/math_s2_tour_inplace_rehearsal_template_v1_hold.sql
