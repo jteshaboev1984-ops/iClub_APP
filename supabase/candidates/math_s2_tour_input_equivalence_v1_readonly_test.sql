@@ -14,14 +14,16 @@ WITH cases(label,reply,expected,should_pass) AS (
  ('unicode_minus','−1/2','-0.5',true),
  ('plus_sign','+4','4',true),
  ('fraction_negative_denom','1/-2','-0.5',true),
- ('near_decimal','0.3333333333','1/3',true),
+ ('near_decimal','0.3333333333','1/3',false),
  ('wrong_numerator','2/3','1/2',false),
  ('wrong_sign','-1/2','1/2',false),
  ('divide_by_zero','1/0','1/2',false),
  ('nonnumeric','drop table','1/2',false),
  ('unallowed_word','half','1/2',false),
  ('wrong_decimal','0.51','1/2',false),
- ('empty','','1/2',false)
+ ('empty','','1/2',false),
+ ('near_half_wrong','0.5000000001','1/2',false),
+ ('hundred_digit_exact','1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000/2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000','1/2',true)
 )
 SELECT count(*) AS cases_total,
        count(*) FILTER (WHERE private.iclub_math_s2_tour_numeric_equiv_v1(reply,expected)=should_pass) AS cases_pass,
@@ -93,16 +95,18 @@ BEGIN
      ('3/2','1.5',true),('0,5','1/2',true),
      (' 3 / 6 ','1/2',true),('−1/2','-0.5',true),
      ('+4','4',true),('1/-2','-0.5',true),
-     ('0.3333333333','1/3',true),
+     ('0.3333333333','1/3',false),
      ('2/3','1/2',false),('-1/2','1/2',false),
      ('1/0','1/2',false),('drop table','1/2',false),
      ('half','1/2',false),('0.51','1/2',false),
-     ('','1/2',false)
+     ('','1/2',false),
+     ('0.5000000001','1/2',false),
+     ('1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000/2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000','1/2',true)
   ) SELECT count(*),
     count(*) FILTER (WHERE private.iclub_math_s2_tour_numeric_equiv_v1(
         reply,expected) IS NOT DISTINCT FROM should_pass)
     INTO v_case_total,v_case_pass FROM cases;
-  IF v_case_total<>16 OR v_case_pass<>16 THEN
+  IF v_case_total<>18 OR v_case_pass<>18 THEN
     RAISE EXCEPTION 'MATH_S2_SCORER_FAILED: synthetic equivalence cases %/%',
       v_case_pass,v_case_total;
   END IF;
@@ -158,7 +162,7 @@ BEGIN
     'EXECUTE') THEN
     RAISE EXCEPTION 'Direct Tour answer oracle was exposed';
   END IF;
-  RAISE NOTICE 'MATH_S2_TOUR_SCORER_SQL_28_INPUT_16_SYNTHETIC_PASS';
+  RAISE NOTICE 'MATH_S2_TOUR_SCORER_SQL_28_INPUT_18_SYNTHETIC_PASS';
 END $acceptance$;
 
 ROLLBACK;
