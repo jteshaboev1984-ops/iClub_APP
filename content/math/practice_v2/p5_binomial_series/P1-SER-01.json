@@ -664,7 +664,7 @@
       ],
       "correct_answer": "A",
       "explanation": {
-        "en": "The x² coefficient is 6 from (1+x)⁴ times 1, plus 4 from the x term multiplied by −x: 6−4=2.",
+        "en": "The x² coefficient is 6 from (1+x)⁴ multiplied by 1, minus 4 from multiplying 4x by −x: 6−4=2.",
         "ru": "Коэффициент при x²: 6 из (1+x)⁴, умноженное на 1, и −4 от члена 4x, умноженного на −x. Получаем 6−4=2.",
         "uz": "x² koeffitsiyenti (1+x)⁴ dan 6·1 va 4x ni −x ga ko‘paytirishdan −4: 6−4=2."
       },
