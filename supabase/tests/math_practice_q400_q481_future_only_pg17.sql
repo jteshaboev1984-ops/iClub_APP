@@ -62,7 +62,7 @@ BEGIN
  -- One altered old hash should deny the whole batch atomically.
  BEGIN
   PERFORM private.math_practice_future_only_activate_v1(v_release,
-    jsonb_set(v_pairs,ARRAY['9','old_hash'],to_jsonb(repeat('0',64))));
+    jsonb_set(v_pairs,ARRAY['1','old_hash'],to_jsonb(repeat('0',64))));
   RAISE EXCEPTION 'hash_drift_accepted';
  EXCEPTION WHEN raise_exception THEN
   GET STACKED DIAGNOSTICS v_err=message_text;
