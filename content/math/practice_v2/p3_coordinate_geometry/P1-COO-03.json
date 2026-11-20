@@ -400,23 +400,23 @@
         {
           "key": "C",
           "text": {
-            "en": "2x−3y=−19",
-            "ru": "2x−3y=−19",
-            "uz": "2x−3y=−19"
-          },
-          "diagnostic_code": "COO03_PARALLEL"
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "3x−2y=−16",
             "ru": "3x−2y=−16",
             "uz": "3x−2y=−16"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "2x−3y=−19",
+            "ru": "2x−3y=−19",
+            "uz": "2x−3y=−19"
+          },
+          "diagnostic_code": "COO03_PARALLEL"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "C",
       "explanation": {
         "en": "Parallel lines can be written with the same x and y coefficients: 3x−2y=c. Substituting (−2,5) gives c=3(−2)−2(5)=−16.",
         "ru": "Параллельные прямые можно записать с одинаковыми коэффициентами при x и y: 3x−2y=c. Подставляем (−2,5): c=3(−2)−2(5)=−16.",
