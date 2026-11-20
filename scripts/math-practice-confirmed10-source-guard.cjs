@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// #574: exact 10-item owner-priority Mathematics Practice micro-release.
+// #574: 10 already-published corrections + 2 new isolated academic fixes.
 // Check all 495 authored questions vs real original main; fail on any other
 // key/text/locale/difficulty change. No protected solution printed in CI.
 const assert=require('node:assert/strict');
@@ -13,6 +13,7 @@ const expected=new Map([
  [7624,['options','correct_answer']],[7662,['options','correct_answer']],
  [7724,['question']],[7791,['explanation']],
  [7797,['options','correct_answer']],[7881,['options','correct_answer']],
+ [7884,['question']],[7965,['explanation']],
  [7893,['options']],[7926,['options','correct_answer']],
  [7937,['options','correct_answer']],[7970,['question','options','correct_answer']]
 ]);
@@ -76,6 +77,32 @@ for(const folder of folderList){
      assert.match(q.question.ru,/одними и теми же двумя лучами/);
      assert.match(q.question.uz,/bir xil ikkita chegaralovchi nurga/);
     }
+    if(id===7884){
+     assert.equal(q.correct_answer,before.correct_answer,'Q400 math key unchanged');
+     assert.ok(eq(q.options,before.options),'Q400 distractors unchanged');
+     assert.ok(eq(q.explanation,before.explanation),'Q400 solution unchanged');
+     assert.match(q.question.en,/complete set of x-values where dy\/dx>0/);
+     assert.match(q.question.ru,/все значения x, при которых dy\/dx>0/);
+     assert.match(q.question.uz,/barcha x qiymatlarini/);
+     // dy/dx=2x-4: 2 is excluded; one valid proper subset is not the full answer.
+     const derivative=x=>2*x-4;
+     assert.equal(derivative(2),0);
+     assert.ok(derivative(3)>0&&derivative(1)<0);
+    }
+    if(id===7965){
+     assert.equal(q.correct_answer,before.correct_answer,'Q481 math key unchanged');
+     assert.ok(eq(q.options,before.options),'Q481 options unchanged');
+     assert.ok(eq(q.question,before.question),'Q481 task unchanged');
+     for(const lang of languages){
+      assert.ok(q.explanation[lang].includes('√(36−24)'),
+       'Q481 explicit discriminant grouping required in '+lang);
+      assert.ok(!q.explanation[lang].includes('√36−24'));
+     }
+     // x²-6x+6=0; both candidate roots satisfy the equation.
+     const residual=x=>x*x-6*x+6;
+     assert.ok(Math.abs(residual(3+Math.sqrt(3)))<1e-12);
+     assert.ok(Math.abs(residual(3-Math.sqrt(3)))<1e-12);
+    }
     if(id===7970)for(const lang of languages){
      assert.notEqual(before.question[lang],q.question[lang]);
      assert.ok(!/(?:Enter k|Введите k|k ni kiriting)/.test(q.question[lang]));
@@ -97,7 +124,7 @@ for(const folder of folderList){
   }
  }
 }
-assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,10);
+assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,12);
 assert.equal(found.size,expected.size);assert.equal(mcq,277);assert.equal(input,218);
 const all={A:0,B:0,C:0,D:0};
 for(let practice=1;practice<=7;practice++){
@@ -122,6 +149,6 @@ for(let practice=1;practice<=7;practice++){
 assert.deepEqual(all,{A:68,B:70,C:71,D:68},
  'correct-answer placement deviates from reviewed 277-question distribution');
 console.log(JSON.stringify({source_guard:'PASS',authored:495,mcq:277,input:218,
- corrected:10,unrelated_change_count:0,practice_batches:7,
+ corrected:12,published_prior:10,new_source_proposals:2,unrelated_change_count:0,practice_batches:7,
  anti_pattern_cycles:0,retained_option_semantics:true,
  answer_distribution:'balanced',protected_keys_printed:false}));
