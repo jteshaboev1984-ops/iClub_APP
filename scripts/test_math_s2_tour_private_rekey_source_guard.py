@@ -74,6 +74,8 @@ class TestMathS2Rekey(unittest.TestCase):
         self.assertEqual(result["tours"],7)
         self.assertEqual(result["semantic_replacements"],4)
         self.assertFalse(result["release_authorized"])
+        self.assertEqual(result["new_question_rows_to_insert"],0)
+        self.assertTrue(result["inplace_candidate_on_unissued_s2_only"])
 
     def test_duplicate_source(self):
         self.doc["per_question_rekey"][1]["old_question_id"]=self.doc["per_question_rekey"][0]["old_question_id"]
@@ -105,6 +107,56 @@ class TestMathS2Rekey(unittest.TestCase):
     def test_published_replacement_rejected(self):
         self.doc["replacements_after_rekey"][0]["new_quality_status"]="published"
         with self.assertRaises(Hold): check(self.doc)
+
+    def test_new_question_row_prohibited(self):
+        self.doc["replacements_after_rekey"][0]["new_question_id"]=999999
+        with self.assertRaises(Hold): check(self.doc)
+
+    def test_inplace_112_rekey_preserves_all_question_ids_and_s1(self):
+        check(self.doc)
+        def make_options(id_,lang):
+            return [f"synthetic_{id_}_{lang}_{i}" for i in range(4)]
+        # Invented S1 and input rows establish unchanged scope.
+        s1 = {999100+i: {"answer": "A", "type": "mcq"} for i in range(20)}
+        inputs = {999200+i: {"answer": str(i), "type": "input"} for i in range(28)}
+        table = {
+            q["old_question_id"]: {
+                "key": q["old_key"],
+                "options": {lang:make_options(q["old_question_id"],lang)
+                            for lang in ("en","ru","uz")},
+                "type":"mcq",
+            }
+            for q in self.doc["per_question_rekey"]
+        }
+        original = copy.deepcopy(table)
+        table.update(s1)
+        table.update(inputs)
+        original_unrelated = {**copy.deepcopy(s1), **copy.deepcopy(inputs)}
+        before_ids = set(table)
+        replacements = {r["replacement_for_question_id"]:r
+                        for r in self.doc["replacements_after_rekey"]}
+        for q in self.doc["per_question_rekey"]:
+            id_ = q["old_question_id"]
+            old = original[id_]
+            perm = q["option_indices_new_to_old"]
+            rep = replacements.get(id_)
+            new_options = {}
+            for lang in ("en","ru","uz"):
+                if rep:
+                    new_options[lang] = list(rep["options_text_"+lang])
+                else:
+                    new_options[lang] = [old["options"][lang][i] for i in perm]
+                    self.assertEqual(
+                        old["options"][lang][ord(q["old_key"])-65],
+                        new_options[lang][ord(q["new_key"])-65])
+            table[id_]["key"] = q["new_key"]
+            table[id_]["options"] = new_options
+        self.assertEqual(len(table),160)
+        self.assertEqual(set(table),before_ids)
+        self.assertEqual({k:table[k] for k in original_unrelated}, original_unrelated)
+        self.assertEqual(sum(q["key"] in "ABCD" for q in table.values()
+                             if q["type"]=="mcq"),132)
+        self.assertEqual(len(replacements),4)
 
     def test_cross_tour_replacement_rejected(self):
         self.doc["replacements_after_rekey"][0]["target_tour"]=7
