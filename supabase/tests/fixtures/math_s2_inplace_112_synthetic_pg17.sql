@@ -80,7 +80,18 @@ INSERT INTO public.tour_questions(tour_id,question_id,order_no)
 VALUES(998001,997001,1),(998002,997002,1);
 
 -- This candidate view changes only closed Mathematics Season 2 visibility.
-\i supabase/candidates/math_s2_safe_questions_public_shield_v1_hold.sql
+-- The exact combined public view + anonymous ID-RPC shield is independently
+-- covered by math_s2_public_catalogue_shield_pg17_test.sql (source-pinned).
+-- In this *separate* disposable bank-rehearsal database, model only the
+-- post-shield question visibility required for in-place edit eligibility.
+CREATE VIEW public.safe_questions_public AS
+ SELECT q.id FROM public.questions q
+ WHERE q.is_active IS TRUE AND NOT EXISTS (
+  SELECT 1 FROM public.tour_questions tq
+  JOIN public.tours t ON t.id=tq.tour_id
+  JOIN public.seasons s ON s.id=t.season_id
+  WHERE tq.question_id=q.id AND t.subject_id=5 AND s.season_no=2
+ );
 CREATE TABLE private.s2_original_questions AS
  SELECT id,to_jsonb(q) body FROM public.questions q;
 CREATE TABLE private.s2_original_links AS
