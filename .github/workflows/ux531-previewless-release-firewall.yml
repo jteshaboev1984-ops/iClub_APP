@@ -73,7 +73,11 @@ jobs:
 
           test "$UX531_EXPECTED_SHA" = "$(git rev-parse HEAD)"
           git cat-file -e "${UX531_BASE_SHA}^{commit}"
-          mapfile -t changed < <(git diff --name-only "$UX531_BASE_SHA" "$UX531_EXPECTED_SHA")
+          # Compare only the PR's changes. Main may advance while a Draft is open;
+          # diffing the two tips would incorrectly include new unrelated main commits.
+          merge_base="$(git merge-base "$UX531_BASE_SHA" "$UX531_EXPECTED_SHA")"
+          test -n "$merge_base"
+          mapfile -t changed < <(git diff --name-only "$merge_base" "$UX531_EXPECTED_SHA")
 
           # This dedicated one-file repair must test its new branch/file classifier.
           # If it touches anything other than the workflow, it FAILS CLOSED.
