@@ -65,8 +65,24 @@ for(const file of files){
     assert.equal(before.options.filter(o=>o.diagnostic_code===null).length,1);
     assert.equal(q.options.find(o=>o.key===q.correct_answer)?.diagnostic_code,null);
     assert.equal(before.options.find(o=>o.key===before.correct_answer)?.diagnostic_code,null);
-    assert.ok(eq({...q,options:[],correct_answer:null},
-                 {...before,options:[],correct_answer:null}),
+    const oldNoOptions={...before,options:[],correct_answer:null};
+    if(id===7970){
+      const approvedInstructionTails={
+        en:['. Enter k.','. Which value of k is correct?'],
+        ru:['. Введите k.','. Какое значение k верно?'],
+        uz:['. k ni kiriting.','. k ning qaysi qiymati to‘g‘ri?']
+      };
+      const exactSafeStem={...before.question};
+      for(const [lang,[wrong,corrected]] of Object.entries(approvedInstructionTails)){
+        assert.ok(exactSafeStem[lang].endsWith(wrong),
+          'published old MCQ instruction differs from prior approved snapshot');
+        exactSafeStem[lang]=exactSafeStem[lang].slice(0,-wrong.length)+corrected;
+        assert.equal(q.question[lang],exactSafeStem[lang],
+          'edited MCQ instruction contains unsanctioned mathematics or locale change');
+      }
+      oldNoOptions.question=exactSafeStem;
+    }
+    assert.ok(eq({...q,options:[],correct_answer:null},oldNoOptions),
       'stem, difficulty, solution, time, source or evaluator drift');
     const semantic=o=>JSON.stringify(stable({text:o.text,diagnostic_code:o.diagnostic_code}));
     assert.deepEqual(q.options.map(semantic).sort(),before.options.map(semantic).sort(),
@@ -103,6 +119,12 @@ for(const [id,q] of byId){
   let pool=pools.get(p)||[];pool.push({id,q});pools.set(p,pool);
   if(q.qtype==='input'){input++;continue;}
   assert.equal(q.qtype,'mcq');mcq++;
+  assert.ok(!/\\b(?:enter|type in|write down|provide your answer|give your answer)\\b/i.test(q.question.en),
+    'MCQ stem asks learner to type free input rather than choose an option: '+id);
+  assert.ok(!/введите|вписа/i.test(q.question.ru),
+    'RU MCQ stem asks for input rather than choosing an option: '+id);
+  assert.ok(!/\\bkiriting\\b/i.test(q.question.uz),
+    'UZ MCQ stem asks for input rather than choosing an option: '+id);
   assert.deepEqual(q.options.map(o=>o.key),letters);
   assert.ok(letters.includes(q.correct_answer));
   assert.equal(q.options.filter(o=>o.key===q.correct_answer).length,1);
