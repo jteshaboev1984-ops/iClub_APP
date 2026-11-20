@@ -1,0 +1,38 @@
+name: Mathematics Practice itemwise corrections, history-safe source gate
+on:
+  push:
+    branches:
+      - fix/math-practice-itemwise-review-20261120
+  pull_request:
+    branches:
+      - qa/math-practice-112-trilingual-semantic-oracles-20261120
+    paths:
+      - 'content/math/practice_v2/p5_binomial_series/P1-SER-01.json'
+      - 'content/math/practice_v2/p6_differentiation/P1-DIF-04.json'
+      - 'content/math/practice_v2/p6_differentiation/P1-DIF-06.json'
+      - 'scripts/math-practice-v2-itemwise-corrections.cjs'
+      - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
+      - '.github/workflows/math-practice-itemwise-corrections.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-corrected-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Independently resolve three itemwise corrections
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-itemwise-corrections.cjs
+          node scripts/math-practice-v2-itemwise-corrections.cjs
+      - name: Regression for impacted Mathematics Practice authored candidate set
+        run: |
+          set -euo pipefail
+          node scripts/math-practice-v2-112-trilingual-independent-proof.cjs
+          node scripts/math-practice-v2-editorial31-independent-oracles.cjs
+      - name: Publication boundary
+        run: echo 'DRAFT SOURCE ONLY; no writes to hosted questions/history, no academic publish, no main/Vercel release.'
