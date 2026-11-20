@@ -1,0 +1,149 @@
+name: Mathematics Practice future-only atomic switch PG17
+on:
+  push:
+    branches:
+      - qa/math-practice-future-only-atomic-switch-pg17-20261120
+  pull_request:
+    branches:
+      - qa/math-practice-future-only-81-contenthash-pin-20261119
+    paths:
+      - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
+      - 'scripts/math-practice-v2-future-only-81-stage-generator.cjs'
+      - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
+      - 'scripts/math-practice-v2-future-only-signed-http.cjs'
+      - 'scripts/math-practice-v2-future-only-chromium-http.cjs'
+      - 'supabase/tests/math_practice_future_only_signed_http_seed_pg17.sql'
+      - 'supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql'
+      - 'supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql'
+      - 'supabase/tests/math_practice_future_only_atomic_switch_pg17.sql'
+      - '.github/workflows/math-practice-v2-future-only-atomic-pg17.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgresql-17:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ephemeral-fixture-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: ephemeral-fixture-only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Generate all 81 staged versions without printing academic content
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-future-only-81-stage-generator.cjs
+          private_dir="$(mktemp -d)"
+          chmod 700 "$private_dir"
+          trap 'rm -rf "$private_dir"' EXIT
+          node scripts/math-practice-v2-future-only-81-stage-generator.cjs --out "$private_dir/stage.sql"
+          node - "$private_dir/stage.sql" <<'NODE'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const sql=fs.readFileSync(process.argv[2],'utf8');
+          assert.ok(sql.includes('jsonb_array_length(v_items)<>81'));
+          assert.ok(sql.includes("qa_math_status,qa_language_status,qa_technical_status,qa_tour_separation_status"));
+          assert.ok(sql.includes("'pending','pending','pending','pending'"));
+          assert.ok(sql.includes("v_new_id,v_old_link.order_no,false"));
+          assert.ok(!sql.includes('delete from public.practice_answers'));
+          console.log('PASS 81 original staged questions, inactive memberships and pending QA; no protected content printed');
+          NODE
+      - name: Run actual future-only swap and rollback in disposable PG17
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_atomic_switch_pg17.sql
+      - name: Execute all 81 actual authored staging records on a second disposable PG17 database
+        run: |
+          set -euo pipefail
+          temp_dir="$(mktemp -d)"
+          chmod 700 "$temp_dir"
+          trap 'rm -rf "$temp_dir"' EXIT
+          node --check scripts/math-practice-v2-future-only-81-test-fixture.cjs
+          node scripts/math-practice-v2-future-only-81-stage-generator.cjs --out "$temp_dir/stage.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs --stage "$temp_dir/stage.sql" --out "$temp_dir/fixture.sql"
+          createdb -T template0 math81
+          psql -v ON_ERROR_STOP=1 -d math81 -f "$temp_dir/fixture.sql"
+          psql -v ON_ERROR_STOP=1 -d math81 -f "$temp_dir/stage.sql"
+          psql -v ON_ERROR_STOP=1 -d math81 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
+          psql -v ON_ERROR_STOP=1 -d math81 -f supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql
+      - name: Prepare genuine v5 runtime and versioned learner sessions in disposable PG17
+        run: |
+          set -euo pipefail
+          createdb -T template0 practice_http
+          export PGDATABASE=practice_http
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_fixture.sql
+          for file in \
+            supabase/migrations/20261007002000_math_practice_v2_unicode_minus_normalization_v1.sql \
+            supabase/migrations/20261007003000_math_practice_v2_close_legacy_answer_oracles_v1.sql \
+            supabase/migrations/20261007004000_math_practice_v2_metadata_foundation_v1.sql \
+            supabase/migrations/20261007005000_math_practice_v2_topic_drill_pool_gate_v1.sql \
+            supabase/migrations/20261007006000_math_practice_v2_selector_v5.sql \
+            supabase/migrations/20261007006500_math_practice_v2_current_mistakes_v5.sql \
+            supabase/migrations/20261007006700_math_practice_v2_deterministic_feedback_v5.sql \
+            supabase/migrations/20261118122500_math_practice_v2_literal_answer_delimiter_v1.sql; do
+            psql -v ON_ERROR_STOP=1 -f "$file"
+          done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_matrix.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_signed_http_seed_pg17.sql
+      - name: Start real local signed JWT PostgREST for synthetic learner role
+        run: |
+          set -euo pipefail
+          secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$secret"
+          echo "PRACTICE_FUTURE_ONLY_JWT_SECRET=$secret" >> "$GITHUB_ENV"
+          echo "PRACTICE_FUTURE_ONLY_ISOLATED=true" >> "$GITHUB_ENV"
+          echo "PGDATABASE=practice_http" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+          docker run -d --rm --name iclub-math-future-only-pgrst --network host \
+            -e PGRST_DB_URI="postgres://postgres:ephemeral-fixture-only@127.0.0.1:5432/practice_http" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$secret" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 35); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then exit 0; fi
+            sleep 2
+          done
+          docker logs --tail 20 iclub-math-future-only-pgrst
+          exit 1
+      - name: Install ephemeral Chromium (no production browser session)
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Browser test real signed v5 NEW version before rollback
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-future-only-chromium-http.cjs
+          node scripts/math-practice-v2-future-only-chromium-http.cjs published
+      - name: Verify real signed JWT PostgREST v5 before and after versioned rollback
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-future-only-signed-http.cjs
+          node scripts/math-practice-v2-future-only-signed-http.cjs
+      - name: Browser test real signed v5 OLD version after rollback
+        run: |
+          set -euo pipefail
+          node scripts/math-practice-v2-future-only-chromium-http.cjs rollback
+      - name: Boundary
+        run: echo 'DISPOSABLE PG17 ONLY; NO production credentials, no live Supabase write, no deployment.'
