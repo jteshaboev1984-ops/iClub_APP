@@ -104,9 +104,10 @@ begin
        or v_new_meta.qa_language_status<>'passed'
        or v_new_meta.qa_technical_status<>'passed'
        or v_new_meta.qa_tour_separation_status<>'passed'
-       or v_new_meta.content_key<>v_old_meta.content_key||
-         case when p_release='math_p1_practice_v2_fix_20261120'
-              then '-V20261120' else '-V20261120Q400Q481' end
+       or (p_release='math_p1_practice_v2_fix_20261120'
+         and v_new_meta.content_key<>v_old_meta.content_key||'-V20261120')
+       or (p_release='math_p1_practice_v2_q400_q481_20261120'
+         and v_new_meta.content_key<>v_old_meta.content_key||'-V20261120Q400Q481')
     then
       raise exception 'future_only_version_identity_or_hash_mismatch';
     end if;
