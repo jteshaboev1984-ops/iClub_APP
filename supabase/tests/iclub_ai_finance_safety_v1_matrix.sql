@@ -16,6 +16,14 @@ DECLARE
 BEGIN
  IF (SELECT enabled FROM private.iclub_ai_all_route_spend_control_v1 WHERE singleton=1) IS DISTINCT FROM false THEN
   RAISE EXCEPTION 'New global spending gate did not default OFF'; END IF;
+ -- Test-phase invariant: deliberately tiny local caps must not throttle
+ -- isolated rehearsals while the shared gate is OFF.
+ -- Disposable PG17 transaction only; production flags remain untouched.
+ UPDATE private.iclub_ai_all_route_spend_control_v1
+ SET enabled=false,max_day_microusd=1,max_lifetime_microusd=1
+ WHERE singleton=1;
+ IF private.iclub_ai_all_route_budget_allowed_v1(10000) IS DISTINCT FROM true THEN
+  RAISE EXCEPTION 'Disabled shared budget incorrectly throttles synthetic tests'; END IF;
  IF has_function_privilege('anon','public.mark_exam_prep_ai_provider_dispatched_service_v1(uuid)','EXECUTE')
  OR has_function_privilege('authenticated','public.mark_practice_ai_provider_dispatched_service_v1(uuid)','EXECUTE')
  OR has_function_privilege('authenticated','private.iclub_ai_all_route_budget_allowed_v1(bigint)','EXECUTE') THEN
