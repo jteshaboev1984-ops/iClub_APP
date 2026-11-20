@@ -13,7 +13,7 @@ assert.ok(m,'staging fixture must use canonical generated staging payload');
 const payload=JSON.parse(m[1].replace(/''/g,"'"));
 const expIndex=args.indexOf('--expect');
 const expected=expIndex<0?10:Number(args[expIndex+1]);
-assert.ok([10].includes(expected),'only pinned 2/3/31/81/117 future-only source fixtures are supported');
+assert.ok([2,3,10].includes(expected),'only pinned 2, 3 or 10-item future-only draft/release batches supported');
 assert.equal(payload.length,expected);
 assert.equal(new Set(payload.map(q=>q.old_id)).size,expected);
 // Optional exact-parent authored semantic fixture: old option meanings remain
@@ -159,11 +159,18 @@ if(codes.size){
  'feedback_ru,feedback_uz,feedback_en,next_action_ru,next_action_uz,next_action_en,'+
  'approval_status,is_runtime_allowed) values\n'+drows.join(',\n')+';');
 }
-const first=payload[0].old_id,second=payload[1].old_id;
+const first=payload[0].old_id,second=payload[1].old_id,
+ third=expected===3?payload[2].old_id:
+       expected===10?(payload.find(q=>q.old_id===7754)?.old_id??null):null;
+// The already published historic ten do not include Q270 and must continue
+// to pass their independent fixture; the newly proposed ten do include Q270.
+if(expected===10&&payload.some(q=>q.old_id===7754))
+ assert.equal(third,7754,'Q270 historical version must be fixture-covered');
 sql.push("insert into public.practice_sessions_v4 values(5001,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',5,array["+first+","+second+"],'in_progress');");
 sql.push("insert into public.practice_session_answers_v4(session_id,question_id,user_answer,is_correct) values(5001,"+first+",'old',true);");
-sql.push("insert into public.practice_drill_sessions_v4 values(6001,'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',5,array["+second+"],'in_progress');");
+sql.push("insert into public.practice_drill_sessions_v4 values(6001,'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',5,array["+second+(third===null?'':','+third)+"],'in_progress');");
 sql.push("insert into public.practice_drill_answers_v4(session_id,question_id,user_answer,is_correct) values(6001,"+second+",'old',true);");
+if(third!==null)sql.push("insert into public.practice_drill_answers_v4(session_id,question_id,user_answer,is_correct) values(6001,"+third+",'old',true);");
 sql.push('commit;');
 const outFile=path.resolve(args[outArg+1]);
 fs.writeFileSync(outFile,sql.join('\n')+'\n',{flag:'wx',mode:0o600});

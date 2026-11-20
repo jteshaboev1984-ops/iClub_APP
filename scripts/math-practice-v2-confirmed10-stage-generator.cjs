@@ -1,17 +1,25 @@
 #!/usr/bin/env node
 'use strict';
-// #574: stage ONLY 10 independently proven Mathematics Practice content corrections
-// with pinned original hashes, without editing historical answers. Reuses #599
+// #574: stage an explicitly selected 10-item published batch OR the isolated
+// Q400/Q481, Q089/Q202/Q226 legacy draft checks or one consolidated ten-item cohort. Reuses #599
 // proven private future-only version and rollback contract.
 // NEVER commit the generated SQL or execute on hosted Supabase without the
 // owner-approved cutover. Does not grant academic QA or publish any question.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
-const release='math_p1_practice_v2_fix_20261120',suffix='-V20261120';
 const args=process.argv.slice(2);
-const mode='hotfix10';
-const specs=[
+const batchArg=args.indexOf('--batch');
+const mode=batchArg>=0?args[batchArg+1]:'hotfix10';
+const releases={
+ hotfix10:{name:'math_p1_practice_v2_fix_20261120',suffix:'-V20261120'},
+ q400q481:{name:'math_p1_practice_v2_q400_q481_20261120',suffix:'-V20261120Q400Q481'},
+ q089q202q226:{name:'math_p1_practice_v2_q089_q202_q226_20261120',suffix:'-V20261120Q089Q202Q226'},
+ pending10:{name:'math_p1_practice_v2_pending10_20261120',suffix:'-V20261120PENDING10'}
+};
+assert.ok(Object.hasOwn(releases,mode),'unsupported governed release batch');
+const release=releases[mode].name,suffix=releases[mode].suffix;
+const baselineSpecs=[
  {id:7624,code:'P1-FUN-08',file:'p2_functions/P1-FUN-08.json',old_hash:'b0ccf462b7bafa14abfcf88940a4a5a878b96ec0b7a4a161b558ea812fdb0d67'},
  {id:7662,code:'P1-COO-03',file:'p3_coordinate_geometry/P1-COO-03.json',old_hash:'4361c8f4aaa539da3d0edee194298c83b114a9cdcc8030571db0d46c4dd266a7'},
  {id:7724,code:'P1-CIR-03',file:'p4_circular_trigonometry/P1-CIR-03.json',old_hash:'9a753b585a39471adc75010f0622dbe3f7c1e00a262b864cb2ed4eec6b75d16e'},
@@ -23,7 +31,41 @@ const specs=[
  {id:7937,code:'P1-INT-02',file:'p7_integration/P1-INT-02.json',old_hash:'43349ae00988b83dc61d827318d6d2b50c7940d1f9a698686ce2887bf3031985'},
  {id:7970,code:'P1-INT-05',file:'p7_integration/P1-INT-05.json',old_hash:'c45c280840f3c960e05290bf45dee920b17dc67ead5b5c759f942e8770256636'}
 ];
-const expectedCount=10;
+// Pinned hosted read-only original hash snapshots, checked on 2026-11-20.
+const nextTwo=[
+ {id:7884,code:'P1-DIF-05',file:'p6_differentiation/P1-DIF-05.json',
+  old_hash:'32b8172779a666e62e031a6b6488b2ecf0e6e4c382e9000ecb417b54da49eaff'},
+ {id:7965,code:'P1-INT-04',file:'p7_integration/P1-INT-04.json',
+  old_hash:'600d6bd3df9bc1409c72ece9fd249095b44101858c378d040b84b36ce9b5201e'}
+];
+const nextThree=[
+ {id:7573,code:'P1-FUN-03',file:'p2_functions/P1-FUN-03.json',
+  old_hash:'2be7d4b6e952e591890789d0870e6dca5519353c4b8b0a9c718f09454c437ec1'},
+ {id:7686,code:'P1-COO-05',file:'p3_coordinate_geometry/P1-COO-05.json',
+  old_hash:'6efedc3b71f46e88e9084c021cd0e5b11ba4bdb8009a38b0100eb0a05a425289'},
+ {id:7710,code:'P1-CIR-02',file:'p4_circular_trigonometry/P1-CIR-02.json',
+  old_hash:'19928acd031087d741fe251b9fc4bb6f7b0f11e4840d89a61133a8ad3fe7feb6'}
+];
+// These five original live hashes were checked SELECT-only on 2026-11-20.
+const decimalFive=[
+ {id:7506,code:'P1-QUA-02',file:'p1_quadratics/P1-QUA-02.json',
+  old_hash:'f3d5b3a0c71cf4cd6cb5c04f3acac038f44985b1e10f4f4d5898b9e49971b79a'},
+ {id:7754,code:'P1-TRI-03',file:'p4_circular_trigonometry/P1-TRI-03.json',
+  old_hash:'62624dc52cfc7d8cc4858da517213efb44a849644c3f9258d52efdf072f235a5'},
+ {id:7761,code:'P1-TRI-04',file:'p4_circular_trigonometry/P1-TRI-04.json',
+  old_hash:'435daca251d04e28cae53db5a20047f76edc2586a92eb30860e97971a89b499e'},
+ {id:7809,code:'P1-SER-03',file:'p5_binomial_series/P1-SER-03.json',
+  old_hash:'5fcb36c761ecc3b03ea10dfe3c62650bc4ee5543c59d54b9f9d41dea970633b2'},
+ {id:7835,code:'P1-SER-05',file:'p5_binomial_series/P1-SER-05.json',
+  old_hash:'55f106f7678a4695de53082a7ea86a3f2395b5e17bf13142ff304752a99eff1f'}
+];
+const pending10=[...decimalFive,...nextThree,...nextTwo].sort((a,b)=>a.id-b.id);
+assert.deepEqual(pending10.map(x=>x.id),
+ [7506,7573,7686,7710,7754,7761,7809,7835,7884,7965]);
+const specs=mode==='hotfix10'?baselineSpecs:
+  mode==='q400q481'?nextTwo:
+  mode==='q089q202q226'?nextThree:pending10;
+const expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
 const hash=x=>crypto.createHash('sha256').update(JSON.stringify(stable(x))).digest('hex');

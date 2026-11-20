@@ -15,9 +15,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
-        "en": "For y=x²−4x+7, on which interval is the function increasing?",
-        "ru": "Для y=x²−4x+7 на каком интервале функция возрастает?",
-        "uz": "y=x²−4x+7 funksiya qaysi intervalda o‘sadi?"
+        "en": "For y=x²−4x+7, which option gives the complete set of x-values where dy/dx>0?",
+        "ru": "Для y=x²−4x+7 какой вариант задаёт все значения x, при которых dy/dx>0?",
+        "uz": "y=x²−4x+7 uchun dy/dx>0 bo‘ladigan barcha x qiymatlarini qaysi javob ifodalaydi?"
       },
       "options": [
         {
