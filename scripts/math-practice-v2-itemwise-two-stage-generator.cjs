@@ -27,9 +27,54 @@ const approvedGroups={
    old_hash:'43349ae00988b83dc61d827318d6d2b50c7940d1f9a698686ce2887bf3031985'}
  ]
 };
+// Exactly the 31 earlier mathematics-editorial equal-key corrections.
+// Owner requires that even text-only edits with prior answers never overwrite
+// the published question; all 31 stage as NEW inactive question IDs.
+function editorial31SourceSpecs(){
+ const contract=fs.readFileSync(path.join(root,
+   'scripts/math-practice-v2-editorial-future-only-contract.cjs'),'utf8');
+ function readSet(name){
+  const match=contract.match(new RegExp('const '+name+' = new Set\\(\\[([^\\]]+)\\]\\)'));
+  assert.ok(match,'missing canonical 112/81 source manifest');
+  return new Set(match[1].split(',').map(x=>Number(x.trim())));
+ }
+ const all=readSet('EXPECTED_IDS'),substantive=readSet('FUTURE_VERSION_REQUIRED');
+ assert.equal(all.size,112);assert.equal(substantive.size,81);
+ const ids=[...all].filter(id=>!substantive.has(id)).sort((a,b)=>a-b);
+ assert.equal(ids.length,31);
+ const pin=fs.readFileSync(path.join(root,
+   'supabase/preflight/math_practice_v2_31_editorial_contenthash_pin_readonly.sql'),'utf8');
+ const pins=[...pin.matchAll(/\((\d+)::bigint,'([a-f0-9]{64})'::text\)/g)]
+   .map(x=>[Number(x[1]),x[2]]);
+ assert.equal(pins.length,31,'exact live 31 hash pin required');
+ const expected=new Map(pins);
+ assert.deepEqual([...expected.keys()],ids,'source diff must match live pin IDs');
+ const byId=new Map();
+ const bank=path.join(root,'content/math/practice_v2');
+ for(const dir of fs.readdirSync(bank,{withFileTypes:true})
+     .filter(x=>x.isDirectory()).map(x=>x.name)){
+  for(const file of fs.readdirSync(path.join(bank,dir))
+      .filter(x=>/^P1-[A-Z]{3}-\d{2}\.json$/.test(x))){
+   for(const q of JSON.parse(fs.readFileSync(path.join(bank,dir,file),'utf8')).questions){
+    const match=q.key.match(/^MATH-P1-PRACTICE2-Q(\d{3})$/);
+    assert.ok(match);
+    const id=7484+Number(match[1]);
+    if(ids.includes(id)){
+     assert.ok(!byId.has(id),'duplicate editorial source ID');
+     byId.set(id,{id,code:q.primary_skill,file:dir+'/'+file,
+       old_hash:expected.get(id)});
+    }
+   }
+  }
+ }
+ assert.equal(byId.size,31,'all pinned editorial source items must exist');
+ return ids.map(id=>byId.get(id));
+}
+if(mode==='editorial31')approvedGroups.editorial31=editorial31SourceSpecs();
 assert.ok(Object.prototype.hasOwnProperty.call(approvedGroups,mode),
  'unknown pinned patch group');
 const specs=approvedGroups[mode],expectedCount=specs.length;
+assert.ok([2,3,31].includes(expectedCount),'unapproved release group cardinality');
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
 const hash=x=>crypto.createHash('sha256').update(JSON.stringify(stable(x))).digest('hex');
@@ -46,31 +91,42 @@ const payload=specs.map(spec=>{
     item.key==='MATH-P1-PRACTICE2-Q'+String(spec.id-7484).padStart(3,'0'));
   assert.ok(q,'missing corrected source ID '+spec.id);
   assert.equal(q.primary_skill,spec.code);
-  assert.equal(q.qtype,'mcq');
+  assert.ok(['mcq','input'].includes(q.qtype));
   assert.ok(q.practice_no>=1&&q.practice_no<=7);
   assert.ok(/^[a-f0-9]{64}$/.test(spec.old_hash));
-  const opts=[...q.options].sort((a,b)=>a.key.localeCompare(b.key));
-  assert.deepEqual(opts.map(x=>x.key),['A','B','C','D']);
-  assert.ok(opts.some(x=>x.key===q.correct_answer));
+  const opts=q.qtype==='mcq'?[...q.options].sort((a,b)=>a.key.localeCompare(b.key)):[];
+  if(q.qtype==='mcq'){
+    assert.deepEqual(opts.map(x=>x.key),['A','B','C','D']);
+    assert.ok(opts.some(x=>x.key===q.correct_answer));
+  }else{
+    assert.ok(q.answer_contract?.number_only===true);
+    assert.ok(q.answer_contract?.canonical_answer);
+  }
   for(const l of ['en','ru','uz']){
     assert.ok(q.question?.[l]&&q.explanation?.[l]);
     for(const opt of opts)assert.ok(opt.text?.[l]);
   }
-  const d=opts.filter(o=>o.key!==q.correct_answer&&o.diagnostic_code)
-    .map(o=>{
-      assert.ok(diagnostics.has(o.diagnostic_code));
-      return {code:o.diagnostic_code,answer_kind:'mcq_option',answer_key:o.key,answer_value:null};
-    });
+  const d=[];
+  for(const option of opts.filter(o=>o.key!==q.correct_answer&&o.diagnostic_code)){
+    assert.ok(diagnostics.has(option.diagnostic_code));
+    d.push({code:option.diagnostic_code,answer_kind:'mcq_option',
+      answer_key:option.key,answer_value:null});
+  }
+  if(q.qtype==='input')for(const rule of q.diagnostic_rules||[]){
+    assert.ok(diagnostics.has(rule.diagnostic_code));
+    d.push({code:rule.diagnostic_code,answer_kind:'input_exact',
+      answer_key:null,answer_value:String(rule.answer_match)});
+  }
   const record={
     old_id:spec.id,old_hash:spec.old_hash,old_key:q.key,
     new_key:q.key+suffix,release_version:release,
     practice_no:q.practice_no,skill:q.primary_skill,role:q.role,
     source_ref:q.source_ref,difficulty:q.difficulty,qtype:q.qtype,
     text:q.question,explanation:q.explanation,
-    options:Object.fromEntries(['en','ru','uz'].map(l=>[l,JSON.stringify(opts.map(o=>o.text[l]))])),
-    correct_answer:q.correct_answer,
+    options:q.qtype==='mcq'?Object.fromEntries(['en','ru','uz'].map(l=>[l,JSON.stringify(opts.map(o=>o.text[l]))])):null,
+    correct_answer:q.qtype==='mcq'?q.correct_answer:q.answer_contract.canonical_answer,
     time_limit_sec:q.difficulty==='hard'?90:q.difficulty==='medium'?60:45,
-    answer_contract:{},diagnostics:d
+    answer_contract:q.qtype==='input'?q.answer_contract:{},diagnostics:d
   };
   record.new_hash=hash(record);
   assert.notEqual(record.new_hash,record.old_hash);
@@ -147,7 +203,7 @@ const sql=[
   "   lifecycle_state,is_runtime_allowed)",
   "   values(v_new_id,v_item->>'new_key',v_item->>'release_version',",
   "   (v_item->>'practice_no')::smallint,v_item->>'skill',v_meta.secondary_skill_codes,",
-  "   v_item->>'role',v_item->>'source_ref','{}'::jsonb,v_item->>'new_hash',",
+  "   v_item->>'role',v_item->>'source_ref',v_item->'answer_contract',v_item->>'new_hash',",
   "   'pending','pending','pending','pending','approved',false);",
   "  insert into public.practice_pool_questions(pool_id,question_id,order_no,is_active)",
   "   values(v_pool.pool_id,v_new_id,v_pool.order_no,false);",
