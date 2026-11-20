@@ -53,7 +53,11 @@ const sandbox={
 const quick=vm.runInNewContext("("+quickFunction+")",sandbox,{timeout:300});
 const invoke=vm.runInNewContext("("+routeFunction+")",sandbox,{timeout:300});
 let checks=0;
-function same(a,b,message){assert.deepEqual(JSON.parse(JSON.stringify(a)),b,message);checks++;}
+function same(a,b,message){
+ // Both sides may originate in distinct Node VM realms; compare plain data.
+ assert.deepEqual(JSON.parse(JSON.stringify(a)),JSON.parse(JSON.stringify(b)),message);
+ checks++;
+}
 for(const screen of Object.keys(PREPARED_SCREEN_ACTIONS)){
  for(const locale of ["ru","uz","en"]){
   lang=locale;active=screen;scope=null;gate.allowed=false;gate.key="";
