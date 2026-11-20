@@ -1,0 +1,113 @@
+name: Mathematics Practice no-pattern answer placement and versioned PG17 safety
+on:
+  push:
+    branches:
+      - fix/math-practice-answer-patterns-future-only-20261120
+  pull_request:
+    branches:
+      - fix/math-practice-itemwise-review-20261120
+    paths:
+      - 'content/math/practice_v2/**'
+      - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
+      - 'scripts/math-practice-v2-answer-pattern-and-semantic-guard.cjs'
+      - 'scripts/math-practice-v2-itemwise-two-stage-generator.cjs'
+      - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
+      - 'supabase/tests/math_practice_answer_patterns_3_future_only_pg17.sql'
+      - 'supabase/tests/math_practice_answer_patterns_81_semantic_pg17.sql'
+      - '.github/workflows/math-practice-answer-patterns.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-and-disposable-pg17:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-only-no-hosted-credentials
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: synthetic-only-no-hosted-credentials
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Full 495 source, exact seven option semantic swaps and no answer patterns
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-answer-pattern-and-semantic-guard.cjs
+          node scripts/math-practice-v2-answer-pattern-and-semantic-guard.cjs
+          node scripts/math-practice-v2-itemwise-corrections.cjs
+          node scripts/math-practice-v2-112-trilingual-independent-proof.cjs
+          node scripts/math-practice-v2-editorial31-independent-oracles.cjs
+      - name: Real 81 source-authored pending-QA staging with three rekeyed items
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node --check scripts/math-practice-v2-future-only-81-stage-generator.cjs
+          node --check scripts/math-practice-v2-future-only-81-test-fixture.cjs
+          node scripts/math-practice-v2-future-only-81-stage-generator.cjs --out "$tmp/stage.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs \
+            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --with-old-rekey-source
+          createdb -T template0 rekey81
+          psql -X -v ON_ERROR_STOP=1 -d rekey81 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekey81 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekey81 \
+            -f supabase/tests/math_practice_answer_patterns_81_semantic_pg17.sql
+          psql -X -v ON_ERROR_STOP=1 -d rekey81 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekey81 \
+            -f supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql
+      - name: Existing two-item editorial future-only rollback regression
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node --check scripts/math-practice-v2-itemwise-two-stage-generator.cjs
+          node scripts/math-practice-v2-itemwise-two-stage-generator.cjs \
+            --group editorial --out "$tmp/stage.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs \
+            --expect 2 --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --with-old-rekey-source
+          createdb -T template0 rekeyeditorial2
+          psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial2 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial2 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial2 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial2 \
+            -f supabase/tests/math_practice_itemwise_two_future_only_stage_pg17.sql
+      - name: Three additional answer-pattern versions preserve semantics and history
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-itemwise-two-stage-generator.cjs \
+            --group answer_pattern --out "$tmp/stage.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs \
+            --expect 3 --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --with-old-rekey-source
+          createdb -T template0 rekeypattern3
+          psql -X -v ON_ERROR_STOP=1 -d rekeypattern3 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeypattern3 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeypattern3 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeypattern3 \
+            -f supabase/tests/math_practice_answer_patterns_3_future_only_pg17.sql
+      - name: Strict scope
+        run: echo 'Local CI PG17 and protected source only; NO hosted Supabase DML, main, deploy or live question rekey.'

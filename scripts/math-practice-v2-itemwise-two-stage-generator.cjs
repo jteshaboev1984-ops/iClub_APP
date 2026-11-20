@@ -8,12 +8,28 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
 const release='math_p1_practice_v2_fix_20261120',suffix='-V20261120';
-const specs=[
+const args=process.argv.slice(2);
+const modeAt=args.indexOf('--group');
+const mode=modeAt>=0?args[modeAt+1]:'editorial';
+const approvedGroups={
+ editorial:[
   {id:7791,code:'P1-SER-01',file:'p5_binomial_series/P1-SER-01.json',
    old_hash:'0356f12e2932059bae0ab896c3010a8a117786984ee4b0dcfbbafbef600e7423'},
   {id:7881,code:'P1-DIF-04',file:'p6_differentiation/P1-DIF-04.json',
    old_hash:'71c936e246749a02c721865fa3517e6c7fa8862e1f983ee79ac32cc2b5d3fa7d'}
-];
+ ],
+ answer_pattern:[
+  {id:7624,code:'P1-FUN-08',file:'p2_functions/P1-FUN-08.json',
+   old_hash:'b0ccf462b7bafa14abfcf88940a4a5a878b96ec0b7a4a161b558ea812fdb0d67'},
+  {id:7797,code:'P1-SER-02',file:'p5_binomial_series/P1-SER-02.json',
+   old_hash:'59930cdbdf3aa2703722ab60c4921a9e5719d7176168458bf3ff9c9269656cec'},
+  {id:7937,code:'P1-INT-02',file:'p7_integration/P1-INT-02.json',
+   old_hash:'43349ae00988b83dc61d827318d6d2b50c7940d1f9a698686ce2887bf3031985'}
+ ]
+};
+assert.ok(Object.prototype.hasOwnProperty.call(approvedGroups,mode),
+ 'unknown pinned patch group');
+const specs=approvedGroups[mode],expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
 const hash=x=>crypto.createHash('sha256').update(JSON.stringify(stable(x))).digest('hex');
@@ -60,7 +76,7 @@ const payload=specs.map(spec=>{
   assert.notEqual(record.new_hash,record.old_hash);
   return record;
 });
-assert.equal(payload.length,2);
+assert.equal(payload.length,expectedCount);
 const quote=s=>"'"+String(s).replace(/'/g,"''")+"'";
 const sql=[
   '-- GENERATED, SENSITIVE QUESTIONS/KEYS: NEVER COMMIT OR LOG.',
@@ -81,7 +97,7 @@ const sql=[
   'begin',
   " perform pg_advisory_xact_lock(hashtext('math_practice_v2_release')::bigint);",
   " perform pg_advisory_xact_lock(hashtext('math_practice_v2_future_only_patch')::bigint);",
-  " if jsonb_array_length(v_items)<>2 then raise exception 'two_item_patch_scope_drift'; end if;",
+  " if jsonb_array_length(v_items)<>"+expectedCount+" then raise exception 'two_item_patch_scope_drift'; end if;",
   " for v_item in select value from jsonb_array_elements(v_items) loop",
   "  select * into v_old from public.questions where id=(v_item->>'old_id')::bigint for update;",
   "  select * into v_meta from private.practice_v2_question_meta where question_id=v_old.id for update;",
@@ -152,11 +168,11 @@ const sql=[
   "  end loop;",
   "  v_count:=v_count+1;",
   " end loop;",
-  " if v_count<>2 then raise exception 'two_item_staging_partial'; end if;",
+  " if v_count<>"+expectedCount+" then raise exception 'two_item_staging_partial'; end if;",
   'end $two_item_staging$;',
   'commit;'
 ].join('\n')+'\n';
-const args=process.argv.slice(2),out=args.indexOf('--out');
+const out=args.indexOf('--out');
 if(out>=0){
   assert.ok(args[out+1],'--out needs a private output file');
   const file=path.resolve(process.cwd(),args[out+1]);
@@ -164,7 +180,8 @@ if(out>=0){
 }
 console.log(JSON.stringify({
   extra_future_only_items:payload.length,
-  historic_published_hashes_pinned:2,
+  group:mode,
+  historic_published_hashes_pinned:expectedCount,
   staged_keys_or_questions_logged:false,
   staging_sql_written:out>=0,
   qa:'PENDING',

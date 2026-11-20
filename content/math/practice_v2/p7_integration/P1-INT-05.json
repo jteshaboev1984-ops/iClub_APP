@@ -143,23 +143,23 @@
         {
           "key": "C",
           "text": {
-            "en": "2",
-            "ru": "2",
-            "uz": "2"
-          },
-          "diagnostic_code": "INT05_PI_FACTOR"
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "3",
             "ru": "3",
             "uz": "3"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "2",
+            "ru": "2",
+            "uz": "2"
+          },
+          "diagnostic_code": "INT05_PI_FACTOR"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "C",
       "explanation": {
         "en": "V=π∫₀²(kx²)²dx=πk²∫₀²x⁴dx=(32k²/5)π. Set 32k²/5=288/5, so k²=9. Since k>0, k=3.",
         "ru": "V=π∫₀²(kx²)²dx=πk²∫₀²x⁴dx=(32k²/5)π. Из 32k²/5=288/5 получаем k²=9. Так как k>0, k=3.",

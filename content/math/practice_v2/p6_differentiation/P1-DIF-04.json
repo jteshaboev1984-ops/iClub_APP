@@ -403,11 +403,11 @@
         {
           "key": "B",
           "text": {
-            "en": "y=0",
-            "ru": "y=0",
-            "uz": "y=0"
+            "en": "y=−16",
+            "ru": "y=−16",
+            "uz": "y=−16"
           },
-          "diagnostic_code": "DIF04_POINT_ON_CURVE"
+          "diagnostic_code": null
         },
         {
           "key": "C",
@@ -421,14 +421,14 @@
         {
           "key": "D",
           "text": {
-            "en": "y=−16",
-            "ru": "y=−16",
-            "uz": "y=−16"
+            "en": "y=0",
+            "ru": "y=0",
+            "uz": "y=0"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF04_POINT_ON_CURVE"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "B",
       "explanation": {
         "en": "dy/dx=3x²−12, which is 0 at x=2, so the tangent is horizontal. The point is (2,−16), hence the tangent is y=−16.",
         "ru": "dy/dx=3x²−12, при x=2 это 0, поэтому касательная горизонтальна. Точка (2,−16), значит касательная y=−16.",
