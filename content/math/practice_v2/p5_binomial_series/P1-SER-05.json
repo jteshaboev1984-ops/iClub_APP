@@ -148,9 +148,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "A convergent geometric series has first term 5 and sum to infinity 20/3. Enter its common ratio.",
-        "ru": "Сходящийся геометрический ряд имеет первый член 5 и сумму до бесконечности 20/3. Введите общее отношение.",
-        "uz": "Yaqinlashuvchi geometrik qatorning birinchi hadi 5, cheksiz yig‘indisi 20/3. Umumiy nisbatni kiriting."
+        "en": "A convergent geometric series has first term 5 and sum to infinity 20/3. Enter its common ratio. Give your answer as a decimal number.",
+        "ru": "Сходящийся геометрический ряд имеет первый член 5 и сумму до бесконечности 20/3. Введите общее отношение. Ответ запишите десятичным числом.",
+        "uz": "Yaqinlashuvchi geometrik qatorning birinchi hadi 5, cheksiz yig‘indisi 20/3. Umumiy nisbatni kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
