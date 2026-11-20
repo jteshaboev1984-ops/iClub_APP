@@ -22,7 +22,9 @@ CREATE TABLE public.questions(
 CREATE TABLE public.seasons(id bigint PRIMARY KEY, season_no integer NOT NULL);
 CREATE TABLE public.tours(
  id bigint PRIMARY KEY, subject_id bigint NOT NULL,
- season_id bigint REFERENCES public.seasons(id), tour_no smallint NOT NULL
+ season_id bigint REFERENCES public.seasons(id), tour_no smallint NOT NULL,
+ is_active boolean NOT NULL DEFAULT false,
+ start_date date, end_date date
 );
 CREATE TABLE public.tour_questions(
  tour_id bigint NOT NULL, question_id bigint NOT NULL,
