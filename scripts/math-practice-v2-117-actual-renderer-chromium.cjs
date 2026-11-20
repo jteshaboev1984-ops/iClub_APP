@@ -92,6 +92,8 @@ const stubs=[
          qTimeLeft:60,safeSessionId:117,_submitInFlight:false,_finishing:false
         };
         renderPracticeQuiz();
+        // Production submit finally{} refreshes disabled state after index change.
+        updatePracticeSubmitEnabled();
         const stem=document.querySelector('#practice-question');
         const wrap=document.querySelector('#practice-options');
         const btn=document.querySelector('#practice-submit-btn');
