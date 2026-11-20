@@ -326,23 +326,23 @@
         {
           "key": "C",
           "text": {
-            "en": "Arithmetic",
-            "ru": "Арифметическая",
-            "uz": "Arifmetik"
-          },
-          "diagnostic_code": null
-        },
-        {
-          "key": "D",
-          "text": {
             "en": "Strictly increasing",
             "ru": "Строго возрастающая",
             "uz": "Qat’iy o‘suvchi"
           },
           "diagnostic_code": "SER02_AP_STRUCTURE"
+        },
+        {
+          "key": "D",
+          "text": {
+            "en": "Arithmetic",
+            "ru": "Арифметическая",
+            "uz": "Arifmetik"
+          },
+          "diagnostic_code": null
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "D",
       "explanation": {
         "en": "Equal consecutive differences are exactly the defining structure of an arithmetic progression.",
         "ru": "Равные соседние разности — это определяющее свойство арифметической прогрессии.",
