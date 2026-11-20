@@ -10,6 +10,8 @@ on:
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
       - 'scripts/math-practice-v2-future-only-81-stage-generator.cjs'
       - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
+      - 'scripts/math-practice-v2-future-only-signed-http.cjs'
+      - 'supabase/tests/math_practice_future_only_signed_http_seed_pg17.sql'
       - 'supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql'
       - 'supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql'
       - 'supabase/tests/math_practice_future_only_atomic_switch_pg17.sql'
@@ -20,7 +22,7 @@ permissions:
 jobs:
   isolated-postgresql-17:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:17
@@ -82,5 +84,51 @@ jobs:
           psql -v ON_ERROR_STOP=1 -d math81 -f "$temp_dir/stage.sql"
           psql -v ON_ERROR_STOP=1 -d math81 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
           psql -v ON_ERROR_STOP=1 -d math81 -f supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql
+      - name: Prepare genuine v5 runtime and versioned learner sessions in disposable PG17
+        run: |
+          set -euo pipefail
+          createdb -T template0 practice_http
+          export PGDATABASE=practice_http
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_fixture.sql
+          for file in \
+            supabase/migrations/20261007002000_math_practice_v2_unicode_minus_normalization_v1.sql \
+            supabase/migrations/20261007003000_math_practice_v2_close_legacy_answer_oracles_v1.sql \
+            supabase/migrations/20261007004000_math_practice_v2_metadata_foundation_v1.sql \
+            supabase/migrations/20261007005000_math_practice_v2_topic_drill_pool_gate_v1.sql \
+            supabase/migrations/20261007006000_math_practice_v2_selector_v5.sql \
+            supabase/migrations/20261007006500_math_practice_v2_current_mistakes_v5.sql \
+            supabase/migrations/20261007006700_math_practice_v2_deterministic_feedback_v5.sql \
+            supabase/migrations/20261118122500_math_practice_v2_literal_answer_delimiter_v1.sql; do
+            psql -v ON_ERROR_STOP=1 -f "$file"
+          done
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_matrix.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_signed_http_seed_pg17.sql
+      - name: Start real local signed JWT PostgREST for synthetic learner role
+        run: |
+          set -euo pipefail
+          secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$secret"
+          echo "PRACTICE_FUTURE_ONLY_JWT_SECRET=$secret" >> "$GITHUB_ENV"
+          echo "PRACTICE_FUTURE_ONLY_ISOLATED=true" >> "$GITHUB_ENV"
+          echo "PGDATABASE=practice_http" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+          docker run -d --rm --name iclub-math-future-only-pgrst --network host \
+            -e PGRST_DB_URI="postgres://postgres:ephemeral-fixture-only@127.0.0.1:5432/practice_http" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$secret" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 35); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then exit 0; fi
+            sleep 2
+          done
+          docker logs --tail 20 iclub-math-future-only-pgrst
+          exit 1
+      - name: Verify real signed JWT PostgREST v5 before and after versioned rollback
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-future-only-signed-http.cjs
+          node scripts/math-practice-v2-future-only-signed-http.cjs
       - name: Boundary
         run: echo 'DISPOSABLE PG17 ONLY; NO production credentials, no live Supabase write, no deployment.'
