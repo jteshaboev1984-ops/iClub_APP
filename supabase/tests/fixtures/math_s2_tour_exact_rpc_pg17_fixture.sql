@@ -215,6 +215,8 @@ INSERT INTO public.tour_session_runtime_v4(attempt_id,user_id,question_ids,final
  (996103,'11111111-1111-4111-8111-111111111111',
   ARRAY[995021]::bigint[],NULL),
  (996104,'22222222-2222-4222-8222-222222222222',
+  ARRAY[995001]::bigint[],NULL),
+ (996105,'11111111-1111-4111-8111-111111111111',
   ARRAY[995001]::bigint[],NULL);
 DO $guard$
 BEGIN
