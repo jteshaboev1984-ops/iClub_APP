@@ -57,7 +57,7 @@ begin
   for v_pair in select value from jsonb_array_elements(p_pairs) loop
     if jsonb_typeof(v_pair) <> 'object'
        or not (v_pair ?& array['old_id','new_id','old_hash','new_hash'])
-       or jsonb_object_length(v_pair)<>4
+       or (select count(*) from jsonb_object_keys(v_pair))<>4
        or (v_pair->>'old_hash') !~ '^[a-f0-9]{64}$'
        or (v_pair->>'new_hash') !~ '^[a-f0-9]{64}$' then
       raise exception 'invalid_future_only_pair_payload';
@@ -191,7 +191,7 @@ begin
   for v_pair in select value from jsonb_array_elements(p_pairs) loop
     if jsonb_typeof(v_pair)<>'object'
        or not (v_pair ?& array['old_id','new_id','old_hash','new_hash'])
-       or jsonb_object_length(v_pair)<>4 then
+       or (select count(*) from jsonb_object_keys(v_pair))<>4 then
       raise exception 'invalid_rollback_payload';
     end if;
     v_old_id := (v_pair->>'old_id')::bigint;
