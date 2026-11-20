@@ -1,0 +1,38 @@
+name: Mathematics Practice five independently checked decimal instructions
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'content/math/practice_v2/p1_quadratics/P1-QUA-02.json'
+      - 'content/math/practice_v2/p4_circular_trigonometry/P1-TRI-03.json'
+      - 'content/math/practice_v2/p4_circular_trigonometry/P1-TRI-04.json'
+      - 'content/math/practice_v2/p5_binomial_series/P1-SER-03.json'
+      - 'content/math/practice_v2/p5_binomial_series/P1-SER-05.json'
+      - 'scripts/math-practice-decimal5-source-guard.cjs'
+      - '.github/workflows/math-practice-decimal5-source-qa.yml'
+permissions:
+  contents: read
+jobs:
+  decimal5-source-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove only five trilingual numeric-format changes and original answers
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-decimal5-source-guard.cjs
+          node scripts/math-practice-decimal5-source-guard.cjs
+      - name: Run full published Practice 495-source structure and evaluator checks
+        run: |
+          set -euo pipefail
+          node scripts/math-practice-v2-global-qa.cjs
+          node scripts/math-practice-v2-evaluator-regression.cjs
+      - name: No hosted release
+        run: echo 'Read-only source tests only, no protected question text logged or hosted SQL.'
