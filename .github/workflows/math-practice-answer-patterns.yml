@@ -64,7 +64,7 @@ jobs:
           node --check scripts/math-practice-v2-future-only-81-test-fixture.cjs
           node scripts/math-practice-v2-future-only-81-stage-generator.cjs --out "$tmp/stage.sql"
           node scripts/math-practice-v2-future-only-81-test-fixture.cjs \
-            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql"
+            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --with-old-rekey-source
           createdb -T template0 rekey81
           psql -X -v ON_ERROR_STOP=1 -d rekey81 -f "$tmp/fixture.sql" >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d rekey81 -f "$tmp/stage.sql" >/dev/null
@@ -84,7 +84,7 @@ jobs:
           node scripts/math-practice-v2-itemwise-two-stage-generator.cjs \
             --group editorial --out "$tmp/stage.sql"
           node scripts/math-practice-v2-future-only-81-test-fixture.cjs \
-            --expect 2 --stage "$tmp/stage.sql" --out "$tmp/fixture.sql"
+            --expect 2 --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --with-old-rekey-source
           createdb -T template0 rekeyeditorial2
           psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial2 -f "$tmp/fixture.sql" >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial2 -f "$tmp/stage.sql" >/dev/null
@@ -101,7 +101,7 @@ jobs:
           node scripts/math-practice-v2-itemwise-two-stage-generator.cjs \
             --group answer_pattern --out "$tmp/stage.sql"
           node scripts/math-practice-v2-future-only-81-test-fixture.cjs \
-            --expect 3 --stage "$tmp/stage.sql" --out "$tmp/fixture.sql"
+            --expect 3 --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --with-old-rekey-source
           createdb -T template0 rekeypattern3
           psql -X -v ON_ERROR_STOP=1 -d rekeypattern3 -f "$tmp/fixture.sql" >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d rekeypattern3 -f "$tmp/stage.sql" >/dev/null
