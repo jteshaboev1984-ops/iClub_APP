@@ -119,25 +119,46 @@ begin
   if cardinality(ids)<>10 or not(2001=any(ids)) then
     raise exception 'Math S2 failed to re-serve old correct question';
   end if;
-  -- Season1 closes for NEW and unfinished old client-session starts at
-  -- Mathematics S2 Tour1. Other subjects do not inherit that cutoff.
+  -- Official S2 closes new S1 starts, not already-created owned drafts.
+  -- The original immutable session and its questions remain recoverable.
+  if (public.start_practice_session_auto_safe_v5(
+        501,'s2-pre-t1-math-001')->>'session_id')::bigint
+       <> (a->>'session_id')::bigint then
+    raise exception 'already-started S1 Tour Practice draft lost at S2';
+  end if;
+  if (public.start_practice_topic_drill_safe_v5(
+        'mathematics','Synthetic',null,'s1-topic-preswitch-001'
+      )->>'session_id')::bigint <> (topic_pre->>'session_id')::bigint then
+    raise exception 'already-started S1 Topic Practice draft lost at S2';
+  end if;
+  -- Same client ID must never silently substitute another Topic or subject.
   begin
-    perform public.start_practice_session_auto_safe_v5(501,'s2-pre-t1-math-001');
-    raise exception 'stale Math Season1 Tour client ID reopened after S2';
-  exception when sqlstate '55000' then
-    if SQLERRM<>'practice_previous_season_closed' then
-      raise exception 'wrong old Tour client error: %',SQLERRM;
-    end if;
+    perform public.start_practice_topic_drill_safe_v5(
+      'mathematics','Future Topic',null,'s1-topic-preswitch-001');
+    raise exception 'reused S1 topic ID allowed cross-topic start';
+  exception when sqlstate '22023' then
+    if SQLERRM<>'client_session_scope_mismatch' then raise;end if;
   end;
   begin
     perform public.start_practice_topic_drill_safe_v5(
-      'mathematics','Synthetic',null,'s1-topic-preswitch-001');
-    raise exception 'stale Math Season1 Topic client ID reopened after S2';
-  exception when sqlstate '55000' then
-    if SQLERRM<>'practice_previous_season_closed' then
-      raise exception 'wrong old Topic client error: %',SQLERRM;
-    end if;
+      'economics','Synthetic',null,'s1-topic-preswitch-001');
+    raise exception 'reused S1 topic ID allowed cross-subject start';
+  exception when sqlstate '22023' then
+    if SQLERRM<>'client_session_scope_mismatch' then raise;end if;
   end;
+  begin
+    perform public.start_practice_session_auto_safe_v5(
+      502,'s2-pre-t1-math-001');
+    raise exception 'reused S1 tour ID allowed cross-pool start';
+  exception when sqlstate '22023' then
+    if SQLERRM<>'client_session_scope_mismatch' then raise;end if;
+  end;
+  if (select count(*) from public.practice_sessions_v4 where user_id=
+      '11111111-1111-4111-8111-111111111111'::uuid)<>2
+     or (select count(*) from public.practice_drill_sessions_v4 where user_id=
+      '11111111-1111-4111-8111-111111111111'::uuid)<>1 then
+    raise exception 'continuing saved S1 draft created an extra session';
+  end if;
   -- Same content IDs are served by new S2 sessions; old S1 is closed, but
   -- the published Practice question bank was not republished or deleted.
   econ:=public.start_practice_session_auto_safe_v5(701,'s2-econ-s1-001');
