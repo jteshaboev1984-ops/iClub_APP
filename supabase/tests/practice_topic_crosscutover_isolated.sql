@@ -17,9 +17,12 @@ create schema private;
 grant usage on schema auth,public to authenticated;
 
 create function auth.uid() returns uuid
- language sql stable as $$
- select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid;
- $$;
+ language sql stable as $
+ select coalesce(
+   nullif(current_setting('request.jwt.claim.sub',true),''),
+   nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub'
+ )::uuid;
+ $;
 grant execute on function auth.uid() to authenticated;
 
 create table public.subjects(id bigint primary key,subject_key text not null);
