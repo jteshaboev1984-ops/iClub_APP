@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - fix/math-practice-answer-patterns-future-only-20261120
+      - qa/math-practice-31-editorial-future-only-20261120
   pull_request:
     branches:
       - fix/math-practice-itemwise-review-20261120
+      - fix/math-practice-answer-patterns-future-only-20261120
     paths:
       - 'content/math/practice_v2/**'
       - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
@@ -14,6 +16,8 @@ on:
       - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
       - 'supabase/tests/math_practice_answer_patterns_3_future_only_pg17.sql'
       - 'supabase/tests/math_practice_answer_patterns_81_semantic_pg17.sql'
+      - 'supabase/preflight/math_practice_v2_31_editorial_contenthash_pin_readonly.sql'
+      - 'supabase/tests/math_practice_editorial31_future_only_pg17.sql'
       - '.github/workflows/math-practice-answer-patterns.yml'
   workflow_dispatch:
 permissions:
@@ -109,5 +113,24 @@ jobs:
             -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d rekeypattern3 \
             -f supabase/tests/math_practice_answer_patterns_3_future_only_pg17.sql
+      - name: Complete remaining 31 editorial future-only correction versions
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-itemwise-two-stage-generator.cjs \
+            --group editorial31 --out "$tmp/stage.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs \
+            --expect 31 --stage "$tmp/stage.sql" --out "$tmp/fixture.sql"
+          createdb -T template0 rekeyeditorial31
+          psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial31 \
+            -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial31 \
+            -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial31 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d rekeyeditorial31 \
+            -f supabase/tests/math_practice_editorial31_future_only_pg17.sql
       - name: Strict scope
         run: echo 'Local CI PG17 and protected source only; NO hosted Supabase DML, main, deploy or live question rekey.'
