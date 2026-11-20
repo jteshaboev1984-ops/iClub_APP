@@ -7,7 +7,7 @@
 BEGIN;
 SET LOCAL statement_timeout='25s';
 SET LOCAL lock_timeout='3s';
-SET LOCAL iclub_math_s2_disposable='true';
+SET LOCAL iclub.math_s2_disposable='true';
 DO $math_s2_rehearsal$
 DECLARE
  v_doc jsonb := (SELECT payload FROM pg_temp.math_s2_private_plan);
@@ -27,7 +27,7 @@ DECLARE
  v_replacements integer:=0;
 BEGIN
  IF current_database() <> 'iclub_math_s2_inplace_synthetic'
-    OR current_setting('iclub_math_s2_disposable',true) IS DISTINCT FROM 'true'
+    OR current_setting('iclub.math_s2_disposable',true) IS DISTINCT FROM 'true'
  THEN RAISE EXCEPTION 'MATH_S2_DISPOSABLE_DATABASE_ONLY'; END IF;
  IF v_doc->>'scope' IS DISTINCT FROM 'MATH_S2_TOURS_ONLY_INPLACE_REPAIR_NO_NEW_QUESTIONS'
     OR v_doc->>'status' IS DISTINCT FROM 'OFFLINE_HOLD_REHEARSAL_NO_LIVE_DB_WRITES'
