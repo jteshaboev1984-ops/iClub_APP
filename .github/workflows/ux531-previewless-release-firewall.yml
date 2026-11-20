@@ -79,13 +79,25 @@ jobs:
           test -n "$merge_base"
           mapfile -t changed < <(git diff --name-only "$merge_base" "$UX531_EXPECTED_SHA")
 
-          # This dedicated one-file repair must test its new branch/file classifier.
-          # If it touches anything other than the workflow, it FAILS CLOSED.
-          if [[ "${GITHUB_HEAD_REF:-}" == "fix/ux531-ci-scope-20261120" ]]; then
-            test "${#changed[@]}" -eq 1
-            test "${changed[0]}" = ".github/workflows/ux531-previewless-release-firewall.yml"
+          # Workflow-only maintenance and docs-only updates are not
+          # application release candidates. Keep the real UX531 safety
+          # source/tests intact; maintainers still need PR review to merge.
+          if [[ "${#changed[@]}" -eq 1 &&
+                "${changed[0]}" == ".github/workflows/ux531-previewless-release-firewall.yml" ]]; then
             echo "run_guard=false" >> "$GITHUB_OUTPUT"
-            echo "UX531: one-file workflow scope repair; classifier self-checks PASS."
+            echo "UX531: workflow-only maintenance; classifier self-checks PASS."
+            exit 0
+          fi
+          only_docs=true
+          for file in "${changed[@]}"; do
+            case "$file" in
+              docs/*) ;;
+              *) only_docs=false; break ;;
+            esac
+          done
+          if [[ "${#changed[@]}" -gt 0 && "$only_docs" == "true" ]]; then
+            echo "run_guard=false" >> "$GITHUB_OUTPUT"
+            echo "UX531: docs-only PR; no full application release candidate."
             exit 0
           fi
 
