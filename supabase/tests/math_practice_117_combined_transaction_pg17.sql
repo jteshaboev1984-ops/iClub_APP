@@ -54,8 +54,7 @@ begin
     where f.group_name=v_group and staged.release_version=v_release;
     if v_pairs is null
        or jsonb_array_length(v_pairs) <>
-         case v_group when '81' then 81 when '31' then 31
-                      when '3' then 3 when '2' then 2 end
+         (jsonb_build_object('81',81,'31',31,'3',3,'2',2)->>v_group)::int
        then raise exception 'missing_or_wrong_staged_group_%',v_group;end if;
     v_batches:=jsonb_set(v_batches,array[v_group],v_pairs,true);
   end loop;
@@ -147,8 +146,7 @@ begin
     v_result:=private.math_practice_future_only_activate_v1(
       v_release,v_batches->v_group);
     if coalesce((v_result->>'replaced')::int,-1) <>
-       case v_group when '81' then 81 when '31' then 31
-                    when '3' then 3 when '2' then 2 end
+       (jsonb_build_object('81',81,'31',31,'3',3,'2',2)->>v_group)::int
       then raise exception 'combined_117_batch_partial';end if;
   end loop;
   if (select count(*) from public.question_version_links
@@ -180,8 +178,7 @@ begin
     v_result:=private.math_practice_future_only_rollback_v1(
       v_release,v_batches->v_group);
     if coalesce((v_result->>'restored_old_memberships')::int,-1) <>
-       case v_group when '81' then 81 when '31' then 31
-                    when '3' then 3 when '2' then 2 end
+       (jsonb_build_object('81',81,'31',31,'3',3,'2',2)->>v_group)::int
       then raise exception 'combined_117_rollback_partial';end if;
   end loop;
   if (select count(*) from public.practice_pool_questions ppq
