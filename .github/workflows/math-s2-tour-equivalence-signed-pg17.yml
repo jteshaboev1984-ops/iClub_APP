@@ -15,6 +15,8 @@ on:
       - 'supabase/tests/fixtures/math_s2_public_catalogue_shield_pg17_test.sql'
       - 'supabase/candidates/math_s2_tour_inplace_rehearsal_template_v1_hold.sql'
       - 'supabase/tests/fixtures/math_s2_inplace_112_synthetic_pg17.sql'
+      - 'supabase/candidates/math_s2_preflight_unissued_20q_deny_v1_hold.sql'
+      - 'supabase/tests/fixtures/math_s2_preflight_unissued_20q_pg17_test.sql'
   workflow_dispatch:
 permissions:
   contents: read
@@ -150,6 +152,12 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE iclub_math_s2_inplace_synthetic'
           PGDATABASE=iclub_math_s2_inplace_synthetic psql -X -v ON_ERROR_STOP=1 \
             -f supabase/tests/fixtures/math_s2_inplace_112_synthetic_pg17.sql
+      - name: Prove S2 Maths 20-question preflight denied before attempt without S1/Chem regression
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE iclub_math_s2_preflight_synthetic'
+          PGDATABASE=iclub_math_s2_preflight_synthetic psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_preflight_unissued_20q_pg17_test.sql
       - name: No hosted endpoints, bank secrets or student data
         if: always()
         run: echo "All data synthetic, PostgreSQL 17 ephemeral, no Supabase/Vercel hosted calls"
