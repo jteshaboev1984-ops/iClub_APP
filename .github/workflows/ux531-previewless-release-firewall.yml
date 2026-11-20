@@ -26,7 +26,103 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
+      - name: Classify scoped UX531 release candidates
+        id: ux531_scope
+        env:
+          UX531_BASE_SHA: ${{ github.event.pull_request.base.sha || 'b5cbf0c10e178c583aeb9c223cc25110cd10c65c' }}
+          UX531_EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          # This full-release source gate is NOT a general PR validator. Keep
+          # legacy reviewed release checks unchanged, but do not reject unrelated
+          # AI/Practice/Math PRs merely for touching index.html or qa/*.
+          branch_requires_guard() {
+            case "$1" in
+              draft/ux531-*|ux531/*|integration/math-ux531-*|integration/math562-ci563-release-candidate-*|fix/math-single-my-plan-legacy-map-*|feature/math-d3-hours-optional-*)
+                return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+          file_requires_guard() {
+            case "$1" in
+              visual/iclub-academy-*|qa/ux531-*|qa/math-ux-stage36-*|qa/math-d3-hours-*|docs/ui-redesign/*|registration-b00-ui.js|supabase/tests/p2_02_stage3_syllabus_closure_matrix.sql|.github/workflows/ux531-*|.github/workflows/math-ux-stage36-integration-source-gate.yml)
+                return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+          # Fast self-check: unrelated shared-source changes must not accidentally
+          # count as UX531 full releases, while real UX531 files/branches remain guarded.
+          branch_requires_guard draft/ux531-v58-b00-integrated-qa-20261115
+          branch_requires_guard ux531/pinned-study-blue-hierarchy-20261117
+          branch_requires_guard integration/math-ux531-stage36-20261117-v1
+          branch_requires_guard feature/math-d3-hours-optional-20261118
+          ! branch_requires_guard draft/ai-beta-screen-contract-20261120
+          ! branch_requires_guard fix/practice-topic-history-20261120
+          file_requires_guard visual/iclub-academy-ux531-b04b08.css
+          file_requires_guard qa/ux531-previewless-release-firewall.cjs
+          file_requires_guard .github/workflows/ux531-previewless-release-firewall.yml
+          ! file_requires_guard supabase/tests/iclub_ai_finance_safety_v1_matrix.sql
+          ! file_requires_guard qa/ai-tutor-source-regression.cjs
+          ! file_requires_guard index.html
+
+          if [[ "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
+            echo "run_guard=true" >> "$GITHUB_OUTPUT"
+            echo "UX531: original explicit push/manual candidate gate retained."
+            exit 0
+          fi
+
+          test "$UX531_EXPECTED_SHA" = "$(git rev-parse HEAD)"
+          git cat-file -e "${UX531_BASE_SHA}^{commit}"
+          # Compare only the PR's changes. Main may advance while a Draft is open;
+          # diffing the two tips would incorrectly include new unrelated main commits.
+          merge_base="$(git merge-base "$UX531_BASE_SHA" "$UX531_EXPECTED_SHA")"
+          test -n "$merge_base"
+          mapfile -t changed < <(git diff --name-only "$merge_base" "$UX531_EXPECTED_SHA")
+
+          # Workflow-only maintenance and docs-only updates are not
+          # application release candidates. Keep the real UX531 safety
+          # source/tests intact; maintainers still need PR review to merge.
+          if [[ "${#changed[@]}" -eq 1 &&
+                "${changed[0]}" == ".github/workflows/ux531-previewless-release-firewall.yml" ]]; then
+            echo "run_guard=false" >> "$GITHUB_OUTPUT"
+            echo "UX531: workflow-only maintenance; classifier self-checks PASS."
+            exit 0
+          fi
+          only_docs=true
+          for file in "${changed[@]}"; do
+            case "$file" in
+              docs/*) ;;
+              *) only_docs=false; break ;;
+            esac
+          done
+          if [[ "${#changed[@]}" -gt 0 && "$only_docs" == "true" ]]; then
+            echo "run_guard=false" >> "$GITHUB_OUTPUT"
+            echo "UX531: docs-only PR; no full application release candidate."
+            exit 0
+          fi
+
+          run_guard=false
+          if branch_requires_guard "${GITHUB_HEAD_REF:-}"; then
+            run_guard=true
+          else
+            for file in "${changed[@]}"; do
+              if file_requires_guard "$file"; then
+                run_guard=true
+                break
+              fi
+            done
+          fi
+          echo "run_guard=$run_guard" >> "$GITHUB_OUTPUT"
+          if [[ "$run_guard" == "true" ]]; then
+            echo "UX531: protected release/source candidate; run unchanged full firewall."
+          else
+            echo "UX531: unrelated PR; skip original full-release-only source firewall."
+          fi
+      - name: Unrelated PRs are not UX531 release candidates
+        if: steps.ux531_scope.outputs.run_guard == 'false'
+        run: echo "PASS scope isolation. Unrelated PR is checked by its own targeted CI."
       - name: Enforce pinned source and absent production side effects
+        if: steps.ux531_scope.outputs.run_guard == 'true'
         env:
           UX531_BASE_SHA: ${{ github.event.pull_request.base.sha || 'b5cbf0c10e178c583aeb9c223cc25110cd10c65c' }}
           UX531_EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
