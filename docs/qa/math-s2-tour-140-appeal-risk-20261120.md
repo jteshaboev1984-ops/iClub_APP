@@ -29,9 +29,23 @@ The current general input scorer compares fractions as literal normalized string
 This isolated Draft stages an uninstalled SQL candidate at supabase/candidates/math_s2_tour_input_equivalence_v1_hold.sql and a read-only test at supabase/candidates/math_s2_tour_input_equivalence_v1_readonly_test.sql. The SQL candidate adds a private rational equivalence function and limits its use to current Season 2 Mathematics Tour membership. It pins the original evaluator source hash and preserves the original Chemistry branches, all other subjects, MCQ and Season1 behavior. No answer keys or protected stems in GitHub.
 
 ## Release prerequisites (not silently waived)
-1. Execute the uninstalled candidate and test on DISPOSABLE PG17, with real signed JWT/PostgREST and Chromium; verify numeric equivalence, malformed and wrong input denial, cross-user access, retry and versioned history. **Current SHA has no verified PG17 execution yet.**
+1. Execute the uninstalled candidate and test on DISPOSABLE PG17, with real signed JWT/PostgREST and Chromium; verify numeric equivalence, malformed and wrong input denial, cross-user access, retry and versioned history. **Superseded: isolated PG17 signed-HTTP/Chromium PASS at tested code SHA 5b8f1a56 (details below).**
 2. Independent EN/RU/UZ academic checking of all 140 key/distractor uniqueness, diagrams, precision/format and the 32 similarity candidates; correct any found ambiguity in a history-safe future-only version. Do not manufacture new questions before checking existing valid content.
 3. Verify the seven live visual assets/rendering and actual Math-only 7x20 Tour gate: unique attempt, timers, anti-cheat, scores, ratings, certificates, season isolation, rollback. Owner alone chooses Tour dates and grants production GO.
 4. Keep Season 2 draft/undated. No main merge, live migration, learner history change, source publication or paid service authorized by this checkpoint.
 
-**Verdict: structural bank PASS; rational input scoring FAIL; final academic/security acceptance PENDING; Season2 release HOLD.**
+**Verdict: structural bank PASS; current production rational-input scoring FAIL (isolated fix PASS, NOT deployed); final academic acceptance PENDING; Season2 release HOLD.**
+
+## Continuation 2026-11-20 (metadata-only; no protected source or keys)
+
+1. Exact tested code SHA: 5b8f1a56f7d500a55330ded25895061c7aeba6c0. [Target CI #44695294152](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/44695294152) SUCCESS. Real PostgreSQL 17/PostgREST signed synthetic JWT, actual deployed Tour RPC source, Chromium fetch, history-preserving rollback. Exact rational cross-multiplication: 18/18 synthetic including 100-digit equivalent fractions and rejection of near-correct answers; 28/28 synthetic canonical, 4/4 equivalent fractions and 1/1 decimal equivalent. Anonymous, expired, cross-user, and out-of-session writes rejected; original Season1 Mathematics/Chemistry behavior unchanged. This is NOT a real learner session or full application Tour UI run.
+
+2. The separate Academy-only UX531 source allowlist still FAILS on this non-UX scoped branch ([run #44695294192](https://github.com/jteshaboev1984-ops/iClub_APP/actions/runs/44695294192)); do not claim all workflow gates passed.
+
+3. An independent SELECT-only **Mathematics-only 7-tour** readiness query verified 7/7 containers, 140/140 valid link structure, 6/9/5, EN/RU/UZ, one hard diagram per Tour, no direct old-season/Practice ID overlap, all undated/inactive. Saved source: supabase/preflight/math_s2_7tour_subject_scoped_readiness_select_only.sql. This is structural evidence, **not GO** or permission to set dates.
+
+4. Confirmed semantic repetition despite distinct IDs: S2 #6083 repeats Season1 #3283 (same mathematical binomial task); S2 #6032 repeats Season1 #2616 (same domain after equivalent radicand transformation); S2 #6091 repeats active Practice #7742 (same trigonometric angle in degrees/radians). A private-only owner file holds three original proposed EN/RU/UZ future-only revisions and independent algebra calculations. No protected stem/key or candidate text in public Git, no production item overwritten, no new question ID activated. Language/academic QA remains pending. Other 32 similarity signals are NOT automatically duplicates.
+
+5. All seven existing SVG source files were read; labels and safety markers were checked without changing them. Source check does not prove live authenticated rendering or independent full diagram proof. Need real Tour UI smoke and separate academic review.
+
+6. Remaining HOLD: professional independent mathematical/distractor and RU/UZ/EN review, source rights and triple-duplicate replacement with immutable history/new IDs, 32 similarity review disposition, one-attempt/timer/anti-cheat/score/rating/certificate season-specific acceptance, owner dates and owner permission to publish/merge/deploy. Host Supabase, public main, learner records, production and paid services untouched.
