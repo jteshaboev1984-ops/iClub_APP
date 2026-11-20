@@ -43,7 +43,7 @@ const mcqProofs=new Map([
   [7558,'Two different allowed inputs give the same output.'],
   [7559,'f is a function but is not one-to-one.'],
   [7562,'1≤f(x)≤'+String((5-2)**2+1)],
-  [7565,'−16≤f(x)≤'+String(-(0+1)**2+9)],
+  [7565,'−16≤f(x)≤'+String(-((0+1)**2)+9)],
   [7569,'−1<f(x)≤'+String(5-1)],
   [7570,'f(x)≤'+String(-(3**2)+4*3+1)],
   [7581,'f(x)=4x−7'],
