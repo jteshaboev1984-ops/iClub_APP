@@ -2,15 +2,17 @@ name: Mathematics Practice future-only atomic switch PG17
 on:
   push:
     branches:
-      - qa/math-practice-future-only-atomic-switch-pg17-20261120
+      - qa/math-practice-versioned-mistakes-signed-pg17-20261120
   pull_request:
     branches:
-      - qa/math-practice-future-only-81-contenthash-pin-20261119
+      - qa/math-practice-future-only-atomic-switch-pg17-20261120
     paths:
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
       - 'scripts/math-practice-v2-future-only-81-stage-generator.cjs'
       - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
       - 'scripts/math-practice-v2-future-only-signed-http.cjs'
+      - 'scripts/math-practice-v2-versioned-mistakes-signed-http.cjs'
+      - 'supabase/tests/math_practice_future_only_mistakes_seed_pg17.sql'
       - 'scripts/math-practice-v2-future-only-chromium-http.cjs'
       - 'supabase/tests/math_practice_future_only_signed_http_seed_pg17.sql'
       - 'supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql'
@@ -105,6 +107,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_matrix.sql
           psql -v ON_ERROR_STOP=1 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_signed_http_seed_pg17.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_future_only_mistakes_seed_pg17.sql
       - name: Start real local signed JWT PostgREST for synthetic learner role
         run: |
           set -euo pipefail
@@ -136,11 +139,20 @@ jobs:
           set -euo pipefail
           node --check scripts/math-practice-v2-future-only-chromium-http.cjs
           node scripts/math-practice-v2-future-only-chromium-http.cjs published
+      - name: Real signed v5 recent-mistakes selection BEFORE rollback
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-versioned-mistakes-signed-http.cjs
+          node scripts/math-practice-v2-versioned-mistakes-signed-http.cjs published
       - name: Verify real signed JWT PostgREST v5 before and after versioned rollback
         run: |
           set -euo pipefail
           node --check scripts/math-practice-v2-future-only-signed-http.cjs
           node scripts/math-practice-v2-future-only-signed-http.cjs
+      - name: Real signed v5 recent-mistakes selection AFTER rollback
+        run: |
+          set -euo pipefail
+          node scripts/math-practice-v2-versioned-mistakes-signed-http.cjs rollback
       - name: Browser test real signed v5 OLD version after rollback
         run: |
           set -euo pipefail
