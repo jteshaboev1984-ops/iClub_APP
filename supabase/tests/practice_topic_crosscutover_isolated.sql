@@ -92,6 +92,9 @@ insert into public.questions(
   'RU explanation','UZ explanation','EN explanation','input','easy','Synthetic',60),
  (14,5,true,'Synthetic Topic','Synthetic Sub','RIGHT',
   'Synthetic Q14','RU Q14','UZ Q14','EN Q14','Synthetic explanation',
+  'RU explanation','UZ explanation','EN explanation','input','easy','Synthetic',60),
+ (15,5,true,'Synthetic Topic','Synthetic Sub','RIGHT',
+  'Synthetic Q15','RU Q15','UZ Q15','EN Q15','Synthetic explanation',
   'RU explanation','UZ explanation','EN explanation','input','easy','Synthetic',60);
 insert into public.practice_drill_sessions_v4(
  id,user_id,subject_id,client_session_id,drill_type,topic,subtopic,
@@ -108,7 +111,11 @@ insert into public.practice_drill_sessions_v4(
   '{13}','in_progress',1,'2026-10-31T12:00:00Z'),
  (103,'22222222-2222-4222-8222-222222222222',5,
   'practice_topic_choice_other_owner_01','rec_topic','Synthetic Topic','Synthetic Sub',
-  '{14}','in_progress',1,'2026-10-31T12:00:00Z');
+  '{14}','in_progress',1,'2026-10-31T12:00:00Z'),
+ -- Reserved for real signed JWT/PostgREST after direct SQL tests complete.
+ (104,'11111111-1111-4111-8111-111111111111',5,
+  'practice_topic_choice_http_old_01','rec_topic','Synthetic Topic','Synthetic Sub',
+  '{15}','in_progress',1,'2026-10-31T12:00:00Z');
 
 \i supabase/tests/fixtures/practice_topic_crosscutover_installed_rpcs_20261120.sql
 revoke all on function public.get_practice_drill_resume_safe_v4(bigint)
