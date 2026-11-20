@@ -118,12 +118,12 @@ BEGIN
     SELECT
       (public.iclub_eval_tour_question_safe_v4(
         id,correct_answer,NULL,true)->>'is_correct')::boolean canon,
-      CASE WHEN correct_answer ~ '^[0-9]+/[0-9]+ THEN
+      CASE WHEN correct_answer ~ '^[0-9]+/[0-9]+$' THEN
         (public.iclub_eval_tour_question_safe_v4(id,
           (2*split_part(correct_answer,'/',1)::integer)::text||'/'||
           (2*split_part(correct_answer,'/',2)::integer)::text,
           NULL,true)->>'is_correct')::boolean END frac,
-      CASE WHEN correct_answer ~ '^[0-9]+[.]5 THEN
+      CASE WHEN correct_answer ~ '^[0-9]+[.]5$' THEN
         (public.iclub_eval_tour_question_safe_v4(id,
           (correct_answer::numeric*2)::integer::text||'/2',
           NULL,true)->>'is_correct')::boolean END dec
