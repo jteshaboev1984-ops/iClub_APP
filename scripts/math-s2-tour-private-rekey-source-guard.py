@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Private, source-only 112-MCQ Mathematics S2 Tour rekey validator.
+"""Private, source-only 112-MCQ Mathematics S2 Tour in-place rekey validator.
 
 Never print answer keys or question text. Never connect to Supabase.
 Never create or edit a question, tour, answer, score or learner record.
@@ -78,8 +78,14 @@ def validate(doc):
         q = next(row for row in rows if row["old_question_id"] == id_)
         if q["replace_stem_source"] != "private_fresh_item" or q["tour_no"] != r.get("target_tour"):
             raise BankHold("replacement_not_linked_to_correct_tour")
-        if q["new_key"] != r.get("correct_answer") or r.get("new_is_active") is not False or r.get("new_quality_status") != "draft":
-            raise BankHold("replacement_key_or_draft_state_bad")
+        if q["new_key"] != r.get("correct_answer"):
+            raise BankHold("replacement_key_mismatch")
+        # The prior private file was drafted for new IDs. Reuse its checked
+        # content, but NEVER let a candidate assert new question-row creation.
+        if r.get("new_question_id") is not None:
+            raise BankHold("new_question_row_prohibited_for_unused_s2_item")
+        if r.get("new_is_active") not in (None, False) or r.get("new_quality_status") not in (None, "draft"):
+            raise BankHold("historical_candidate_publication_not_authorized")
         for lang in ("en", "ru", "uz"):
             opts = r.get("options_text_"+lang)
             if not isinstance(opts, list) or len(opts) != 4 or len(set(opts)) != 4 or not all(isinstance(o, str) and o.strip() for o in opts):
@@ -89,7 +95,9 @@ def validate(doc):
                 raise BankHold("missing_localized_stem_or_explanation")
     return {"tours": 7, "mcq": 112, "semantic_replacements": 4,
             "moved_answer_positions": sum(q["old_key"] != q["new_key"] for q in rows),
-            "source_records_modified": 0, "release_authorized": False}
+            "source_records_modified": 0, "new_question_rows_to_insert": 0,
+            "inplace_candidate_on_unissued_s2_only": True,
+            "release_authorized": False}
 
 
 if __name__ == "__main__":
