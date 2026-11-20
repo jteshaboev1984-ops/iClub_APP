@@ -13,7 +13,7 @@ assert.ok(m,'staging fixture must use canonical generated staging payload');
 const payload=JSON.parse(m[1].replace(/''/g,"'"));
 const expIndex=args.indexOf('--expect');
 const expected=expIndex<0?10:Number(args[expIndex+1]);
-assert.ok([10].includes(expected),'only pinned 2/3/31/81/117 future-only source fixtures are supported');
+assert.ok([2,10].includes(expected),'only the two isolated Q400/Q481 or ten previously published versions are supported');
 assert.equal(payload.length,expected);
 assert.equal(new Set(payload.map(q=>q.old_id)).size,expected);
 // Optional exact-parent authored semantic fixture: old option meanings remain
