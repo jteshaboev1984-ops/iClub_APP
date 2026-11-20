@@ -43,7 +43,7 @@ def make_fake():
                 "replace_stem_source":"old_published_unmodified"
             })
     reps = []
-    for tour,index in ((2,3),(4,5),(5,7)):
+    for tour,index in ((1,10),(2,3),(4,5),(5,7)):
         old_id = 990000+tour*100+index
         row = next(r for r in rows if r["old_question_id"]==old_id)
         row["replace_stem_source"]="private_fresh_item"
@@ -72,7 +72,7 @@ class TestMathS2Rekey(unittest.TestCase):
         result=check(self.doc)
         self.assertEqual(result["mcq"],112)
         self.assertEqual(result["tours"],7)
-        self.assertEqual(result["semantic_replacements"],3)
+        self.assertEqual(result["semantic_replacements"],4)
         self.assertFalse(result["release_authorized"])
 
     def test_duplicate_source(self):
