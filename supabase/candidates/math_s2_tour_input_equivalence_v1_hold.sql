@@ -24,8 +24,11 @@ BEGIN
 END
 $preflight$;
 
--- Exact rational equality when possible; existing narrow numeric tolerance
--- for decimal approximations. No dynamic SQL, text/code eval or API calls.
+-- Exact rational equality for future S2 Mathematics inputs. Mathematically
+-- equivalent integer/decimal/fraction forms compare by CROSS MULTIPLICATION;
+-- no floating error and no tolerance that awards nearly-correct guesses.
+-- Limit 500 UTF-8 characters, matching current Tour client text input.
+-- This is an exact rational comparison, NOT symbolic algebra evaluation.
 CREATE OR REPLACE FUNCTION private.iclub_math_s2_tour_numeric_equiv_v1(
   p_user_answer text, p_expected_answer text
 ) RETURNS boolean
@@ -35,46 +38,48 @@ AS $function$
 DECLARE
   v_user text := trim(translate(coalesce(p_user_answer,''), '−–—', '---'));
   v_expected text := trim(translate(coalesce(p_expected_answer,''), '−–—', '---'));
-  v_user_value numeric;
-  v_expected_value numeric;
-  v_denom numeric;
+  v_user_n numeric;
+  v_user_d numeric;
+  v_expected_n numeric;
+  v_expected_d numeric;
+  v_dec numeric;
 BEGIN
-  IF v_user='' OR v_expected='' OR length(v_user)>64 OR length(v_expected)>64 THEN
+  IF v_user='' OR v_expected='' OR length(v_user)>500 OR length(v_expected)>500 THEN
     RETURN false;
   END IF;
-  -- Decimal comma is a decimal separator, not a thousands separator.
   v_user := replace(v_user, ',', '.');
   v_expected := replace(v_expected, ',', '.');
   v_user := regexp_replace(v_user, '[[:space:]]*/[[:space:]]*', '/', 'g');
   v_expected := regexp_replace(v_expected, '[[:space:]]*/[[:space:]]*', '/', 'g');
-
   BEGIN
-    IF v_user ~ '^[+-]?[0-9]+([.][0-9]+)?([eE][+-]?[0-9]{1,3})?$' THEN
-      v_user_value := v_user::numeric;
+    IF v_user ~ '^[+-]?[0-9]+([.][0-9]+)?([eE][+-]?[0-9]{1,2})?$' THEN
+      v_dec := v_user::numeric;
+      v_user_d := power(10::numeric,scale(v_dec));
+      v_user_n := v_dec*v_user_d;
     ELSIF v_user ~ '^[+-]?[0-9]+/[+-]?[0-9]+$' THEN
-      v_denom := split_part(v_user,'/',2)::numeric;
-      IF v_denom=0 THEN RETURN false; END IF;
-      v_user_value := split_part(v_user,'/',1)::numeric/v_denom;
+      v_user_n := split_part(v_user,'/',1)::numeric;
+      v_user_d := split_part(v_user,'/',2)::numeric;
+      IF v_user_d=0 THEN RETURN false; END IF;
     ELSE
       RETURN false;
     END IF;
-    IF v_expected ~ '^[+-]?[0-9]+([.][0-9]+)?([eE][+-]?[0-9]{1,3})?$' THEN
-      v_expected_value := v_expected::numeric;
+    IF v_expected ~ '^[+-]?[0-9]+([.][0-9]+)?([eE][+-]?[0-9]{1,2})?$' THEN
+      v_dec := v_expected::numeric;
+      v_expected_d := power(10::numeric,scale(v_dec));
+      v_expected_n := v_dec*v_expected_d;
     ELSIF v_expected ~ '^[+-]?[0-9]+/[+-]?[0-9]+$' THEN
-      v_denom := split_part(v_expected,'/',2)::numeric;
-      IF v_denom=0 THEN RETURN false; END IF;
-      v_expected_value := split_part(v_expected,'/',1)::numeric/v_denom;
+      v_expected_n := split_part(v_expected,'/',1)::numeric;
+      v_expected_d := split_part(v_expected,'/',2)::numeric;
+      IF v_expected_d=0 THEN RETURN false; END IF;
     ELSE
-      -- Any future nonnumeric item keeps the existing v4 contract.
+      -- Explicit nonnumeric answers continue using the existing comparator.
       RETURN public.iclub_tour_input_is_correct_v4(p_user_answer,p_expected_answer);
     END IF;
   EXCEPTION WHEN invalid_text_representation OR numeric_value_out_of_range
     OR division_by_zero THEN
     RETURN false;
   END;
-
-  RETURN abs(v_user_value-v_expected_value)
-    <= greatest(1::numeric,abs(v_expected_value)) * 0.000000001::numeric;
+  RETURN v_user_n*v_expected_d = v_expected_n*v_user_d;
 END
 $function$;
 
