@@ -13,7 +13,7 @@ assert.ok(m,'staging fixture must use canonical generated staging payload');
 const payload=JSON.parse(m[1].replace(/''/g,"'"));
 const expIndex=args.indexOf('--expect');
 const expected=expIndex<0?81:Number(args[expIndex+1]);
-assert.ok([2,81].includes(expected),'only existing 81 and owner-pinned two-item source fixtures are supported');
+assert.ok([2,3,81].includes(expected),'only existing 81 and pinned two-/three-item source fixtures are supported');
 assert.equal(payload.length,expected);
 assert.equal(new Set(payload.map(q=>q.old_id)).size,expected);
 const codes=new Map();
