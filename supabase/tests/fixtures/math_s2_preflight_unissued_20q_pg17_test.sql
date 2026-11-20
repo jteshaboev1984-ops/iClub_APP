@@ -170,12 +170,16 @@ BEGIN
  IF (SELECT count(*) FROM public.get_tour_preflight_questions_safe_v4(9101))<>20
   OR (SELECT count(*) FROM public.get_tour_preflight_questions_safe_v4(9103))<>20
  THEN RAISE EXCEPTION 'S1_OR_CHEMISTRY_REGRESSION'; END IF;
- IF (SELECT count(*) FROM public.questions)<>60
-  OR (SELECT count(*) FROM public.tour_questions)<>60
- THEN RAISE EXCEPTION 'QUESTION_BANK_ROWS_CHANGED'; END IF;
  RAISE NOTICE 'S2_UNISSUED_20Q_DENIED_S1_AND_CHEMISTRY_UNCHANGED';
 END $check$;
 RESET ROLE;
+-- Assert bank row preservation as fixture owner, not as an authenticated learner.
+DO $unchanged$
+BEGIN
+ IF (SELECT count(*) FROM public.questions)<>60
+  OR (SELECT count(*) FROM public.tour_questions)<>60
+ THEN RAISE EXCEPTION 'QUESTION_BANK_ROWS_CHANGED'; END IF;
+END $unchanged$;
 DO $secure$
 BEGIN
  IF has_function_privilege('anon','public.get_tour_preflight_questions_safe_v4(bigint)','EXECUTE')
