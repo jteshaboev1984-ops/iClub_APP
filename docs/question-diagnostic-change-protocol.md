@@ -175,6 +175,18 @@ Initial Economics candidates showed three different situations:
    - Example: answer key `3`, user answers such as `3 units Y` were marked incorrect by exact input checking.
    - Action: future evaluator rule; historical recalculation only with explicit approval.
 
+## Owner's 2026-11-20 Practice correction priority (scoped exception)
+
+[Approved owner decision](https://github.com/jteshaboev1984-ops/iClub_APP/issues/574#issuecomment-7039540376), registered in [Rules Inbox #570](https://github.com/jteshaboev1984-ops/iClub_APP/issues/570#issuecomment-7039548309), updates the older unconditional preservation guidance **for demonstrably wrong or ambiguous Practice questions**:
+
+- **Do not keep a wrong question learner-facing just to preserve its answer history.** Fix the concrete issue, independently check its mathematical result, distractors, explanation, diagnostics, RU/UZ/EN, and release the verified correction promptly in small batches instead of waiting for an entire bank.
+- The preferred route remains **retire the old version for future selection and activate a tested new version** (Case D), allowing issued sessions and previous results to remain valid wherever possible. Existing answers do **not** create a release block.
+- Where the particular Practice correction genuinely requires removal of erroneous answer records, the owner has **expressly authorized deletion limited to answers tied to that specific wrong question**. Before applying it, identify only those answer rows, FK/dependency/parent-session consequences and existing aggregate statistics; use transactional guarded DML with recorded counts. Do not extrapolate to an all-learner Practice reset, user deletion, Tour answers, protected assessments, rankings, certificates or unaffected history.
+- A fix is ready for publication when its specific answer contract, mathematics and multilingual source pass the applicable QA and publication is within the owner's approved scope. **Pending review of unrelated question revisions is not a reason to delay an independently complete confirmed correction.**
+- No silent semantic rewrite of prior option letters on already-issued items; re-score/modify competitive results only under a separate explicit owner decision.
+
+This rule is **Practice-specific** and later than the historical July 2026 default protocol. Other assessment types still follow their original protected-history procedures.
+
 ## 7. Final principle
 
 For President Tech Award demo, use the diagnostic layer to prove intelligent feedback.
