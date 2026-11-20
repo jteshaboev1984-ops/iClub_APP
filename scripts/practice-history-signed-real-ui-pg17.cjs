@@ -66,7 +66,7 @@ const api=async(page,subject,token)=>page.evaluate(async ({subject,token})=>{
         await page.evaluate(()=>{
           const start=document.getElementById('courses-practice-start');
           start.classList.add('is-active');
-          document.addEventListener('iclub-practice-open-history',()=>{
+          window.addEventListener('iclub-practice-open-history',()=>{
             start.classList.remove('is-active');
             document.getElementById('courses-practice-history').classList.add('is-active');
             window.iClubPracticeHistoryScreenV1.render();
