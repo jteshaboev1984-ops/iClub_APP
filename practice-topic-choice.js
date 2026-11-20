@@ -9,7 +9,7 @@
       searchPlaceholder:"Найти тему…", loading:"Загружаем доступные темы…",
       empty:"Пока нет доступных тем для практики.",
       filtered:"Темы не найдены", error:"Не удалось загрузить темы. Попробуйте ещё раз.",
-      retry:"Повторить", items:"заданий", start:"Начать", note:"Засчитывается отдельно от результата практики тура.",
+      retry:"Повторить", errorCode:"Код", items:"заданий", start:"Начать", note:"Засчитывается отдельно от результата практики тура.",
       more:"Показать ещё", historyTitle:"Практика по темам",
       historyLast:"Последний результат", historyBest:"Лучший результат", historyAll:"Правильных ответов",
       historyRecent:"Последние попытки", historyCount:"попыток",
@@ -21,7 +21,7 @@
       searchPlaceholder:"Mavzuni topish…", loading:"Mavzular yuklanmoqda…",
       empty:"Hozircha mavzular bo‘yicha amaliyot mavjud emas.",
       filtered:"Mavzu topilmadi", error:"Mavzularni yuklab bo‘lmadi. Qayta urinib ko‘ring.",
-      retry:"Qayta urinish", items:"savol", start:"Boshlash", note:"Natija tur amaliyotining natijasidan alohida saqlanadi.",
+      retry:"Qayta urinish", errorCode:"Kod", items:"savol", start:"Boshlash", note:"Natija tur amaliyotining natijasidan alohida saqlanadi.",
       more:"Yana ko‘rsatish", historyTitle:"Mavzular bo‘yicha amaliyot",
       historyLast:"So‘nggi natija", historyBest:"Eng yaxshi natija", historyAll:"To‘g‘ri javoblar",
       historyRecent:"So‘nggi urinishlar", historyCount:"urinish",
@@ -33,7 +33,7 @@
       searchPlaceholder:"Find a topic…", loading:"Loading available topics…",
       empty:"No topic practice is currently available.",
       filtered:"No matching topics", error:"Could not load topics. Please try again.",
-      retry:"Try again", items:"questions", start:"Start", note:"Topic drills are separate from your Tour practice result.",
+      retry:"Try again", errorCode:"Code", items:"questions", start:"Start", note:"Topic drills are separate from your Tour practice result.",
       more:"Show more", historyTitle:"Practice by topic",
       historyLast:"Latest result", historyBest:"Best result", historyAll:"Correct answers",
       historyRecent:"Recent attempts", historyCount:"attempts",
@@ -42,6 +42,23 @@
       historyRetry:"Retry" }
   };
   let mountSerial=0;
+
+  // Codes are intentionally bounded enums; never expose RPC errors/messages,
+  // URLs, access tokens, user IDs, question content or diagnostic payloads.
+  // A screenshot of a failed catalog can now distinguish client readiness,
+  // permission/HTTP, a stale subject response and malformed server data.
+  function catalogFailureCode(error,response) {
+    const problem=String(error?.message||'');
+    if(problem==='client_not_ready') return 'CLIENT_NOT_READY';
+    const http=Number(response?.status??error?.status);
+    if(Number.isInteger(http)&&http>=400&&http<=599)return 'HTTP_'+http;
+    const serverCode=String(error?.code||'');
+    if(/^(?:PGRST[0-9A-Z]{1,12}|[0-9A-Z]{5})$/.test(serverCode))
+      return serverCode;
+    if(problem==='catalog_subject_mismatch')return 'SUBJECT_MISMATCH';
+    if(problem==='catalog_shape_invalid')return 'INVALID_RESPONSE';
+    return 'UNAVAILABLE';
+  }
 
   function itemCountLabel(n,lang,c) {
     if(lang==="ru") {
@@ -92,7 +109,12 @@
     const note=element("p","practice-topic-choice-note",c.note);
     const history=element("section","practice-topic-history");
     history.hidden=true;
-    host.append(header,panel,note,history);
+    // Preserve latest Topic attempts below Start/Resume in the grouped Practice
+    // screen; original fallback layout stays unchanged if no outlet is present.
+    const historyOutlet=document.getElementById('practice-topic-history-placement');
+    host.append(header,panel,note);
+    if(historyOutlet)historyOutlet.replaceChildren(history);
+    else host.append(history);
 
     function safeResult(row) {
       if (!row || typeof row!=="object") return null;
@@ -227,15 +249,25 @@
     async function load() {
       if(loading || topics!==null) return;
       loading=true;
+      delete status.dataset.catalogFailure;
       status.textContent=c.loading;
       search.hidden=true;
       list.setAttribute("aria-busy", "true");
       list.innerHTML = '<div class="iclub-skeleton-topic" aria-hidden="true"><span class="iclub-skeleton-shape"></span><span class="iclub-skeleton-shape"></span></div>'.repeat(3);
+      let result=null;
       try {
-        if(!window.sb || typeof window.sb.rpc!=="function") throw new Error("offline");
-        const {data,error}=await window.sb.rpc("get_practice_available_topics_safe_v1",
-                                                  {p_subject_key:String(subjectKey)});
-        if(error || data?.ok!==true || !Array.isArray(data.topics)) throw new Error("catalog_unavailable");
+        if(!window.sb || typeof window.sb.rpc!=="function")
+          throw new Error("client_not_ready");
+        result=await window.sb.rpc("get_practice_available_topics_safe_v1",
+                                   {p_subject_key:String(subjectKey)});
+        if(result?.error) throw result.error;
+        const data=result?.data;
+        if(data?.ok!==true || !Array.isArray(data.topics))
+          throw new Error("catalog_shape_invalid");
+        // The source RPC always echoes the actual subject key. A wrong-key
+        // response must never display or launch a different subject's topics.
+        if(data.subject_key!==String(subjectKey))
+          throw new Error("catalog_subject_mismatch");
         if(ownSerial!==mountSerial) return;
         topics=data.topics.filter(x=>
           x && typeof x.topic==="string" && x.topic.length>0 &&
@@ -244,9 +276,13 @@
         ).map(x=>({topic:x.topic,question_count:Number(x.question_count)}));
         search.hidden=topics.length===0;
         render();
-      } catch {
+      } catch(error) {
         if(ownSerial!==mountSerial) return;
+        const code=catalogFailureCode(error,result);
+        status.dataset.catalogFailure=code;
         status.textContent=c.error;
+        status.append(element("small","practice-topic-choice-error-code",
+                              c.errorCode+": "+code));
         const retry=element("button","practice-topic-choice-retry",c.retry);
         retry.type="button";
         retry.addEventListener("click",()=>{ retry.remove(); load(); });

@@ -1,0 +1,221 @@
+name: Practice Season 2 progress read-only PostgreSQL17
+on:
+  pull_request:
+    branches: [main, ux/practice-topic-direct-start-20261119, ux/practice-accepted-order-integration-20261119, feat/practice-season1-access-until-s2-20261119, fix/practice-season-boundary-finalizer-20261119 , fix/practice-topic-catalog-independent-mount-20261120]
+    paths:
+      - 'supabase/candidates/practice_season2_progress_safe_v1.sql'
+      - 'supabase/tests/practice_season2_progress_safe_isolated.sql'
+      - 'supabase/candidates/practice_finalizer_season_boundary_v5_future.sql'
+      - 'supabase/tests/practice_finalizer_season_boundary_isolated.sql'
+      - 'supabase/tests/practice_topic_crosscutover_isolated.sql'
+      - 'scripts/practice-topic-crosscutover-signed-http.cjs'
+      - 'supabase/tests/fixtures/practice_topic_integrated_signed_catalog_history_20261120.sql'
+      - 'supabase/tests/practice_topic_integrated_signed_ui_fixture.sql'
+      - 'scripts/practice-integrated-signed-browser.cjs'
+      - 'supabase/tests/fixtures/practice_topic_crosscutover_installed_rpcs_20261120.sql'
+      - 'supabase/candidates/practice_subject_tour1_runtime_v5_future.sql'
+      - 'supabase/tests/practice_subject_tour1_runtime_selector_isolated.sql'
+      - '.github/workflows/practice-season2-progress-isolated.yml'
+      - 'scripts/practice-season2-progress-signed-http.cjs'
+      - 'scripts/practice-season2-history-chromium.cjs'
+      - 'practice-results-tabs.js'
+      - 'practice-results-tabs.css'
+      - 'practice-history-screen.js'
+      - 'scripts/practice-history-standalone-chromium.cjs'
+      - 'app.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: practice-season2-progress-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  isolated-pg17:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-test-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate Season 2 scoped Practice progress without touching history
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 5432 -U postgres -d postgres \
+            -f supabase/tests/practice_season2_progress_safe_isolated.sql
+      - name: Verify future-serving per-subject Practice selectors on separate synthetic PG17
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          createdb -h 127.0.0.1 -U postgres practice_selector
+          export PGHOST=127.0.0.1 PGUSER=postgres PGDATABASE=practice_selector
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_v2_runtime_rehearsal_fixture.sql
+          for source in \
+            supabase/migrations/20261007002000_math_practice_v2_unicode_minus_normalization_v1.sql \
+            supabase/migrations/20261007003000_math_practice_v2_close_legacy_answer_oracles_v1.sql \
+            supabase/migrations/20261007004000_math_practice_v2_metadata_foundation_v1.sql \
+            supabase/migrations/20261007005000_math_practice_v2_topic_drill_pool_gate_v1.sql \
+            supabase/migrations/20261007006000_math_practice_v2_selector_v5.sql
+          do
+            psql -X -v ON_ERROR_STOP=1 -f "$source"
+          done
+          psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/practice_subject_tour1_runtime_v5_future.sql
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/practice_subject_tour1_runtime_selector_isolated.sql
+
+      - name: Verify S1 late finalization does not enter S2 or mutate historical attempts
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          createdb -h 127.0.0.1 -U postgres practice_finalizer
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres \
+            -d practice_finalizer -f supabase/tests/practice_finalizer_season_boundary_isolated.sql
+
+      - name: Check installed Topic submit and resume at Season1-to-Season2 boundary
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          createdb -h 127.0.0.1 -U postgres practice_topic_cutover
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres \
+            -d practice_topic_cutover -f supabase/tests/practice_topic_crosscutover_isolated.sql
+
+      - name: Install exact installed catalog plus History into disposable Topic PG17
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres \
+            -d practice_topic_cutover \
+            -f supabase/tests/practice_topic_integrated_signed_ui_fixture.sql
+
+      - name: Activate fixture period and launch signed local PostgREST
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres -d postgres \
+            -c "UPDATE public.seasons SET status='current',start_date='2026-11-01' WHERE id=2;"
+          secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$secret"
+          echo "PRACTICE_SEASON2_JWT_SECRET=$secret" >> "$GITHUB_ENV"
+          echo "PRACTICE_SEASON2_ISOLATED=true" >> "$GITHUB_ENV"
+          echo "PGHOST=127.0.0.1" >> "$GITHUB_ENV"
+          echo "PGDATABASE=postgres" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+          docker run -d --rm --name iclub-practice-s2-pgrst --network host \
+            -e PGRST_DB_URI="postgres://postgres:isolated-test-only@127.0.0.1:5432/postgres" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$secret" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 40); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then exit 0; fi
+            sleep 2
+          done
+          docker logs --tail 25 iclub-practice-s2-pgrst
+          exit 1
+
+      - name: Signed JWT owner/subject and archive E2E
+        run: |
+          set -euo pipefail
+          node --check scripts/practice-season2-progress-signed-http.cjs
+          node scripts/practice-season2-progress-signed-http.cjs
+
+      - name: Signed JWT/PostgREST Topic resume and final answer across S1-to-S2
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+          PRACTICE_TOPIC_CUTOVER_ISOLATED: "true"
+          PRACTICE_TOPIC_DB: "practice_topic_cutover"
+        run: |
+          set -euo pipefail
+          docker run -d --rm --name iclub-practice-topic-pgrst --network host \
+            -e PGRST_DB_URI="postgres://postgres:isolated-test-only@127.0.0.1:5432/practice_topic_cutover" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_SERVER_PORT="3001" \
+            -e PGRST_JWT_SECRET="${PRACTICE_SEASON2_JWT_SECRET}" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 40); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then break; fi
+            sleep 2
+          done
+          node --check scripts/practice-topic-crosscutover-signed-http.cjs
+          node scripts/practice-topic-crosscutover-signed-http.cjs
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres \
+            -d practice_topic_cutover -c "DO \$audit\$ BEGIN
+              IF (SELECT count(*) FROM public.practice_drill_sessions_v4
+                 WHERE id=104 AND status='finalized'
+                   AND created_at='2026-10-31T12:00:00Z'
+                   AND finalized_at>'2026-10-31T19:00:00Z')<>1
+                 OR (SELECT count(*) FROM public.practice_drill_answers_v4
+                   WHERE session_id=104 AND question_id=15)<>1
+              THEN RAISE EXCEPTION 'signed HTTP Topic history period changed'; END IF;
+              RAISE NOTICE 'PRACTICE_S1_TOPIC_HTTP_HISTORY_PG17_PASS';
+            END \$audit\$;"
+
+      - name: Chromium validation of accepted 3+5 Practice history UI
+        env:
+          PRACTICE_S2_SCREENSHOT_DIR: artifacts/practice-season2-owner-acceptance
+        run: |
+          set -euo pipefail
+          node --check app.js
+          node --check practice-results-tabs.js
+          node --check scripts/practice-season2-history-chromium.cjs
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node scripts/practice-season2-history-chromium.cjs
+
+      - name: Validate standalone History including closed S1 fallback
+        env:
+          PRACTICE_HISTORY_SCREEN_DIR: artifacts/practice-season2-owner-acceptance
+        run: |
+          set -euo pipefail
+          node --check practice-history-screen.js
+          node --check scripts/practice-history-standalone-chromium.cjs
+          node scripts/practice-history-standalone-chromium.cjs
+
+      - name: Actual Practice screen signed JWT browser with local catalog, Topic History and S1/S2 archive RPCs
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+          PRACTICE_TOPIC_CUTOVER_ISOLATED: "true"
+          PRACTICE_TOPIC_DB: "practice_topic_cutover"
+          PRACTICE_S2_SCREENSHOT_DIR: artifacts/practice-season2-owner-acceptance
+        run: |
+          set -euo pipefail
+          node --check scripts/practice-integrated-signed-browser.cjs
+          node scripts/practice-integrated-signed-browser.cjs
+
+      - name: Save visual acceptance screenshots (synthetic test data only)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-season2-owner-acceptance-${{ github.sha }}
+          path: artifacts/practice-season2-owner-acceptance/*.png
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: No production access
+        run: echo 'Synthetic PostgreSQL 17 only. No live Supabase or Vercel integration.'

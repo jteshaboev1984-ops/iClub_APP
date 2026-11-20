@@ -9,7 +9,7 @@ const i18n=fs.readFileSync(path.join(root,'i18n.js'),'utf8');
 const globalViews=['splash','registration','home','courses','ratings','profile','notifications',
  'community','about','support','support-topic','certificates','certificate-verify','archive'];
 const stackScreens=['all-subjects','subject-hub','lessons','video','practice-start','practice-quiz',
- 'practice-result','practice-review','practice-recs','tours','tour-rules','tour-quiz','tour-result',
+ 'practice-history','practice-result','practice-review','practice-recs','tours','tour-rules','tour-quiz','tour-result',
  'tour-review','books','my-recs','my-rec-topic-history','my-rec-topic-review','my-rec-detail'];
 const protectedIds=['practice-pause-btn','practice-submit-btn','practice-question',
  'tour-rules-accept','tour-warn-btn','tour-overall-time','tour-question-time','tour-next-btn',
@@ -23,10 +23,12 @@ for(const id of [...globalViews.map(x=>'view-'+x),...stackScreens.map(x=>'course
  assert.equal((source.match(new RegExp('id="'+id+'"','g'))||[]).length,1,'missing or duplicate source ID '+id);
 }
 for(const action of actions)assert(source.includes('data-action="'+action+'"'),'source action lost: '+action);
-assert.equal([...source.matchAll(/<section\b[^>]*\bid="[^"]+"[^>]*>/g)].length,35,'named source screen structure changed');
+assert.equal([...source.matchAll(/<section\b[^>]*\bid="[^"]+"[^>]*>/g)].length,36,'named source screen structure changed');
 // Two dynamic subject-access sections are intentionally unnamed UI containers.
-assert.equal([...source.matchAll(/<section\b[^>]*>/g)].length,37,'including two subject-access subsections');
+assert.equal([...source.matchAll(/<section\b[^>]*>/g)].length,38,'including two subject-access subsections');
 assert(source.includes('visual/iclub-academy-ux531-b04b08.css'),'new visual layer not linked');
+assert(source.includes('id="practice-history-content"')&&source.includes('practice-history-screen.js'),
+ 'new Practice history screen must have real viewer/root linked, not a silent empty route');
 for(const k of ['academy_profile_subtitle','academy_continue_title']){
  assert.equal((i18n.match(new RegExp('\\b'+k+':','g'))||[]).length,3,'missing RU/UZ/EN key '+k);
 }

@@ -5241,6 +5241,28 @@ function formatAnswerForDisplay(q, rawAnswer) {
 }
    
 // --- Practice stage helpers + DB-first practice set builder ---
+async function getPracticeSubjectSeasonId(subjectId) {
+  // Use this subject's Tour 1; a global current season must not lock others.
+  const fallback=await getSeasonOneId();
+  if(!window.sb||!subjectId)return fallback;
+  try{
+    const published=await loadPublishedSeasonRows();
+    if(!published.length)return fallback;
+    const ids=published.map(x=>Number(x.id)).filter(Boolean);
+    const {data,error}=await window.sb.from("tours")
+      .select("season_id,start_date,end_date")
+      .eq("subject_id",Number(subjectId)).eq("tour_no",1)
+      .in("season_id",ids);
+    if(error||!Array.isArray(data))return fallback;
+    const today=getLocalTodayISO();
+    const eligible=published.filter(sn=>data.some(t=>
+      Number(t.season_id)===Number(sn.id)&&!!t.start_date&&!!t.end_date&&
+      String(t.start_date)<=String(t.end_date)&&String(t.start_date)<=today
+    )).sort((a,b)=>b.season_no-a.season_no);
+    return Number(eligible[0]?.id)||fallback;
+  }catch{return fallback;}
+}
+
 async function getPracticeStageContext(subjectKey) {
   if (!window.sb) return null;
 
@@ -5248,7 +5270,7 @@ async function getPracticeStageContext(subjectKey) {
   if (!subjectId) return null;
 
   const seasonId =
-    await getCurrentSeasonId();
+    await getPracticeSubjectSeasonId(subjectId);
 
   if (!seasonId) return null;
 
@@ -5274,9 +5296,7 @@ async function getPracticeStageContext(subjectKey) {
   const tours = Array.isArray(toursRes?.data) ? toursRes.data : [];
   const totalTours = tours.length;
 
-  const pad2 = (n) => String(n).padStart(2, "0");
-  const d0 = new Date();
-  const todayISO = `${d0.getFullYear()}-${pad2(d0.getMonth() + 1)}-${pad2(d0.getDate())}`;
+  const todayISO = getLocalTodayISO();
 
   const isInWindow = (row) => {
     const sd = row?.start_date
@@ -5346,16 +5366,19 @@ async function getPracticePoolQuestionIds(poolId) {
     .filter(Boolean);
 }
 
-async function getClosedPracticeQuestionIds(subjectId, uid, questionIds) {
+async function getClosedPracticeQuestionIds(subjectId, uid, questionIds, sinceAt = null) {
   if (!window.sb || !subjectId || !uid || !Array.isArray(questionIds) || !questionIds.length) {
     return new Set();
   }
 
-  const attemptsRes = await window.sb
+  let attemptsQuery = window.sb
     .from("practice_attempts")
     .select("id")
     .eq("user_id", uid)
     .eq("subject_id", subjectId);
+  // A fresh academic period does not republish or reset the question bank.
+  if (sinceAt) attemptsQuery = attemptsQuery.gte("created_at", sinceAt);
+  const attemptsRes = await attemptsQuery;
 
   const attemptIds = (Array.isArray(attemptsRes?.data) ? attemptsRes.data : [])
     .map(x => Number(x?.id))
@@ -5511,9 +5534,12 @@ function setSelectedPracticeTourNo(subjectKey, tourNo) {
 }
 
 function getLocalTodayISO() {
-  const d0 = new Date();
-  const p = (n) => String(n).padStart(2, "0");
-  return `${d0.getFullYear()}-${p(d0.getMonth() + 1)}-${p(d0.getDate())}`;
+  // Tour dates follow Uzbekistan calendar day, independent of the device TZ.
+  const parts=new Intl.DateTimeFormat('en-US',{
+    timeZone:'Asia/Tashkent',year:'numeric',month:'2-digit',day:'2-digit'
+  }).formatToParts(new Date());
+  const part=k=>parts.find(p=>p.type===k)?.value||'';
+  return [part('year'),part('month'),part('day')].join('-');
 }
 
 function isTourRowInWindow(
@@ -5547,6 +5573,19 @@ async function getPracticeTourCards(subjectKey) {
   const currentTourNo =
     Number(ctx?.practiceTourNo || 1) || 1;
 
+  let season2Period=null;
+  try {
+    if (window.sb?.rpc) {
+      const {data,error}=await window.sb.rpc("get_practice_season2_progress_safe_v1",
+        {p_subject_key:subjectKey});
+      if(!error&&data?.ok===true&&String(data.subject_key||'')===String(subjectKey))
+        season2Period=data;
+    }
+  } catch (_) {}
+  const periodCutoff=season2Period?.period_active===true &&
+    Number.isFinite(Date.parse(String(season2Period.period_starts_at||''))) ?
+      String(season2Period.period_starts_at) : null;
+
   const pools =
     Array.isArray(ctx?.pools)
       ? ctx.pools
@@ -5558,6 +5597,7 @@ async function getPracticeTourCards(subjectKey) {
     !pools.length
   ) {
     return {
+      subjectKey,
       currentTourNo,
       selectedTourNo: currentTourNo,
       cards: []
@@ -5601,21 +5641,24 @@ async function getPracticeTourCards(subjectKey) {
 
       let stats = null;
       if (hasPool) {
-        stats = await computePracticeStageStats(subjectKey, tourNo).catch(() => null);
+        stats = await computePracticeStageStats(subjectKey, tourNo, periodCutoff).catch(() => null);
       }
 
       let stateName = "available";
 
       if (tourRow) {
-        if (tourRow?.is_active === true && isTourRowInWindow(tourRow, todayISO)) {
-          stateName = "active";
-        } else if (tourRow?.start_date && String(tourRow.start_date) > todayISO) {
-          stateName = "locked";
+        if (!tourRow.start_date || !tourRow.end_date ||
+            String(tourRow.start_date)>String(tourRow.end_date)) {
+          stateName="locked"; // Undated is never active or completed.
+        } else if (tourRow.is_active===true && isTourRowInWindow(tourRow,todayISO)) {
+          stateName="active";
+        } else if (String(tourRow.end_date)<todayISO) {
+          stateName="past";
         } else {
-          stateName = "past";
+          stateName="locked";
         }
       } else {
-        stateName = tourNo <= currentTourNo ? (tourNo === currentTourNo ? "active" : "past") : "locked";
+        stateName=tourNo<=currentTourNo?"past":"locked";
       }
 
       const total = Number(stats?.totalCount || 0);
@@ -5645,13 +5688,20 @@ async function getPracticeTourCards(subjectKey) {
   const selectedCard = rawCards.find(c => c.tourNo === selectedRaw && !c.isLocked);
   const fallbackCard =
     rawCards.find(c => c.isActive && !c.isLocked) ||
-    rawCards.find(c => !c.isLocked) ||
+    rawCards.slice().reverse().find(c => !c.isLocked) ||
     rawCards[0];
 
   const selectedTourNo = Number(selectedCard?.tourNo || fallbackCard?.tourNo || currentTourNo || 1);
   setSelectedPracticeTourNo(subjectKey, selectedTourNo);
 
-  return { currentTourNo, selectedTourNo, cards: rawCards };
+  const activeCard=rawCards.find(c=>c.isActive&&!c.isLocked)||null;
+  const lastCompleted=rawCards.slice().reverse().find(c=>c.stateName==='past')||null;
+  const nextUpcoming=rawCards.find(c=>c.stateName==='locked'&&
+    !!tourByNo.get(c.tourNo)?.start_date)||null;
+  return { subjectKey, currentTourNo, selectedTourNo, cards: rawCards, season2Period,
+    periodCutoff,activeTourNo:activeCard?.tourNo||null,
+    lastCompletedTourNo:lastCompleted?.tourNo||null,
+    nextUpcomingTourNo:nextUpcoming?.tourNo||null };
 }
 
    function updatePracticeStartButtonForTour(tourNo, canResume = false) {
@@ -5737,7 +5787,7 @@ function renderPracticeTourPicker(cards, selectedTourNo) {
   }
 }
    
-async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
+async function computePracticeStageStats(subjectKey, forcedTourNo = null, sinceAt = null) {
   const uid = await getAuthUid().catch(() => null);
   if (!uid) {
     return {
@@ -5778,7 +5828,7 @@ async function computePracticeStageStats(subjectKey, forcedTourNo = null) {
   }
 
   const allIds = await getPracticePoolQuestionIds(poolId);
-  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allIds);
+  const closedIds = await getClosedPracticeQuestionIds(ctx.subjectId, uid, allIds, sinceAt);
 
   const totalCount = allIds.length;
   const masteredCount = Array.from(closedIds).length;
@@ -12434,6 +12484,7 @@ function bindRatingsUI() {
     "lessons",
     "video",
     "practice-start",
+    "practice-history",
     "practice-quiz",
     "practice-result",
     "practice-review",
@@ -12557,6 +12608,11 @@ function bindRatingsUI() {
 
   // The Practice start/result screens may become the stack root. Do not
   // unexpectedly send the learner to Home when Back should stay in Practice.
+  if (state.courses.stack.length <= 1 && top === "practice-history") {
+    replaceCourses("practice-start");
+    renderPracticeStart();
+    return;
+  }
   if (state.courses.stack.length <= 1 && top === "practice-start") {
     replaceCourses("subject-hub");
     renderSubjectHub();
@@ -12582,6 +12638,8 @@ function bindRatingsUI() {
     renderToursStart();
   } else if (next === "practice-start") {
     renderPracticeStart();
+  } else if (next === "practice-history") {
+    window.iClubPracticeHistoryScreenV1?.render?.();
   } else if (next === "subject-hub") {
     renderSubjectHub();
   } else if (next === "books") {
@@ -12625,7 +12683,7 @@ function canCoursesBack() {
 
   // Practice can be the sole entry in the stack after finishing or exiting a
   // topic drill. A visible back control must always have a safe destination.
-  if (["practice-start","practice-result","practice-review","practice-recs"].includes(top)) return true;
+  if (["practice-start","practice-history","practice-result","practice-review","practice-recs"].includes(top)) return true;
 
   return state.courses.stack.length > 1;
 }
@@ -17286,6 +17344,17 @@ function addMyRecsFromAttempt(attempt) {
   const titleEl = $("#practice-subject-title");
   if (titleEl) titleEl.textContent = subjectTitle(subjectKey, subj?.title || subjectKey || "—");
 
+  // Topic Practice has its own authenticated catalog/History RPC. Mount it
+  // BEFORE awaiting the separate Tour selector, per-Tour questions or stats:
+  // those may be slow/offline without making the Topic mode unavailable.
+  // This does not bootstrap auth or launch a Practice attempt; topic loading
+  // remains user-triggered by opening the selector with an explicit Retry.
+  window.iClubPracticeTopicChoice?.mount({
+    subjectKey,
+    language: currentLang(),
+    onStart: (topic) => startPracticeByRec({ topic, subtopic: null }, "practice")
+  });
+
   const stageMetaEl = $("#practice-stage-meta");
   if (stageMetaEl) stageMetaEl.textContent = tr3("Загружаем статистику", "Statistika yuklanmoqda", "Loading statistics");
 
@@ -17331,11 +17400,14 @@ function addMyRecsFromAttempt(attempt) {
    return (async () => {
     const picker = await getPracticeTourCards(subjectKey);
     if (!isCurrent()) return;
-
+    const season2Period=picker?.season2Period||null;
+    window.iClubPracticeSeason2HistoryV1?.render?.(season2Period,subjectKey,currentLang());
+    window.iClubPracticeCurrentTourV1?.render?.(picker,currentLang());
+    const periodCutoff=picker?.periodCutoff||null;
     const selectedTourNo = Number(picker?.selectedTourNo || 1);
 updatePracticeStartButtonForTour(selectedTourNo, false);
 
-const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo);
+const stageStats = await computePracticeStageStats(subjectKey, selectedTourNo, periodCutoff);
 if (!isCurrent()) return;
 const startBtn = document.getElementById("practice-restart-btn");
 if (startBtn?.dataset.premiumLoadingBlocked === "1") {
@@ -17345,12 +17417,6 @@ if (startBtn?.dataset.premiumLoadingBlocked === "1") {
 
 renderPracticeTourPicker(picker.cards, selectedTourNo);
 updatePracticeStartButtonForTour(selectedTourNo, false);
-// Topic practice is independent of Tour attempts; the server catalog only lists eligible topics.
-window.iClubPracticeTopicChoice?.mount({
-  subjectKey,
-  language: currentLang(),
-  onStart: (topic) => startPracticeByRec({ topic, subtopic: null }, "practice")
-});
      
     const done = Number(stageStats?.masteredCount || 0);
     const total = Number(stageStats?.totalCount || 0);
@@ -17369,7 +17435,8 @@ window.iClubPracticeTopicChoice?.mount({
         ? tr3(`Осталось ${open}`, `${open} ta qoldi`, `${open} left`)
         : "";
 
-      stageMetaEl.textContent = [titlePart, progressPart, leftPart].filter(Boolean).join(" • ");
+      const periodTitle=periodCutoff ? tr3("Сезон 2","2-mavsum","Season 2") : "";
+      stageMetaEl.textContent = [titlePart,periodTitle,progressPart,leftPart].filter(Boolean).join(" • ");
     }
 
         let h = null;
@@ -17399,26 +17466,38 @@ window.iClubPracticeTopicChoice?.mount({
             };
           };
 
-          const bestDb = data.best ? normalizeDbAttempt(data.best) : null;
-          const lastDb = Array.isArray(data.last)
-            ? data.last.map(normalizeDbAttempt).filter(row => Number(row.id || 0) > 0)
-            : [];
-
-          h = {
-            best: bestDb,
-            last: lastDb
-          };
+          const samePeriod=row=>!periodCutoff ||
+            Date.parse(String(row?.created_at||''))>=Date.parse(periodCutoff);
+          const lastDb=Array.isArray(data.last) ?
+            data.last.filter(samePeriod).map(normalizeDbAttempt).filter(row=>row.id>0) : [];
+          // If the lifetime best is from Season 1, show the best among the
+          // bounded *recent Season 2* entries with an honest range label.
+          // Never claim it is the entire Season 2 best when >30 attempts exist.
+          const exactBest=Boolean(data.best&&samePeriod(data.best));
+          const bestDb=exactBest?normalizeDbAttempt(data.best):
+            (lastDb.slice().sort((a,b)=>b.percent-a.percent||
+              a.durationSec-b.durationSec||b.ts-a.ts)[0]||null);
+          h={best:bestDb,last:lastDb,bestIsRecentSample:!!periodCutoff&&!exactBest&&!!bestDb};
         }
       }
     } catch {}
     if (!isCurrent()) return;
 
     if (!h) {
-      h = loadPracticeHistory(subjectKey, selectedTourNo);
+      h = periodCutoff?{best:null,last:[]}:
+        loadPracticeHistory(subjectKey,selectedTourNo);
     }
 
     const best = h?.best || null;
     const last = Array.isArray(h?.last) ? h.last : [];
+    const resultLabel=document.querySelector('#courses-practice-start .practice-hero-metrics .practice-metric-label');
+    if(resultLabel){
+      resultLabel.textContent=periodCutoff?
+        (h?.bestIsRecentSample?tr3("Лучший из последних 30 попыток",
+          "So‘nggi 30 urinish ichidagi eng yaxshisi","Best of last 30 attempts"):
+          tr3("Лучший результат · Сезон 2","Eng yaxshi natija · 2-mavsum","Best result · Season 2")):
+        (t("practice_best_result")||tr3("Лучший результат","Eng yaxshi natija","Best result"));
+    }
 
     if (best) {
       if (bestScoreEl) {
@@ -20962,6 +21041,14 @@ async function loadTopicHistoryScreen(){
   if(key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-rec-topic-history")return;
   window.iClubPracticeTopicHistoryV1?.renderHistoryPage?.(currentLang(),key,data,unavailable);
 }
+// Read-only standalone History is a real Courses-stack screen.
+window.addEventListener("iclub-practice-open-history",event=>{
+  const key=String(event?.detail?.subjectKey||"");
+  if(!key||key!==String(state?.courses?.subjectKey||"")||
+     getCoursesTopScreen()!=="practice-start")return;
+  pushCourses("practice-history");
+  window.iClubPracticeHistoryScreenV1?.render?.();
+});
 window.addEventListener("iclub-practice-open-history-list",event=>{
   const key=String(event?.detail?.subjectKey||"");
   if(!key||key!==String(state?.courses?.subjectKey||"")||getCoursesTopScreen()!=="my-recs")return;
@@ -24119,6 +24206,7 @@ if (action === "practice-select-tour") {
   const tourNo = Number(btn.dataset.tourNo || 0);
   if (tourNo > 0) {
     setSelectedPracticeTourNo(state.courses.subjectKey, tourNo);
+    window.iClubPracticeTabsV1?.select?.('tours');
     updatePracticeStartButtonForTour(tourNo, false);
     await renderPracticeStart();
   }

@@ -50,6 +50,10 @@
   margin:0;font-size:12px;line-height:1.4;color:var(--v3-muted,#65748e);
 }
 .iclub-visual-v3 #courses-practice-start .practice-topic-choice-status:empty{display:none;}
+.iclub-visual-v3 #courses-practice-start .practice-topic-choice-error-code {
+  display:block;margin-top:4px;font-size:11px;line-height:1.4;
+  font-weight:600;color:var(--v3-muted,#65748e);
+}
 .iclub-visual-v3 #courses-practice-start .practice-topic-choice-search {
   width:100%;
   min-height:44px;
