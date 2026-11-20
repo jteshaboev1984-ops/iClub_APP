@@ -1,0 +1,93 @@
+name: Math Practice 117 complete transaction PG17 without widening private 81 cap
+on:
+  push:
+    branches:
+      - qa/math-practice-117-atomic-release-rehearsal-20261120
+  pull_request:
+    branches:
+      - qa/math-practice-31-editorial-future-only-20261120
+    paths:
+      - 'scripts/math-practice-v2-117-bundle-fixture.cjs'
+      - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
+      - 'supabase/tests/math_practice_117_combined_transaction_pg17.sql'
+      - '.github/workflows/math-practice-117-combined-pg17.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  all-117-disposable:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-only-no-prod
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: synthetic-only-no-prod
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify exact 495 item/277 MCQ candidate without guessable key cycles
+        run: |
+          set -euo pipefail
+          node scripts/math-practice-v2-answer-pattern-and-semantic-guard.cjs
+          node scripts/math-practice-v2-editorial31-independent-oracles.cjs
+      - name: Compose all four staged groups in private ephemeral SQL, detect duplicate authored IDs
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-117-bundle-fixture.cjs
+          node --check scripts/math-practice-v2-future-only-81-test-fixture.cjs
+          node --check scripts/math-practice-v2-itemwise-two-stage-generator.cjs
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          echo "PRIVPG_TMP=$tmp" >> "$GITHUB_ENV"
+          node scripts/math-practice-v2-future-only-81-stage-generator.cjs --out "$tmp/81.sql"
+          node scripts/math-practice-v2-itemwise-two-stage-generator.cjs \
+            --group editorial31 --out "$tmp/31.sql"
+          node scripts/math-practice-v2-itemwise-two-stage-generator.cjs \
+            --group answer_pattern --out "$tmp/3.sql"
+          node scripts/math-practice-v2-itemwise-two-stage-generator.cjs \
+            --group editorial --out "$tmp/2.sql"
+          node scripts/math-practice-v2-117-bundle-fixture.cjs \
+            --stage81 "$tmp/81.sql" --stage31 "$tmp/31.sql" \
+            --stage3 "$tmp/3.sql" --stage2 "$tmp/2.sql" \
+            --bundle-out "$tmp/bundle.sql" --groups-out "$tmp/groups.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs \
+            --expect 117 --stage "$tmp/bundle.sql" --out "$tmp/fixture.sql" \
+            --with-old-rekey-source
+      - name: Verify all 117 source versions on disposable PostgreSQL 17 as ONE transaction
+        run: |
+          set -euo pipefail
+          createdb -T template0 math117
+          psql -X -v ON_ERROR_STOP=1 -d math117 -f "$PRIVPG_TMP/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math117 -f "$PRIVPG_TMP/groups.sql" >/dev/null
+          for group in 81 31 3 2; do
+            psql -X -v ON_ERROR_STOP=1 -d math117 -f "$PRIVPG_TMP/$group.sql" >/dev/null
+          done
+          psql -X -v ON_ERROR_STOP=1 -d math117 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math117 \
+            -f supabase/tests/math_practice_117_combined_transaction_pg17.sql
+      - name: Remove private SQL generated from approved academic source
+        if: always()
+        run: |
+          set -e
+          if [ -n "$PRIVPG_TMP" ]; then rm -rf -- "$PRIVPG_TMP"; fi
+          echo 'No source question texts, correct options, or answer keys committed, printed or uploaded.'
+      - name: Safety boundary
+        run: echo 'Local PG17 only, no hosted database writes, no release, no widening 81-pair operator cap.'
