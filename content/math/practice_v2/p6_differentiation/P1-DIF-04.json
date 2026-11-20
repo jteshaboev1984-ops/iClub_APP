@@ -392,13 +392,13 @@
       },
       "options": [
         {
-          "key": "D",
+          "key": "A",
           "text": {
-            "en": "y=−16",
-            "ru": "y=−16",
-            "uz": "y=−16"
+            "en": "y=−8x",
+            "ru": "y=−8x",
+            "uz": "y=−8x"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
         },
         {
           "key": "B",
@@ -419,13 +419,13 @@
           "diagnostic_code": "DIF04_TANGENT_GRADIENT"
         },
         {
-          "key": "A",
+          "key": "D",
           "text": {
-            "en": "y=−8x",
-            "ru": "y=−8x",
-            "uz": "y=−8x"
+            "en": "y=−16",
+            "ru": "y=−16",
+            "uz": "y=−16"
           },
-          "diagnostic_code": "DIF04_LINE_CONSTANT"
+          "diagnostic_code": null
         }
       ],
       "correct_answer": "D",

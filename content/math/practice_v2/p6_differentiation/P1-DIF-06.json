@@ -19,13 +19,13 @@
       },
       "options": [
         {
-          "key": "D",
+          "key": "A",
           "text": {
-            "en": "5 cm² s⁻¹",
-            "ru": "5 см² с⁻¹",
-            "uz": "5 sm² s⁻¹"
+            "en": "5 cm s⁻¹",
+            "ru": "5 см с⁻¹",
+            "uz": "5 sm s⁻¹"
           },
-          "diagnostic_code": null
+          "diagnostic_code": "DIF06_UNITS"
         },
         {
           "key": "B",
@@ -46,13 +46,13 @@
           "diagnostic_code": "DIF06_CHAIN_RATES"
         },
         {
-          "key": "A",
+          "key": "D",
           "text": {
-            "en": "5 cm s⁻¹",
-            "ru": "5 см с⁻¹",
-            "uz": "5 sm s⁻¹"
+            "en": "5 cm² s⁻¹",
+            "ru": "5 см² с⁻¹",
+            "uz": "5 sm² s⁻¹"
           },
-          "diagnostic_code": "DIF06_UNITS"
+          "diagnostic_code": null
         }
       ],
       "correct_answer": "D",
