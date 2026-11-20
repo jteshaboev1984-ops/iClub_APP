@@ -57,8 +57,11 @@ if(out)fs.mkdirSync(out,{recursive:true});
      assert.equal(await page.locator('.practice-topic-choice-item').count(),0);
      assert.equal(await page.evaluate(()=>window.__catalogCalls),0);
      assert((await code.innerText()).includes('CLIENT_NOT_READY'));
+     // History has its own independent Retry; catalog recovery must target
+     // the selector panel instead of the first indistinguishable button.
+     assert.equal(await page.locator('.practice-topic-history .practice-topic-choice-retry').count(),1);
      await page.evaluate(()=>window.sb=window.__rpc);
-     await page.locator('.practice-topic-choice-retry').click();
+     await page.locator('.practice-topic-choice-list .practice-topic-choice-retry').click();
      await page.waitForFunction(()=>document.querySelectorAll('.practice-topic-choice-item').length===2);
      assert.equal(await code.getAttribute('data-catalog-failure'),null,'stale error marker retained after success');
 
@@ -80,10 +83,10 @@ if(out)fs.mkdirSync(out,{recursive:true});
        assert.equal((await page.evaluate(()=>window.__launches)).length,0,
          'failed catalog/retry started a Practice attempt');
        await page.evaluate(()=>window.__scenario='good');
-       await page.locator('.practice-topic-choice-retry').click();
+       await page.locator('.practice-topic-choice-list .practice-topic-choice-retry').click();
        await page.waitForFunction(()=>document.querySelectorAll('.practice-topic-choice-item').length===2);
        assert.equal(await code.getAttribute('data-catalog-failure'),null);
-       assert.equal(await page.locator('.practice-topic-choice-retry').count(),0,
+       assert.equal(await page.locator('.practice-topic-choice-list .practice-topic-choice-retry').count(),0,
          'retry did not clear error action');
      }
      // Delayed old Mathematics RPC must not render its results in a new
