@@ -392,22 +392,22 @@
       },
       "options": [
         {
-          "key": "D",
+          "key": "A",
+          "text": {
+            "en": "y=−8x",
+            "ru": "y=−8x",
+            "uz": "y=−8x"
+          },
+          "diagnostic_code": "DIF04_LINE_CONSTANT"
+        },
+        {
+          "key": "B",
           "text": {
             "en": "y=−16",
             "ru": "y=−16",
             "uz": "y=−16"
           },
           "diagnostic_code": null
-        },
-        {
-          "key": "B",
-          "text": {
-            "en": "y=0",
-            "ru": "y=0",
-            "uz": "y=0"
-          },
-          "diagnostic_code": "DIF04_POINT_ON_CURVE"
         },
         {
           "key": "C",
@@ -419,16 +419,16 @@
           "diagnostic_code": "DIF04_TANGENT_GRADIENT"
         },
         {
-          "key": "A",
+          "key": "D",
           "text": {
-            "en": "y=−8x",
-            "ru": "y=−8x",
-            "uz": "y=−8x"
+            "en": "y=0",
+            "ru": "y=0",
+            "uz": "y=0"
           },
-          "diagnostic_code": "DIF04_LINE_CONSTANT"
+          "diagnostic_code": "DIF04_POINT_ON_CURVE"
         }
       ],
-      "correct_answer": "D",
+      "correct_answer": "B",
       "explanation": {
         "en": "dy/dx=3x²−12, which is 0 at x=2, so the tangent is horizontal. The point is (2,−16), hence the tangent is y=−16.",
         "ru": "dy/dx=3x²−12, при x=2 это 0, поэтому касательная горизонтальна. Точка (2,−16), значит касательная y=−16.",

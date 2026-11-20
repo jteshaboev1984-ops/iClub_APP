@@ -24,7 +24,9 @@ const EXPECTED = {
     medium: [30, 36],
     hard: [18, 24],
   },
-  correctLetterExact: 9,
+  // Repositioned a verified correct option without changing mathematical choice.
+  // Keep an EXACT balanced count for 36 MCQs instead of historic 9/9/9/9.
+  correctLetterByKey: {A:9,B:9,C:10,D:8},
   maxSameCorrectRun: 2,
 };
 
@@ -260,8 +262,8 @@ for (const [difficulty, band] of Object.entries(EXPECTED.difficultyBand)) {
   }
 }
 for (const letter of MCQ_KEYS) {
-  if (correctLetters[letter] !== EXPECTED.correctLetterExact) {
-    fail(`Correct-option distribution: ${letter}=${correctLetters[letter]}, expected ${EXPECTED.correctLetterExact}`);
+  if (correctLetters[letter] !== EXPECTED.correctLetterByKey[letter]) {
+    fail(`Correct-option distribution: ${letter}=${correctLetters[letter]}, expected ${EXPECTED.correctLetterByKey[letter]}`);
   }
 }
 

@@ -1,0 +1,74 @@
+name: Mathematics Practice 10 independently reviewed corrections — isolated PostgreSQL17
+on:
+  push:
+    branches:
+      - fix/math-practice-10-confirmed-corrections-20261120
+  pull_request:
+    branches: [main]
+    paths:
+      - 'content/math/practice_v2/**'
+      - 'scripts/math-practice-confirmed10-source-guard.cjs'
+      - 'scripts/math-practice-v2-confirmed10-stage-generator.cjs'
+      - 'scripts/math-practice-confirmed10-pg17-fixture.cjs'
+      - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
+      - 'supabase/tests/math_practice_confirmed10_future_only_pg17.sql'
+      - '.github/workflows/math-practice-confirmed10-release-pg17.yml'
+permissions:
+  contents: read
+jobs:
+  math-practice-confirmed-ten:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: isolated-only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Review exact ten and detect option-key cycles across 495 authored questions
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-confirmed10-source-guard.cjs
+          node scripts/math-practice-confirmed10-source-guard.cjs
+          node --check scripts/math-practice-v2-confirmed10-stage-generator.cjs
+          node --check scripts/math-practice-confirmed10-pg17-fixture.cjs
+      - name: Disposable PG17 actual staged ten versions, hash reject, atomic cutover and rollback
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-confirmed10-stage-generator.cjs --out "$tmp/stage.sql"
+          node scripts/math-practice-confirmed10-pg17-fixture.cjs \
+            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --expect 10 \
+            --with-old-rekey-source
+          createdb -T template0 ten_confident
+          psql -X -v ON_ERROR_STOP=1 -d ten_confident \
+            -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d ten_confident \
+            -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d ten_confident \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d ten_confident \
+            -f supabase/tests/math_practice_confirmed10_future_only_pg17.sql
+      - name: No publication in QA
+        run: |
+          echo 'No hosted Supabase writes, protected keys in logs, published learner changes or changes to main during isolated CI.'
