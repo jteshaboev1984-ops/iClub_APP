@@ -13,6 +13,8 @@ on:
       - 'scripts/test_math_s2_tour_private_rekey_source_guard.py'
       - 'supabase/candidates/math_s2_safe_questions_public_shield_v1_hold.sql'
       - 'supabase/tests/fixtures/math_s2_public_catalogue_shield_pg17_test.sql'
+      - 'supabase/candidates/math_s2_tour_inplace_rehearsal_template_v1_hold.sql'
+      - 'supabase/tests/fixtures/math_s2_inplace_112_synthetic_pg17.sql'
   workflow_dispatch:
 permissions:
   contents: read
@@ -138,6 +140,12 @@ jobs:
             THEN RAISE EXCEPTION 'Non-destructive rollback failed'; END IF;
             RAISE NOTICE 'MATH_S2_TOUR_PG17_ROLLBACK_PRESERVED_HISTORY_PASS';
           END \$s\$;"
+      - name: Rehearse 112 same-ID MCQ fixes and 4 replacements on fresh disposable PG17, prove rollback
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE iclub_math_s2_inplace_synthetic'
+          PGDATABASE=iclub_math_s2_inplace_synthetic psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_inplace_112_synthetic_pg17.sql
       - name: No hosted endpoints, bank secrets or student data
         if: always()
         run: echo "All data synthetic, PostgreSQL 17 ephemeral, no Supabase/Vercel hosted calls"
