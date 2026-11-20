@@ -1,0 +1,38 @@
+name: AI Tutor beta source and route contract (no provider)
+
+on:
+  pull_request:
+    paths:
+      - 'iclub-ai-v21-ui.js'
+      - 'iclub-ai-v21-beta-client.js'
+      - 'index.html'
+      - 'scripts/ai-tutor-beta-screen-contract.cjs'
+      - 'scripts/ai-tutor-beta-route-contract.cjs'
+      - '.github/workflows/ai-tutor-beta-contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-beta-contract-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-contract:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout PR source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check installed Node version
+        run: node --version
+
+      - name: Run approved-screen contract (no network or dependencies)
+        run: node scripts/ai-tutor-beta-screen-contract.cjs
+
+      - name: Run real Tutor prompt and route selection (mocked adapters)
+        run: node scripts/ai-tutor-beta-route-contract.cjs
