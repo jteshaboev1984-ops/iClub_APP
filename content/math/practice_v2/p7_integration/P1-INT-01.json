@@ -650,20 +650,20 @@
         {
           "key": "B",
           "text": {
-            "en": "(2x+3)⁴−2x³+C",
-            "ru": "(2x+3)⁴−2x³+C",
-            "uz": "(2x+3)⁴−2x³+C"
-          },
-          "diagnostic_code": "INT01_INNER_FACTOR"
-        },
-        {
-          "key": "C",
-          "text": {
             "en": "(2x+3)⁴/2−2x³+C",
             "ru": "(2x+3)⁴/2−2x³+C",
             "uz": "(2x+3)⁴/2−2x³+C"
           },
           "diagnostic_code": null
+        },
+        {
+          "key": "C",
+          "text": {
+            "en": "(2x+3)⁴−2x³+C",
+            "ru": "(2x+3)⁴−2x³+C",
+            "uz": "(2x+3)⁴−2x³+C"
+          },
+          "diagnostic_code": "INT01_INNER_FACTOR"
         },
         {
           "key": "D",
@@ -675,7 +675,7 @@
           "diagnostic_code": "INT01_POWER_RULE"
         }
       ],
-      "correct_answer": "C",
+      "correct_answer": "B",
       "explanation": {
         "en": "∫4(2x+3)³ dx=4(2x+3)⁴/(4·2)=(2x+3)⁴/2, and ∫−6x² dx=−2x³.",
         "ru": "∫4(2x+3)³ dx=4(2x+3)⁴/(4·2)=(2x+3)⁴/2, а ∫−6x² dx=−2x³.",
