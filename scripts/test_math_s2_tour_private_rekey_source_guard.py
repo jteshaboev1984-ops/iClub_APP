@@ -154,8 +154,8 @@ class TestMathS2Rekey(unittest.TestCase):
         self.assertEqual(len(table),160)
         self.assertEqual(set(table),before_ids)
         self.assertEqual({k:table[k] for k in original_unrelated}, original_unrelated)
-        self.assertEqual(sum(q["key"] in "ABCD" for q in table.values()
-                             if q["type"]=="mcq"),132)
+        self.assertEqual(sum((q.get("key") or q.get("answer")) in "ABCD"
+                             for q in table.values() if q["type"]=="mcq"),132)
         self.assertEqual(len(replacements),4)
 
     def test_cross_tour_replacement_rejected(self):
