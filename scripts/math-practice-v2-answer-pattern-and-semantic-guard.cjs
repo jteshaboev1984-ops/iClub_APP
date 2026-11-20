@@ -119,11 +119,11 @@ for(const [id,q] of byId){
   let pool=pools.get(p)||[];pool.push({id,q});pools.set(p,pool);
   if(q.qtype==='input'){input++;continue;}
   assert.equal(q.qtype,'mcq');mcq++;
-  assert.ok(!/\\b(?:enter|type in|write down|provide your answer|give your answer)\\b/i.test(q.question.en),
+  assert.ok(!/\b(?:enter|type in|write down|provide your answer|give your answer)\b/i.test(q.question.en),
     'MCQ stem asks learner to type free input rather than choose an option: '+id);
   assert.ok(!/введите|вписа/i.test(q.question.ru),
     'RU MCQ stem asks for input rather than choosing an option: '+id);
-  assert.ok(!/\\bkiriting\\b/i.test(q.question.uz),
+  assert.ok(!/\bkiriting\b/i.test(q.question.uz),
     'UZ MCQ stem asks for input rather than choosing an option: '+id);
   assert.deepEqual(q.options.map(o=>o.key),letters);
   assert.ok(letters.includes(q.correct_answer));
