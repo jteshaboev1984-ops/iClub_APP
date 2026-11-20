@@ -9,6 +9,8 @@ on:
       - 'supabase/tests/fixtures/math_s2_tour_exact_rpc_pg17_fixture.sql'
       - 'supabase/tests/fixtures/math_s2_tour_original_evaluator_pg17.sql'
       - 'scripts/math-s2-tour-equal-answers-signed-http.cjs'
+      - 'scripts/math-s2-tour-private-rekey-source-guard.py'
+      - 'scripts/test_math_s2_tour_private_rekey_source_guard.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -44,6 +46,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Prove private 112-question trilingual rekey plan contract using synthetic data only
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s scripts -p 'test_math_s2_tour_private_rekey_source_guard.py' -v
       - name: Install authentic pre-cutover Tour functions and invented questions
         run: |
           set -euo pipefail
