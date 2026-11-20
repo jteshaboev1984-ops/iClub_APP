@@ -1,4 +1,8 @@
--- HOLD ONLY: not installed on Supabase. Owner separate GO required.
+-- DEPLOYED on owner's explicit GO to hosted Supabase on 2026-11-20.
+-- Recorded migration version 20261120140710 (name: math_s2_tours_close_public_catalogue_and_id_lookup_20261120).
+-- Historical one-time, source-hash-pinned release candidate: do NOT re-run it against
+-- the now-updated live objects; the preimage hashes will intentionally fail.
+-- S2 Maths Tours remain closed; NO tour/question/learner data release authorized.
 -- Paired S2 protection: the public view AND the SECURITY DEFINER
 -- get_safe_questions_by_ids RPC must be repaired atomically.
 -- Current production source hashes, checked SELECT-only on 2026-11-20:
@@ -18,11 +22,11 @@ BEGIN
  THEN RAISE EXCEPTION 'math_s2_public_access_source_drift'; END IF;
 END $pin$;
 
--- HOLD / NOT INSTALLED IN HOSTED SUPABASE.
+-- DEPLOYED S2-only access shield; this file is an audit/reproduction source.
 -- Prevent anonymous/authenticated catalogue access to unreleased Mathematics Season 2
 -- Tour question stems/options without changing Season 1 or any question rows.
 -- This view is NOT used to supply secure open Tour sessions; existing Tour RPCs remain.
--- Recheck existing grants, dependencies and current live view definition before any owner-GO deployment.
+-- Original grants/dependencies preserved; rollback requires separate guarded migration.
 -- The current installed view is owned by postgres and returns every active question,
 -- including inactive/undated S2 Tour questions: 140 protected contents exposed.
 --
