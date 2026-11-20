@@ -85,7 +85,7 @@ if(/correct_answer|answer_key|score_update|mastery/i.test(privacyScan))throw Err
                 {topic:'Topic 23',correct:1,total:10},
                 {topic:'Topic 01',correct:2,total:10}
               ]},error:null};
-          return {data:{ok:true,topics:Array.from({length:23},(_,i)=>({
+          return {data:{ok:true,subject_key:'economics',topics:Array.from({length:23},(_,i)=>({
             topic:'Topic '+String(i+1).padStart(2,'0'),question_count:i+1
           }))},error:null};
         }
@@ -134,7 +134,7 @@ if(/correct_answer|answer_key|score_update|mastery/i.test(privacyScan))throw Err
     data:name==='get_practice_topic_history_safe_v1'
       ? {ok:true,subject_key:'mathematics',completed_sessions:0,
          total_correct_answers:0,total_answered:0,last:null,best:null,recent:[]}
-      : {ok:true,topics:[]},error:null
+      : {ok:true,subject_key:'mathematics',topics:[]},error:null
     })};window.iClubPracticeTopicChoice.mount({subjectKey:'mathematics',language:'ru',onStart:async()=>{}});});
   await page.click('.practice-topic-choice-toggle');
   await page.waitForFunction(()=>document.querySelector('.practice-topic-choice-status')?.textContent.includes('нет доступных'));
