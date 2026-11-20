@@ -1,11 +1,14 @@
 name: Practice owner order and topic catalog UI regression
 on:
   pull_request:
-    branches: [ux/practice-history-standalone-20261119, ux/practice-start-layout-ordered-20261119, ux/practice-topic-direct-start-20261119, ux/practice-accepted-order-integration-20261119]
+    branches: [ux/practice-history-standalone-20261119, ux/practice-start-layout-ordered-20261119, ux/practice-topic-direct-start-20261119, ux/practice-accepted-order-integration-20261119 , fix/practice-topic-season-handoff-20261120]
     paths:
       - 'practice-results-tabs.js'
       - 'practice-results-tabs.css'
       - 'practice-topic-choice.js'
+      - 'practice-topic-choice.css'
+      - 'scripts/practice-topic-choice-regression.cjs'
+      - 'scripts/practice-topic-catalog-client-diagnostics-chromium.cjs'
       - 'scripts/practice-owner-order-chromium.cjs'
       - '.github/workflows/practice-owner-order-ux.yml'
   workflow_dispatch:
@@ -30,6 +33,8 @@ jobs:
           node --check practice-history-screen.js
           node --check app.js
           node --check scripts/practice-owner-order-chromium.cjs
+          node --check scripts/practice-topic-choice-regression.cjs
+          node --check scripts/practice-topic-catalog-client-diagnostics-chromium.cjs
       - name: Chromium source-only Practice order and retry
         env:
           PRACTICE_ORDER_SCREEN_DIR: artifacts/practice-owner-order
@@ -38,6 +43,9 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install chromium
           node scripts/practice-owner-order-chromium.cjs
+          node scripts/practice-topic-choice-regression.cjs
+          PRACTICE_TOPIC_DIAG_SCREEN_DIR=artifacts/practice-owner-order \
+            node scripts/practice-topic-catalog-client-diagnostics-chromium.cjs
       - name: Save read-only synthetic screenshots
         if: always()
         uses: actions/upload-artifact@v4
