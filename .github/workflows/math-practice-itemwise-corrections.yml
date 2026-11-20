@@ -11,6 +11,9 @@ on:
       - 'content/math/practice_v2/p6_differentiation/P1-DIF-04.json'
       - 'content/math/practice_v2/p6_differentiation/P1-DIF-06.json'
       - 'scripts/math-practice-v2-itemwise-corrections.cjs'
+      - 'scripts/math-practice-v2-itemwise-two-stage-generator.cjs'
+      - 'supabase/tests/math_practice_itemwise_two_future_only_stage_pg17.sql'
+      - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
       - 'docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119.csv'
       - '.github/workflows/math-practice-itemwise-corrections.yml'
   workflow_dispatch:
@@ -19,7 +22,26 @@ permissions:
 jobs:
   verify-corrected-source:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-fixture-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: synthetic-fixture-only
+      PGDATABASE: postgres
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,5 +56,27 @@ jobs:
           set -euo pipefail
           node scripts/math-practice-v2-112-trilingual-independent-proof.cjs
           node scripts/math-practice-v2-editorial31-independent-oracles.cjs
+      - name: Real 2-item future-only staging and rollback on disposable PG17
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-itemwise-two-stage-generator.cjs
+          node --check scripts/math-practice-v2-future-only-81-test-fixture.cjs
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-itemwise-two-stage-generator.cjs --out "$tmp/two.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs --expect 2 --stage "$tmp/two.sql" --out "$tmp/fixture.sql"
+          psql -X -v ON_ERROR_STOP=1 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -f "$tmp/two.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/math_practice_itemwise_two_future_only_stage_pg17.sql
+      - name: Preserve previously accepted 81-item fixture contract
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-future-only-81-stage-generator.cjs --out "$tmp/eighty-one.sql"
+          node scripts/math-practice-v2-future-only-81-test-fixture.cjs --stage "$tmp/eighty-one.sql" --out "$tmp/original-fixture.sql"
       - name: Publication boundary
         run: echo 'DRAFT SOURCE ONLY; no writes to hosted questions/history, no academic publish, no main/Vercel release.'
