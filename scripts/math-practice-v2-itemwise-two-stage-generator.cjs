@@ -70,7 +70,7 @@ function editorial31SourceSpecs(){
  assert.equal(byId.size,31,'all pinned editorial source items must exist');
  return ids.map(id=>byId.get(id));
 }
-approvedGroups.editorial31=editorial31SourceSpecs();
+if(mode==='editorial31')approvedGroups.editorial31=editorial31SourceSpecs();
 assert.ok(Object.prototype.hasOwnProperty.call(approvedGroups,mode),
  'unknown pinned patch group');
 const specs=approvedGroups[mode],expectedCount=specs.length;
