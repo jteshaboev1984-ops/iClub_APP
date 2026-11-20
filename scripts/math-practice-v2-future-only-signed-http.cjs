@@ -85,7 +85,7 @@ const pair='[{"old_id":2001,"new_id":3001,"old_hash":"'+
 
  // Operator rollback inside the disposable PostgreSQL, not via learner HTTP.
  const rolled=sql("select private.math_practice_future_only_rollback_v1("+
-  "'math_p1_practice_v2_fix_20261120',"+JSON.stringify(pair)+"::jsonb)::text");
+  "'math_p1_practice_v2_fix_20261120','"+pair+"'::jsonb)::text");
  assert(rolled.includes('restored_old_memberships'),'rollback failed');
 
  // Already issued NEW question ID still scores after future selection reverts.
