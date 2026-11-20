@@ -1,6 +1,8 @@
 -- iClub Practice Season2 candidate — SOURCE DRAFT ONLY / NOT MIGRATED.
--- Exactly the existing start_practice_session_auto_safe_v5 + topic-drill-v5,
--- changing only subject-scoped season choice and past-correct eligibility.
+-- Subject-specific season routing and past-correct eligibility. Idempotent
+-- owned session resume is intentionally allowed across S1->S2 (same pool or
+-- topic+subject): continuing a saved pre-cutover quiz is not a new S1 start.
+-- New sessions still select only the currently open subject Practice period.
 -- Source: Oct 2026 v5 migrations in current main.
 -- Live v5 pg_get_functiondef MD5 at preflight 2026-11-19: 16da8c441c9a1991802ca2e93ef5ff35.
 -- STOP at release if installed definition has drifted. No DB or learner rows changed here.
@@ -59,25 +61,10 @@ begin
     if v_s.pool_id<>p_pool_id then
       raise exception 'client_session_scope_mismatch' using errcode='22023';
     end if;
-    -- A retry using an old S1 client_session_id must not reopen an unfinished
-    -- S1 session after this SUBJECT's official S2 Tour1 cutoff. Finalized
-    -- sessions remain untouched/readable through their original history APIs.
-    if v_s.status not in ('finalized','completed','closed')
-       and exists (
-         select 1 from public.seasons sn
-         join public.tours t on t.season_id=sn.id
-          and t.subject_id=v_s.subject_id and t.tour_no=1
-         where sn.season_no=2 and sn.status in ('current','closed')
-           and t.start_date is not null and t.end_date is not null
-           and t.start_date<=t.end_date
-           and (t.start_date::timestamp at time zone 'Asia/Tashkent')
-               <= statement_timestamp()
-           and v_s.created_at <
-               (t.start_date::timestamp at time zone 'Asia/Tashkent')
-       )
-    then
-      raise exception 'practice_previous_season_closed' using errcode='55000';
-    end if;
+    -- Existing learner-owned session IDs represent CONTINUATION, not a new
+    -- Season1 attempt. Their question IDs and server creation time remain
+    -- immutable. Season2 blocks new S1 selection via fresh-session routing,
+    -- but must not make pre-cutover saved progress impossible to finish.
 
     return jsonb_build_object(
       'session_id',v_s.id,
@@ -695,25 +682,10 @@ exception
     if v_s.pool_id<>p_pool_id then
       raise exception 'client_session_scope_mismatch' using errcode='22023';
     end if;
-    -- A retry using an old S1 client_session_id must not reopen an unfinished
-    -- S1 session after this SUBJECT's official S2 Tour1 cutoff. Finalized
-    -- sessions remain untouched/readable through their original history APIs.
-    if v_s.status not in ('finalized','completed','closed')
-       and exists (
-         select 1 from public.seasons sn
-         join public.tours t on t.season_id=sn.id
-          and t.subject_id=v_s.subject_id and t.tour_no=1
-         where sn.season_no=2 and sn.status in ('current','closed')
-           and t.start_date is not null and t.end_date is not null
-           and t.start_date<=t.end_date
-           and (t.start_date::timestamp at time zone 'Asia/Tashkent')
-               <= statement_timestamp()
-           and v_s.created_at <
-               (t.start_date::timestamp at time zone 'Asia/Tashkent')
-       )
-    then
-      raise exception 'practice_previous_season_closed' using errcode='55000';
-    end if;
+    -- Existing learner-owned session IDs represent CONTINUATION, not a new
+    -- Season1 attempt. Their question IDs and server creation time remain
+    -- immutable. Season2 blocks new S1 selection via fresh-session routing,
+    -- but must not make pre-cutover saved progress impossible to finish.
 
 
     return jsonb_build_object(
@@ -785,28 +757,18 @@ begin
   limit 1;
 
   if v_s.id is not null then
-    if v_s.drill_type<>'rec_topic' then
+    if v_s.drill_type<>'rec_topic'
+      or v_s.topic<>v_topic
+      or not exists (
+        select 1 from public.subjects s
+        where s.id=v_s.subject_id and s.subject_key=trim(p_subject_key)
+      ) then
       raise exception 'client_session_scope_mismatch' using errcode='22023';
     end if;
-    -- A retry using an old S1 client_session_id must not reopen an unfinished
-    -- S1 session after this SUBJECT's official S2 Tour1 cutoff. Finalized
-    -- sessions remain untouched/readable through their original history APIs.
-    if v_s.status not in ('finalized','completed','closed')
-       and exists (
-         select 1 from public.seasons sn
-         join public.tours t on t.season_id=sn.id
-          and t.subject_id=v_s.subject_id and t.tour_no=1
-         where sn.season_no=2 and sn.status in ('current','closed')
-           and t.start_date is not null and t.end_date is not null
-           and t.start_date<=t.end_date
-           and (t.start_date::timestamp at time zone 'Asia/Tashkent')
-               <= statement_timestamp()
-           and v_s.created_at <
-               (t.start_date::timestamp at time zone 'Asia/Tashkent')
-       )
-    then
-      raise exception 'practice_previous_season_closed' using errcode='55000';
-    end if;
+    -- Existing learner-owned session IDs represent CONTINUATION, not a new
+    -- Season1 attempt. Their question IDs and server creation time remain
+    -- immutable. Season2 blocks new S1 selection via fresh-session routing,
+    -- but must not make pre-cutover saved progress impossible to finish.
 
     return jsonb_build_object(
       'session_id',v_s.id,
@@ -1181,28 +1143,18 @@ exception
     limit 1;
 
     if v_s.id is null then raise; end if;
-    if v_s.drill_type<>'rec_topic' then
+    if v_s.drill_type<>'rec_topic'
+      or v_s.topic<>v_topic
+      or not exists (
+        select 1 from public.subjects s
+        where s.id=v_s.subject_id and s.subject_key=trim(p_subject_key)
+      ) then
       raise exception 'client_session_scope_mismatch' using errcode='22023';
     end if;
-    -- A retry using an old S1 client_session_id must not reopen an unfinished
-    -- S1 session after this SUBJECT's official S2 Tour1 cutoff. Finalized
-    -- sessions remain untouched/readable through their original history APIs.
-    if v_s.status not in ('finalized','completed','closed')
-       and exists (
-         select 1 from public.seasons sn
-         join public.tours t on t.season_id=sn.id
-          and t.subject_id=v_s.subject_id and t.tour_no=1
-         where sn.season_no=2 and sn.status in ('current','closed')
-           and t.start_date is not null and t.end_date is not null
-           and t.start_date<=t.end_date
-           and (t.start_date::timestamp at time zone 'Asia/Tashkent')
-               <= statement_timestamp()
-           and v_s.created_at <
-               (t.start_date::timestamp at time zone 'Asia/Tashkent')
-       )
-    then
-      raise exception 'practice_previous_season_closed' using errcode='55000';
-    end if;
+    -- Existing learner-owned session IDs represent CONTINUATION, not a new
+    -- Season1 attempt. Their question IDs and server creation time remain
+    -- immutable. Season2 blocks new S1 selection via fresh-session routing,
+    -- but must not make pre-cutover saved progress impossible to finish.
 
 
     return jsonb_build_object(
