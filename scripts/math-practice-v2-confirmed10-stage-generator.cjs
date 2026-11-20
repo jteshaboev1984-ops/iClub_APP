@@ -1,17 +1,21 @@
 #!/usr/bin/env node
 'use strict';
-// #574: stage ONLY 10 independently proven Mathematics Practice content corrections
-// with pinned original hashes, without editing historical answers. Reuses #599
+// #574: stage an explicitly selected 10-item published batch OR the isolated
+// Q400/Q481 two-item proposal, with pinned original hashes. Reuses #599
 // proven private future-only version and rollback contract.
 // NEVER commit the generated SQL or execute on hosted Supabase without the
 // owner-approved cutover. Does not grant academic QA or publish any question.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
-const release='math_p1_practice_v2_fix_20261120',suffix='-V20261120';
 const args=process.argv.slice(2);
-const mode='hotfix10';
-const specs=[
+const batchArg=args.indexOf('--batch');
+const mode=batchArg>=0?args[batchArg+1]:'hotfix10';
+assert.ok(['hotfix10','q400q481'].includes(mode),'unsupported governed release batch');
+const release=mode==='hotfix10'?'math_p1_practice_v2_fix_20261120'
+  :'math_p1_practice_v2_q400_q481_20261120';
+const suffix=mode==='hotfix10'?'-V20261120':'-V20261120Q400Q481';
+const baselineSpecs=[
  {id:7624,code:'P1-FUN-08',file:'p2_functions/P1-FUN-08.json',old_hash:'b0ccf462b7bafa14abfcf88940a4a5a878b96ec0b7a4a161b558ea812fdb0d67'},
  {id:7662,code:'P1-COO-03',file:'p3_coordinate_geometry/P1-COO-03.json',old_hash:'4361c8f4aaa539da3d0edee194298c83b114a9cdcc8030571db0d46c4dd266a7'},
  {id:7724,code:'P1-CIR-03',file:'p4_circular_trigonometry/P1-CIR-03.json',old_hash:'9a753b585a39471adc75010f0622dbe3f7c1e00a262b864cb2ed4eec6b75d16e'},
@@ -23,7 +27,15 @@ const specs=[
  {id:7937,code:'P1-INT-02',file:'p7_integration/P1-INT-02.json',old_hash:'43349ae00988b83dc61d827318d6d2b50c7940d1f9a698686ce2887bf3031985'},
  {id:7970,code:'P1-INT-05',file:'p7_integration/P1-INT-05.json',old_hash:'c45c280840f3c960e05290bf45dee920b17dc67ead5b5c759f942e8770256636'}
 ];
-const expectedCount=10;
+// Pinned hosted read-only original hash snapshots, checked on 2026-11-20.
+const nextTwo=[
+ {id:7884,code:'P1-DIF-05',file:'p6_differentiation/P1-DIF-05.json',
+  old_hash:'32b8172779a666e62e031a6b6488b2ecf0e6e4c382e9000ecb417b54da49eaff'},
+ {id:7965,code:'P1-INT-04',file:'p7_integration/P1-INT-04.json',
+  old_hash:'600d6bd3df9bc1409c72ece9fd249095b44101858c378d040b84b36ce9b5201e'}
+];
+const specs=mode==='hotfix10'?baselineSpecs:nextTwo;
+const expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
 const hash=x=>crypto.createHash('sha256').update(JSON.stringify(stable(x))).digest('hex');
