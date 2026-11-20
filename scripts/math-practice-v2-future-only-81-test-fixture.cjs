@@ -15,7 +15,7 @@ const expIndex=args.indexOf('--expect');
 const expected=expIndex<0?81:Number(args[expIndex+1]);
 assert.ok([2,81].includes(expected),'only existing 81 and owner-pinned two-item source fixtures are supported');
 assert.equal(payload.length,expected);
-assert.equal(new Set(payload.map(q=>q.old_id)).size,81);
+assert.equal(new Set(payload.map(q=>q.old_id)).size,expected);
 const codes=new Map();
 for(const q of payload)for(const d of q.diagnostics||[]){
  if(!codes.has(d.code))codes.set(d.code,q.skill);
