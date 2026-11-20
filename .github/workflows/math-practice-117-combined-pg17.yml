@@ -3,10 +3,14 @@ on:
   push:
     branches:
       - qa/math-practice-117-atomic-release-rehearsal-20261120
+      - fix/math-practice-v2-mcq-instruction-qa-20261120
   pull_request:
     branches:
       - qa/math-practice-31-editorial-future-only-20261120
+      - qa/math-practice-117-atomic-release-rehearsal-20261120
     paths:
+      - 'content/math/practice_v2/p7_integration/P1-INT-05.json'
+      - 'scripts/math-practice-v2-answer-pattern-and-semantic-guard.cjs'
       - 'scripts/math-practice-v2-117-bundle-fixture.cjs'
       - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
       - 'supabase/tests/math_practice_117_combined_transaction_pg17.sql'
