@@ -3,7 +3,7 @@
 // TEST ONLY: builds a fully disposable PostgreSQL17 historical 81-question
 // fixture from a generated (never-committed) staging SQL file.
 // Never use this fixture outside disposable CI. No question/answer text printed.
-const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
 const args=process.argv.slice(2),stageArg=args.indexOf('--stage'),outArg=args.indexOf('--out');
 assert.ok(stageArg>=0&&outArg>=0&&args[stageArg+1]&&args[outArg+1],
  'Usage: --stage <temporary-stage-sql> --out <temporary-test-fixture-sql>');
@@ -16,6 +16,42 @@ const expected=expIndex<0?81:Number(args[expIndex+1]);
 assert.ok([2,3,81].includes(expected),'only existing 81 and pinned two-/three-item source fixtures are supported');
 assert.equal(payload.length,expected);
 assert.equal(new Set(payload.map(q=>q.old_id)).size,expected);
+// Optional exact-parent authored semantic fixture: old option meanings remain
+// confined to generated ephemeral SQL. Never print, commit or upload this SQL.
+// Original #599 fixture behavior is retained when the flag is absent.
+const semantic=new Map();
+if(args.includes('--with-old-rekey-source')){
+ const base='381e57ee6ea53b437298d5b5faf4190cf6dc2cb1';
+ const ids=new Set([7624,7662,7797,7881,7926,7937,7970]);
+ const bank=path.resolve(__dirname,'../content/math/practice_v2');
+ const folders=fs.readdirSync(bank,{withFileTypes:true})
+   .filter(x=>x.isDirectory()).map(x=>x.name);
+ for(const item of payload){
+  if(!ids.has(item.old_id))continue;
+  const fileName=item.skill+'.json';
+  const folder=folders.find(folder=>fs.existsSync(path.join(bank,folder,fileName)));
+  assert.ok(folder,'old author file missing from source');
+  const relative='content/math/practice_v2/'+folder+'/'+fileName;
+  const before=JSON.parse(execFileSync('git',['show',base+':'+relative],{
+    cwd:path.resolve(__dirname,'..'),encoding:'utf8',maxBuffer:8*1024*1024
+  })).questions.find(q=>q.key===item.old_key);
+  assert.ok(before&&before.qtype==='mcq');
+  assert.notEqual(before.correct_answer,item.correct_answer,
+    'only rekeyed authors are permitted in prior-version fixture');
+  const options=[...before.options].sort((a,b)=>a.key.localeCompare(b.key));
+  assert.deepEqual(options.map(o=>o.key),['A','B','C','D']);
+  const oldCorrect=options.find(o=>o.key===before.correct_answer);
+  const staged=JSON.parse(item.options.en);
+  assert.equal(oldCorrect.text.en,staged['ABCD'.indexOf(item.correct_answer)],
+    'old and new answer meanings diverge even in fixture generation');
+  semantic.set(item.old_id,{
+   correct_answer:before.correct_answer,
+   en:JSON.stringify(options.map(o=>o.text.en)),
+   ru:JSON.stringify(options.map(o=>o.text.ru)),
+   uz:JSON.stringify(options.map(o=>o.text.uz))
+  });
+ }
+}
 const codes=new Map();
 for(const q of payload)for(const d of q.diagnostics||[]){
  if(!codes.has(d.code))codes.set(d.code,q.skill);
@@ -83,12 +119,20 @@ sql.push("insert into public.subjects values(5,'mathematics',true),(4,'chemistry
 sql.push('insert into public.practice_pools values'+
  Array.from({length:7},(_,i)=>'('+(101+i)+',5,'+(i+1)+',true)').join(',')+
  ',(40,4,1,true);');
-const questions=payload.map(q=>'('+
- [q.old_id,5,sqlQuote('Original topic'),sqlQuote(q.skill),sqlQuote('medium'),
- sqlQuote(q.qtype),sqlQuote('SYNTHETIC PREVIOUS VERSION'), 'null',
- sqlQuote(q.correct_answer),'null','null','true',
- 'null','null','null','null','null','null','null','null','null',
- sqlQuote(q.source_ref),'60','null',sqlQuote('published')].join(',')+')');
+const questions=payload.map(q=>{
+ const old=semantic.get(q.old_id);
+ return '('+[
+ q.old_id,5,sqlQuote('Original topic'),sqlQuote(q.skill),sqlQuote('medium'),
+ sqlQuote(q.qtype),sqlQuote('SYNTHETIC PREVIOUS VERSION'),
+ old?sqlQuote(old.en):'null',
+ sqlQuote(old?old.correct_answer:q.correct_answer),
+ 'null','null','true','null','null','null',
+ old?sqlQuote(old.ru):'null',
+ old?sqlQuote(old.uz):'null',
+ old?sqlQuote(old.en):'null',
+ 'null','null','null',sqlQuote(q.source_ref),'60','null',sqlQuote('published')
+ ].join(',')+')';
+});
 sql.push('insert into public.questions('+
  'id,subject_id,topic,subtopic,difficulty,qtype,question_text,options_text,correct_answer,'+
  'explanation,image_url,is_active,question_text_ru,question_text_uz,question_text_en,'+
