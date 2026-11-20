@@ -1,0 +1,65 @@
+name: iClub CI - Preview or Cancel Old Queued PR Runs (MANUAL)
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Only this open iClub pull request (e.g. 558)'
+        required: true
+        type: number
+        default: 558
+      mode:
+        description: 'Preview is read-only. Cancel requires exact confirmation.'
+        required: true
+        type: choice
+        options:
+          - preview
+          - cancel
+        default: preview
+      confirmation:
+        description: 'For cancel, enter exactly CANCEL PR 558 (adapt number). Leave blank for preview.'
+        required: false
+        type: string
+        default: ''
+      max_runs:
+        description: 'Maximum queued old-SHA runs to cancel per click (1-25)'
+        required: true
+        type: number
+        default: 20
+
+# One manual cleanup at a time. Do not cancel earlier cleanup itself.
+concurrency:
+  group: iclub-queued-pr-cleanup-manual
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: write
+
+jobs:
+  cleanup:
+    name: Safety-filtered queued PR cleanup (manual only)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout iClub main script
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check script syntax and built-in filter tests
+        run: |
+          node --check .github/scripts/ci-queued-pr-cleanup.cjs
+          node --test .github/scripts/ci-queued-pr-cleanup.test.cjs
+      - name: Preview or cancel ONLY stale queued runs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+          MAX_CANCEL: ${{ inputs.max_runs }}
+        run: node .github/scripts/ci-queued-pr-cleanup.cjs
