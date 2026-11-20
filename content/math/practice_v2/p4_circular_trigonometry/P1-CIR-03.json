@@ -316,9 +316,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch4 Circular measure, printed pp. 74–81",
       "question": {
-        "en": "Two concentric sectors have the same angle 2 radians and radii 6 cm and 3 cm. What is the area between the two arcs?",
-        "ru": "Два концентрических сектора имеют одинаковый угол 2 радиана и радиусы 6 см и 3 см. Какова площадь между двумя дугами?",
-        "uz": "Ikki konsentrik sektor burchagi 2 radian, radiuslari 6 sm va 3 sm. Ikki yoy orasidagi yuza qancha?"
+        "en": "Two concentric sectors share the same two bounding rays and have central angle 2 radians, with radii 6 cm and 3 cm. What is the area of the annular sector between their arcs?",
+        "ru": "Два концентрических сектора ограничены одними и теми же двумя лучами, имеют центральный угол 2 радиана и радиусы 6 см и 3 см. Какова площадь кольцевого сектора между их дугами?",
+        "uz": "Ikki konsentrik sektor bir xil ikkita chegaralovchi nurga ega, markaziy burchagi 2 radian va radiuslari 6 sm hamda 3 sm. Ularning yoylari orasidagi halqasimon sektor yuzasi qancha?"
       },
       "options": [
         {

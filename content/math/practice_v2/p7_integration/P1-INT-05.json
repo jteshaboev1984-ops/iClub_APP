@@ -117,9 +117,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
-        "en": "For k>0, the region under y=kx² from x=0 to x=2 is rotated about the x-axis and has volume 288π/5. Enter k.",
-        "ru": "При k>0 область под y=kx² от x=0 до x=2 вращается вокруг оси x и имеет объём 288π/5. Введите k.",
-        "uz": "k>0 uchun y=kx² ostidagi x=0 dan x=2 gacha soha x o‘qi atrofida aylantiriladi va hajmi 288π/5. k ni kiriting."
+        "en": "For k>0, the region under y=kx² from x=0 to x=2 is rotated about the x-axis and has volume 288π/5. Which value of k is correct?",
+        "ru": "При k>0 область под y=kx² от x=0 до x=2 вращается вокруг оси x и имеет объём 288π/5. Какое значение k верно?",
+        "uz": "k>0 uchun y=kx² ostidagi x=0 dan x=2 gacha soha x o‘qi atrofida aylantiriladi va hajmi 288π/5. k ning qaysi qiymati to‘g‘ri?"
       },
       "options": [
         {

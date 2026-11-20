@@ -12,6 +12,7 @@ const root=path.resolve(__dirname,'..');
 const bank=path.join(root,'content/math/practice_v2');
 const baseline='381e57ee6ea53b437298d5b5faf4190cf6dc2cb1';
 const edited=new Set([7624,7662,7797,7881,7926,7937,7970]);
+const disambiguated=new Set([7724]);
 const extra=new Set([7624,7797,7937]);
 const letters=['A','B','C','D'];
 const stable=v=>Array.isArray(v)?v.map(stable):v&&typeof v==='object'
@@ -33,7 +34,7 @@ const rows=read('docs/qa/math-practice-v2-all495-itemwise-review-ledger-20261119
   .trim().split('\n').slice(1).map(x=>x.split(','));
 assert.equal(rows.length,495);
 const byId=new Map();
-let found=new Set(),unmodified=0;
+let found=new Set(),disambiguatedFound=new Set(),unmodified=0;
 for(const file of files){
   const old=JSON.parse(parent(file));
   const now=JSON.parse(read(file));
@@ -50,8 +51,25 @@ for(const file of files){
     const id=7484+Number(match[1]);
     assert.ok(!byId.has(id),'duplicate author ID');
     byId.set(id,q);
+    if(disambiguated.has(id)){
+      const approvedStems={
+        en:'Two concentric sectors share the same two bounding rays and have central angle 2 radians, with radii 6 cm and 3 cm. What is the area of the annular sector between their arcs?',
+        ru:'Два концентрических сектора ограничены одними и теми же двумя лучами, имеют центральный угол 2 радиана и радиусы 6 см и 3 см. Какова площадь кольцевого сектора между их дугами?',
+        uz:'Ikki konsentrik sektor bir xil ikkita chegaralovchi nurga ega, markaziy burchagi 2 radian va radiuslari 6 sm hamda 3 sm. Ularning yoylari orasidagi halqasimon sektor yuzasi qancha?'
+      };
+      assert.equal(before.question.en,
+        'Two concentric sectors have the same angle 2 radians and radii 6 cm and 3 cm. What is the area between the two arcs?',
+        'old annular sector stem changed since approved snapshot');
+      for(const lang of ['en','ru','uz'])
+        assert.equal(q.question[lang],approvedStems[lang],
+          'unreviewed annular-sector condition or translation drift');
+      assert.ok(eq({...q,question:before.question},before),
+        'annular-sector question may only narrow geometric directions: '+id);
+      disambiguatedFound.add(id);
+      continue;
+    }
     if(!edited.has(id)){
-      assert.ok(eq(q,before),'unapproved question changed outside seven-item fix');
+      assert.ok(eq(q,before),'unapproved question changed outside reviewed corrections');
       unmodified++;
       continue;
     }
@@ -65,8 +83,24 @@ for(const file of files){
     assert.equal(before.options.filter(o=>o.diagnostic_code===null).length,1);
     assert.equal(q.options.find(o=>o.key===q.correct_answer)?.diagnostic_code,null);
     assert.equal(before.options.find(o=>o.key===before.correct_answer)?.diagnostic_code,null);
-    assert.ok(eq({...q,options:[],correct_answer:null},
-                 {...before,options:[],correct_answer:null}),
+    const oldNoOptions={...before,options:[],correct_answer:null};
+    if(id===7970){
+      const approvedInstructionTails={
+        en:['. Enter k.','. Which value of k is correct?'],
+        ru:['. Введите k.','. Какое значение k верно?'],
+        uz:['. k ni kiriting.','. k ning qaysi qiymati to‘g‘ri?']
+      };
+      const exactSafeStem={...before.question};
+      for(const [lang,[wrong,corrected]] of Object.entries(approvedInstructionTails)){
+        assert.ok(exactSafeStem[lang].endsWith(wrong),
+          'published old MCQ instruction differs from prior approved snapshot');
+        exactSafeStem[lang]=exactSafeStem[lang].slice(0,-wrong.length)+corrected;
+        assert.equal(q.question[lang],exactSafeStem[lang],
+          'edited MCQ instruction contains unsanctioned mathematics or locale change');
+      }
+      oldNoOptions.question=exactSafeStem;
+    }
+    assert.ok(eq({...q,options:[],correct_answer:null},oldNoOptions),
       'stem, difficulty, solution, time, source or evaluator drift');
     const semantic=o=>JSON.stringify(stable({text:o.text,diagnostic_code:o.diagnostic_code}));
     assert.deepEqual(q.options.map(semantic).sort(),before.options.map(semantic).sort(),
@@ -85,7 +119,8 @@ for(const file of files){
   }
 }
 assert.deepEqual([...found].sort((a,b)=>a-b),[...edited].sort((a,b)=>a-b));
-assert.equal(unmodified,495-edited.size);
+assert.deepEqual([...disambiguatedFound],[7724]);
+assert.equal(unmodified,495-edited.size-disambiguated.size);
 assert.equal(byId.size,495);
 const contract=read('scripts/math-practice-v2-editorial-future-only-contract.cjs');
 const match=contract.match(/const FUTURE_VERSION_REQUIRED = new Set\(\[([^\]]+)\]\)/);
@@ -103,6 +138,12 @@ for(const [id,q] of byId){
   let pool=pools.get(p)||[];pool.push({id,q});pools.set(p,pool);
   if(q.qtype==='input'){input++;continue;}
   assert.equal(q.qtype,'mcq');mcq++;
+  assert.ok(!/\b(?:enter|type in|write down|provide your answer|give your answer)\b/i.test(q.question.en),
+    'MCQ stem asks learner to type free input rather than choose an option: '+id);
+  assert.ok(!/введите|вписа/i.test(q.question.ru),
+    'RU MCQ stem asks for input rather than choosing an option: '+id);
+  assert.ok(!/\bkiriting\b/i.test(q.question.uz),
+    'UZ MCQ stem asks for input rather than choosing an option: '+id);
   assert.deepEqual(q.options.map(o=>o.key),letters);
   assert.ok(letters.includes(q.correct_answer));
   assert.equal(q.options.filter(o=>o.key===q.correct_answer).length,1);
