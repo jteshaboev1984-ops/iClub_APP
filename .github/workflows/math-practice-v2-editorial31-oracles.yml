@@ -1,0 +1,30 @@
+name: Mathematics Practice editorial 31 independent source oracles
+on:
+  push:
+    branches:
+      - qa/math-practice-editorial31-independent-oracles-20261120
+  pull_request:
+    branches:
+      - qa/math-practice-future-only-atomic-switch-pg17-20261120
+    paths:
+      - 'scripts/math-practice-v2-editorial31-independent-oracles.cjs'
+      - 'content/math/practice_v2/**'
+      - '.github/workflows/math-practice-v2-editorial31-oracles.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  academic-source-oracles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check source-only editorials and independent calculations
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-editorial31-independent-oracles.cjs
+          node scripts/math-practice-v2-editorial31-independent-oracles.cjs
+      - name: Release boundary
+        run: echo 'Source-only check; 31 editorial items, 3 historical versions. No DB writes, academic signoff or release.'
