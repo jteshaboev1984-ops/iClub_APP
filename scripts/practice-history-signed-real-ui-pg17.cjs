@@ -55,6 +55,7 @@ const api=async(page,subject,token)=>page.evaluate(async ({subject,token})=>{
           '<section id="courses-practice-history" class="stack-screen">'+
           '<div id="practice-history-title"></div><div id="practice-history-subtitle"></div>'+
           '<div id="practice-history-content"></div></section></main></body></html>');
+        await page.evaluate(locale=>{ document.documentElement.lang=locale; },lang);
         await page.addStyleTag({content:
           'html,body{margin:0;font:14px system-ui;background:#f5f8fe;color:#142b50}'+
           '*,*::before,*::after{box-sizing:border-box}.stack-screen[hidden]{display:none!important}'+
