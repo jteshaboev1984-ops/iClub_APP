@@ -11,6 +11,7 @@ on:
       - 'scripts/math-practice-v2-future-only-81-stage-generator.cjs'
       - 'scripts/math-practice-v2-future-only-81-test-fixture.cjs'
       - 'scripts/math-practice-v2-future-only-signed-http.cjs'
+      - 'scripts/math-practice-v2-future-only-chromium-http.cjs'
       - 'supabase/tests/math_practice_future_only_signed_http_seed_pg17.sql'
       - 'supabase/tests/math_practice_future_only_81_generated_staging_pg17.sql'
       - 'supabase/tests/math_practice_future_only_atomic_fixture_pg17.sql'
@@ -125,10 +126,24 @@ jobs:
           done
           docker logs --tail 20 iclub-math-future-only-pgrst
           exit 1
+      - name: Install ephemeral Chromium (no production browser session)
+        run: |
+          set -euo pipefail
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+      - name: Browser test real signed v5 NEW version before rollback
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-v2-future-only-chromium-http.cjs
+          node scripts/math-practice-v2-future-only-chromium-http.cjs published
       - name: Verify real signed JWT PostgREST v5 before and after versioned rollback
         run: |
           set -euo pipefail
           node --check scripts/math-practice-v2-future-only-signed-http.cjs
           node scripts/math-practice-v2-future-only-signed-http.cjs
+      - name: Browser test real signed v5 OLD version after rollback
+        run: |
+          set -euo pipefail
+          node scripts/math-practice-v2-future-only-chromium-http.cjs rollback
       - name: Boundary
         run: echo 'DISPOSABLE PG17 ONLY; NO production credentials, no live Supabase write, no deployment.'
