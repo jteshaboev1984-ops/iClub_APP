@@ -161,8 +161,11 @@ if(codes.size){
 }
 const first=payload[0].old_id,second=payload[1].old_id,
  third=expected===3?payload[2].old_id:
-       expected===10?payload.find(q=>q.old_id===7754).old_id:null;
-if(expected===10)assert.ok(third,'Q270 historical version must be fixture-covered');
+       expected===10?(payload.find(q=>q.old_id===7754)?.old_id??null):null;
+// The already published historic ten do not include Q270 and must continue
+// to pass their independent fixture; the newly proposed ten do include Q270.
+if(expected===10&&payload.some(q=>q.old_id===7754))
+ assert.equal(third,7754,'Q270 historical version must be fixture-covered');
 sql.push("insert into public.practice_sessions_v4 values(5001,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',5,array["+first+","+second+"],'in_progress');");
 sql.push("insert into public.practice_session_answers_v4(session_id,question_id,user_answer,is_correct) values(5001,"+first+",'old',true);");
 sql.push("insert into public.practice_drill_sessions_v4 values(6001,'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',5,array["+second+(third===null?'':','+third)+"],'in_progress');");
