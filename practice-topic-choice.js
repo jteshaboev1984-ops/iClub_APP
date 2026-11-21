@@ -16,7 +16,7 @@
       historyFoot:"Здесь показаны результаты попыток по темам. Результаты практики по турам учитываются отдельно.",
       historyUnavailable:"История попыток по темам сейчас недоступна.",
       historyRetry:"Повторить",historySessions:"Завершено попыток",
-      historyScope:"Сохранённые результаты",historyEmpty:"Пока нет завершённых тренировок по темам." },
+      historyScope:"Сохранённые результаты",historyEmpty:"Пока нет завершённых тренировок по темам.",historyLoading:"Загружаем результаты по темам…" },
     uz: { title:"Mavzuni tanlang", desc:"Tur amaliyotidan alohida mavzu bo‘yicha amaliyot qiling.",
       open:"Mavzuni tanlash", close:"Mavzularni yashirish", search:"Mavzuni qidirish",
       searchPlaceholder:"Mavzuni topish…", loading:"Mavzular yuklanmoqda…",
@@ -29,7 +29,7 @@
       historyFoot:"Bu yerda mavzular bo‘yicha urinishlar natijalari ko‘rsatiladi. Tur amaliyoti natijalari alohida hisoblanadi.",
       historyUnavailable:"Mavzular bo‘yicha urinishlar tarixini hozir yuklab bo‘lmadi.",
       historyRetry:"Qayta urinish",historySessions:"Tugallangan urinishlar",
-      historyScope:"Saqlangan natijalar",historyEmpty:"Mavzular bo‘yicha tugallangan mashqlar hali yo‘q." },
+      historyScope:"Saqlangan natijalar",historyEmpty:"Mavzular bo‘yicha tugallangan mashqlar hali yo‘q.",historyLoading:"Mavzular natijalari yuklanmoqda…" },
     en: { title:"Choose a topic", desc:"Practise a specific topic independently from your Tour practice.",
       open:"Choose topic", close:"Hide topics", search:"Search topics",
       searchPlaceholder:"Find a topic…", loading:"Loading available topics…",
@@ -42,7 +42,7 @@
       historyFoot:"These are results from topic practice. Tour results are tracked separately.",
       historyUnavailable:"Topic practice history is temporarily unavailable.",
       historyRetry:"Retry",historySessions:"Completed attempts",
-      historyScope:"Saved results",historyEmpty:"No completed topic practice attempts yet." }
+      historyScope:"Saved results",historyEmpty:"No completed topic practice attempts yet.",historyLoading:"Loading topic practice results…" }
   };
   let mountSerial=0;
 
@@ -123,6 +123,11 @@
       historyOutlet.replaceChildren(history);
       if(!compact)historyOutlet.hidden=false;
     }else host.append(history);
+    if(compact){
+      history.setAttribute("aria-live","polite");
+      history.append(element("p","practice-topic-history-empty",c.historyLoading));
+      history.hidden=false;
+    }
 
     function safeResult(row) {
       if (!row || typeof row!=="object") return null;
