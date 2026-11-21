@@ -7,6 +7,7 @@ on:
       - 'supabase/candidates/iclub_ai_tutor_history_v1_owner_gated_dormant.sql'
       - 'iclub-ai-v21-ui.js'
       - 'scripts/ai-tutor-history-reload-chromium.cjs'
+      - 'scripts/ai-tutor-history-signed-pg17.cjs'
       - 'supabase/tests/iclub_ai_tutor_history_v1_isolated.sql'
       - 'docs/ai/AI_TUTOR_HISTORY_OWNER_GATE_DRAFT_2026-11-21.md'
       - '.github/workflows/ai-tutor-history-owner-gated-pg17.yml'
@@ -62,6 +63,40 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_tutor_history_v1_isolated.sql
+      - name: Start isolated signed JWT PostgREST using disposable PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          jwt_secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$jwt_secret"
+          echo "ICLUB_TUTOR_HISTORY_SIGNED_JWT_SECRET=$jwt_secret" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+          docker run -d --rm --name iclub-ai-history-local-postgrest --network host \
+            -e PGRST_DB_URI="postgres://postgres:postgres@127.0.0.1:5432/postgres" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$jwt_secret" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 45); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then
+              echo 'PASS: local PostgREST responds; no hosted credentials'
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs --tail 35 iclub-ai-history-local-postgrest
+          exit 1
+      - name: Signed JWT HTTP owner / access / assessment negative matrix
+        shell: bash
+        env:
+          ICLUB_TUTOR_HISTORY_SIGNED_ISOLATED: 'true'
+        run: |
+          set -euo pipefail
+          node --check scripts/ai-tutor-history-signed-pg17.cjs
+          node scripts/ai-tutor-history-signed-pg17.cjs
+      - name: Stop disposable history PostgREST
+        if: always()
+        run: docker rm -f iclub-ai-history-local-postgrest >/dev/null 2>&1 || true
       - name: Check dormant source stays hard-OFF
         shell: bash
         run: |
