@@ -37,7 +37,7 @@ if (baseline.status !== 0) {
   if (summary) {
     const expectedOrders = { 1: 68, 2: 80, 3: 68, 4: 77, 5: 66, 6: 70, 7: 66 };
     if (summary.questions !== 495) fail(`expected 495 questions, got ${summary.questions}`);
-    if (summary.catalogs !== 201) fail(`expected 201 diagnostic catalog rows, got ${summary.catalogs}`);
+    if (summary.catalogs !== 212) fail(`expected 212 diagnostic catalog rows, got ${summary.catalogs}`);
     if (summary.diagnosticMappings !== 868) fail(`expected 868 diagnostic mappings, got ${summary.diagnosticMappings}`);
     if (summary.memberships !== 495) fail(`expected 495 memberships, got ${summary.memberships}`);
     if (summary.mcq !== 277 || summary.input !== 218) {
@@ -110,7 +110,7 @@ try {
 console.log(JSON.stringify({
   ok: errors.length === 0,
   baselineQuestions: 495,
-  baselineDiagnostics: 201,
+  baselineDiagnostics: 212,
   baselineMappings: 868,
   exactPracticeMappingGuard: true,
   exactSkillMappingGuard: true,
