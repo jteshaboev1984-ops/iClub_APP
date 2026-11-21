@@ -78,9 +78,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "For f(x)=(x−2)²+1 with 2≤x≤5, what is the range?",
-        "ru": "Для f(x)=(x−2)²+1 при 2≤x≤5 какова область значений?",
-        "uz": "f(x)=(x−2)²+1 va 2≤x≤5 bo‘lsa, qiymatlar to‘plami qaysi?"
+        "en": "For f(x)=(x−2)²+1 with 2≤x≤5, which interval gives its exact range?",
+        "ru": "Для f(x)=(x−2)²+1 при 2≤x≤5 какой промежуток точно задаёт область значений?",
+        "uz": "f(x)=(x−2)²+1 va 2≤x≤5 bo‘lsa, qaysi oraliq qiymatlar to‘plamini aynan ifodalaydi?"
       },
       "options": [
         {
@@ -241,9 +241,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "For f(x)=−(x+1)²+9 with 0≤x≤4, what is the range?",
-        "ru": "Для f(x)=−(x+1)²+9 при 0≤x≤4 какова область значений?",
-        "uz": "f(x)=−(x+1)²+9 va 0≤x≤4 bo‘lsa, qiymatlar to‘plami qaysi?"
+        "en": "For f(x)=−(x+1)²+9 with 0≤x≤4, which interval gives its exact range?",
+        "ru": "Для f(x)=−(x+1)²+9 при 0≤x≤4 какой промежуток точно задаёт область значений?",
+        "uz": "f(x)=−(x+1)²+9 va 0≤x≤4 bo‘lsa, qaysi oraliq qiymatlar to‘plamini aynan ifodalaydi?"
       },
       "options": [
         {
@@ -467,9 +467,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "For f(x)=5−x on the domain 1≤x<6, which range is correct?",
-        "ru": "Для f(x)=5−x при 1≤x<6 какая область значений верна?",
-        "uz": "f(x)=5−x va 1≤x<6 bo‘lsa, qaysi qiymatlar to‘plami to‘g‘ri?"
+        "en": "For f(x)=5−x on the domain 1≤x<6, which interval gives its exact range?",
+        "ru": "Для f(x)=5−x при 1≤x<6 какой промежуток точно задаёт область значений?",
+        "uz": "f(x)=5−x va 1≤x<6 bo‘lsa, qaysi oraliq qiymatlar to‘plamini aynan ifodalaydi?"
       },
       "options": [
         {
@@ -530,9 +530,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "For f(x)=−x²+4x+1 restricted to x≥3, which range is correct?",
-        "ru": "Для f(x)=−x²+4x+1 при ограничении x≥3 какая область значений верна?",
-        "uz": "f(x)=−x²+4x+1 va x≥3 cheklovida qaysi qiymatlar to‘plami to‘g‘ri?"
+        "en": "For f(x)=−x²+4x+1 restricted to x≥3, which statement gives its exact range?",
+        "ru": "Для f(x)=−x²+4x+1 при ограничении x≥3 какое утверждение точно задаёт область значений?",
+        "uz": "f(x)=−x²+4x+1 va x≥3 cheklovida qaysi tasdiq qiymatlar to‘plamini aynan ifodalaydi?"
       },
       "options": [
         {
