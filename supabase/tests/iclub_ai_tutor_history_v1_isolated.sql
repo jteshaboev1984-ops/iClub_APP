@@ -11,9 +11,19 @@ CREATE ROLE service_role NOLOGIN;
 CREATE SCHEMA auth;
 CREATE SCHEMA private;
 GRANT USAGE ON SCHEMA auth TO authenticated,anon;
-CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE
-AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+-- Match the actual deployed auth.uid()/auth.role() semantics, including
+-- PostgREST v12's JSON request.jwt.claims setting for signed bearer tokens.
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $
+ SELECT coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),
+ (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub'))::uuid
+$;
+CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $
+ SELECT coalesce(nullif(current_setting('request.jwt.claim.role',true),''),
+ (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'role'))::text
+$;
 CREATE TABLE private.qa_protected(user_id uuid PRIMARY KEY);
+-- Production uses this separate table to protect unfinished Practice.
+CREATE TABLE public.practice_sessions_v4(user_id uuid NOT NULL,status text NOT NULL);
 CREATE FUNCTION private.iclub_ai_has_active_protected_assessment_v1(p_user_id uuid)
 RETURNS boolean LANGUAGE sql STABLE AS $$
  SELECT EXISTS(SELECT 1 FROM private.qa_protected WHERE user_id=p_user_id)
@@ -163,6 +173,21 @@ END;
 $verify$;
 RESET ROLE;
 DELETE FROM private.qa_protected;
+INSERT INTO public.practice_sessions_v4(user_id,status)
+VALUES ('00000000-0000-4000-8000-000000000011','in_progress');
+SET ROLE authenticated;
+DO $verify$
+DECLARE v jsonb;
+BEGIN
+ v:=public.iclub_ai_tutor_history_service_v1('read','mathematics');
+ IF v->>'reason'<>'active_assessment' THEN RAISE EXCEPTION 'in-progress Practice replay: %',v; END IF;
+ v:=public.iclub_ai_tutor_history_service_v1('append','mathematics',
+ '44444444-4444-4444-8444-444444444445','assistant','practice clue','uz');
+ IF v->>'reason'<>'active_assessment' THEN RAISE EXCEPTION 'in-progress Practice append: %',v; END IF;
+END;
+$verify$;
+RESET ROLE;
+DELETE FROM public.practice_sessions_v4;
 
 -- Expired rows are hidden immediately and physically removable only by operator.
 UPDATE private.iclub_ai_tutor_history_v1_messages
