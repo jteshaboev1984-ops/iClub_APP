@@ -10,6 +10,7 @@ on:
       - 'scripts/math-practice-confirmed10-pg17-fixture.cjs'
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
       - 'supabase/tests/math_practice_hard9_successor_versioning_pg17.sql'
+      - 'supabase/tests/math_practice_range4_future_only_pg17.sql'
       - '.github/workflows/math-practice-hard9-future-only-pg17.yml'
   workflow_dispatch:
 
@@ -69,5 +70,21 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -d math_hard9 -f "$tmp/stage.sql" >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d math_hard9             -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d math_hard9             -f supabase/tests/math_practice_hard9_successor_versioning_pg17.sql
+      - name: Four exact ranges — second independent future-only MCQ PG17 release rehearsal
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-confirmed10-stage-generator.cjs --batch range4 --out "$tmp/stage.sql"
+          node scripts/math-practice-confirmed10-pg17-fixture.cjs \
+            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --expect 4
+          createdb -T template0 math_range4
+          psql -X -v ON_ERROR_STOP=1 -d math_range4 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_range4 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_range4 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_range4 \
+            -f supabase/tests/math_practice_range4_future_only_pg17.sql
       - name: No production or user content publication
         run: echo 'Fixture-only PostgreSQL17 rehearsal passed; hosted Supabase and main untouched.'
