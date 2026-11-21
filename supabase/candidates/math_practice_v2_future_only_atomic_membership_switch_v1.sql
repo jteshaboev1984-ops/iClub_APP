@@ -25,7 +25,7 @@ declare
   v_rows integer := 0;
 begin
   -- No caller-controlled SQL, dynamic table name or generation bump.
-  if p_release is null or p_release not in ('math_p1_practice_v2_fix_20261120','math_p1_practice_v2_q400_q481_20261120','math_p1_practice_v2_q089_q202_q226_20261120','math_p1_practice_v2_pending10_20261120','math_p1_practice_v2_decimal8_20261121','math_p1_practice_v2_semantic2_20261121') then
+  if p_release is null or p_release not in ('math_p1_practice_v2_fix_20261120','math_p1_practice_v2_q400_q481_20261120','math_p1_practice_v2_q089_q202_q226_20261120','math_p1_practice_v2_pending10_20261120','math_p1_practice_v2_decimal8_20261121','math_p1_practice_v2_semantic2_20261121','math_p1_practice_v2_setrange1_20261121') then
     raise exception 'unapproved_math_practice_patch_release';
   end if;
   if jsonb_typeof(p_pairs) is distinct from 'array'
@@ -62,6 +62,11 @@ begin
     or (select array_agg((x.value->>'old_id')::bigint order by (x.value->>'old_id')::bigint)
        from jsonb_array_elements(p_pairs) x) is distinct from array[7553::bigint,7795::bigint]
   ) then raise exception 'semantic2_exact_release_scope'; end if;
+  if p_release='math_p1_practice_v2_setrange1_20261121' and (
+    jsonb_array_length(p_pairs)<>1
+    or (select array_agg((x.value->>'old_id')::bigint order by (x.value->>'old_id')::bigint)
+        from jsonb_array_elements(p_pairs) x) is distinct from array[7554::bigint]
+  ) then raise exception 'setrange1_exact_release_scope'; end if;
   select s.id into v_subject_id from public.subjects s
   where s.subject_key='mathematics' and s.is_active is true;
   if v_subject_id is null then raise exception 'mathematics_subject_missing'; end if;
@@ -140,6 +145,8 @@ begin
          and v_new_meta.content_key<>v_old_meta.content_key||'-V20261121DEC8')
        or (p_release='math_p1_practice_v2_semantic2_20261121'
          and v_new_meta.content_key<>v_old_meta.content_key||'-V20261121SEM2')
+       or (p_release='math_p1_practice_v2_setrange1_20261121'
+         and v_new_meta.content_key<>v_old_meta.content_key||'-V20261121SETRANGE1')
     then
       raise exception 'future_only_version_identity_or_hash_mismatch';
     end if;
@@ -215,7 +222,7 @@ declare
   v_new_pool public.practice_pool_questions%rowtype;
   v_count integer := 0;
 begin
-  if p_release is null or p_release not in ('math_p1_practice_v2_fix_20261120','math_p1_practice_v2_q400_q481_20261120','math_p1_practice_v2_q089_q202_q226_20261120','math_p1_practice_v2_pending10_20261120','math_p1_practice_v2_decimal8_20261121','math_p1_practice_v2_semantic2_20261121')
+  if p_release is null or p_release not in ('math_p1_practice_v2_fix_20261120','math_p1_practice_v2_q400_q481_20261120','math_p1_practice_v2_q089_q202_q226_20261120','math_p1_practice_v2_pending10_20261120','math_p1_practice_v2_decimal8_20261121','math_p1_practice_v2_semantic2_20261121','math_p1_practice_v2_setrange1_20261121')
      or jsonb_typeof(p_pairs) is distinct from 'array'
      or jsonb_array_length(p_pairs) not between 1 and 81 then
     raise exception 'invalid_future_only_rollback_request';
@@ -250,6 +257,11 @@ begin
     or (select array_agg((x.value->>'old_id')::bigint order by (x.value->>'old_id')::bigint)
        from jsonb_array_elements(p_pairs) x) is distinct from array[7553::bigint,7795::bigint]
   ) then raise exception 'semantic2_exact_rollback_scope'; end if;
+  if p_release='math_p1_practice_v2_setrange1_20261121' and (
+    jsonb_array_length(p_pairs)<>1
+    or (select array_agg((x.value->>'old_id')::bigint order by (x.value->>'old_id')::bigint)
+        from jsonb_array_elements(p_pairs) x) is distinct from array[7554::bigint]
+  ) then raise exception 'setrange1_exact_rollback_scope'; end if;
   perform pg_advisory_xact_lock(hashtext('math_practice_v2_release')::bigint);
   perform pg_advisory_xact_lock(hashtext('math_practice_v2_future_only_patch')::bigint);
   if (select count(distinct (x.value->>'old_id')::bigint)
