@@ -1809,9 +1809,9 @@ body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .prac
   display:inline-flex;
   justify-content:center;
   align-items:center;
-  flex:0 0 108px;
-  width:108px;
-  min-width:108px;
+  flex:0 0 118px;
+  width:118px;
+  min-width:118px;
   height:52px;
   min-height:52px;
   padding:0 11px;
@@ -1896,8 +1896,8 @@ body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .prac
     padding:12px 10px 11px;
   }
   body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip {
-    flex-basis:102px;
-    width:102px;
-    min-width:102px;
+    flex-basis:110px;
+    width:110px;
+    min-width:110px;
   }
 }
