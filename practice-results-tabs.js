@@ -2,9 +2,9 @@
 (function () {
   'use strict';
   const COPY = Object.freeze({
-    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Статистика по туру'},
-    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Tur statistikasi'},
-    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'Tour statistics'}
+    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Мои результаты',s2Note:'Результаты по темам за текущий сезон доступны в истории практики.'},
+    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Mening natijalarim',s2Note:'Joriy mavsumdagi mavzu natijalari amaliyot tarixida mavjud.'},
+    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'My results',s2Note:'Current-season topic results are available in Practice history.'}
   });
   const ROOT_ID = 'courses-practice-start';
   const lang = () => {
@@ -654,18 +654,27 @@
     const tourTab = create('practice-results-tab-tours','practice-results-panel-tours');
     const topicTab = create('practice-results-tab-topics','practice-results-panel-topics');
     bar.append(tourTab,topicTab);
-    // Owner-approved order: stats first, then learning mode, choice,
-    // contextual Start/Resume, then latest attempts. Keep the real Tour state
-    // in the overview; do not duplicate a banner above the stats.
+    // Owner-accepted unified results: one mode switch above one contextual
+    // results area, then the existing choice, Start/Resume and owner History.
+    // Keep the original Tour hero and genuine season/access state intact.
     const overview=node('section','iclub-practice-overview');
     const overviewTitle=node('strong','iclub-practice-overview-label');
-    overview.append(overviewTitle,hero);
+    const tourOverview=node('div','iclub-practice-tour-overview');
+    tourOverview.append(hero);
     const currentTour=node('section','iclub-practice-current-tour');
     currentTour.dataset.practiceCurrentTour='true';
     currentTour.setAttribute('aria-live','polite');
-    overview.append(currentTour);
+    tourOverview.append(currentTour);
+    const topicOverview=node('div','iclub-practice-topic-overview');
+    topicOverview.id='practice-topic-overview';
+    topicOverview.hidden=true;
+    const topicSummary=node('div','iclub-practice-topic-summary');
+    topicSummary.id='practice-topic-overview-content';
+    const topicSeasonNote=node('p','iclub-practice-topic-s2-note');
+    topicOverview.append(topicSummary,topicSeasonNote);
+    overview.append(overviewTitle,tourOverview,topicOverview);
     root.insertBefore(overview,picker);
-    root.insertBefore(bar,picker);
+    root.insertBefore(bar,overview);
 
     const tourPanel=document.createElement('section');
     tourPanel.id='practice-results-panel-tours';
@@ -696,8 +705,11 @@
     const topicActions=node('div','practice-topic-start-actions');
     topicActions.hidden=true;
     topicActions.append(resumed);
+    // Legacy fallback outlet exists only for shells without the shared results.
+    // Normally the Topic summary mounts inside #practice-topic-overview-content.
     const topicRecent=node('div','practice-topic-history-placement');
     topicRecent.id='practice-topic-history-placement';
+    topicRecent.hidden=true;
     topicPanel.append(topics,topicActions,topicRecent);
     const topicSeasonHistory=node('div','iclub-s2-history');
     topicSeasonHistory.dataset.practiceS2History='topics';
@@ -721,6 +733,7 @@
       const c=COPY[lang()];
       tourTab.textContent=c.tours; topicTab.textContent=c.topics;
       overviewTitle.textContent=c.stats;
+      topicSeasonNote.textContent=c.s2Note;
       syncResume();
     };
     const centerSelected=()=>{
@@ -741,6 +754,7 @@
       root.dataset.practiceResultsMode=next;
       const isTours=next==='tours';
       tourPanel.hidden=!isTours; topicPanel.hidden=isTours;
+      tourOverview.hidden=!isTours; topicOverview.hidden=isTours;
       for (const [button,selected] of [[tourTab,isTours],[topicTab,!isTours]]) {
         button.setAttribute('aria-selected',String(selected));
         button.tabIndex=selected?0:-1;
