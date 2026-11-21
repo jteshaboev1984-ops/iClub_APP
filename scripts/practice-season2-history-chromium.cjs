@@ -116,9 +116,21 @@ const {chromium}=require('playwright');
    assert(theme.oldTopicHidden,'stale Topic History duplicates active S2 view');
    for(const mode of ['topics','tours']){
     await practice.locator('#practice-results-tab-'+mode).click();
-    assert.equal(await practice.locator('#practice-results-panel-'+mode).isVisible(),true);
-    assert.equal(await practice.locator('#practice-results-panel-'+
-      (mode==='tours'?'topics':'tours')).isVisible(),false);
+    // This fixture has no loaded Topic catalog. An empty tab panel can have
+    // zero height even when active; inspect true tab and hidden attributes.
+    const other=mode==='tours'?'topics':'tours';
+    assert.equal(await practice.locator('#practice-results-tab-'+mode)
+      .getAttribute('aria-selected'),'true');
+    assert.equal(await practice.locator('#practice-results-panel-'+mode)
+      .getAttribute('hidden'),null,'active panel must not be hidden');
+    assert.equal(await practice.locator('#practice-results-panel-'+other)
+      .getAttribute('hidden'),'','inactive panel must be hidden');
+    assert.equal(await practice.locator(mode==='tours'
+      ?'.iclub-practice-tour-overview':'#practice-topic-overview')
+      .getAttribute('hidden'),null,'contextual stats must follow selected tab');
+    assert.equal(await practice.locator(mode==='tours'
+      ?'#practice-topic-overview':'.iclub-practice-tour-overview')
+      .getAttribute('hidden'),'','other statistics must not overlap');
    }
    // Existing user-owned recommendation histories retain 3 + 5 disclosure.
    const topicHolder=page.locator('#my-rec-topic-history-body .iclub-s2-history-earlier');
