@@ -420,6 +420,22 @@
         "ru": "Отличайте интеграл со знаком от полной геометрической площади, где вклады берутся по модулю.",
         "uz": "Ishorali integralni modullar bo‘yicha yig‘iladigan umumiy geometrik yuzadan farqlang."
       }
+    },
+    {
+      "code": "INT03_NOT_BOUNDS_REVERSAL",
+      "skill": "P1-INT-03",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "This result is not explained by reversing the integral's bounds: reversing the bounds would give the negative of the correct value.",
+        "ru": "Этот результат нельзя объяснить одной лишь перестановкой пределов: тогда получилось бы число, противоположное правильному.",
+        "uz": "Bu natijani faqat integral chegaralarini almashtirish bilan izohlab bo‘lmaydi: bunda to‘g‘ri qiymatning qarama-qarshi ishoralisi chiqadi."
+      },
+      "next_action": {
+        "en": "Find an antiderivative F and evaluate F(upper)−F(lower). Check each endpoint value before subtracting.",
+        "ru": "Найдите первообразную F и вычислите F(верхняя граница)−F(нижняя граница). Проверьте значения на обеих границах перед вычитанием.",
+        "uz": "F boshlang‘ich funksiyani topib, F(yuqori chegara)−F(pastki chegara) ni hisoblang. Ayirishdan oldin ikkala chegaradagi qiymatlarni tekshiring."
+      }
     }
   ]
 }
