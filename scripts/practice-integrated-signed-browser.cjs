@@ -150,9 +150,13 @@ async function postRaw(base,fn,subject,token){
   try{
    const cases=[
     ...['ru','uz','en'].flatMap(locale=>[320,375,430,1440].map(width=>
-      ({locale,width,uid:A,subject:'mathematics'}))),
+      ({locale,width,uid:A,subject:'mathematics'})))
+      .filter(item=>!(item.locale==='ru'&&item.width===375)),
     {locale:'ru',width:375,uid:B,subject:'mathematics'},
-    {locale:'en',width:375,uid:A,subject:'chemistry'}
+    {locale:'en',width:375,uid:A,subject:'chemistry'},
+    // Run write-capable real browser case LAST so it cannot contaminate
+    // the established read-only History expectations for other cases.
+    {locale:'ru',width:375,uid:A,subject:'mathematics'}
    ];
    for(const item of cases){
     const page=await browser.newPage({viewport:{width:item.width,height:900}});
@@ -436,6 +440,33 @@ async function postRaw(base,fn,subject,token){
        const unchanged=await postRaw(url,'get_practice_topic_history_safe_v1','mathematics',signed(A));
        assert(unchanged.ok&&unchanged.data?.completed_sessions===3,
          'unfinished browser attempt incorrectly finalized');
+       for(let i=1;i<launched.total;i++){
+         await page.locator('#practice-input').fill('RIGHT');
+         await page.locator('#practice-submit-btn').click();
+         if(i===launched.total-1)
+           await page.waitForFunction(()=>window.__qaFinished===true,null,{timeout:13000});
+         else
+           await page.waitForFunction(idx=>state.quiz?.index===idx,i+1,{timeout:13000});
+       }
+       // Actual server finalized the session on its fifth answer; check
+       // signed server truth, not only the synthetic host's final display.
+       const verified=await page.evaluate(id=>window.sb.rpc(
+         'get_practice_drill_resume_safe_v4',{p_session_id:id}),launched.id);
+       assert(Array.isArray(verified.data)&&verified.data.length===5,
+         'completed Practice question review lost');
+       assert(verified.data.every(q=>q.was_answered),
+         'server retained unanswered question after browser completion');
+       assert.equal(verified.data.filter(q=>q.saved_is_correct).length,4,
+         'signed server score changed after browser completion');
+       const newHistory=await page.evaluate(()=>window.sb.rpc(
+         'get_practice_topic_history_safe_v1',{p_subject_key:'mathematics'}));
+       assert(newHistory.data?.ok===true&&newHistory.data?.completed_sessions===4,
+         'completed browser attempt not added to authenticated History');
+       assert(JSON.stringify(newHistory.data).includes('"session_id":'+launched.id),
+         'completed browser session absent from owner-only recent History');
+       if(screens)await page.screenshot({
+         path:path.join(screens,'qa-actual-completed-ru-375.png'),
+         animations:'disabled'});
        assert.equal(networkFailures.length,0,
          'unexpected browser errors after real Submit/Pause: '+networkFailures.join('; ').slice(0,140));
      }
