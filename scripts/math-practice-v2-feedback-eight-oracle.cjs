@@ -9,10 +9,9 @@ const qs=[...load('p6_differentiation','P1-DIF-05'),...load('p6_differentiation'
 const byNo=new Map(qs.map(q=>[Number(q.key.slice(-3)),q]));
 const expectCode=(n,letters,code)=>{const q=byNo.get(n);assert.ok(q);for(const key of letters){const opt=q.options.find(o=>o.key===key);assert.ok(opt&&key!==q.correct_answer);assert.equal(opt.diagnostic_code,code);}};
 expectCode(408,['C'],'DIF05_VALUE_NOT_SLOPE_SIGN');
-assert.match(byNo.get(408).question.en,/f′\\(x\\)<0 at every point/);
+assert.ok(byNo.get(408).question.en.includes('f′(x)<0 at every point'));
 assert.equal(byNo.get(408).options.find(o=>o.key==='D').diagnostic_code,'DIF05_NO_STATIONARY_WHEN_NEGATIVE');
 // A negative derivative need not give a negative function value.
-assert.ok([-0.5,-0.1].every(x=>10+x>0)); // f(x)=10-x on (0,1)
 assert.ok([0.2,0.8].every(x=>10-x>0&&-1<0));
 for(const [n,x,fprime] of [
  [419,0,z=>3*z*z-6*z],
