@@ -95,7 +95,7 @@ const adapter={
 const routeSrc=extract("  async function invokeGlobalAi(body) {",
   "\n  async function sendMessage(");
 const route=vm.runInNewContext("("+routeSrc+")",{
- window:{iClubAiV21BetaClient:adapter}
+ window:{iClubAiV21BetaClient:adapter},verifiedProductHelpIntent:intent
 },{timeout:500});
 const template={request_id:"00000000-0000-4000-8000-000000000001",
   locale:"uz",subject_key:"general",scope_code:"global",
