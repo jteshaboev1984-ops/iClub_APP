@@ -6,6 +6,7 @@ on:
       - '.github/workflows/math-s2-tour-equivalence-signed-pg17.yml'
       - 'supabase/candidates/math_s2_tour_input_equivalence_v1_hold.sql'
       - 'supabase/candidates/math_s2_tour_input_equivalence_v1_readonly_test.sql'
+      - 'supabase/tests/fixtures/math_s2_lowest_terms_exception_pg17_test.sql'
       - 'supabase/tests/fixtures/math_s2_tour_exact_rpc_pg17_fixture.sql'
       - 'supabase/tests/fixtures/math_s2_tour_original_evaluator_pg17.sql'
       - 'scripts/math-s2-tour-equal-answers-signed-http.cjs'
@@ -86,6 +87,11 @@ jobs:
           set -euo pipefail
           psql -X -v ON_ERROR_STOP=1 \
             -f supabase/candidates/math_s2_tour_input_equivalence_v1_readonly_test.sql
+      - name: Prove lowest-terms exception with invented PG17 item and mandatory rollback
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_lowest_terms_exception_pg17_test.sql
       - name: Run local signed JWT PostgREST only
         run: |
           set -euo pipefail
