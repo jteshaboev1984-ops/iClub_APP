@@ -1684,6 +1684,17 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 .iclub-visual-v3 #courses-practice-start #practice-topic-overview-content {
   margin:0;min-width:0;
 }
+/* Same visual tokens as the real current-Tour status, without reusing its
+   semantic selector (the Tour status is unique in the DOM). No arrow/action. */
+.iclub-visual-v3 #courses-practice-start .iclub-practice-overview .iclub-practice-topic-footer {
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;
+  margin:0;padding:11px 14px;
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:var(--academy-radius-sm,11px);
+  background:var(--academy-paper-blue,#f3f8ff);
+  box-shadow:none;
+  color:var(--academy-text,#142b50);
+}
 .iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history {
   display:grid;gap:10px;min-width:0;
   padding:0;margin:0;border:0;border-radius:0;
