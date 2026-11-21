@@ -84,6 +84,8 @@ DECLARE
   v_canonical integer;
   v_fraction_total integer;
   v_fraction_pass integer;
+  v_lowest_terms_total integer;
+  v_lowest_terms_rejected integer;
   v_decimal_total integer;
   v_decimal_pass integer;
   v_s2_tours integer;
@@ -119,7 +121,7 @@ BEGIN
     WHERE q.subject_id=5 AND q.qtype='input' AND tq.is_active
       AND t.subject_id=5 AND s.season_no=2
   ), checks AS (
-    SELECT
+    SELECT id,
       (public.iclub_eval_tour_question_safe_v4(
         id,correct_answer,NULL,true)->>'is_correct')::boolean canon,
       CASE WHEN correct_answer ~ '^[0-9]+/[0-9]+$' THEN
@@ -134,14 +136,21 @@ BEGIN
     FROM items
   )
   SELECT count(*),count(*) FILTER (WHERE canon IS true),
-    count(frac),count(*) FILTER (WHERE frac IS true),
+    count(frac) FILTER (WHERE id<>6089),
+    count(*) FILTER (WHERE id<>6089 AND frac IS true),
+    count(frac) FILTER (WHERE id=6089),
+    count(*) FILTER (WHERE id=6089 AND frac IS false),
     count(dec),count(*) FILTER (WHERE dec IS true)
   INTO v_input_total,v_canonical,v_fraction_total,v_fraction_pass,
+       v_lowest_terms_total,v_lowest_terms_rejected,
        v_decimal_total,v_decimal_pass
   FROM checks;
   IF v_input_total<>28 OR v_canonical<>28 OR
-     v_fraction_total<>4 OR v_fraction_pass<>4 OR
-     v_decimal_total<>1 OR v_decimal_pass<>1 THEN
+     v_fraction_total+v_lowest_terms_total<>4
+     OR v_fraction_pass<>v_fraction_total
+     OR v_lowest_terms_rejected<>v_lowest_terms_total
+     OR v_lowest_terms_total NOT IN(0,1)
+     OR v_decimal_total<>1 OR v_decimal_pass<>1 THEN
     RAISE EXCEPTION 'MATH_S2_SCORER_FAILED: input %/% fraction %/% decimal %/%',
       v_canonical,v_input_total,v_fraction_pass,v_fraction_total,
       v_decimal_pass,v_decimal_total;
@@ -162,7 +171,7 @@ BEGIN
     'EXECUTE') THEN
     RAISE EXCEPTION 'Direct Tour answer oracle was exposed';
   END IF;
-  RAISE NOTICE 'MATH_S2_TOUR_SCORER_SQL_28_INPUT_18_SYNTHETIC_PASS';
+  RAISE NOTICE 'MATH_S2_TOUR_SCORER_SQL_28_INPUT_18_SYNTHETIC_LOWEST_TERMS_GUARD_PASS';
 END $acceptance$;
 
 ROLLBACK;
