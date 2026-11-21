@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// #574: 28 published corrections + two independent, future-only MCQ semantic clarifications.
+// #574: 30 previously published Practice corrections + scoped Q070 set-equivalence fix.
 // Check all 495 authored questions vs real original main; fail on any other
 // key/text/locale/difficulty change. No protected solution printed in CI.
 const assert=require('node:assert/strict');
@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..');
 const bank=path.join(root,'content/math/practice_v2');
 const baseline='296bf21df09a808152b4ae4e153ddcec8aec85cd';
 const expected=new Map([
- [7553,['question','explanation']],[7795,['question','explanation']],
+ [7553,['question','explanation']],[7554,['options']],[7795,['question','explanation']],
  [7714,['question']],[7727,['question']],[7796,['question']],
  [7818,['question']],[7829,['question']],[7838,['question']],
  [7894,['question']],[7900,['question']],
@@ -87,7 +87,7 @@ for(const folder of folderList){
        'correct mathematical option changed '+id+' '+lang);
      const semantics=o=>stable({text:o.text,diagnostic_code:o.diagnostic_code});
      const pool=arr=>arr.map(o=>JSON.stringify(semantics(o))).sort();
-     if(id!==7573)assert.deepEqual(pool(q.options),pool(before.options),
+     if(id!==7573&&id!==7554)assert.deepEqual(pool(q.options),pool(before.options),
        'distractor or diagnostic semantics changed');
      if(rekey.has(id))assert.notEqual(before.correct_answer,q.correct_answer);
      if(id===7893)assert.equal(before.correct_answer,q.correct_answer);
@@ -114,6 +114,32 @@ for(const folder of folderList){
      }
     }
 
+
+    if(id===7554){
+     // A set ignores repeated entries: {4,4,7} and {4,7} are identical.
+     // Q070 must have exactly one mathematically valid domain/range option.
+     assert.equal(q.qtype,'mcq');
+     assert.equal(q.correct_answer,'C');
+     assert.equal(q.correct_answer,before.correct_answer);
+     assert.ok(eq(q.question,before.question)&&eq(q.explanation,before.explanation));
+     const asSets=text=>[...String(text).matchAll(/\\{([^}]+)\\}/g)]
+       .map(m=>[...new Set(m[1].split(',').map(Number))].sort((a,b)=>a-b).join(',')).join(';');
+     for(const lang of languages){
+      const oldB=before.options.find(o=>o.key==='B'),newB=q.options.find(o=>o.key==='B');
+      assert.ok(oldB&&newB);
+      assert.ok(oldB.text[lang].includes('{4,4,7}'));
+      assert.equal(newB.text[lang],oldB.text[lang].replace('{4,4,7}','{4,5,7}'));
+      assert.equal(newB.diagnostic_code,oldB.diagnostic_code);
+      for(const key of ['A','C','D'])assert.ok(eq(q.options.find(o=>o.key===key),
+        before.options.find(o=>o.key===key)),'Q070 non-B option changed '+lang);
+      assert.equal(asSets(oldB.text[lang]),asSets(before.options.find(o=>o.key==='C').text[lang]),
+        'Q070 historical distractor mathematical equivalence not reproduced');
+      assert.notEqual(asSets(newB.text[lang]),asSets(q.options.find(o=>o.key==='C').text[lang]),
+        'Q070 new distractor is still equivalent to correct');
+      const signatures=q.options.map(o=>asSets(o.text[lang]));
+      assert.equal(new Set(signatures).size,4,'Q070 all choices must be distinct sets '+lang);
+     }
+    }
     if(id===7553){
      assert.ok(eq(before.options,q.options),'Q069 original answer and distractor semantics must stay unchanged');
      assert.equal(q.correct_answer,before.correct_answer);
@@ -258,7 +284,7 @@ for(const folder of folderList){
   }
  }
 }
-assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,30);
+assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,31);
 assert.equal(found.size,expected.size);assert.equal(mcq,277);assert.equal(input,218);
 const all={A:0,B:0,C:0,D:0};
 for(let practice=1;practice<=7;practice++){
