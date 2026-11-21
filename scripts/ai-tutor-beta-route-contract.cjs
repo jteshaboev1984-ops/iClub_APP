@@ -33,7 +33,7 @@ const quickFunction="function quickPrompts(ctx) {"+quickSource;
 const routeSource=between("  async function invokeGlobalAi(body) {",
   "\n  async function sendMessage(");
 const routeFunction="async function invokeGlobalAi(body) {"+routeSource;
-const productIntentSource=between("  function verifiedProductHelpIntent(raw) {",
+const productIntentSource="function verifiedProductHelpIntent(raw) {"+between("  function verifiedProductHelpIntent(raw) {",
   "\n  async function invokeGlobalAi(body) {");
 const verifiedProductHelpIntent=vm.runInNewContext(
  "(function(){"+productIntentSource+"return verifiedProductHelpIntent;})()",
