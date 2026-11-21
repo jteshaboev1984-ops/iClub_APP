@@ -49,6 +49,13 @@ jobs:
             test "$(git hash-object exam-prep/exam-prep-api.js)" = 'ddfb9f643d089c726ec5c84284359a5cea87b7f4'
             test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '4c54b9d774b56a843aa1b98454758ef60cdd56fa'
           elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
+                "${GITHUB_HEAD_REF:-}" == "security/math-p016b-stale-build-writer-fence-20261119" &&
+                "${GITHUB_BASE_REF:-}" == "main" ]]; then
+            # Candidate-only reviewed API writer header; untouched map and recovery.
+            test "${{ github.event.pull_request.base.sha }}" = "f30adcd4b6b4cbc230fa375418e5aa56f95e49d2"
+            test "$(git hash-object exam-prep/exam-prep-api.js)" = '60a1ab37e29447ea9fd78eefd6583a902ade4abd'
+            test "$(git hash-object exam-prep/exam-prep-exam-map.js)" = '4c54b9d774b56a843aa1b98454758ef60cdd56fa'
+          elif [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
                 "${GITHUB_HEAD_REF:-}" == "feature/math-d3-hours-optional-20261118" &&
                 "${GITHUB_BASE_REF:-}" == "main" ]]; then
             test "$(git hash-object exam-prep/exam-prep-api.js)" = '61924125bbb0fd781c7897bc063fd61e22e22a57'

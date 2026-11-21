@@ -138,6 +138,19 @@ jobs:
           # Targeted owner-requested UX531 postrelease repair. The old
           # Academy and D3 source gates still apply to their own branches.
           # Reject all other files and all drift from the reviewed main SHA.
+          # P0-16B narrowly scoped, owner-requested SECURITY source candidate.
+          # Validate the complete source graph and immutable UI/history pins;
+          # the original Academy UX531 and other PR release firewalls remain.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
+                "${GITHUB_HEAD_REF:-}" == "security/math-p016b-stale-build-writer-fence-20261119" ]]; then
+            test "${GITHUB_BASE_REF:-}" = "main"
+            test "$UX531_BASE_SHA" = "f30adcd4b6b4cbc230fa375418e5aa56f95e49d2"
+            test "$UX531_EXPECTED_SHA" = "$(git rev-parse HEAD)"
+            node --check qa/math-p016b-source-firewall.cjs
+            P016B_BASE_SHA="$UX531_BASE_SHA" P016B_HEAD_SHA="$UX531_EXPECTED_SHA" node qa/math-p016b-source-firewall.cjs
+            echo "P0-16B reviewed-source gate PASS; original UX531 guards untouched."
+            exit 0
+          fi
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" &&
                 "${GITHUB_HEAD_REF:-}" == "fix/math-single-my-plan-legacy-map-20261118" ]]; then
             test "${GITHUB_BASE_REF:-}" = "main"
