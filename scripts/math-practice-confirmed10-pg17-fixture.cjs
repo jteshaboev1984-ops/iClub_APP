@@ -122,7 +122,7 @@ sql.push('insert into public.practice_pools values'+
 const questions=payload.map(q=>{
  const old=semantic.get(q.old_id);
  return '('+[
- q.old_id,5,sqlQuote('Original topic'),sqlQuote(q.skill),sqlQuote('medium'),
+ q.old_id,5,sqlQuote('Original topic'),sqlQuote(q.skill),sqlQuote(expected===4?q.difficulty:'medium'),
  sqlQuote(q.qtype),sqlQuote('SYNTHETIC PREVIOUS VERSION'),
  old?sqlQuote(old.en):'null',
  sqlQuote(old?old.correct_answer:q.correct_answer),
