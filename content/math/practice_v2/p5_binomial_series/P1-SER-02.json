@@ -196,9 +196,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "Which property is enough to identify a non-constant arithmetic progression?",
-        "ru": "Какого свойства достаточно, чтобы распознать непостоянную арифметическую прогрессию?",
-        "uz": "O‘zgarmas bo‘lmagan arifmetik progressiyani aniqlash uchun qaysi xossa yetarli?"
+        "en": "Which property is sufficient to identify an arithmetic progression?",
+        "ru": "Какого свойства достаточно, чтобы распознать арифметическую прогрессию?",
+        "uz": "Arifmetik progressiyani aniqlash uchun qaysi xossa yetarli?"
       },
       "options": [
         {
@@ -240,9 +240,9 @@
       ],
       "correct_answer": "B",
       "explanation": {
-        "en": "An arithmetic progression is defined by a constant difference between consecutive terms.",
-        "ru": "Арифметическая прогрессия определяется постоянной разностью соседних членов.",
-        "uz": "Arifmetik progressiya ketma-ket hadlar orasidagi doimiy ayirma bilan aniqlanadi."
+        "en": "An arithmetic progression has a constant difference between consecutive terms. This difference may be zero, as in a constant sequence.",
+        "ru": "В арифметической прогрессии разность соседних членов постоянна. Она может равняться нулю, как у постоянной последовательности.",
+        "uz": "Arifmetik progressiyada qo‘shni hadlar ayirmasi doimiy bo‘ladi. U o‘zgarmas ketma-ketlikdagi kabi nolga ham teng bo‘lishi mumkin."
       },
       "ai_source_skill": "P1-SER-02",
       "status": "draft"
