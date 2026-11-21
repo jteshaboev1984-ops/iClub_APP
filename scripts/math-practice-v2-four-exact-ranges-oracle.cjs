@@ -9,7 +9,7 @@ const path = require('node:path');
 const source = JSON.parse(fs.readFileSync(path.join(__dirname,
   '../content/math/practice_v2/p2_functions/P1-FUN-02.json'), 'utf8'));
 const keys = new Map(source.questions.map(q => [7484 + Number(q.key.slice(-3)), q]));
-const minus = s => String(s).replace(/−/g, '-').replace(/\\s/g, '');
+const minus = s => String(s).replace(/−/g, '-').replace(/\s/g, '');
 function expression(text) {
   const v = minus(text);
   const p = v.match(/^(-?\\d+(?:\\.\\d+)?)(≤|<)f\\(x\\)(≤|<)(-?\\d+(?:\\.\\d+)?)$/);
@@ -29,7 +29,7 @@ const specs = [
   {id:7562,f:x=>(x-2)**2+1,derivative:x=>2*(x-2),
     checkpoints:[2,3,5],range:({f})=>({
       low:f(2),lowClosed:true,high:f(5),highClosed:true})},
-  {id:7565,f:x=>-(x+1)**2+9,derivative:x=>-2*(x+1),
+  {id:7565,f:x=>-((x+1)**2)+9,derivative:x=>-2*(x+1),
     checkpoints:[0,2,4],range:({f})=>({
       low:f(4),lowClosed:true,high:f(0),highClosed:true})},
   {id:7569,f:x=>5-x,derivative:x=>-1,
