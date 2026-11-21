@@ -50,6 +50,8 @@
       assessmentStart: "AI Tutor недоступен во время экзамена. Он вернётся после завершения.",
       assessmentTap: "AI Tutor недоступен во время экзамена. После завершения ты сможешь разобрать результат и ошибки.",
       unavailable: "iClub AI сейчас недоступен. Попробуй позже.",
+      freeformNoSource: "По этому вопросу пока нет утверждённого материала. Попробуй готовые подсказки iClub AI — они остаются доступны.",
+      freeformRejected: "Ответ AI не прошёл проверку. Готовые подсказки доступны; повторного платного запроса автоматически не будет.",
       timeout: "Ответ занял слишком много времени. Попробуй ещё раз.",
       limitTitle: "Лимит iClub AI достигнут",
       limitReset: "Доступ восстановится в {time}.",
@@ -117,6 +119,8 @@
       assessmentStart: "AI Tutor imtihon vaqtida mavjud emas. Imtihon tugagach yana ishlaydi.",
       assessmentTap: "AI Tutor imtihon vaqtida mavjud emas. Tugagach natija va xatolarni tahlil qilishing mumkin.",
       unavailable: "iClub AI hozir mavjud emas. Keyinroq qayta urinib ko‘r.",
+      freeformNoSource: "Bu savol uchun hozircha tasdiqlangan manba yo‘q. iClub AI tayyor yordam takliflaridan foydalanishingiz mumkin.",
+      freeformRejected: "AI javobi tekshiruvdan o‘tmadi. Tayyor yordam takliflari mavjud; pulli so‘rov avtomatik takrorlanmaydi.",
       timeout: "Javob juda uzoq davom etdi. Qayta urinib ko‘r.",
       limitTitle: "iClub AI limiti tugadi",
       limitReset: "Kirish {time} da tiklanadi.",
@@ -184,6 +188,8 @@
       assessmentStart: "AI Tutor is unavailable during the exam. It will return after you finish.",
       assessmentTap: "AI Tutor is unavailable during the exam. After you finish, you can review your result and errors.",
       unavailable: "iClub AI is unavailable right now. Try again later.",
+      freeformNoSource: "There is no approved source for this question yet. You can still use the prepared iClub AI help suggestions.",
+      freeformRejected: "The AI response did not pass verification. Prepared help is still available; no paid request will be retried automatically.",
       timeout: "The answer took too long. Try again.",
       limitTitle: "iClub AI limit reached",
       limitReset: "Access will return at {time}.",
@@ -1640,6 +1646,16 @@
         if (data.usage_exhausted === true) {
           setUsageExhausted(data.reset_at || null);
         }
+        return;
+      }
+
+      // A generated General Help answer can incur provider cost even if
+      // rejected. Never claim that refusal was free, and never auto-retry.
+      // The category is fixed by the beta transport's allowlist.
+      if (reason === "no_verified_answer") {
+        appendMessage(threadKey, "assistant",
+          data.failure_category === "source_unavailable"
+            ? copy().freeformNoSource : copy().freeformRejected, "notice");
         return;
       }
 
