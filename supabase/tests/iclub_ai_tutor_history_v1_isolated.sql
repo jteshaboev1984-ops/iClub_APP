@@ -108,6 +108,12 @@ BEGIN
  v:=public.iclub_ai_tutor_history_service_v1('append','mathematics',
   '33333333-3333-4333-8333-333333333333','user','', 'en');
  IF v->>'reason'<>'invalid_message' THEN RAISE EXCEPTION 'empty message allowed: %',v; END IF;
+ v:=public.iclub_ai_tutor_history_service_v1('append','mathematics',
+  '33333333-3333-4333-8333-333333333334',NULL,'foo','en');
+ IF v->>'reason'<>'invalid_message' THEN RAISE EXCEPTION 'null speaker allowed: %',v; END IF;
+ v:=public.iclub_ai_tutor_history_service_v1('append','mathematics',
+  '33333333-3333-4333-8333-333333333335','user','foo',NULL);
+ IF v->>'reason'<>'invalid_message' THEN RAISE EXCEPTION 'null locale allowed: %',v; END IF;
 END;
 $verify$;
 RESET ROLE;
