@@ -649,10 +649,28 @@
       root:"courses-tour-review",record:"iclubAiTourAttemptId"}
   };
   const lastScan=new Map();
+  // A prepared academic action belongs to the authorized user who obtained
+  // it, not merely to the screen's persistent attempt ID. Invalidate scans
+  // and drop old actions synchronously on an authentication identity change.
+  let academicScanEpoch=0;
+  function clearAcademicActions(){
+    academicScanEpoch++;
+    lastScan.clear();
+    for(const conf of Object.values(scopeFor)){
+      document.getElementById(conf.container)
+        ?.querySelectorAll("[data-iclub-ai-academic-button]")
+        .forEach(button=>button.remove());
+    }
+  }
   function academicButton(container,surface,recordId,questionId=null){
     const identifier=surface+":"+recordId+":"+(questionId||0);
-    if(container.querySelector?.('[data-iclub-ai-academic-button="'+identifier+'"]'))
+    const existing=container.querySelector?.(
+      '[data-iclub-ai-academic-button="'+identifier+'"]');
+    if(existing){
+      // Locale can change while the reviewed answer remains on screen.
+      existing.textContent=(academicLabels[localeNow()]||academicLabels.ru)[surface];
       return;
+    }
     const button=document.createElement("button");
     button.type="button";button.className="btn";
     button.dataset.iclubAiAcademicButton=identifier;
@@ -679,20 +697,32 @@
     if(!positiveInt(id)||!container)return;
     const key=surface+":"+id+":"+localeNow();
     if(lastScan.get(surface)===key)return;
+    const epoch=academicScanEpoch;
     lastScan.set(surface,key);
     const available=await availableAcademic({surface,recordId:id,locale:localeNow()});
-    if(!active(conf.screen)||!el?.isConnected||Number(el.dataset?.[conf.record]||0)!==id)
+    if(epoch!==academicScanEpoch||!active(conf.screen)||!el?.isConnected||
+       Number(el.dataset?.[conf.record]||0)!==id||key!==surface+":"+id+":"+localeNow())
       return;
     if(surface==="practice_error"){
       const rows=container.querySelectorAll?.("[data-practice-ai-question-id]")||[];
       for(const row of rows){
         const questionId=Number(row.dataset.practiceAiQuestionId||0);
-        // The server returns ONLY wrong, finalized, source-published IDs.
-        if(positiveInt(questionId)&&available.includes(questionId))
-          academicButton(row,surface,id,questionId);
+        const allowed=positiveInt(questionId)&&available.includes(questionId);
+        const identifier=surface+":"+id+":"+questionId;
+        // Remove controls from a previously viewed attempt or revoked
+        // source. Only server-reported current IDs may remain clickable.
+        row.querySelectorAll("[data-iclub-ai-academic-button]").forEach(button=>{
+          if(!allowed||button.dataset.iclubAiAcademicButton!==identifier)
+            button.remove();
+        });
+        if(allowed)academicButton(row,surface,id,questionId);
       }
-    }else if(available.includes(id)){
-      academicButton(container,surface,id);
+    }else{
+      container.querySelectorAll("[data-iclub-ai-academic-button]").forEach(button=>{
+        if(!available.includes(id)||button.dataset.iclubAiAcademicButton!==surface+":"+id+":0")
+          button.remove();
+      });
+      if(available.includes(id))academicButton(container,surface,id);
     }
   }
   function setupAcademicAutoAttach(){
@@ -716,18 +746,44 @@
     document.addEventListener("iclub:practice-ai-context-changed",()=>{
       lastScan.delete("practice_error");void scanAcademic("practice_error");
     });
+    // Existing approved academic buttons are not newly attached on a
+    // language switch, so their displayed label must be refreshed too.
+    if(typeof MutationObserver==="function")
+      new MutationObserver(()=>{
+        for(const surface of Object.keys(scopeFor)){
+          lastScan.delete(surface);
+          void scanAcademic(surface);
+        }
+      }).observe(document.documentElement,{
+        attributes:true,attributeFilter:["lang"]
+      });
   }
 
   function resetOnIdentityChange(){
     sequence++;authEpoch++;permission=null;lastUser="";
     statusInFlight=null;
+    clearAcademicActions();
     removeInvite();
     document.getElementById(dialogId)?.remove();
   }
   try{
     window.sb?.auth?.onAuthStateChange?.((event)=>{
-      if(["SIGNED_OUT","USER_DELETED","SIGNED_IN"].includes(event))
-        resetOnIdentityChange();
+      if(!["SIGNED_OUT","USER_DELETED","SIGNED_IN"].includes(event))return;
+      resetOnIdentityChange();
+      if(event==="SIGNED_IN"){
+        // The review DOM may be unchanged after an account switch. Removing
+        // the previous learner's actions cannot be the only trigger: if
+        // there were no old buttons, the newly entitled learner would see
+        // no fresh action until navigating away and back.
+        const epoch=authEpoch;
+        // Defer auth-dependent status/getUser reads until the Supabase
+        // auth-event callback has completed (avoids auth lock re-entry).
+        setTimeout(()=>{
+          if(epoch!==authEpoch)return;
+          for(const surface of Object.keys(scopeFor))
+            if(active(scopeFor[surface].screen))void scanAcademic(surface);
+        },0);
+      }
     });
   }catch{}
   if(document.readyState==="loading")
