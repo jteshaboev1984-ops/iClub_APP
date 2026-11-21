@@ -22,6 +22,18 @@ CREATE UNIQUE INDEX qa_topic_owned_client_idempotency
 -- Real application RPC source, NOT a test-only implementation.
 \i supabase/migrations/20261008090100_practice_topic_choice_drill_v1.sql
 
+-- Minimal old-session tables referenced by the EXISTING mistake-retake RPC;
+-- only synthetic records. The actual retest will be authorized by completed
+-- voluntary Topic answers, not these legacy placeholders.
+CREATE TABLE public.practice_attempts(id bigint primary key,user_id uuid,subject_id bigint);
+CREATE TABLE public.practice_answers(attempt_id bigint,question_id bigint,is_correct boolean);
+CREATE TABLE public.practice_sessions_v4(id bigint primary key,user_id uuid,subject_id bigint,status text);
+CREATE TABLE public.practice_session_answers_v4(session_id bigint,question_id bigint,is_correct boolean);
+
+-- Exact installed hosted retest definition, read-only snapshot pinned to MD5.
+\i supabase/tests/fixtures/practice_topic_installed_mistakes_v5_20261121.sql
+
+
 DO $qa_start_acl$
 BEGIN
   -- Strictly pin the synthetic compiled function to the independently
@@ -30,6 +42,15 @@ BEGIN
     'public.start_practice_topic_drill_choice_safe_v1(text,text,text,text)'::regprocedure))
       <> '18b369300d9c6a084613529701d706f5'
   THEN RAISE EXCEPTION 'isolated Start RPC source differs from hosted approved function'; END IF;
+  IF md5(pg_get_functiondef(
+    'public.start_practice_mistakes_drill_safe_v5(text,bigint[],text)'::regprocedure))
+     <> '98288aa91757b2e4936c442f29c87905'
+  THEN RAISE EXCEPTION 'isolated installed mistake-retake RPC differs from hosted source'; END IF;
+  IF has_function_privilege('anon',
+     'public.start_practice_mistakes_drill_safe_v5(text,bigint[],text)','EXECUTE')
+   OR NOT has_function_privilege('authenticated',
+     'public.start_practice_mistakes_drill_safe_v5(text,bigint[],text)','EXECUTE')
+  THEN RAISE EXCEPTION 'isolated retest owner ACL regression'; END IF;
   IF has_function_privilege('anon',
     'public.start_practice_topic_drill_choice_safe_v1(text,text,text,text)','EXECUTE')
    OR NOT has_function_privilege('authenticated',
