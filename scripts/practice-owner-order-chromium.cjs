@@ -33,7 +33,6 @@ const {chromium}=require('playwright');
          '<div class="practice-hero-title" id="practice-subject-title">Mathematics</div>'+
          '<div class="practice-hero-stage" id="practice-stage-meta">'+ui.stage+'</div>'+
          '</div></div></div>'+
-         '<div class="practice-hero-metrics" style="display:none"></div>'+
          '<div class="practice-last card"><div class="card-title">'+ui.recent+
          '</div><div class="practice-table-wrap">1 / 1</div></div>'+
          '<div class="practice-start-actions"><button id="practice-resume-btn" style="display:none" data-action="practice-resume">Resume</button>'+
