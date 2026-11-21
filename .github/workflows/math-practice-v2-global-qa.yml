@@ -54,6 +54,11 @@ jobs:
       - name: Run global Practice v2 QA
         run: node scripts/math-practice-v2-global-qa.cjs
 
+      - name: Independently verify 23 trigonometric option-feedback mismatches (no live data)
+        run: |
+          node --check scripts/math-practice-v2-trig-feedback-oracle.cjs
+          node scripts/math-practice-v2-trig-feedback-oracle.cjs
+
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 
