@@ -14,11 +14,11 @@ const {chromium}=require('playwright');
        const page=await browser.newPage({viewport:{width,height:850}});
        const ui=({
          ru:{page:'Практика',tour:'Тур',best:'Лучший результат',time:'Лучшее время',
-           stage:'Практика 1 тура',start:'Начать практику тура 1',recent:'Последние попытки'},
+           stage:'Практика 2 тура',start:'Начать практику тура 2',recent:'Последние попытки'},
          uz:{page:'Amaliyot',tour:'Tur',best:'Eng yaxshi natija',time:'Eng yaxshi vaqt',
-           stage:'1-tur amaliyoti',start:'1-tur amaliyotini boshlash',recent:'So‘nggi urinishlar'},
+           stage:'2-tur amaliyoti',start:'2-tur amaliyotini boshlash',recent:'So‘nggi urinishlar'},
          en:{page:'Practice',tour:'Tour',best:'Best result',time:'Best time',
-           stage:'Practice for Tour 1',start:'Start practice for Tour 1',recent:'Recent attempts'}
+           stage:'Practice for Tour 2',start:'Start practice for Tour 2',recent:'Recent attempts'}
        })[locale];
        // Real component markup & stylesheet order, but only synthetic scores.
        await page.setContent('<!doctype html><html lang="'+locale+'">'+
@@ -106,8 +106,8 @@ const {chromium}=require('playwright');
            }
          });
          window.iClubPracticeCurrentTourV1.render({
-           subjectKey:'mathematics',activeTourNo:1,
-           lastCompletedTourNo:null,selectedTourNo:1,
+           subjectKey:'mathematics',activeTourNo:2,
+           lastCompletedTourNo:1,selectedTourNo:2,
            season2Period:{ok:true,subject_key:'mathematics',period_active:false,
              practice_access:{open_season_no:1,season1_new_attempts_open:true,
                season2_new_attempts_open:false}}
@@ -183,7 +183,7 @@ const {chromium}=require('playwright');
          'S1 availability caption missing');
        // Official S2 per-subject state flips only the current Practice period.
        await page.evaluate(language=>window.iClubPracticeCurrentTourV1.render({
-         subjectKey:'mathematics',activeTourNo:1,lastCompletedTourNo:null,
+         subjectKey:'mathematics',activeTourNo:2,lastCompletedTourNo:null,
          season2Period:{ok:true,subject_key:'mathematics',period_active:true,
            practice_access:{open_season_no:2,season1_new_attempts_open:false,
              season2_new_attempts_open:true}}
@@ -192,7 +192,7 @@ const {chromium}=require('playwright');
          'S1 not closed when subject S2 opens');
        // A cross-subject or invalid RPC is never permitted to claim access.
        await page.evaluate(language=>window.iClubPracticeCurrentTourV1.render({
-         subjectKey:'mathematics',activeTourNo:1,
+         subjectKey:'mathematics',activeTourNo:2,
          season2Period:{ok:true,subject_key:'chemistry',period_active:true,
            practice_access:{open_season_no:2,season1_new_attempts_open:false,
              season2_new_attempts_open:true}}
