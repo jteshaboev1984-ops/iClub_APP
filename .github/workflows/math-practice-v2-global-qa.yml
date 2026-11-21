@@ -64,6 +64,11 @@ jobs:
           node --check scripts/math-practice-v2-integral-dif-feedback-oracle.cjs
           node scripts/math-practice-v2-integral-dif-feedback-oracle.cjs
 
+      - name: Independently check eight additional wrong-option diagnostic truth cases
+        run: |
+          node --check scripts/math-practice-v2-feedback-eight-oracle.cjs
+          node scripts/math-practice-v2-feedback-eight-oracle.cjs
+
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 

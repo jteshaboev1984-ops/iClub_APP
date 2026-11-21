@@ -516,6 +516,38 @@
         "ru": "Для стационарной точки дифференцируемой функции требуется f′(x)=0. Поскольку f′(x)<0 на всём I, функция убывает и таких точек на I нет.",
         "uz": "Differensiallanuvchi funksiyaning statsionar nuqtasida f′(x)=0 bo‘lishi kerak. I ning hamma joyida f′(x)<0 bo‘lgani uchun funksiya kamayadi va I da bunday nuqta yo‘q."
       }
+    },
+    {
+      "code": "DIF05_VALUE_NOT_SLOPE_SIGN",
+      "skill": "P1-DIF-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A negative derivative means that f is decreasing, not that f(x) itself is negative.",
+        "ru": "Отрицательная производная означает, что f убывает, но не то, что значения f(x) отрицательны.",
+        "uz": "Manfiy hosila f kamayishini bildiradi, lekin f(x) ning o‘zi manfiy ekanini anglatmaydi."
+      },
+      "next_action": {
+        "en": "Distinguish the sign of f′ from the sign of f. For example, f(x)=10−x has f′(x)=−1 yet f(x)>0 on 0<x<1.",
+        "ru": "Различайте знак f′ и знак f. Например, у f(x)=10−x производная равна −1, но f(x)>0 при 0<x<1.",
+        "uz": "f′ va f ishoralarini farqlang. Masalan, f(x)=10−x uchun f′(x)=−1, ammo 0<x<1 da f(x)>0."
+      }
+    },
+    {
+      "code": "DIF07_POINT_IS_STATIONARY",
+      "skill": "P1-DIF-07",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The point is stationary because the derivative equals zero at the stated x-value. The selected 'not stationary' conclusion is false.",
+        "ru": "В указанной точке производная равна нулю, поэтому точка стационарная. Вывод «не стационарная» неверен.",
+        "uz": "Ko‘rsatilgan x qiymatida hosila nolga teng, demak nuqta statsionar. «Statsionar emas» degan javob noto‘g‘ri."
+      },
+      "next_action": {
+        "en": "Differentiate and substitute the given x-value to verify f′(x)=0. Then classify the stationary point by checking derivative signs on both sides.",
+        "ru": "Найдите производную и подставьте заданное x: убедитесь, что f′(x)=0. Затем определите тип стационарной точки по знакам производной слева и справа.",
+        "uz": "Hosilani hisoblab, berilgan x ni qo‘ying va f′(x)=0 ekanini tekshiring. So‘ng nuqta turini ikki tomondagi hosila ishoralari orqali aniqlang."
+      }
     }
   ]
 }

@@ -78,11 +78,21 @@ const diagIntegral9=new Map(Object.entries({
  "7892":{"D":"DIF05_NO_STATIONARY_WHEN_NEGATIVE"}
 }).map(([id,changes])=>[Number(id),changes]));
 const extraCatalogIntegral9={"p7_integration":["INT03_NOT_BOUNDS_REVERSAL"],"p6_differentiation":["DIF05_NO_STATIONARY_WHEN_NEGATIVE"]};
+const diagNext8=new Map(Object.entries({
+ "7892":{"C":"DIF05_VALUE_NOT_SLOPE_SIGN"},
+ "7903":{"D":"DIF07_POINT_IS_STATIONARY"},
+ "7907":{"D":"DIF07_POINT_IS_STATIONARY"},
+ "7909":{"C":"DIF07_POINT_IS_STATIONARY"},
+ "7955":{"C":"INT04_NOT_ORDER_REVERSAL","D":"INT04_NOT_ORDER_REVERSAL"},
+ "7956":{"A":"INT04_NOT_ORDER_REVERSAL","B":"INT04_NOT_ORDER_REVERSAL"}
+}).map(([id,changes])=>[Number(id),changes]));
+const extraCatalogNext8={"p6_differentiation":["DIF05_VALUE_NOT_SLOPE_SIGN","DIF07_POINT_IS_STATIONARY"],"p7_integration":["INT04_NOT_ORDER_REVERSAL"]};
 const previousRelease=file=>JSON.parse(execFileSync('git',['show',preDiagnosticRelease+':'+file],{
  cwd:root,encoding:'utf8',maxBuffer:7*1024*1024}));
 let checked21=new Set(),seenUz21=0,seenDiag21=0;
 let checkedTrig23=new Set(),seenDiagTrig23=0;
 let checkedIntegral9=new Set(),seenDiagIntegral9=0;
+let checkedNext8=new Set(),seenDiagNext8=0;
 let items=0,mcq=0,input=0,changed=0;
 const groups=new Map(),found=new Set();
 const languages=['en','ru','uz'],letters=['A','B','C','D'];
@@ -141,7 +151,19 @@ for(const folder of folderList){
     }
     checkedIntegral9.add(id21);
    }
-   assert.ok(eq(actual,expectedNow),'consolidated original+approved published+integral9 scope drift '+id21);
+   if(diagNext8.has(id21)){
+    for(const [letter,code] of Object.entries(diagNext8.get(id21))){
+     const opt=expectedNow.options?.find(o=>o.key===letter);
+     assert.ok(opt&&letter!==expectedNow.correct_answer);
+     const oldCode=id21===7892?'DIF05_SIGN_INTERVAL':
+      [7903,7907,7909].includes(id21)?'DIF07_STATIONARY_CONDITION':'INT04_TOP_BOTTOM';
+     assert.equal(opt.diagnostic_code,oldCode,'new eight feedback preimage mismatch');
+     opt.diagnostic_code=code;
+     seenDiagNext8++;
+    }
+    checkedNext8.add(id21);
+   }
+   assert.ok(eq(actual,expectedNow),'consolidated approved released+next8 scope drift '+id21);
    assert.equal(before.key,q.key,'candidate order changed');
    const id=7484+Number(q.key.slice(-3));
    items++;
@@ -365,18 +387,19 @@ assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,31);
 assert.equal(checked21.size,21);assert.equal(seenUz21,19);assert.equal(seenDiag21,12);
 assert.equal(checkedTrig23.size,14);assert.equal(seenDiagTrig23,23);
 assert.equal(checkedIntegral9.size,6);assert.equal(seenDiagIntegral9,9);
+assert.equal(checkedNext8.size,6);assert.equal(seenDiagNext8,8);
 for(const folder of folderList){
  const rel='content/math/practice_v2/'+folder.name+'/diagnostic_catalog.json';
  const current=JSON.parse(fs.readFileSync(path.join(root,rel),'utf8'));
  const previous=previousRelease(rel);
- const extra=[...(newCatalog21[folder.name]||[]),...(folder.name==='p4_circular_trigonometry'?extraCatalogTrig23:[]),...(extraCatalogIntegral9[folder.name]||[])];
+ const extra=[...(newCatalog21[folder.name]||[]),...(folder.name==='p4_circular_trigonometry'?extraCatalogTrig23:[]),...(extraCatalogIntegral9[folder.name]||[]),...(extraCatalogNext8[folder.name]||[])];
  assert.equal(current.diagnostics.length,previous.diagnostics.length+extra.length);
  assert.ok(eq(current.diagnostics.slice(0,previous.diagnostics.length),previous.diagnostics));
  assert.deepEqual(current.diagnostics.slice(previous.diagnostics.length).map(d=>d.code),extra);
  for(const d of current.diagnostics.slice(previous.diagnostics.length)){
   assert.ok(d.feedback?.en&&d.feedback?.ru&&d.feedback?.uz);
   assert.ok(d.next_action?.en&&d.next_action?.ru&&d.next_action?.uz);
-  assert.ok(['P1-FUN-01','P1-FUN-04','P1-SER-02','P1-INT-04','P1-TRI-03','P1-TRI-05','P1-INT-03','P1-DIF-05'].includes(d.skill));
+  assert.ok(['P1-FUN-01','P1-FUN-04','P1-SER-02','P1-INT-04','P1-TRI-03','P1-TRI-05','P1-INT-03','P1-DIF-05','P1-DIF-07'].includes(d.skill));
  }
 }
 assert.equal(found.size,expected.size);assert.equal(mcq,277);assert.equal(input,218);
@@ -403,6 +426,6 @@ for(let practice=1;practice<=7;practice++){
 assert.deepEqual(all,{A:68,B:70,C:71,D:68},
  'correct-answer placement deviates from reviewed 277-question distribution');
 console.log(JSON.stringify({source_guard:'PASS',authored:495,mcq:277,input:218,
- corrected:30,diagnostic21:21,additional_trig_questions:14,additional_true_feedback_remaps:23,new_integral_derivative_questions:6,new_integral_derivative_remaps:9,new_uz_field_occurrences:19,new_option_diagnostic_mappings:44,published_prior:28,new_source_proposals:2,unrelated_change_count:0,practice_batches:7,
+ corrected:30,diagnostic21:21,additional_trig_questions:14,additional_true_feedback_remaps:23,new_integral_derivative_questions:6,new_integral_derivative_remaps:9,new_8_feedback_questions:6,new_8_feedback_remaps:8,new_uz_field_occurrences:19,new_option_diagnostic_mappings:52,published_prior:28,new_source_proposals:2,unrelated_change_count:0,practice_batches:7,
  anti_pattern_cycles:0,retained_option_semantics:true,
  answer_distribution:'balanced',protected_keys_printed:false}));

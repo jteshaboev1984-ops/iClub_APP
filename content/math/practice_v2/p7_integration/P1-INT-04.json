@@ -84,7 +84,7 @@
             "ru": "2",
             "uz": "2"
           },
-          "diagnostic_code": "INT04_TOP_BOTTOM"
+          "diagnostic_code": "INT04_NOT_ORDER_REVERSAL"
         },
         {
           "key": "D",
@@ -93,7 +93,7 @@
             "ru": "6",
             "uz": "6"
           },
-          "diagnostic_code": "INT04_TOP_BOTTOM"
+          "diagnostic_code": "INT04_NOT_ORDER_REVERSAL"
         }
       ],
       "correct_answer": "A",
@@ -130,7 +130,7 @@
             "ru": "8/3",
             "uz": "8/3"
           },
-          "diagnostic_code": "INT04_TOP_BOTTOM"
+          "diagnostic_code": "INT04_NOT_ORDER_REVERSAL"
         },
         {
           "key": "B",
@@ -139,7 +139,7 @@
             "ru": "2/3",
             "uz": "2/3"
           },
-          "diagnostic_code": "INT04_TOP_BOTTOM"
+          "diagnostic_code": "INT04_NOT_ORDER_REVERSAL"
         },
         {
           "key": "C",
