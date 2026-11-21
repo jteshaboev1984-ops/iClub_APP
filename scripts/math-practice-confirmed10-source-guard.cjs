@@ -24,6 +24,14 @@ const expected=new Map([
  [7893,['options']],[7926,['options','correct_answer']],
  [7937,['options','correct_answer']],[7970,['question','options','correct_answer']]
 ]);
+// Four approved exact-range MCQ stem clarifications; all answer/option/diagnostic fields immutable.
+const exactRangeFour=new Map([
+ [7562,{"en":"For f(x)=(x−2)²+1 with 2≤x≤5, which interval gives its exact range?","ru":"Для f(x)=(x−2)²+1 при 2≤x≤5 какой промежуток точно задаёт область значений?","uz":"f(x)=(x−2)²+1 va 2≤x≤5 bo‘lsa, qaysi oraliq qiymatlar to‘plamini aynan ifodalaydi?"}],
+ [7565,{"en":"For f(x)=−(x+1)²+9 with 0≤x≤4, which interval gives its exact range?","ru":"Для f(x)=−(x+1)²+9 при 0≤x≤4 какой промежуток точно задаёт область значений?","uz":"f(x)=−(x+1)²+9 va 0≤x≤4 bo‘lsa, qaysi oraliq qiymatlar to‘plamini aynan ifodalaydi?"}],
+ [7569,{"en":"For f(x)=5−x on the domain 1≤x<6, which interval gives its exact range?","ru":"Для f(x)=5−x при 1≤x<6 какой промежуток точно задаёт область значений?","uz":"f(x)=5−x va 1≤x<6 bo‘lsa, qaysi oraliq qiymatlar to‘plamini aynan ifodalaydi?"}],
+ [7570,{"en":"For f(x)=−x²+4x+1 restricted to x≥3, which statement gives its exact range?","ru":"Для f(x)=−x²+4x+1 при ограничении x≥3 какое утверждение точно задаёт область значений?","uz":"f(x)=−x²+4x+1 va x≥3 cheklovida qaysi tasdiq qiymatlar to‘plamini aynan ifodalaydi?"}]
+]);
+for(const id of exactRangeFour.keys())expected.set(id,['question']);
 // Nine author-reviewed 2026-11-19 Hard-transfer rewrites from the archived #594
 // source HEAD. Reuse only these exact fields; older stacked bank edits are NOT imported.
 // GitHub Actions jobs running this source guard must check out full Git history.
@@ -199,6 +207,11 @@ for(const folder of folderList){
     }
     checkedSeven.add(id21);
    }
+   if(exactRangeFour.has(id21)){
+    assert.ok(!eq(expectedNow.question,exactRangeFour.get(id21)),
+      'original exact-range question must precede clarified draft '+id21);
+    expectedNow.question=exactRangeFour.get(id21);
+   }
    if(hardOnly.has(id21)) {
     const archived=originalHardAuthoring(relative).questions
       .find(item=>item.key===q.key);
@@ -218,7 +231,7 @@ for(const folder of folderList){
     expectedNow.explanation=archived.explanation;
     checkedHard.add(id21);
    }
-   assert.ok(eq(actual,expectedNow),'consolidated released+seven+hard9 scope drift '+id21);
+   assert.ok(eq(actual,expectedNow),'consolidated approved released+seven+four+hard9 scope drift '+id21);
    assert.equal(before.key,q.key,'candidate order changed');
    const id=7484+Number(q.key.slice(-3));
    items++;
@@ -226,7 +239,8 @@ for(const folder of folderList){
    if(!allowed)assert.ok(eq(before,q),'unrelated authored item mutated '+id);
    else{
     changed++;found.add(id);
-    const fields=Object.keys(q).filter(k=>!eq(before[k],q[k])).sort();
+    const checkedFields=exactRangeFour.has(id)?actual:q;
+    const fields=Object.keys(checkedFields).filter(k=>!eq(before[k],checkedFields[k])).sort();
     assert.deepEqual(fields,allowed.slice().sort(),
       'micro-release includes unsanctioned field change '+id);
     assert.equal(before.difficulty,q.difficulty,'release not authorized to regrade difficulty');
@@ -438,13 +452,13 @@ for(const folder of folderList){
   }
  }
 }
-assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,31);
+assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,35);
 assert.equal(checked21.size,21);assert.equal(seenUz21,19);assert.equal(seenDiag21,12);
 assert.equal(checkedTrig23.size,14);assert.equal(seenDiagTrig23,23);
 assert.equal(checkedIntegral9.size,6);assert.equal(seenDiagIntegral9,9);
 assert.equal(checkedNext8.size,6);assert.equal(seenDiagNext8,8);
 assert.equal(checkedSeven.size,5);
-assert.equal(checkedHard.size,9,'all nine Hard source IDs must be present exactly once');assert.equal(seenDiagSeven,7);
+assert.equal(checkedHard.size,9,'expected exact nine academic Hard source candidates');assert.equal(seenDiagSeven,7);
 for(const folder of folderList){
  const rel='content/math/practice_v2/'+folder.name+'/diagnostic_catalog.json';
  const current=JSON.parse(fs.readFileSync(path.join(root,rel),'utf8'));
@@ -483,6 +497,6 @@ for(let practice=1;practice<=7;practice++){
 assert.deepEqual(all,{A:68,B:70,C:71,D:68},
  'correct-answer placement deviates from reviewed 277-question distribution');
 console.log(JSON.stringify({source_guard:'PASS',authored:495,mcq:277,input:218,
- corrected:30,diagnostic21:21,additional_trig_questions:14,additional_true_feedback_remaps:23,new_integral_derivative_questions:6,new_integral_derivative_remaps:9,new_8_feedback_questions:6,new_8_feedback_remaps:8,new_7_feedback_questions:5,new_7_feedback_remaps:7,new_uz_field_occurrences:19,new_option_diagnostic_mappings:59,published_prior:28,new_source_proposals:2,hard_source_candidates:9,unrelated_change_count:0,practice_batches:7,
+ corrected:30,diagnostic21:21,additional_trig_questions:14,additional_true_feedback_remaps:23,new_integral_derivative_questions:6,new_integral_derivative_remaps:9,new_8_feedback_questions:6,new_8_feedback_remaps:8,new_7_feedback_questions:5,new_7_feedback_remaps:7,new_uz_field_occurrences:19,new_option_diagnostic_mappings:59,published_prior:28,new_source_proposals:6,new_exact_range_stems:4,hard_source_candidates:9,unrelated_change_count:0,practice_batches:7,
  anti_pattern_cycles:0,retained_option_semantics:true,
  answer_distribution:'balanced',protected_keys_printed:false}));
