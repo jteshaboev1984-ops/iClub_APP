@@ -19,7 +19,8 @@ const releases={
  decimal8:{name:'math_p1_practice_v2_decimal8_20261121',suffix:'-V20261121DEC8'},
  semantic2:{name:'math_p1_practice_v2_semantic2_20261121',suffix:'-V20261121SEM2'},
  setrange1:{name:'math_p1_practice_v2_setrange1_20261121',suffix:'-V20261121SETRANGE1'},
- hard9:{name:'math_p1_practice_v2_hard9_20261121',suffix:'-V20261121HARD9'}
+ hard9:{name:'math_p1_practice_v2_hard9_20261121',suffix:'-V20261121HARD9'},
+ range4:{name:'math_p1_practice_v2_range4_20261121',suffix:'-V20261121RANGE4'}
 };
 assert.ok(Object.hasOwn(releases,mode),'unsupported governed release batch');
 const release=releases[mode].name,suffix=releases[mode].suffix;
@@ -119,13 +120,23 @@ const hardNine=[
 ];
 assert.deepEqual(hardNine.map(x=>x.id),
  [7511,7585,7692,7723,7769,7823,7908,7974,10119]);
+// Fresh hosted SELECT-only preimages. Four clarified MCQ stems already merged
+// via PR #638; old keys/options/answers/diagnostics stay historically immutable.
+const rangeFour=[
+ {id:7562,code:'P1-FUN-02',file:'p2_functions/P1-FUN-02.json',old_hash:'951ba9ba48ef6a040cc3af66223cba94f2eb05fca56683ccfa2c908a6be4d43d'},
+ {id:7565,code:'P1-FUN-02',file:'p2_functions/P1-FUN-02.json',old_hash:'7d4e20c49e890c7036df1b5cf3c7fd36c28829815689bb111ef86cd7020d0fe5'},
+ {id:7569,code:'P1-FUN-02',file:'p2_functions/P1-FUN-02.json',old_hash:'c60385b5525b63ac722d04a4b329ebe80c04cc6bc2deb741a22b5d6b47b8f911'},
+ {id:7570,code:'P1-FUN-02',file:'p2_functions/P1-FUN-02.json',old_hash:'3f280ef7d1229afe2723d15f9bbf4d8b520074b8cbd611432c5246a4500b62da'}
+];
+assert.deepEqual(rangeFour.map(x=>x.id),[7562,7565,7569,7570]);
 const specs=mode==='hotfix10'?baselineSpecs:
   mode==='q400q481'?nextTwo:
   mode==='q089q202q226'?nextThree:
   mode==='pending10'?pending10:
   mode==='decimal8'?decimalEight:
   mode==='semantic2'?semanticTwo:
-  mode==='setrange1'?setRangeOne:hardNine;
+  mode==='setrange1'?setRangeOne:
+  mode==='range4'?rangeFour:hardNine;
 const expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
@@ -144,6 +155,8 @@ const payload=specs.map(spec=>{
   assert.ok(q,'missing corrected source ID '+spec.id);
   if(mode==='hard9')assert.ok(q.qtype==='input'&&q.difficulty==='hard',
     'hard9 source must have exactly one hard numeric transfer per pinned ID');
+  if(mode==='range4')assert.ok(q.qtype==='mcq'&&q.difficulty==='medium',
+    'range4 must preserve original MCQ contract and difficulty');
   assert.equal(q.primary_skill,spec.code);
   assert.ok(['mcq','input'].includes(q.qtype));
   assert.ok(q.practice_no>=1&&q.practice_no<=7);
