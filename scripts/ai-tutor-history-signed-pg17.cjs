@@ -81,7 +81,8 @@ async function run(){
  const wrong=jwt(A).slice(0,-1)+"A";
  refused(await post("read",{p_thread_key:"mathematics"},wrong),null,"forged signature");
  refused(await post("read",{p_thread_key:"mathematics"},
-   jwt(A,"authenticated",{exp:Math.floor(Date.now()/1000)-5})),null,"expired JWT");
+   jwt(A,"authenticated",{iat:Math.floor(Date.now()/1000)-7200,
+     exp:Math.floor(Date.now()/1000)-3600})),null,"expired JWT");
  refused(await post("read",{p_thread_key:"mathematics"},jwt(A,"service_role")),null,"service role");
  // Direct table read is inaccessible via the public PostgREST schema.
  const table=await fetch(HOST+"/iclub_ai_tutor_history_v1_messages",{
