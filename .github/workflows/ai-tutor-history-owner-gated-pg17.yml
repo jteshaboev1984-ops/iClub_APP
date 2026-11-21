@@ -1,0 +1,68 @@
+name: AI Tutor history owner-bound dormant PG17 contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/candidates/iclub_ai_tutor_history_v1_owner_gated_dormant.sql'
+      - 'supabase/tests/iclub_ai_tutor_history_v1_isolated.sql'
+      - 'docs/ai/AI_TUTOR_HISTORY_OWNER_GATE_DRAFT_2026-11-21.md'
+      - '.github/workflows/ai-tutor-history-owner-gated-pg17.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-tutor-history-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres17-dormant-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+      PGOPTIONS: '-c iclub.tutor_history_isolated=true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check no live migration / browser transcript writes introduced
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f supabase/candidates/iclub_ai_tutor_history_v1_owner_gated_dormant.sql
+          test ! -e supabase/migrations/20261121183000_iclub_ai_tutor_history_v1.sql
+          test ! -e supabase/functions/iclub-ai-v21-history
+          ! grep -Eiq '(localStorage|sessionStorage|setItem\(|sendBeacon|api\.openai)' supabase/candidates/iclub_ai_tutor_history_v1_owner_gated_dormant.sql
+          node --check iclub-ai-v21-ui.js
+      - name: Run actual dormant SQL in disposable PostgreSQL17
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = 'postgres'
+          psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_tutor_history_v1_isolated.sql
+      - name: Confirm candidate does not alter the existing Tutor or publish chat storage
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'PASS: candidate SQL is under supabase/candidates ONLY; no UI network integration or live DB migration.'
+          echo 'This SQL role-claims fixture is NOT genuine signed GoTrue/PostgREST browser E2E.'
