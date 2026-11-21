@@ -94,7 +94,7 @@
             "ru": "Не является стационарной точкой",
             "uz": "Statsionar nuqta emas"
           },
-          "diagnostic_code": "DIF07_STATIONARY_CONDITION"
+          "diagnostic_code": "DIF07_POINT_IS_STATIONARY"
         }
       ],
       "correct_answer": "C",
@@ -272,7 +272,7 @@
             "ru": "Не стационарная",
             "uz": "Statsionar emas"
           },
-          "diagnostic_code": "DIF07_STATIONARY_CONDITION"
+          "diagnostic_code": "DIF07_POINT_IS_STATIONARY"
         }
       ],
       "correct_answer": "B",
@@ -363,7 +363,7 @@
             "ru": "Не является стационарной точкой",
             "uz": "Statsionar nuqta emas"
           },
-          "diagnostic_code": "DIF07_STATIONARY_CONDITION"
+          "diagnostic_code": "DIF07_POINT_IS_STATIONARY"
         },
         {
           "key": "D",

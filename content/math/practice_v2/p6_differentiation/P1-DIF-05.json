@@ -498,7 +498,7 @@
             "ru": "f(x)<0 на всём I.",
             "uz": "f(x)<0 butun I da."
           },
-          "diagnostic_code": "DIF05_SIGN_INTERVAL"
+          "diagnostic_code": "DIF05_VALUE_NOT_SLOPE_SIGN"
         },
         {
           "key": "D",

@@ -436,6 +436,22 @@
         "ru": "Найдите первообразную F и вычислите F(верхняя граница)−F(нижняя граница). Проверьте значения на обеих границах перед вычитанием.",
         "uz": "F boshlang‘ich funksiyani topib, F(yuqori chegara)−F(pastki chegara) ni hisoblang. Ayirishdan oldin ikkala chegaradagi qiymatlarni tekshiring."
       }
+    },
+    {
+      "code": "INT04_NOT_ORDER_REVERSAL",
+      "skill": "P1-INT-04",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Reversing upper-minus-lower alone would negate the correct signed area. This positive choice is not that reversed-order result.",
+        "ru": "Одна лишь перестановка «верхняя минус нижняя» дала бы противоположное число. Данный положительный вариант не является таким результатом.",
+        "uz": "Faqat «yuqoridagi minus pastdagi» ayirish tartibini almashtirish natija ishorasini teskari qiladi. Bu musbat variant bunday natija emas."
+      },
+      "next_action": {
+        "en": "Set up the area as the integral of upper minus lower (or the positive height above the axis), then check the limits and arithmetic.",
+        "ru": "Запишите площадь как интеграл «верхняя функция минус нижняя» (или положительной высоты над осью), затем проверьте пределы и вычисления.",
+        "uz": "Yuzani «yuqoridagi funksiya minus pastdagi funksiya» integrali (yoki o‘qdan musbat balandlik) sifatida yozib, chegaralar va hisoblashlarni tekshiring."
+      }
     }
   ]
 }
