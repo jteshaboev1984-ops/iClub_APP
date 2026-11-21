@@ -360,8 +360,7 @@ async function postRaw(base,fn,subject,token){
            'click',()=>{void handlePracticeDrillSubmitSafe(false);});
          document.getElementById('practice-pause-btn').addEventListener(
            'click',()=>handlePracticePause());
-         document.getElementById('practice-resume-btn').addEventListener(
-           'click',async()=>{
+         const resumeTopic=async()=>{
              const draft=loadPracticeDraft();
              if(draft?.status!=='paused'||draft.subjectKey!=='mathematics')
                throw Error('saved Practice draft missing or wrong subject');
@@ -376,7 +375,8 @@ async function postRaw(base,fn,subject,token){
              clearPracticeDraft(restored.safeDrillSessionId);
              window.pushCourses('practice-quiz');
              renderPracticeQuiz();
-           });
+           };
+         document.getElementById('practice-topic-resume-btn').addEventListener('click',resumeTopic);
        });
        await page.locator('.practice-topic-choice-item').first().click();
        await page.waitForFunction(()=>Number(window.state.quiz?.safeDrillSessionId)>0,
@@ -414,8 +414,8 @@ async function postRaw(base,fn,subject,token){
        assert.equal(Number(draft?.quiz?.safeDrillSessionId),Number(launched.id));
        assert(draft.quiz.questions.every(q=>!q.correctAnswer&&!q.explanation),
          'paused draft leaked answers or explanations');
-       await page.locator('#practice-resume-btn').waitFor({state:'visible',timeout:12000});
-       await page.locator('#practice-resume-btn').click();
+       await page.locator('#practice-topic-resume-btn').waitFor({state:'visible',timeout:12000});
+       await page.locator('#practice-topic-resume-btn').click();
        await page.waitForFunction(()=>state.quiz?.index===1,null,{timeout:13000});
        const restored=await page.evaluate(()=>({
          id:state.quiz.safeDrillSessionId,
