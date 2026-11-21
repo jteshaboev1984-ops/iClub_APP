@@ -64,6 +64,47 @@ for(const bad of [null,undefined,{},42,"a".repeat(241),""]){
  assert.equal(intent(bad),"");cases++;
 }
 
+// Execute the actual early sendMessage decision: generic Practice-purpose
+// questions must bypass PC3/PC4 preflight/paid chat even on finalized review.
+const practiceDecisionSrc=extract(
+ "    const productHelp = !academicContext && !practiceContext &&",
+ "    if (practiceRetry &&");
+const gate={allowed:true,key:"own-finalized"};
+let preflights=0;
+const state={contextEpoch:1,authEpoch:1,context:{threadKey:"own-finalized"},
+ busy:false};
+const scoped={key:"own-finalized",attemptRef:42,locale:"uz"};
+const decision=vm.runInNewContext(
+ "(async function decide(promptKey,cleanText,academicContext=null,practiceContext=null){"+
+ practiceDecisionSrc+"return {productHelp,typedPractice,contextOk};})",
+ {verifiedProductHelpIntent:intent,
+  practiceScope:()=>scoped,practiceGate:gate,practiceScopeKey:x=>x.key,
+  checkPracticeChatGate:async()=>{preflights++;gate.allowed=true;},
+  state,threadKey:"own-finalized",currentBlocked:()=>false,
+  locale:()=>"uz",renderPanel:()=>{},appendMessage:()=>{}},
+ {timeout:500});
+(async()=>{
+ gate.allowed=true;preflights=0;
+ let x=await decision("","Амалиёт нима учун керак?");
+ assert.equal(x.productHelp,"practice_rules");
+ assert.equal(x.typedPractice,null);assert.equal(preflights,0);cases++;
+ gate.allowed=false;preflights=0;
+ x=await decision("","Амалиет Нима учун кк");
+ assert.equal(x.productHelp,"practice_rules");
+ assert.equal(x.typedPractice,null);
+ assert.equal(preflights,0,"generic product help must not require attempt preflight");cases++;
+ gate.allowed=true;preflights=0;
+ x=await decision("","Practice natijam nima?");
+ assert.equal(x.productHelp,"");
+ assert.equal(x.typedPractice.purpose,"practice_result");
+ assert.equal(x.typedPractice.attemptRef,42);cases++;
+ gate.allowed=false;preflights=0;
+ x=await decision("","Explain my Practice mistake");
+ assert.equal(x.productHelp,"");
+ assert.equal(preflights,1,"personal question must use existing verified Practice gate");
+ assert.equal(x.typedPractice.purpose,"practice_result");cases++;
+})().catch(err=>{console.error(err);process.exitCode=1;});
+
 const invokes=[];
 const adapter={
  askPrepared:async args=>{
