@@ -49,7 +49,7 @@ BEGIN
        WHERE sess.id=5001 AND sess.status='in_progress' AND 7554=ANY(sess.question_ids))<>1
  OR (SELECT count(*) FROM public.practice_drill_answers_v4 d
        WHERE d.session_id=6001 AND d.question_id=7554)<>1
- THEN RAISE EXCEPTION 'q311_old_unfinished_session_or_history_missing'; END IF;
+ THEN RAISE EXCEPTION 'q070_synthetic_old_session_or_history_missing'; END IF;
 
  -- QA must remain NOT approved on staging. The first activation must fail.
  BEGIN
