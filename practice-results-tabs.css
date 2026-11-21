@@ -1586,7 +1586,7 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 }
 
 
-/* #574 — owner-approved Practice order (stats → mode → choice → CTA → recent).
+/* #574 — prior Practice grouping, refined by owner-accepted unified mode+statistics layout.
    Only existing surfaces moved; learning permissions, scoring and answers unchanged. */
 .iclub-visual-v3 #courses-practice-start .iclub-practice-overview {
   display:grid;gap:8px;margin:4px 0 14px;min-width:0;
@@ -1657,5 +1657,85 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 @media(max-width:359px){
   .iclub-visual-v3 #courses-practice-start .iclub-practice-overview .iclub-practice-current-tour {
     padding:10px 12px;
+  }
+}
+
+/* #574 · Owner-accepted unified Practice results (Tour / Topic), 2026-11-21.
+   Navigation mode controls both the contextual statistics and the learning
+   choice. Original authenticated score/history sources remain independent. */
+.iclub-visual-v3 #courses-practice-start .iclub-practice-overview {
+  margin:0 0 13px;
+}
+.iclub-visual-v3 #courses-practice-start .practice-results-tabs {
+  margin:4px 0 11px;
+}
+.iclub-visual-v3 #courses-practice-start .iclub-practice-tour-overview,
+.iclub-visual-v3 #courses-practice-start .iclub-practice-topic-overview {
+  display:grid;gap:8px;min-width:0;
+}
+.iclub-visual-v3 #courses-practice-start .iclub-practice-tour-overview[hidden],
+.iclub-visual-v3 #courses-practice-start .iclub-practice-topic-overview[hidden],
+.iclub-visual-v3 #courses-practice-start .practice-topic-history-placement[hidden] {
+  display:none!important;
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history {
+  margin:0;padding:13px;
+  background:linear-gradient(150deg,#eff9f3 0%,#f7fcf9 100%);
+  border-color:#c8e6d3;
+  border-radius:var(--academy-radius-lg,16px);
+  gap:10px;
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-count {
+  color:#286a4d;
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-metrics {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-metric {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-metric:last-child {
+  grid-column:auto;
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-latest {
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;align-items:center;
+  min-height:40px;padding:9px 11px;
+  border:1px solid #e1ece5;border-radius:10px;
+  background:#fff;
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-latest>span {
+  min-width:0;overflow-wrap:anywhere;font-size:12px;
+  color:var(--v3-muted,#65748e);
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-latest>strong {
+  font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;
+  white-space:nowrap;color:var(--v3-text,#132443);
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-empty {
+  margin:0;color:var(--v3-muted,#65748e);
+  font-size:13px;line-height:1.45;
+}
+.iclub-visual-v3 #courses-practice-start .iclub-practice-topic-s2-note {
+  display:none;margin:0;padding:13px;
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:var(--academy-radius,12px);
+  background:var(--academy-paper-blue,#f3f8ff);
+  color:var(--v3-muted,#65748e);font-size:13px;line-height:1.5;
+}
+/* The legacy all-season Topic RPC must never masquerade as an S2 metric.
+   The separately verified season-scoped data stays accessible in History. */
+body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
+ #practice-topic-overview .practice-topic-history { display:none!important; }
+body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
+ .iclub-practice-topic-s2-note { display:block; }
+@media(max-width:359px){
+  .iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history {
+    padding:11px;
+  }
+  .iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-metric {
+    padding:10px 8px;
   }
 }
