@@ -59,6 +59,11 @@ jobs:
           node --check scripts/math-practice-v2-trig-feedback-oracle.cjs
           node scripts/math-practice-v2-trig-feedback-oracle.cjs
 
+      - name: Independently verify nine definite-integral and derivative diagnostic contradictions
+        run: |
+          node --check scripts/math-practice-v2-integral-dif-feedback-oracle.cjs
+          node scripts/math-practice-v2-integral-dif-feedback-oracle.cjs
+
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 
