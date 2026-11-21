@@ -15,7 +15,8 @@ const releases={
  hotfix10:{name:'math_p1_practice_v2_fix_20261120',suffix:'-V20261120'},
  q400q481:{name:'math_p1_practice_v2_q400_q481_20261120',suffix:'-V20261120Q400Q481'},
  q089q202q226:{name:'math_p1_practice_v2_q089_q202_q226_20261120',suffix:'-V20261120Q089Q202Q226'},
- pending10:{name:'math_p1_practice_v2_pending10_20261120',suffix:'-V20261120PENDING10'}
+ pending10:{name:'math_p1_practice_v2_pending10_20261120',suffix:'-V20261120PENDING10'},
+ decimal8:{name:'math_p1_practice_v2_decimal8_20261121',suffix:'-V20261121DEC8'}
 };
 assert.ok(Object.hasOwn(releases,mode),'unsupported governed release batch');
 const release=releases[mode].name,suffix=releases[mode].suffix;
@@ -62,9 +63,31 @@ const decimalFive=[
 const pending10=[...decimalFive,...nextThree,...nextTwo].sort((a,b)=>a.id-b.id);
 assert.deepEqual(pending10.map(x=>x.id),
  [7506,7573,7686,7710,7754,7761,7809,7835,7884,7965]);
+// Verified SELECT-only against live original hosted version/hash and 1 active Practice pool, 0 Tour/version links.
+const decimalEight=[
+ {id:7714,code:'P1-CIR-02',file:'p4_circular_trigonometry/P1-CIR-02.json',
+  old_hash:'cc6db4cfee0b8f03a3d2eac20e1072d25f690231ea96df6b063d6c7273f15759'},
+ {id:7727,code:'P1-CIR-03',file:'p4_circular_trigonometry/P1-CIR-03.json',
+  old_hash:'12cb40ca98e1b9254c008870e3c5dfd4a61c3059bc6d8eebe960c5317ad3fcab'},
+ {id:7796,code:'P1-SER-02',file:'p5_binomial_series/P1-SER-02.json',
+  old_hash:'4b6570d98de8656c449f56dff7b0a1452f176af554758f377f1c4b43086b25c6'},
+ {id:7818,code:'P1-SER-04',file:'p5_binomial_series/P1-SER-04.json',
+  old_hash:'c963bf29e6652acab2bbbd227fdcaa17b927ca415b6113c1f87b335e75184f4a'},
+ {id:7829,code:'P1-SER-04',file:'p5_binomial_series/P1-SER-04.json',
+  old_hash:'58641c016d8a8543bfa0f06a8bae0a51f21058801010bf7c42907e8209c762da'},
+ {id:7838,code:'P1-SER-05',file:'p5_binomial_series/P1-SER-05.json',
+  old_hash:'cb9e5d82eb02aa4083fd6bb6a31d3639ab079163ddfc401f9e9288c3dc91baec'},
+ {id:7894,code:'P1-DIF-06',file:'p6_differentiation/P1-DIF-06.json',
+  old_hash:'b5e9eed746e17b803fd4e2ddd1e86b35fc35da4a8d9d2201ffcf8681f6a322e3'},
+ {id:7900,code:'P1-DIF-06',file:'p6_differentiation/P1-DIF-06.json',
+  old_hash:'bb1a52aceeffe34c6478ac59e0561c249d4ac78ae852c839fe6ce5fdb8cfbeec'}
+];
+assert.deepEqual(decimalEight.map(x=>x.id),
+ [7714,7727,7796,7818,7829,7838,7894,7900]);
 const specs=mode==='hotfix10'?baselineSpecs:
   mode==='q400q481'?nextTwo:
-  mode==='q089q202q226'?nextThree:pending10;
+  mode==='q089q202q226'?nextThree:
+  mode==='pending10'?pending10:decimalEight;
 const expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
