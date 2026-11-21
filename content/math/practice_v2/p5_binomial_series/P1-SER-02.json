@@ -321,7 +321,7 @@
             "ru": "Ни одна",
             "uz": "Hech biri"
           },
-          "diagnostic_code": "SER02_AP_STRUCTURE"
+          "diagnostic_code": "SER02_EQUAL_DIFFS_AP"
         },
         {
           "key": "C",
@@ -330,7 +330,7 @@
             "ru": "Строго возрастающая",
             "uz": "Qat’iy o‘suvchi"
           },
-          "diagnostic_code": "SER02_AP_STRUCTURE"
+          "diagnostic_code": "SER02_INCREASE_NOT_GUARANTEED"
         },
         {
           "key": "D",
@@ -382,7 +382,7 @@
             "ru": "3, 6, 9, 12, ...",
             "uz": "3, 6, 9, 12, ..."
           },
-          "diagnostic_code": "SER02_AP_STRUCTURE"
+          "diagnostic_code": "SER02_AP_NOT_GP"
         },
         {
           "key": "C",
@@ -477,7 +477,7 @@
             "ru": "Только арифметическая",
             "uz": "Faqat arifmetik"
           },
-          "diagnostic_code": "SER02_GP_STRUCTURE"
+          "diagnostic_code": "SER02_CONSTANT_BOTH"
         },
         {
           "key": "B",
@@ -486,7 +486,7 @@
             "ru": "Только геометрическая",
             "uz": "Faqat geometrik"
           },
-          "diagnostic_code": "SER02_AP_STRUCTURE"
+          "diagnostic_code": "SER02_CONSTANT_BOTH"
         },
         {
           "key": "C",
@@ -538,7 +538,7 @@
             "ru": "7, 10, 13, 16, ...",
             "uz": "7, 10, 13, 16, ..."
           },
-          "diagnostic_code": "SER02_AP_STRUCTURE"
+          "diagnostic_code": "SER02_AP_NOT_NEITHER"
         },
         {
           "key": "B",
@@ -556,7 +556,7 @@
             "ru": "16, 8, 4, 2, ...",
             "uz": "16, 8, 4, 2, ..."
           },
-          "diagnostic_code": "SER02_GP_STRUCTURE"
+          "diagnostic_code": "SER02_GP_NOT_NEITHER"
         },
         {
           "key": "D",
