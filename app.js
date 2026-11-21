@@ -21788,6 +21788,16 @@ async function updateTourAttempt(attemptId, patch) {
     }
   } catch (error) {
     if (mathS2) {
+      if (String(error?.message || error || "").toLowerCase().includes("already_attempted")) {
+        await uiAlert({
+          title: t("tour_unavailable_title") || "Тур недоступен",
+          message: t("tour_unavailable_already_attempted") || tr3(
+            "В этом туре попытка уже использована.",
+            "Bu tur uchun urinish allaqachon ishlatilgan.",
+            "Your attempt for this tour has already been used.")
+        });
+        return;
+      }
       const alreadyStarted = Number(startResult?.attempt_id || 0) > 0;
       await uiAlert({
         title: tr3("Изображение не загрузилось", "Rasm yuklanmadi", "Image unavailable"),
