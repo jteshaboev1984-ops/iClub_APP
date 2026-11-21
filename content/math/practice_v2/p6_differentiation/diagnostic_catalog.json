@@ -500,6 +500,22 @@
         "ru": "После нахождения стационарных кандидатов оставьте только допустимые и при необходимости сравните с границами.",
         "uz": "Statsionar nomzodlardan faqat ruxsat etilganlarini qoldirib, kerak bo‘lsa chegara qiymatlari bilan solishtiring."
       }
+    },
+    {
+      "code": "DIF05_NO_STATIONARY_WHEN_NEGATIVE",
+      "skill": "P1-DIF-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The derivative is strictly negative throughout the interval, so it cannot be zero at any point there; stationary points are excluded.",
+        "ru": "Производная строго отрицательна на всём интервале, поэтому она нигде там не равна нулю; стационарных точек нет.",
+        "uz": "Hosila butun oraliqda qat’iy manfiy, shuning uchun u bu yerda hech qachon nolga teng bo‘lmaydi; statsionar nuqtalar yo‘q."
+      },
+      "next_action": {
+        "en": "A stationary point of a differentiable function requires f′(x)=0. Since f′(x)<0 everywhere on I, f is decreasing and no such point exists on I.",
+        "ru": "Для стационарной точки дифференцируемой функции требуется f′(x)=0. Поскольку f′(x)<0 на всём I, функция убывает и таких точек на I нет.",
+        "uz": "Differensiallanuvchi funksiyaning statsionar nuqtasida f′(x)=0 bo‘lishi kerak. I ning hamma joyida f′(x)<0 bo‘lgani uchun funksiya kamayadi va I da bunday nuqta yo‘q."
+      }
     }
   ]
 }

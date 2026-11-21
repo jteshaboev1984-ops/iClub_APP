@@ -507,7 +507,7 @@
             "ru": "f имеет стационарную точку при каждом x в I.",
             "uz": "f I dagi har bir x da statsionar nuqtaga ega."
           },
-          "diagnostic_code": "DIF05_ROOTS_ONLY"
+          "diagnostic_code": "DIF05_NO_STATIONARY_WHEN_NEGATIVE"
         }
       ],
       "correct_answer": "B",

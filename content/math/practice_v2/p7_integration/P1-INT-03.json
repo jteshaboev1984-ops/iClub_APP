@@ -114,7 +114,7 @@
             "ru": "82",
             "uz": "82"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": "INT03_NOT_BOUNDS_REVERSAL"
         },
         {
           "key": "C",
@@ -123,7 +123,7 @@
             "ru": "81",
             "uz": "81"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": "INT03_NOT_BOUNDS_REVERSAL"
         },
         {
           "key": "D",
@@ -186,7 +186,7 @@
             "ru": "0",
             "uz": "0"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": "INT03_NOT_BOUNDS_REVERSAL"
         },
         {
           "key": "D",
@@ -270,7 +270,7 @@
             "ru": "6",
             "uz": "6"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": "INT03_NOT_BOUNDS_REVERSAL"
         },
         {
           "key": "B",
@@ -279,7 +279,7 @@
             "ru": "2",
             "uz": "2"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": "INT03_NOT_BOUNDS_REVERSAL"
         },
         {
           "key": "C",
@@ -297,7 +297,7 @@
             "ru": "8",
             "uz": "8"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": "INT03_NOT_BOUNDS_REVERSAL"
         }
       ],
       "correct_answer": "C",
@@ -390,7 +390,7 @@
             "ru": "8",
             "uz": "8"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": "INT03_NOT_BOUNDS_REVERSAL"
         },
         {
           "key": "D",
@@ -519,7 +519,7 @@
             "ru": "−16",
             "uz": "−16"
           },
-          "diagnostic_code": "INT03_UPPER_MINUS_LOWER"
+          "diagnostic_code": "INT03_NOT_BOUNDS_REVERSAL"
         },
         {
           "key": "B",
