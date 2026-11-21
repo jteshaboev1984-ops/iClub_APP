@@ -26,9 +26,20 @@ const {chromium}=require('playwright');
          '<button id="practice-restart-btn" data-action="practice-start">Start Practice</button></div>'+
          '<section id="practice-topic-choice"></section>'+
          '</section></body>');
+       // Keep the synthetic fixture data, but render with the actual bundled
+       // Practice/AOS styles in production stylesheet order. Screenshots with
+       // only two CSS files falsely looked like unstyled text/cards.
        await page.addStyleTag({content:'html,body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Arial}*{box-sizing:border-box}#courses-practice-start{padding:14px}body{background:#f6f9fd;color:#142b50}'});
-       await page.addStyleTag({path:path.resolve('practice-results-tabs.css')});
-       await page.addStyleTag({path:path.resolve('visual/iclub-academy-ux531-b04b08.css')});
+       for (const file of [
+         'style.css',
+         'visual/iclub-visual-v3.css',
+         'visual/iclub-premium-v3.css',
+         'visual/iclub-academy-v55-shell-b01.css',
+         'visual/iclub-academy-ux531-b02b03.css',
+         'practice-topic-choice.css',
+         'practice-results-tabs.css',
+         'visual/iclub-academy-ux531-b04b08.css'
+       ]) await page.addStyleTag({path:path.resolve(file)});
        await page.addInitScript(()=>{});
        await page.addScriptTag({path:path.resolve('practice-topic-choice.js')});
        await page.addScriptTag({path:path.resolve('practice-results-tabs.js')});
