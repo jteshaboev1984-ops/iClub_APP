@@ -74,6 +74,11 @@ jobs:
           node --check scripts/math-practice-v2-feedback-seven-oracle.cjs
           node scripts/math-practice-v2-feedback-seven-oracle.cjs
 
+      - name: Independently prove four exact function ranges and MCQ uniqueness
+        run: |
+          node --check scripts/math-practice-v2-four-exact-ranges-oracle.cjs
+          node scripts/math-practice-v2-four-exact-ranges-oracle.cjs
+
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 
