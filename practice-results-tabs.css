@@ -1660,9 +1660,9 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
   }
 }
 
-/* #574 · Owner-accepted unified Practice results (Tour / Topic), 2026-11-21.
-   Navigation mode controls both the contextual statistics and the learning
-   choice. Original authenticated score/history sources remain independent. */
+/* #574 · Owner-refined Practice overview: one existing Academy-blue hero in
+   each mode. Tour stats are for the chosen Tour; Topic stats across all Topics.
+   Never manufacture a combined score, mastery, or a season-specific best. */
 .iclub-visual-v3 #courses-practice-start .iclub-practice-overview {
   margin:0 0 13px;
 }
@@ -1675,67 +1675,60 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
 }
 .iclub-visual-v3 #courses-practice-start .iclub-practice-tour-overview[hidden],
 .iclub-visual-v3 #courses-practice-start .iclub-practice-topic-overview[hidden],
-.iclub-visual-v3 #courses-practice-start .practice-topic-history-placement[hidden] {
+.iclub-visual-v3 #courses-practice-start .practice-topic-history-placement[hidden],
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview-footer[hidden] {
   display:none!important;
 }
+/* The Topic hero is the original .practice-hero, with its original title,
+   score-card layout, blue gradient, edge, Academy tokens and dimensions. */
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview-content {
+  margin:0;min-width:0;
+}
 .iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history {
-  margin:0;padding:13px;
-  background:linear-gradient(150deg,#eff9f3 0%,#f7fcf9 100%);
-  border-color:#c8e6d3;
-  border-radius:var(--academy-radius-lg,16px);
-  gap:10px;
+  display:grid;gap:10px;min-width:0;
+  padding:0;margin:0;border:0;border-radius:0;
+  background:transparent;box-shadow:none;
 }
-.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-count {
-  color:#286a4d;
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history[hidden] {
+  display:none!important;
 }
-.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-metrics {
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history .practice-hero-metrics {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;min-width:0;
 }
-.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-metric {
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history .practice-metric {
   min-width:0;
+}
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-metric-label {
   overflow-wrap:anywhere;
 }
-.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-metric:last-child {
-  grid-column:auto;
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-metric-value {
+  flex-wrap:wrap;gap:2px 6px;min-width:0;
 }
-.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-latest {
-  display:grid;grid-template-columns:minmax(0,1fr) auto;
-  gap:10px;align-items:center;
-  min-height:40px;padding:9px 11px;
-  border:1px solid #e1ece5;border-radius:10px;
-  background:#fff;
-}
-.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-latest>span {
-  min-width:0;overflow-wrap:anywhere;font-size:12px;
+.iclub-visual-v3 #courses-practice-start #practice-topic-overview .iclub-topic-stat-topic {
+  display:block;flex:1 1 100%;min-width:0;
+  font-size:11px;line-height:1.35;font-weight:650;
   color:var(--v3-muted,#65748e);
-}
-.iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-latest>strong {
-  font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;
-  white-space:nowrap;color:var(--v3-text,#132443);
+  overflow-wrap:anywhere;
 }
 .iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-empty {
   margin:0;color:var(--v3-muted,#65748e);
   font-size:13px;line-height:1.45;
 }
 .iclub-visual-v3 #courses-practice-start .iclub-practice-topic-s2-note {
-  display:none;margin:0;padding:13px;
-  border:1px solid var(--academy-edge,#ccdcf4);
-  border-radius:var(--academy-radius,12px);
-  background:var(--academy-paper-blue,#f3f8ff);
-  color:var(--v3-muted,#65748e);font-size:13px;line-height:1.5;
+  display:none;margin:0;
+  color:var(--v3-muted,#65748e);
+  font-size:13px;line-height:1.5;
 }
-/* The legacy all-season Topic RPC must never masquerade as an S2 metric.
-   The separately verified season-scoped data stays accessible in History. */
+/* The all-time Topic RPC cannot claim a current Season 2 aggregate. Display
+   only a source-truthful note *inside the same original blue hero*. */
 body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
- #practice-topic-overview .practice-topic-history { display:none!important; }
+ #practice-topic-overview .practice-topic-history {display:none!important;}
 body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
- .iclub-practice-topic-s2-note { display:block; }
+ #practice-topic-overview-footer {display:none!important;}
+body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
+ .iclub-practice-topic-s2-note {display:block;}
 @media(max-width:359px){
-  .iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history {
-    padding:11px;
-  }
-  .iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-topic-history-metric {
+  .iclub-visual-v3 #courses-practice-start #practice-topic-overview .practice-metric {
     padding:10px 8px;
   }
 }
