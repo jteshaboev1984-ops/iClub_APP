@@ -484,6 +484,70 @@
         "ru": "Перед решением sin x=a или cos x=a проверьте −1≤a≤1.",
         "uz": "sin x=a yoki cos x=a ni yechishdan oldin −1≤a≤1 ni tekshiring."
       }
+    },
+    {
+      "code": "TRI03_IN_RANGE_WRONG_SIGN",
+      "skill": "P1-TRI-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The proposed angle lies inside the principal-value interval, but its trigonometric function has the wrong sign.",
+        "ru": "Предложенный угол лежит в диапазоне главных значений, но знак соответствующей тригонометрической функции неверен.",
+        "uz": "Taklif qilingan burchak asosiy qiymatlar oralig‘ida, ammo mos trigonometrik funksiyaning ishorasi noto‘g‘ri."
+      },
+      "next_action": {
+        "en": "Evaluate the cosine or tangent sign at the proposed angle, then apply the principal-value range.",
+        "ru": "Проверьте знак косинуса или тангенса предложенного угла, затем примените диапазон главных значений.",
+        "uz": "Taklif qilingan burchakda kosinus yoki tangensning ishorasini tekshiring, so‘ng asosiy qiymatlar oralig‘ini qo‘llang."
+      }
+    },
+    {
+      "code": "TRI03_PRINCIPAL_INTERVAL_DEFINITION",
+      "skill": "P1-TRI-03",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "This interval is not the full principal-value range of arccos: it includes disallowed angles or omits allowed ones.",
+        "ru": "Этот интервал не является диапазоном главных значений arccos: он включает недопустимые углы либо пропускает допустимые.",
+        "uz": "Bu oraliq arccos ning asosiy qiymatlari oralig‘i emas: unda ortiqcha burchaklar bor yoki ruxsat etilganlari yetishmaydi."
+      },
+      "next_action": {
+        "en": "The principal-value range of arccos is 0°≤θ≤180°, including both endpoints.",
+        "ru": "Диапазон главных значений arccos: 0°≤θ≤180°; обе границы включены.",
+        "uz": "arccos ning asosiy qiymatlari 0°≤θ≤180° oralig‘ida bo‘ladi; ikkala chegara ham kiradi."
+      }
+    },
+    {
+      "code": "TRI03_INPUT_VALID",
+      "skill": "P1-TRI-03",
+      "mistake_type": "interpretation",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The input 0.5 is within the domain of arcsin, [−1,1]; the calculator result is an angle in radians, not an invalid input.",
+        "ru": "Аргумент 0,5 входит в область определения arcsin [−1;1]; результат калькулятора — угол в радианах, а не ошибка области определения.",
+        "uz": "0,5 argumenti arcsin ning [−1;1] aniqlanish sohasiga kiradi; kalkulyator natijasi radianlardagi burchak, soha xatosi emas."
+      },
+      "next_action": {
+        "en": "Check the input interval [−1,1] first. Then convert π/6 radians to 30° or switch the calculator to degree mode.",
+        "ru": "Сначала проверьте область [−1;1]. Затем переведите π/6 радиан в 30° или включите на калькуляторе градусный режим.",
+        "uz": "Avval [−1;1] sohani tekshiring. Keyin π/6 radianni 30° ga aylantiring yoki kalkulyatorni gradus rejimiga o‘tkazing."
+      }
+    },
+    {
+      "code": "TRI05_INVALID_LISTED_ANGLE",
+      "skill": "P1-TRI-05",
+      "mistake_type": "method",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "At least one listed angle does not satisfy the original trigonometric equation. This is not merely a missing-solution error.",
+        "ru": "Как минимум один указанный угол не удовлетворяет исходному тригонометрическому уравнению. Ошибка не сводится к пропущенному решению.",
+        "uz": "Ko‘rsatilgan burchaklardan kamida bittasi dastlabki trigonometrik tenglamani qanoatlantirmaydi. Xato faqat yechimni tushirib qoldirish emas."
+      },
+      "next_action": {
+        "en": "Substitute each listed angle into the original equation, accounting for argument shifts and multipliers. Then check that all valid interval solutions are included.",
+        "ru": "Подставьте каждый указанный угол в исходное уравнение с учётом сдвигов и множителей аргумента. Затем проверьте полноту решений на интервале.",
+        "uz": "Har bir ko‘rsatilgan burchakni argumentdagi siljish va ko‘paytiruvchilarni hisobga olib, dastlabki tenglamaga qo‘ying. So‘ng intervaldagi barcha to‘g‘ri yechimlar kiritilganini tekshiring."
+      }
     }
   ]
 }
