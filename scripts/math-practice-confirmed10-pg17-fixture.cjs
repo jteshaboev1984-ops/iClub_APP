@@ -13,7 +13,7 @@ assert.ok(m,'staging fixture must use canonical generated staging payload');
 const payload=JSON.parse(m[1].replace(/''/g,"'"));
 const expIndex=args.indexOf('--expect');
 const expected=expIndex<0?10:Number(args[expIndex+1]);
-assert.ok([2,3,10].includes(expected),'only pinned 2, 3 or 10-item future-only draft/release batches supported');
+assert.ok([2,3,8,10].includes(expected),'only pinned 2, 3, 8 or 10-item future-only draft/release batches supported');
 assert.equal(payload.length,expected);
 assert.equal(new Set(payload.map(q=>q.old_id)).size,expected);
 // Optional exact-parent authored semantic fixture: old option meanings remain
