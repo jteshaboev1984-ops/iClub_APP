@@ -117,7 +117,8 @@ for(const [id,file,skill] of items){
  assert.equal(q.primary_skill,skill);
  assert.equal(q.qtype,'input');
  assert.equal(q.difficulty,'hard');
- assert.equal(q.answer_contract.kind,'numeric_exact');
+ assert.ok(['integer_exact','numeric_exact'].includes(q.answer_contract.kind),
+   'unsupported deterministic numeric input contract');
  assert.equal(q.answer_contract.number_only,true);
  assert.ok(near(Number(q.answer_contract.canonical_answer),derived.get(id)),
    'independently derived answer disagrees with original deterministic contract');
