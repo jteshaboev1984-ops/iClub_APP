@@ -142,7 +142,7 @@
     }
 
     // Use the same visible Practice hero typography/metrics as the Tour card.
-    // This presentation is not a new scoring or mastery computation.
+    // This presentation changes no scoring or student achievement calculation.
     function makeCompactHeader() {
       const head=element("div","practice-hero-top");
       const left=element("div","practice-hero-left");
