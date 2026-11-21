@@ -40,7 +40,9 @@ assert(renderer.indexOf('window.iClubPracticeTopicChoice?.mount({')<
 const screenStart=index.indexOf('<section id="courses-practice-start"');
 const screenEnd=index.indexOf('<!-- Practice Quiz -->',screenStart);
 assert(screenStart>0&&screenEnd>screenStart,'actual Practice and History DOM missing');
-const actualDom=index.slice(screenStart,screenEnd);
+const quizEnd=index.indexOf('<!-- Practice Result -->',screenEnd);
+assert(quizEnd>screenEnd,'actual Practice quiz DOM missing');
+const actualDom=index.slice(screenStart,quizEnd);
 assert(actualDom.includes('id="courses-practice-history"'),
  'standalone History missing from original DOM');
 const uiHtml='<!doctype html><html><head><meta charset="utf-8">'+
@@ -48,6 +50,7 @@ const uiHtml='<!doctype html><html><head><meta charset="utf-8">'+
  '<body class="iclub-visual-v3"><main>'+actualDom+'</main></body></html>';
 const allowed=new Map([
  ['/practice-topic-choice.js','practice-topic-choice.js'],
+ ['/security/legacy-assessment-safe-api.js','security/legacy-assessment-safe-api.js'],
  ['/practice-results-tabs.js','practice-results-tabs.js'],
  ['/practice-history-screen.js','practice-history-screen.js'],
  ['/practice-topic-choice.css','practice-topic-choice.css'],
@@ -57,7 +60,10 @@ const allowed=new Map([
 const upstream=new Map([
  ['get_practice_available_topics_safe_v1',3001],
  ['get_practice_topic_history_safe_v1',3001],
- ['get_practice_season2_progress_safe_v1',3000]
+ ['get_practice_season2_progress_safe_v1',3000],
+ ['start_practice_topic_drill_choice_safe_v1',3001],
+ ['get_practice_drill_resume_safe_v4',3001],
+ ['submit_practice_drill_answer_safe_v5',3001]
 ]);
 const server=http.createServer(async(req,res)=>{
  let uri;try{uri=new URL(req.url,'http://127.0.0.1')}catch{res.writeHead(400).end();return;}
@@ -213,7 +219,10 @@ async function postRaw(base,fn,subject,token){
       window.sb={rpc:async(name,args)=>{
        if(!['get_practice_available_topics_safe_v1',
              'get_practice_topic_history_safe_v1',
-             'get_practice_season2_progress_safe_v1'].includes(name))
+             'get_practice_season2_progress_safe_v1',
+             'start_practice_topic_drill_choice_safe_v1',
+             'get_practice_drill_resume_safe_v4',
+             'submit_practice_drill_answer_safe_v5'].includes(name))
         return {data:null,error:{code:'UNRELATED_MOCKED_RPC'},status:404};
        const r=await fetch('/rest/v1/rpc/'+name,{
         method:'POST',
