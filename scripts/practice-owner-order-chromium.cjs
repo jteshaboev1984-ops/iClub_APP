@@ -12,20 +12,46 @@ const {chromium}=require('playwright');
    for(const locale of ['ru','uz','en']){
      for(const width of [320,375,430,1440]){
        const page=await browser.newPage({viewport:{width,height:850}});
+       const ui=({
+         ru:{page:'Практика',tour:'Тур',best:'Лучший результат',time:'Лучшее время',
+           stage:'Практика 1 тура',start:'Начать практику тура 1',recent:'Последние попытки'},
+         uz:{page:'Amaliyot',tour:'Tur',best:'Eng yaxshi natija',time:'Eng yaxshi vaqt',
+           stage:'1-tur amaliyoti',start:'1-tur amaliyotini boshlash',recent:'So‘nggi urinishlar'},
+         en:{page:'Practice',tour:'Tour',best:'Best result',time:'Best time',
+           stage:'Practice for Tour 1',start:'Start practice for Tour 1',recent:'Recent attempts'}
+       })[locale];
+       // Real component markup & stylesheet order, but only synthetic scores.
        await page.setContent('<!doctype html><html lang="'+locale+'">'+
          '<body class="iclub-visual-v3">'+
          '<section id="courses-practice-start" class="stack-screen is-active">'+
-         '<div class="section"><div class="h1">Practice</div></div>'+
-         '<div id="practice-tour-picker"><div class="practice-tour-chip-row">'+
-         '<button class="practice-tour-chip is-selected">Tour 1</button><button class="practice-tour-chip">Tour 2</button></div></div>'+
-         '<div class="practice-hero"><div class="practice-hero-top"><div class="practice-hero-title">Mathematics</div>'+
-         '<div class="practice-hero-stage">Practice for Tour 1</div></div>'+
-         '<div class="practice-hero-metrics"><div class="practice-metric">Best score</div><div class="practice-metric">Best time</div></div></div>'+
-         '<div class="practice-last card"><div class="card-title">Recent attempts</div><div class="practice-table-wrap">1 attempt</div></div>'+
+         '<div class="section"><div class="h1">'+ui.page+'</div></div>'+
+         '<div id="practice-tour-picker" class="practice-tour-picker"><div class="practice-tour-chip-row">'+
+         '<button class="practice-tour-chip is-selected">'+ui.tour+' 1</button>'+
+         '<button class="practice-tour-chip">'+ui.tour+' 2</button></div></div>'+
+         '<div class="practice-hero"><div class="practice-hero-top"><div class="practice-hero-left">'+
+         '<div class="practice-hero-kicker">'+(locale==='ru'?'Предмет':locale==='uz'?'Fan':'Subject')+'</div>'+
+         '<div class="practice-hero-title" id="practice-subject-title">Mathematics</div>'+
+         '<div class="practice-hero-stage" id="practice-stage-meta">'+ui.stage+'</div>'+
+         '</div></div></div>'+
+         '<div class="practice-hero-metrics" style="display:none"></div>'+
+         '<div class="practice-last card"><div class="card-title">'+ui.recent+
+         '</div><div class="practice-table-wrap">1 / 1</div></div>'+
          '<div class="practice-start-actions"><button id="practice-resume-btn" style="display:none" data-action="practice-resume">Resume</button>'+
-         '<button id="practice-restart-btn" data-action="practice-start">Start Practice</button></div>'+
-         '<section id="practice-topic-choice"></section>'+
+         '<button id="practice-restart-btn" class="btn primary" data-action="practice-start">'+ui.start+'</button></div>'+
+         '<section id="practice-topic-choice" class="practice-topic-choice"></section>'+
          '</section></body>');
+       // Build the metric DOM exactly as the published iClub Practice hero.
+       await page.evaluate(ui=>{
+         const hero=document.querySelector('#courses-practice-start .practice-hero');
+         const m=document.createElement('div');m.className='practice-hero-metrics';
+         for(const [label,value] of [[ui.best,'8/10'],[ui.time,'4:35']]){
+           const card=document.createElement('div');card.className='practice-metric';
+           const lab=document.createElement('div');lab.className='practice-metric-label';lab.textContent=label;
+           const v=document.createElement('div');v.className='practice-metric-value';v.textContent=value;
+           card.append(lab,v);m.append(card);
+         }
+         hero.append(m);
+       },ui);
        // Keep the synthetic fixture data, but render with the actual bundled
        // Practice/AOS styles in production stylesheet order. Screenshots with
        // only two CSS files falsely looked like unstyled text/cards.
@@ -113,7 +139,7 @@ const {chromium}=require('playwright');
          order.topicStatsInside&&order.topicStatsBeforeChoice,
          'unified Practice block order changed: '+JSON.stringify(order));
        assert.equal(order.topicOverviewOnce,1,'one contextual Topic stats slot');
-       assert.equal(order.statsOnce,1,'must preserve original stats');
+       assert.equal(order.statsOnce,2,'one identical blue hero for each mode');
        assert.equal(order.historyEntryOnce,1,'single standalone History link');
        assert.equal(order.currentTourOnce,1,'genuine Tour state must remain');
        const access=root.locator('.iclub-practice-current-tour');
@@ -150,16 +176,35 @@ const {chromium}=require('playwright');
        await root.locator('#practice-results-tab-topics').click();
        await page.waitForFunction(()=>document.querySelectorAll('.practice-topic-choice-item').length===2);
        await page.waitForFunction(()=>document.querySelectorAll(
-         '#practice-topic-overview .practice-topic-history-metric').length===2);
+         '#practice-topic-overview .practice-hero-metrics .practice-metric').length===2);
        assert.equal(await root.locator('.iclub-practice-tour-overview').isVisible(),false,
          'Tour statistics must not be shown in Topic mode');
        assert.equal(await root.locator('#practice-topic-overview').isVisible(),true,
          'Topic stats must be shown above the chooser');
-       const topicMetrics=await root.locator('#practice-topic-overview .practice-topic-history-metric').allTextContents();
-       assert(topicMetrics.some(x=>x.includes('2'))&&topicMetrics.some(x=>x.includes('9 / 10')),
-         'live owner-scoped topic aggregate not surfaced: '+JSON.stringify(topicMetrics));
-       assert.equal(await root.locator('#practice-topic-overview .practice-topic-history-latest').count(),1,
-         'latest Topic attempt must appear compactly with shared statistics');
+       const topicMetrics=await root.locator('#practice-topic-overview .practice-metric').allTextContents();
+       assert(topicMetrics.some(x=>x.includes('5/5')&&x.includes('Synthetic geometry'))&&
+         topicMetrics.some(x=>x.includes('4/5')&&x.includes('Synthetic algebra')),
+         'owner-scoped best and latest must be labeled with source topics: '+JSON.stringify(topicMetrics));
+       const footer=await root.locator('#practice-topic-overview-footer').textContent();
+       assert(footer.includes('2')&&footer.includes('9/10'),
+         'verified completed sessions and correct/answered absent from summary footer: '+footer);
+       assert.equal(await root.locator('#practice-topic-overview .practice-hero').count(),1,
+         'Topic must reuse one original iClub hero card');
+       assert.equal(await root.locator('#practice-topic-overview .practice-hero-metrics').count(),1,
+         'Topic metrics must share Tour two-column component');
+       const visual=await root.evaluate(el=>{
+         const tour=getComputedStyle(el.querySelector('.iclub-practice-tour-overview .practice-hero'));
+         const topic=getComputedStyle(el.querySelector('#practice-topic-overview .practice-hero'));
+         return {background:tour.backgroundImage===topic.backgroundImage,
+           border:tour.borderTopColor===topic.borderTopColor,
+           radius:tour.borderTopLeftRadius===topic.borderTopLeftRadius};
+       });
+       assert(visual.background&&visual.border&&visual.radius,
+         'Tour and Topic result cards are visually inconsistent: '+JSON.stringify(visual));
+       assert.equal(await root.locator('#practice-topic-overview .practice-topic-history-latest').count(),0,
+         'obsolete third mini-card must not duplicate the latest result');
+       assert.equal(await root.locator('#practice-topic-overview svg').count(),0,
+         'do not add academic cap or decorative status arrows');
        assert.equal(await root.locator('#practice-topic-history-placement .practice-topic-history').count(),0,
          'Topic summary must not be duplicated below selection');
        assert.equal(await root.locator('#practice-start-topic-btn').count(),0,
