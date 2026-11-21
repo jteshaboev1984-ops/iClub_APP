@@ -48,6 +48,13 @@ const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
 const eq=(a,b)=>JSON.stringify(stable(a))===JSON.stringify(stable(b));
 const prev=file=>JSON.parse(execFileSync('git',['show',baseline+':'+file],{
  cwd:root,encoding:'utf8',maxBuffer:7*1024*1024}));
+const preDiagnosticRelease='4082f2da036628efbb4c3c89244eb388b93de53c';
+const terms21=new Set([7555,7556,7558,7559,7581,7586,7587,7590,7591,7593,7594,7597,7598,7599]);
+const diag21=new Map(Object.entries({"7554":{"B":"FUN01_RANGE_EXTRA","D":"FUN01_DOMAIN_EXTRA"},"7586":{"A":"FUN04_MONOTONIC_DIRECTION"},"7797":{"B":"SER02_EQUAL_DIFFS_AP","C":"SER02_INCREASE_NOT_GUARANTEED"},"7798":{"B":"SER02_AP_NOT_GP"},"7800":{"A":"SER02_CONSTANT_BOTH","B":"SER02_CONSTANT_BOTH"},"7801":{"A":"SER02_AP_NOT_NEITHER","C":"SER02_GP_NOT_NEITHER"},"7958":{"C":"INT04_MISSED_BELOW_AXIS"},"7966":{"B":"INT04_ZERO_SIGNED_NOT_AREA"}}).map(([id,v])=>[Number(id),v]));
+const newCatalog21={"p2_functions":["FUN01_RANGE_EXTRA","FUN01_DOMAIN_EXTRA","FUN04_MONOTONIC_DIRECTION"],"p5_binomial_series":["SER02_EQUAL_DIFFS_AP","SER02_INCREASE_NOT_GUARANTEED","SER02_AP_NOT_GP","SER02_CONSTANT_BOTH","SER02_AP_NOT_NEITHER","SER02_GP_NOT_NEITHER"],"p7_integration":["INT04_MISSED_BELOW_AXIS","INT04_ZERO_SIGNED_NOT_AREA"]};
+const previousRelease=file=>JSON.parse(execFileSync('git',['show',preDiagnosticRelease+':'+file],{
+ cwd:root,encoding:'utf8',maxBuffer:7*1024*1024}));
+let checked21=new Set(),seenUz21=0,seenDiag21=0;
 let items=0,mcq=0,input=0,changed=0;
 const groups=new Map(),found=new Set();
 const languages=['en','ru','uz'],letters=['A','B','C','D'];
@@ -60,11 +67,32 @@ for(const folder of folderList){
   const relative='content/math/practice_v2/'+folder.name+'/'+name;
   const original=prev(relative);
   const now=JSON.parse(fs.readFileSync(path.join(root,relative),'utf8'));
+  const previousNow=previousRelease(relative);
+  assert.equal(previousNow.questions.length,now.questions.length);
   assert.equal(original.skill,now.skill);
   assert.equal(original.questions.length,now.questions.length);
   assert.ok(eq({...original,questions:[]},{...now,questions:[]}));
   for(let i=0;i<now.questions.length;i++){
-   const before=original.questions[i],q=now.questions[i];
+   const before=original.questions[i],q=previousNow.questions[i],actual=now.questions[i];
+   const id21=7484+Number(q.key.slice(-3));
+   const expectedNow=JSON.parse(JSON.stringify(q));
+   if(terms21.has(id21)){
+    for(const field of [expectedNow.question,expectedNow.explanation,...(expectedNow.options||[]).map(o=>o.text)]){
+     if(!field?.uz)continue;
+     seenUz21+=(field.uz.match(/one-to-one/gi)||[]).length;
+     field.uz=field.uz.replace(/one-to-one/gi,'injektiv (birga-bir)');
+    }
+    checked21.add(id21);
+   }
+   if(diag21.has(id21)){
+    for(const [letter,code] of Object.entries(diag21.get(id21))){
+     const option=expectedNow.options.find(o=>o.key===letter);
+     assert.ok(option&&option.key!==expectedNow.correct_answer);
+     option.diagnostic_code=code;seenDiag21++;
+    }
+    checked21.add(id21);
+   }
+   assert.ok(eq(actual,expectedNow),'consolidated academic 21-item scope drift '+id21);
    assert.equal(before.key,q.key,'candidate order changed');
    const id=7484+Number(q.key.slice(-3));
    items++;
@@ -285,6 +313,21 @@ for(const folder of folderList){
  }
 }
 assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,31);
+assert.equal(checked21.size,21);assert.equal(seenUz21,19);assert.equal(seenDiag21,12);
+for(const folder of folderList){
+ const rel='content/math/practice_v2/'+folder.name+'/diagnostic_catalog.json';
+ const current=JSON.parse(fs.readFileSync(path.join(root,rel),'utf8'));
+ const previous=previousRelease(rel);
+ const extra=newCatalog21[folder.name]||[];
+ assert.equal(current.diagnostics.length,previous.diagnostics.length+extra.length);
+ assert.ok(eq(current.diagnostics.slice(0,previous.diagnostics.length),previous.diagnostics));
+ assert.deepEqual(current.diagnostics.slice(previous.diagnostics.length).map(d=>d.code),extra);
+ for(const d of current.diagnostics.slice(previous.diagnostics.length)){
+  assert.ok(d.feedback?.en&&d.feedback?.ru&&d.feedback?.uz);
+  assert.ok(d.next_action?.en&&d.next_action?.ru&&d.next_action?.uz);
+  assert.ok(['P1-FUN-01','P1-FUN-04','P1-SER-02','P1-INT-04'].includes(d.skill));
+ }
+}
 assert.equal(found.size,expected.size);assert.equal(mcq,277);assert.equal(input,218);
 const all={A:0,B:0,C:0,D:0};
 for(let practice=1;practice<=7;practice++){
@@ -309,6 +352,6 @@ for(let practice=1;practice<=7;practice++){
 assert.deepEqual(all,{A:68,B:70,C:71,D:68},
  'correct-answer placement deviates from reviewed 277-question distribution');
 console.log(JSON.stringify({source_guard:'PASS',authored:495,mcq:277,input:218,
- corrected:30,published_prior:28,new_source_proposals:2,unrelated_change_count:0,practice_batches:7,
+ corrected:30,diagnostic21:21,new_uz_field_occurrences:19,new_option_diagnostic_mappings:12,published_prior:28,new_source_proposals:2,unrelated_change_count:0,practice_batches:7,
  anti_pattern_cycles:0,retained_option_semantics:true,
  answer_distribution:'balanced',protected_keys_printed:false}));
