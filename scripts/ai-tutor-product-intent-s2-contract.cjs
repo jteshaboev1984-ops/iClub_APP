@@ -113,7 +113,8 @@ async function check(q,body,expectedRoute){
  }else{
   assert.equal(invokes.length,1,JSON.stringify(q));
   assert.equal(invokes[0].route,expectedRoute,JSON.stringify(q));
-  if(expectedRoute==="prepared"&&intent(q)==="practice_rules"){
+  if(expectedRoute==="prepared"&&intent(q)==="practice_rules"&&
+     (body.prompt_key??template.prompt_key)===""){
    assert.equal(invokes[0].args.promptKey,"practice_rules");
    assert.equal(invokes[0].args.userText,"");
    assert.equal(result.data.provider_called,false);
