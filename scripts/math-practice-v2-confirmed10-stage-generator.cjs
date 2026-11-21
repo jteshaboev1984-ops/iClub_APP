@@ -155,8 +155,8 @@ const payload=specs.map(spec=>{
   assert.ok(q,'missing corrected source ID '+spec.id);
   if(mode==='hard9')assert.ok(q.qtype==='input'&&q.difficulty==='hard',
     'hard9 source must have exactly one hard numeric transfer per pinned ID');
-  if(mode==='range4')assert.ok(q.qtype==='mcq'&&q.difficulty==='medium',
-    'range4 must preserve original MCQ contract and difficulty');
+  if(mode==='range4')assert.ok(q.qtype==='mcq'&&q.difficulty===({7562:'easy',7565:'medium',7569:'medium',7570:'hard'})[spec.id],
+    'range4 must preserve exact source MCQ type and each original difficulty');
   assert.equal(q.primary_skill,spec.code);
   assert.ok(['mcq','input'].includes(q.qtype));
   assert.ok(q.practice_no>=1&&q.practice_no<=7);
