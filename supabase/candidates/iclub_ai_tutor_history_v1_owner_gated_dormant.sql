@@ -70,6 +70,10 @@ BEGIN
  IF v_uid IS NULL OR current_setting('request.jwt.claim.role',true) IS DISTINCT FROM 'authenticated' THEN
    RETURN jsonb_build_object('ok',false,'reason','auth_required');
  END IF;
+ -- Serialize this owner's consent, save and delete. Otherwise a late append
+ -- could race a history opt-out and resurrect text after deletion.
+ PERFORM pg_catalog.pg_advisory_xact_lock(
+   pg_catalog.hashtextextended(v_uid::text,412071));
  -- Delete/withdraw is available even after an operator disables the feature.
  IF p_action='opt_out' THEN
    DELETE FROM private.iclub_ai_tutor_history_v1_messages WHERE user_id=v_uid;
@@ -128,8 +132,8 @@ BEGIN
    RETURN jsonb_build_object('ok',true,'messages',v_messages,
      'provider_called',false,'academic_state_changed',false);
  ELSIF p_action='append' THEN
-   IF p_request_id IS NULL OR p_speaker NOT IN ('user','assistant')
-      OR p_locale NOT IN ('ru','uz','en') OR p_text IS NULL
+   IF p_request_id IS NULL OR coalesce(p_speaker,'') NOT IN ('user','assistant')
+      OR coalesce(p_locale,'') NOT IN ('ru','uz','en') OR p_text IS NULL
       OR char_length(btrim(p_text)) NOT BETWEEN 1 AND 2400 THEN
      RETURN jsonb_build_object('ok',false,'reason','invalid_message');
    END IF;
