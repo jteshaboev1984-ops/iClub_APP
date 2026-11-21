@@ -33,6 +33,12 @@ const quickFunction="function quickPrompts(ctx) {"+quickSource;
 const routeSource=between("  async function invokeGlobalAi(body) {",
   "\n  async function sendMessage(");
 const routeFunction="async function invokeGlobalAi(body) {"+routeSource;
+const productIntentSource=between("  function verifiedProductHelpIntent(raw) {",
+  "\n  async function invokeGlobalAi(body) {");
+const verifiedProductHelpIntent=vm.runInNewContext(
+ "(function(){"+productIntentSource+"return verifiedProductHelpIntent;})()",
+ Object.create(null),{timeout:400});
+
 
 const calls=[];
 const adapter={
@@ -46,6 +52,7 @@ let lang="ru",active="home",scope=null,gate={allowed:false,key:""};
 const window={iClubAiV21BetaClient:adapter};
 const sandbox={
  PUBLISHED_PREPARED_ACTIONS,PREPARED_SCREEN_ACTIONS,PREPARED_ACTION_LABELS,window,
+ verifiedProductHelpIntent,
  copy:()=>({practiceResult:"Explain verified result",practiceNext:"Next verified step"}),
  practiceScope:()=>scope,practiceGate:gate,practiceScopeKey:s=>s.key,
  locale:()=>lang,activeViewName:()=>active
