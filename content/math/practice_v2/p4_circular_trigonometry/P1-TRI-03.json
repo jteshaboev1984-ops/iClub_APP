@@ -70,7 +70,7 @@
             "ru": "45°",
             "uz": "45°"
           },
-          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+          "diagnostic_code": "TRI03_IN_RANGE_WRONG_SIGN"
         },
         {
           "key": "B",
@@ -142,7 +142,7 @@
             "ru": "60°",
             "uz": "60°"
           },
-          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+          "diagnostic_code": "TRI03_IN_RANGE_WRONG_SIGN"
         },
         {
           "key": "C",
@@ -194,7 +194,7 @@
             "ru": "−90°≤θ≤90°",
             "uz": "−90°≤θ≤90°"
           },
-          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+          "diagnostic_code": "TRI03_PRINCIPAL_INTERVAL_DEFINITION"
         },
         {
           "key": "B",
@@ -203,7 +203,7 @@
             "ru": "−180°<θ<180°",
             "uz": "−180°<θ<180°"
           },
-          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+          "diagnostic_code": "TRI03_PRINCIPAL_INTERVAL_DEFINITION"
         },
         {
           "key": "C",
@@ -212,7 +212,7 @@
             "ru": "0°≤θ<360°",
             "uz": "0°≤θ<360°"
           },
-          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+          "diagnostic_code": "TRI03_PRINCIPAL_INTERVAL_DEFINITION"
         },
         {
           "key": "D",
@@ -293,7 +293,7 @@
             "ru": "0.5 вне области определения sin⁻¹.",
             "uz": "0.5 sin⁻¹ aniqlanish sohasidan tashqarida."
           },
-          "diagnostic_code": "TRI03_PRINCIPAL_RANGE"
+          "diagnostic_code": "TRI03_INPUT_VALID"
         },
         {
           "key": "B",
