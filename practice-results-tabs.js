@@ -2,9 +2,9 @@
 (function () {
   'use strict';
   const COPY = Object.freeze({
-    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Мои результаты',s2Note:'Результаты по темам за текущий сезон доступны в истории практики.'},
-    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Mening natijalarim',s2Note:'Joriy mavsumdagi mavzu natijalari amaliyot tarixida mavjud.'},
-    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'My results',s2Note:'Current-season topic results are available in Practice history.'}
+    ru: {tours:'По турам', topics:'По темам', resume:'Продолжить попытку',stats:'Мои результаты',bestAttemptTime:'Время лучшей попытки',s2Note:'Результаты по темам за текущий сезон доступны в истории практики.'},
+    uz: {tours:'Turlar bo‘yicha', topics:'Mavzular bo‘yicha', resume:'Urinishni davom ettirish',stats:'Mening natijalarim',bestAttemptTime:'Eng yaxshi urinish vaqti',s2Note:'Joriy mavsumdagi mavzu natijalari amaliyot tarixida mavjud.'},
+    en: {tours:'By tour', topics:'By topic', resume:'Resume attempt',stats:'My results',bestAttemptTime:'Time of best attempt',s2Note:'Current-season topic results are available in Practice history.'}
   });
   const ROOT_ID = 'courses-practice-start';
   const lang = () => {
@@ -740,6 +740,13 @@
       tourTab.textContent=c.tours; topicTab.textContent=c.topics;
       overviewTitle.textContent=c.stats;
       topicSeasonNote.textContent=c.s2Note;
+      // The recorded time belongs to the *best-scoring* Tour attempt; it is
+      // not necessarily the shortest time across all attempts.
+      const timeLabel=hero.querySelector('.practice-hero-metrics .practice-metric:nth-child(2) .practice-metric-label');
+      if(timeLabel){
+        timeLabel.removeAttribute('data-i18n');
+        timeLabel.textContent=c.bestAttemptTime;
+      }
       syncResume();
     };
     const centerSelected=()=>{
