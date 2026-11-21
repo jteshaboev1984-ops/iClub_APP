@@ -1,0 +1,169 @@
+name: Mathematics S2 Tour equivalent answers signed PG17
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/math-s2-tour-equivalence-signed-pg17.yml'
+      - 'supabase/candidates/math_s2_tour_input_equivalence_v1_hold.sql'
+      - 'supabase/candidates/math_s2_tour_input_equivalence_v1_readonly_test.sql'
+      - 'supabase/tests/fixtures/math_s2_lowest_terms_exception_pg17_test.sql'
+      - 'supabase/tests/fixtures/math_s2_tour_exact_rpc_pg17_fixture.sql'
+      - 'supabase/tests/fixtures/math_s2_tour_original_evaluator_pg17.sql'
+      - 'scripts/math-s2-tour-equal-answers-signed-http.cjs'
+      - 'scripts/math-s2-tour-private-rekey-source-guard.py'
+      - 'scripts/test_math_s2_tour_private_rekey_source_guard.py'
+      - 'supabase/candidates/math_s2_safe_questions_public_shield_v1_hold.sql'
+      - 'supabase/tests/fixtures/math_s2_public_catalogue_shield_pg17_test.sql'
+      - 'supabase/candidates/math_s2_tour_inplace_rehearsal_template_v1_hold.sql'
+      - 'supabase/tests/fixtures/math_s2_inplace_112_synthetic_pg17.sql'
+      - 'supabase/candidates/math_s2_preflight_unissued_20q_deny_v1_hold.sql'
+      - 'supabase/tests/fixtures/math_s2_preflight_unissued_20q_pg17_test.sql'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: math-s2-tour-pg17-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  signed-pg17:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-pg17-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      CI: "true"
+      PGHOST: "127.0.0.1"
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: synthetic-pg17-only
+      PGDATABASE: postgres
+      MATH_S2_TOUR_DISPOSABLE: "true"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prove private 112-question trilingual rekey plan contract using synthetic data only
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s scripts -p 'test_math_s2_tour_private_rekey_source_guard.py' -v
+      - name: Install authentic pre-cutover Tour functions and invented questions
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_tour_exact_rpc_pg17_fixture.sql
+      - name: Prove S2-only anonymous/authenticated public catalogue protection on PG17
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_public_catalogue_shield_pg17_test.sql
+      - name: Confirm old fractional-answer bug reproduced before candidate
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -c "
+          DO \$s\$ BEGIN
+            IF (public.iclub_eval_tour_question_safe_v4(995001,'2/4',NULL,true)->>'is_correct')::boolean IS DISTINCT FROM false
+               OR (public.iclub_eval_tour_question_safe_v4(995001,'1/2',NULL,true)->>'is_correct')::boolean IS DISTINCT FROM true
+            THEN RAISE EXCEPTION 'Baseline fraction rejection not reproduced'; END IF;
+            RAISE NOTICE 'MATH_S2_BASELINE_FRACTION_REJECTION_REPRODUCED';
+          END \$s\$;"
+      - name: Apply candidate ONLY on disposable PostgreSQL 17
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/candidates/math_s2_tour_input_equivalence_v1_hold.sql
+      - name: Run strict SQL assertions for synthetic and all 28 S2 test inputs
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/candidates/math_s2_tour_input_equivalence_v1_readonly_test.sql
+      - name: Prove lowest-terms exception with invented PG17 item and mandatory rollback
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_lowest_terms_exception_pg17_test.sql
+      - name: Run local signed JWT PostgREST only
+        run: |
+          set -euo pipefail
+          test "$PGHOST" = "127.0.0.1"
+          test "$PGDATABASE" = "postgres"
+          test "$MATH_S2_TOUR_DISPOSABLE" = "true"
+          disposable_secret="$(openssl rand -hex 48)"
+          echo "::add-mask::$disposable_secret"
+          echo "MATH_S2_TOUR_JWT_SECRET=$disposable_secret" >> "$GITHUB_ENV"
+          docker pull postgrest/postgrest:v12.2.3
+          docker run -d --rm --name iclub-math-s2-pgrst --network host \
+            -e PGRST_DB_URI="postgres://postgres:synthetic-pg17-only@127.0.0.1:5432/postgres" \
+            -e PGRST_DB_SCHEMA="public" -e PGRST_DB_ANON_ROLE="anon" \
+            -e PGRST_JWT_SECRET="$disposable_secret" \
+            postgrest/postgrest:v12.2.3
+          for i in $(seq 1 40); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/ || true)"
+            if [[ "$status" =~ ^(200|400|401|404)$ ]]; then exit 0; fi
+            sleep 2
+          done
+          docker logs --tail 25 iclub-math-s2-pgrst
+          exit 1
+      - name: Verify anonymous HTTP sees Season1 and Chemistry but not closed Mathematics Season2
+        run: |
+          set -euo pipefail
+          base='http://127.0.0.1:3000/safe_questions_public?select=id&id=eq.'
+          hidden="$(curl --fail --silent --show-error "${base}995001")"
+          existing="$(curl --fail --silent --show-error "${base}995011")"
+          other="$(curl --fail --silent --show-error "${base}995021")"
+          test "$hidden" = '[]'
+          test "$existing" = '[{"id":995011}]'
+          test "$other" = '[{"id":995021}]'
+          rpc_response="$(curl --fail --silent --show-error -X POST -H 'Content-Type: application/json' \
+            --data '{"p_question_ids":[995001,995005,995011,995021]}' \
+            http://127.0.0.1:3000/rpc/get_safe_questions_by_ids)"
+          RPC_RESPONSE="$rpc_response" python3 -c 'import os,json; rows=json.loads(os.environ["RPC_RESPONSE"]); assert [(r["request_order"],r["id"]) for r in rows]==[(3,995011),(4,995021)], "closed mathematics questions leaked through privileged ID lookup"'
+          echo 'Math S2 public catalogue and privileged ID-RPC shield: HTTP anonymous PASS'
+      - name: Verify real signed HTTP/actual Tour submit RPC and Chromium
+        run: |
+          set -euo pipefail
+          node --check scripts/math-s2-tour-equal-answers-signed-http.cjs
+          npm install --no-save playwright@1.55.0
+          npx playwright install chromium
+          node scripts/math-s2-tour-equal-answers-signed-http.cjs
+      - name: Roll back evaluator without changing historical submitted answers
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_tour_original_evaluator_pg17.sql
+          psql -X -v ON_ERROR_STOP=1 -c \
+            "DROP FUNCTION private.iclub_math_s2_tour_numeric_equiv_v1(text,text);"
+          psql -X -v ON_ERROR_STOP=1 -c "
+          DO \$s\$ BEGIN
+            IF (SELECT count(*) FROM public.tour_session_answers_v4)<>10
+               OR (SELECT count(*) FROM public.tour_session_answers_v4 WHERE is_correct)<>7
+               OR (public.iclub_eval_tour_question_safe_v4(995001,'2/4',NULL,true)->>'is_correct')::boolean IS DISTINCT FROM false
+               OR (SELECT md5(prosrc) FROM pg_proc WHERE proname='iclub_eval_tour_question_safe_v4')<>'7f564255956fbe61ab8d1a14cade9389'
+            THEN RAISE EXCEPTION 'Non-destructive rollback failed'; END IF;
+            RAISE NOTICE 'MATH_S2_TOUR_PG17_ROLLBACK_PRESERVED_HISTORY_PASS';
+          END \$s\$;"
+      - name: Rehearse 112 same-ID MCQ fixes and 4 replacements on fresh disposable PG17, prove rollback
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE iclub_math_s2_inplace_synthetic'
+          PGDATABASE=iclub_math_s2_inplace_synthetic psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_inplace_112_synthetic_pg17.sql
+      - name: Prove S2 Maths 20-question preflight denied before attempt without S1/Chem regression
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE iclub_math_s2_preflight_synthetic'
+          PGDATABASE=iclub_math_s2_preflight_synthetic psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_preflight_unissued_20q_pg17_test.sql
+      - name: No hosted endpoints, bank secrets or student data
+        if: always()
+        run: echo "All data synthetic, PostgreSQL 17 ephemeral, no Supabase/Vercel hosted calls"
