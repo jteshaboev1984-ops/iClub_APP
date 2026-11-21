@@ -27,7 +27,7 @@
             "ru": "x=60°,300°",
             "uz": "x=60°,300°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "B",
@@ -45,7 +45,7 @@
             "ru": "x=120°,240°",
             "uz": "x=120°,240°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "D",
@@ -90,7 +90,7 @@
             "ru": "x=30°,330°",
             "uz": "x=30°,330°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "B",
@@ -108,7 +108,7 @@
             "ru": "x=150°,330°",
             "uz": "x=150°,330°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "D",
@@ -154,7 +154,7 @@
             "ru": "x=30°,210°",
             "uz": "x=30°,210°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "B",
@@ -163,7 +163,7 @@
             "ru": "x=15°,195°",
             "uz": "x=15°,195°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "C",
@@ -265,7 +265,7 @@
             "ru": "x=90°,270°",
             "uz": "x=90°,270°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "C",
@@ -274,7 +274,7 @@
             "ru": "x=120°,300°",
             "uz": "x=120°,300°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "D",
@@ -344,7 +344,7 @@
             "ru": "x=180°",
             "uz": "x=180°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         }
       ],
       "correct_answer": "B",
@@ -389,7 +389,7 @@
             "ru": "x=45°,135°",
             "uz": "x=45°,135°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "C",
@@ -398,7 +398,7 @@
             "ru": "x=−45°,135°",
             "uz": "x=−45°,135°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "D",
@@ -459,7 +459,7 @@
             "ru": "x=120°,180°,240°",
             "uz": "x=120°,180°,240°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "D",
@@ -504,7 +504,7 @@
             "ru": "x=135°,315°",
             "uz": "x=135°,315°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "B",
@@ -513,7 +513,7 @@
             "ru": "x=45°,135°",
             "uz": "x=45°,135°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "C",
@@ -622,7 +622,7 @@
             "ru": "x=45°,225°",
             "uz": "x=45°,225°"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "D",
@@ -667,7 +667,7 @@
             "ru": "x=π/6,5π/6",
             "uz": "x=π/6,5π/6"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "B",
@@ -685,7 +685,7 @@
             "ru": "x=5π/6,7π/6",
             "uz": "x=5π/6,7π/6"
           },
-          "diagnostic_code": "TRI05_REFERENCE_SOLUTIONS"
+          "diagnostic_code": "TRI05_INVALID_LISTED_ANGLE"
         },
         {
           "key": "D",
