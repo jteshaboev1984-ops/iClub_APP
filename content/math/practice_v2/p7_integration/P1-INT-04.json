@@ -251,7 +251,7 @@
             "ru": "2",
             "uz": "2"
           },
-          "diagnostic_code": "INT04_AREA_SIGN"
+          "diagnostic_code": "INT04_MISSED_BELOW_AXIS"
         },
         {
           "key": "D",
@@ -629,7 +629,7 @@
             "ru": "Геометрическая площадь обязательно равна 0.",
             "uz": "Geometrik yuza albatta 0."
           },
-          "diagnostic_code": "INT04_AREA_SIGN"
+          "diagnostic_code": "INT04_ZERO_SIGNED_NOT_AREA"
         },
         {
           "key": "C",

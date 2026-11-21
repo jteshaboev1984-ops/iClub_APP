@@ -436,6 +436,102 @@
         "ru": "Запишите |r(параметр)|<1 и аккуратно решите двойное неравенство.",
         "uz": "|r(parametr)|<1 ni yozib, hosil bo‘lgan qo‘sh tengsizlikni ehtiyotkorlik bilan yeching."
       }
+    },
+    {
+      "code": "SER02_EQUAL_DIFFS_AP",
+      "skill": "P1-SER-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Equal consecutive differences guarantee an arithmetic progression, so the sequence cannot be classified as neither.",
+        "ru": "Равные разности соседних членов гарантируют арифметическую прогрессию, поэтому вариант «ни то ни другое» неверен.",
+        "uz": "Ketma-ket hadlar ayirmalari teng bo‘lsa, bu arifmetik progressiya bo‘ladi; «hech biri» javobi noto‘g‘ri."
+      },
+      "next_action": {
+        "en": "Apply the definition of an arithmetic progression, including a possible zero common difference.",
+        "ru": "Арифметическая прогрессия допускает и нулевую общую разность.",
+        "uz": "Arifmetik progressiyada umumiy ayirma nol bo‘lishi ham mumkin."
+      }
+    },
+    {
+      "code": "SER02_INCREASE_NOT_GUARANTEED",
+      "skill": "P1-SER-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Equal consecutive differences do not guarantee increasing terms: the common difference may be zero or negative.",
+        "ru": "Равные разности не гарантируют возрастание членов: общая разность может быть нулевой или отрицательной.",
+        "uz": "Teng ayirmalar hadlarning o‘sishini kafolatlamaydi: umumiy ayirma nol yoki manfiy bo‘lishi mumkin."
+      },
+      "next_action": {
+        "en": "Check the sign of the common difference before concluding that the terms increase.",
+        "ru": "Прежде чем утверждать возрастание, установите знак общей разности.",
+        "uz": "Hadlar o‘sadi deyishdan oldin umumiy ayirmaning ishorasini tekshiring."
+      }
+    },
+    {
+      "code": "SER02_AP_NOT_GP",
+      "skill": "P1-SER-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The chosen sequence is arithmetic, with constant difference, but it is not geometric because its consecutive ratios are not constant.",
+        "ru": "Выбранная последовательность арифметическая: разность постоянна, но отношение соседних членов не постоянно.",
+        "uz": "Tanlangan ketma-ketlik arifmetik: ayirma o‘zgarmas, lekin qo‘shni hadlar nisbati o‘zgarmas emas."
+      },
+      "next_action": {
+        "en": "A geometric progression needs the same ratio between successive terms, not merely the same difference.",
+        "ru": "Для геометрической прогрессии необходимо постоянное отношение соседних членов, а не разность.",
+        "uz": "Geometrik progressiya uchun qo‘shni hadlar nisbati doimiy bo‘lishi kerak, ayirmasi emas."
+      }
+    },
+    {
+      "code": "SER02_CONSTANT_BOTH",
+      "skill": "P1-SER-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A nonzero constant sequence is both arithmetic and geometric: its common difference is 0 and its common ratio is 1.",
+        "ru": "Ненулевая постоянная последовательность одновременно арифметическая и геометрическая: разность равна 0, отношение равно 1.",
+        "uz": "Noldan farqli o‘zgarmas ketma-ketlik ham arifmetik, ham geometrik: ayirma 0, nisbat 1."
+      },
+      "next_action": {
+        "en": "Check both definitions; neither “arithmetic only” nor “geometric only” describes it fully.",
+        "ru": "Проверьте оба определения: варианты «только арифметическая» и «только геометрическая» неполны.",
+        "uz": "Ikkala ta’rifni tekshiring: «faqat arifmetik» ham, «faqat geometrik» ham to‘liq emas."
+      }
+    },
+    {
+      "code": "SER02_AP_NOT_NEITHER",
+      "skill": "P1-SER-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "This choice is an arithmetic progression because its consecutive differences are equal; it cannot be the requested “neither” sequence.",
+        "ru": "Это арифметическая прогрессия, поскольку разности соседних членов равны; она не подходит под «ни то ни другое».",
+        "uz": "Bu arifmetik progressiya, chunki qo‘shni hadlar ayirmasi teng; «hech biri» shartiga mos emas."
+      },
+      "next_action": {
+        "en": "To choose “neither,” rule out both a constant difference and a constant ratio.",
+        "ru": "Для ответа «ни то ни другое» исключите постоянную разность и постоянное отношение.",
+        "uz": "«Hech biri» javobi uchun o‘zgarmas ayirma ham, o‘zgarmas nisbat ham bo‘lmasligi kerak."
+      }
+    },
+    {
+      "code": "SER02_GP_NOT_NEITHER",
+      "skill": "P1-SER-02",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "This choice is a geometric progression because successive terms have a constant ratio; it cannot be the requested “neither” sequence.",
+        "ru": "Это геометрическая прогрессия, поскольку отношение соседних членов постоянно; она не подходит под «ни то ни другое».",
+        "uz": "Bu geometrik progressiya, chunki qo‘shni hadlar nisbati o‘zgarmas; «hech biri» shartiga mos emas."
+      },
+      "next_action": {
+        "en": "Test adjacent ratios as well as differences before declaring a sequence neither type.",
+        "ru": "Прежде чем выбрать «ни то ни другое», проверьте отношения и разности соседних членов.",
+        "uz": "«Hech biri» deyishdan oldin qo‘shni hadlar nisbati va ayirmalarini tekshiring."
+      }
     }
   ]
 }

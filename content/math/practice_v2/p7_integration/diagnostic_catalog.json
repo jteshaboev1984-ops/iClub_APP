@@ -388,6 +388,38 @@
         "ru": "При необходимости используйте π∫(R²−r²) dx: квадрат внешнего радиуса минус квадрат внутреннего.",
         "uz": "Kerak bo‘lsa π∫(R²−r²) dx: tashqi radius kvadrati minus ichki radius kvadrati."
       }
+    },
+    {
+      "code": "INT04_MISSED_BELOW_AXIS",
+      "skill": "P1-INT-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "This answer includes only the region above the x-axis and omits the geometric area below it.",
+        "ru": "В ответе учтена только область над осью x; площадь области под осью x пропущена.",
+        "uz": "Bu javobda faqat x o‘qidan yuqoridagi soha hisoblangan, pastdagi geometrik yuza qoldirilgan."
+      },
+      "next_action": {
+        "en": "Split at the x-intercept and add the absolute areas of both regions.",
+        "ru": "Разбейте интеграл в точке пересечения с осью x и сложите площади обеих областей.",
+        "uz": "x o‘qi bilan kesishish nuqtasida ajrating va ikkala sohaning musbat yuzalarini qo‘shing."
+      }
+    },
+    {
+      "code": "INT04_ZERO_SIGNED_NOT_AREA",
+      "skill": "P1-INT-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A zero signed integral can result from positive and negative contributions cancelling; the geometric area can still be positive.",
+        "ru": "Нулевой определённый интеграл может получиться из-за взаимного сокращения положительных и отрицательных вкладов; геометрическая площадь при этом положительна.",
+        "uz": "Aniq integral nol chiqishi musbat va manfiy qismlarning o‘zaro qisqarishidan bo‘lishi mumkin; geometrik yuza esa musbat bo‘lishi mumkin."
+      },
+      "next_action": {
+        "en": "Distinguish the signed integral from total geometric area, which adds absolute contributions.",
+        "ru": "Отличайте интеграл со знаком от полной геометрической площади, где вклады берутся по модулю.",
+        "uz": "Ishorali integralni modullar bo‘yicha yig‘iladigan umumiy geometrik yuzadan farqlang."
+      }
     }
   ]
 }
