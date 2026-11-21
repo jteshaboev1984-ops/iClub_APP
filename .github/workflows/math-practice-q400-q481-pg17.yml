@@ -5,6 +5,7 @@ on:
     paths:
       - 'content/math/practice_v2/p1_quadratics/P1-QUA-02.json'
       - 'content/math/practice_v2/p2_functions/P1-FUN-03.json'
+      - 'content/math/practice_v2/p2_functions/P1-FUN-01.json'
       - 'content/math/practice_v2/p4_circular_trigonometry/P1-TRI-03.json'
       - 'content/math/practice_v2/p4_circular_trigonometry/P1-TRI-04.json'
       - 'content/math/practice_v2/p5_binomial_series/P1-SER-03.json'
@@ -24,6 +25,7 @@ on:
       - 'supabase/tests/math_practice_q089_q202_q226_future_only_pg17.sql'
       - 'supabase/tests/math_practice_pending10_future_only_pg17.sql'
       - 'supabase/tests/math_practice_decimal8_future_only_pg17.sql'
+      - 'supabase/tests/math_practice_q069_q311_semantic_future_only_pg17.sql'
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
       - '.github/workflows/math-practice-q400-q481-pg17.yml'
 permissions:
@@ -56,7 +58,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Guard all 495 and prove 20 prior plus 8 next exact corrections
+      - name: Guard all 495 and prove 28 published plus 2 next semantic corrections
         run: |
           set -euo pipefail
           node --check scripts/math-practice-confirmed10-source-guard.cjs
@@ -127,5 +129,21 @@ jobs:
             -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d math_decimal8 \
             -f supabase/tests/math_practice_decimal8_future_only_pg17.sql
+      - name: Two exact MCQ semantic clarifications Q069/Q311 — pending QA and atomic future-only replacement with preserved open session
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-confirmed10-stage-generator.cjs --batch semantic2 --out "$tmp/stage.sql"
+          node scripts/math-practice-confirmed10-pg17-fixture.cjs \
+            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --expect 2
+          createdb -T template0 math_semantic2
+          psql -X -v ON_ERROR_STOP=1 -d math_semantic2 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_semantic2 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_semantic2 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_semantic2 \
+            -f supabase/tests/math_practice_q069_q311_semantic_future_only_pg17.sql
       - name: No live academic publication
-        run: echo 'Eight-item next candidate and prior published regressions ONLY. No hosted DML, app deployment, QA approval or published key output.'
+        run: echo 'Two new semantic items Q069/Q311 and previous published regressions ONLY. No hosted DML, app deployment, QA approval or published key output.'

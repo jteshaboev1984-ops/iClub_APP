@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// #574: 20 already-published corrections + 8 new scoped numeric-format fixes.
+// #574: 28 published corrections + two independent, future-only MCQ semantic clarifications.
 // Check all 495 authored questions vs real original main; fail on any other
 // key/text/locale/difficulty change. No protected solution printed in CI.
 const assert=require('node:assert/strict');
@@ -10,6 +10,7 @@ const root=path.resolve(__dirname,'..');
 const bank=path.join(root,'content/math/practice_v2');
 const baseline='296bf21df09a808152b4ae4e153ddcec8aec85cd';
 const expected=new Map([
+ [7553,['question','explanation']],[7795,['question','explanation']],
  [7714,['question']],[7727,['question']],[7796,['question']],
  [7818,['question']],[7829,['question']],[7838,['question']],
  [7894,['question']],[7900,['question']],
@@ -111,6 +112,35 @@ for(const folder of folderList){
         id===7506&&lang==='en'?'Enter the answer as a decimal number.':decimalEnding[lang],
         'decimal format instruction not exact trilingual reviewed text');
      }
+    }
+
+    if(id===7553){
+     assert.ok(eq(before.options,q.options),'Q069 original answer and distractor semantics must stay unchanged');
+     assert.equal(q.correct_answer,before.correct_answer);
+     assert.equal(q.correct_answer,'B');
+     assert.ok(/Which statement correctly defines/.test(q.question.en));
+     assert.ok(/Какое утверждение/.test(q.question.ru));
+     assert.ok(/Qaysi tasdiq/.test(q.question.uz));
+     assert.equal(q.explanation.en,before.explanation.en);
+     assert.equal(q.explanation.ru,before.explanation.ru);
+     assert.ok(/injektiv \(birga-bir\)/.test(q.explanation.uz));
+     assert.ok(!/one-to-one/.test(q.explanation.uz));
+    }
+    if(id===7795){
+     assert.ok(eq(before.options,q.options),'Q311 original answer and diagnostic meanings must stay unchanged');
+     assert.equal(q.correct_answer,before.correct_answer);
+     assert.equal(q.correct_answer,'B');
+     const constantSeq=[5,5,5,5];
+     const diffs=constantSeq.slice(1).map((v,i)=>v-constantSeq[i]);
+     assert.equal(new Set(diffs).size,1);
+     assert.equal(diffs[0],0);
+     assert.ok(/an arithmetic progression\?/.test(q.question.en));
+     assert.ok(!/non-constant/i.test(q.question.en));
+     assert.ok(!/непостоянную/i.test(q.question.ru));
+     assert.ok(!/O‘zgarmas bo‘lmagan/i.test(q.question.uz));
+     assert.ok(/zero/.test(q.explanation.en));
+     assert.ok(/нулю/.test(q.explanation.ru));
+     assert.ok(/nolga/.test(q.explanation.uz));
     }
     if(id===7573){
      // g(f(x)) = 1-(3x-2): one correct expression, four distinct polynomials.
@@ -228,7 +258,7 @@ for(const folder of folderList){
   }
  }
 }
-assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,28);
+assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,30);
 assert.equal(found.size,expected.size);assert.equal(mcq,277);assert.equal(input,218);
 const all={A:0,B:0,C:0,D:0};
 for(let practice=1;practice<=7;practice++){
@@ -253,6 +283,6 @@ for(let practice=1;practice<=7;practice++){
 assert.deepEqual(all,{A:68,B:70,C:71,D:68},
  'correct-answer placement deviates from reviewed 277-question distribution');
 console.log(JSON.stringify({source_guard:'PASS',authored:495,mcq:277,input:218,
- corrected:28,published_prior:20,new_source_proposals:8,unrelated_change_count:0,practice_batches:7,
+ corrected:30,published_prior:28,new_source_proposals:2,unrelated_change_count:0,practice_batches:7,
  anti_pattern_cycles:0,retained_option_semantics:true,
  answer_distribution:'balanced',protected_keys_printed:false}));

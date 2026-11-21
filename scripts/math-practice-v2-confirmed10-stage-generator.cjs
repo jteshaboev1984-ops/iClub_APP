@@ -16,7 +16,8 @@ const releases={
  q400q481:{name:'math_p1_practice_v2_q400_q481_20261120',suffix:'-V20261120Q400Q481'},
  q089q202q226:{name:'math_p1_practice_v2_q089_q202_q226_20261120',suffix:'-V20261120Q089Q202Q226'},
  pending10:{name:'math_p1_practice_v2_pending10_20261120',suffix:'-V20261120PENDING10'},
- decimal8:{name:'math_p1_practice_v2_decimal8_20261121',suffix:'-V20261121DEC8'}
+ decimal8:{name:'math_p1_practice_v2_decimal8_20261121',suffix:'-V20261121DEC8'},
+ semantic2:{name:'math_p1_practice_v2_semantic2_20261121',suffix:'-V20261121SEM2'}
 };
 assert.ok(Object.hasOwn(releases,mode),'unsupported governed release batch');
 const release=releases[mode].name,suffix=releases[mode].suffix;
@@ -84,10 +85,19 @@ const decimalEight=[
 ];
 assert.deepEqual(decimalEight.map(x=>x.id),
  [7714,7727,7796,7818,7829,7838,7894,7900]);
+// 2026-11-21 read-only live originals, Q311 one unfinished Practice session.
+const semanticTwo=[
+ {id:7553,code:'P1-FUN-01',file:'p2_functions/P1-FUN-01.json',
+  old_hash:'1d9cb30a2754fa7460d60adf2d4cc2fdd186e9768ec7ba20939698fa7eb82eea'},
+ {id:7795,code:'P1-SER-02',file:'p5_binomial_series/P1-SER-02.json',
+  old_hash:'8826d11258161ea3bd246c1861cd34d13f912c6570de40065cdb11589336dc28'}
+];
+assert.deepEqual(semanticTwo.map(x=>x.id),[7553,7795]);
 const specs=mode==='hotfix10'?baselineSpecs:
   mode==='q400q481'?nextTwo:
   mode==='q089q202q226'?nextThree:
-  mode==='pending10'?pending10:decimalEight;
+  mode==='pending10'?pending10:
+  mode==='decimal8'?decimalEight:semanticTwo;
 const expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
