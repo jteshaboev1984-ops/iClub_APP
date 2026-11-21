@@ -1,0 +1,61 @@
+name: Math S2 private image delivery -- source and PG17
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/math-s2-private-image-auth-pg17.yml'
+      - 'security/math-s2-private-images.js'
+      - 'scripts/math-s2-private-image-browser-contract.test.cjs'
+      - 'supabase/candidates/math_s2_private_images_v1_uninstalled.sql'
+      - 'supabase/candidates/math_s2_legacy_preflight_shutdown_v1_hold.sql'
+      - 'supabase/tests/fixtures/math_s2_private_images_v1_pg17.sql'
+      - 'app.js'
+      - 'index.html'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: math-s2-image-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  private-image-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-only-math-s2
+          POSTGRES_DB: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: synthetic-only-math-s2
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify real source wiring + synthetic WebView image failures and same-attempt resume
+        run: |
+          set -euo pipefail
+          node --check security/math-s2-private-images.js
+          node --check scripts/math-s2-private-image-browser-contract.test.cjs
+          node --check app.js
+          node scripts/math-s2-private-image-browser-contract.test.cjs
+      - name: Run owner/RLS/attempt-scope isolation with invented data on ephemeral PostgreSQL 17
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE iclub_math_s2_private_image_synthetic'
+          PGDATABASE=iclub_math_s2_private_image_synthetic psql -X -v ON_ERROR_STOP=1 \
+            -f supabase/tests/fixtures/math_s2_private_images_v1_pg17.sql
+      - name: Confirm no live resource writes and no protected bank exported
+        if: always()
+        run: echo 'All data synthetic; candidate SQL never applied to hosted database; no images or answer keys in logs'
