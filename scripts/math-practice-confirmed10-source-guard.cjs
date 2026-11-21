@@ -122,7 +122,7 @@ for(const folder of folderList){
      assert.equal(q.correct_answer,'C');
      assert.equal(q.correct_answer,before.correct_answer);
      assert.ok(eq(q.question,before.question)&&eq(q.explanation,before.explanation));
-     const asSets=text=>[...String(text).matchAll(/\\{([^}]+)\\}/g)]
+     const asSets=text=>[...String(text).matchAll(/\{([^}]+)\}/g)]
        .map(m=>[...new Set(m[1].split(',').map(Number))].sort((a,b)=>a-b).join(',')).join(';');
      for(const lang of languages){
       const oldB=before.options.find(o=>o.key==='B'),newB=q.options.find(o=>o.key==='B');
