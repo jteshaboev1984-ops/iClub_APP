@@ -448,6 +448,11 @@ async function main(){
     window.__isolated.visibilityAllowed=false;
     document.getElementById("courses-practice-result").dataset.practiceAiAttemptId="502";
   });
+  // New attempt intentionally gets an isolated Tutor thread; its previous
+  // panel closes rather than showing a result from attempt 501.
+  await page.waitForFunction(()=>window.iClubGlobalAiShell.context().threadKey===
+    "practice_attempt_502",null,{timeout:8000});
+  await page.evaluate(()=>window.iClubGlobalAiShell.open());
   await askInput.fill("Что означает мой результат 70%?");
   await page.locator("[data-global-ai-send]").click();
   await page.waitForFunction(()=>document.querySelector("[data-global-ai-messages]")
