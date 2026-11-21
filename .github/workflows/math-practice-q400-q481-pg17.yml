@@ -1,4 +1,4 @@
-name: Mathematics Practice 10 pending corrections future-only PG17
+name: Mathematics Practice versioned correction batches — isolated PostgreSQL17
 on:
   pull_request:
     branches: [main]
@@ -11,6 +11,10 @@ on:
       - 'content/math/practice_v2/p5_binomial_series/P1-SER-05.json'
       - 'content/math/practice_v2/p3_coordinate_geometry/P1-COO-05.json'
       - 'content/math/practice_v2/p4_circular_trigonometry/P1-CIR-02.json'
+      - 'content/math/practice_v2/p4_circular_trigonometry/P1-CIR-03.json'
+      - 'content/math/practice_v2/p5_binomial_series/P1-SER-02.json'
+      - 'content/math/practice_v2/p5_binomial_series/P1-SER-04.json'
+      - 'content/math/practice_v2/p6_differentiation/P1-DIF-06.json'
       - 'content/math/practice_v2/p6_differentiation/P1-DIF-05.json'
       - 'content/math/practice_v2/p7_integration/P1-INT-04.json'
       - 'scripts/math-practice-confirmed10-source-guard.cjs'
@@ -19,12 +23,13 @@ on:
       - 'supabase/tests/math_practice_q400_q481_future_only_pg17.sql'
       - 'supabase/tests/math_practice_q089_q202_q226_future_only_pg17.sql'
       - 'supabase/tests/math_practice_pending10_future_only_pg17.sql'
+      - 'supabase/tests/math_practice_decimal8_future_only_pg17.sql'
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
       - '.github/workflows/math-practice-q400-q481-pg17.yml'
 permissions:
   contents: read
 jobs:
-  pending-ten-pg17:
+  versioned-math-batches-pg17:
     runs-on: ubuntu-24.04
     timeout-minutes: 18
     services:
@@ -51,7 +56,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Guard all 495 and prove ten exact mathematical/localized changes
+      - name: Guard all 495 and prove 20 prior plus 8 next exact corrections
         run: |
           set -euo pipefail
           node --check scripts/math-practice-confirmed10-source-guard.cjs
@@ -106,5 +111,21 @@ jobs:
             -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d math_pending10 \
             -f supabase/tests/math_practice_pending10_future_only_pg17.sql
+      - name: Next eight numeric-format clarifications — exact original hashes, inactive QA, atomic switch and rollback
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-confirmed10-stage-generator.cjs --batch decimal8 --out "$tmp/stage.sql"
+          node scripts/math-practice-confirmed10-pg17-fixture.cjs \
+            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --expect 8
+          createdb -T template0 math_decimal8
+          psql -X -v ON_ERROR_STOP=1 -d math_decimal8 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_decimal8 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_decimal8 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_decimal8 \
+            -f supabase/tests/math_practice_decimal8_future_only_pg17.sql
       - name: No live academic publication
-        run: echo 'Ten-item draft only. No hosted DML, app deployment, QA approval or published key output.'
+        run: echo 'Eight-item next candidate and prior published regressions ONLY. No hosted DML, app deployment, QA approval or published key output.'

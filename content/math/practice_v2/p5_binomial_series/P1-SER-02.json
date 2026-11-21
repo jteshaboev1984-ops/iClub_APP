@@ -257,9 +257,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "The sequence −4, 6, −9, 13.5, ... is geometric. Enter its common ratio.",
-        "ru": "Последовательность −4, 6, −9, 13.5, ... является геометрической. Введите её общее отношение.",
-        "uz": "−4, 6, −9, 13.5, ... ketma-ketligi geometrik. Uning umumiy nisbatini kiriting."
+        "en": "The sequence −4, 6, −9, 13.5, ... is geometric. Enter its common ratio. Give your answer as a decimal number.",
+        "ru": "Последовательность −4, 6, −9, 13.5, ... является геометрической. Введите её общее отношение. Ответ запишите десятичным числом.",
+        "uz": "−4, 6, −9, 13.5, ... ketma-ketligi geometrik. Uning umumiy nisbatini kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
