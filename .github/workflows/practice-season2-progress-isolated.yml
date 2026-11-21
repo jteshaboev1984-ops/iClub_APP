@@ -18,6 +18,7 @@ on:
       - 'scripts/practice-owner-order-chromium.cjs'
       - 'scripts/practice-topic-start-signed-http.cjs'
       - 'supabase/tests/practice_topic_real_start_signed_browser_pg17_fixture.sql'
+      - 'supabase/tests/fixtures/practice_topic_installed_mistakes_v5_20261121.sql'
       - 'supabase/tests/fixtures/practice_topic_crosscutover_installed_rpcs_20261120.sql'
       - 'supabase/candidates/practice_subject_tour1_runtime_v5_future.sql'
       - 'supabase/tests/practice_subject_tour1_runtime_selector_isolated.sql'
