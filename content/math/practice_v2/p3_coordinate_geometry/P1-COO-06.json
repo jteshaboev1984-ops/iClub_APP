@@ -153,13 +153,13 @@
         "P1-COO-04"
       ],
       "role": "parameter_tangency",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch3 Coordinate geometry, printed pp. 48–67",
       "question": {
-        "en": "The line y=2x+p is tangent to the circle (x−1)²+(y+1)²=5 for two values of p. Enter the sum of those values.",
-        "ru": "Прямая y=2x+p касается окружности (x−1)²+(y+1)²=5 при двух значениях p. Введите сумму этих значений.",
-        "uz": "y=2x+p chiziq (x−1)²+(y+1)²=5 aylanaga p ning ikki qiymatida urinadi. Shu qiymatlar yig‘indisini kiriting."
+        "en": "A circle has diameter endpoints A(0,−3) and B(2,1). The line y=2x+p is tangent to this circle for two real values of p. Enter the sum of those values.",
+        "ru": "Концы диаметра окружности — A(0,−3) и B(2,1). Прямая y=2x+p касается этой окружности при двух действительных значениях p. Введите их сумму.",
+        "uz": "Aylananing diametri uchlari A(0,−3) va B(2,1). y=2x+p chiziq bu aylanaga p ning ikkita haqiqiy qiymatida urinadi. Shu qiymatlar yig‘indisini kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -178,9 +178,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Write the line as 2x−y+p=0. The centre is (1,−1) and radius √5, so tangency requires |2(1)−(−1)+p|/√5=√5. Thus |p+3|=5, giving p=2 or −8. Their sum is −6.",
-        "ru": "Запишем прямую как 2x−y+p=0. Центр (1,−1), радиус √5, поэтому для касания |2(1)−(−1)+p|/√5=√5. Получаем |p+3|=5, откуда p=2 или −8. Сумма равна −6.",
-        "uz": "Chiziqni 2x−y+p=0 deb yozamiz. Markaz (1,−1), radius √5, urinish uchun |2(1)−(−1)+p|/√5=√5. Demak |p+3|=5, bundan p=2 yoki −8. Yig‘indi −6."
+        "en": "The diameter midpoint gives centre (1,−1); half the diameter length gives radius √5. Write the line as 2x−y+p=0. The distance from the centre to a tangent is √5, so |2(1)−(−1)+p|/√5=√5 and |p+3|=5. Thus p=2 or p=−8, whose sum is −6.",
+        "ru": "Середина диаметра даёт центр (1,−1); половина длины диаметра даёт радиус √5. Запишем прямую как 2x−y+p=0. Расстояние от центра до касательной равно √5, поэтому |2(1)−(−1)+p|/√5=√5 и |p+3|=5. Следовательно p=2 или p=−8, их сумма −6.",
+        "uz": "Diametrning o‘rtasi markaz (1,−1) ni, uning uzunligining yarmi radius √5 ni beradi. Chiziq tenglamasi 2x−y+p=0. Markazdan urinmagacha masofa √5 ga teng, shuning uchun |2(1)−(−1)+p|/√5=√5 va |p+3|=5. Demak p=2 yoki p=−8, ularning yig‘indisi −6."
       },
       "ai_source_skill": "P1-COO-06",
       "status": "draft"
