@@ -24,6 +24,21 @@ const expected=new Map([
  [7893,['options']],[7926,['options','correct_answer']],
  [7937,['options','correct_answer']],[7970,['question','options','correct_answer']]
 ]);
+// Nine author-reviewed 2026-11-19 Hard-transfer rewrites from the archived #594
+// source HEAD. Reuse only these exact fields; older stacked bank edits are NOT imported.
+// GitHub Actions jobs running this source guard must check out full Git history.
+const hardSourceSHA='887807ca8d10ede62f02044fbd00792565206726';
+const hardOnly=new Set([7511,7585,7692,7723,7769,7823,7835,7908,7974]);
+const historicHardFile=new Map();
+function originalHardAuthoring(relative) {
+ if(!historicHardFile.has(relative)) {
+  const file=execFileSync('git',['show',hardSourceSHA+':'+relative],{
+   cwd:root,encoding:'utf8',maxBuffer:7*1024*1024
+  });
+  historicHardFile.set(relative,JSON.parse(file));
+ }
+ return historicHardFile.get(relative);
+}
 const rekey=new Set([7624,7662,7797,7881,7926,7937,7970]);
 const extraDecimal=new Map([
  [7714,()=>(26-2*8)/8],
@@ -102,6 +117,7 @@ let checkedTrig23=new Set(),seenDiagTrig23=0;
 let checkedIntegral9=new Set(),seenDiagIntegral9=0;
 let checkedNext8=new Set(),seenDiagNext8=0;
 let checkedSeven=new Set(),seenDiagSeven=0;
+const checkedHard=new Set();
 let items=0,mcq=0,input=0,changed=0;
 const groups=new Map(),found=new Set();
 const languages=['en','ru','uz'],letters=['A','B','C','D'];
@@ -183,7 +199,26 @@ for(const folder of folderList){
     }
     checkedSeven.add(id21);
    }
-   assert.ok(eq(actual,expectedNow),'consolidated approved released+seven scope drift '+id21);
+   if(hardOnly.has(id21)) {
+    const archived=originalHardAuthoring(relative).questions
+      .find(item=>item.key===q.key);
+    assert.ok(archived,'missing archived Hard source '+id21);
+    const fields=Object.keys(archived).filter(k=>!eq(archived[k],q[k])).sort();
+    assert.deepEqual(fields,['difficulty','explanation','question'],
+      'Hard source must only change localized question/explanation/difficulty');
+    assert.equal(q.difficulty,'medium','unexpected original Hard candidate level');
+    assert.equal(archived.difficulty,'hard','archived Hard candidate lost its level');
+    assert.equal(q.qtype,'input');
+    for(const lang of languages) {
+      assert.ok(archived.question[lang]&&archived.explanation[lang]);
+      assert.notEqual(archived.question[lang],q.question[lang]);
+    }
+    expectedNow.difficulty=archived.difficulty;
+    expectedNow.question=archived.question;
+    expectedNow.explanation=archived.explanation;
+    checkedHard.add(id21);
+   }
+   assert.ok(eq(actual,expectedNow),'consolidated released+seven+hard9 scope drift '+id21);
    assert.equal(before.key,q.key,'candidate order changed');
    const id=7484+Number(q.key.slice(-3));
    items++;
@@ -408,7 +443,8 @@ assert.equal(checked21.size,21);assert.equal(seenUz21,19);assert.equal(seenDiag2
 assert.equal(checkedTrig23.size,14);assert.equal(seenDiagTrig23,23);
 assert.equal(checkedIntegral9.size,6);assert.equal(seenDiagIntegral9,9);
 assert.equal(checkedNext8.size,6);assert.equal(seenDiagNext8,8);
-assert.equal(checkedSeven.size,5);assert.equal(seenDiagSeven,7);
+assert.equal(checkedSeven.size,5);
+assert.equal(checkedHard.size,9,'all nine Hard source IDs must be present exactly once');assert.equal(seenDiagSeven,7);
 for(const folder of folderList){
  const rel='content/math/practice_v2/'+folder.name+'/diagnostic_catalog.json';
  const current=JSON.parse(fs.readFileSync(path.join(root,rel),'utf8'));
@@ -447,6 +483,6 @@ for(let practice=1;practice<=7;practice++){
 assert.deepEqual(all,{A:68,B:70,C:71,D:68},
  'correct-answer placement deviates from reviewed 277-question distribution');
 console.log(JSON.stringify({source_guard:'PASS',authored:495,mcq:277,input:218,
- corrected:30,diagnostic21:21,additional_trig_questions:14,additional_true_feedback_remaps:23,new_integral_derivative_questions:6,new_integral_derivative_remaps:9,new_8_feedback_questions:6,new_8_feedback_remaps:8,new_7_feedback_questions:5,new_7_feedback_remaps:7,new_uz_field_occurrences:19,new_option_diagnostic_mappings:59,published_prior:28,new_source_proposals:2,unrelated_change_count:0,practice_batches:7,
+ corrected:30,diagnostic21:21,additional_trig_questions:14,additional_true_feedback_remaps:23,new_integral_derivative_questions:6,new_integral_derivative_remaps:9,new_8_feedback_questions:6,new_8_feedback_remaps:8,new_7_feedback_questions:5,new_7_feedback_remaps:7,new_uz_field_occurrences:19,new_option_diagnostic_mappings:59,published_prior:28,new_source_proposals:2,hard_source_candidates:9,unrelated_change_count:0,practice_batches:7,
  anti_pattern_cycles:0,retained_option_semantics:true,
  answer_distribution:'balanced',protected_keys_printed:false}));
