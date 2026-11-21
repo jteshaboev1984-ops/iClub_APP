@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'supabase/candidates/iclub_ai_tutor_history_v1_owner_gated_dormant.sql'
+      - 'iclub-ai-v21-ui.js'
+      - 'scripts/ai-tutor-history-reload-chromium.cjs'
       - 'supabase/tests/iclub_ai_tutor_history_v1_isolated.sql'
       - 'docs/ai/AI_TUTOR_HISTORY_OWNER_GATE_DRAFT_2026-11-21.md'
       - '.github/workflows/ai-tutor-history-owner-gated-pg17.yml'
@@ -60,7 +62,22 @@ jobs:
           test "$PGHOST" = '127.0.0.1'
           test "$PGDATABASE" = 'postgres'
           psql -X -v ON_ERROR_STOP=1 -f supabase/tests/iclub_ai_tutor_history_v1_isolated.sql
-      - name: Confirm candidate does not alter the existing Tutor or publish chat storage
+      - name: Check dormant source stays hard-OFF
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'const TUTOR_HISTORY_DRAFT_ENABLED = false;' iclub-ai-v21-ui.js
+          node --check scripts/ai-tutor-history-reload-chromium.cjs
+      - name: Install Chromium for offline original-Tutor reload regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-package-lock playwright@1.55.0
+          npx playwright install chromium
+      - name: Exercise history reload / account separation in local Chromium only
+        shell: bash
+        run: node scripts/ai-tutor-history-reload-chromium.cjs
+      - name: Confirm candidate does not publish chat storage
         shell: bash
         run: |
           set -euo pipefail
