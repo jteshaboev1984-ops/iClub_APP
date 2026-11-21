@@ -67,7 +67,7 @@ DECLARE
  v_inserted boolean := false;
  v_count integer := 0;
 BEGIN
- IF v_uid IS NULL OR current_setting('request.jwt.claim.role',true) IS DISTINCT FROM 'authenticated' THEN
+ IF v_uid IS NULL OR auth.role() IS DISTINCT FROM 'authenticated' THEN
    RETURN jsonb_build_object('ok',false,'reason','auth_required');
  END IF;
  -- Serialize this owner's consent, save and delete. Otherwise a late append
@@ -89,7 +89,13 @@ BEGIN
  IF coalesce((v_status->>'eligible')::boolean,false) IS NOT TRUE THEN
    RETURN jsonb_build_object('ok',false,'reason','beta_not_enabled');
  END IF;
- IF private.iclub_ai_has_active_protected_assessment_v1(v_uid) IS DISTINCT FROM false THEN
+ -- The shared protected assessor checks Tour/Exam Prep; unfinished Practice
+ -- is independently blocked on the server (never rely on a hidden WebView).
+ IF private.iclub_ai_has_active_protected_assessment_v1(v_uid) IS DISTINCT FROM false
+    OR EXISTS(
+      SELECT 1 FROM public.practice_sessions_v4
+      WHERE user_id=v_uid AND status='in_progress'
+    ) THEN
    RETURN jsonb_build_object('ok',false,'reason','active_assessment');
  END IF;
  SELECT EXISTS(SELECT 1 FROM private.iclub_ai_tutor_history_v1_optins
