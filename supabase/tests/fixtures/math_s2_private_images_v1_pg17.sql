@@ -18,6 +18,8 @@ ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 GRANT USAGE ON SCHEMA auth,storage TO authenticated,anon;
 GRANT SELECT ON storage.objects TO authenticated,anon;
 INSERT INTO storage.buckets VALUES('books','books',true);
+-- Disposable metadata mimics an independently authorized private-bucket creation.
+INSERT INTO storage.buckets VALUES('iclub-math-s2-private','iclub-math-s2-private',false);
 CREATE TABLE public.seasons(id bigint PRIMARY KEY,season_no integer NOT NULL);
 CREATE TABLE public.tours(id bigint PRIMARY KEY,subject_id bigint NOT NULL,season_id bigint NOT NULL REFERENCES public.seasons(id),
  is_active boolean NOT NULL,start_date date,end_date date);
@@ -87,6 +89,10 @@ BEGIN
 END $g$;
 RESET ROLE;
 -- Synthetic signed start/issue boundary: owner only, server immutable question snapshot.
+-- Preexisting S1 / Chemistry results must survive S2 asset code unchanged.
+INSERT INTO public.tour_attempts VALUES
+ (7002,'00000000-0000-4000-8000-000000000101',82,'submitted'),
+ (7003,'00000000-0000-4000-8000-000000000102',83,'anti_cheat');
 INSERT INTO public.tour_attempts VALUES(7001,'00000000-0000-4000-8000-000000000101',81,'active');
 INSERT INTO public.tour_session_runtime_v4(attempt_id,user_id,tour_id,question_ids)
 VALUES(7001,'00000000-0000-4000-8000-000000000101',81,
@@ -139,7 +145,9 @@ DO $g$ BEGIN
 END $g$;
 RESET ROLE;
 DO $g$ BEGIN
- IF (SELECT count(*) FROM public.tour_attempts)<>1 OR
+ IF (SELECT count(*) FROM public.tour_attempts)<>3 OR
+    (SELECT count(*) FROM public.tour_attempts WHERE (id=7002 AND status='submitted')
+      OR (id=7003 AND status='anti_cheat'))<>2 OR
     (SELECT count(*) FROM public.tour_session_runtime_v4)<>1 OR
     (SELECT count(*) FROM public.questions)<>20 OR
     (SELECT count(*) FROM storage.buckets WHERE id='books' AND public IS TRUE)<>1 OR
