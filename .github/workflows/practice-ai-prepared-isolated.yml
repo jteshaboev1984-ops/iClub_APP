@@ -23,6 +23,8 @@ on:
       - supabase/tests/iclub_ai_practice_pc3_real_quota_rpcs_isolated.sql
       - scripts/practice-ai-freeform-canonical-e2e.cjs
       - scripts/practice-ai-unified-tutor-browser-e2e.cjs
+      - scripts/ai-tutor-academic-unavailable-regression.cjs
+      - scripts/ai-tutor-practice-attempt-bridge-browser.cjs
       - scripts/fixtures/practice-ai-unified-tutor-local-only.html
       - iclub-ai-v21-ui.css
       - supabase/functions/iclub-ai-practice-freeform/index.ts
@@ -116,6 +118,12 @@ jobs:
             throw new Error('Single Tutor Practice context bridge missing');
           console.log('PASS: dormant Practice route belongs to existing Tutor only');
           NODE
+      - name: Provider-free academic no-source RU/UZ/EN regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/ai-tutor-academic-unavailable-regression.cjs
+          node scripts/ai-tutor-academic-unavailable-regression.cjs
       - name: Deno type-check
         run: deno check supabase/functions/iclub-ai-practice-prepared/index.ts
       - name: PC3 isolated release-gate and type-check
@@ -203,6 +211,7 @@ jobs:
           set -euo pipefail
           node scripts/practice-ai-prepared-browser-smoke.cjs
           node scripts/practice-ai-unified-tutor-browser-e2e.cjs
+          node scripts/ai-tutor-practice-attempt-bridge-browser.cjs
       - name: Real Edge to isolated PostgreSQL browser flow
         shell: bash
         run: |
