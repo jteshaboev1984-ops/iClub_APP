@@ -158,8 +158,16 @@ BEGIN
       WHERE tq.question_id=v_q.id AND tq.is_active IS true
         AND t.subject_id=5 AND s.season_no=2
     ) THEN
-      v_correct:=private.iclub_math_s2_tour_numeric_equiv_v1(
-        v_selected,v_q.correct_answer);
+      -- The existing Q6089 prompt requires a fraction IN LOWEST TERMS.
+      -- Keep the original exact canonical-form test for this one input.
+      -- For other S2 inputs, accept mathematically equivalent rationals.
+      IF v_q.id=6089 THEN
+        v_correct:=public.iclub_tour_input_is_correct_v4(
+          v_selected,v_q.correct_answer);
+      ELSE
+        v_correct:=private.iclub_math_s2_tour_numeric_equiv_v1(
+          v_selected,v_q.correct_answer);
+      END IF;
     ELSE
       v_correct:=public.iclub_tour_input_is_correct_v4(
         v_selected,v_q.correct_answer);
