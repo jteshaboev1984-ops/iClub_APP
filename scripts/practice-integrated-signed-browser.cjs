@@ -2,8 +2,9 @@
 'use strict';
 /* #574. Actual Practice renderer + Topic/Tabs/standalone History source and
    genuine local HTTP PostgREST/JWT/PG17, synthetic learners and bank only.
-   Mocked: unrelated app shell, Tour statistics, account registration, Tour
-   question selection, and the write-capable onStart callback. Never production. */
+   Read-only UI cases mock unrelated shell/onStart. The scoped write case runs
+   actual app.js Topic Start/Submit/Pause and signed local PG17 RPCs.
+   Telegram login and Tour statistics remain untested; never production. */
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
 const fs=require('node:fs');
@@ -298,6 +299,108 @@ async function postRaw(base,fn,subject,token){
      if(screens&&item.locale==='ru'&&item.width===375&&item.uid===A&&item.subject==='mathematics')
       await page.screenshot({path:path.join(screens,'practice-real-jwt-postgrest-history-ru-375.png'),
        animations:'disabled'});
+
+     // An additional real learner write path in the same isolated Chromium session.
+     // Earlier read-only assertions and History baseline have already passed.
+     if(item.subject==='mathematics'&&item.locale==='ru'&&item.width===375&&item.uid===A){
+       const range=(from,to)=>{
+         const begin=original.indexOf(from),end=original.indexOf(to,begin+from.length);
+         assert(begin>=0&&end>begin,'actual app.js handler unavailable: '+from);
+         return original.slice(begin,end);
+       };
+       const liveHandlers=[
+         ['function parseOptionsText(', 'function isNumericLike('],
+         ['function pickContentText(', 'async function buildPracticeSetByRec('],
+         ['function getPracticeSafeApi()', 'function practiceSafeReviewRowsToDetails('],
+         ['function loadPracticeDraft()', 'function stripTourQuestionSecrets('],
+         ['function savePracticeDraft(', 'function loadMyRecs()'],
+         ['async function startPracticeByRec(', 'async function startPracticeRetryMistakes('],
+         ['function renderPracticeQuiz()', 'function updatePracticeSubmitEnabled()'],
+         ['function updatePracticeSubmitEnabled()', 'function handlePracticePause()'],
+         ['function handlePracticePause()', 'async function handlePracticeDrillSubmitSafe('],
+         ['async function handlePracticeDrillSubmitSafe(', 'async function handlePracticeSubmit(']
+       ].map(([from,to])=>range(from,to)).join('\n');
+       await page.evaluate(uid=>{
+         window.loadProfile=()=>({language:document.documentElement.lang});
+         window.PRACTICE_CONFIG={total:10,timeByDifficulty:{easy:45,medium:60,hard:90}};
+         window.normalizeDifficulty=x=>String(x||'medium');
+         window.formatMMSS=x=>'00:'+String(Math.floor(Number(x)||0)).padStart(2,'0');
+         window.escapeHTML=x=>String(x).replace(/[&<>"']/g,c=>
+           ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+         window.dbWriteWithRetry=fn=>fn();
+         window.showAsyncOverlay=()=>{};
+         window.hideAsyncOverlay=()=>{};
+         window.showToast=()=>{};
+         window.saveState=()=>true;
+         window.stopPracticeQuestionTimer=()=>{};
+         window.startPracticeQuestionTimer=()=>{};
+         window.trackEvent=()=>{};
+         window.finishPractice=()=>{window.__qaFinished=true;};
+         window.iClubPracticeDraftIdentityV1={
+           bind:async()=>uid,
+           ownsActiveQuiz:q=>q?.practiceOwnerUid===uid,
+           read:()=>JSON.parse(sessionStorage.getItem('qa-topic-draft')||'null'),
+           save:d=>{sessionStorage.setItem('qa-topic-draft',JSON.stringify(d));return true;},
+           clear:()=>{sessionStorage.removeItem('qa-topic-draft');return true;}
+         };
+         window.pushCourses=screen=>{
+           document.querySelectorAll('.stack-screen').forEach(el=>el.classList.remove('is-active'));
+           document.getElementById('courses-'+screen)?.classList.add('is-active');
+         };
+         window.replaceCourses=window.pushCourses;
+         document.getElementById('courses-practice-history').classList.remove('is-active');
+         document.getElementById('courses-practice-start').classList.add('is-active');
+       },A);
+       await page.addScriptTag({url:url+'/security/legacy-assessment-safe-api.js'});
+       await page.addScriptTag({content:liveHandlers});
+       await page.evaluate(()=>{
+         document.getElementById('practice-submit-btn').addEventListener(
+           'click',()=>{void handlePracticeDrillSubmitSafe(false);});
+         document.getElementById('practice-pause-btn').addEventListener(
+           'click',()=>handlePracticePause());
+       });
+       await page.locator('.practice-topic-choice-item').first().click();
+       await page.waitForFunction(()=>Number(window.state.quiz?.safeDrillSessionId)>0,
+         null,{timeout:14000});
+       const launched=await page.evaluate(()=>({
+         id:state.quiz.safeDrillSessionId,
+         total:state.quiz.questions.length,
+         initial:state.quiz.questions[0]?.correctAnswer,
+         shown:document.getElementById('practice-question')?.textContent
+       }));
+       assert.equal(launched.total,5,'signed UI Start must select five eligible questions');
+       assert(!launched.initial,'unanswered correct answer exposed by UI');
+       assert(/^RU Q/.test(launched.shown),'actual app.js localized quiz not displayed');
+       const writeCalls=await page.evaluate(()=>window.__rpcCalls.slice());
+       assert(writeCalls.some(c=>c.name==='start_practice_topic_drill_choice_safe_v1'&&c.status===200),
+         'real browser Start missed signed RPC');
+       assert(writeCalls.some(c=>c.name==='get_practice_drill_resume_safe_v4'&&c.status===200),
+         'real browser Start missed owned question fetch');
+       if(screens)await page.screenshot({path:path.join(screens,'qa-actual-start-ru-375.png'),
+         animations:'disabled'});
+       await page.locator('#practice-input').fill('WRONG');
+       await page.locator('#practice-submit-btn').click();
+       await page.waitForFunction(()=>state.quiz?.index===1,null,{timeout:13000});
+       const submitted=await page.evaluate(()=>({
+         correct:state.quiz.correct[0],
+         answer:state.quiz.questions[0].correctAnswer,
+         explanation:state.quiz.questions[0].explanation
+       }));
+       assert(submitted.correct===false&&submitted.answer==='RIGHT'&&
+         submitted.explanation==='RU explanation','actual app.js submission/feedback mismatch');
+       await page.locator('#practice-pause-btn').click();
+       await page.waitForFunction(()=>state.quiz===null&&Boolean(
+         sessionStorage.getItem('qa-topic-draft')),null,{timeout:13000});
+       const draft=await page.evaluate(()=>loadPracticeDraft());
+       assert.equal(Number(draft?.quiz?.safeDrillSessionId),Number(launched.id));
+       assert(draft.quiz.questions.every(q=>!q.correctAnswer&&!q.explanation),
+         'paused draft leaked answers or explanations');
+       const unchanged=await postRaw(url,'get_practice_topic_history_safe_v1','mathematics',signed(A));
+       assert(unchanged.ok&&unchanged.data?.completed_sessions===3,
+         'unfinished browser attempt incorrectly finalized');
+       assert.equal(networkFailures.length,0,
+         'unexpected browser errors after real Submit/Pause: '+networkFailures.join('; ').slice(0,140));
+     }
     }finally{await page.close();}
    }
   }finally{await browser.close();}
