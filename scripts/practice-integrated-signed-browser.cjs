@@ -313,6 +313,7 @@ async function postRaw(base,fn,subject,token){
          ['function pickContentText(', 'async function buildPracticeSetByRec('],
          ['function getPracticeSafeApi()', 'function practiceSafeReviewRowsToDetails('],
          ['function loadPracticeDraft()', 'function stripTourQuestionSecrets('],
+         ['async function restorePracticeQuizSecrets(quiz)', 'function savePracticeDraft('],
          ['function savePracticeDraft(', 'function loadMyRecs()'],
          ['async function startPracticeByRec(', 'async function startPracticeRetryMistakes('],
          ['function renderPracticeQuiz()', 'function updatePracticeSubmitEnabled()'],
@@ -336,6 +337,7 @@ async function postRaw(base,fn,subject,token){
          window.startPracticeQuestionTimer=()=>{};
          window.trackEvent=()=>{};
          window.finishPractice=()=>{window.__qaFinished=true;};
+         window.__qaUid=uid;
          window.iClubPracticeDraftIdentityV1={
            bind:async()=>uid,
            ownsActiveQuiz:q=>q?.practiceOwnerUid===uid,
@@ -358,6 +360,23 @@ async function postRaw(base,fn,subject,token){
            'click',()=>{void handlePracticeDrillSubmitSafe(false);});
          document.getElementById('practice-pause-btn').addEventListener(
            'click',()=>handlePracticePause());
+         document.getElementById('practice-resume-btn').addEventListener(
+           'click',async()=>{
+             const draft=loadPracticeDraft();
+             if(draft?.status!=='paused'||draft.subjectKey!=='mathematics')
+               throw Error('saved Practice draft missing or wrong subject');
+             const restored=await restorePracticeQuizSecrets(draft.quiz);
+             if(!restored||restored.safeDrillSessionId!==draft.quiz.safeDrillSessionId)
+               throw Error('server-owned Practice restore failed');
+             if(await window.iClubPracticeDraftIdentityV1.bind()!==window.__qaUid)
+               throw Error('draft learner identity mismatch');
+             restored.practiceOwnerUid=window.__qaUid;
+             window.state.quiz=restored;
+             window.state.quizLock='practice';
+             clearPracticeDraft(restored.safeDrillSessionId);
+             window.pushCourses('practice-quiz');
+             renderPracticeQuiz();
+           });
        });
        await page.locator('.practice-topic-choice-item').first().click();
        await page.waitForFunction(()=>Number(window.state.quiz?.safeDrillSessionId)>0,
@@ -395,6 +414,25 @@ async function postRaw(base,fn,subject,token){
        assert.equal(Number(draft?.quiz?.safeDrillSessionId),Number(launched.id));
        assert(draft.quiz.questions.every(q=>!q.correctAnswer&&!q.explanation),
          'paused draft leaked answers or explanations');
+       await page.locator('#practice-resume-btn').waitFor({state:'visible',timeout:12000});
+       await page.locator('#practice-resume-btn').click();
+       await page.waitForFunction(()=>state.quiz?.index===1,null,{timeout:13000});
+       const restored=await page.evaluate(()=>({
+         id:state.quiz.safeDrillSessionId,
+         answered:state.quiz.questions[0].correctAnswer,
+         next:state.quiz.questions[1].correctAnswer,
+         draft:loadPracticeDraft(),
+         text:document.getElementById('practice-question')?.textContent,
+         rpcs:window.__rpcCalls.filter(c=>c.name==='get_practice_drill_resume_safe_v4').length
+       }));
+       assert.equal(Number(restored.id),Number(launched.id),'browser Resume changed session');
+       assert.equal(restored.answered,'RIGHT','Resume lost server-verified saved answer');
+       assert(!restored.next,'Resume exposed next unanswered solution');
+       assert.equal(restored.draft,null,'successful Resume failed to clear draft');
+       assert(restored.text?.startsWith('RU Q'),'Resume did not render localized next question');
+       assert(restored.rpcs>=2,'browser Resume skipped authenticated question RPC');
+       if(screens)await page.screenshot({path:path.join(screens,'qa-actual-resume-ru-375.png'),
+         animations:'disabled'});
        const unchanged=await postRaw(url,'get_practice_topic_history_safe_v1','mathematics',signed(A));
        assert(unchanged.ok&&unchanged.data?.completed_sessions===3,
          'unfinished browser attempt incorrectly finalized');
