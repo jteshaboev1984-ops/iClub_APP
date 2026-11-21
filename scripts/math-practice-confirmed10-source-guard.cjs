@@ -204,7 +204,8 @@ for(const folder of folderList){
    if(!allowed)assert.ok(eq(before,q),'unrelated authored item mutated '+id);
    else{
     changed++;found.add(id);
-    const fields=Object.keys(q).filter(k=>!eq(before[k],q[k])).sort();
+    const checkedFields=exactRangeFour.has(id)?actual:q;
+    const fields=Object.keys(checkedFields).filter(k=>!eq(before[k],checkedFields[k])).sort();
     assert.deepEqual(fields,allowed.slice().sort(),
       'micro-release includes unsanctioned field change '+id);
     assert.equal(before.difficulty,q.difficulty,'release not authorized to regrade difficulty');
