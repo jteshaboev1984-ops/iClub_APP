@@ -15,7 +15,8 @@
       historyRecent:"Последние попытки", historyCount:"попыток",
       historyFoot:"Здесь показаны результаты попыток по темам. Результаты практики по турам учитываются отдельно.",
       historyUnavailable:"История попыток по темам сейчас недоступна.",
-      historyRetry:"Повторить" },
+      historyRetry:"Повторить",historySessions:"Завершено попыток",
+      historyScope:"Сохранённые результаты",historyEmpty:"Пока нет завершённых тренировок по темам." },
     uz: { title:"Mavzuni tanlang", desc:"Tur amaliyotidan alohida mavzu bo‘yicha amaliyot qiling.",
       open:"Mavzuni tanlash", close:"Mavzularni yashirish", search:"Mavzuni qidirish",
       searchPlaceholder:"Mavzuni topish…", loading:"Mavzular yuklanmoqda…",
@@ -27,7 +28,8 @@
       historyRecent:"So‘nggi urinishlar", historyCount:"urinish",
       historyFoot:"Bu yerda mavzular bo‘yicha urinishlar natijalari ko‘rsatiladi. Tur amaliyoti natijalari alohida hisoblanadi.",
       historyUnavailable:"Mavzular bo‘yicha urinishlar tarixini hozir yuklab bo‘lmadi.",
-      historyRetry:"Qayta urinish" },
+      historyRetry:"Qayta urinish",historySessions:"Tugallangan urinishlar",
+      historyScope:"Saqlangan natijalar",historyEmpty:"Mavzular bo‘yicha tugallangan mashqlar hali yo‘q." },
     en: { title:"Choose a topic", desc:"Practise a specific topic independently from your Tour practice.",
       open:"Choose topic", close:"Hide topics", search:"Search topics",
       searchPlaceholder:"Find a topic…", loading:"Loading available topics…",
@@ -39,7 +41,8 @@
       historyRecent:"Recent attempts", historyCount:"attempts",
       historyFoot:"These are results from topic practice. Tour results are tracked separately.",
       historyUnavailable:"Topic practice history is temporarily unavailable.",
-      historyRetry:"Retry" }
+      historyRetry:"Retry",historySessions:"Completed attempts",
+      historyScope:"Saved results",historyEmpty:"No completed topic practice attempts yet." }
   };
   let mountSerial=0;
 
@@ -109,12 +112,17 @@
     const note=element("p","practice-topic-choice-note",c.note);
     const history=element("section","practice-topic-history");
     history.hidden=true;
-    // Preserve latest Topic attempts below Start/Resume in the grouped Practice
-    // screen; original fallback layout stays unchanged if no outlet is present.
-    const historyOutlet=document.getElementById('practice-topic-history-placement');
+    // Reuse the existing signed, owner-scoped History RPC. With unified Practice
+    // tabs, its compact summary lives above Topic selection. If older shells
+    // lack that slot, preserve the original summary below Topic Start/Resume.
+    const topStats=document.getElementById('practice-topic-overview-content');
+    const historyOutlet=topStats||document.getElementById('practice-topic-history-placement');
+    const compact=!!topStats;
     host.append(header,panel,note);
-    if(historyOutlet)historyOutlet.replaceChildren(history);
-    else host.append(history);
+    if(historyOutlet){
+      historyOutlet.replaceChildren(history);
+      if(!compact)historyOutlet.hidden=false;
+    }else host.append(history);
 
     function safeResult(row) {
       if (!row || typeof row!=="object") return null;
@@ -127,50 +135,61 @@
     function renderHistory(data) {
       if (!history.isConnected || ownSerial!==mountSerial) return;
       history.replaceChildren();
-      const sessions=Number(data?.completed_sessions||0);
-      const latest=safeResult(data?.last);
-      const best=safeResult(data?.best);
-      if (!Number.isInteger(sessions)||sessions<1||!latest||!best) {
-        history.hidden=true;
+      const sessions=Number(data?.completed_sessions);
+      if(!Number.isInteger(sessions)||sessions<0)throw Error("history_invalid_count");
+      if(sessions===0) {
+        if(compact){
+          history.append(element("p","practice-topic-history-empty",c.historyEmpty));
+          history.hidden=false;
+        }else history.hidden=true;
         return;
       }
+      const latest=safeResult(data?.last);
+      const best=safeResult(data?.best);
       const correct=Number(data?.total_correct_answers), answered=Number(data?.total_answered);
-      if (!Number.isInteger(correct)||!Number.isInteger(answered)||
-          correct<0||answered<correct) { history.hidden=true; return; }
+      if(!latest||!best||!Number.isInteger(correct)||!Number.isInteger(answered)||
+          correct<0||answered<correct)throw Error("history_invalid_shape");
 
       const heading=element("div","practice-topic-history-head");
       heading.append(element("strong","",c.historyTitle),
-        element("span","practice-topic-history-count",sessionCountLabel(sessions,lang,c)));
+        element("span","practice-topic-history-count",
+          compact?c.historyScope:sessionCountLabel(sessions,lang,c)));
       const metrics=element("div","practice-topic-history-metrics");
-      // With one completed session, latest, best and recent all refer to one attempt.
-      const visibleMetrics=sessions===1
-        ? [[c.historyLast,latest.correct+" / "+latest.total]]
-        : [
-            [c.historyLast,latest.correct+" / "+latest.total],
-            [c.historyBest,best.correct+" / "+best.total],
-            [c.historyAll,correct+" / "+answered]
-          ];
+      const visibleMetrics=compact
+        ? [[c.historySessions,String(sessions)],[c.historyAll,correct+" / "+answered]]
+        : sessions===1
+          ? [[c.historyLast,latest.correct+" / "+latest.total]]
+          : [[c.historyLast,latest.correct+" / "+latest.total],
+             [c.historyBest,best.correct+" / "+best.total],
+             [c.historyAll,correct+" / "+answered]];
       for(const [label,value] of visibleMetrics) {
         const metric=element("div","practice-topic-history-metric");
         metric.append(element("span","",label),element("strong","",value));
         metrics.append(metric);
       }
       history.append(heading,metrics);
-      const recent=sessions>1&&Array.isArray(data?.recent)?data.recent.slice(0,3):[];
-      if(recent.length) {
-        const list=element("div","practice-topic-history-recent");
-        list.append(element("strong","practice-topic-history-recent-title",c.historyRecent));
-        for (const raw of recent) {
-          const item=safeResult(raw);
-          if(!item) continue;
-          const row=element("div","practice-topic-history-row");
-          row.append(element("span","",item.topic||c.historyTitle),
-            element("strong","",item.correct+" / "+item.total));
-          list.append(row);
+      if(compact){
+        const last=element("div","practice-topic-history-latest");
+        last.append(element("span","",c.historyLast+": "+latest.topic),
+          element("strong","",latest.correct+" / "+latest.total));
+        history.append(last);
+      }else{
+        const recent=sessions>1&&Array.isArray(data?.recent)?data.recent.slice(0,3):[];
+        if(recent.length) {
+          const list=element("div","practice-topic-history-recent");
+          list.append(element("strong","practice-topic-history-recent-title",c.historyRecent));
+          for (const raw of recent) {
+            const item=safeResult(raw);
+            if(!item) continue;
+            const row=element("div","practice-topic-history-row");
+            row.append(element("span","",item.topic||c.historyTitle),
+              element("strong","",item.correct+" / "+item.total));
+            list.append(row);
+          }
+          history.append(list);
         }
-        history.append(list);
+        history.append(element("p","practice-topic-history-foot",c.historyFoot));
       }
-      history.append(element("p","practice-topic-history-foot",c.historyFoot));
       history.hidden=false;
     }
 
