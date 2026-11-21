@@ -15,11 +15,10 @@ CREATE TABLE IF NOT EXISTS private.math_s2_image_assets_v1 (
 );
 REVOKE ALL ON private.math_s2_image_assets_v1 FROM PUBLIC, anon, authenticated;
 
--- New private bucket: do not change shared books or team-photos.
--- Storage bytes are uploaded separately through the approved operator flow.
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('iclub-math-s2-private', 'iclub-math-s2-private', false)
-ON CONFLICT (id) DO NOTHING;
+-- Existing approved private bucket prerequisite: create it using the
+-- Supabase Storage management API ONLY after owner GO. Do not INSERT into
+-- Supabase-managed storage metadata tables from this candidate SQL.
+-- Never mutate shared books/team-photos or learner assets.
 DO $guard$ BEGIN
  IF NOT EXISTS (SELECT 1 FROM storage.buckets
    WHERE id='iclub-math-s2-private' AND public IS FALSE) THEN
