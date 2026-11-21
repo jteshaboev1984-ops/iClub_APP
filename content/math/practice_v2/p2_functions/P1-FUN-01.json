@@ -91,9 +91,9 @@
         {
           "key": "B",
           "text": {
-            "en": "Domain {1,2,3}; range {4,4,7}",
-            "ru": "Область определения {1,2,3}; область значений {4,4,7}",
-            "uz": "Aniqlanish sohasi {1,2,3}; qiymatlar to‘plami {4,4,7}"
+            "en": "Domain {1,2,3}; range {4,5,7}",
+            "ru": "Область определения {1,2,3}; область значений {4,5,7}",
+            "uz": "Aniqlanish sohasi {1,2,3}; qiymatlar to‘plami {4,5,7}"
           },
           "diagnostic_code": "FUN01_DOMAIN_RANGE"
         },

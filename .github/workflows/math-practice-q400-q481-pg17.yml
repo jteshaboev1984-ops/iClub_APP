@@ -26,6 +26,7 @@ on:
       - 'supabase/tests/math_practice_pending10_future_only_pg17.sql'
       - 'supabase/tests/math_practice_decimal8_future_only_pg17.sql'
       - 'supabase/tests/math_practice_q069_q311_semantic_future_only_pg17.sql'
+      - 'supabase/tests/math_practice_q070_setrange_future_only_pg17.sql'
       - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
       - '.github/workflows/math-practice-q400-q481-pg17.yml'
 permissions:
@@ -145,5 +146,21 @@ jobs:
             -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
           psql -X -v ON_ERROR_STOP=1 -d math_semantic2 \
             -f supabase/tests/math_practice_q069_q311_semantic_future_only_pg17.sql
+      - name: One Q070 set-equivalence correction — isolated version, QA fail-closed, guarded rollback
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-confirmed10-stage-generator.cjs --batch setrange1 --out "$tmp/stage.sql"
+          node scripts/math-practice-confirmed10-pg17-fixture.cjs \
+            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --expect 1
+          createdb -T template0 math_setrange1
+          psql -X -v ON_ERROR_STOP=1 -d math_setrange1 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_setrange1 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_setrange1 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_setrange1 \
+            -f supabase/tests/math_practice_q070_setrange_future_only_pg17.sql
       - name: No live academic publication
-        run: echo 'Two new semantic items Q069/Q311 and previous published regressions ONLY. No hosted DML, app deployment, QA approval or published key output.'
+        run: echo 'Q070 one-item future-only staging and previous published regressions ONLY. No hosted DML, app deployment, QA approval or published key output.'

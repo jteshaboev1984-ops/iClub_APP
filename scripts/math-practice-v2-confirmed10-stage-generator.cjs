@@ -17,7 +17,8 @@ const releases={
  q089q202q226:{name:'math_p1_practice_v2_q089_q202_q226_20261120',suffix:'-V20261120Q089Q202Q226'},
  pending10:{name:'math_p1_practice_v2_pending10_20261120',suffix:'-V20261120PENDING10'},
  decimal8:{name:'math_p1_practice_v2_decimal8_20261121',suffix:'-V20261121DEC8'},
- semantic2:{name:'math_p1_practice_v2_semantic2_20261121',suffix:'-V20261121SEM2'}
+ semantic2:{name:'math_p1_practice_v2_semantic2_20261121',suffix:'-V20261121SEM2'},
+ setrange1:{name:'math_p1_practice_v2_setrange1_20261121',suffix:'-V20261121SETRANGE1'}
 };
 assert.ok(Object.hasOwn(releases,mode),'unsupported governed release batch');
 const release=releases[mode].name,suffix=releases[mode].suffix;
@@ -93,11 +94,18 @@ const semanticTwo=[
   old_hash:'8826d11258161ea3bd246c1861cd34d13f912c6570de40065cdb11589336dc28'}
 ];
 assert.deepEqual(semanticTwo.map(x=>x.id),[7553,7795]);
+// Exact read-only source pin for Q070 / original live #7554. Future-only one-item batch.
+const setRangeOne=[
+ {id:7554,code:'P1-FUN-01',file:'p2_functions/P1-FUN-01.json',
+  old_hash:'d868b7ea232799fc1c92114efc986b7f26e5a781f7f634110d8cec17f8ac5963'}
+];
+assert.deepEqual(setRangeOne.map(x=>x.id),[7554]);
 const specs=mode==='hotfix10'?baselineSpecs:
   mode==='q400q481'?nextTwo:
   mode==='q089q202q226'?nextThree:
   mode==='pending10'?pending10:
-  mode==='decimal8'?decimalEight:semanticTwo;
+  mode==='decimal8'?decimalEight:
+  mode==='semantic2'?semanticTwo:setRangeOne;
 const expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
