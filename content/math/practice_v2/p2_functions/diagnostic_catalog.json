@@ -500,6 +500,54 @@
         "ru": "Изменения снаружи f прямо действуют на y; изменения внутри f обратно действуют на x.",
         "uz": "f tashqarisidagi o‘zgarishlar y ga to‘g‘ridan-to‘g‘ri, f ichidagilar x ga teskari ta’sir qiladi."
       }
+    },
+    {
+      "code": "FUN01_RANGE_EXTRA",
+      "skill": "P1-FUN-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The selected range includes an output that the mapping never produces.",
+        "ru": "Выбрана область значений с лишним числом, которое функция не принимает.",
+        "uz": "Tanlangan qiymatlar to‘plamida funksiya hech qachon bermaydigan ortiqcha qiymat bor."
+      },
+      "next_action": {
+        "en": "Read the outputs of all three arrows; a range contains only values actually reached.",
+        "ru": "Все значения области значений должны получаться по заданным стрелкам.",
+        "uz": "Qiymatlar to‘plami faqat moslikda haqiqatan olingan natijalardan iborat bo‘ladi."
+      }
+    },
+    {
+      "code": "FUN01_DOMAIN_EXTRA",
+      "skill": "P1-FUN-01",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The selected domain contains values that are outputs, not permitted inputs.",
+        "ru": "В область определения ошибочно добавлены значения, являющиеся выходами, а не входами.",
+        "uz": "Aniqlanish sohasiga kirish emas, chiqish qiymatlari ham noto‘g‘ri qo‘shilgan."
+      },
+      "next_action": {
+        "en": "Use only the input numbers to form the domain; do not add their outputs.",
+        "ru": "Область определения содержит только заданные входные числа.",
+        "uz": "Aniqlanish sohasini faqat berilgan kirish qiymatlaridan tuzing."
+      }
+    },
+    {
+      "code": "FUN04_MONOTONIC_DIRECTION",
+      "skill": "P1-FUN-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "This restriction makes the function one-to-one, but it is increasing rather than decreasing.",
+        "ru": "При таком ограничении функция инъективна, но возрастает, а не убывает.",
+        "uz": "Bu sohada funksiya injektiv, ammo kamayuvchi emas, o‘suvchidir."
+      },
+      "next_action": {
+        "en": "Check which side of the quadratic vertex decreases as x increases.",
+        "ru": "Определите ветвь параболы, на которой значения убывают при увеличении x.",
+        "uz": "x ortganda parabola qaysi tarmoqda kamayishini tekshiring."
+      }
     }
   ]
 }
