@@ -35,7 +35,8 @@ BEGIN
       AND m.qa_language_status='pending' AND m.qa_technical_status='pending'
       AND m.qa_tour_separation_status='pending'
       AND q.is_active=false AND q.quality_status='draft'
-      AND q.qtype='mcq' AND q.difficulty='medium' AND q.time_limit_sec=60
+      AND q.qtype='mcq' AND q.difficulty IN('easy','medium','hard')
+      AND q.time_limit_sec=CASE q.difficulty WHEN 'easy' THEN 45 WHEN 'medium' THEN 60 WHEN 'hard' THEN 90 END
       AND q.question_text_en IS NOT NULL AND q.question_text_ru IS NOT NULL
       AND q.question_text_uz IS NOT NULL
       AND q.options_text_en IS NOT NULL AND q.options_text_ru IS NOT NULL
