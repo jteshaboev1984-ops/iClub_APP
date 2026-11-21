@@ -67,7 +67,7 @@
             "ru": "Стационарная точка перегиба",
             "uz": "Statsionar egilish nuqtasi"
           },
-          "diagnostic_code": "DIF07_CLASSIFICATION"
+          "diagnostic_code": "DIF07_MAX_NOT_INFLEXION"
         },
         {
           "key": "B",
@@ -263,7 +263,7 @@
             "ru": "Стационарная точка перегиба",
             "uz": "Statsionar egilish nuqtasi"
           },
-          "diagnostic_code": "DIF07_CLASSIFICATION"
+          "diagnostic_code": "DIF07_MAX_NOT_INFLEXION"
         },
         {
           "key": "D",
@@ -345,7 +345,7 @@
             "ru": "Локальный максимум",
             "uz": "Lokal maksimum"
           },
-          "diagnostic_code": "DIF07_CLASSIFICATION"
+          "diagnostic_code": "DIF07_INFLEXION_NOT_EXTREMUM"
         },
         {
           "key": "B",
@@ -354,7 +354,7 @@
             "ru": "Локальный минимум",
             "uz": "Lokal minimum"
           },
-          "diagnostic_code": "DIF07_CLASSIFICATION"
+          "diagnostic_code": "DIF07_INFLEXION_NOT_EXTREMUM"
         },
         {
           "key": "C",

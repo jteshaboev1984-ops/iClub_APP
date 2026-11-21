@@ -620,7 +620,7 @@
             "ru": "f(x) должна быть положительной везде.",
             "uz": "f(x) hamma joyda musbat bo‘lishi kerak."
           },
-          "diagnostic_code": "INT04_SPLIT_CROSSING"
+          "diagnostic_code": "INT04_ZERO_NEEDS_SIGN_CHANGE"
         },
         {
           "key": "B",
@@ -647,7 +647,7 @@
             "ru": "f(x) должна быть отрицательной везде.",
             "uz": "f(x) hamma joyda manfiy bo‘lishi kerak."
           },
-          "diagnostic_code": "INT04_SPLIT_CROSSING"
+          "diagnostic_code": "INT04_ZERO_NEEDS_SIGN_CHANGE"
         }
       ],
       "correct_answer": "C",

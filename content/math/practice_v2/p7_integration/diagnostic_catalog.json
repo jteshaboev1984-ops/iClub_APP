@@ -452,6 +452,22 @@
         "ru": "Запишите площадь как интеграл «верхняя функция минус нижняя» (или положительной высоты над осью), затем проверьте пределы и вычисления.",
         "uz": "Yuzani «yuqoridagi funksiya minus pastdagi funksiya» integrali (yoki o‘qdan musbat balandlik) sifatida yozib, chegaralar va hisoblashlarni tekshiring."
       }
+    },
+    {
+      "code": "INT04_ZERO_NEEDS_SIGN_CHANGE",
+      "skill": "P1-INT-04",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "A continuous, nonzero function with a zero integral over this interval cannot be strictly positive everywhere or strictly negative everywhere; positive and negative contributions must cancel.",
+        "ru": "Непрерывная функция, не равная тождественно нулю, не может быть всюду строго положительной или всюду строго отрицательной при нулевом интеграле: положительные и отрицательные вклады компенсируются.",
+        "uz": "Oraliqda uzluksiz va aynan nol bo‘lmagan funksiyaning integrali nol bo‘lsa, u hamma joyda qat’iy musbat yoki qat’iy manfiy bo‘la olmaydi: musbat va manfiy hissalar o‘zaro kompensatsiyalanadi."
+      },
+      "next_action": {
+        "en": "Distinguish the signed integral from geometric area. For continuous f that is not identically zero, ∫f=0 requires positive and negative signed contributions, while total geometric area is positive.",
+        "ru": "Отличайте интеграл со знаком от геометрической площади. Если непрерывная f не тождественно нулевая, то при ∫f=0 нужны положительные и отрицательные вклады, а геометрическая площадь положительна.",
+        "uz": "Ishorali integralni geometrik yuzadan farqlang. Uzluksiz f aynan nol bo‘lmasa, ∫f=0 da musbat va manfiy hissalar bo‘ladi, umumiy geometrik yuza esa musbat qoladi."
+      }
     }
   ]
 }

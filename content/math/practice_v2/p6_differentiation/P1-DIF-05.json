@@ -407,7 +407,7 @@
             "ru": "x<3",
             "uz": "x<3"
           },
-          "diagnostic_code": "DIF05_ENDPOINT"
+          "diagnostic_code": "DIF05_DOMAIN_INTERSECTION"
         }
       ],
       "correct_answer": "A",

@@ -69,6 +69,11 @@ jobs:
           node --check scripts/math-practice-v2-feedback-eight-oracle.cjs
           node scripts/math-practice-v2-feedback-eight-oracle.cjs
 
+      - name: Independently verify seven further domain, stationary and signed-area misconceptions
+        run: |
+          node --check scripts/math-practice-v2-feedback-seven-oracle.cjs
+          node scripts/math-practice-v2-feedback-seven-oracle.cjs
+
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 
