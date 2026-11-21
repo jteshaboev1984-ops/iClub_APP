@@ -87,6 +87,42 @@ async function run(){
  const other=await rpc('get_practice_topic_history_safe_v1',{p_subject_key:'mathematics'},bob);
  assert(other.ok&&other.data?.completed_sessions===1&&
   !JSON.stringify(other.data).includes('"session_id":'+sid),'history owner isolation failed');
- console.log('PRACTICE_TOPIC_REAL_SIGNED_HTTP_PASS: start/idempotency/submit/wrong feedback/restore/finalized history/access boundaries, disposable PG17');
+ // Reuse the exact hosted current-mistakes retest contract: ONLY wrong
+ // answers to finalized owned Topic attempts in the active Practice pool.
+ const wrongId=first.id;
+ const currentWrong=await rpc('start_practice_mistakes_drill_safe_v5',{
+  p_subject_key:'mathematics',p_question_ids:[wrongId],
+  p_client_session_id:'practice_mistakes_qa_http_userC_20261121'},alice);
+ assert(currentWrong.ok&&currentWrong.data?.question_count===1&&
+  currentWrong.data?.drill_type==='rec_mistakes',
+  'owned finalized Topic error cannot be retested');
+ const retestId=Number(currentWrong.data.session_id);
+ const mistakeQuestions=await rpc('get_practice_drill_resume_safe_v4',
+  {p_session_id:retestId},alice);
+ assert(mistakeQuestions.ok&&mistakeQuestions.data?.length===1&&
+  mistakeQuestions.data[0].id===wrongId&&!mistakeQuestions.data[0].was_answered,
+  'retest failed to open the SAME owned wrong question');
+ assert(mistakeQuestions.data[0].correct_answer===null,
+  'retest revealed protected answer before submission');
+ const forbidden=await rpc('start_practice_mistakes_drill_safe_v5',{
+  p_subject_key:'mathematics',p_question_ids:[wrongId],
+  p_client_session_id:'practice_mistakes_qa_http_userB_20261121'},bob);
+ assert(!forbidden.ok,'other learner launched C-own mistake');
+ const notWrong=await rpc('start_practice_mistakes_drill_safe_v5',{
+  p_subject_key:'mathematics',p_question_ids:[resume.data[1].id],
+  p_client_session_id:'practice_mistakes_qa_correct_20261121'},alice);
+ assert(!notWrong.ok,'correct-only question incorrectly eligible as a mistake');
+ const twice=await rpc('start_practice_mistakes_drill_safe_v5',{
+  p_subject_key:'mathematics',p_question_ids:[wrongId],
+  p_client_session_id:'practice_mistakes_qa_http_userC_20261121'},alice);
+ assert(twice.ok&&twice.data?.resumed===true&&
+  Number(twice.data?.session_id)===retestId,'retest retry created a duplicate');
+ const retestAnswered=await rpc('submit_practice_drill_answer_safe_v5',{
+  p_session_id:retestId,p_question_id:wrongId,p_user_answer:'RIGHT',
+  p_picked_index:null,p_time_spent:7},alice);
+ assert(retestAnswered.ok&&retestAnswered.data?.is_correct===true&&
+  retestAnswered.data?.complete===true,
+  'retested corrected answer not accepted/finalized');
+ console.log('PRACTICE_TOPIC_REAL_SIGNED_HTTP_PASS: start/idempotency/submit/wrong feedback/restore/finalized history + scoped current-bank mistake RETEST/ownership, disposable PG17');
 }
 run().catch(err=>{console.error('PRACTICE_TOPIC_REAL_SIGNED_HTTP_FAILED:',err?.message);process.exitCode=1});
