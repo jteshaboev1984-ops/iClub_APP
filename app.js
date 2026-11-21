@@ -21795,9 +21795,9 @@ async function updateTourAttempt(attemptId, patch) {
           ? tr3("Ваша попытка сохранена на сервере. Откройте этот же тур повторно, чтобы продолжить, не создавая новую попытку.",
             "Urinishingiz serverda saqlandi. Yangi urinish yaratmasdan davom etish uchun shu turni qayta oching.",
             "Your attempt remains on the server. Reopen the same tour to resume without creating another attempt.")
-          : tr3("Тур не начат. Проверьте соединение и повторите вход.",
-            "Tur boshlanmagan. Internetni tekshiring va qayta urinib ko‘ring.",
-            "The tour was not started. Check your connection and retry.")
+          : tr3("Не удалось подтвердить запуск на сервере. Повторно откройте этот же тур: приложение проверит, есть ли уже ваша попытка.",
+            "Serverda boshlangani tasdiqlanmadi. Shu turni qayta oching: ilova avval mavjud urinishingizni tekshiradi.",
+            "Start could not be confirmed. Reopen the same tour: the app will first check for your existing attempt.")
       });
       try { trackEvent("math_s2_private_image_attempt_retry", {
         tour_id: String(tour.id), reserved: alreadyStarted ? "yes" : "unknown"
