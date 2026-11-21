@@ -548,6 +548,54 @@
         "ru": "Найдите производную и подставьте заданное x: убедитесь, что f′(x)=0. Затем определите тип стационарной точки по знакам производной слева и справа.",
         "uz": "Hosilani hisoblab, berilgan x ni qo‘ying va f′(x)=0 ekanini tekshiring. So‘ng nuqta turini ikki tomondagi hosila ishoralari orqali aniqlang."
       }
+    },
+    {
+      "code": "DIF05_DOMAIN_INTERSECTION",
+      "skill": "P1-DIF-05",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "This interval includes x≤0, but the function is defined only for x>0. The domain restriction must be included.",
+        "ru": "Этот промежуток включает x≤0, однако функция определена только при x>0. Необходимо учитывать область определения.",
+        "uz": "Bu oraliqqa x≤0 ham kiradi, ammo funksiya faqat x>0 da aniqlangan. Aniqlanish sohasini hisobga olish zarur."
+      },
+      "next_action": {
+        "en": "Solve f′(x)<0 and intersect the result with the given domain x>0. Since x(x−3)<0 between 0 and 3, the interval is 0<x<3.",
+        "ru": "Решите неравенство f′(x)<0 и пересеките результат с областью определения x>0. Так как x(x−3)<0 между 0 и 3, получаем 0<x<3.",
+        "uz": "f′(x)<0 tengsizlikni yechib, yechimni x>0 aniqlanish sohasi bilan kesishiring. x(x−3)<0 faqat 0 bilan 3 orasida, ya’ni 0<x<3."
+      }
+    },
+    {
+      "code": "DIF07_MAX_NOT_INFLEXION",
+      "skill": "P1-DIF-07",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "The derivative changes from positive to negative at this stationary point, so it is a local maximum, not a stationary point of inflexion.",
+        "ru": "В этой стационарной точке производная меняет знак с плюса на минус: это локальный максимум, а не стационарная точка перегиба.",
+        "uz": "Bu statsionar nuqtada hosila ishorasi musbatdan manfiyga o‘zgaradi: bu statsionar egilish nuqtasi emas, mahalliy maksimum."
+      },
+      "next_action": {
+        "en": "Check the sign of the first derivative immediately before and after the stated x. Positive→negative gives a local maximum.",
+        "ru": "Проверьте знак первой производной слева и справа от указанного x. Переход от плюса к минусу означает локальный максимум.",
+        "uz": "Berilgan x ning chap va o‘ng tomonida birinchi hosila ishorasini tekshiring. Musbatdan manfiyga o‘tish mahalliy maksimumni bildiradi."
+      }
+    },
+    {
+      "code": "DIF07_INFLEXION_NOT_EXTREMUM",
+      "skill": "P1-DIF-07",
+      "mistake_type": "concept",
+      "inference_strength": "specific",
+      "feedback": {
+        "en": "Although f′(0)=0, the derivative is positive on both sides of x=0, so this stationary point is neither a local maximum nor a local minimum.",
+        "ru": "Хотя f′(0)=0, по обе стороны от x=0 производная положительна. Значит, стационарная точка не является ни локальным максимумом, ни локальным минимумом.",
+        "uz": "f′(0)=0 bo‘lsa ham, x=0 ning ikkala tomonida hosila musbat. Demak, bu statsionar nuqta mahalliy maksimum ham, minimum ham emas."
+      },
+      "next_action": {
+        "en": "For f(x)=x³, f′(x)=3x² is positive for x≠0. The function increases through x=0 without an extremum; this is a stationary point of inflexion.",
+        "ru": "Для f(x)=x³ производная f′(x)=3x² положительна при x≠0. Функция возрастает через x=0 без экстремума: это стационарная точка перегиба.",
+        "uz": "f(x)=x³ uchun f′(x)=3x², x≠0 da musbat. Funksiya x=0 dan ekstremumsiz o‘sib o‘tadi; bu statsionar egilish nuqtasi."
+      }
     }
   ]
 }
