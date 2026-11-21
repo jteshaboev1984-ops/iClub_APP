@@ -8,6 +8,8 @@ on:
       - 'index.html'
       - 'scripts/ai-tutor-beta-screen-contract.cjs'
       - 'scripts/ai-tutor-beta-route-contract.cjs'
+      - 'scripts/ai-tutor-freeform-refusal-contract.cjs'
+      - 'scripts/ai-tutor-product-intent-s2-contract.cjs'
       - '.github/workflows/ai-tutor-beta-contract.yml'
 
 permissions:
@@ -36,6 +38,12 @@ jobs:
 
       - name: Run real Tutor prompt and route selection (mocked adapters)
         run: node scripts/ai-tutor-beta-route-contract.cjs
+
+      - name: Verify freeform refusal localization and category firewall (no provider)
+        run: node scripts/ai-tutor-freeform-refusal-contract.cjs
+
+      - name: Verify S2 bounded approved product-help routing across screens (no provider)
+        run: node scripts/ai-tutor-product-intent-s2-contract.cjs
 
       - name: Install pinned isolated browser test runtime
         run: |

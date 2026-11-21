@@ -381,6 +381,15 @@
     }
     if(epoch!==authEpoch||user!==await identity()||protectedNow())
       return closed("context_changed");
+    // Edge v6 distinguishes a vetted no-source refusal from other rejected
+    // provider output. Preserve only a FIXED category, never raw provider
+    // detail or content; the UI may show an honest localized explanation.
+    // A failed paid request must NOT be automatically replayed.
+    if(answer?.ok===false&&answer?.reason==="no_verified_answer"){
+      return {...closed("no_verified_answer"),
+        failure_category:answer.failure_category==="source_unavailable"
+          ?"source_unavailable":"other"};
+    }
     if(answer?.ok!==true||answer?.mode!=="generated"||
        answer?.provider_called!==true||
        answer?.academic_state_changed!==false||

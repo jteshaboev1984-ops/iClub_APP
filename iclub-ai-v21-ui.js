@@ -50,6 +50,8 @@
       assessmentStart: "AI Tutor недоступен во время экзамена. Он вернётся после завершения.",
       assessmentTap: "AI Tutor недоступен во время экзамена. После завершения ты сможешь разобрать результат и ошибки.",
       unavailable: "iClub AI сейчас недоступен. Попробуй позже.",
+      freeformNoSource: "По этому вопросу пока нет утверждённого материала. Попробуй готовые подсказки iClub AI — они остаются доступны.",
+      freeformRejected: "Ответ AI не прошёл проверку. Готовые подсказки доступны; повторного платного запроса автоматически не будет.",
       timeout: "Ответ занял слишком много времени. Попробуй ещё раз.",
       limitTitle: "Лимит iClub AI достигнут",
       limitReset: "Доступ восстановится в {time}.",
@@ -117,6 +119,8 @@
       assessmentStart: "AI Tutor imtihon vaqtida mavjud emas. Imtihon tugagach yana ishlaydi.",
       assessmentTap: "AI Tutor imtihon vaqtida mavjud emas. Tugagach natija va xatolarni tahlil qilishing mumkin.",
       unavailable: "iClub AI hozir mavjud emas. Keyinroq qayta urinib ko‘r.",
+      freeformNoSource: "Bu savol uchun hozircha tasdiqlangan manba yo‘q. iClub AI tayyor yordam takliflaridan foydalanishingiz mumkin.",
+      freeformRejected: "AI javobi tekshiruvdan o‘tmadi. Tayyor yordam takliflari mavjud; pulli so‘rov avtomatik takrorlanmaydi.",
       timeout: "Javob juda uzoq davom etdi. Qayta urinib ko‘r.",
       limitTitle: "iClub AI limiti tugadi",
       limitReset: "Kirish {time} da tiklanadi.",
@@ -184,6 +188,8 @@
       assessmentStart: "AI Tutor is unavailable during the exam. It will return after you finish.",
       assessmentTap: "AI Tutor is unavailable during the exam. After you finish, you can review your result and errors.",
       unavailable: "iClub AI is unavailable right now. Try again later.",
+      freeformNoSource: "There is no approved source for this question yet. You can still use the prepared iClub AI help suggestions.",
+      freeformRejected: "The AI response did not pass verification. Prepared help is still available; no paid request will be retried automatically.",
       timeout: "The answer took too long. Try again.",
       limitTitle: "iClub AI limit reached",
       limitReset: "Access will return at {time}.",
@@ -1359,6 +1365,51 @@
     }
   }
 
+  function verifiedProductHelpIntent(raw) {
+    if(typeof raw!=="string"||raw.length<8||raw.length>240)return "";
+    // Bounded Uzbek Cyrillic/Latin and common Russian spellings. This is
+    // deterministic product intent recognition, NOT academic translation.
+    const cyr={
+      "а":"a","б":"b","в":"v","г":"g","ғ":"g","д":"d","е":"e",
+      "ё":"yo","ж":"j","з":"z","и":"i","й":"y","к":"k","қ":"q",
+      "л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s",
+      "т":"t","у":"u","ў":"o","ф":"f","х":"x","ҳ":"h","ц":"ts",
+      "ч":"ch","ш":"sh","щ":"sh","ъ":"","ы":"i","ь":"",
+      "э":"e","ю":"yu","я":"ya"
+    };
+    const normalized=Array.from(raw.normalize("NFKC").toLowerCase(),
+      ch=>Object.prototype.hasOwnProperty.call(cyr,ch)?cyr[ch]:ch)
+      .join("").replace(/[‘’ʻʼ'\x60]/g,"")
+      .replace(/[^a-z0-9]+/g," ").trim();
+    if(!normalized)return "";
+    const terms=new Set(normalized.split(/\s+/));
+    const has=(...words)=>words.some(word=>terms.has(word));
+    const about=has("nima","nimaga","qanday","qanaqa","uchun","kerak","kk",
+      "what","why","how","where","rules","rule","meaning","purpose",
+      "chto","takoe","zachem","dlya","kak","pravila",
+      "ishlaydi","foydasi","boshlash","boshlanadi","ochish",
+      "open","start","works","work","qoidalar","qoidalari");
+    if(!about)return "";
+    // A personalized score, task, error or solution must NEVER be turned
+    // into generic product help just because it mentions Practice.
+    if(has("natija","natijam","natijani","score","scores","scored","ball",
+      "balim","bali","bahom","marks","rating","reyting","certificate",
+      "sertifikat","xato","xatolar","error","mistake","mistakes",
+      "javob","javobi","answers","answer","solve","solution","yechim",
+      "yechish","masala","masalani","problem","equation","tenglama",
+      "integral","derivative","question","savol","savolim","zadacha",
+      "otvet","primer","misol","qaysi")||/[=+*^{}]/.test(raw))
+      return "";
+    // Unpublished Exam Prep product-help has no rights-approved card.
+    // Do not spend on a model or substitute Practice for it.
+    if(has("exam","ekzam","ekzamen")&&
+      has("prep","preparation","tayyorgarlik","podgotovka"))return "exam_prep_unpublished";
+    if(has("practice","practise","practis","praktika","praktiki",
+      "praktike","amaliyot","amaliyat","amaliat","amaliet",
+      "amaliyet","amaliot"))return "practice_rules";
+    return "";
+  }
+
   async function invokeGlobalAi(body) {
     // Only an explicitly loaded, separately authorized connected-beta adapter
     // can route this QA copy to the real prepared-only server.
@@ -1390,6 +1441,25 @@
         questionId:body.question_id,locale:body.locale
       });
       return {data:answer,error:null};
+    }
+    // A typed question about an approved product feature is provider-free on
+    // EVERY non-protected screen. The current subject is never authorization.
+    // Academic/Practice personal intents were handled by their guarded routes.
+    if(body?.prompt_key==="" && typeof body?.user_text==="string" &&
+       body.user_text.trim().length>=8) {
+      const productIntent=verifiedProductHelpIntent(body.user_text);
+      if(productIntent==="practice_rules"){
+        if(typeof beta?.askPrepared!=="function")
+          return {data:{ok:false,reason:"source_not_ready",
+            academic_state_changed:false,provider_called:false},error:null};
+        const answer=await beta.askPrepared({
+          promptKey:"practice_rules",locale:body.locale,userText:""
+        });
+        return {data:answer,error:null};
+      }
+      if(productIntent==="exam_prep_unpublished")
+        return {data:{ok:false,reason:"approved_source_missing",
+          academic_state_changed:false,provider_called:false},error:null};
     }
     // Only General Help can use the separately budgeted, real-model beta.
     // Keep ready-made buttons, protected academic routes and Tutor unchanged.
@@ -1434,13 +1504,18 @@
     const cleanDisplay = String(displayText || "").trim();
     const cleanText = String(userText || "").trim().slice(0, MAX_INPUT_CHARS);
     if (!cleanDisplay) return;
+    // A product-purpose question uses a published provider-free card even
+    // on a finalized Practice result. It is not a personal PC3/PC4 question.
+    const productHelp = !academicContext && !practiceContext &&
+      promptKey==="" && cleanText.length>=8
+      ? verifiedProductHelpIntent(cleanText) : "";
     const currentPractice = practiceScope();
     let contextOk = !!currentPractice && practiceGate.allowed &&
       practiceGate.key===practiceScopeKey(currentPractice);
     // Do not charge a fallback global route for a Practice result. However,
     // a previous transient denied preflight must not be cached forever.
     if(currentPractice && !contextOk && !academicContext && !practiceContext &&
-       promptKey==="" && cleanText.length>0){
+       promptKey==="" && cleanText.length>0 && !productHelp){
       const epoch=state.contextEpoch,accountEpoch=state.authEpoch;
       await checkPracticeChatGate(true);
       if(epoch!==state.contextEpoch||accountEpoch!==state.authEpoch||
@@ -1463,7 +1538,7 @@
       }
     }
     const typedPractice = !academicContext && !practiceContext &&
-      promptKey==="" && cleanText.length>=8 && contextOk
+      promptKey==="" && cleanText.length>=8 && contextOk && !productHelp
       ? {purpose:"practice_result",attemptRef:currentPractice.attemptRef,
          locale:currentPractice.locale,question:cleanText,
          scopeKey:practiceScopeKey(currentPractice)} : null;
@@ -1640,6 +1715,16 @@
         if (data.usage_exhausted === true) {
           setUsageExhausted(data.reset_at || null);
         }
+        return;
+      }
+
+      // A generated General Help answer can incur provider cost even if
+      // rejected. Never claim that refusal was free, and never auto-retry.
+      // The category is fixed by the beta transport's allowlist.
+      if (reason === "no_verified_answer") {
+        appendMessage(threadKey, "assistant",
+          data.failure_category === "source_unavailable"
+            ? copy().freeformNoSource : copy().freeformRejected, "notice");
         return;
       }
 
