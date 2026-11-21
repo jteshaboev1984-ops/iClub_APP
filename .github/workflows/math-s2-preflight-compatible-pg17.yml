@@ -1,0 +1,52 @@
+name: Math S2 redacted preflight legacy compatibility PG17
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/math-s2-preflight-compatible-pg17.yml'
+      - 'supabase/candidates/math_s2_preflight_redacted_legacy_compatible_v1_hold.sql'
+      - 'supabase/tests/fixtures/math_s2_preflight_redacted_legacy_compatible_pg17_test.sql'
+      - 'scripts/math-s2-preflight-legacy-flow-guard.cjs'
+      - 'app.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: math-s2-preflight-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  compatibility-pg17:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-pg17-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      PGHOST: "127.0.0.1"
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: synthetic-pg17-only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce current and cached client preflight order
+        run: node scripts/math-s2-preflight-legacy-flow-guard.cjs
+      - name: Build disposable synthetic PostgreSQL17 fixture, never hosted
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -c 'CREATE DATABASE iclub_math_s2_preflight_synthetic'
+          PGDATABASE=iclub_math_s2_preflight_synthetic psql -X -v ON_ERROR_STOP=1 -f supabase/tests/fixtures/math_s2_preflight_redacted_legacy_compatible_pg17_test.sql
+      - name: Scope guard
+        run: echo 'Synthetic S1/S2/Chemistry only; no live SQL, no Tour activation or learner data'
