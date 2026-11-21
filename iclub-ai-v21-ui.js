@@ -1365,6 +1365,51 @@
     }
   }
 
+  function verifiedProductHelpIntent(raw) {
+    if(typeof raw!=="string"||raw.length<8||raw.length>240)return "";
+    // Bounded Uzbek Cyrillic/Latin and common Russian spellings. This is
+    // deterministic product intent recognition, NOT academic translation.
+    const cyr={
+      "а":"a","б":"b","в":"v","г":"g","ғ":"g","д":"d","е":"e",
+      "ё":"yo","ж":"j","з":"z","и":"i","й":"y","к":"k","қ":"q",
+      "л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s",
+      "т":"t","у":"u","ў":"o","ф":"f","х":"x","ҳ":"h","ц":"ts",
+      "ч":"ch","ш":"sh","щ":"sh","ъ":"","ы":"i","ь":"",
+      "э":"e","ю":"yu","я":"ya"
+    };
+    const normalized=Array.from(raw.normalize("NFKC").toLowerCase(),
+      ch=>Object.prototype.hasOwnProperty.call(cyr,ch)?cyr[ch]:ch)
+      .join("").replace(/[‘’ʻʼ'\x60]/g,"")
+      .replace(/[^a-z0-9]+/g," ").trim();
+    if(!normalized)return "";
+    const terms=new Set(normalized.split(/\s+/));
+    const has=(...words)=>words.some(word=>terms.has(word));
+    const about=has("nima","nimaga","qanday","qanaqa","uchun","kerak","kk",
+      "what","why","how","where","rules","rule","meaning","purpose",
+      "chto","takoe","zachem","dlya","kak","pravila",
+      "ishlaydi","foydasi","boshlash","boshlanadi","ochish",
+      "open","start","works","work","qoidalar","qoidalari");
+    if(!about)return "";
+    // A personalized score, task, error or solution must NEVER be turned
+    // into generic product help just because it mentions Practice.
+    if(has("natija","natijam","natijani","score","scores","scored","ball",
+      "balim","bali","bahom","marks","rating","reyting","certificate",
+      "sertifikat","xato","xatolar","error","mistake","mistakes",
+      "javob","javobi","answers","answer","solve","solution","yechim",
+      "yechish","masala","masalani","problem","equation","tenglama",
+      "integral","derivative","question","savol","savolim","zadacha",
+      "otvet","primer","misol","qaysi")||/[=+*^{}]/.test(raw))
+      return "";
+    // Unpublished Exam Prep product-help has no rights-approved card.
+    // Do not spend on a model or substitute Practice for it.
+    if(has("exam","ekzam","ekzamen")&&
+      has("prep","preparation","tayyorgarlik","podgotovka"))return "exam_prep_unpublished";
+    if(has("practice","practise","practis","praktika","praktiki",
+      "praktike","amaliyot","amaliyat","amaliat","amaliet",
+      "amaliyet","amaliot"))return "practice_rules";
+    return "";
+  }
+
   async function invokeGlobalAi(body) {
     // Only an explicitly loaded, separately authorized connected-beta adapter
     // can route this QA copy to the real prepared-only server.
@@ -1396,6 +1441,25 @@
         questionId:body.question_id,locale:body.locale
       });
       return {data:answer,error:null};
+    }
+    // A typed question about an approved product feature is provider-free on
+    // EVERY non-protected screen. The current subject is never authorization.
+    // Academic/Practice personal intents were handled by their guarded routes.
+    if(body?.prompt_key==="" && typeof body?.user_text==="string" &&
+       body.user_text.trim().length>=8) {
+      const productIntent=verifiedProductHelpIntent(body.user_text);
+      if(productIntent==="practice_rules"){
+        if(typeof beta?.askPrepared!=="function")
+          return {data:{ok:false,reason:"source_not_ready",
+            academic_state_changed:false,provider_called:false},error:null};
+        const answer=await beta.askPrepared({
+          promptKey:"practice_rules",locale:body.locale,userText:""
+        });
+        return {data:answer,error:null};
+      }
+      if(productIntent==="exam_prep_unpublished")
+        return {data:{ok:false,reason:"approved_source_missing",
+          academic_state_changed:false,provider_called:false},error:null};
     }
     // Only General Help can use the separately budgeted, real-model beta.
     // Keep ready-made buttons, protected academic routes and Tutor unchanged.
