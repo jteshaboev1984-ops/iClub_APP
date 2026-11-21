@@ -21653,51 +21653,100 @@ async function updateTourAttempt(attemptId, patch) {
     return;
   }
 
-  // 4) load questions by mapping table tour_questions
-  const questions = await loadTourQuestionsDB(tour.id);
-  if (!questions || questions.length === 0) {
-    await uiAlert({
-      title: t("tour_unavailable_title") || "Тур недоступен",
-      message: t("tour_unavailable_no_questions") || "Для тура не назначены вопросы."
-    });
-    return;
-  }
-
-
-  showAsyncOverlay(tr3(
-    "Загружаем изображения вопросов…",
-    "Savol rasmlari yuklanmoqda…",
-    "Loading question images…"
-  ));
-
-  let imagePreloadResult = { ok: true, failed: [] };
-  try {
-    imagePreloadResult = await preloadTourQuestionImages(questions);
-  } finally {
-    hideAsyncOverlay();
-  }
-
-  if (!imagePreloadResult?.ok) {
+  // Mathematics S2 cannot expose private content/images before the attempt.
+  // Legacy S1 / all other subjects retain the original fail-before-attempt preload.
+  const privateS2 = window.iclubMathS2PrivateImages || null;
+  let mathS2 = false;
+  let privateImageCount = 0;
+  if (Number(subjectId) === 5) {
     try {
-      trackEvent("tour_question_image_preload_failed", {
-        tour_id: String(tour.id || ""),
-        subject_key: String(subjectKey || ""),
-        tour_no: Number(tourNo || 0),
-        failed_urls: (imagePreloadResult.failed || []).map(x => String(x?.url || ""))
+      if (privateS2) {
+        mathS2 = await privateS2.isMathSeason2(subjectId, tour.season_id);
+      } else {
+        const { data: season, error: scopeError } = await window.sb
+          .from("seasons").select("season_no").eq("id", Number(tour.season_id)).maybeSingle();
+        if (scopeError || !season) throw new Error("math_season_unavailable");
+        mathS2 = Number(season.season_no) === 2;
+      }
+    } catch {
+      await uiAlert({
+        title: tr3("Тур временно недоступен", "Tur vaqtincha mavjud emas", "Tour temporarily unavailable"),
+        message: tr3("Проверьте соединение и повторите вход.",
+          "Internetni tekshirib, qayta urinib ko‘ring.",
+          "Check your connection and try again.")
       });
-    } catch {}
-
-    await uiAlert({
-      title: tr3("Изображение не загрузилось", "Rasm yuklanmadi", "Image failed to load"),
-      message: tr3(
-        "Тур не начат и попытка не использована. Проверьте интернет и попробуйте открыть тур снова.",
-        "Tur boshlanmadi va urinish sarflanmadi. Internetni tekshirib, turni qayta ochib ko‘ring.",
-        "The tour was not started and your attempt was not used. Check your connection and open the tour again."
-      ),
-      okText: tr3("Понятно", "Tushunarli", "OK")
-    });
-    return;
+      return;
+    }
   }
+  if (mathS2) {
+    if (!privateS2) {
+      await uiAlert({
+        title: tr3("Требуется обновление", "Yangilash kerak", "Update required"),
+        message: tr3("Закройте и заново откройте приложение. Попытка не начата.",
+          "Ilovani yopib qayta oching. Urinish boshlanmagan.",
+          "Close and reopen the app. No attempt was started.")
+      });
+      return;
+    }
+    try {
+      const safePreflight = await privateS2.preflight(tour.id);
+      privateImageCount = safePreflight.imageCount;
+    } catch {
+      await uiAlert({
+        title: tr3("Тур временно недоступен", "Tur vaqtincha mavjud emas", "Tour temporarily unavailable"),
+        message: tr3("Защищённые изображения пока недоступны. Попытка не начата.",
+          "Himoyalangan rasmlar hozircha mavjud emas. Urinish boshlanmagan.",
+          "Private images are not ready. No attempt was started.")
+      });
+      return;
+    }
+  } else {
+    const questions = await loadTourQuestionsDB(tour.id);
+    if (!questions || questions.length === 0) {
+      await uiAlert({
+        title: t("tour_unavailable_title") || "Тур недоступен",
+        message: t("tour_unavailable_no_questions") || "Для тура не назначены вопросы."
+      });
+      return;
+    }
+  
+  
+    showAsyncOverlay(tr3(
+      "Загружаем изображения вопросов…",
+      "Savol rasmlari yuklanmoqda…",
+      "Loading question images…"
+    ));
+  
+    let imagePreloadResult = { ok: true, failed: [] };
+    try {
+      imagePreloadResult = await preloadTourQuestionImages(questions);
+    } finally {
+      hideAsyncOverlay();
+    }
+  
+    if (!imagePreloadResult?.ok) {
+      try {
+        trackEvent("tour_question_image_preload_failed", {
+          tour_id: String(tour.id || ""),
+          subject_key: String(subjectKey || ""),
+          tour_no: Number(tourNo || 0),
+          failed_urls: (imagePreloadResult.failed || []).map(x => String(x?.url || ""))
+        });
+      } catch {}
+  
+      await uiAlert({
+        title: tr3("Изображение не загрузилось", "Rasm yuklanmadi", "Image failed to load"),
+        message: tr3(
+          "Тур не начат и попытка не использована. Проверьте интернет и попробуйте открыть тур снова.",
+          "Tur boshlanmadi va urinish sarflanmadi. Internetni tekshirib, turni qayta ochib ko‘ring.",
+          "The tour was not started and your attempt was not used. Check your connection and open the tour again."
+        ),
+        okText: tr3("Понятно", "Tushunarli", "OK")
+      });
+      return;
+    }
+  
+    }
 
     try {
     trackEvent("tour_rules_accepted", {
@@ -21720,12 +21769,41 @@ async function updateTourAttempt(attemptId, patch) {
   let startResult = null;
   let runtimeRows = [];
   try {
-    startResult = await dbWriteWithRetry(() => tourApi.start({
-      tourId: Number(tour.id),
-      clientSessionId: tourClientSessionId
-    }), { tries: 3, baseDelayMs: 400 });
+    if (mathS2) {
+      const existingId = await privateS2.existingAttempt(tour.id);
+      if (existingId) startResult = { attempt_id: existingId, resumed: true };
+    }
+    if (!startResult) {
+      startResult = await dbWriteWithRetry(() => tourApi.start({
+        tourId: Number(tour.id),
+        clientSessionId: tourClientSessionId
+      }), { tries: 3, baseDelayMs: 400 });
+    }
     runtimeRows = await dbWriteWithRetry(() => tourApi.questions(Number(startResult?.attempt_id)), { tries: 3, baseDelayMs: 350 });
+    if (mathS2) {
+      // A download/decoding failure leaves the same server attempt recoverable.
+      // No fallback to public image_url, no automatic finalize/second attempt.
+      runtimeRows = await privateS2.hydrateIssuedQuestions(
+        Number(startResult?.attempt_id), runtimeRows, privateImageCount);
+    }
   } catch (error) {
+    if (mathS2) {
+      const alreadyStarted = Number(startResult?.attempt_id || 0) > 0;
+      await uiAlert({
+        title: tr3("Изображение не загрузилось", "Rasm yuklanmadi", "Image unavailable"),
+        message: alreadyStarted
+          ? tr3("Ваша попытка сохранена на сервере. Откройте этот же тур повторно, чтобы продолжить, не создавая новую попытку.",
+            "Urinishingiz serverda saqlandi. Yangi urinish yaratmasdan davom etish uchun shu turni qayta oching.",
+            "Your attempt remains on the server. Reopen the same tour to resume without creating another attempt.")
+          : tr3("Тур не начат. Проверьте соединение и повторите вход.",
+            "Tur boshlanmagan. Internetni tekshiring va qayta urinib ko‘ring.",
+            "The tour was not started. Check your connection and retry.")
+      });
+      try { trackEvent("math_s2_private_image_attempt_retry", {
+        tour_id: String(tour.id), reserved: alreadyStarted ? "yes" : "unknown"
+      }); } catch {}
+      return;
+    }
     const text = String(error?.message || error || "").toLowerCase();
     if (text.includes("already_attempted")) {
       await uiAlert({
@@ -21922,6 +22000,9 @@ async function updateTourAttempt(attemptId, patch) {
   function normalizeQuestionImageUrl(value) {
     const raw = String(value || "").trim();
     if (!raw) return "";
+    if (raw.startsWith("blob:") && window.iclubMathS2PrivateImages?.ownBlobUrl(raw)) {
+      return raw;
+    }
 
     try {
       const parsed = new URL(raw, window.location.href);
