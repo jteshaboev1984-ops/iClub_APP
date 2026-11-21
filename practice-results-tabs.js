@@ -668,10 +668,16 @@
     const topicOverview=node('div','iclub-practice-topic-overview');
     topicOverview.id='practice-topic-overview';
     topicOverview.hidden=true;
-    const topicSummary=node('div','iclub-practice-topic-summary');
+    // Topic overview deliberately reuses the SAME original hero component
+    // and Tour status surface; only verified data and scope labels differ.
+    const topicSummary=node('div','iclub-practice-topic-summary practice-hero');
     topicSummary.id='practice-topic-overview-content';
     const topicSeasonNote=node('p','iclub-practice-topic-s2-note');
-    topicOverview.append(topicSummary,topicSeasonNote);
+    topicSummary.append(topicSeasonNote);
+    const topicFooter=node('section','iclub-practice-current-tour iclub-practice-topic-footer');
+    topicFooter.id='practice-topic-overview-footer';
+    topicFooter.hidden=true;
+    topicOverview.append(topicSummary,topicFooter);
     overview.append(overviewTitle,tourOverview,topicOverview);
     root.insertBefore(overview,picker);
     root.insertBefore(bar,overview);
