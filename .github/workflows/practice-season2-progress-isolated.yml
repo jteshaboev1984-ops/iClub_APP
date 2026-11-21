@@ -12,6 +12,13 @@ on:
       - 'supabase/tests/fixtures/practice_topic_integrated_signed_catalog_history_20261120.sql'
       - 'supabase/tests/practice_topic_integrated_signed_ui_fixture.sql'
       - 'scripts/practice-integrated-signed-browser.cjs'
+      - 'scripts/practice-topic-choice-regression.cjs'
+      - 'scripts/practice-topic-catalog-client-diagnostics-chromium.cjs'
+      - 'scripts/practice-topic-full-render-independence-chromium.cjs'
+      - 'scripts/practice-owner-order-chromium.cjs'
+      - 'scripts/practice-topic-start-signed-http.cjs'
+      - 'supabase/tests/practice_topic_real_start_signed_browser_pg17_fixture.sql'
+      - 'supabase/tests/fixtures/practice_topic_installed_mistakes_v5_20261121.sql'
       - 'supabase/tests/fixtures/practice_topic_crosscutover_installed_rpcs_20261120.sql'
       - 'supabase/candidates/practice_subject_tour1_runtime_v5_future.sql'
       - 'supabase/tests/practice_subject_tour1_runtime_selector_isolated.sql'
@@ -107,6 +114,14 @@ jobs:
           psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres \
             -d practice_topic_cutover \
             -f supabase/tests/practice_topic_integrated_signed_ui_fixture.sql
+
+      - name: Install exact real Topic Start RPC into disposable PostgreSQL17
+        shell: bash
+        env:
+          PGPASSWORD: isolated-test-only
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -U postgres             -d practice_topic_cutover             -f supabase/tests/practice_topic_real_start_signed_browser_pg17_fixture.sql
 
       - name: Activate fixture period and launch signed local PostgREST
         shell: bash
@@ -207,6 +222,32 @@ jobs:
           set -euo pipefail
           node --check scripts/practice-integrated-signed-browser.cjs
           node scripts/practice-integrated-signed-browser.cjs
+
+      - name: Topic catalog error/retry, independent mount and accepted layout Chromium
+        shell: bash
+        env:
+          PRACTICE_TOPIC_DIAG_SCREEN_DIR: artifacts/practice-season2-owner-acceptance
+          PRACTICE_TOPIC_RENDER_SCREEN_DIR: artifacts/practice-season2-owner-acceptance
+          PRACTICE_ORDER_SCREEN_DIR: artifacts/practice-season2-owner-acceptance
+        run: |
+          set -euo pipefail
+          node --check scripts/practice-topic-catalog-client-diagnostics-chromium.cjs
+          node --check scripts/practice-topic-full-render-independence-chromium.cjs
+          node --check scripts/practice-owner-order-chromium.cjs
+          node scripts/practice-topic-choice-regression.cjs
+          node scripts/practice-topic-catalog-client-diagnostics-chromium.cjs
+          node scripts/practice-topic-full-render-independence-chromium.cjs
+          node scripts/practice-owner-order-chromium.cjs
+
+      - name: Signed real Topic Start → Submit → Resume → Finalize → History
+        shell: bash
+        env:
+          PRACTICE_TOPIC_CUTOVER_ISOLATED: "true"
+          PRACTICE_TOPIC_DB: "practice_topic_cutover"
+        run: |
+          set -euo pipefail
+          node --check scripts/practice-topic-start-signed-http.cjs
+          node scripts/practice-topic-start-signed-http.cjs
 
       - name: Save visual acceptance screenshots (synthetic test data only)
         if: always()

@@ -2,8 +2,9 @@
 'use strict';
 /* #574. Actual Practice renderer + Topic/Tabs/standalone History source and
    genuine local HTTP PostgREST/JWT/PG17, synthetic learners and bank only.
-   Mocked: unrelated app shell, Tour statistics, account registration, Tour
-   question selection, and the write-capable onStart callback. Never production. */
+   Read-only UI cases mock unrelated shell/onStart. The scoped write case runs
+   actual app.js Topic Start/Submit/Pause and signed local PG17 RPCs.
+   Telegram login and Tour statistics remain untested; never production. */
 const assert=require('node:assert/strict');
 const crypto=require('node:crypto');
 const fs=require('node:fs');
@@ -40,7 +41,9 @@ assert(renderer.indexOf('window.iClubPracticeTopicChoice?.mount({')<
 const screenStart=index.indexOf('<section id="courses-practice-start"');
 const screenEnd=index.indexOf('<!-- Practice Quiz -->',screenStart);
 assert(screenStart>0&&screenEnd>screenStart,'actual Practice and History DOM missing');
-const actualDom=index.slice(screenStart,screenEnd);
+const quizEnd=index.indexOf('<!-- Practice Result -->',screenEnd);
+assert(quizEnd>screenEnd,'actual Practice quiz DOM missing');
+const actualDom=index.slice(screenStart,quizEnd);
 assert(actualDom.includes('id="courses-practice-history"'),
  'standalone History missing from original DOM');
 const uiHtml='<!doctype html><html><head><meta charset="utf-8">'+
@@ -48,6 +51,7 @@ const uiHtml='<!doctype html><html><head><meta charset="utf-8">'+
  '<body class="iclub-visual-v3"><main>'+actualDom+'</main></body></html>';
 const allowed=new Map([
  ['/practice-topic-choice.js','practice-topic-choice.js'],
+ ['/security/legacy-assessment-safe-api.js','security/legacy-assessment-safe-api.js'],
  ['/practice-results-tabs.js','practice-results-tabs.js'],
  ['/practice-history-screen.js','practice-history-screen.js'],
  ['/practice-topic-choice.css','practice-topic-choice.css'],
@@ -57,7 +61,10 @@ const allowed=new Map([
 const upstream=new Map([
  ['get_practice_available_topics_safe_v1',3001],
  ['get_practice_topic_history_safe_v1',3001],
- ['get_practice_season2_progress_safe_v1',3000]
+ ['get_practice_season2_progress_safe_v1',3000],
+ ['start_practice_topic_drill_choice_safe_v1',3001],
+ ['get_practice_drill_resume_safe_v4',3001],
+ ['submit_practice_drill_answer_safe_v5',3001]
 ]);
 const server=http.createServer(async(req,res)=>{
  let uri;try{uri=new URL(req.url,'http://127.0.0.1')}catch{res.writeHead(400).end();return;}
@@ -143,9 +150,13 @@ async function postRaw(base,fn,subject,token){
   try{
    const cases=[
     ...['ru','uz','en'].flatMap(locale=>[320,375,430,1440].map(width=>
-      ({locale,width,uid:A,subject:'mathematics'}))),
+      ({locale,width,uid:A,subject:'mathematics'})))
+      .filter(item=>!(item.locale==='ru'&&item.width===375)),
     {locale:'ru',width:375,uid:B,subject:'mathematics'},
-    {locale:'en',width:375,uid:A,subject:'chemistry'}
+    {locale:'en',width:375,uid:A,subject:'chemistry'},
+    // Run write-capable real browser case LAST so it cannot contaminate
+    // the established read-only History expectations for other cases.
+    {locale:'ru',width:375,uid:A,subject:'mathematics'}
    ];
    for(const item of cases){
     const page=await browser.newPage({viewport:{width:item.width,height:900}});
@@ -213,7 +224,10 @@ async function postRaw(base,fn,subject,token){
       window.sb={rpc:async(name,args)=>{
        if(!['get_practice_available_topics_safe_v1',
              'get_practice_topic_history_safe_v1',
-             'get_practice_season2_progress_safe_v1'].includes(name))
+             'get_practice_season2_progress_safe_v1',
+             'start_practice_topic_drill_choice_safe_v1',
+             'get_practice_drill_resume_safe_v4',
+             'submit_practice_drill_answer_safe_v5'].includes(name))
         return {data:null,error:{code:'UNRELATED_MOCKED_RPC'},status:404};
        const r=await fetch('/rest/v1/rpc/'+name,{
         method:'POST',
@@ -289,6 +303,173 @@ async function postRaw(base,fn,subject,token){
      if(screens&&item.locale==='ru'&&item.width===375&&item.uid===A&&item.subject==='mathematics')
       await page.screenshot({path:path.join(screens,'practice-real-jwt-postgrest-history-ru-375.png'),
        animations:'disabled'});
+
+     // An additional real learner write path in the same isolated Chromium session.
+     // Earlier read-only assertions and History baseline have already passed.
+     if(item.subject==='mathematics'&&item.locale==='ru'&&item.width===375&&item.uid===A){
+       const range=(from,to)=>{
+         const begin=original.indexOf(from),end=original.indexOf(to,begin+from.length);
+         assert(begin>=0&&end>begin,'actual app.js handler unavailable: '+from);
+         return original.slice(begin,end);
+       };
+       const liveHandlers=[
+         ['function parseOptionsText(', 'function isNumericLike('],
+         ['function pickContentText(', 'async function buildPracticeSetByRec('],
+         ['function getPracticeSafeApi()', 'function practiceSafeReviewRowsToDetails('],
+         ['function loadPracticeDraft()', 'function stripTourQuestionSecrets('],
+         ['async function restorePracticeQuizSecrets(quiz)', 'function savePracticeDraft('],
+         ['function savePracticeDraft(', 'function loadMyRecs()'],
+         ['async function startPracticeByRec(', 'async function startPracticeRetryMistakes('],
+         ['function renderPracticeQuiz()', 'function updatePracticeSubmitEnabled()'],
+         ['function updatePracticeSubmitEnabled()', 'function handlePracticePause()'],
+         ['function handlePracticePause()', 'async function handlePracticeDrillSubmitSafe('],
+         ['async function handlePracticeDrillSubmitSafe(', 'async function handlePracticeSubmit(']
+       ].map(([from,to])=>range(from,to)).join('\n');
+       await page.evaluate(uid=>{
+         window.loadProfile=()=>({language:document.documentElement.lang});
+         window.PRACTICE_CONFIG={total:10,timeByDifficulty:{easy:45,medium:60,hard:90}};
+         window.normalizeDifficulty=x=>String(x||'medium');
+         window.formatMMSS=x=>'00:'+String(Math.floor(Number(x)||0)).padStart(2,'0');
+         window.escapeHTML=x=>String(x).replace(/[&<>"']/g,c=>
+           ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+         window.dbWriteWithRetry=fn=>fn();
+         window.showAsyncOverlay=()=>{};
+         window.hideAsyncOverlay=()=>{};
+         window.showToast=()=>{};
+         window.saveState=()=>true;
+         window.stopPracticeQuestionTimer=()=>{};
+         window.startPracticeQuestionTimer=()=>{};
+         window.trackEvent=()=>{};
+         window.finishPractice=()=>{window.__qaFinished=true;};
+         window.__qaUid=uid;
+         window.iClubPracticeDraftIdentityV1={
+           bind:async()=>uid,
+           ownsActiveQuiz:q=>q?.practiceOwnerUid===uid,
+           read:()=>JSON.parse(sessionStorage.getItem('qa-topic-draft')||'null'),
+           save:d=>{sessionStorage.setItem('qa-topic-draft',JSON.stringify(d));return true;},
+           clear:()=>{sessionStorage.removeItem('qa-topic-draft');return true;}
+         };
+         window.pushCourses=screen=>{
+           document.querySelectorAll('.stack-screen').forEach(el=>el.classList.remove('is-active'));
+           document.getElementById('courses-'+screen)?.classList.add('is-active');
+         };
+         window.replaceCourses=window.pushCourses;
+         document.getElementById('courses-practice-history').classList.remove('is-active');
+         document.getElementById('courses-practice-start').classList.add('is-active');
+       },A);
+       await page.addScriptTag({url:url+'/security/legacy-assessment-safe-api.js'});
+       await page.addScriptTag({content:liveHandlers});
+       await page.evaluate(()=>{
+         document.getElementById('practice-submit-btn').addEventListener(
+           'click',()=>{void handlePracticeDrillSubmitSafe(false);});
+         document.getElementById('practice-pause-btn').addEventListener(
+           'click',()=>handlePracticePause());
+         const resumeTopic=async()=>{
+             const draft=loadPracticeDraft();
+             if(draft?.status!=='paused'||draft.subjectKey!=='mathematics')
+               throw Error('saved Practice draft missing or wrong subject');
+             const restored=await restorePracticeQuizSecrets(draft.quiz);
+             if(!restored||restored.safeDrillSessionId!==draft.quiz.safeDrillSessionId)
+               throw Error('server-owned Practice restore failed');
+             if(await window.iClubPracticeDraftIdentityV1.bind()!==window.__qaUid)
+               throw Error('draft learner identity mismatch');
+             restored.practiceOwnerUid=window.__qaUid;
+             window.state.quiz=restored;
+             window.state.quizLock='practice';
+             clearPracticeDraft(restored.safeDrillSessionId);
+             window.pushCourses('practice-quiz');
+             renderPracticeQuiz();
+           };
+         document.getElementById('practice-topic-resume-btn').addEventListener('click',resumeTopic);
+       });
+       await page.locator('.practice-topic-choice-item').first().click();
+       await page.waitForFunction(()=>Number(window.state.quiz?.safeDrillSessionId)>0,
+         null,{timeout:14000});
+       const launched=await page.evaluate(()=>({
+         id:state.quiz.safeDrillSessionId,
+         total:state.quiz.questions.length,
+         initial:state.quiz.questions[0]?.correctAnswer,
+         shown:document.getElementById('practice-question')?.textContent
+       }));
+       assert.equal(launched.total,5,'signed UI Start must select five eligible questions');
+       assert(!launched.initial,'unanswered correct answer exposed by UI');
+       assert(/^RU Q/.test(launched.shown),'actual app.js localized quiz not displayed');
+       const writeCalls=await page.evaluate(()=>window.__rpcCalls.slice());
+       assert(writeCalls.some(c=>c.name==='start_practice_topic_drill_choice_safe_v1'&&c.status===200),
+         'real browser Start missed signed RPC');
+       assert(writeCalls.some(c=>c.name==='get_practice_drill_resume_safe_v4'&&c.status===200),
+         'real browser Start missed owned question fetch');
+       if(screens)await page.screenshot({path:path.join(screens,'qa-actual-start-ru-375.png'),
+         animations:'disabled'});
+       await page.locator('#practice-input').fill('WRONG');
+       await page.locator('#practice-submit-btn').click();
+       await page.waitForFunction(()=>state.quiz?.index===1,null,{timeout:13000});
+       const submitted=await page.evaluate(()=>({
+         correct:state.quiz.correct[0],
+         answer:state.quiz.questions[0].correctAnswer,
+         explanation:state.quiz.questions[0].explanation
+       }));
+       assert(submitted.correct===false&&submitted.answer==='RIGHT'&&
+         submitted.explanation==='RU explanation','actual app.js submission/feedback mismatch');
+       await page.locator('#practice-pause-btn').click();
+       await page.waitForFunction(()=>state.quiz===null&&Boolean(
+         sessionStorage.getItem('qa-topic-draft')),null,{timeout:13000});
+       const draft=await page.evaluate(()=>loadPracticeDraft());
+       assert.equal(Number(draft?.quiz?.safeDrillSessionId),Number(launched.id));
+       assert(draft.quiz.questions.every(q=>!q.correctAnswer&&!q.explanation),
+         'paused draft leaked answers or explanations');
+       await page.locator('#practice-topic-resume-btn').waitFor({state:'visible',timeout:12000});
+       await page.locator('#practice-topic-resume-btn').click();
+       await page.waitForFunction(()=>state.quiz?.index===1,null,{timeout:13000});
+       const restored=await page.evaluate(()=>({
+         id:state.quiz.safeDrillSessionId,
+         answered:state.quiz.questions[0].correctAnswer,
+         next:state.quiz.questions[1].correctAnswer,
+         draft:loadPracticeDraft(),
+         text:document.getElementById('practice-question')?.textContent,
+         rpcs:window.__rpcCalls.filter(c=>c.name==='get_practice_drill_resume_safe_v4').length
+       }));
+       assert.equal(Number(restored.id),Number(launched.id),'browser Resume changed session');
+       assert.equal(restored.answered,'RIGHT','Resume lost server-verified saved answer');
+       assert(!restored.next,'Resume exposed next unanswered solution');
+       assert.equal(restored.draft,null,'successful Resume failed to clear draft');
+       assert(restored.text?.startsWith('RU Q'),'Resume did not render localized next question');
+       assert(restored.rpcs>=2,'browser Resume skipped authenticated question RPC');
+       if(screens)await page.screenshot({path:path.join(screens,'qa-actual-resume-ru-375.png'),
+         animations:'disabled'});
+       const unchanged=await postRaw(url,'get_practice_topic_history_safe_v1','mathematics',signed(A));
+       assert(unchanged.ok&&unchanged.data?.completed_sessions===3,
+         'unfinished browser attempt incorrectly finalized');
+       for(let i=1;i<launched.total;i++){
+         await page.locator('#practice-input').fill('RIGHT');
+         await page.locator('#practice-submit-btn').click();
+         if(i===launched.total-1)
+           await page.waitForFunction(()=>window.__qaFinished===true,null,{timeout:13000});
+         else
+           await page.waitForFunction(idx=>state.quiz?.index===idx,i+1,{timeout:13000});
+       }
+       // Actual server finalized the session on its fifth answer; check
+       // signed server truth, not only the synthetic host's final display.
+       const verified=await page.evaluate(id=>window.sb.rpc(
+         'get_practice_drill_resume_safe_v4',{p_session_id:id}),launched.id);
+       assert(Array.isArray(verified.data)&&verified.data.length===5,
+         'completed Practice question review lost');
+       assert(verified.data.every(q=>q.was_answered),
+         'server retained unanswered question after browser completion');
+       assert.equal(verified.data.filter(q=>q.saved_is_correct).length,4,
+         'signed server score changed after browser completion');
+       const newHistory=await page.evaluate(()=>window.sb.rpc(
+         'get_practice_topic_history_safe_v1',{p_subject_key:'mathematics'}));
+       assert(newHistory.data?.ok===true&&newHistory.data?.completed_sessions===4,
+         'completed browser attempt not added to authenticated History');
+       assert(JSON.stringify(newHistory.data).includes('"session_id":'+launched.id),
+         'completed browser session absent from owner-only recent History');
+       if(screens)await page.screenshot({
+         path:path.join(screens,'qa-actual-completed-ru-375.png'),
+         animations:'disabled'});
+       assert.equal(networkFailures.length,0,
+         'unexpected browser errors after real Submit/Pause: '+networkFailures.join('; ').slice(0,140));
+     }
     }finally{await page.close();}
    }
   }finally{await browser.close();}
