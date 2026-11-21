@@ -1,0 +1,90 @@
+name: Mathematics Practice nine genuine Hard transfers — isolated PG17
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'content/math/practice_v2/**'
+      - 'scripts/math-practice-v2-nine-hard-oracle.cjs'
+      - 'scripts/math-practice-confirmed10-source-guard.cjs'
+      - 'scripts/math-practice-v2-confirmed10-stage-generator.cjs'
+      - 'scripts/math-practice-confirmed10-pg17-fixture.cjs'
+      - 'supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql'
+      - 'supabase/tests/math_practice_hard9_successor_versioning_pg17.sql'
+      - 'supabase/tests/math_practice_range4_future_only_pg17.sql'
+      - '.github/workflows/math-practice-hard9-future-only-pg17.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nine-hard-versioned:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: isolated-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: isolated-only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm exact nine archived Hard source payloads and original 495 bank
+        run: |
+          set -euo pipefail
+          node --check scripts/math-practice-confirmed10-source-guard.cjs
+          node scripts/math-practice-confirmed10-source-guard.cjs
+          node --check scripts/math-practice-v2-nine-hard-oracle.cjs
+          node scripts/math-practice-v2-nine-hard-oracle.cjs
+      - name: Stage 9 versioned new questions in PRIVATE disposable PostgreSQL17
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node --check scripts/math-practice-v2-confirmed10-stage-generator.cjs
+          node --check scripts/math-practice-confirmed10-pg17-fixture.cjs
+          node scripts/math-practice-v2-confirmed10-stage-generator.cjs --batch hard9 --out "$tmp/stage.sql"
+          node scripts/math-practice-confirmed10-pg17-fixture.cjs             --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --expect 9
+          createdb -T template0 math_hard9
+          psql -X -v ON_ERROR_STOP=1 -d math_hard9 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_hard9 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_hard9             -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_hard9             -f supabase/tests/math_practice_hard9_successor_versioning_pg17.sql
+      - name: Four exact ranges — second independent future-only MCQ PG17 release rehearsal
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          chmod 700 "$tmp"
+          trap 'rm -rf "$tmp"' EXIT
+          node scripts/math-practice-v2-confirmed10-stage-generator.cjs --batch range4 --out "$tmp/stage.sql"
+          node scripts/math-practice-confirmed10-pg17-fixture.cjs \
+            --stage "$tmp/stage.sql" --out "$tmp/fixture.sql" --expect 4
+          createdb -T template0 math_range4
+          psql -X -v ON_ERROR_STOP=1 -d math_range4 -f "$tmp/fixture.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_range4 -f "$tmp/stage.sql" >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_range4 \
+            -f supabase/candidates/math_practice_v2_future_only_atomic_membership_switch_v1.sql >/dev/null
+          psql -X -v ON_ERROR_STOP=1 -d math_range4 \
+            -f supabase/tests/math_practice_range4_future_only_pg17.sql
+      - name: No production or user content publication
+        run: echo 'Fixture-only PostgreSQL17 rehearsal passed; hosted Supabase and main untouched.'

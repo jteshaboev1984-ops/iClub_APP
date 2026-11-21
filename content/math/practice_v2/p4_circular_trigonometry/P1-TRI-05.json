@@ -201,13 +201,13 @@
         "P1-TRI-01"
       ],
       "role": "transformed_equation_count",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch5 Trigonometry, printed pp. 86–104",
       "question": {
-        "en": "How many solutions does sin(2x)=0 have for 0°≤x<360°? Enter the integer.",
-        "ru": "Сколько решений имеет sin(2x)=0 при 0°≤x<360°? Введите целое число.",
-        "uz": "0°≤x<360° da sin(2x)=0 nechta yechimga ega? Butun sonni kiriting."
+        "en": "How many distinct solutions does (2sin(x−30°)−1)(2cos x+1)=0 have for 0°≤x<360°? Enter the integer.",
+        "ru": "Сколько различных решений имеет уравнение (2sin(x−30°)−1)(2cos x+1)=0 при 0°≤x<360°? Введите целое число.",
+        "uz": "0°≤x<360° da (2sin(x−30°)−1)(2cos x+1)=0 tenglamaning nechta turli yechimi bor? Butun son kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -225,9 +225,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "For 0°≤x<360°, the angle 2x satisfies 0°≤2x<720°. sin(2x)=0 at 2x=0°,180°,360°,540°, giving x=0°,90°,180°,270°. There are 4 solutions.",
-        "ru": "При 0°≤x<360° имеем 0°≤2x<720°. sin(2x)=0 при 2x=0°,180°,360°,540°, поэтому x=0°,90°,180°,270°. Всего 4 решения.",
-        "uz": "0°≤x<360° bo‘lsa 0°≤2x<720°. sin(2x)=0 uchun 2x=0°,180°,360°,540°, demak x=0°,90°,180°,270°. 4 ta yechim."
+        "en": "A product is zero when at least one factor is zero. sin(x−30°)=1/2 gives x=60°,180° in the stated interval. cos x=−1/2 gives x=120°,240°. These four values are distinct, so there are 4 solutions.",
+        "ru": "Произведение равно нулю, если хотя бы один множитель равен нулю. Из sin(x−30°)=1/2 получаем x=60°,180° в заданном промежутке. Из cos x=−1/2 получаем x=120°,240°. Все четыре значения различны, поэтому решений 4.",
+        "uz": "Ko‘paytma nol bo‘lishi uchun kamida bitta ko‘paytuvchi nol bo‘lishi kerak. sin(x−30°)=1/2 dan berilgan oraliqda x=60°,180° chiqadi. cos x=−1/2 dan x=120°,240° chiqadi. To‘rtta qiymat turlicha, demak 4 ta yechim bor."
       },
       "ai_source_skill": "P1-TRI-05",
       "status": "draft"

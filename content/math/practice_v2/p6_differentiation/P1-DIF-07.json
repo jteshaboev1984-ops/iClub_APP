@@ -290,13 +290,13 @@
       "primary_skill": "P1-DIF-07",
       "secondary_skills": [],
       "role": "optimisation_model",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch9 Further differentiation, printed pp. 156–167",
       "question": {
-        "en": "A rectangle has sides x and 12−2x, with 0<x<6. Enter the value of x that maximises its area.",
-        "ru": "Прямоугольник имеет стороны x и 12−2x, где 0<x<6. Введите x, при котором площадь максимальна.",
-        "uz": "To‘g‘ri to‘rtburchak tomonlari x va 12−2x, bunda 0<x<6. Yuzani maksimum qiladigan x ni kiriting."
+        "en": "A rectangular enclosure is built against a straight wall, so the side along the wall needs no fence. One internal partition perpendicular to the wall divides it into two equal pens. If 18 m of fencing is available, enter the depth x in metres that maximises the total enclosed area.",
+        "ru": "Прямоугольный загон устраивают вдоль прямой стены, поэтому сторона у стены не требует ограждения. Одна внутренняя перегородка, перпендикулярная стене, делит загон на две равные секции. На ограждения имеется 18 м материала. Введите глубину x в метрах, при которой общая площадь максимальна.",
+        "uz": "To‘g‘ri to‘rtburchak shaklidagi maydon tekis devor yonida quriladi, shuning uchun devor bo‘ylab panjara kerak emas. Devorga perpendikulyar bitta ichki to‘siq maydonni ikkita teng bo‘limga ajratadi. Jami 18 m panjara mavjud. Umumiy yuzani eng katta qiladigan chuqurlik x ni metrda kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -314,9 +314,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "A=x(12−2x)=12x−2x². Then dA/dx=12−4x=0 gives x=3. Since the quadratic opens downward, this is the maximum.",
-        "ru": "A=x(12−2x)=12x−2x². dA/dx=12−4x=0 даёт x=3. Квадратичная функция направлена ветвями вниз, поэтому это максимум.",
-        "uz": "A=x(12−2x)=12x−2x². dA/dx=12−4x=0 dan x=3. Kvadrat funksiya pastga ochilgan, demak bu maksimum."
+        "en": "There are three fence segments of depth x (two outer sides and the partition) and one length y opposite the wall, so 3x+y=18 and 0<x<6. The total area A=xy=x(18−3x)=18x−3x². Differentiating gives A′=18−6x=0 at x=3. Since A″=−6<0, this is the unique maximum.",
+        "ru": "Ограждаются три отрезка глубины x (две внешние стороны и перегородка) и одна сторона y напротив стены. Поэтому 3x+y=18 и 0<x<6. Общая площадь A=xy=x(18−3x)=18x−3x². Из A′=18−6x=0 получаем x=3. Поскольку A″=−6<0, это единственный максимум.",
+        "uz": "Chuqurligi x bo‘lgan uchta to‘siq (ikkita tashqi tomon va ichki to‘siq) hamda devorga qarama-qarshi y tomon panjaralanadi. Shuning uchun 3x+y=18 va 0<x<6. Umumiy yuza A=xy=x(18−3x)=18x−3x². A′=18−6x=0 dan x=3 chiqadi. A″=−6<0 bo‘lgani uchun bu yagona maksimum."
       },
       "ai_source_skill": "P1-DIF-07",
       "status": "draft"

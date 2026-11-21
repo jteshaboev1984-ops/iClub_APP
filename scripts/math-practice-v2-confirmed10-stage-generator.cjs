@@ -18,7 +18,9 @@ const releases={
  pending10:{name:'math_p1_practice_v2_pending10_20261120',suffix:'-V20261120PENDING10'},
  decimal8:{name:'math_p1_practice_v2_decimal8_20261121',suffix:'-V20261121DEC8'},
  semantic2:{name:'math_p1_practice_v2_semantic2_20261121',suffix:'-V20261121SEM2'},
- setrange1:{name:'math_p1_practice_v2_setrange1_20261121',suffix:'-V20261121SETRANGE1'}
+ setrange1:{name:'math_p1_practice_v2_setrange1_20261121',suffix:'-V20261121SETRANGE1'},
+ hard9:{name:'math_p1_practice_v2_hard9_20261121',suffix:'-V20261121HARD9'},
+ range4:{name:'math_p1_practice_v2_range4_20261121',suffix:'-V20261121RANGE4'}
 };
 assert.ok(Object.hasOwn(releases,mode),'unsupported governed release batch');
 const release=releases[mode].name,suffix=releases[mode].suffix;
@@ -100,12 +102,41 @@ const setRangeOne=[
   old_hash:'d868b7ea232799fc1c92114efc986b7f26e5a781f7f634110d8cec17f8ac5963'}
 ];
 assert.deepEqual(setRangeOne.map(x=>x.id),[7554]);
+// Fresh SELECT-only hosted pinned hashes 2026-11-21. Q351 original #7835
+// was already replaced: use published active #10119, never retire it twice.
+const hardNine=[
+ {id:7511,code:'P1-QUA-03',file:'p1_quadratics/P1-QUA-03.json',old_hash:'292874e42c2304fc5c5a84a8a792517f362e397919a893ecf5022174c818be14'},
+ {id:7585,code:'P1-FUN-04',file:'p2_functions/P1-FUN-04.json',old_hash:'0040f8fad2356d8360b8bcba6ac56d4bc84e9ca4f1996d5bbbd2f3758946aae2'},
+ {id:7692,code:'P1-COO-06',file:'p3_coordinate_geometry/P1-COO-06.json',old_hash:'f367fef18ffa5fa1a4210d88035bb35b51cd80fb225d9fa6b7cd2089d2e8b7b7'},
+ {id:7723,code:'P1-CIR-03',file:'p4_circular_trigonometry/P1-CIR-03.json',old_hash:'857a0b7f92de6e6ca33720a338df6a8fb77d6b8d0a6474537a425f198fec1133'},
+ {id:7769,code:'P1-TRI-05',file:'p4_circular_trigonometry/P1-TRI-05.json',old_hash:'08dcf765d026d7e929b225f6cc3b1bbe5521268a02001df71949a9d0acb8a874'},
+ {id:7823,code:'P1-SER-04',file:'p5_binomial_series/P1-SER-04.json',old_hash:'526852d8e794a3655b317071a32f1cbd7cab6ae007704b6541e9fdb074f1daef'},
+ {id:7908,code:'P1-DIF-07',file:'p6_differentiation/P1-DIF-07.json',old_hash:'62e28e4491895f85798dd367ef53811ff6c76938ed3e661a0f215d79fc761309'},
+ {id:7974,code:'P1-INT-05',file:'p7_integration/P1-INT-05.json',old_hash:'ea534fdc7ee55bdd4619a0d2acbd038ff8b2e0c01085fe889577569636242586'},
+ {id:10119,author_id:7835,code:'P1-SER-05',file:'p5_binomial_series/P1-SER-05.json',
+  old_hash:'904b257e16194eed1b9a1244bd7bd08d4de055f612486ccde72bc9dfaf4b9d98',
+  old_key:'MATH-P1-PRACTICE2-Q351-V20261120PENDING10',
+  old_release_version:'math_p1_practice_v2_pending10_20261120'}
+];
+assert.deepEqual(hardNine.map(x=>x.id),
+ [7511,7585,7692,7723,7769,7823,7908,7974,10119]);
+// Fresh hosted SELECT-only preimages. Four clarified MCQ stems already merged
+// via PR #638; old keys/options/answers/diagnostics stay historically immutable.
+const rangeFour=[
+ {id:7562,code:'P1-FUN-02',file:'p2_functions/P1-FUN-02.json',old_hash:'951ba9ba48ef6a040cc3af66223cba94f2eb05fca56683ccfa2c908a6be4d43d'},
+ {id:7565,code:'P1-FUN-02',file:'p2_functions/P1-FUN-02.json',old_hash:'7d4e20c49e890c7036df1b5cf3c7fd36c28829815689bb111ef86cd7020d0fe5'},
+ {id:7569,code:'P1-FUN-02',file:'p2_functions/P1-FUN-02.json',old_hash:'c60385b5525b63ac722d04a4b329ebe80c04cc6bc2deb741a22b5d6b47b8f911'},
+ {id:7570,code:'P1-FUN-02',file:'p2_functions/P1-FUN-02.json',old_hash:'3f280ef7d1229afe2723d15f9bbf4d8b520074b8cbd611432c5246a4500b62da'}
+];
+assert.deepEqual(rangeFour.map(x=>x.id),[7562,7565,7569,7570]);
 const specs=mode==='hotfix10'?baselineSpecs:
   mode==='q400q481'?nextTwo:
   mode==='q089q202q226'?nextThree:
   mode==='pending10'?pending10:
   mode==='decimal8'?decimalEight:
-  mode==='semantic2'?semanticTwo:setRangeOne;
+  mode==='semantic2'?semanticTwo:
+  mode==='setrange1'?setRangeOne:
+  mode==='range4'?rangeFour:hardNine;
 const expectedCount=specs.length;
 const stable=x=>Array.isArray(x)?x.map(stable):x&&typeof x==='object'
   ?Object.fromEntries(Object.keys(x).sort().map(k=>[k,stable(x[k])])):x;
@@ -120,8 +151,12 @@ const payload=specs.map(spec=>{
   const file=path.join(root,'content/math/practice_v2',spec.file);
   const contents=JSON.parse(fs.readFileSync(file,'utf8'));
   const q=contents.questions.find(item=>
-    item.key==='MATH-P1-PRACTICE2-Q'+String(spec.id-7484).padStart(3,'0'));
+    item.key==='MATH-P1-PRACTICE2-Q'+String((spec.author_id||spec.id)-7484).padStart(3,'0'));
   assert.ok(q,'missing corrected source ID '+spec.id);
+  if(mode==='hard9')assert.ok(q.qtype==='input'&&q.difficulty==='hard',
+    'hard9 source must have exactly one hard numeric transfer per pinned ID');
+  if(mode==='range4')assert.ok(q.qtype==='mcq'&&q.difficulty===({7562:'easy',7565:'medium',7569:'medium',7570:'hard'})[spec.id],
+    'range4 must preserve exact source MCQ type and each original difficulty');
   assert.equal(q.primary_skill,spec.code);
   assert.ok(['mcq','input'].includes(q.qtype));
   assert.ok(q.practice_no>=1&&q.practice_no<=7);
@@ -150,8 +185,8 @@ const payload=specs.map(spec=>{
       answer_key:null,answer_value:String(rule.answer_match)});
   }
   const record={
-    old_id:spec.id,old_hash:spec.old_hash,old_key:q.key,
-    new_key:q.key+suffix,release_version:release,
+    old_id:spec.id,old_hash:spec.old_hash,old_key:spec.old_key||q.key,
+    new_key:(spec.old_key||q.key)+suffix,release_version:release,
     practice_no:q.practice_no,skill:q.primary_skill,role:q.role,
     source_ref:q.source_ref,difficulty:q.difficulty,qtype:q.qtype,
     text:q.question,explanation:q.explanation,
@@ -160,6 +195,7 @@ const payload=specs.map(spec=>{
     time_limit_sec:q.difficulty==='hard'?90:q.difficulty==='medium'?60:45,
     answer_contract:q.qtype==='input'?q.answer_contract:{},diagnostics:d
   };
+  if(spec.old_release_version)record.old_release_version=spec.old_release_version;
   record.new_hash=hash(record);
   assert.notEqual(record.new_hash,record.old_hash);
   return record;
@@ -194,7 +230,7 @@ const sql=[
   "    or v_old.quality_status<>'published' or v_old.qtype<>v_item->>'qtype'",
   "    or v_meta.question_id is null or v_meta.lifecycle_state<>'published'",
   "    or v_meta.is_runtime_allowed is not true",
-  "    or v_meta.release_version<>'math_p1_practice_v2_2026_10_07'",
+  "    or v_meta.release_version<>coalesce(v_item->>'old_release_version','math_p1_practice_v2_2026_10_07')",
   "    or v_meta.content_hash<>v_item->>'old_hash'",
   "    or v_meta.content_key<>v_item->>'old_key'",
   "    or v_meta.practice_no<>(v_item->>'practice_no')::smallint",

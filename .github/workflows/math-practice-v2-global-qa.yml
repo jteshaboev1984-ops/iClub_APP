@@ -79,6 +79,11 @@ jobs:
           node --check scripts/math-practice-v2-four-exact-ranges-oracle.cjs
           node scripts/math-practice-v2-four-exact-ranges-oracle.cjs
 
+      - name: Independently derive all nine Hard-transfer numeric answers and RU/UZ/EN premise parity
+        run: |
+          node --check scripts/math-practice-v2-nine-hard-oracle.cjs
+          node scripts/math-practice-v2-nine-hard-oracle.cjs
+
       - name: Run evaluator normalization regression
         run: node scripts/math-practice-v2-evaluator-regression.cjs
 

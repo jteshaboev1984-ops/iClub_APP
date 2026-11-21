@@ -205,13 +205,13 @@
       "primary_skill": "P1-QUA-03",
       "secondary_skills": [],
       "role": "representation_variation",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch1 Quadratics, printed pp. 2-20",
       "question": {
-        "en": "Solve (x − 2)(x + 5) = 18. Enter the positive root.",
-        "ru": "Решите (x − 2)(x + 5) = 18. Введите положительный корень.",
-        "uz": "(x − 2)(x + 5) = 18 ni yeching. Musbat ildizni kiriting."
+        "en": "The graph of y=x²+bx+c has its vertex at x=1/2 and crosses the y-axis at −12. Enter the positive x-coordinate where the graph crosses the x-axis.",
+        "ru": "График y=x²+bx+c имеет вершину с абсциссой x=1/2 и пересекает ось y при значении −12. Введите положительную абсциссу точки пересечения графика с осью x.",
+        "uz": "y=x²+bx+c grafigi uchining x koordinatasi 1/2 ga teng va u y o‘qini −12 qiymatda kesib o‘tadi. Grafikning x o‘qi bilan kesishish nuqtasidagi musbat x koordinatasini kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -229,9 +229,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "Expand and rearrange: x² + 3x − 10 = 18, so x² + 3x − 28 = 0 = (x + 7)(x − 4). The positive root is 4.",
-        "ru": "Раскрываем скобки и переносим: x² + 3x − 10 = 18, то есть x² + 3x − 28 = 0 = (x + 7)(x − 4). Положительный корень равен 4.",
-        "uz": "Qavslarni ochib, bir tomonga o‘tkazamiz: x² + 3x − 10 = 18, ya’ni x² + 3x − 28 = 0 = (x + 7)(x − 4). Musbat ildiz 4."
+        "en": "The vertex has x=−b/2=1/2, so b=−1. The y-intercept is c=−12. Setting y=0 gives x²−x−12=0, hence (x−4)(x+3)=0. The positive x-intercept is 4.",
+        "ru": "Абсцисса вершины равна x=−b/2=1/2, значит b=−1. Пересечение с осью y задаёт c=−12. При y=0 получаем x²−x−12=0, то есть (x−4)(x+3)=0. Положительная абсцисса равна 4.",
+        "uz": "Uchning x koordinatasi x=−b/2=1/2, shuning uchun b=−1. y o‘qi bilan kesishishda c=−12 bo‘ladi. y=0 deb olsak, x²−x−12=0, ya’ni (x−4)(x+3)=0. Musbat x koordinata 4."
       },
       "ai_source_skill": "P1-QUA-03",
       "status": "draft"

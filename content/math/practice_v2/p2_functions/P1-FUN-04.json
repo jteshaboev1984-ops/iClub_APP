@@ -229,13 +229,13 @@
       "primary_skill": "P1-FUN-04",
       "secondary_skills": [],
       "role": "application_variation",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "For f(x)=(x−5)/4, let p=f⁻¹(3) and q=f⁻¹(5). Enter q−p.",
-        "ru": "Для f(x)=(x−5)/4 пусть p=f⁻¹(3), q=f⁻¹(5). Введите q−p.",
-        "uz": "f(x)=(x−5)/4 uchun p=f⁻¹(3), q=f⁻¹(5) bo‘lsin. q−p ni kiriting."
+        "en": "A one-to-one linear function f(x)=ax+b, a>0, satisfies f⁻¹(−1)=2 and f⁻¹(0)=6. Let p=f⁻¹(3) and q=f⁻¹(5). Enter q−p.",
+        "ru": "Взаимно-однозначная линейная функция f(x)=ax+b, где a>0, удовлетворяет условиям f⁻¹(−1)=2 и f⁻¹(0)=6. Пусть p=f⁻¹(3), q=f⁻¹(5). Введите q−p.",
+        "uz": "Bir qiymatli teskari funksiyaga ega f(x)=ax+b chiziqli funksiya uchun a>0, f⁻¹(−1)=2 va f⁻¹(0)=6. p=f⁻¹(3), q=f⁻¹(5) bo‘lsin. q−p ni kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -253,9 +253,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "The inverse is f⁻¹(x)=4x+5. Thus p=17 and q=25, so q−p=8.",
-        "ru": "Обратная функция: f⁻¹(x)=4x+5. Поэтому p=17, q=25 и q−p=8.",
-        "uz": "Teskari funksiya f⁻¹(x)=4x+5. Demak p=17, q=25 va q−p=8."
+        "en": "The inverse data mean f(2)=−1 and f(6)=0. Therefore 4a=f(6)−f(2)=1, so a=1/4 and b=−3/2. Since f⁻¹( y )=(y−b)/a, the difference is q−p=(5−3)/a=2/(1/4)=8.",
+        "ru": "Из данных об обратной функции следует f(2)=−1 и f(6)=0. Поэтому 4a=f(6)−f(2)=1, значит a=1/4 и b=−3/2. Поскольку f⁻¹(y)=(y−b)/a, получаем q−p=(5−3)/a=2/(1/4)=8.",
+        "uz": "Teskari funksiya shartlaridan f(2)=−1 va f(6)=0 kelib chiqadi. Demak, 4a=f(6)−f(2)=1, shuning uchun a=1/4 va b=−3/2. f⁻¹(y)=(y−b)/a bo‘lgani uchun q−p=(5−3)/a=2/(1/4)=8."
       },
       "ai_source_skill": "P1-FUN-04",
       "status": "draft"

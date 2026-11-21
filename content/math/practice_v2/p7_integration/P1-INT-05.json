@@ -293,13 +293,13 @@
         "P1-INT-03"
       ],
       "role": "reverse_upper_limit",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch10 Integration, printed pp. 173–200",
       "question": {
-        "en": "For a>0, the region under y=x from x=0 to x=a is rotated about the x-axis and has volume 9π. Enter a.",
-        "ru": "При a>0 область под y=x от x=0 до x=a вращается вокруг оси x и имеет объём 9π. Введите a.",
-        "uz": "a>0 uchun y=x ostidagi x=0 dan x=a gacha soha x o‘qi atrofida aylantiriladi va hajmi 9π. a ni kiriting."
+        "en": "For a>0 and k>0, the region under y=kx from x=0 to x=a has area 9/2. Rotating this region about the x-axis gives volume 9π. Find a. Enter a number.",
+        "ru": "При a>0 и k>0 область под прямой y=kx от x=0 до x=a имеет площадь 9/2. При вращении этой области вокруг оси x получается объём 9π. Найдите a. Введите число.",
+        "uz": "a>0 va k>0 bo‘lganda, y=kx chizig‘i ostidagi x=0 dan x=a gacha sohaning yuzi 9/2. Bu soha x o‘qi atrofida aylantirilganda hajm 9π bo‘ladi. a ni toping. Javobni son bilan kiriting."
       },
       "answer_contract": {
         "kind": "integer_exact",
@@ -317,9 +317,9 @@
       },
       "diagnostic_rules": [],
       "explanation": {
-        "en": "V=π∫₀ᵃx²dx=πa³/3. Set a³/3=9, so a³=27 and a=3.",
-        "ru": "V=π∫₀ᵃx²dx=πa³/3. Из a³/3=9 получаем a³=27 и a=3.",
-        "uz": "V=π∫₀ᵃx²dx=πa³/3. a³/3=9 dan a³=27 va a=3."
+        "en": "Area = ∫₀ᵃkx dx = ka²/2 = 9/2, hence ka²=9. Volume = π∫₀ᵃ(kx)²dx = πk²a³/3 = 9π, hence k²a³=27. Since k=9/a², substituting gives 81/a=27, so a=3.",
+        "ru": "Площадь = ∫₀ᵃkx dx = ka²/2 = 9/2, поэтому ka²=9. Объём = π∫₀ᵃ(kx)²dx = πk²a³/3 = 9π, поэтому k²a³=27. Из k=9/a² получаем 81/a=27, следовательно a=3.",
+        "uz": "Yuza = ∫₀ᵃkx dx = ka²/2 = 9/2, demak ka²=9. Hajm = π∫₀ᵃ(kx)²dx = πk²a³/3 = 9π, demak k²a³=27. k=9/a² ni o‘rniga qo‘ysak, 81/a=27, shundan a=3."
       },
       "ai_source_skill": "P1-INT-05",
       "status": "draft"
