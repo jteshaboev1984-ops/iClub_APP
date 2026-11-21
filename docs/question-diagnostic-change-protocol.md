@@ -175,6 +175,10 @@ Initial Economics candidates showed three different situations:
    - Example: answer key `3`, user answers such as `3 units Y` were marked incorrect by exact input checking.
    - Action: future evaluator rule; historical recalculation only with explicit approval.
 
+## Proportionate QA for Practice content patches (owner-confirmed 2026-11-21)
+
+[Owner confirmation](https://github.com/jteshaboev1984-ops/iClub_APP/issues/574#issuecomment-7057671300): for a *verified, narrowly scoped* wording, translation, explanation or distractor correction, check the exact mathematical claim, correct key/accepted variants, distractor uniqueness, diagnostics, RU/UZ/EN and unchanged neighboring fields/skill, then use the tested version-safe publication path and post-release selector/history checks. **Full authenticated browser E2E is not required for each ordinary textual question correction.** If runtime logic, grading, permissions, session/resume, history/progress, UI/API behavior or an actual integration failure is implicated, require appropriately scoped real signed JWT/HTTP/PostgREST/PG17/Chromium checks and do not call SQL-only tests E2E. Always obtain explicit owner permission for *each* live academic batch, then distinguish READY from PUBLISHED with precise IDs and CI. This reduces unnecessary repeat audits, not academic correctness or rights review.
+
 ## Owner's 2026-11-20 Practice correction priority (scoped exception)
 
 [Approved owner decision](https://github.com/jteshaboev1984-ops/iClub_APP/issues/574#issuecomment-7039540376), registered in [Rules Inbox #570](https://github.com/jteshaboev1984-ops/iClub_APP/issues/570#issuecomment-7039548309), updates the older unconditional preservation guidance **for demonstrably wrong or ambiguous Practice questions**:
