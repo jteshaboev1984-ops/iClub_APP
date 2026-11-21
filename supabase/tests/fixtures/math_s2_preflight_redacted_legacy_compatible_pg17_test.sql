@@ -189,6 +189,23 @@ BEGIN
  RAISE NOTICE 'S2_REDACTED_PREFLIGHT_COMPATIBLE_S1_CHEMISTRY_UNCHANGED';
 END $check$;
 RESET ROLE;
+-- Verify original server access checks remain fail-closed for authenticated nonmembers.
+SELECT set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000009099',false);
+SET ROLE authenticated;
+DO $nonmember$
+BEGIN
+ BEGIN
+  PERFORM id FROM public.get_tour_preflight_questions_safe_v4(9102);
+  RAISE EXCEPTION 'UNENROLLED_USER_WAS_ALLOWED';
+ EXCEPTION WHEN SQLSTATE '42501' THEN
+  IF SQLERRM <> 'tour_requires_school_student' THEN
+   RAISE EXCEPTION 'WRONG_NONMEMBER_DENIAL';
+  END IF;
+ END;
+ RAISE NOTICE 'NONMEMBER_PREFLIGHT_DENIED';
+END $nonmember$;
+RESET ROLE;
+
 -- Assert bank row preservation as fixture owner, not as an authenticated learner.
 DO $unchanged$
 BEGIN
