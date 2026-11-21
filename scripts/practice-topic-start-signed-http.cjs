@@ -9,7 +9,7 @@ assert(process.env.CI==='true'&&process.env.PRACTICE_SEASON2_ISOLATED==='true'&&
  'REFUSED: disposable PostgreSQL 17 only');
 const secret=process.env.PRACTICE_SEASON2_JWT_SECRET;
 assert(secret&&secret.length>=48,'ephemeral signing secret missing');
-const A='11111111-1111-4111-8111-111111111111';
+const A='33333333-3333-4333-8333-333333333333'; // fresh isolated HTTP learner; separate from browser learner
 const B='22222222-2222-4222-8222-222222222222';
 const enc=x=>Buffer.from(JSON.stringify(x)).toString('base64url');
 function jwt(user,ttl=600){
@@ -37,7 +37,7 @@ async function run(){
   assert(!unauthorized.ok&&unauthorized.status>=400,'unauthorized start permitted');
  }
  const before=await rpc('get_practice_topic_history_safe_v1',{p_subject_key:'mathematics'},alice);
- assert(before.ok&&before.data?.completed_sessions===3,'historical sessions not preserved');
+ assert(before.ok&&before.data?.completed_sessions===0,'historical sessions not preserved');
  const client='practice_topic_choice_qa_integrated_20261121';
  const started=await rpc('start_practice_topic_drill_choice_safe_v1',startArgs(client),alice);
  assert(started.ok,'server rejected new session '+started.status);
@@ -82,7 +82,7 @@ async function run(){
   'finalized attempt unavailable in signed review');
  assert(finished.data.filter(q=>q.saved_is_correct).length===4);
  const history=await rpc('get_practice_topic_history_safe_v1',{p_subject_key:'mathematics'},alice);
- assert(history.ok&&history.data?.completed_sessions===4&&
+ assert(history.ok&&history.data?.completed_sessions===1&&
   JSON.stringify(history.data).includes('"session_id":'+sid),'completed attempt not in own History');
  const other=await rpc('get_practice_topic_history_safe_v1',{p_subject_key:'mathematics'},bob);
  assert(other.ok&&other.data?.completed_sessions===1&&
