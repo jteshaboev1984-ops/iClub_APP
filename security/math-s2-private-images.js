@@ -147,7 +147,10 @@
     for (const url of issuedBlobs) URL.revokeObjectURL(url);
     issuedBlobs.clear();
   }
-  window.addEventListener("pagehide", releaseImages);
+  // A bfcache pagehide keeps the same live quiz and its local decoded blobs.
+  window.addEventListener("pagehide", event => {
+    if (!event?.persisted) releaseImages();
+  });
   window.iclubMathS2PrivateImages = Object.freeze({
     version: "math-s2-private-v1",
     isMathSeason2,
