@@ -174,6 +174,66 @@ $$;
 
 RESET ROLE;
 
+-- AI-3 regression: a wrong answer with a *contradictory* diagnosis row
+-- (is_correct=true) must never advertise that diagnosis to the AI Tutor.
+-- The fixture mutates only its synthetic row inside the rollback transaction.
+UPDATE public.user_answer_diagnosis d SET is_correct=true
+FROM ai3_ids i
+WHERE d.attempt_id=i.attempt_id AND d.question_id=i.mapped_question_id
+  AND d.user_id=i.user_id;
+SET LOCAL ROLE service_role;
+DO $ai3_consistency$
+DECLARE
+ v_uid uuid:=(SELECT user_id FROM ai3_ids LIMIT 1);
+ v_attempt bigint:=(SELECT attempt_id FROM ai3_ids LIMIT 1);
+ v_qid bigint:=(SELECT mapped_question_id FROM ai3_ids LIMIT 1);
+ v_review jsonb;
+ v_result jsonb;
+BEGIN
+ v_review:=public.get_practice_ai_review_question_context_service_v1(
+   v_uid,v_attempt,v_qid,'en');
+ IF v_review IS NULL
+    OR v_review->>'is_correct'<>'false'
+    OR v_review->>'diagnostic_mapped'<>'false'
+    OR v_review->'diagnostic' IS DISTINCT FROM 'null'::jsonb THEN
+   RAISE EXCEPTION 'AI-3 leaked contradictory true-diagnosis for wrong answer: %',v_review;
+ END IF;
+ v_result:=public.get_practice_ai_result_context_service_v1(v_uid,v_attempt,'en');
+ IF jsonb_array_length(v_result->'diagnostic_patterns')<>0 THEN
+   RAISE EXCEPTION 'AI-3 result inferred a contradicted diagnosis: %',v_result;
+ END IF;
+ IF public.get_practice_ai_review_question_context_service_v1(
+   gen_random_uuid(),v_attempt,v_qid,'en') IS NOT NULL THEN
+   RAISE EXCEPTION 'AI-3 cross-account context exposed';
+ END IF;
+END
+$ai3_consistency$;
+RESET ROLE;
+
+-- Restore the synthetic mapping inside the same transaction and demonstrate
+-- that the negative guard is selective: valid published diagnosis still works.
+UPDATE public.user_answer_diagnosis d SET is_correct=false
+FROM ai3_ids i
+WHERE d.attempt_id=i.attempt_id AND d.question_id=i.mapped_question_id
+  AND d.user_id=i.user_id;
+SET LOCAL ROLE service_role;
+DO $ai3_valid_mapping$
+DECLARE
+ v_uid uuid:=(SELECT user_id FROM ai3_ids LIMIT 1);
+ v_attempt bigint:=(SELECT attempt_id FROM ai3_ids LIMIT 1);
+ v_qid bigint:=(SELECT mapped_question_id FROM ai3_ids LIMIT 1);
+ v_review jsonb;
+BEGIN
+ v_review:=public.get_practice_ai_review_question_context_service_v1(
+   v_uid,v_attempt,v_qid,'en');
+ IF v_review->>'diagnostic_mapped'<>'true'
+    OR v_review#>>'{diagnostic,mistake_type}'<>'direction_error' THEN
+   RAISE EXCEPTION 'AI-3 blocked valid deterministic diagnosis: %',v_review;
+ END IF;
+END
+$ai3_valid_mapping$;
+RESET ROLE;
+
 ROLLBACK;
 
 DO $$
