@@ -13,9 +13,9 @@
       "qtype": "mcq",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch2 Functions and transformations, printed pp. 24–42",
       "question": {
-        "en": "Which relation defines y as a function of x?",
-        "ru": "Какое соотношение задаёт y как функцию от x?",
-        "uz": "Qaysi munosabat y ni x ning funksiyasi sifatida aniqlaydi?"
+        "en": "Which statement correctly defines y as a function of x?",
+        "ru": "Какое утверждение правильно определяет y как функцию от x?",
+        "uz": "Qaysi tasdiq y ni x ning funksiyasi sifatida to‘g‘ri ta’riflaydi?"
       },
       "options": [
         {
@@ -59,7 +59,7 @@
       "explanation": {
         "en": "A function assigns exactly one output to each allowed input. Different inputs may share an output; that affects one-to-one behavior, not whether the relation is a function.",
         "ru": "Функция сопоставляет каждому допустимому входу ровно один выход. Разные входы могут давать один и тот же выход: это влияет на взаимную однозначность, но не на само определение функции.",
-        "uz": "Funksiya har bir ruxsat etilgan kirishga aynan bitta chiqish mos qo‘yadi. Turli kirishlar bir xil chiqish berishi mumkin; bu one-to-one xususiyatiga ta’sir qiladi, lekin funksiyaning o‘z ta’rifiga emas."
+        "uz": "Funksiya har bir ruxsat etilgan kirishga aynan bitta chiqish mos qo‘yadi. Turli kirishlar bir xil chiqish berishi mumkin; bu injektiv (birga-bir) xususiyatiga ta’sir qiladi, lekin funksiyaning o‘z ta’rifiga emas."
       },
       "ai_source_skill": "P1-FUN-01",
       "status": "draft"
