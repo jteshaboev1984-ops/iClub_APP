@@ -1504,13 +1504,18 @@
     const cleanDisplay = String(displayText || "").trim();
     const cleanText = String(userText || "").trim().slice(0, MAX_INPUT_CHARS);
     if (!cleanDisplay) return;
+    // A product-purpose question uses a published provider-free card even
+    // on a finalized Practice result. It is not a personal PC3/PC4 question.
+    const productHelp = !academicContext && !practiceContext &&
+      promptKey==="" && cleanText.length>=8
+      ? verifiedProductHelpIntent(cleanText) : "";
     const currentPractice = practiceScope();
     let contextOk = !!currentPractice && practiceGate.allowed &&
       practiceGate.key===practiceScopeKey(currentPractice);
     // Do not charge a fallback global route for a Practice result. However,
     // a previous transient denied preflight must not be cached forever.
     if(currentPractice && !contextOk && !academicContext && !practiceContext &&
-       promptKey==="" && cleanText.length>0){
+       promptKey==="" && cleanText.length>0 && !productHelp){
       const epoch=state.contextEpoch,accountEpoch=state.authEpoch;
       await checkPracticeChatGate(true);
       if(epoch!==state.contextEpoch||accountEpoch!==state.authEpoch||
@@ -1533,7 +1538,7 @@
       }
     }
     const typedPractice = !academicContext && !practiceContext &&
-      promptKey==="" && cleanText.length>=8 && contextOk
+      promptKey==="" && cleanText.length>=8 && contextOk && !productHelp
       ? {purpose:"practice_result",attemptRef:currentPractice.attemptRef,
          locale:currentPractice.locale,question:cleanText,
          scopeKey:practiceScopeKey(currentPractice)} : null;
