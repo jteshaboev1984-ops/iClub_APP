@@ -1743,3 +1743,161 @@ body.iclub-visual-v3 #courses-practice-start[data-practice-s2-active="true"]
     padding:10px 8px;
   }
 }
+
+/* #574 · Premium Academy OS Tour rail (owner-approved, 2026-11-21).
+   Use native horizontal scrolling and published Tour state classes. This
+   changes neither eligibility nor selection callbacks. Reference principles:
+   Material 3 filter-chip states and Apple touch/scroll affordances. */
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker {
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  padding:13px 12px 12px;
+  border:1px solid var(--academy-edge,#ccdcf4);
+  border-radius:var(--academy-radius-lg,20px);
+  background:linear-gradient(155deg,#ffffff 0%,#f5f9ff 100%);
+  box-shadow:0 4px 16px rgba(23,65,126,.07);
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker-head {
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:space-between;
+  margin:0 0 5px;
+  gap:8px;
+  font-size:12px;
+  letter-spacing:0;
+  text-transform:none;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker-title {
+  font-size:13px;
+  line-height:1.35;
+  font-weight:820;
+  letter-spacing:0;
+  text-transform:none;
+  color:var(--academy-text,#142b50);
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-scroll-hint {
+  margin:0 0 7px;
+  padding:0;
+  font-size:10.5px;
+  line-height:1.3;
+  font-weight:550;
+  color:var(--academy-text-soft,#5a759b);
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-chip-row {
+  display:flex;
+  flex-wrap:nowrap;
+  gap:9px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  margin:0 -10px -7px;
+  padding:5px 10px 10px;
+  min-width:0;
+  scroll-padding-inline:10px;
+  scroll-snap-type:x proximity;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  touch-action:pan-x pan-y;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-chip-row::-webkit-scrollbar {
+  display:none;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip {
+  position:relative;
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  flex:0 0 108px;
+  width:108px;
+  min-width:108px;
+  height:52px;
+  min-height:52px;
+  padding:0 11px;
+  border:1px solid #d5e1f4;
+  border-radius:14px;
+  background:linear-gradient(180deg,#fff 0%,#f7faff 100%);
+  box-shadow:0 2px 5px rgba(32,65,115,.055);
+  color:#48638b;
+  font-size:13px;
+  font-weight:790;
+  letter-spacing:0;
+  line-height:1.15;
+  white-space:nowrap;
+  scroll-snap-align:center;
+  cursor:pointer;
+  transition:background-color 140ms ease,border-color 140ms ease,
+    box-shadow 140ms ease,color 140ms ease;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip .practice-tour-chip-label {
+  display:inline-flex;
+  justify-content:center;
+  align-items:center;
+  gap:5px;
+  color:inherit;
+  line-height:1.2;
+  font:inherit;
+  white-space:nowrap;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip.is-completed:not(.is-selected):not(.is-locked) {
+  border-color:#bdcff0;
+  background:linear-gradient(180deg,#f8fbff 0%,#edf4ff 100%);
+  color:#28568e;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip.is-active:not(.is-selected):not(.is-locked) {
+  border-color:#a9c8fa;
+  background:#ecf4ff;
+  color:#245bbb;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip.is-selected:not(.is-locked) {
+  border-color:#235dd0;
+  background:linear-gradient(135deg,#3173e7 0%,#2459c6 100%);
+  color:#fff;
+  box-shadow:0 6px 15px rgba(36,86,183,.2),inset 0 1px 0 rgba(255,255,255,.2);
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip.is-selected:not(.is-locked) .practice-tour-chip-label {
+  color:#fff;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip.is-locked,
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip.is-locked.is-selected {
+  border-color:#e1e7f0;
+  background:#f4f6fa;
+  color:#8a98ac;
+  opacity:1;
+  box-shadow:none;
+  cursor:not-allowed;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip.is-locked .practice-tour-chip-label {
+  color:inherit;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-chip-lock {
+  font-size:12px;
+  opacity:.7;
+}
+body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip:focus-visible {
+  outline:3px solid var(--academy-focus,#377bdf);
+  outline-offset:2px;
+}
+@media(hover:hover) and (pointer:fine) {
+  body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip:not(:disabled):not(.is-selected):hover {
+    border-color:#9dc0fb;
+    background:#edf4ff;
+    box-shadow:0 4px 12px rgba(36,86,183,.1);
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip {
+    transition:none;
+  }
+}
+@media(max-width:359px) {
+  body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker {
+    padding:12px 10px 11px;
+  }
+  body.iclub-visual-v3 #courses-practice-start #practice-results-panel-tours .practice-tour-picker button.practice-tour-chip {
+    flex-basis:102px;
+    width:102px;
+    min-width:102px;
+  }
+}
