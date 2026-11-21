@@ -24,6 +24,12 @@ CREATE UNIQUE INDEX qa_topic_owned_client_idempotency
 
 DO $qa_start_acl$
 BEGIN
+  -- Strictly pin the synthetic compiled function to the independently
+  -- verified hosted *definition* (read-only fingerprint on 2026-11-21).
+  IF md5(pg_get_functiondef(
+    'public.start_practice_topic_drill_choice_safe_v1(text,text,text,text)'::regprocedure))
+      <> '18b369300d9c6a084613529701d706f5'
+  THEN RAISE EXCEPTION 'isolated Start RPC source differs from hosted approved function'; END IF;
   IF has_function_privilege('anon',
     'public.start_practice_topic_drill_choice_safe_v1(text,text,text,text)','EXECUTE')
    OR NOT has_function_privilege('authenticated',
