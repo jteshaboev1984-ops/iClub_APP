@@ -12,10 +12,10 @@ const keys = new Map(source.questions.map(q => [7484 + Number(q.key.slice(-3)), 
 const minus = s => String(s).replace(/−/g, '-').replace(/\s/g, '');
 function expression(text) {
   const v = minus(text);
-  const p = v.match(/^(-?\\d+(?:\\.\\d+)?)(≤|<)f\\(x\\)(≤|<)(-?\\d+(?:\\.\\d+)?)$/);
+  const p = v.match(/^(-?\d+(?:\.\d+)?)(≤|<)f\(x\)(≤|<)(-?\d+(?:\.\d+)?)$/);
   if (p) return { low: Number(p[1]), lowClosed: p[2] === '≤',
     high: Number(p[4]), highClosed: p[3] === '≤' };
-  const one = v.match(/^f\\(x\\)(≤|<|≥|>)(-?\\d+(?:\\.\\d+)?)$/);
+  const one = v.match(/^f\(x\)(≤|<|≥|>)(-?\d+(?:\.\d+)?)$/);
   assert.ok(one, 'unrecognized Mathematics range candidate');
   if (one[1] === '≤' || one[1] === '<')
     return {low:-Infinity,lowClosed:false,high:Number(one[2]),highClosed:one[1]==='≤'};
