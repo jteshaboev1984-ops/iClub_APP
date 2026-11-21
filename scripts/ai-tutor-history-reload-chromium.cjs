@@ -97,6 +97,10 @@ async function main(){
     await page.evaluate(()=>{
       const result=document.getElementById("courses-practice-result");
       result.classList.remove("is-active");result.hidden=true;
+      const subject=document.createElement("section");
+      subject.id="courses-practice-start";
+      subject.className="stack-screen is-active";
+      document.getElementById("view-courses").appendChild(subject);
     });
     await page.addStyleTag({content:css});
     await page.addScriptTag({content:ui});
@@ -128,6 +132,10 @@ async function main(){
   await page.evaluate(()=>{
     const result=document.getElementById("courses-practice-result");
     result.classList.remove("is-active");result.hidden=true;
+      const subject=document.createElement("section");
+      subject.id="courses-practice-start";
+      subject.className="stack-screen is-active";
+      document.getElementById("view-courses").appendChild(subject);
   });
   await page.addStyleTag({content:css});
   await page.addScriptTag({content:ui});
