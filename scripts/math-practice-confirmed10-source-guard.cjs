@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-// #574: 10 already-published corrections + 10 new scoped source fixes.
+// #574: 20 already-published corrections + 8 new scoped numeric-format fixes.
 // Check all 495 authored questions vs real original main; fail on any other
 // key/text/locale/difficulty change. No protected solution printed in CI.
 const assert=require('node:assert/strict');
@@ -10,6 +10,9 @@ const root=path.resolve(__dirname,'..');
 const bank=path.join(root,'content/math/practice_v2');
 const baseline='296bf21df09a808152b4ae4e153ddcec8aec85cd';
 const expected=new Map([
+ [7714,['question']],[7727,['question']],[7796,['question']],
+ [7818,['question']],[7829,['question']],[7838,['question']],
+ [7894,['question']],[7900,['question']],
  [7506,['question']],[7754,['question']],[7761,['question']],
  [7809,['question']],[7835,['question']],
  [7573,['options']],[7686,['question']],[7710,['question']],
@@ -22,6 +25,14 @@ const expected=new Map([
 ]);
 const rekey=new Set([7624,7662,7797,7881,7926,7937,7970]);
 const extraDecimal=new Map([
+ [7714,()=>(26-2*8)/8],
+ [7727,()=>36/(0.5*(8**2-4**2))],
+ [7796,()=>6/(-4)],
+ [7818,()=>8*((-4/8)**5)],
+ [7829,()=>5000*(0.9**4)],
+ [7838,()=>6*(0.5**4)/(1-0.5)],
+ [7894,()=>2*4*(-0.2)],
+ [7900,()=>-(6*3)/8],
  [7506,()=>{const roots=[-2,5],p=-(roots[0]+roots[1]),q=roots[0]*roots[1];return (p*p-4*q)/4;}],
  [7754,()=>Math.sin(Math.PI/6)],
  [7761,()=>(3/5)/(4/5)],
@@ -217,7 +228,7 @@ for(const folder of folderList){
   }
  }
 }
-assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,20);
+assert.equal(nFiles,45);assert.equal(items,495);assert.equal(changed,28);
 assert.equal(found.size,expected.size);assert.equal(mcq,277);assert.equal(input,218);
 const all={A:0,B:0,C:0,D:0};
 for(let practice=1;practice<=7;practice++){
@@ -242,6 +253,6 @@ for(let practice=1;practice<=7;practice++){
 assert.deepEqual(all,{A:68,B:70,C:71,D:68},
  'correct-answer placement deviates from reviewed 277-question distribution');
 console.log(JSON.stringify({source_guard:'PASS',authored:495,mcq:277,input:218,
- corrected:20,published_prior:10,new_source_proposals:10,unrelated_change_count:0,practice_batches:7,
+ corrected:28,published_prior:20,new_source_proposals:8,unrelated_change_count:0,practice_batches:7,
  anti_pattern_cycles:0,retained_option_semantics:true,
  answer_distribution:'balanced',protected_keys_printed:false}));
