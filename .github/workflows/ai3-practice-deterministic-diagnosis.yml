@@ -82,6 +82,12 @@ jobs:
           set -euo pipefail
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20260925190000_practice_ai3_deterministic_diagnosis_context_v1.sql
 
+      - name: Apply beta diagnosis consistency migration in isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261121110000_practice_ai3_diagnosis_consistency_beta_v2.sql
+
       - name: Run AI-3 rollback-only diagnosis matrix
         shell: bash
         run: |
