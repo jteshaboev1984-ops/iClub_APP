@@ -674,7 +674,7 @@
     topicSummary.id='practice-topic-overview-content';
     const topicSeasonNote=node('p','iclub-practice-topic-s2-note');
     topicSummary.append(topicSeasonNote);
-    const topicFooter=node('section','iclub-practice-current-tour iclub-practice-topic-footer');
+    const topicFooter=node('section','iclub-practice-topic-footer');
     topicFooter.id='practice-topic-overview-footer';
     topicFooter.hidden=true;
     topicOverview.append(topicSummary,topicFooter);
