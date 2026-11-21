@@ -25,9 +25,18 @@ const {chromium}=require('playwright');
          '<body class="iclub-visual-v3">'+
          '<section id="courses-practice-start" class="stack-screen is-active">'+
          '<div class="section"><div class="h1">'+ui.page+'</div></div>'+
-         '<div id="practice-tour-picker" class="practice-tour-picker"><div class="practice-tour-chip-row">'+
-         '<button class="practice-tour-chip is-selected">'+ui.tour+' 1</button>'+
-         '<button class="practice-tour-chip">'+ui.tour+' 2</button></div></div>'+
+         '<div id="practice-tour-picker" class="practice-tour-picker">'+
+         '<div class="practice-tour-picker-head"><div class="practice-tour-picker-title">'+
+         (locale==='ru'?'Выбор тура':locale==='uz'?'Tur tanlash':'Tour selection')+'</div></div>'+
+         '<div class="practice-tour-scroll-hint">'+
+         (locale==='ru'?'← Листайте, чтобы увидеть все туры →':
+          locale==='uz'?'← Barcha turlarni ko‘rish uchun suring →':'← Swipe to see all tours →')+
+         '</div><div class="practice-tour-chip-row">'+
+         '<button class="practice-tour-chip is-completed" type="button" data-tour-no="1">'+ui.tour+' 1</button>'+
+         '<button class="practice-tour-chip is-selected is-active" type="button" data-tour-no="2">'+ui.tour+' 2</button>'+
+         '<button class="practice-tour-chip is-not-started" type="button" data-tour-no="3">'+ui.tour+' 3</button>'+
+         [4,5,6,7].map(n=>'<button class="practice-tour-chip is-locked" type="button" disabled aria-disabled="true" data-tour-no="'+n+'"><span class="practice-tour-chip-label"><span class="practice-tour-chip-lock">🔒</span>'+ui.tour+' '+n+'</span></button>').join('')+
+         '</div></div>'+
          '<div class="practice-hero"><div class="practice-hero-top"><div class="practice-hero-left">'+
          '<div class="practice-hero-kicker">'+(locale==='ru'?'Предмет':locale==='uz'?'Fan':'Subject')+'</div>'+
          '<div class="practice-hero-title" id="practice-subject-title">Mathematics</div>'+
@@ -138,6 +147,32 @@ const {chromium}=require('playwright');
          order.topicStatsInside&&order.topicStatsBeforeChoice,
          'unified Practice block order changed: '+JSON.stringify(order));
        assert.equal(order.topicOverviewOnce,1,'one contextual Topic stats slot');
+       // Seven real-shaped Tour tiles: a selected available Tour, a completed
+       // Practice Tour, an eligible sibling, and future disabled Tours.
+       const rail=await root.evaluate(el=>{
+         const list=el.querySelector('.practice-tour-chip-row');
+         const tiles=[...list.querySelectorAll('.practice-tour-chip')];
+         const chosen=tiles.find(x=>x.classList.contains('is-selected'));
+         const done=tiles.find(x=>x.classList.contains('is-completed'));
+         const locked=tiles.filter(x=>x.classList.contains('is-locked'));
+         const bg=getComputedStyle(chosen).backgroundImage;
+         return {count:tiles.length,selected:chosen?.dataset.tourNo,
+           minHeight:Math.min(...tiles.map(x=>x.getBoundingClientRect().height)),
+           rounded:getComputedStyle(chosen).borderTopLeftRadius,
+           hasBlueSelection:bg.includes('gradient'),
+           unlockedCompleted:done?.disabled===false,
+           mutedCompleted:getComputedStyle(done).color!==getComputedStyle(chosen).color,
+           lockedDisabled:locked.every(x=>x.disabled),
+           horizontalOverflow:list.scrollWidth>list.clientWidth,
+           scrollWidth:list.scrollWidth,clientWidth:list.clientWidth};
+       });
+       assert.equal(rail.count,7,'seven Tour buttons must remain rendered in a single rail');
+       assert.equal(rail.selected,'2','selected Tour is still determined by the existing selector');
+       assert(rail.minHeight>=44,'Tour tiles must meet minimum touch target: '+JSON.stringify(rail));
+       assert(rail.hasBlueSelection&&rail.mutedCompleted&&rail.unlockedCompleted,
+         'selected/completed Practice states lack distinct premium appearance: '+JSON.stringify(rail));
+       assert(rail.lockedDisabled,'future Tour must never be made selectable by styling');
+       if(width<=430)assert(rail.horizontalOverflow,'Tour rail must be horizontally swipeable on phones');
        assert.equal(order.statsOnce,2,'one identical blue hero for each mode');
        assert.equal(order.historyEntryOnce,1,'single standalone History link');
        assert.equal(order.currentTourOnce,1,'genuine Tour state must remain');
