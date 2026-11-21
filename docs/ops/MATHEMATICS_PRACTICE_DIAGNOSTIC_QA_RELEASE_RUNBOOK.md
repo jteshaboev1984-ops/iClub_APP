@@ -1,6 +1,6 @@
 # Mathematics Practice — diagnostic-only QA and release runbook
 
-Status: **owner-requested operational procedure, proposed in a separate docs-only Draft PR until owner authorizes its merge**. Scope: existing Mathematics Practice v2 **wrong-option feedback / diagnostic-code / next-action** fixes where stems, distractor meanings, answer keys, evaluator, scoring, timing, membership, and learner history stay unchanged. This is **not** automatic approval for another release.
+Status: **owner-approved diagnostic-only operational procedure (2026-11-21)**; new chats apply it after verifying this document is present in current GitHub `main`. Scope: existing Mathematics Practice v2 **wrong-option feedback / diagnostic-code / next-action** fixes where stems, distractor meanings, answer keys, evaluator, scoring, timing, membership, and learner history stay unchanged. This is **not** automatic approval for another release.
 
 Sources: [AGENTS.md](../../AGENTS.md), [CHAT_PROTOCOL](CHAT_PROTOCOL.md), [WORKSTREAMS](WORKSTREAMS.md), [Practice release gate](../practice-bank-generations-release-gate.md), canonical [Issue #574](https://github.com/jteshaboev1984-ops/iClub_APP/issues/574), actual source generator `scripts/math-practice-v2-build-staging-sql.cjs`. Published precedents: [#628](https://github.com/jteshaboev1984-ops/iClub_APP/pull/628), [#629](https://github.com/jteshaboev1984-ops/iClub_APP/pull/629), [#631](https://github.com/jteshaboev1984-ops/iClub_APP/pull/631). These are **historical receipts**, never live-state proofs.
 
