@@ -8,6 +8,10 @@
   const PROTECTED_EXAM_PREP_TYPES = new Set(["diagnostic", "retest", "mixed", "timed", "paper"]);
   const MAX_INPUT_CHARS = 2000;
   const MAX_THREAD_MESSAGES = 40;
+  // DRAFT ONLY: cannot be enabled until a separate learner-history privacy GO,
+  // a versioned server migration and genuine signed-browser acceptance.
+  // The production path currently makes ZERO history-storage calls.
+  const TUTOR_HISTORY_DRAFT_ENABLED = false;
   const REQUEST_TIMEOUT_MS = 15000;
 
   const SUBJECT_ALIASES = {
@@ -258,6 +262,8 @@
     usageExhausted: false,
     resetAt: null,
     threads: new Map(),
+    historyConsent: false,
+    historyReadyPromise: null,
     destroyed: false,
     introShown: false,
     introRead: false,
@@ -509,6 +515,72 @@
     if (target.messages.length > MAX_THREAD_MESSAGES) {
       target.messages.splice(0, target.messages.length - MAX_THREAD_MESSAGES);
     }
+  }
+
+  // Dormant owner-bound server history adapter. Never persist chat on device.
+  // This initial candidate accepts ONLY reviewed public-help answer pairs,
+  // not paid generation, academic content, Practice PC4, Tour or Exam Prep.
+  function canUseDraftHistory(ctx) {
+    return TUTOR_HISTORY_DRAFT_ENABLED && ctx?.scopeCode === "global" &&
+      typeof ctx.threadKey === "string" &&
+      /^[a-z][a-z0-9_-]{0,79}$/.test(ctx.threadKey) &&
+      !/^(practice_attempt_|qa_|exam_prep|tour_)/.test(ctx.threadKey) &&
+      !currentBlocked() && state.bootstrap?.visible === true;
+  }
+  async function tutorHistoryRpc(action, args = {}) {
+    if (!TUTOR_HISTORY_DRAFT_ENABLED || !window.sb?.rpc) return null;
+    try {
+      const {data,error} = await window.sb.rpc(
+        "iclub_ai_tutor_history_service_v1", {p_action:action,...args}
+      );
+      return !error && data && typeof data === "object" ? data : null;
+    } catch { return null; }
+  }
+  async function hydrateTutorHistory() {
+    const ctx = state.context;
+    if (!canUseDraftHistory(ctx) || !state.authUserId ||
+        panel()?.hidden || thread(ctx.threadKey).messages.length) return;
+    const uid=state.authUserId,epoch=state.authEpoch;
+    const ctxEpoch=state.contextEpoch,key=ctx.threadKey;
+    const current=()=>state.authUserId===uid && state.authEpoch===epoch &&
+      state.contextEpoch===ctxEpoch && state.context?.threadKey===key &&
+      canUseDraftHistory(state.context) && panel() && !panel().hidden;
+    const consent=await tutorHistoryRpc("status");
+    if (!current() || consent?.ok!==true) return;
+    state.historyConsent=consent.consented===true;
+    if (!state.historyConsent) return;
+    const saved=await tutorHistoryRpc("read",{p_thread_key:key});
+    if (!current() || saved?.ok!==true ||
+        !Array.isArray(saved.messages) || saved.messages.length>40) return;
+    const t=thread(key);
+    if (t.messages.length) return; // Live messages take priority over late reads.
+    for (const item of saved.messages) {
+      if ((item.role!=="user"&&item.role!=="assistant") ||
+          !["ru","uz","en"].includes(item.locale) ||
+          typeof item.text!=="string" ||
+          item.text.length<1 || item.text.length>2400) return;
+    }
+    for (const item of saved.messages) {
+      t.messages.push({role:item.role,kind:"message",text:item.text});
+    }
+    renderPanel();
+  }
+  async function persistTutorPublicHelpPair({ctx,requestId,question,answer,
+    localeCode,authEpoch,owner}) {
+    if (!canUseDraftHistory(ctx) || !owner || !requestId ||
+        typeof question!=="string" || typeof answer!=="string" ||
+        question.length<1 || question.length>2400 ||
+        answer.length<1 || answer.length>2400 ||
+        !["ru","uz","en"].includes(localeCode)) return;
+    await state.historyReadyPromise;
+    if (!state.historyConsent || state.authEpoch!==authEpoch ||
+        state.authUserId!==owner || currentBlocked()) return;
+    const args={p_thread_key:ctx.threadKey,p_request_id:requestId,
+      p_locale:localeCode};
+    await tutorHistoryRpc("append",{...args,p_speaker:"user",p_text:question});
+    if (state.authEpoch!==authEpoch || state.authUserId!==owner ||
+        currentBlocked()) return;
+    await tutorHistoryRpc("append",{...args,p_speaker:"assistant",p_text:answer});
   }
 
   function formatResetTime(value) {
@@ -1262,6 +1334,8 @@
     p.hidden = false;
     mark()?.setAttribute("aria-expanded", "true");
     renderPanel();
+    if (TUTOR_HISTORY_DRAFT_ENABLED)
+      state.historyReadyPromise=hydrateTutorHistory();
     void checkPracticeChatGate();
     if(practiceGate.allowed)void recoverSavedPracticeReply();
   }
@@ -1698,6 +1772,19 @@
             isApprovedQaSample ? "qa_practice_explanation" : "message");
         if(typedPractice && state.practicePending?.requestId===sentId)
           state.practicePending.messageShown=true;
+        // Replayable history is only a personal UI convenience. Never use it
+        // as learning evidence, model prompt memory or an academic source.
+        if (TUTOR_HISTORY_DRAFT_ENABLED && data.mode==="prepared" &&
+            data.provider_called===false && !academicContext &&
+            !practiceContext && !typedPractice && !practiceRetry &&
+            (productHelp==="practice_rules" ||
+             PUBLISHED_PREPARED_ACTIONS.has(promptKey))) {
+          void persistTutorPublicHelpPair({
+            ctx:context,requestId:sentId,question:cleanDisplay,
+            answer:message,localeCode:locale(),authEpoch:sentAuthEpoch,
+            owner:state.authUserId
+          });
+        }
         // ACK only after insertion into the still-current existing Tutor thread.
         // An ACK timeout does not create a new request UUID: the original
         // in-memory receipt remains eligible for a same-ID recovery.
@@ -2032,6 +2119,8 @@
         practiceGate={key:"",allowed:false,pending:false};
         invalidatePendingAnswer();
         state.threads.clear();
+        state.historyConsent=false;
+        state.historyReadyPromise=null;
         state.context = null;
         state.bootstrap = null;
         state.usageExhausted = false;
