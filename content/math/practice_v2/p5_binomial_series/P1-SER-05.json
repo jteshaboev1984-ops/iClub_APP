@@ -287,9 +287,9 @@
       "qtype": "input",
       "source_ref": "Complete Pure Mathematics 1, 2nd ed., Ch7 Series, printed pp. 120–133",
       "question": {
-        "en": "For the series 6+3+1.5+..., enter S∞−S₄.",
-        "ru": "Для ряда 6+3+1.5+... введите S∞−S₄.",
-        "uz": "6+3+1.5+... qator uchun S∞−S₄ ni kiriting."
+        "en": "For the series 6+3+1.5+..., enter S∞−S₄. Give your answer as a decimal number.",
+        "ru": "Для ряда 6+3+1.5+... введите S∞−S₄. Ответ запишите десятичным числом.",
+        "uz": "6+3+1.5+... qator uchun S∞−S₄ ni kiriting. Javobni o‘nli son ko‘rinishida kiriting."
       },
       "answer_contract": {
         "kind": "numeric_exact",
