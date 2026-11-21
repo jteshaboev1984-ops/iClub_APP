@@ -13,7 +13,7 @@ assert.ok(m,'staging fixture must use canonical generated staging payload');
 const payload=JSON.parse(m[1].replace(/''/g,"'"));
 const expIndex=args.indexOf('--expect');
 const expected=expIndex<0?10:Number(args[expIndex+1]);
-assert.ok([1,2,3,8,10].includes(expected),'only pinned 1, 2, 3, 8 or 10-item future-only batches supported');
+assert.ok([1,2,3,8,9,10].includes(expected),'only pinned 1, 2, 3, 8, 9 or 10-item future-only batches supported');
 assert.equal(payload.length,expected);
 assert.equal(new Set(payload.map(q=>q.old_id)).size,expected);
 // Optional exact-parent authored semantic fixture: old option meanings remain
@@ -140,7 +140,7 @@ sql.push('insert into public.questions('+
  'book_ref,time_limit_sec,quality_flag,quality_status) values\n'+questions.join(',\n')+';');
 sql.push("select setval(pg_get_serial_sequence('public.questions','id'),10000,true);");
 const oldRows=payload.map(q=>'('+
- [q.old_id,sqlQuote(q.old_key),sqlQuote('math_p1_practice_v2_2026_10_07'),
+ [q.old_id,sqlQuote(q.old_key),sqlQuote(q.old_release_version||'math_p1_practice_v2_2026_10_07'),
  q.practice_no,sqlQuote(q.skill),sqlQuote(q.role),sqlQuote(q.source_ref),
  sqlQuote(q.old_hash),"'passed'","'passed'","'passed'","'passed'","'published'","true"].join(',')+')');
 sql.push('insert into private.practice_v2_question_meta('+
@@ -149,6 +149,29 @@ sql.push('insert into private.practice_v2_question_meta('+
  'qa_tour_separation_status,lifecycle_state,is_runtime_allowed) values\n'+oldRows.join(',\n')+';');
 const pp=payload.map((q,i)=>'('+(100+q.practice_no)+','+q.old_id+','+(i+1)+',true)');
 sql.push('insert into public.practice_pool_questions(pool_id,question_id,order_no,is_active) values\n'+pp.join(',\n')+';');
+if(expected===9){
+ // Q351 original #7835 was already replaced by #10119. Model the previous
+ // version link and original inactive pool; future Hard must target #10119.
+ const replacement=payload.filter(q=>q.old_id===10119);
+ assert.equal(replacement.length,1,'exactly one Q351 current successor');
+ assert.equal(replacement[0].old_key,'MATH-P1-PRACTICE2-Q351-V20261120PENDING10');
+ assert.equal(replacement[0].old_release_version,'math_p1_practice_v2_pending10_20261120');
+ sql.push("insert into public.questions(id,subject_id,topic,subtopic,difficulty,qtype,question_text,correct_answer,is_active,quality_status) "+
+  "select 7835,subject_id,topic,subtopic,difficulty,qtype,'SYNTHETIC ARCHIVED Q351',correct_answer,true,'published' "+
+  "from public.questions where id=10119;");
+ sql.push("insert into private.practice_v2_question_meta("+
+  "question_id,content_key,release_version,practice_no,primary_skill_code,question_role,source_ref,content_hash,"+
+  "qa_math_status,qa_language_status,qa_technical_status,qa_tour_separation_status,lifecycle_state,is_runtime_allowed) "+
+  "select 7835,'MATH-P1-PRACTICE2-Q351','math_p1_practice_v2_2026_10_07',"+
+  "practice_no,primary_skill_code,question_role,source_ref,"+
+  "'55f106f7678a4695de53082a7ea86a3f2395b5e17bf13142ff304752a99eff1f',"+
+  "'passed','passed','passed','passed','published',true "+
+  "from private.practice_v2_question_meta where question_id=10119;");
+ sql.push("insert into public.practice_pool_questions(pool_id,question_id,order_no,is_active) "+
+  "select pool_id,7835,order_no,false from public.practice_pool_questions where question_id=10119;");
+ sql.push("insert into public.question_version_links(old_question_id,new_question_id,link_type,reason) "+
+  "values(7835,10119,'replacement','math_p1_practice_v2_pending10_20261120');");
+}
 if(codes.size){
  const drows=[...codes].map(([code,skill])=>'('+
  [sqlQuote(code),sqlQuote('math_p1_practice_v2_2026_10_07'),sqlQuote(skill),
@@ -160,7 +183,8 @@ if(codes.size){
  'approval_status,is_runtime_allowed) values\n'+drows.join(',\n')+';');
 }
 const first=payload[0].old_id,second=payload[1]?.old_id??payload[0].old_id,
- third=expected===3?payload[2].old_id:
+ third=expected===9?10119:
+       expected===3?payload[2].old_id:
        expected===10?(payload.find(q=>q.old_id===7754)?.old_id??null):null;
 // The already published historic ten do not include Q270 and must continue
 // to pass their independent fixture; the newly proposed ten do include Q270.
